@@ -26790,10 +26790,11 @@ if(
 
 
 
+
 // =========================================================
-// BLOCK 9 DYNAMIC DEVOIR
+// BLOCK 9 DYNAMIC HOMEWORK
 // MICROSOFT WORD 2007 FORMATION
-// RANISE MOISE — DYNAMIC HOMEWORK VALIDATION ENGINE
+// RANISE MOISE — DYNAMIC HOMEWORK EVALUATION ENGINE
 // =========================================================
 //
 // CHAPTER 1:
@@ -26802,54 +26803,61 @@ if(
 // CHAPTER 2+:
 //     READS chapter.homework DYNAMICALLY
 //     USES EXISTING WORD 2007 SIMULATION
-//     USES THE SAME OBSERVATION PRINCIPLES AS BLOCK 8
+//     MONITORS REAL DOCUMENT CONTENT
+//     MONITORS REAL WORD SIMULATION ACTIONS
+//     VALIDATES HOMEWORK SEQUENTIALLY
+//     RANISE CONFIRMS VALIDATION
+//     LAST HOMEWORK VALIDATION UNLOCKS EVALUATION
 //
 // =========================================================
 //
-// STRICT SEQUENCE:
+// CRITICAL LAUNCH RULE:
 //
-//     BLOCK 7
-//          ↓
-//     PRACTICE COMPLETED
-//          ↓
-//     BRIDGE
-//          ↓
-//     EXERCISES UNLOCKED
-//          ↓
-//     BLOCK 8
-//          ↓
-//     ALL EXERCISES VALIDATED
-//          ↓
-//     BRIDGE.unlockNextPart(chapterId,"exercises")
-//          ↓
-//     DEVOIR UNLOCKED
-//          ↓
-//     BLOCK 9 RECEIVES REAL BRIDGE HANDOFF
-//          ↓
-//     BLOCK 9 STARTS
-//          ↓
-//     HOMEWORK VALIDATION
-//          ↓
-//     BRIDGE.unlockNextPart(chapterId,"devoir")
-//          ↓
-//     EVALUATION UNLOCKED
+// BLOCK 9 MUST NEVER START BECAUSE:
+//
+//     homework === true
+//
+//     OR
+//
+//     localStorage says homework is unlocked
+//
+//     OR
+//
+//     the simulation iframe opens
+//
+//     OR
+//
+//     the chapter is rendered
+//
+//     OR
+//
+//     Block 7 finished
+//
+//     OR
+//
+//     Block 8 exists
+//
+// =========================================================
+//
+// THE ONLY VALID LAUNCH SIGNAL:
+//
+//     RaniseDynamicUnlockRenderBridge.unlockNextPart(
+//         chapterId,
+//         "exercises"
+//     )
+//
+// This call must occur AFTER Block 8 has completely
+// validated the Exercises.
 //
 // =========================================================
 //
 // IMPORTANT:
 //
-// BLOCK 9 DOES NOT:
+// If homework was already unlocked BEFORE Block 9
+// installed its Bridge handoff, Block 9 DOES NOT launch.
 //
-//     - WATCH localStorage
-//     - WATCH homework === true
-//     - WATCH practice
-//     - WATCH exercises === true
-//     - START WHEN SIMULATION OPENS
-//     - START WHEN CHAPTER OPENS
-//
-// ONLY THIS REAL BRIDGE TRANSITION CAN LAUNCH BLOCK 9:
-//
-//     unlockNextPart(chapterId,"exercises")
+// It waits for a NEW real Bridge call in the current
+// runtime session.
 //
 // =========================================================
 
@@ -26872,7 +26880,7 @@ if(
 
         homework:null,
 
-        homeworkText:"",
+        homeworkIndex:0,
 
         started:false,
 
@@ -26888,43 +26896,29 @@ if(
 
         autoLaunchStarted:false,
 
+        baselineText:"",
+
+        currentAnswerText:"",
+
+        lastSelectionText:"",
+
+        currentActions:{},
+
+        currentSelections:[],
+
+        clipboardEvents:{
+            copy:0,
+            cut:0,
+            paste:0
+        },
+
+        lastActionTime:0,
+
         bridgeWrapped:false,
 
         unlockReceived:false,
 
-        launchPending:false,
-
-        devoirStarted:false,
-
-        validationScheduled:false,
-
-        baselineText:"",
-
-        currentDocumentText:"",
-
-        lastSelectionText:"",
-
-        currentSelections:[],
-
-        currentActions:{},
-
-        clipboardEvents:{
-
-            copy:0,
-
-            cut:0,
-
-            paste:0
-
-        },
-
-        textChanged:false,
-
-        requiredActions:{},
-
-        exactTextRequirements:[],
-
-        launchToken:0
+        launchPending:false
 
     };
 
@@ -27012,9 +27006,7 @@ if(
 
 
     // =====================================================
-    // GET CHAPTER HOMEWORK
-    //
-    // NO HOMEWORK TEXT IS HARDCODED IN BLOCK 9.
+    // GET HOMEWORK DYNAMICALLY
     // =====================================================
 
     function getChapterHomework(chapterId){
@@ -27231,7 +27223,7 @@ if(
 
 
     // =====================================================
-    // READ CHAPTER ID FROM ELEMENT
+    // READ CHAPTER ID
     // =====================================================
 
     function getChapterIdFromElement(element){
@@ -27246,11 +27238,8 @@ if(
         const attributes = [
 
             "data-chapter-id",
-
             "data-chapter",
-
             "data-current-chapter",
-
             "data-chapterid"
 
         ];
@@ -27428,7 +27417,7 @@ if(
 
 
     // =====================================================
-    // CONNECT TO EXISTING SIMULATION
+    // CONNECT TO SIMULATION
     // =====================================================
 
     function connectToSimulation(){
@@ -27575,7 +27564,7 @@ if(
 
 
     // =====================================================
-    // GET SELECTION TEXT
+    // SELECTION
     // =====================================================
 
     function getSelectionText(){
@@ -27593,7 +27582,8 @@ if(
 
         try{
 
-            let selection = null;
+            let selection =
+                null;
 
 
             if(
@@ -27842,6 +27832,177 @@ if(
 
 
     // =====================================================
+    // HOMEWORK TYPE
+    // =====================================================
+
+    function homeworkType(text){
+
+        const value =
+            normalize(text);
+
+
+        if(
+            value.includes("presse-papiers") ||
+            value.includes("presse papiers")
+        ){
+
+            return "complete-homework";
+
+        }
+
+
+        if(
+            value.includes("police") ||
+            value.includes("font")
+        ){
+
+            return "complete-homework";
+
+        }
+
+
+        return "generic-homework";
+
+    }
+
+
+    // =====================================================
+    // HOMEWORK VALIDATION
+    // =====================================================
+
+    function validateHomework(){
+
+        if(
+            !state.homework ||
+            !state.homework[
+                state.homeworkIndex
+            ]
+        ){
+
+            return false;
+
+        }
+
+
+        const instruction =
+            state.homework[
+                state.homeworkIndex
+            ];
+
+
+        const type =
+            homeworkType(
+                instruction
+            );
+
+
+        const text =
+            getDocumentText();
+
+
+        const baseline =
+            normalize(
+                state.baselineText
+            );
+
+
+        const current =
+            normalize(text);
+
+
+        // -------------------------------------------------
+        // THE STUDENT MUST HAVE WRITTEN/CHANGED CONTENT.
+        // -------------------------------------------------
+
+        if(
+            !current ||
+            current === baseline
+        ){
+
+            return false;
+
+        }
+
+
+        state.currentAnswerText =
+            text;
+
+
+        // -------------------------------------------------
+        // COMPLETE WORD HOMEWORK
+        // -------------------------------------------------
+
+        if(
+            type === "complete-homework"
+        ){
+
+            const hasCopy =
+                state.currentActions.copy > 0;
+
+
+            const hasCut =
+                state.currentActions.cut > 0;
+
+
+            const hasPaste =
+                state.currentActions.paste > 0;
+
+
+            const hasFontFamily =
+                state.currentActions[
+                    "font-family"
+                ] > 0;
+
+
+            const hasFontSize =
+                state.currentActions[
+                    "font-size"
+                ] > 0;
+
+
+            const hasBold =
+                state.currentActions.bold > 0;
+
+
+            const hasItalic =
+                state.currentActions.italic > 0;
+
+
+            const hasUnderline =
+                state.currentActions.underline > 0;
+
+
+            const hasColor =
+                state.currentActions.color > 0;
+
+
+            const hasHighlight =
+                state.currentActions.highlight > 0;
+
+
+            return (
+                hasCopy &&
+                hasCut &&
+                hasPaste &&
+                hasFontFamily &&
+                hasFontSize &&
+                hasBold &&
+                hasItalic &&
+                hasUnderline &&
+                hasColor &&
+                hasHighlight &&
+                state.currentSelections.length >= 2
+            );
+
+        }
+
+
+        return current.length >= 20;
+
+    }
+
+
+    // =====================================================
     // RECORD ACTION
     // =====================================================
 
@@ -27943,601 +28104,61 @@ if(
 
 
     // =====================================================
-    // DETECT REQUIRED ACTIONS FROM HOMEWORK
-    //
-    // NO CHAPTER-SPECIFIC HOMEWORK IS HARD-CODED.
-    // The engine reads the actual homework instructions.
+    // SIMULATION CLICK
     // =====================================================
 
-    function detectRequiredActions(text){
-
-        const value =
-            normalize(text);
-
-
-        const required = {
-
-            text:false,
-
-            copy:false,
-
-            cut:false,
-
-            paste:false,
-
-            fontFamily:false,
-
-            fontSize:false,
-
-            bold:false,
-
-            italic:false,
-
-            underline:false,
-
-            color:false,
-
-            highlight:false
-
-        };
-
-
-        if(
-            value.includes("saisir") ||
-            value.includes("taper") ||
-            value.includes("ecrire") ||
-            value.includes("texte") ||
-            value.includes("rediger")
-        ){
-
-            required.text =
-                true;
-
-        }
-
-
-        if(
-            value.includes("copier") ||
-            value.includes("copy")
-        ){
-
-            required.copy =
-                true;
-
-        }
-
-
-        if(
-            value.includes("couper") ||
-            value.includes("cut")
-        ){
-
-            required.cut =
-                true;
-
-        }
-
-
-        if(
-            value.includes("coller") ||
-            value.includes("paste")
-        ){
-
-            required.paste =
-                true;
-
-        }
-
-
-        if(
-            value.includes("type de police") ||
-            value.includes("police (font)") ||
-            value.includes("font family")
-        ){
-
-            required.fontFamily =
-                true;
-
-        }
-
-
-        if(
-            value.includes("taille de police") ||
-            value.includes("font size")
-        ){
-
-            required.fontSize =
-                true;
-
-        }
-
-
-        if(
-            value.includes("gras") ||
-            value.includes("bold")
-        ){
-
-            required.bold =
-                true;
-
-        }
-
-
-        if(
-            value.includes("italique") ||
-            value.includes("italic")
-        ){
-
-            required.italic =
-                true;
-
-        }
-
-
-        if(
-            value.includes("souligne") ||
-            value.includes("soulign") ||
-            value.includes("underline")
-        ){
-
-            required.underline =
-                true;
-
-        }
-
-
-        if(
-            value.includes("couleur de police") ||
-            value.includes("font color")
-        ){
-
-            required.color =
-                true;
-
-        }
-
-
-        if(
-            value.includes("surbrillance") ||
-            value.includes("text highlight") ||
-            value.includes("highlight")
-        ){
-
-            required.highlight =
-                true;
-
-        }
-
-
-        state.requiredActions =
-            required;
-
-
-        return required;
-
-    }
-
-
-    // =====================================================
-    // EXTRACT QUOTED TEXT REQUIREMENTS
-    //
-    // If homework explicitly contains quoted text,
-    // Block 9 can verify that exact text.
-    //
-    // Otherwise, the engine only requires that the
-    // student actually entered document text.
-    // =====================================================
-
-    function extractExactTextRequirements(text){
-
-        const result = [];
-
-
-        const patterns = [
-
-            /"([^"]+)"/g,
-
-            /«([^»]+)»/g,
-
-            /'([^']+)'/g
-
-        ];
-
-
-        patterns.forEach(function(pattern){
-
-            let match;
-
-
-            while(
-                (
-                    match =
-                    pattern.exec(text)
-                ) !== null
-            ){
-
-                const value =
-                    normalize(
-                        match[1]
-                    );
-
-
-                if(
-                    value.length >= 3 &&
-                    !result.includes(value)
-                ){
-
-                    result.push(value);
-
-                }
-
-            }
-
-        });
-
-
-        state.exactTextRequirements =
-            result;
-
-
-        return result;
-
-    }
-
-
-    // =====================================================
-    // RESET DEVOIR OBSERVATION
-    // =====================================================
-
-    function resetDevoirObservation(){
-
-        state.baselineText =
-            getDocumentText();
-
-
-        state.currentDocumentText =
-            state.baselineText;
-
-
-        state.lastSelectionText =
-            "";
-
-
-        state.currentSelections =
-            [];
-
-
-        state.currentActions =
-            {};
-
-
-        state.clipboardEvents = {
-
-            copy:0,
-
-            cut:0,
-
-            paste:0
-
-        };
-
-
-        state.textChanged =
-            false;
-
-
-        detectRequiredActions(
-            state.homeworkText
-        );
-
-
-        extractExactTextRequirements(
-            state.homeworkText
-        );
-
-    }
-
-
-    // =====================================================
-    // UPDATE DOCUMENT OBSERVATION
-    // =====================================================
-
-    function updateDocumentObservation(){
-
-        const current =
-            getDocumentText();
-
-
-        state.currentDocumentText =
-            current;
-
-
-        const baseline =
-            normalize(
-                state.baselineText
-            );
-
-
-        const normalizedCurrent =
-            normalize(
-                current
-            );
-
-
-        state.textChanged =
-            Boolean(
-                normalizedCurrent &&
-                normalizedCurrent !==
-                baseline
-            );
-
-    }
-
-
-    // =====================================================
-    // VALIDATE TEXT
-    // =====================================================
-
-    function validateHomeworkText(){
-
-        updateDocumentObservation();
-
-
-        if(
-            !state.requiredActions.text
-        ){
-
-            return true;
-
-        }
-
-
-        if(
-            !state.textChanged
-        ){
-
-            return false;
-
-        }
-
-
-        const current =
-            normalize(
-                state.currentDocumentText
-            );
-
-
-        if(
-            current.length < 12
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            state.exactTextRequirements.length
-        ){
-
-            for(
-                let i = 0;
-                i <
-                state.exactTextRequirements.length;
-                i++
-            ){
-
-                if(
-                    !current.includes(
-                        state.exactTextRequirements[i]
-                    )
-                ){
-
-                    return false;
-
-                }
-
-            }
-
-        }
-
-
-        return true;
-
-    }
-
-
-    // =====================================================
-    // VALIDATE REQUIRED ACTIONS
-    // =====================================================
-
-    function validateRequiredActions(){
-
-        const required =
-            state.requiredActions;
-
-
-        if(
-            required.copy &&
-            state.currentActions.copy < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.cut &&
-            state.currentActions.cut < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.paste &&
-            state.currentActions.paste < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.fontFamily &&
-            state.currentActions[
-                "font-family"
-            ] < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.fontSize &&
-            state.currentActions[
-                "font-size"
-            ] < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.bold &&
-            state.currentActions.bold < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.italic &&
-            state.currentActions.italic < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.underline &&
-            state.currentActions.underline < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.color &&
-            state.currentActions.color < 1
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            required.highlight &&
-            state.currentActions.highlight < 1
-        ){
-
-            return false;
-
-        }
-
-
-        return true;
-
-    }
-
-
-    // =====================================================
-    // VALIDATE DEVOIR
-    // =====================================================
-
-    function validateDevoir(){
+    function handleSimulationClick(event){
 
         if(
             !state.started ||
             state.completed ||
-            !state.waiting ||
-            !state.homeworkText
+            state.speaking ||
+            !state.waiting
         ){
-
-            return false;
-
-        }
-
-
-        if(
-            !validateHomeworkText()
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            !validateRequiredActions()
-        ){
-
-            return false;
-
-        }
-
-
-        return true;
-
-    }
-
-
-    // =====================================================
-    // REGISTER SIMULATION ACTION
-    // =====================================================
-
-    function inspectSimulationTarget(target){
-
-        if(!target){
 
             return;
 
         }
 
 
+        const now =
+            Date.now();
+
+
+        if(
+            now -
+            state.lastActionTime <
+            80
+        ){
+
+            return;
+
+        }
+
+
+        state.lastActionTime =
+            now;
+
+
+        recordSelection();
+
+
         const action =
             ribbonAction(
-                target
+                event.target
             );
 
 
         if(action){
 
-            recordAction(
-                action
-            );
+            recordAction(action);
 
         }
 
 
         const data =
             elementData(
-                target
+                event.target
             );
 
 
@@ -28590,36 +28211,18 @@ if(
 
         }
 
-    }
 
+        setTimeout(function(){
 
-    // =====================================================
-    // SIMULATION CLICK OBSERVER
-    // =====================================================
+            if(
+                validateHomework()
+            ){
 
-    function handleSimulationClick(event){
+                nextHomework();
 
-        if(
-            !state.started ||
-            state.completed ||
-            state.speaking ||
-            !state.waiting
-        ){
+            }
 
-            return;
-
-        }
-
-
-        recordSelection();
-
-
-        inspectSimulationTarget(
-            event.target
-        );
-
-
-        scheduleValidation();
+        },120);
 
     }
 
@@ -28642,38 +28245,23 @@ if(
         }
 
 
-        updateDocumentObservation();
+        setTimeout(function(){
 
+            if(
+                validateHomework()
+            ){
 
-        scheduleValidation();
+                nextHomework();
 
-    }
+            }
 
-
-    // =====================================================
-    // SELECTION OBSERVER
-    // =====================================================
-
-    function handleSelectionChange(){
-
-        if(
-            !state.started ||
-            state.completed ||
-            !state.waiting
-        ){
-
-            return;
-
-        }
-
-
-        recordSelection();
+        },150);
 
     }
 
 
     // =====================================================
-    // ATTACH SIMULATION LISTENERS
+    // ATTACH LISTENERS
     // =====================================================
 
     function attachSimulationListeners(){
@@ -28729,7 +28317,7 @@ if(
 
         doc.addEventListener(
             "selectionchange",
-            handleSelectionChange,
+            recordSelection,
             true
         );
 
@@ -28741,54 +28329,57 @@ if(
 
 
     // =====================================================
-    // SCHEDULE VALIDATION
+    // RESET HOMEWORK OBSERVATION
     // =====================================================
 
-    function scheduleValidation(){
+    function resetHomeworkObservation(){
 
-        if(
-            state.validationScheduled ||
-            state.processing ||
-            state.completed
-        ){
-
-            return;
-
-        }
+        state.baselineText =
+            getDocumentText();
 
 
-        state.validationScheduled =
-            true;
+        state.currentAnswerText =
+            "";
 
 
-        setTimeout(function(){
-
-            state.validationScheduled =
-                false;
+        state.lastSelectionText =
+            "";
 
 
-            if(
-                validateDevoir()
-            ){
+        state.currentActions =
+            {};
 
-                completeDevoir();
 
-            }
+        state.currentSelections =
+            [];
 
-        },180);
+
+        state.clipboardEvents = {
+
+            copy:0,
+            cut:0,
+            paste:0
+
+        };
+
+
+        state.lastActionTime =
+            0;
 
     }
 
 
     // =====================================================
-    // COMPLETE DEVOIR
+    // SPEAK CURRENT HOMEWORK
     // =====================================================
 
-    async function completeDevoir(){
+    async function speakCurrentHomework(){
 
         if(
-            state.completed ||
-            state.processing
+            !state.homework ||
+            !state.homework[
+                state.homeworkIndex
+            ]
         ){
 
             return;
@@ -28796,8 +28387,69 @@ if(
         }
 
 
+        const homework =
+            state.homework[
+                state.homeworkIndex
+            ];
+
+
+        state.waiting =
+            false;
+
+
+        resetHomeworkObservation();
+
+
+        await speak(
+
+            "Devoir. " +
+            homework +
+            " Réalisez maintenant ce devoir directement dans la simulation Microsoft Word 2007. Je contrôlerai votre document et les actions réalisées avant de valider votre travail."
+
+        );
+
+
         if(
-            !validateDevoir()
+            !state.completed
+        ){
+
+            resetHomeworkObservation();
+
+            state.waiting =
+                true;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CONFIRM HOMEWORK
+    // =====================================================
+
+    async function confirmHomework(){
+
+        state.waiting =
+            false;
+
+
+        await speak(
+            "Très bien. Votre devoir est correct et validé."
+        );
+
+    }
+
+
+    // =====================================================
+    // NEXT HOMEWORK
+    // =====================================================
+
+    async function nextHomework(){
+
+        if(
+            state.completed ||
+            state.processing ||
+            !state.waiting
         ){
 
             return;
@@ -28809,25 +28461,52 @@ if(
             true;
 
 
-        state.waiting =
-            false;
-
-
         try{
 
-            await speak(
-                "Très bien. Votre devoir est correct. Vous avez réalisé les différentes opérations demandées et les mises en forme demandées. La partie Devoir est maintenant validée."
-            );
+            await confirmHomework();
 
+
+            if(
+                state.homeworkIndex <
+                state.homework.length - 1
+            ){
+
+                state.homeworkIndex++;
+
+                await speakCurrentHomework();
+
+                return;
+
+            }
+
+
+            // =================================================
+            // ALL HOMEWORK COMPLETED
+            // =================================================
 
             state.completed =
                 true;
 
 
+            state.waiting =
+                false;
+
+
+            await speak(
+
+                "Excellent. Vous avez terminé et validé le devoir du " +
+                chapterName(
+                    state.chapterId
+                ) +
+                ". La partie Devoir est maintenant validée. La partie Evaluation est maintenant déverrouillée. Bravo pour votre travail."
+
+            );
+
+
             // =================================================
             // BLOCK 9 → BRIDGE
             //
-            // THIS CALL UNLOCKS EVALUATION.
+            // HOMEWORK → EVALUATION
             // =================================================
 
             if(
@@ -28842,7 +28521,7 @@ if(
 
                     state.chapterId,
 
-                    "devoir"
+                    "homework"
 
                 );
 
@@ -28885,6 +28564,25 @@ if(
             String(
                 chapterId
             ).trim();
+
+
+        // -------------------------------------------------
+        // ABSOLUTE PROTECTION:
+        // start() is NOT the launch mechanism.
+        // Only the Bridge handoff may call it.
+        // -------------------------------------------------
+
+        if(
+            !state.unlockReceived
+        ){
+
+            console.warn(
+                "RANISE BLOCK 9: Start rejected. No real Exercises → Homework Bridge handoff."
+            );
+
+            return false;
+
+        }
 
 
         if(
@@ -28932,8 +28630,8 @@ if(
             homework;
 
 
-        state.homeworkText =
-            homework.join("\n\n");
+        state.homeworkIndex =
+            0;
 
 
         state.started =
@@ -28960,25 +28658,11 @@ if(
             true;
 
 
-        state.devoirStarted =
-            true;
-
-
         state.listenersAttached =
             false;
 
 
-        state.launchPending =
-            false;
-
-
-        state.launchToken++;
-
-
         attachSimulationListeners();
-
-
-        resetDevoirObservation();
 
 
         await speak(
@@ -28987,8 +28671,7 @@ if(
             chapterName(
                 chapterId
             ) +
-            ". " +
-            "Cette partie a été déverrouillée après la validation complète des exercices. Je vais vous accompagner et vérifier votre travail directement dans la simulation Microsoft Word 2007."
+            ". Je vais vous accompagner et vérifier votre réalisation directement dans la simulation Microsoft Word 2007."
 
         );
 
@@ -28997,25 +28680,7 @@ if(
             !state.completed
         ){
 
-            await speak(
-
-                "Voici votre devoir. " +
-                state.homeworkText +
-                " Réalisez maintenant le travail directement dans la simulation. Je contrôlerai le texte que vous saisissez ainsi que les opérations et les mises en forme demandées."
-
-            );
-
-        }
-
-
-        if(
-            !state.completed
-        ){
-
-            resetDevoirObservation();
-
-            state.waiting =
-                true;
+            await speakCurrentHomework();
 
         }
 
@@ -29028,7 +28693,10 @@ if(
     // =====================================================
     // WAIT FOR SIMULATION
     //
-    // ONLY CALLED AFTER THE REAL BRIDGE HANDOFF.
+    // IMPORTANT:
+    //
+    // This function is NEVER called at page load.
+    // It is called ONLY after the real Bridge handoff.
     // =====================================================
 
     function waitForSimulation(
@@ -29037,6 +28705,7 @@ if(
     ){
 
         if(
+            !state.unlockReceived ||
             !chapterId ||
             isChapter1(chapterId)
         ){
@@ -29059,26 +28728,10 @@ if(
             200;
 
 
-        const launchToken =
-            state.launchToken;
-
-
         const timer =
             setInterval(function(){
 
                 attempts++;
-
-
-                if(
-                    launchToken !==
-                    state.launchToken
-                ){
-
-                    clearInterval(timer);
-
-                    return;
-
-                }
 
 
                 if(
@@ -29177,7 +28830,8 @@ if(
 
                             if(
                                 !state.started &&
-                                state.launchPending
+                                state.launchPending &&
+                                state.unlockReceived
                             ){
 
                                 startBlock9Dynamic(
@@ -29202,21 +28856,18 @@ if(
     // =====================================================
     // REAL BRIDGE HANDOFF
     //
-    // THIS IS THE ONLY LAUNCH AUTHORITY.
+    // BLOCK 9 LISTENS ONLY FOR:
     //
-    // Block 8 calls:
+    //     currentPart === "exercises"
     //
-    //     unlockNextPart(chapterId,"exercises")
+    // This means:
     //
-    // The ORIGINAL bridge executes first.
+    //     PRACTICE → EXERCISES
+    //         = Block 8
     //
-    // Only then does Block 9 prepare itself.
+    //     EXERCISES → HOMEWORK
+    //         = Block 9
     //
-    // Block 7 calls:
-    //
-    //     unlockNextPart(chapterId,"practice")
-    //
-    // That transition is COMPLETELY IGNORED.
     // =====================================================
 
     function installBridgeHandoff(){
@@ -29277,7 +28928,8 @@ if(
         ){
 
             // -------------------------------------------------
-            // ORIGINAL BRIDGE ALWAYS RUNS FIRST.
+            // FIRST:
+            // Preserve the original Bridge behavior.
             // -------------------------------------------------
 
             const result =
@@ -29288,11 +28940,10 @@ if(
 
 
             // -------------------------------------------------
-            // ONLY:
+            // BLOCK 8 → EXERCISES → HOMEWORK
             //
-            //     exercises → devoir
-            //
-            // CAN AUTHORIZE BLOCK 9.
+            // This is the ONLY event that can authorize
+            // Block 9 to launch.
             // -------------------------------------------------
 
             const normalizedPart =
@@ -29302,8 +28953,7 @@ if(
 
 
             if(
-                normalizedPart ===
-                "exercises" &&
+                normalizedPart === "exercises" &&
                 chapterId &&
                 !isChapter1(chapterId)
             ){
@@ -29313,6 +28963,10 @@ if(
                         chapterId
                     ).trim();
 
+
+                // ---------------------------------------------
+                // REAL HANDOFF RECEIVED
+                // ---------------------------------------------
 
                 state.unlockReceived =
                     true;
@@ -29326,11 +28980,9 @@ if(
                     true;
 
 
-                // -------------------------------------------------
-                // DO NOT LAUNCH SYNCHRONOUSLY.
-                // Give the original Bridge its normal DOM/update
-                // cycle before connecting to the simulation.
-                // -------------------------------------------------
+                // ---------------------------------------------
+                // NEVER launch synchronously inside Bridge.
+                // ---------------------------------------------
 
                 setTimeout(function(){
 
@@ -29406,10 +29058,12 @@ if(
     // =====================================================
     // WAIT FOR BRIDGE ONLY
     //
-    // This does NOT launch Block 9.
+    // THIS DOES NOT CHECK HOMEWORK PROGRESS.
     //
-    // It only waits for the Bridge object so the
-    // handoff wrapper can be installed.
+    // THIS DOES NOT LAUNCH BLOCK 9.
+    //
+    // IT ONLY WAITS FOR THE BRIDGE OBJECT SO THE
+    // REAL-HANDOFF WRAPPER CAN BE INSTALLED.
     // =====================================================
 
     function waitForBridge(){
@@ -29453,21 +29107,27 @@ if(
 
 
     // =====================================================
-    // NO LOCALSTORAGE WATCHER
+    // ABSOLUTE RULE:
     //
-    // NO PRACTICE WATCHER
+    // NO localStorage WATCHER
     //
-    // NO EXERCISES STATE WATCHER
+    // NO HOMEWORK UNLOCK WATCHER
     //
-    // NO HOMEWORK STATE WATCHER
+    // NO SIMULATION AUTO-LAUNCH
     //
-    // NO SIMULATION-OPEN LAUNCH
+    // NO CHAPTER RENDER AUTO-LAUNCH
     //
-    // ONLY REAL BRIDGE HANDOFF:
+    // NO BLOCK 7 AUTO-LAUNCH
     //
-    //     "exercises"
+    // NO BLOCK 8 EXISTENCE AUTO-LAUNCH
     //
-    // CAN PREPARE BLOCK 9.
+    // ONLY:
+    //
+    //     Bridge.unlockNextPart(
+    //         chapterId,
+    //         "exercises"
+    //     )
+    //
     // =====================================================
 
     waitForBridge();
@@ -29477,14 +29137,10 @@ if(
     // PUBLIC API
     // =====================================================
 
-    window.RaniseMoiseDynamicDevoirEngine = {
+    window.RaniseMoiseDynamicHomeworkEvaluationEngine = {
 
         start:
             startBlock9Dynamic,
-
-
-        validate:
-            validateDevoir,
 
 
         getState:function(){
@@ -29499,6 +29155,9 @@ if(
 
                 completed:
                     state.completed,
+
+                homeworkIndex:
+                    state.homeworkIndex,
 
                 waiting:
                     state.waiting,
@@ -29516,25 +29175,7 @@ if(
                     state.unlockReceived,
 
                 launchPending:
-                    state.launchPending,
-
-                devoirStarted:
-                    state.devoirStarted,
-
-                textChanged:
-                    state.textChanged,
-
-                currentActions:
-                    Object.assign(
-                        {},
-                        state.currentActions
-                    ),
-
-                requiredActions:
-                    Object.assign(
-                        {},
-                        state.requiredActions
-                    )
+                    state.launchPending
 
             };
 
@@ -29544,7 +29185,6 @@ if(
 
 
 })();
-
 
 
 
