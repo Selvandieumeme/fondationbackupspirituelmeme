@@ -26792,12 +26792,8 @@ if(
 
 
 
-
-
-
-
 // =========================================================
-// BLOCK 9 DYNAMIC HOMEWORK
+// BLOCK 9 — DYNAMIC HOMEWORK
 // MICROSOFT WORD 2007 FORMATION
 // RANISE MOISE — DYNAMIC HOMEWORK ENGINE
 // =========================================================
@@ -26806,66 +26802,69 @@ if(
 //     COMPLETELY EXCLUDED
 //
 // CHAPTER 2+:
-//     READS chapter.homework DYNAMICALLY
-//     USES EXISTING WORD 2007 SIMULATION
-//     STUDENT WRITES DIRECTLY IN THE DOCUMENT
-//     RANISE READS THE REAL DOCUMENT
-//     RANISE VALIDATES THE HOMEWORK
+//     WAITS FOR BLOCK 8 TO BE COMPLETELY FINISHED
+//     WAITS FOR EXERCISES TO BE VALIDATED
+//     WAITS FOR HOMEWORK TO BE UNLOCKED
+//     THEN LAUNCHES HOMEWORK
 //
 // =========================================================
-// STRICT LAUNCH ORDER
+// STRICT SEQUENCE
 // =========================================================
 //
-//     BLOCK 7
-//        ↓
-//     PRACTICE VALIDATED
-//        ↓
-//     BRIDGE:
-//     unlockNextPart(chapterId,"practice")
-//        ↓
-//     BLOCK 8
-//        ↓
-//     ALL EXERCISES VALIDATED
-//        ↓
-//     BRIDGE:
-//     unlockNextPart(chapterId,"exercises")
-//        ↓
-//     HOMEWORK UNLOCKED
-//        ↓
-//     BLOCK 9
-//        ↓
-//     HOMEWORK
-//        ↓
-//     BRIDGE:
-//     unlockNextPart(chapterId,"homework")
-//        ↓
-//     EVALUATION
+// BLOCK 7
+//    ↓
+// PRACTICE VALIDATED
+//    ↓
+// BRIDGE
+//    ↓
+// EXERCISES UNLOCKED
+//    ↓
+// BLOCK 8
+//    ↓
+// ALL EXERCISES VALIDATED
+//    ↓
+// BLOCK 8 COMPLETED === TRUE
+//    ↓
+// BRIDGE unlocks HOMEWORK
+//    ↓
+// BLOCK 9
+//    ↓
+// HOMEWORK
+//    ↓
+// HOMEWORK VALIDATED
+//    ↓
+// BRIDGE unlocks EVALUATION
 //
 // =========================================================
-// CRITICAL RULE
+// HARD ISOLATION RULE
 // =========================================================
 //
-// BLOCK 9 CAN ONLY START AFTER THE REAL BRIDGE EVENT:
+// BLOCK 9:
 //
-//     unlockNextPart(chapterId,"exercises")
+//     DOES NOT START BLOCK 7
+//     DOES NOT START BLOCK 8
+//     DOES NOT RESET BLOCK 7
+//     DOES NOT RESET BLOCK 8
+//     DOES NOT CHANGE BLOCK 7 STATE
+//     DOES NOT CHANGE BLOCK 8 STATE
+//     DOES NOT CALL BLOCK 8 VALIDATION
+//     DOES NOT CALL BLOCK 7 VALIDATION
 //
-// IMPORTANT:
-//
-//     homework === true
-//     ALONE
-//
-//     MUST NEVER LAUNCH BLOCK 9.
-//
-// This prevents Block 9 from starting at the beginning of
-// the chapter or immediately after Block 7.
+// BLOCK 9 ONLY READS BLOCK 8 FINAL STATE.
 //
 // =========================================================
+// HARD LAUNCH GATE
+// =========================================================
 //
-// DOES NOT MODIFY BLOCK 7
-// DOES NOT MODIFY BLOCK 8
-// DOES NOT MODIFY THE BRIDGE LOGIC
-// DOES NOT RENDER campusContent
-// DOES NOT CLOSE THE SIMULATION
+// HOMEWORK CAN START ONLY WHEN:
+//
+//     SAME CHAPTER:
+//
+//         practice   === true
+//         exercises  === true
+//         block8.completed === true
+//         homework   === true
+//
 // =========================================================
 
 (function(){
@@ -26907,17 +26906,11 @@ if(
 
         currentDocumentText:"",
 
-        lastActionTime:0,
-
         validationTimer:null,
 
-        bridgeWrapped:false,
+        launchLock:false,
 
-        unlockReceived:false,
-
-        launchPending:false,
-
-        launchTimer:null
+        launchToken:0
 
     };
 
@@ -27039,10 +27032,8 @@ if(
 
 
         return homework.length
-            ?
-            homework
-            :
-            null;
+            ? homework
+            : null;
 
     }
 
@@ -27167,6 +27158,10 @@ if(
 
     // =====================================================
     // FIND WORD SIMULATION
+    //
+    // IMPORTANT:
+    // This function ONLY FINDS an existing simulation.
+    // It NEVER creates or renders one.
     // =====================================================
 
     function findSimulation(){
@@ -27184,39 +27179,51 @@ if(
         }
 
 
-        let frame =
-            campusContent.querySelector(
-                'iframe[src*="campusword2007simulation"]'
-            );
-
-
-        if(frame){
-
-            return frame;
-
-        }
-
-
-        frame =
-            campusContent.querySelector(
-                'iframe[data-chapter-id]'
-            );
-
-
-        if(frame){
-
-            return frame;
-
-        }
-
-
-        frame =
-            campusContent.querySelector(
+        const frames =
+            campusContent.querySelectorAll(
                 "iframe"
             );
 
 
-        return frame || null;
+        if(!frames.length){
+
+            return null;
+
+        }
+
+
+        for(
+            let i = 0;
+            i < frames.length;
+            i++
+        ){
+
+            const frame =
+                frames[i];
+
+
+            const src =
+                String(
+                    frame.getAttribute(
+                        "src"
+                    ) || ""
+                ).toLowerCase();
+
+
+            if(
+                src.includes(
+                    "campusword2007simulation"
+                )
+            ){
+
+                return frame;
+
+            }
+
+        }
+
+
+        return null;
 
     }
 
@@ -27281,6 +27288,10 @@ if(
 
     // =====================================================
     // DETECT CURRENT CHAPTER
+    //
+    // IMPORTANT:
+    // Do NOT scan arbitrary active elements.
+    // Prefer the existing active chapter globals.
     // =====================================================
 
     function detectCurrentChapterId(){
@@ -27288,6 +27299,10 @@ if(
         let chapterId =
             null;
 
+
+        // -------------------------------------------------
+        // EXISTING GLOBAL
+        // -------------------------------------------------
 
         if(
             typeof currentChapterId !==
@@ -27329,24 +27344,33 @@ if(
         }
 
 
-        const campusContent =
-            document.getElementById(
-                "campusContent"
-            );
+        // -------------------------------------------------
+        // EXISTING CAMPUS CONTENT MARKER
+        // -------------------------------------------------
 
+        if(!chapterId){
 
-        if(
-            !chapterId &&
-            campusContent
-        ){
-
-            chapterId =
-                getChapterIdFromElement(
-                    campusContent
+            const campusContent =
+                document.getElementById(
+                    "campusContent"
                 );
+
+
+            if(campusContent){
+
+                chapterId =
+                    getChapterIdFromElement(
+                        campusContent
+                    );
+
+            }
 
         }
 
+
+        // -------------------------------------------------
+        // EXISTING SIMULATION MARKER
+        // -------------------------------------------------
 
         if(!chapterId){
 
@@ -27360,40 +27384,6 @@ if(
                     getChapterIdFromElement(
                         frame
                     );
-
-            }
-
-        }
-
-
-        if(!chapterId){
-
-            const candidates =
-                document.querySelectorAll(
-                    "[data-chapter-id], [data-chapter], [data-current-chapter]"
-                );
-
-
-            for(
-                let i = 0;
-                i < candidates.length;
-                i++
-            ){
-
-                const candidateId =
-                    getChapterIdFromElement(
-                        candidates[i]
-                    );
-
-
-                if(candidateId){
-
-                    chapterId =
-                        candidateId;
-
-                    break;
-
-                }
 
             }
 
@@ -27419,13 +27409,45 @@ if(
     // CONNECT TO EXISTING SIMULATION
     // =====================================================
 
-    function connectToSimulation(){
+    function connectToSimulation(chapterId){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return false;
+
+        }
+
 
         const frame =
             findSimulation();
 
 
         if(!frame){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // NEVER ACCEPT A SIMULATION BELONGING TO ANOTHER
+        // CHAPTER.
+        // -------------------------------------------------
+
+        const frameChapterId =
+            getChapterIdFromElement(
+                frame
+            );
+
+
+        if(
+            frameChapterId &&
+            String(frameChapterId) !==
+            String(chapterId)
+        ){
 
             return false;
 
@@ -27606,6 +27628,392 @@ if(
 
 
     // =====================================================
+    // READ PART PROGRESS
+    //
+    // READ ONLY.
+    // NEVER WRITES PROGRESS.
+    // =====================================================
+
+    function getPartsProgress(chapterId){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return null;
+
+        }
+
+
+        // -------------------------------------------------
+        // CHAPTER 2 EXISTING ENGINE
+        // -------------------------------------------------
+
+        if(
+            chapterId === "chapitre2" &&
+            typeof WordChapter2PartsEngine !==
+            "undefined" &&
+            WordChapter2PartsEngine &&
+            typeof WordChapter2PartsEngine.getProgress ===
+            "function"
+        ){
+
+            try{
+
+                return WordChapter2PartsEngine.getProgress();
+
+            }catch(error){
+
+                console.warn(
+                    "RANISE BLOCK 9: Chapter 2 progress read failed.",
+                    error
+                );
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // GENERIC CHAPTER 2+
+        // -------------------------------------------------
+
+        const key =
+            "word_" +
+            chapterId +
+            "_partsProgress";
+
+
+        try{
+
+            const saved =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(!saved){
+
+                return null;
+
+            }
+
+
+            const progress =
+                JSON.parse(
+                    saved
+                );
+
+
+            if(
+                progress &&
+                typeof progress ===
+                "object"
+            ){
+
+                return progress;
+
+            }
+
+        }catch(error){
+
+            console.warn(
+                "RANISE BLOCK 9: Progress read error.",
+                error
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // PRACTICE VALIDATED
+    // =====================================================
+
+    function isPracticeValidated(chapterId){
+
+        const progress =
+            getPartsProgress(
+                chapterId
+            );
+
+
+        return !!(
+            progress &&
+            progress.practice === true
+        );
+
+    }
+
+
+    // =====================================================
+    // EXERCISES VALIDATED
+    // =====================================================
+
+    function areExercisesValidated(chapterId){
+
+        const progress =
+            getPartsProgress(
+                chapterId
+            );
+
+
+        return !!(
+            progress &&
+            progress.exercises === true
+        );
+
+    }
+
+
+    // =====================================================
+    // HOMEWORK UNLOCKED
+    // =====================================================
+
+    function isHomeworkUnlocked(chapterId){
+
+        const progress =
+            getPartsProgress(
+                chapterId
+            );
+
+
+        return !!(
+            progress &&
+            progress.homework === true
+        );
+
+    }
+
+
+    // =====================================================
+    // BLOCK 8 FINAL STATE
+    //
+    // READ ONLY.
+    //
+    // BLOCK 9 NEVER CALLS A BLOCK 8 ACTION.
+    // It ONLY reads getState().
+    // =====================================================
+
+    function getBlock8State(chapterId){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return null;
+
+        }
+
+
+        const engine =
+            window.RaniseMoiseDynamicExerciseEvaluationEngine;
+
+
+        if(
+            !engine ||
+            typeof engine.getState !==
+            "function"
+        ){
+
+            return null;
+
+        }
+
+
+        try{
+
+            const block8State =
+                engine.getState();
+
+
+            if(!block8State){
+
+                return null;
+
+            }
+
+
+            // -------------------------------------------------
+            // THE STATE MUST BELONG TO THE SAME CHAPTER.
+            // -------------------------------------------------
+
+            if(
+                String(
+                    block8State.chapterId || ""
+                ) !==
+                String(chapterId)
+            ){
+
+                return null;
+
+            }
+
+
+            return block8State;
+
+        }catch(error){
+
+            console.warn(
+                "RANISE BLOCK 9: Unable to read Block 8 state.",
+                error
+            );
+
+
+            return null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // BLOCK 8 COMPLETED
+    // =====================================================
+
+    function isBlock8Completed(chapterId){
+
+        const block8State =
+            getBlock8State(
+                chapterId
+            );
+
+
+        if(!block8State){
+
+            return false;
+
+        }
+
+
+        return (
+            block8State.completed === true
+        );
+
+    }
+
+
+    // =====================================================
+    // FINAL SINGLE HARD GATE
+    //
+    // NOTHING IN BLOCK 9 MAY BYPASS THIS FUNCTION.
+    // =====================================================
+
+    function canLaunchHomework(chapterId){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return false;
+
+        }
+
+
+        chapterId =
+            String(
+                chapterId
+            ).trim();
+
+
+        // -------------------------------------------------
+        // CONDITION 1
+        // PRACTICE MUST BE VALIDATED.
+        // -------------------------------------------------
+
+        if(
+            !isPracticeValidated(
+                chapterId
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // CONDITION 2
+        // ALL EXERCISES MUST BE VALIDATED.
+        // -------------------------------------------------
+
+        if(
+            !areExercisesValidated(
+                chapterId
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // CONDITION 3
+        // BLOCK 8 MUST REALLY SAY COMPLETED.
+        // -------------------------------------------------
+
+        if(
+            !isBlock8Completed(
+                chapterId
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // CONDITION 4
+        // BRIDGE MUST HAVE UNLOCKED HOMEWORK.
+        // -------------------------------------------------
+
+        if(
+            !isHomeworkUnlocked(
+                chapterId
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // ALL CONDITIONS PASSED.
+        // -------------------------------------------------
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // RESET DOCUMENT OBSERVATION
+    // =====================================================
+
+    function resetObservation(){
+
+        state.baselineText =
+            getDocumentText();
+
+
+        state.currentDocumentText =
+            "";
+
+
+    }
+
+
+    // =====================================================
     // BASIC HOMEWORK VALIDATION
     // =====================================================
 
@@ -27729,17 +28137,11 @@ if(
 
             "\n---\n\n" +
 
-            "Les notions Copier, Couper, Coller, police, taille, Gras, Italique, Souligné, Couleur et Surbrillance ont déjà été travaillées et validées dans les parties Pratique et Exercices. " +
-
-            "Ne demande PAS à l'élève d'expliquer chaque commande. " +
-
-            "Ne demande PAS de refaire inutilement les exercices précédents. " +
-
             "Vérifie principalement que l'élève a réellement produit un court document cohérent et conforme au devoir. " +
 
             "Le document ne doit pas être vide, insignifiant ou complètement hors sujet. " +
 
-            "\n\nRéponds uniquement avec : VALIDÉ ou À_CORRIGER.";
+            "Réponds uniquement avec : VALIDÉ ou À_CORRIGER.";
 
 
         try{
@@ -27757,10 +28159,7 @@ if(
 
 
             if(
-                result.includes("valide") ||
-                result.includes("validé") ||
-                result.includes("validee") ||
-                result.includes("validée")
+                result.includes("valide")
             ){
 
                 return true;
@@ -27809,6 +28208,10 @@ if(
 
         try{
 
+            // -------------------------------------------------
+            // LOCAL VALIDATION
+            // -------------------------------------------------
+
             if(
                 !validateHomeworkText()
             ){
@@ -27823,7 +28226,9 @@ if(
 
 
             await speak(
+
                 "Je vais maintenant lire votre document et vérifier votre devoir."
+
             );
 
 
@@ -27836,6 +28241,10 @@ if(
             }
 
 
+            // -------------------------------------------------
+            // AI VALIDATION
+            // -------------------------------------------------
+
             const valid =
                 await validateHomeworkWithAI();
 
@@ -27847,7 +28256,9 @@ if(
 
 
                 await speak(
-                    "Votre devoir a besoin d'une petite correction. Complétez simplement votre document puis je le vérifierai à nouveau."
+
+                    "Votre devoir a besoin d'une petite correction. Complétez votre document puis je le vérifierai à nouveau."
+
                 );
 
 
@@ -27857,7 +28268,7 @@ if(
 
 
             // =================================================
-            // HOMEWORK VALIDATED
+            // HOMEWORK COMPLETED
             // =================================================
 
             state.completed =
@@ -27878,7 +28289,10 @@ if(
             // =================================================
             // BLOCK 9 → BRIDGE
             //
-            // homework → evaluation
+            // THIS IS THE ONLY WRITE ACTION OF BLOCK 9.
+            //
+            // It occurs AFTER homework validation.
+            // It does NOT touch Block 7 or Block 8.
             // =================================================
 
             if(
@@ -27900,20 +28314,15 @@ if(
             }else{
 
                 console.error(
-
                     "RANISE BLOCK 9: Dynamic Unlock Bridge unavailable."
-
                 );
 
             }
 
 
             console.log(
-
                 "RANISE BLOCK 9: HOMEWORK COMPLETED — EVALUATION UNLOCK REQUESTED",
-
                 state.chapterId
-
             );
 
         }finally{
@@ -27954,6 +28363,9 @@ if(
             setTimeout(function(){
 
                 if(
+                    state.started &&
+                    !state.completed &&
+                    state.waiting &&
                     validateHomeworkText()
                 ){
 
@@ -27968,6 +28380,9 @@ if(
 
     // =====================================================
     // SIMULATION CLICK OBSERVER
+    //
+    // ONLY INSIDE THE WORD SIMULATION.
+    // NEVER GLOBAL.
     // =====================================================
 
     function handleSimulationClick(){
@@ -27985,21 +28400,26 @@ if(
         }
 
 
-        state.lastActionTime =
-            Date.now();
+        clearTimeout(
+            state.validationTimer
+        );
 
 
-        setTimeout(function(){
+        state.validationTimer =
+            setTimeout(function(){
 
-            if(
-                validateHomeworkText()
-            ){
+                if(
+                    state.started &&
+                    !state.completed &&
+                    state.waiting &&
+                    validateHomeworkText()
+                ){
 
-                validateHomework();
+                    validateHomework();
 
-            }
+                }
 
-        },500);
+            },500);
 
     }
 
@@ -28040,26 +28460,6 @@ if(
 
         state.listenersAttached =
             true;
-
-    }
-
-
-    // =====================================================
-    // RESET OBSERVATION
-    // =====================================================
-
-    function resetObservation(){
-
-        state.baselineText =
-            getDocumentText();
-
-
-        state.currentDocumentText =
-            "";
-
-
-        state.lastActionTime =
-            0;
 
     }
 
@@ -28123,10 +28523,11 @@ if(
     // =====================================================
     // START BLOCK 9
     //
-    // THIS FUNCTION IS NOT PUBLICLY USED TO BYPASS
-    // THE BRIDGE.
+    // SECOND HARD GATE.
     //
-    // It requires unlockReceived === true.
+    // Even if another script calls start(),
+    // Block 9 refuses to launch unless the COMPLETE
+    // previous sequence is already finished.
     // =====================================================
 
     async function startBlock9Dynamic(chapterId){
@@ -28147,40 +28548,20 @@ if(
             ).trim();
 
 
-        // =================================================
-        // ABSOLUTE BRIDGE GATE
-        //
-        // Nothing can start Block 9 unless the real
-        // Block 8 → Bridge event has already been received.
-        // =================================================
+        // -------------------------------------------------
+        // HARD GATE #1
+        // -------------------------------------------------
 
         if(
-            !state.unlockReceived
+            !canLaunchHomework(
+                chapterId
+            )
         ){
 
             console.log(
-
-                "RANISE BLOCK 9: LAUNCH REFUSED — WAITING FOR BLOCK 8 → BRIDGE → HOMEWORK."
-
+                "RANISE BLOCK 9: LAUNCH REFUSED — BLOCK 8 NOT COMPLETELY FINISHED.",
+                chapterId
             );
-
-
-            return false;
-
-        }
-
-
-        if(
-            state.unlockChapterId &&
-            state.unlockChapterId !== chapterId
-        ){
-
-            console.log(
-
-                "RANISE BLOCK 9: LAUNCH REFUSED — WRONG CHAPTER."
-
-            );
-
 
             return false;
 
@@ -28188,8 +28569,17 @@ if(
 
 
         // -------------------------------------------------
-        // PREVENT DUPLICATE LAUNCH
+        // GLOBAL LAUNCH LOCK
         // -------------------------------------------------
+
+        if(
+            state.launchLock
+        ){
+
+            return false;
+
+        }
+
 
         if(
             state.started &&
@@ -28202,125 +28592,166 @@ if(
         }
 
 
-        // -------------------------------------------------
-        // GET HOMEWORK
-        // -------------------------------------------------
-
-        const homework =
-            getChapterHomework(
-                chapterId
-            );
-
-
-        if(!homework){
-
-            console.warn(
-
-                "RANISE BLOCK 9: No homework found for",
-
-                chapterId
-
-            );
-
-
-            return false;
-
-        }
-
-
-        // -------------------------------------------------
-        // CONNECT TO EXISTING SIMULATION
-        // -------------------------------------------------
-
-        if(
-            !connectToSimulation()
-        ){
-
-            return false;
-
-        }
-
-
-        // -------------------------------------------------
-        // INITIALIZE STATE
-        // -------------------------------------------------
-
-        state.chapterId =
-            chapterId;
-
-
-        state.homework =
-            homework;
-
-
-        state.homeworkIndex =
-            0;
-
-
-        state.started =
+        state.launchLock =
             true;
 
 
-        state.waiting =
-            false;
+        const token =
+            ++state.launchToken;
 
 
-        state.completed =
-            false;
+        try{
+
+            // -------------------------------------------------
+            // HARD GATE #2 — CHECK AGAIN BEFORE START.
+            // -------------------------------------------------
+
+            if(
+                !canLaunchHomework(
+                    chapterId
+                )
+            ){
+
+                return false;
+
+            }
 
 
-        state.speaking =
-            false;
+            // -------------------------------------------------
+            // GET HOMEWORK.
+            // -------------------------------------------------
+
+            const homework =
+                getChapterHomework(
+                    chapterId
+                );
 
 
-        state.processing =
-            false;
+            if(!homework){
+
+                console.warn(
+                    "RANISE BLOCK 9: No homework found for",
+                    chapterId
+                );
+
+                return false;
+
+            }
 
 
-        state.autoLaunchStarted =
-            true;
+            // -------------------------------------------------
+            // CONNECT ONLY TO THE EXISTING SAME-CHAPTER
+            // SIMULATION.
+            // -------------------------------------------------
+
+            if(
+                !connectToSimulation(
+                    chapterId
+                )
+            ){
+
+                return false;
+
+            }
 
 
-        state.listenersAttached =
-            false;
+            // -------------------------------------------------
+            // INITIALIZE STATE.
+            // -------------------------------------------------
+
+            state.chapterId =
+                chapterId;
 
 
-        attachSimulationListeners();
+            state.homework =
+                homework;
 
 
-        // -------------------------------------------------
-        // RANISE START
-        // -------------------------------------------------
-
-        await speak(
-
-            "Bienvenue dans la partie Devoir du " +
-
-            chapterName(
-                chapterId
-            ) +
-
-            ". Les parties Pratique et Exercices ont été validées. La partie Devoir est maintenant déverrouillée. Nous allons réaliser le devoir directement dans la simulation Microsoft Word 2007."
-
-        );
+            state.homeworkIndex =
+                0;
 
 
-        if(
-            !state.completed
-        ){
+            state.started =
+                true;
 
-            await speakHomework();
+
+            state.waiting =
+                false;
+
+
+            state.completed =
+                false;
+
+
+            state.speaking =
+                false;
+
+
+            state.processing =
+                false;
+
+
+            state.autoLaunchStarted =
+                true;
+
+
+            state.listenersAttached =
+                false;
+
+
+            attachSimulationListeners();
+
+
+            // -------------------------------------------------
+            // START RANISE.
+            // -------------------------------------------------
+
+            await speak(
+
+                "Bienvenue dans la partie Devoir du " +
+
+                chapterName(
+                    chapterId
+                ) +
+
+                ". Les parties Pratique et Exercices ont été terminées et validées. Le devoir est maintenant déverrouillé."
+
+            );
+
+
+            if(
+                token !==
+                state.launchToken
+            ){
+
+                return false;
+
+            }
+
+
+            if(
+                !state.completed
+            ){
+
+                await speakHomework();
+
+            }
+
+
+            return true;
+
+        }finally{
+
+            state.launchLock =
+                false;
 
         }
-
-
-        return true;
 
     }
 
 
     // =====================================================
-    // WAIT FOR SIMULATION
+    // WAIT FOR EXISTING SIMULATION
     // =====================================================
 
     function waitForSimulation(
@@ -28351,42 +28782,32 @@ if(
             200;
 
 
-        if(
-            state.launchTimer
-        ){
-
-            clearInterval(
-                state.launchTimer
-            );
-
-        }
-
-
-        state.launchTimer =
+        const timer =
             setInterval(function(){
 
                 attempts++;
 
 
                 // -------------------------------------------------
-                // BLOCK 9 MAY ONLY WAIT AFTER REAL BRIDGE EVENT.
+                // THE COMPLETE GATE MUST REMAIN TRUE.
                 // -------------------------------------------------
 
                 if(
-                    !state.unlockReceived
+                    !canLaunchHomework(
+                        chapterId
+                    )
                 ){
 
-                    clearInterval(
-                        state.launchTimer
-                    );
-
-                    state.launchTimer =
-                        null;
+                    clearInterval(timer);
 
                     return;
 
                 }
 
+
+                // -------------------------------------------------
+                // ALREADY RUNNING.
+                // -------------------------------------------------
 
                 if(
                     state.started &&
@@ -28394,12 +28815,7 @@ if(
                     chapterId
                 ){
 
-                    clearInterval(
-                        state.launchTimer
-                    );
-
-                    state.launchTimer =
-                        null;
+                    clearInterval(timer);
 
                     return;
 
@@ -28416,15 +28832,38 @@ if(
                         attempts >= limit
                     ){
 
-                        clearInterval(
-                            state.launchTimer
-                        );
-
-                        state.launchTimer =
-                            null;
+                        clearInterval(timer);
 
                     }
 
+                    return;
+
+                }
+
+
+                const frameChapterId =
+                    getChapterIdFromElement(
+                        frame
+                    );
+
+
+                // -------------------------------------------------
+                // NEVER CONNECT TO ANOTHER CHAPTER.
+                // -------------------------------------------------
+
+                if(
+                    frameChapterId &&
+                    String(frameChapterId) !==
+                    String(chapterId)
+                ){
+
+                    if(
+                        attempts >= limit
+                    ){
+
+                        clearInterval(timer);
+
+                    }
 
                     return;
 
@@ -28450,17 +28889,24 @@ if(
                         "loading"
                     ){
 
-                        clearInterval(
-                            state.launchTimer
-                        );
-
-                        state.launchTimer =
-                            null;
+                        clearInterval(timer);
 
 
-                        startBlock9Dynamic(
-                            chapterId
-                        );
+                        // -------------------------------------------------
+                        // FINAL HARD GATE BEFORE LAUNCH.
+                        // -------------------------------------------------
+
+                        if(
+                            canLaunchHomework(
+                                chapterId
+                            )
+                        ){
+
+                            startBlock9Dynamic(
+                                chapterId
+                            );
+
+                        }
 
 
                         return;
@@ -28478,52 +28924,7 @@ if(
                     attempts >= limit
                 ){
 
-                    clearInterval(
-                        state.launchTimer
-                    );
-
-                    state.launchTimer =
-                        null;
-
-                }
-
-
-                if(
-                    !frame.__raniseBlock9LoadAttached
-                ){
-
-                    frame.__raniseBlock9LoadAttached =
-                        true;
-
-
-                    frame.addEventListener(
-
-                        "load",
-
-                        function(){
-
-                            frame.__raniseBlock9LoadAttached =
-                                false;
-
-
-                            if(
-                                !state.started &&
-                                state.unlockReceived &&
-                                state.unlockChapterId ===
-                                chapterId
-                            ){
-
-                                startBlock9Dynamic(
-                                    chapterId
-                                );
-
-                            }
-
-                        },
-
-                        {once:true}
-
-                    );
+                    clearInterval(timer);
 
                 }
 
@@ -28533,345 +28934,132 @@ if(
 
 
     // =====================================================
-    // REAL BRIDGE HANDOFF
+    // AUTOMATIC HOMEWORK WATCHER
     //
-    // THIS IS THE ONLY AUTOMATIC LAUNCH TRIGGER.
+    // THIS IS THE ONLY AUTOMATIC LAUNCH MECHANISM.
     //
-    // Block 8 calls:
+    // It DOES NOT start Block 7.
+    // It DOES NOT start Block 8.
     //
-    //     unlockNextPart(chapterId,"exercises")
-    //
-    // The original Bridge executes FIRST.
-    //
-    // ONLY AFTER THAT REAL CALL DOES BLOCK 9 RECEIVE
-    // unlockReceived = true.
+    // It waits until the COMPLETE STATE exists.
     // =====================================================
 
-    function installBridgeHandoff(){
+    function watchHomeworkUnlock(){
 
-        if(
-            state.bridgeWrapped
-        ){
+        setInterval(function(){
 
-            return true;
-
-        }
-
-
-        if(
-            typeof RaniseDynamicUnlockRenderBridge ===
-            "undefined" ||
-            !RaniseDynamicUnlockRenderBridge
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            typeof RaniseDynamicUnlockRenderBridge.unlockNextPart !==
-            "function"
-        ){
-
-            return false;
-
-        }
-
-
-        const bridge =
-            RaniseDynamicUnlockRenderBridge;
-
-
-        const originalUnlock =
-            bridge.unlockNextPart;
-
-
-        if(
-            originalUnlock.__raniseBlock9Wrapped
-        ){
-
-            state.bridgeWrapped =
-                true;
-
-            return true;
-
-        }
-
-
-        function wrappedUnlockNextPart(
-            chapterId,
-            currentPart
-        ){
-
-            // =================================================
-            // ORIGINAL BRIDGE ALWAYS RUNS FIRST.
-            // NOTHING IS CHANGED HERE.
-            // =================================================
-
-            const result =
-                originalUnlock.apply(
-                    this,
-                    arguments
-                );
-
-
-            const normalizedPart =
-                normalize(
-                    currentPart
-                );
-
-
-            // =================================================
-            // BLOCK 8 → BLOCK 9
-            //
-            // ONLY this exact event unlocks Block 9:
-            //
-            //     chapterId
-            //     +
-            //     currentPart === "exercises"
-            //
-            // =================================================
+            // -------------------------------------------------
+            // BLOCK 9 ALREADY RUNNING.
+            // -------------------------------------------------
 
             if(
-                normalizedPart ===
-                "exercises" &&
-                chapterId &&
-                !isChapter1(chapterId)
+                state.started ||
+                state.launchLock
             ){
 
-                const targetChapterId =
-                    String(
-                        chapterId
-                    ).trim();
-
-
-                // -------------------------------------------------
-                // RECORD THE REAL BRIDGE EVENT.
-                // -------------------------------------------------
-
-                state.unlockReceived =
-                    true;
-
-
-                state.unlockChapterId =
-                    targetChapterId;
-
-
-                state.launchPending =
-                    true;
-
-
-                state.autoLaunchStarted =
-                    true;
-
-
-                console.log(
-
-                    "RANISE BLOCK 9: REAL BLOCK 8 → BRIDGE → HOMEWORK EVENT RECEIVED",
-
-                    targetChapterId
-
-                );
-
-
-                // -------------------------------------------------
-                // NEVER launch synchronously inside Bridge.
-                // Give Bridge time to finish its own unlock/render.
-                // -------------------------------------------------
-
-                setTimeout(function(){
-
-                    if(
-                        state.started
-                    ){
-
-                        return;
-
-                    }
-
-
-                    if(
-                        !state.unlockReceived
-                    ){
-
-                        return;
-
-                    }
-
-
-                    if(
-                        state.unlockChapterId !==
-                        targetChapterId
-                    ){
-
-                        return;
-
-                    }
-
-
-                    const activeChapter =
-                        detectCurrentChapterId();
-
-
-                    const finalChapterId =
-                        activeChapter ===
-                        targetChapterId
-                        ?
-                        activeChapter
-                        :
-                        targetChapterId;
-
-
-                    if(
-                        !finalChapterId ||
-                        isChapter1(finalChapterId)
-                    ){
-
-                        return;
-
-                    }
-
-
-                    // -------------------------------------------------
-                    // FINAL BLOCK 8 → BLOCK 9 GATE
-                    // -------------------------------------------------
-
-                    if(
-                        !state.unlockReceived ||
-                        state.unlockChapterId !==
-                        finalChapterId
-                    ){
-
-                        return;
-
-                    }
-
-
-                    waitForSimulation(
-                        finalChapterId,
-                        200
-                    );
-
-                },150);
+                return;
 
             }
 
 
-            return result;
+            // -------------------------------------------------
+            // CURRENT CHAPTER ONLY.
+            // -------------------------------------------------
 
-        }
-
-
-        wrappedUnlockNextPart.__raniseBlock9Wrapped =
-            true;
-
-
-        wrappedUnlockNextPart.__raniseBlock9Original =
-            originalUnlock;
+            const chapterId =
+                detectCurrentChapterId();
 
 
-        bridge.unlockNextPart =
-            wrappedUnlockNextPart;
+            if(
+                !chapterId ||
+                isChapter1(chapterId)
+            ){
+
+                return;
+
+            }
 
 
-        state.bridgeWrapped =
-            true;
+            // -------------------------------------------------
+            // THE SINGLE HARD GATE.
+            //
+            // If ANY condition is false:
+            // DO ABSOLUTELY NOTHING.
+            // -------------------------------------------------
+
+            if(
+                !canLaunchHomework(
+                    chapterId
+                )
+            ){
+
+                return;
+
+            }
 
 
-        console.log(
-            "RANISE BLOCK 9: Bridge handoff installed."
-        );
+            // -------------------------------------------------
+            // LOCK BEFORE WAITING FOR SIMULATION.
+            // -------------------------------------------------
+
+            if(
+                state.launchLock
+            ){
+
+                return;
+
+            }
 
 
-        return true;
-
-    }
-
-
-    // =====================================================
-    // WAIT FOR BRIDGE
-    //
-    // IMPORTANT:
-    //
-    // This watcher ONLY installs the Bridge wrapper.
-    //
-    // IT NEVER LAUNCHES BLOCK 9.
-    // =====================================================
-
-    function waitForBridge(){
-
-        let attempts =
-            0;
+            state.launchLock =
+                true;
 
 
-        const timer =
-            setInterval(function(){
-
-                attempts++;
+            state.autoLaunchStarted =
+                true;
 
 
-                if(
-                    installBridgeHandoff()
-                ){
-
-                    clearInterval(timer);
-
-                    return;
-
-                }
+            waitForSimulation(
+                chapterId,
+                200
+            );
 
 
-                if(
-                    attempts >= 300
-                ){
+            // -------------------------------------------------
+            // Release watcher lock.
+            // startBlock9Dynamic has its own lock.
+            // -------------------------------------------------
 
-                    clearInterval(timer);
+            setTimeout(function(){
 
-                    console.warn(
+                state.launchLock =
+                    false;
 
-                        "RANISE BLOCK 9: Bridge handoff could not be installed."
+            },5000);
 
-                    );
-
-                }
-
-            },100);
+        },250);
 
     }
 
 
     // =====================================================
-    // NO PROGRESS WATCHER
+    // NO GLOBAL CLICK FALLBACK
     //
     // IMPORTANT:
     //
-    // There is intentionally NO:
+    // Block 9 MUST NOT react to arbitrary clicks on the
+    // Campus page to decide that Homework should start.
     //
-    //     setInterval(...)
-    //
-    // checking:
-    //
-    //     homework === true
-    //
-    // and there is NO automatic launch based on
-    // localStorage.
-    //
-    // The ONLY launch path is:
-    //
-    //     Block 8
-    //       ↓
-    //     Bridge("exercises")
-    //       ↓
-    //     Bridge wrapper
-    //       ↓
-    //     waitForSimulation()
-    //       ↓
-    //     startBlock9Dynamic()
+    // Automatic launch is controlled ONLY by the complete
+    // progress gate above.
     // =====================================================
 
 
-    waitForBridge();
+    // =====================================================
+    // START AUTOMATIC WATCHER
+    // =====================================================
+
+    watchHomeworkUnlock();
 
 
     // =====================================================
@@ -28907,16 +29095,7 @@ if(
                     state.speaking,
 
                 autoLaunchStarted:
-                    state.autoLaunchStarted,
-
-                bridgeWrapped:
-                    state.bridgeWrapped,
-
-                unlockReceived:
-                    state.unlockReceived,
-
-                launchPending:
-                    state.launchPending
+                    state.autoLaunchStarted
 
             };
 
@@ -28925,20 +29104,8 @@ if(
 
         canLaunch:function(chapterId){
 
-            if(
-                !chapterId ||
-                isChapter1(chapterId)
-            ){
-
-                return false;
-
-            }
-
-
-            return (
-                state.unlockReceived === true &&
-                state.unlockChapterId ===
-                String(chapterId).trim()
+            return canLaunchHomework(
+                chapterId
             );
 
         }
@@ -28947,16 +29114,6 @@ if(
 
 
 })();
-
-
-
-
-
-
-
-
-
-
 
 
 
