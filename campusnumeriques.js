@@ -26793,6 +26793,7 @@ if(
 
 
 
+
 // =========================================================
 // BLOCK 9 DYNAMIC HOMEWORK
 // MICROSOFT WORD 2007 FORMATION
@@ -26813,11 +26814,11 @@ if(
 //
 // =========================================================
 //
-// ABSOLUTE PIPELINE:
+// ABSOLUTE LAUNCH PIPELINE:
 //
 //     SIMULATION OPENS
 //             ↓
-//     PRACTICE = FIRST ACTIVE PART
+//     PRACTICE
 //             ↓
 //     BLOCK 7
 //             ↓
@@ -26827,45 +26828,42 @@ if(
 //             ↓
 //     BLOCK 8
 //             ↓
-//     EXERCISES VALIDATED COMPLETELY
+//     ALL EXERCISES VALIDATED
 //             ↓
-//     BRIDGE
+//     BRIDGE.unlockNextPart(
+//         chapterId,
+//         "exercises"
+//     )
 //             ↓
-//     HOMEWORK UNLOCKED
+//     ONE-TIME HOMEWORK LAUNCH TICKET
 //             ↓
-//     BLOCK 9
+//     WAIT FOR THE CURRENT SIMULATION
+//             ↓
+//     BLOCK 9 STARTS
 //
 // =========================================================
 //
-// CRITICAL RULE:
+// CRITICAL:
 //
-// BLOCK 9 MUST NEVER START BECAUSE:
+// Block 9 NEVER launches because:
 //
-//     homework === true
-//     localStorage contains homework unlocked
-//     chapter is rendered
-//     simulation iframe opens
+//     simulation opens
+//     practice opens
+//     chapter renders
+//     homework is unlocked in localStorage
+//     homework button exists
 //     Block 7 exists
 //     Block 8 exists
-//     Devoir was unlocked previously
+//     start() is called externally
 //
-// ONLY THIS REAL TRANSITION AUTHORIZES BLOCK 9:
+// ONLY A NEW:
 //
-//     Block 8
-//          ↓
-//     RaniseDynamicUnlockRenderBridge.unlockNextPart(
+//     unlockNextPart(
 //         chapterId,
 //         "exercises"
 //     )
 //
-// =========================================================
-//
-// IMPORTANT:
-//
-// A previously unlocked Devoir is NOT a launch signal.
-//
-// Block 9 waits for a NEW Exercises → Homework
-// handoff received during the CURRENT runtime.
+// CAN CREATE THE ONE-TIME LAUNCH TICKET.
 //
 // =========================================================
 
@@ -26902,8 +26900,6 @@ if(
 
         listenersAttached:false,
 
-        autoLaunchStarted:false,
-
         baselineText:"",
 
         currentAnswerText:"",
@@ -26924,13 +26920,13 @@ if(
 
         bridgeWrapped:false,
 
-        unlockReceived:false,
-
-        launchPending:false,
-
         bridgeHandoffChapterId:null,
 
-        bridgeHandoffSequence:0
+        bridgeHandoffSequence:0,
+
+        launchTicket:null,
+
+        launchTicketConsumed:false
 
     };
 
@@ -27233,7 +27229,7 @@ if(
 
 
     // =====================================================
-    // READ CHAPTER ID FROM ELEMENT
+    // READ CHAPTER ID
     // =====================================================
 
     function getChapterIdFromElement(element){
@@ -27421,7 +27417,9 @@ if(
         }
 
 
-        return chapterId;
+        return String(
+            chapterId
+        ).trim();
 
     }
 
@@ -27465,6 +27463,7 @@ if(
 
             state.simulationFrame =
                 frame;
+
 
             state.simulationDocument =
                 doc;
@@ -28506,7 +28505,7 @@ if(
 
 
             // =================================================
-            // BLOCK 9 → EVALUATION BRIDGE
+            // HOMEWORK → EVALUATION
             // =================================================
 
             if(
@@ -28545,20 +28544,39 @@ if(
 
 
     // =====================================================
-    // START BLOCK 9
+    // INTERNAL START
     //
-    // THIS FUNCTION CAN ONLY START AFTER THE REAL
-    // EXERCISES → HOMEWORK HANDOFF HAS BEEN RECEIVED.
+    // IMPORTANT:
+    //
+    // THIS FUNCTION REQUIRES A LIVE ONE-TIME TICKET.
     // =====================================================
 
-    async function startBlock9Dynamic(chapterId){
+    async function startFromLaunchTicket(
+        chapterId,
+        ticket
+    ){
 
         if(
-            !state.unlockReceived
+            !ticket ||
+            !state.launchTicket ||
+            ticket !== state.launchTicket
         ){
 
             console.warn(
-                "RANISE BLOCK 9: Start rejected. No current Exercises → Homework handoff."
+                "RANISE BLOCK 9: Invalid launch ticket."
+            );
+
+            return false;
+
+        }
+
+
+        if(
+            state.launchTicketConsumed
+        ){
+
+            console.warn(
+                "RANISE BLOCK 9: Launch ticket already consumed."
             );
 
             return false;
@@ -28582,32 +28600,16 @@ if(
             ).trim();
 
 
-        // -------------------------------------------------
-        // THE CHAPTER AUTHORIZED BY THE BRIDGE MUST BE THE
-        // SAME CHAPTER THAT BLOCK 9 IS ABOUT TO START.
-        // -------------------------------------------------
-
         if(
-            state.bridgeHandoffChapterId &&
             state.bridgeHandoffChapterId !==
             chapterId
         ){
 
             console.warn(
-                "RANISE BLOCK 9: Chapter mismatch. Launch rejected."
+                "RANISE BLOCK 9: Launch ticket chapter mismatch."
             );
 
             return false;
-
-        }
-
-
-        if(
-            state.started &&
-            state.chapterId === chapterId
-        ){
-
-            return true;
 
         }
 
@@ -28637,6 +28639,20 @@ if(
             return false;
 
         }
+
+
+        // -------------------------------------------------
+        // CONSUME TICKET IMMEDIATELY.
+        //
+        // This prevents every other caller from reusing it.
+        // -------------------------------------------------
+
+        state.launchTicketConsumed =
+            true;
+
+
+        state.launchTicket =
+            null;
 
 
         state.chapterId =
@@ -28669,10 +28685,6 @@ if(
 
         state.processing =
             false;
-
-
-        state.autoLaunchStarted =
-            true;
 
 
         state.listenersAttached =
@@ -28709,22 +28721,19 @@ if(
 
     // =====================================================
     // WAIT FOR SIMULATION
-    //
-    // NEVER CALLED AT PAGE LOAD.
-    //
-    // ONLY CALLED AFTER THE REAL BRIDGE HANDOFF.
     // =====================================================
 
     function waitForSimulation(
         chapterId,
+        ticket,
         maxAttempts
     ){
 
         if(
-            !state.unlockReceived ||
-            !state.launchPending ||
-            !chapterId ||
-            isChapter1(chapterId)
+            !ticket ||
+            !state.launchTicket ||
+            state.launchTicket !== ticket ||
+            state.launchTicketConsumed
         ){
 
             return;
@@ -28751,8 +28760,15 @@ if(
                 attempts++;
 
 
+                // ---------------------------------------------
+                // TICKET INVALIDATED
+                // ---------------------------------------------
+
                 if(
-                    state.started
+                    !state.launchTicket ||
+                    state.launchTicket !== ticket ||
+                    state.launchTicketConsumed ||
+                    state.bridgeHandoffChapterId !== chapterId
                 ){
 
                     clearInterval(timer);
@@ -28763,18 +28779,24 @@ if(
 
 
                 // ---------------------------------------------
-                // ABORT IF THE AUTHORIZATION IS NO LONGER
-                // THE CURRENT HANDOFF.
+                // CURRENT ACTIVE CHAPTER CHECK
                 // ---------------------------------------------
 
+                const activeChapter =
+                    detectCurrentChapterId();
+
+
                 if(
-                    !state.unlockReceived ||
-                    !state.launchPending ||
-                    state.bridgeHandoffChapterId !==
+                    activeChapter &&
+                    String(activeChapter).trim() !==
                     chapterId
                 ){
 
                     clearInterval(timer);
+
+                    console.warn(
+                        "RANISE BLOCK 9: Current chapter does not match Homework launch ticket."
+                    );
 
                     return;
 
@@ -28822,8 +28844,9 @@ if(
                         clearInterval(timer);
 
 
-                        startBlock9Dynamic(
-                            chapterId
+                        startFromLaunchTicket(
+                            chapterId,
+                            ticket
                         );
 
 
@@ -28864,15 +28887,16 @@ if(
 
 
                             if(
-                                !state.started &&
-                                state.launchPending &&
-                                state.unlockReceived &&
+                                state.launchTicket ===
+                                ticket &&
+                                !state.launchTicketConsumed &&
                                 state.bridgeHandoffChapterId ===
                                 chapterId
                             ){
 
-                                startBlock9Dynamic(
-                                    chapterId
+                                startFromLaunchTicket(
+                                    chapterId,
+                                    ticket
                                 );
 
                             }
@@ -28891,22 +28915,10 @@ if(
 
 
     // =====================================================
-    // REAL BLOCK 8 → BLOCK 9 HANDOFF
+    // REAL EXERCISES → HOMEWORK HANDOFF
     //
-    // THIS IS THE ONLY LAUNCH AUTHORIZATION.
-    //
-    // IMPORTANT:
-    //
-    // We do NOT inspect homework progress.
-    // We do NOT inspect localStorage.
-    // We do NOT inspect rendered locks.
-    // We do NOT launch because the simulation opens.
-    //
-    // We only accept a NEW Bridge invocation whose
-    // currentPart is exactly "exercises".
-    //
-    // This is the same architectural principle used by
-    // Block 8.
+    // THIS IS THE ONLY PLACE THAT CREATES A
+    // BLOCK 9 LAUNCH TICKET.
     // =====================================================
 
     function installBridgeHandoff(){
@@ -28949,10 +28961,6 @@ if(
             bridge.unlockNextPart;
 
 
-        // -------------------------------------------------
-        // DO NOT DOUBLE-WRAP THE SAME FUNCTION.
-        // -------------------------------------------------
-
         if(
             originalUnlock.__raniseBlock9Wrapped
         ){
@@ -28970,8 +28978,80 @@ if(
             currentPart
         ){
 
+            const normalizedPart =
+                normalize(
+                    currentPart
+                );
+
+
             // -------------------------------------------------
-            // ALWAYS PRESERVE ORIGINAL BRIDGE FIRST.
+            // ONLY EXERCISES CAN AUTHORIZE BLOCK 9.
+            // -------------------------------------------------
+
+            const isHomeworkHandoff =
+                normalizedPart ===
+                "exercises" &&
+                chapterId &&
+                !isChapter1(chapterId);
+
+
+            // -------------------------------------------------
+            // CREATE THE TICKET BEFORE THE ORIGINAL BRIDGE
+            // RUNS.
+            //
+            // This removes the race window.
+            // -------------------------------------------------
+
+            let ticket =
+                null;
+
+
+            let targetChapterId =
+                null;
+
+
+            if(
+                isHomeworkHandoff
+            ){
+
+                targetChapterId =
+                    String(
+                        chapterId
+                    ).trim();
+
+
+                state.bridgeHandoffSequence++;
+
+
+                ticket =
+                    "block9-homework-" +
+                    Date.now() +
+                    "-" +
+                    state.bridgeHandoffSequence;
+
+
+                state.bridgeHandoffChapterId =
+                    targetChapterId;
+
+
+                state.launchTicket =
+                    ticket;
+
+
+                state.launchTicketConsumed =
+                    false;
+
+
+                console.log(
+                    "RANISE BLOCK 9: NEW EXERCISES → HOMEWORK LAUNCH TICKET CREATED",
+                    targetChapterId
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // PRESERVE ORIGINAL BRIDGE BEHAVIOR.
             // -------------------------------------------------
 
             const result =
@@ -28981,152 +29061,66 @@ if(
                 );
 
 
-            const normalizedPart =
-                normalize(
-                    currentPart
-                );
-
-
             // -------------------------------------------------
-            // ONLY:
-            //
-            //     EXERCISES → HOMEWORK
-            //
-            // IS VALID FOR BLOCK 9.
+            // ONLY THE NEW TICKET CAN START BLOCK 9.
             // -------------------------------------------------
 
             if(
-                normalizedPart !==
-                "exercises"
+                isHomeworkHandoff &&
+                ticket
             ){
 
-                return result;
+                setTimeout(function(){
 
-            }
+                    if(
+                        state.launchTicket !==
+                        ticket ||
+                        state.launchTicketConsumed
+                    ){
 
+                        return;
 
-            if(
-                !chapterId
-            ){
-
-                return result;
-
-            }
-
-
-            if(
-                isChapter1(chapterId)
-            ){
-
-                return result;
-
-            }
+                    }
 
 
-            const targetChapterId =
-                String(
-                    chapterId
-                ).trim();
+                    if(
+                        state.bridgeHandoffChapterId !==
+                        targetChapterId
+                    ){
+
+                        return;
+
+                    }
 
 
-            // -------------------------------------------------
-            // NEW REAL HANDOFF RECEIVED.
-            //
-            // This is the ONLY place where Block 9 receives
-            // launch authorization.
-            // -------------------------------------------------
-
-            state.bridgeHandoffSequence++;
+                    const activeChapter =
+                        detectCurrentChapterId();
 
 
-            state.bridgeHandoffChapterId =
-                targetChapterId;
+                    if(
+                        activeChapter &&
+                        String(activeChapter).trim() !==
+                        targetChapterId
+                    ){
+
+                        console.warn(
+                            "RANISE BLOCK 9: Active chapter differs from Homework handoff. Launch cancelled."
+                        );
+
+                        return;
+
+                    }
 
 
-            state.unlockReceived =
-                true;
-
-
-            state.launchPending =
-                true;
-
-
-            state.autoLaunchStarted =
-                false;
-
-
-            // -------------------------------------------------
-            // NEVER START SYNCHRONOUSLY INSIDE THE BRIDGE.
-            //
-            // The original Bridge must finish its own unlock/
-            // render work first.
-            // -------------------------------------------------
-
-            setTimeout(function(){
-
-                if(
-                    state.started
-                ){
-
-                    return;
-
-                }
-
-
-                if(
-                    !state.unlockReceived ||
-                    !state.launchPending
-                ){
-
-                    return;
-
-                }
-
-
-                if(
-                    state.bridgeHandoffChapterId !==
-                    targetChapterId
-                ){
-
-                    return;
-
-                }
-
-
-                // -------------------------------------------------
-                // IMPORTANT:
-                //
-                // The chapter must still be the active chapter.
-                //
-                // If another chapter is active, do NOT launch
-                // Block 9 into the wrong simulation.
-                // -------------------------------------------------
-
-                const activeChapter =
-                    detectCurrentChapterId();
-
-
-                if(
-                    activeChapter &&
-                    String(activeChapter).trim() !==
-                    targetChapterId
-                ){
-
-                    console.warn(
-                        "RANISE BLOCK 9: Active chapter differs from Bridge handoff. Launch rejected."
+                    waitForSimulation(
+                        targetChapterId,
+                        ticket,
+                        200
                     );
 
-                    return;
+                },150);
 
-                }
-
-
-                waitForSimulation(
-                    targetChapterId,
-                    200
-                );
-
-            },100);
+            }
 
 
             return result;
@@ -29151,7 +29145,7 @@ if(
 
 
         console.log(
-            "RANISE BLOCK 9: Exercises → Homework Bridge handoff installed."
+            "RANISE BLOCK 9: Exercises → Homework Bridge listener installed."
         );
 
 
@@ -29161,15 +29155,12 @@ if(
 
 
     // =====================================================
-    // WAIT FOR BRIDGE ONLY
+    // WAIT ONLY FOR THE BRIDGE OBJECT
     //
-    // THIS DOES NOT CHECK HOMEWORK.
+    // IMPORTANT:
     //
-    // THIS DOES NOT CHECK localStorage.
-    //
-    // THIS DOES NOT START BLOCK 9.
-    //
-    // IT ONLY INSTALLS THE HANDOFF LISTENER.
+    // This function NEVER launches Block 9.
+    // It only installs the listener.
     // =====================================================
 
     function waitForBridge(){
@@ -29202,7 +29193,7 @@ if(
                     clearInterval(timer);
 
                     console.warn(
-                        "RANISE BLOCK 9: Bridge handoff could not be installed."
+                        "RANISE BLOCK 9: Bridge listener could not be installed."
                     );
 
                 }
@@ -29213,25 +29204,7 @@ if(
 
 
     // =====================================================
-    // ABSOLUTE LAUNCH PROTECTION
-    //
-    // THERE IS INTENTIONALLY NO:
-    //
-    //     localStorage WATCHER
-    //     homework UNLOCK WATCHER
-    //     simulation LOAD LAUNCH
-    //     chapter RENDER LAUNCH
-    //     Block 7 LAUNCH
-    //     Block 8 EXISTENCE LAUNCH
-    //
-    // waitForBridge() ONLY INSTALLS THE LISTENER.
-    //
-    // Block 9 STARTS ONLY WHEN:
-    //
-    //     Block 8
-    //        ↓
-    //     unlockNextPart(chapterId,"exercises")
-    //
+    // START LISTENER INSTALLATION
     // =====================================================
 
     waitForBridge();
@@ -29239,12 +29212,25 @@ if(
 
     // =====================================================
     // PUBLIC API
+    //
+    // IMPORTANT:
+    //
+    // External start() calls CANNOT launch Block 9.
+    //
+    // Block 9 requires the internal one-time ticket.
     // =====================================================
 
     window.RaniseMoiseDynamicHomeworkEvaluationEngine = {
 
-        start:
-            startBlock9Dynamic,
+        start:function(){
+
+            console.warn(
+                "RANISE BLOCK 9: Direct start rejected. Block 9 can only start from a new Exercises → Homework Bridge handoff."
+            );
+
+            return false;
+
+        },
 
 
         getState:function(){
@@ -29269,23 +29255,20 @@ if(
                 speaking:
                     state.speaking,
 
-                autoLaunchStarted:
-                    state.autoLaunchStarted,
-
                 bridgeWrapped:
                     state.bridgeWrapped,
-
-                unlockReceived:
-                    state.unlockReceived,
-
-                launchPending:
-                    state.launchPending,
 
                 bridgeHandoffChapterId:
                     state.bridgeHandoffChapterId,
 
                 bridgeHandoffSequence:
-                    state.bridgeHandoffSequence
+                    state.bridgeHandoffSequence,
+
+                launchTicketActive:
+                    !!state.launchTicket,
+
+                launchTicketConsumed:
+                    state.launchTicketConsumed
 
             };
 
@@ -29295,7 +29278,6 @@ if(
 
 
 })();
-
 
 
 
