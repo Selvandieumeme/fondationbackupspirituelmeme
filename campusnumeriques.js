@@ -1317,6 +1317,43 @@ if(launchChapter2Button){
 
 
 
+// =====================================
+// CHAPTER 3 SIMULATION LAUNCH
+// =====================================
+
+const launchChapter3Button =
+    document.getElementById(
+        "launchMicrosoftWordChapter3SimulationBtn"
+    );
+
+if(launchChapter3Button){
+
+    launchChapter3Button.addEventListener(
+        "click",
+        function(){
+
+            campusContent.innerHTML = `
+
+                <iframe
+                    src="https://fondationbackupspirituel.com/campusword2007simulation"
+                    style="
+                        width:100%;
+                        height:900px;
+                        border:none;
+                        border-radius:12px;
+                    "
+                    title="Microsoft Word Simulation — Chapitre 3">
+                </iframe>
+
+            `;
+
+        }
+    );
+
+}
+
+
+
 
 
 document.querySelectorAll(
