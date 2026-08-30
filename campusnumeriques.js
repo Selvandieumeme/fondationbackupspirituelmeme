@@ -1248,6 +1248,17 @@ ${!unlocked ? "🔒" : "📘"} ${chapter.title}
 
         </button>
 
+
+<button
+            id="launchMicrosoftWordChapter3SimulationBtn"
+            class="cwLaunchWordSimulationBtn">
+
+            🚀 Ouvrir Microsoft Word Simulation — Chapitre 3
+
+        </button>
+
+
+
     </div>
 
 </div>
