@@ -13584,6 +13584,2329 @@ const RaniseMoisePedagogicalExplanationEngine = {
 
 
 
+// =========================================================
+// BLOCK 9
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE HOMEWORK MASTERY ENGINE
+// =========================================================
+// ISOLATED FINAL VERSION
+//
+// IMPORTANT:
+// 1. BLOCK 9 WAITS FOR BLOCK 8.
+// 2. BLOCK 9 STARTS ONLY WHEN BLOCK 8.completed === true.
+// 3. BLOCK 9 NEVER UNLOCKS THE NEXT CHAPTER.
+// 4. BLOCK 9 DOES NOT MODIFY BLOCK 8.
+// 5. BLOCK 9 DOES NOT MODIFY BLOCK 7.
+// 6. BLOCK 9 DOES NOT MODIFY BLOCK 6.
+// 7. BLOCK 9 DOES NOT MODIFY THE SIMULATION ENGINE.
+// 8. BLOCK 9 USES THE EXISTING MARYTTS + AVATAR SYSTEM.
+// 9. FIVE REAL TASKS ARE COUNTED.
+// 10. ONE GREEN CHECKMARK = ONE REAL EXECUTED TASK.
+// 11. AT 5/5 THE FINAL VALIDATION AUDIO STARTS IMMEDIATELY.
+// 12. THE HOMEWORK PANEL GETS A CLOSE BUTTON AFTER VALIDATION.
+// =========================================================
+
+(function () {
+
+"use strict";
+
+
+// =========================================================
+// STATE
+// =========================================================
+
+const state = {
+
+    started: false,
+
+    completed: false,
+
+    waitingForBlock8: true,
+
+    block8CompletionDetected: false,
+
+    simulationFrame: null,
+
+    simulationDocument: null,
+
+    chapter: null,
+
+    homework: "",
+
+    listenersAttached: false,
+
+    transitionTimer: null,
+
+    monitorTimer: null,
+
+    validationStarted: false,
+
+    closeEnabled: false,
+
+    lastActionTime: 0,
+
+    actionHistory: [],
+
+    lastDocumentSignature: "",
+
+    lastTaskSignature: "",
+
+
+    // =====================================================
+    // FIVE REAL HOMEWORK TASKS
+    // =====================================================
+
+    tasks: {
+
+        titleBar: false,
+
+        officeButton: false,
+
+        ribbon: false,
+
+        tabs: false,
+
+        documentArea: false
+
+    },
+
+
+    // =====================================================
+    // UI
+    // =====================================================
+
+    ui: {
+
+        root: null,
+
+        title: null,
+
+        close: null,
+
+        progress: null,
+
+        instruction: null,
+
+        status: null,
+
+        tasks: null
+
+    }
+
+};
+
+
+// =========================================================
+// NORMALIZE
+// =========================================================
+
+function normalize(value) {
+
+    return String(value || "")
+
+        .normalize("NFD")
+
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+
+        .toLowerCase()
+
+        .replace(
+            /[“”"«»]/g,
+            " "
+        )
+
+        .replace(
+            /[.,;:!?()[\]{}]/g,
+            " "
+        )
+
+        .replace(
+            /\s+/g,
+            " "
+        )
+
+        .trim();
+
+}
+
+
+// =========================================================
+// CHAPTER 1
+// =========================================================
+
+function getChapter1() {
+
+    if (
+        typeof microsoftWordCourse ===
+        "undefined"
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            microsoftWordCourse.chapters
+        )
+    ) {
+
+        return null;
+
+    }
+
+
+    return microsoftWordCourse.chapters.find(
+
+        chapter =>
+
+            chapter &&
+
+            chapter.id === "chapitre1"
+
+    ) || null;
+
+}
+
+
+// =========================================================
+// FIND EXISTING SIMULATION
+// =========================================================
+
+function findSimulation() {
+
+    const campusContent =
+
+        document.getElementById(
+            "campusContent"
+        );
+
+
+    if (!campusContent) {
+
+        return null;
+
+    }
+
+
+    return campusContent.querySelector(
+
+        'iframe[src*="campusword2007simulation"]'
+
+    ) || null;
+
+}
+
+
+// =========================================================
+// CONNECT TO SIMULATION
+// =========================================================
+
+function connectToSimulation() {
+
+    const frame =
+        findSimulation();
+
+
+    if (!frame) {
+
+        return false;
+
+    }
+
+
+    try {
+
+        const doc =
+
+            frame.contentDocument ||
+
+            frame.contentWindow.document;
+
+
+        if (!doc) {
+
+            return false;
+
+        }
+
+
+        state.simulationFrame =
+            frame;
+
+        state.simulationDocument =
+            doc;
+
+
+        return true;
+
+    } catch (error) {
+
+        return false;
+
+    }
+
+}
+
+
+// =========================================================
+// READ DOCUMENT
+// =========================================================
+
+function readDocumentText() {
+
+    if (
+        !state.simulationDocument
+    ) {
+
+        return "";
+
+    }
+
+
+    const pages =
+
+        Array.from(
+
+            state.simulationDocument.querySelectorAll(
+                ".cwPageContent"
+            )
+
+        );
+
+
+    let text = "";
+
+
+    pages.forEach(
+
+        page => {
+
+            text +=
+
+                " " +
+
+                (
+
+                    page.innerText ||
+
+                    page.textContent ||
+
+                    ""
+
+                );
+
+        }
+
+    );
+
+
+    return text
+
+        .replace(
+            /\u00a0/g,
+            " "
+        )
+
+        .replace(
+            /\s+/g,
+            " "
+        )
+
+        .trim();
+
+}
+
+
+// =========================================================
+// DOCUMENT SIGNATURE
+// =========================================================
+
+function getDocumentSignature() {
+
+    const text =
+        readDocumentText();
+
+
+    const pages =
+
+        state.simulationDocument
+
+            ? state.simulationDocument
+                .querySelectorAll(
+                    ".cwPageContent"
+                ).length
+
+            : 0;
+
+
+    return [
+
+        pages,
+
+        text.length,
+
+        normalize(text)
+
+    ].join("|");
+
+}
+
+
+// =========================================================
+// SPEAK
+//
+// IMPORTANT:
+// NEVER BLOCK FINAL VALIDATION WITH AWAIT.
+// =========================================================
+
+function speak(text) {
+
+    if (!text) {
+
+        return;
+
+    }
+
+
+    try {
+
+        if (
+            typeof raniseStartTalking ===
+            "function"
+        ) {
+
+            raniseStartTalking();
+
+        }
+
+
+        if (
+            typeof speakProfessorIAWithMaryTTS ===
+            "function"
+        ) {
+
+            Promise.resolve(
+
+                speakProfessorIAWithMaryTTS(
+                    text
+                )
+
+            )
+
+            .catch(
+                function () {}
+            )
+
+            .finally(
+
+                function () {
+
+                    if (
+                        typeof raniseStopTalking ===
+                        "function"
+                    ) {
+
+                        raniseStopTalking();
+
+                    }
+
+                }
+
+            );
+
+        } else {
+
+            if (
+                typeof raniseStopTalking ===
+                "function"
+            ) {
+
+                raniseStopTalking();
+
+            }
+
+        }
+
+    } catch (error) {
+
+        if (
+            typeof raniseStopTalking ===
+            "function"
+        ) {
+
+            raniseStopTalking();
+
+        }
+
+    }
+
+}
+
+
+// =========================================================
+// COUNT TASKS
+// =========================================================
+
+function completedTaskCount() {
+
+    return Object.values(
+        state.tasks
+    ).filter(Boolean).length;
+
+}
+
+
+// =========================================================
+// TASK LABEL
+// =========================================================
+
+function taskLabel(task) {
+
+    const labels = {
+
+        titleBar:
+            "Barre de titre",
+
+        officeButton:
+            "Bouton Office",
+
+        ribbon:
+            "Ruban",
+
+        tabs:
+            "Onglets",
+
+        documentArea:
+            "Zone de travail"
+
+    };
+
+
+    return labels[task] || task;
+
+}
+
+
+// =========================================================
+// CREATE HOMEWORK PANEL
+// =========================================================
+
+function createHomeworkPanel() {
+
+    if (
+
+        !state.simulationDocument ||
+
+        state.ui.root
+
+    ) {
+
+        return;
+
+    }
+
+
+    const doc =
+        state.simulationDocument;
+
+
+    const root =
+        doc.createElement("div");
+
+
+    root.id =
+        "raniseBlock9HomeworkPanel";
+
+
+    root.style.cssText =
+
+        "position:fixed;" +
+        "top:12px;" +
+        "right:12px;" +
+        "width:min(330px,calc(100vw - 24px));" +
+        "max-width:calc(100vw - 24px);" +
+        "max-height:calc(100vh - 24px);" +
+        "overflow:auto;" +
+        "z-index:2147483640;" +
+        "background:rgba(255,255,255,.97);" +
+        "border:2px solid #1f4e79;" +
+        "border-radius:12px;" +
+        "box-shadow:0 8px 30px rgba(0,0,0,.25);" +
+        "padding:12px;" +
+        "font-family:Arial,sans-serif;" +
+        "font-size:13px;" +
+        "line-height:1.4;" +
+        "box-sizing:border-box;" +
+        "user-select:none;" +
+        "-webkit-user-select:none;";
+
+
+    // =====================================================
+    // HEADER
+    // =====================================================
+
+    const header =
+        doc.createElement("div");
+
+
+    header.style.cssText =
+
+        "display:flex;" +
+        "align-items:center;" +
+        "justify-content:space-between;" +
+        "gap:8px;" +
+        "margin-bottom:7px;";
+
+
+    const title =
+        doc.createElement("div");
+
+
+    title.textContent =
+        "Ranise Moïse — Devoir";
+
+
+    title.style.cssText =
+
+        "font-weight:700;" +
+        "font-size:15px;" +
+        "cursor:grab;" +
+        "touch-action:none;" +
+        "flex:1;";
+
+
+    // =====================================================
+    // CLOSE BUTTON
+    // =====================================================
+
+    const close =
+        doc.createElement("button");
+
+
+    close.type =
+        "button";
+
+
+    close.textContent =
+        "×";
+
+
+    close.title =
+        "Fermer";
+
+
+    close.setAttribute(
+        "aria-label",
+        "Fermer le devoir"
+    );
+
+
+    close.style.cssText =
+
+        "width:26px;" +
+        "height:26px;" +
+        "border:0;" +
+        "border-radius:50%;" +
+        "background:#e9eef2;" +
+        "color:#52616b;" +
+        "font-size:20px;" +
+        "font-weight:700;" +
+        "line-height:24px;" +
+        "padding:0;" +
+        "cursor:pointer;" +
+        "display:none;";
+
+
+    close.addEventListener(
+
+        "click",
+
+        function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            if (
+                !state.closeEnabled
+            ) {
+
+                return;
+
+            }
+
+
+            removePanel();
+
+        },
+
+        true
+
+    );
+
+
+    header.appendChild(title);
+
+    header.appendChild(close);
+
+
+    // =====================================================
+    // PROGRESS
+    // =====================================================
+
+    const progress =
+        doc.createElement("div");
+
+
+    progress.style.cssText =
+
+        "font-weight:700;" +
+        "margin-bottom:7px;";
+
+
+    // =====================================================
+    // INSTRUCTION
+    // =====================================================
+
+    const instruction =
+        doc.createElement("div");
+
+
+    instruction.style.cssText =
+
+        "margin-bottom:8px;";
+
+
+    instruction.textContent =
+
+        state.homework ||
+
+        "Réalisez le devoir demandé dans la simulation Word 2007.";
+
+
+    // =====================================================
+    // STATUS
+    // =====================================================
+
+    const status =
+        doc.createElement("div");
+
+
+    status.style.cssText =
+
+        "padding:7px;" +
+        "border-radius:7px;" +
+        "background:#eef4f8;" +
+        "margin-bottom:8px;";
+
+
+    // =====================================================
+    // TASK LIST
+    // =====================================================
+
+    const tasks =
+        doc.createElement("div");
+
+
+    root.appendChild(header);
+
+    root.appendChild(progress);
+
+    root.appendChild(instruction);
+
+    root.appendChild(status);
+
+    root.appendChild(tasks);
+
+
+    (
+        doc.body ||
+        doc.documentElement
+    ).appendChild(root);
+
+
+    state.ui.root =
+        root;
+
+    state.ui.title =
+        title;
+
+    state.ui.close =
+        close;
+
+    state.ui.progress =
+        progress;
+
+    state.ui.instruction =
+        instruction;
+
+    state.ui.status =
+        status;
+
+    state.ui.tasks =
+        tasks;
+
+
+    enableDragging();
+
+    updatePanel();
+
+}
+
+
+// =========================================================
+// UPDATE PANEL
+// =========================================================
+
+function updatePanel() {
+
+    if (!state.ui.root) {
+
+        return;
+
+    }
+
+
+    const count =
+        completedTaskCount();
+
+
+    state.ui.progress.textContent =
+
+        "Devoir — Chapitre 1 — " +
+
+        count +
+
+        "/5 tâches exécutées";
+
+
+    const taskNames = [
+
+        "titleBar",
+
+        "officeButton",
+
+        "ribbon",
+
+        "tabs",
+
+        "documentArea"
+
+    ];
+
+
+    let html = "";
+
+
+    taskNames.forEach(
+
+        task => {
+
+            const checked =
+                state.tasks[task];
+
+
+            html +=
+
+                "<div style=\"" +
+
+                "display:flex;" +
+                "align-items:center;" +
+                "gap:8px;" +
+                "margin:5px 0;" +
+
+                "\">" +
+
+                "<span style=\"" +
+
+                "display:inline-flex;" +
+                "align-items:center;" +
+                "justify-content:center;" +
+                "width:21px;" +
+                "height:21px;" +
+                "border-radius:50%;" +
+                "font-weight:700;" +
+
+                (
+
+                    checked
+
+                        ? "background:#16a34a;color:white;"
+
+                        : "background:#e8edf1;color:#74808a;"
+
+                ) +
+
+                "\">" +
+
+                (
+
+                    checked
+
+                        ? "✓"
+
+                        : "○"
+
+                ) +
+
+                "</span>" +
+
+                "<span>" +
+
+                taskLabel(task) +
+
+                "</span>" +
+
+                "</div>";
+
+        }
+
+    );
+
+
+    state.ui.tasks.innerHTML =
+        html;
+
+
+    if (
+        count === 5 &&
+        !state.completed
+    ) {
+
+        state.ui.status.textContent =
+
+            "✓ 5/5 tâches exécutées. Validation en cours.";
+
+    }
+
+}
+
+
+// =========================================================
+// STATUS
+// =========================================================
+
+function setStatus(message) {
+
+    if (
+        state.ui.status
+    ) {
+
+        state.ui.status.textContent =
+            message;
+
+    }
+
+}
+
+
+// =========================================================
+// DRAG PANEL
+// =========================================================
+
+function enableDragging() {
+
+    if (
+
+        !state.ui.root ||
+
+        !state.ui.title
+
+    ) {
+
+        return;
+
+    }
+
+
+    const panel =
+        state.ui.root;
+
+    const handle =
+        state.ui.title;
+
+
+    let dragging = false;
+
+    let pointerId = null;
+
+    let offsetX = 0;
+
+    let offsetY = 0;
+
+
+    handle.addEventListener(
+
+        "pointerdown",
+
+        function (event) {
+
+            if (
+
+                event.pointerType === "mouse" &&
+
+                event.button !== 0
+
+            ) {
+
+                return;
+
+            }
+
+
+            const rect =
+                panel.getBoundingClientRect();
+
+
+            dragging = true;
+
+            pointerId =
+                event.pointerId;
+
+
+            offsetX =
+                event.clientX -
+                rect.left;
+
+            offsetY =
+                event.clientY -
+                rect.top;
+
+
+            handle.style.cursor =
+                "grabbing";
+
+
+            try {
+
+                handle.setPointerCapture(
+                    event.pointerId
+                );
+
+            } catch (error) {}
+
+
+            event.preventDefault();
+
+        },
+
+        true
+
+    );
+
+
+    handle.addEventListener(
+
+        "pointermove",
+
+        function (event) {
+
+            if (
+                !dragging ||
+                event.pointerId !== pointerId
+            ) {
+
+                return;
+
+            }
+
+
+            const doc =
+                state.simulationDocument;
+
+
+            const width =
+
+                doc?.documentElement?.clientWidth ||
+
+                window.innerWidth;
+
+
+            const height =
+
+                doc?.documentElement?.clientHeight ||
+
+                window.innerHeight;
+
+
+            const rect =
+                panel.getBoundingClientRect();
+
+
+            const left = Math.max(
+
+                0,
+
+                Math.min(
+
+                    event.clientX -
+                    offsetX,
+
+                    Math.max(
+                        0,
+                        width -
+                        rect.width
+                    )
+
+                )
+
+            );
+
+
+            const top = Math.max(
+
+                0,
+
+                Math.min(
+
+                    event.clientY -
+                    offsetY,
+
+                    Math.max(
+                        0,
+                        height -
+                        rect.height
+                    )
+
+                )
+
+            );
+
+
+            panel.style.left =
+                left + "px";
+
+            panel.style.top =
+                top + "px";
+
+            panel.style.right =
+                "auto";
+
+
+            event.preventDefault();
+
+        },
+
+        true
+
+    );
+
+
+    function stopDrag(event) {
+
+        if (
+
+            !dragging ||
+
+            (
+
+                event &&
+
+                event.pointerId !== pointerId
+
+            )
+
+        ) {
+
+            return;
+
+        }
+
+
+        dragging = false;
+
+        pointerId = null;
+
+        handle.style.cursor =
+            "grab";
+
+    }
+
+
+    handle.addEventListener(
+        "pointerup",
+        stopDrag,
+        true
+    );
+
+
+    handle.addEventListener(
+        "pointercancel",
+        stopDrag,
+        true
+    );
+
+}
+
+
+// =========================================================
+// RECORD ACTION
+// =========================================================
+
+function recordAction(name) {
+
+    if (!name) {
+
+        return;
+
+    }
+
+
+    state.lastActionTime =
+        Date.now();
+
+
+    state.actionHistory.push({
+
+        name:
+            name,
+
+        time:
+            Date.now()
+
+    });
+
+
+    if (
+        state.actionHistory.length > 200
+    ) {
+
+        state.actionHistory.shift();
+
+    }
+
+}
+
+
+// =========================================================
+// CLOSEST
+// =========================================================
+
+function closest(target, selector) {
+
+    if (
+
+        !target ||
+
+        typeof target.closest !==
+        "function"
+
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        return target.closest(
+            selector
+        );
+
+    } catch (error) {
+
+        return null;
+
+    }
+
+}
+
+
+// =========================================================
+// REAL TARGET IDENTIFICATION
+// =========================================================
+
+function identifyTask(target) {
+
+    if (!target) {
+
+        return null;
+
+    }
+
+
+    let node =
+        target;
+
+
+    for (
+        let i = 0;
+        i < 10 && node;
+        i++
+    ) {
+
+        const cls =
+
+            typeof node.className === "string"
+
+                ? normalize(node.className)
+
+                : "";
+
+
+        const id =
+            normalize(node.id || "");
+
+
+        const role =
+
+            normalize(
+
+                node.getAttribute?.(
+                    "data-role"
+                ) || ""
+
+            );
+
+
+        const action =
+
+            normalize(
+
+                node.getAttribute?.(
+                    "data-action"
+                ) || ""
+
+            );
+
+
+        const command =
+
+            normalize(
+
+                node.getAttribute?.(
+                    "data-command"
+                ) || ""
+
+            );
+
+
+        const aria =
+
+            normalize(
+
+                node.getAttribute?.(
+                    "aria-label"
+                ) || ""
+
+            );
+
+
+        const combined =
+
+            cls + " " +
+            id + " " +
+            role + " " +
+            action + " " +
+            command + " " +
+            aria;
+
+
+        // -------------------------------------------------
+        // TITLE BAR
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwTitleBar"
+            ) ||
+
+            combined.includes("cwtitlebar") ||
+
+            combined.includes("titlebar") ||
+
+            combined.includes("barretitre")
+
+        ) {
+
+            return "titleBar";
+
+        }
+
+
+        // -------------------------------------------------
+        // OFFICE BUTTON
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                '.cwOfficeButton,[data-role="office-button"]'
+            ) ||
+
+            combined.includes("cwofficebutton") ||
+
+            combined.includes("officebutton")
+
+        ) {
+
+            return "officeButton";
+
+        }
+
+
+        // -------------------------------------------------
+        // RIBBON
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwRibbon"
+            ) ||
+
+            combined.includes("cwribbon")
+
+        ) {
+
+            return "ribbon";
+
+        }
+
+
+        // -------------------------------------------------
+        // TABS
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwTabBtn"
+            ) ||
+
+            combined.includes("cwtabbtn") ||
+
+            combined.includes("ribbontab")
+
+        ) {
+
+            return "tabs";
+
+        }
+
+
+        // -------------------------------------------------
+        // DOCUMENT AREA
+        // -------------------------------------------------
+
+        if (
+
+            node.matches?.(
+                ".cwPageContent"
+            )
+
+        ) {
+
+            return "documentArea";
+
+        }
+
+
+        node =
+            node.parentElement;
+
+    }
+
+
+    return null;
+
+}
+
+
+// =========================================================
+// ACTIVATE ONE TASK
+// =========================================================
+
+function activateTask(task) {
+
+    if (
+
+        !task ||
+
+        state.completed ||
+
+        state.tasks[task]
+
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+
+        !Object.prototype.hasOwnProperty.call(
+            state.tasks,
+            task
+        )
+
+    ) {
+
+        return;
+
+    }
+
+
+    state.tasks[task] =
+        true;
+
+
+    recordAction(
+        "homework-" + task
+    );
+
+
+    updatePanel();
+
+
+    const count =
+        completedTaskCount();
+
+
+    setStatus(
+
+        "✓ " +
+
+        taskLabel(task) +
+
+        " exécuté. " +
+
+        count +
+
+        "/5."
+
+    );
+
+
+    // =====================================================
+    // CRITICAL:
+    // THE MOMENT 5 GREEN CHECKMARKS EXIST,
+    // VALIDATE WITHOUT WAITING.
+    // =====================================================
+
+    if (
+        count === 5
+    ) {
+
+        validateHomeworkImmediately();
+
+    }
+
+}
+
+
+// =========================================================
+// CLICK
+// =========================================================
+
+function handleClick(event) {
+
+    if (
+
+        !state.started ||
+
+        state.completed ||
+
+        !event ||
+
+        !event.target
+
+    ) {
+
+        return;
+
+    }
+
+
+    const task =
+        identifyTask(
+            event.target
+        );
+
+
+    if (task) {
+
+        activateTask(task);
+
+        return;
+
+    }
+
+
+    // Document area is also recognized
+    // from real clicks inside the page.
+
+    if (
+
+        closest(
+            event.target,
+            ".cwPageContent"
+        )
+
+    ) {
+
+        activateTask(
+            "documentArea"
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// INPUT
+// =========================================================
+
+function handleInput(event) {
+
+    if (
+
+        !state.started ||
+
+        state.completed
+
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+
+        event?.target &&
+
+        closest(
+            event.target,
+            ".cwPageContent"
+        )
+
+    ) {
+
+        activateTask(
+            "documentArea"
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// VALIDATE HOMEWORK IMMEDIATELY
+// =========================================================
+
+function validateHomeworkImmediately() {
+
+    if (
+
+        state.completed ||
+
+        state.validationStarted
+
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        completedTaskCount() !== 5
+    ) {
+
+        return;
+
+    }
+
+
+    state.validationStarted =
+        true;
+
+
+    state.completed =
+        true;
+
+
+    state.closeEnabled =
+        true;
+
+
+    updatePanel();
+
+
+    setStatus(
+
+        "✓ 5/5 — Devoir validé par Ranise."
+
+    );
+
+
+    // =====================================================
+    // CLOSE BUTTON APPEARS ONLY AFTER VALIDATION
+    // =====================================================
+
+    if (
+        state.ui.close
+    ) {
+
+        state.ui.close.style.display =
+            "inline-flex";
+
+    }
+
+
+    // =====================================================
+    // SAVE CHAPTER 1 HOMEWORK COMPLETION
+    // =====================================================
+
+    try {
+
+        localStorage.setItem(
+
+            "wordChapter1HomeworkCompleted",
+
+            "true"
+
+        );
+
+    } catch (error) {}
+
+
+    // =====================================================
+    // SYNC EXISTING PROGRESS ENGINE ONLY
+    //
+    // NO NEXT CHAPTER UNLOCK.
+    // =====================================================
+
+    if (
+
+        typeof MicrosoftWordProgressEngine !==
+        "undefined"
+
+    ) {
+
+        try {
+
+            const progress =
+                MicrosoftWordProgressEngine.get();
+
+
+            if (
+
+                !Array.isArray(
+                    progress.completedChapters
+                )
+
+            ) {
+
+                progress.completedChapters = [];
+
+            }
+
+
+            if (
+
+                !progress.completedChapters.includes(
+                    "chapitre1"
+                )
+
+            ) {
+
+                progress.completedChapters.push(
+                    "chapitre1"
+                );
+
+            }
+
+
+            MicrosoftWordProgressEngine.save(
+                progress
+            );
+
+        } catch (error) {}
+
+    }
+
+
+    // =====================================================
+    // IMPORTANT:
+    // NO UNLOCK ENGINE HERE.
+    // BLOCK 10 OWNS NEXT-CHAPTER UNLOCKING.
+    // =====================================================
+
+
+    stopMonitoring();
+
+
+    // =====================================================
+    // IMMEDIATE RANISE AUDIO
+    //
+    // NO await.
+    // NO delay.
+    // NO blocking validation.
+    // =====================================================
+
+    const message =
+
+        "Excellent travail. " +
+
+        "J'ai vérifié les cinq tâches de votre devoir. " +
+
+        "Les cinq tâches sont correctement réalisées. " +
+
+        "Votre devoir du Chapitre 1 est validé. " +
+
+        "Félicitations.";
+
+
+    speak(message);
+
+}
+
+
+// =========================================================
+// REMOVE PANEL
+// =========================================================
+
+function removePanel() {
+
+    if (
+        state.ui.root
+    ) {
+
+        try {
+
+            state.ui.root.remove();
+
+        } catch (error) {
+
+            if (
+                state.ui.root.parentNode
+            ) {
+
+                state.ui.root.parentNode.removeChild(
+                    state.ui.root
+                );
+
+            }
+
+        }
+
+    }
+
+
+    state.ui.root =
+        null;
+
+    state.ui.title =
+        null;
+
+    state.ui.close =
+        null;
+
+    state.ui.progress =
+        null;
+
+    state.ui.instruction =
+        null;
+
+    state.ui.status =
+        null;
+
+    state.ui.tasks =
+        null;
+
+}
+
+
+// =========================================================
+// STOP MONITORING
+// =========================================================
+
+function stopMonitoring() {
+
+    if (
+        state.monitorTimer
+    ) {
+
+        clearInterval(
+            state.monitorTimer
+        );
+
+        state.monitorTimer =
+            null;
+
+    }
+
+}
+
+
+// =========================================================
+// ATTACH SIMULATION EVENTS
+// =========================================================
+
+function attachSimulationListeners() {
+
+    if (
+
+        !state.simulationDocument ||
+
+        state.listenersAttached
+
+    ) {
+
+        return;
+
+    }
+
+
+    const doc =
+        state.simulationDocument;
+
+
+    // CAPTURE ONLY:
+    // Block 9 OBSERVES.
+    // It does not stop the simulation.
+
+    doc.addEventListener(
+        "click",
+        handleClick,
+        true
+    );
+
+
+    doc.addEventListener(
+        "input",
+        handleInput,
+        true
+    );
+
+
+    state.listenersAttached =
+        true;
+
+
+    state.monitorTimer =
+
+        setInterval(
+
+            function () {
+
+                if (
+
+                    state.completed ||
+
+                    !state.started
+
+                ) {
+
+                    return;
+
+                }
+
+
+                // Reconnect if iframe document changed.
+
+                if (
+                    !state.simulationDocument
+                ) {
+
+                    connectToSimulation();
+
+                }
+
+
+                // CRITICAL:
+                // NEVER validate before 5/5.
+
+                if (
+                    completedTaskCount() === 5
+                ) {
+
+                    validateHomeworkImmediately();
+
+                }
+
+            },
+
+            100
+
+        );
+
+}
+
+
+// =========================================================
+// LOAD DATA
+// =========================================================
+
+function loadChapterData() {
+
+    const chapter =
+        getChapter1();
+
+
+    if (!chapter) {
+
+        return false;
+
+    }
+
+
+    state.chapter =
+        chapter;
+
+
+    state.homework =
+
+        String(
+
+            chapter.homework ||
+
+            ""
+
+        ).trim();
+
+
+    return true;
+
+}
+
+
+// =========================================================
+// RESET
+// =========================================================
+
+function resetState() {
+
+    state.tasks.titleBar =
+        false;
+
+    state.tasks.officeButton =
+        false;
+
+    state.tasks.ribbon =
+        false;
+
+    state.tasks.tabs =
+        false;
+
+    state.tasks.documentArea =
+        false;
+
+
+    state.completed =
+        false;
+
+    state.validationStarted =
+        false;
+
+    state.closeEnabled =
+        false;
+
+    state.actionHistory = [];
+
+}
+
+
+// =========================================================
+// START BLOCK 9
+// =========================================================
+
+async function startBlock9() {
+
+    if (
+
+        state.started ||
+
+        state.completed
+
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !connectToSimulation()
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !loadChapterData()
+    ) {
+
+        return;
+
+    }
+
+
+    resetState();
+
+
+    state.started =
+        true;
+
+    state.waitingForBlock8 =
+        false;
+
+    state.block8CompletionDetected =
+        true;
+
+
+    state.lastDocumentSignature =
+        getDocumentSignature();
+
+
+    createHomeworkPanel();
+
+
+    attachSimulationListeners();
+
+
+    updatePanel();
+
+
+    setStatus(
+
+        "0/5 tâches exécutées. Commencez le devoir."
+
+    );
+
+
+    // -----------------------------------------------------
+    // INTRODUCTION
+    // -----------------------------------------------------
+
+    speak(
+
+        "Très bien. Nous passons maintenant au devoir " +
+        "du Chapitre 1. Réalisez uniquement les tâches " +
+        "demandées dans la simulation. Je vais vérifier " +
+        "chaque tâche réelle et afficher une coche verte " +
+        "pour chaque tâche exécutée."
+
+    );
+
+}
+
+
+// =========================================================
+// BLOCK 8 → BLOCK 9
+//
+// THIS IS THE CRITICAL PROTECTION.
+// NEVER START WHILE BLOCK 8 IS FALSE.
+// =========================================================
+
+function checkBlock8Completion() {
+
+    // -----------------------------------------------------
+    // BLOCK 9 MUST NOT START IF ALREADY RUNNING.
+    // -----------------------------------------------------
+
+    if (
+
+        state.started ||
+
+        state.completed
+
+    ) {
+
+        return;
+
+    }
+
+
+    const engine =
+
+        window.RaniseMoiseExerciseMasteryEngine;
+
+
+    if (
+
+        !engine ||
+
+        typeof engine.getState !==
+        "function"
+
+    ) {
+
+        return;
+
+    }
+
+
+    let block8State;
+
+
+    try {
+
+        block8State =
+            engine.getState();
+
+    } catch (error) {
+
+        return;
+
+    }
+
+
+    if (!block8State) {
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // ABSOLUTE CONDITION:
+    //
+    // FALSE = DO NOTHING.
+    // TRUE = BLOCK 9 MAY START.
+    //
+    // NO SPEAK.
+    // NO PANEL.
+    // NO TASK LIST.
+    // NO SIMULATION VALIDATION.
+    // =====================================================
+
+    if (
+        block8State.completed !== true
+    ) {
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // BLOCK 8 IS REALLY COMPLETE.
+    // =====================================================
+
+    state.block8CompletionDetected =
+        true;
+
+
+    startBlock9();
+
+}
+
+
+// =========================================================
+// WAIT FOR BLOCK 8
+// =========================================================
+
+state.transitionTimer =
+
+    setInterval(
+
+        function () {
+
+            if (
+
+                state.started ||
+
+                state.completed
+
+            ) {
+
+                clearInterval(
+                    state.transitionTimer
+                );
+
+                state.transitionTimer =
+                    null;
+
+                return;
+
+            }
+
+
+            // IMPORTANT:
+            // Do NOT set transitionDetected here.
+            // Do NOT assume Block 8 is complete.
+            // Only check its real state.
+
+            checkBlock8Completion();
+
+        },
+
+        100
+
+    );
+
+
+// =========================================================
+// PUBLIC API
+// =========================================================
+
+window.RaniseMoiseHomeworkMasteryEngine = {
+
+    start:
+        startBlock9,
+
+
+    getState:
+
+        function () {
+
+            return {
+
+                started:
+                    state.started,
+
+                completed:
+                    state.completed,
+
+                waitingForBlock8:
+                    state.waitingForBlock8,
+
+                block8CompletionDetected:
+                    state.block8CompletionDetected,
+
+                closeEnabled:
+                    state.closeEnabled,
+
+                tasks:
+
+                    Object.assign(
+                        {},
+                        state.tasks
+                    ),
+
+                completedTasks:
+                    completedTaskCount(),
+
+                homework:
+                    state.homework
+
+            };
+
+        }
+
+};
+
+})();
+
+
+
+
 
 
 
