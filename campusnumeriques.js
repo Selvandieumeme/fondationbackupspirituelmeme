@@ -491,6 +491,190 @@ homework: [
 
 }
 
+
+
+{
+    id:"chapitre3",
+
+    unlocked:false,
+
+    title:"Microsoft Word 2007 — Onglet Home : Groupe Police (Font) — Commandes avancées",
+
+    theory:[
+        {
+            title:"Grow Font / Augmenter la taille",
+            content:
+                "La commande Grow Font (Augmenter la taille) permet d’augmenter rapidement la taille du texte sélectionné. Elle est utile lorsqu’on souhaite agrandir progressivement un texte sans saisir manuellement une nouvelle valeur dans la zone Font Size."
+        },
+
+        {
+            title:"Shrink Font / Réduire la taille",
+            content:
+                "La commande Shrink Font (Réduire la taille) permet de diminuer rapidement la taille du texte sélectionné. Elle fonctionne comme l’outil inverse de Grow Font et permet d’ajuster rapidement la présentation d’un texte."
+        },
+
+        {
+            title:"Strikethrough / Barré",
+            content:
+                "La commande Strikethrough (Barré) permet de tracer une ligne à travers le texte sélectionné. Elle peut être utilisée pour signaler une information supprimée, une modification ou un élément qui ne doit plus être considéré comme valide."
+        },
+
+        {
+            title:"Subscript / Indice",
+            content:
+                "La commande Subscript (Indice) permet de placer des caractères légèrement sous la ligne normale du texte. Elle est notamment utilisée pour écrire certaines formules, notations et expressions scientifiques."
+        },
+
+        {
+            title:"Superscript / Exposant",
+            content:
+                "La commande Superscript (Exposant) permet de placer des caractères légèrement au-dessus de la ligne normale du texte. Elle peut notamment être utilisée pour écrire des exposants mathématiques et certaines notations."
+        },
+
+        {
+            title:"Maîtrise des commandes avancées du groupe Police",
+            content:
+                "Le groupe Police (Font) contient plusieurs commandes permettant de contrôler l’apparence du texte. Dans ce chapitre, l’étudiant doit maîtriser Grow Font (Augmenter la taille), Shrink Font (Réduire la taille), Strikethrough (Barré), Subscript (Indice) et Superscript (Exposant), puis être capable de les utiliser de manière autonome dans la simulation."
+        }
+    ],
+
+
+    practice:[
+        {
+            title:"Pratique — Grow Font / Augmenter la taille",
+            steps:[
+                "Ouvrir l’onglet Home (Accueil).",
+                "Repérer le groupe Police (Font).",
+                "Saisir ou sélectionner un texte dans le document.",
+                "Utiliser la commande Grow Font (Augmenter la taille).",
+                "Observer l’augmentation de la taille du texte sélectionné.",
+                "Répéter l’opération afin d’observer les différentes augmentations."
+            ]
+        },
+
+        {
+            title:"Pratique — Shrink Font / Réduire la taille",
+            steps:[
+                "Sélectionner un texte déjà mis en forme.",
+                "Repérer la commande Shrink Font (Réduire la taille) dans le groupe Police.",
+                "Cliquer sur Shrink Font.",
+                "Observer la diminution de la taille du texte.",
+                "Répéter l’opération afin de vérifier la diminution progressive."
+            ]
+        },
+
+        {
+            title:"Pratique — Strikethrough / Barré",
+            steps:[
+                "Saisir une phrase dans le document.",
+                "Sélectionner une partie de la phrase.",
+                "Activer Strikethrough (Barré).",
+                "Observer la ligne traversant le texte sélectionné.",
+                "Sélectionner une autre partie du texte et appliquer également Barré."
+            ]
+        },
+
+        {
+            title:"Pratique — Subscript / Indice",
+            steps:[
+                "Saisir une expression nécessitant un indice.",
+                "Sélectionner le caractère ou le nombre concerné.",
+                "Activer Subscript (Indice).",
+                "Observer le déplacement du caractère sous la ligne normale.",
+                "Vérifier que le reste du texte n’est pas modifié."
+            ]
+        },
+
+        {
+            title:"Pratique — Superscript / Exposant",
+            steps:[
+                "Saisir une expression nécessitant un exposant.",
+                "Sélectionner le caractère ou le nombre concerné.",
+                "Activer Superscript (Exposant).",
+                "Observer le déplacement du caractère au-dessus de la ligne normale.",
+                "Vérifier que seul le texte sélectionné est concerné."
+            ]
+        },
+
+        {
+            title:"Pratique — Synthèse des commandes avancées du groupe Police",
+            steps:[
+                "Créer un court texte dans le document.",
+                "Utiliser Grow Font pour augmenter la taille d’une partie du texte.",
+                "Utiliser Shrink Font pour réduire la taille d’une autre partie.",
+                "Appliquer Strikethrough à une partie du texte.",
+                "Appliquer Subscript au caractère ou au nombre approprié.",
+                "Appliquer Superscript au caractère ou au nombre approprié.",
+                "Vérifier visuellement chaque résultat."
+            ]
+        }
+    ],
+
+
+    exercises:[
+        "Sélectionner un texte et utiliser Grow Font (Augmenter la taille) afin d’augmenter progressivement sa taille.",
+
+        "Sélectionner une autre partie du texte et utiliser Shrink Font (Réduire la taille) afin de diminuer progressivement sa taille.",
+
+        "Sélectionner une partie d’un texte et appliquer Strikethrough (Barré).",
+
+        "Créer une expression contenant un caractère ou un nombre devant être placé en indice et utiliser Subscript (Indice).",
+
+        "Créer une expression contenant un caractère ou un nombre devant être placé en exposant et utiliser Superscript (Exposant).",
+
+        "Réaliser un court document démontrant l’utilisation correcte de Grow Font, Shrink Font, Strikethrough, Subscript et Superscript."
+    ],
+
+
+    homework:[
+        "Réaliser un document Microsoft Word 2007 permettant de démontrer la maîtrise des commandes avancées étudiées dans le groupe Police (Font). L’élève doit saisir un court texte puis utiliser Grow Font (Augmenter la taille), Shrink Font (Réduire la taille), Strikethrough (Barré), Subscript (Indice) et Superscript (Exposant) sur différentes parties du document. Le document final doit présenter clairement les différentes transformations réalisées et l’élève doit être capable d’expliquer le rôle de chaque commande utilisée."
+    ],
+
+
+    evaluation:[
+        "Identifier le groupe Police (Font) de l’onglet Home (Accueil) et expliquer son rôle dans la mise en forme du texte.",
+
+        "Démontrer correctement l’utilisation de Grow Font (Augmenter la taille) sur un texte sélectionné.",
+
+        "Démontrer correctement l’utilisation de Shrink Font (Réduire la taille) sur un texte sélectionné.",
+
+        "Démontrer correctement l’utilisation de Strikethrough (Barré).",
+
+        "Démontrer correctement l’utilisation de Subscript (Indice).",
+
+        "Démontrer correctement l’utilisation de Superscript (Exposant).",
+
+        "Réaliser une mise en forme complète d’un court document en utilisant correctement Grow Font, Shrink Font, Strikethrough, Subscript et Superscript.",
+
+        "Expliquer oralement ou par écrit le rôle de chacune des cinq commandes utilisées et justifier leur utilisation.",
+
+        "Réaliser l’ensemble de l’évaluation de manière autonome afin de démontrer la maîtrise théorique et pratique des cinq commandes avancées du groupe Police (Font)."
+    ],
+
+
+    objective:[
+        "Identifier le groupe Police (Font) de l’onglet Home (Accueil) de Microsoft Word 2007.",
+
+        "Comprendre le rôle de Grow Font (Augmenter la taille).",
+
+        "Comprendre le rôle de Shrink Font (Réduire la taille).",
+
+        "Comprendre et utiliser Strikethrough (Barré).",
+
+        "Comprendre et utiliser Subscript (Indice).",
+
+        "Comprendre et utiliser Superscript (Exposant).",
+
+        "Être capable de choisir la commande Font appropriée selon le résultat recherché parmi les cinq commandes étudiées.",
+
+        "Être capable d’utiliser les cinq commandes avancées du groupe Police (Font) de manière autonome.",
+
+        "Être capable d’expliquer théoriquement chaque commande avant de l’appliquer dans la simulation."
+    ]
+}
+
+
+
 ]
 
 };
