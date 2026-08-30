@@ -29549,7 +29549,2353 @@ if(
 
 
 
+// =========================================================
+// BLOCK 10 DYNAMIC EVALUATION
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE — DYNAMIC EVALUATION ENGINE
+// =========================================================
+//
+// CHAPTER 1:
+//     COMPLETELY EXCLUDED
+//
+// CHAPTER 2+:
+//     READS chapter.evaluation DYNAMICALLY
+//     LAUNCHES ONLY AFTER:
+//         HOMEWORK → EVALUATION BRIDGE
+//
+// PIPELINE:
+//
+//     BLOCK 9
+//          ↓
+//     unlockNextPart(chapterId,"homework")
+//          ↓
+//     BLOCK 10
+//          ↓
+//     EVALUATION VALIDATION
+//          ↓
+//     ALL EVALUATION ITEMS VALIDATED
+//          ↓
+//     unlockNextPart(chapterId,"evaluation")
+//          ↓
+//     CHAPTER COMPLETED
+//          ↓
+//     NEXT CHAPTER UNLOCKED
+//
+// =========================================================
 
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // STATE
+    // =====================================================
+
+    const state = {
+
+        chapterId:null,
+
+        simulationFrame:null,
+
+        simulationDocument:null,
+
+        evaluation:null,
+
+        evaluationIndex:0,
+
+        started:false,
+
+        waiting:false,
+
+        completed:false,
+
+        speaking:false,
+
+        processing:false,
+
+        listenersAttached:false,
+
+        bridgeWrapped:false,
+
+        unlockReceived:false,
+
+        launchPending:false,
+
+        bridgeHandoffChapterId:null,
+
+        bridgeHandoffSequence:0,
+
+        baselineText:"",
+
+        currentAnswerText:"",
+
+        currentActions:{},
+
+        currentSelections:[],
+
+        lastActionTime:0
+
+    };
+
+
+    // =====================================================
+    // CHAPTER 1 PROTECTION
+    // =====================================================
+
+    function isChapter1(chapterId){
+
+        return String(chapterId || "")
+            .toLowerCase()
+            .trim() === "chapitre1";
+
+    }
+
+
+    // =====================================================
+    // NORMALIZE
+    // =====================================================
+
+    function normalize(value){
+
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g,"")
+            .toLowerCase()
+            .replace(/\s+/g," ")
+            .trim();
+
+    }
+
+
+    // =====================================================
+    // GET CHAPTER
+    // =====================================================
+
+    function getChapter(chapterId){
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return null;
+
+        }
+
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+        if(
+            !microsoftWordCourse ||
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        return microsoftWordCourse.chapters.find(
+            function(chapter){
+
+                return (
+                    chapter &&
+                    String(chapter.id) ===
+                    String(chapterId)
+                );
+
+            }
+        ) || null;
+
+    }
+
+
+    // =====================================================
+    // GET EVALUATION DYNAMICALLY
+    // =====================================================
+
+    function getChapterEvaluation(chapterId){
+
+        const chapter =
+            getChapter(chapterId);
+
+
+        if(
+            !chapter ||
+            !Array.isArray(
+                chapter.evaluation
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        const evaluation =
+            chapter.evaluation
+                .map(function(item){
+
+                    return String(
+                        item || ""
+                    ).trim();
+
+                })
+                .filter(Boolean);
+
+
+        return evaluation.length
+            ? evaluation
+            : null;
+
+    }
+
+
+    // =====================================================
+    // CHAPTER NAME
+    // =====================================================
+
+    function chapterName(chapterId){
+
+        const chapter =
+            getChapter(chapterId);
+
+
+        return (
+            chapter &&
+            chapter.title
+        )
+        ?
+        String(chapter.title)
+        :
+        String(chapterId || "");
+
+    }
+
+
+    // =====================================================
+    // RANISE VOICE
+    // =====================================================
+
+    async function speak(text){
+
+        if(!text){
+
+            return;
+
+        }
+
+
+        if(
+            typeof speakProfessorIAWithMaryTTS !==
+            "function"
+        ){
+
+            console.warn(
+                "RANISE BLOCK 10: MaryTTS unavailable."
+            );
+
+            return;
+
+        }
+
+
+        state.speaking =
+            true;
+
+
+        if(
+            typeof raniseStartTalking ===
+            "function"
+        ){
+
+            try{
+
+                raniseStartTalking();
+
+            }catch(error){}
+
+        }
+
+
+        try{
+
+            await speakProfessorIAWithMaryTTS(
+                text
+            );
+
+        }catch(error){
+
+            console.error(
+                "RANISE BLOCK 10: Voice error.",
+                error
+            );
+
+        }finally{
+
+            state.speaking =
+                false;
+
+
+            if(
+                typeof raniseStopTalking ===
+                "function"
+            ){
+
+                try{
+
+                    raniseStopTalking();
+
+                }catch(error){}
+
+            }
+
+        }
+
+    }
+
+
+    // =====================================================
+    // FIND SIMULATION
+    // =====================================================
+
+    function findSimulation(){
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(!campusContent){
+
+            return null;
+
+        }
+
+
+        let frame =
+            campusContent.querySelector(
+                'iframe[src*="campusword2007simulation"]'
+            );
+
+
+        if(frame){
+
+            return frame;
+
+        }
+
+
+        frame =
+            campusContent.querySelector(
+                "iframe[data-chapter-id]"
+            );
+
+
+        if(frame){
+
+            return frame;
+
+        }
+
+
+        return campusContent.querySelector(
+            "iframe"
+        ) || null;
+
+    }
+
+
+    // =====================================================
+    // CHAPTER ID FROM ELEMENT
+    // =====================================================
+
+    function getChapterIdFromElement(element){
+
+        if(!element){
+
+            return null;
+
+        }
+
+
+        const attributes = [
+
+            "data-chapter-id",
+            "data-chapter",
+            "data-current-chapter",
+            "data-chapterid"
+
+        ];
+
+
+        for(
+            let i = 0;
+            i < attributes.length;
+            i++
+        ){
+
+            try{
+
+                const value =
+                    element.getAttribute(
+                        attributes[i]
+                    );
+
+
+                if(
+                    value &&
+                    !isChapter1(value)
+                ){
+
+                    return String(
+                        value
+                    ).trim();
+
+                }
+
+            }catch(error){}
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // ACTIVE CHAPTER
+    // =====================================================
+
+    function detectCurrentChapterId(){
+
+        let chapterId =
+            null;
+
+
+        if(
+            typeof currentChapterId !==
+            "undefined" &&
+            currentChapterId
+        ){
+
+            chapterId =
+                String(
+                    currentChapterId
+                ).trim();
+
+        }
+
+
+        if(
+            !chapterId &&
+            window.currentChapterId
+        ){
+
+            chapterId =
+                String(
+                    window.currentChapterId
+                ).trim();
+
+        }
+
+
+        if(
+            !chapterId &&
+            window.RaniseActiveChapterId
+        ){
+
+            chapterId =
+                String(
+                    window.RaniseActiveChapterId
+                ).trim();
+
+        }
+
+
+        const campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(
+            !chapterId &&
+            campusContent
+        ){
+
+            chapterId =
+                getChapterIdFromElement(
+                    campusContent
+                );
+
+        }
+
+
+        if(!chapterId){
+
+            const frame =
+                findSimulation();
+
+
+            if(frame){
+
+                chapterId =
+                    getChapterIdFromElement(
+                        frame
+                    );
+
+            }
+
+        }
+
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return null;
+
+        }
+
+
+        return chapterId;
+
+    }
+
+
+    // =====================================================
+    // CONNECT TO SIMULATION
+    // =====================================================
+
+    function connectToSimulation(){
+
+        const frame =
+            findSimulation();
+
+
+        if(!frame){
+
+            return false;
+
+        }
+
+
+        try{
+
+            const doc =
+                frame.contentDocument ||
+                (
+                    frame.contentWindow
+                    ?
+                    frame.contentWindow.document
+                    :
+                    null
+                );
+
+
+            if(!doc){
+
+                return false;
+
+            }
+
+
+            state.simulationFrame =
+                frame;
+
+            state.simulationDocument =
+                doc;
+
+
+            return true;
+
+        }catch(error){
+
+            console.error(
+                "RANISE BLOCK 10: Simulation connection error.",
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT TEXT
+    // =====================================================
+
+    function getDocumentText(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return "";
+
+        }
+
+
+        const pages =
+            doc.querySelectorAll(
+                ".cwPageContent"
+            );
+
+
+        if(pages.length){
+
+            return Array.from(pages)
+                .map(function(page){
+
+                    return (
+                        page.innerText ||
+                        page.textContent ||
+                        ""
+                    );
+
+                })
+                .join(" ");
+
+        }
+
+
+        const editable =
+            doc.querySelectorAll(
+                '[contenteditable="true"], textarea, input[type="text"]'
+            );
+
+
+        if(editable.length){
+
+            return Array.from(editable)
+                .map(function(node){
+
+                    if(
+                        typeof node.value ===
+                        "string"
+                    ){
+
+                        return node.value;
+
+                    }
+
+
+                    return (
+                        node.innerText ||
+                        node.textContent ||
+                        ""
+                    );
+
+                })
+                .join(" ");
+
+        }
+
+
+        return doc.body
+            ?
+            (
+                doc.body.innerText ||
+                doc.body.textContent ||
+                ""
+            )
+            :
+            "";
+
+    }
+
+
+    // =====================================================
+    // SELECTION
+    // =====================================================
+
+    function getSelectionText(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(!doc){
+
+            return "";
+
+        }
+
+
+        try{
+
+            const selection =
+                typeof doc.getSelection ===
+                "function"
+                ?
+                doc.getSelection()
+                :
+                null;
+
+
+            return selection
+                ?
+                String(
+                    selection.toString() || ""
+                ).trim()
+                :
+                "";
+
+        }catch(error){
+
+            return "";
+
+        }
+
+    }
+
+
+    // =====================================================
+    // ELEMENT DATA
+    // =====================================================
+
+    function elementData(element){
+
+        if(!element){
+
+            return "";
+
+        }
+
+
+        try{
+
+            return normalize([
+
+                element.id,
+
+                typeof element.className ===
+                "string"
+                ?
+                element.className
+                :
+                "",
+
+                element.innerText,
+
+                element.textContent,
+
+                element.getAttribute("title"),
+
+                element.getAttribute("aria-label"),
+
+                element.getAttribute("data-action"),
+
+                element.getAttribute("data-command"),
+
+                element.getAttribute("data-role"),
+
+                element.getAttribute("name"),
+
+                element.getAttribute("value")
+
+            ]
+            .filter(Boolean)
+            .join(" "));
+
+        }catch(error){
+
+            return "";
+
+        }
+
+    }
+
+
+    // =====================================================
+    // RIBBON ACTION
+    // =====================================================
+
+    function ribbonAction(target){
+
+        let node =
+            target;
+
+
+        for(
+            let i = 0;
+            i < 8 && node;
+            i++
+        ){
+
+            const action =
+                normalize(
+                    node.getAttribute &&
+                    node.getAttribute(
+                        "data-action"
+                    )
+                );
+
+
+            const command =
+                normalize(
+                    node.getAttribute &&
+                    node.getAttribute(
+                        "data-command"
+                    )
+                );
+
+
+            const data =
+                elementData(node);
+
+
+            if(action){
+
+                return action;
+
+            }
+
+
+            if(command){
+
+                return command;
+
+            }
+
+
+            if(
+                data.includes("copy") ||
+                data.includes("copier")
+            ){
+
+                return "copy";
+
+            }
+
+
+            if(
+                data.includes("cut") ||
+                data.includes("couper")
+            ){
+
+                return "cut";
+
+            }
+
+
+            if(
+                data.includes("paste") ||
+                data.includes("coller")
+            ){
+
+                return "paste";
+
+            }
+
+
+            if(
+                data.includes("font family") ||
+                data.includes("type de police")
+            ){
+
+                return "font-family";
+
+            }
+
+
+            if(
+                data.includes("font size") ||
+                data.includes("taille de police")
+            ){
+
+                return "font-size";
+
+            }
+
+
+            if(
+                data.includes("bold") ||
+                data.includes("gras")
+            ){
+
+                return "bold";
+
+            }
+
+
+            if(
+                data.includes("italic") ||
+                data.includes("italique")
+            ){
+
+                return "italic";
+
+            }
+
+
+            if(
+                data.includes("underline") ||
+                data.includes("soulign")
+            ){
+
+                return "underline";
+
+            }
+
+
+            if(
+                data.includes("font color") ||
+                data.includes("couleur de police")
+            ){
+
+                return "color";
+
+            }
+
+
+            if(
+                data.includes("highlight") ||
+                data.includes("surbrillance")
+            ){
+
+                return "highlight";
+
+            }
+
+
+            node =
+                node.parentElement;
+
+        }
+
+
+        return "";
+
+    }
+
+
+    // =====================================================
+    // RESET CURRENT EVALUATION ITEM
+    // =====================================================
+
+    function resetEvaluationObservation(){
+
+        state.baselineText =
+            getDocumentText();
+
+
+        state.currentAnswerText =
+            "";
+
+
+        state.currentActions =
+            {};
+
+
+        state.currentSelections =
+            [];
+
+
+        state.lastActionTime =
+            0;
+
+    }
+
+
+    // =====================================================
+    // RECORD ACTION
+    // =====================================================
+
+    function recordAction(action){
+
+        if(!action){
+
+            return;
+
+        }
+
+
+        state.currentActions[action] =
+            (
+                state.currentActions[action] ||
+                0
+            ) + 1;
+
+    }
+
+
+    // =====================================================
+    // RECORD SELECTION
+    // =====================================================
+
+    function recordSelection(){
+
+        const text =
+            getSelectionText();
+
+
+        if(!text){
+
+            return;
+
+        }
+
+
+        const normalized =
+            normalize(text);
+
+
+        if(
+            normalized &&
+            !state.currentSelections.includes(
+                normalized
+            )
+        ){
+
+            state.currentSelections.push(
+                normalized
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // EVALUATION ITEM VALIDATION
+    // =====================================================
+
+    function validateEvaluationItem(){
+
+        if(
+            !state.evaluation ||
+            !state.evaluation[
+                state.evaluationIndex
+            ]
+        ){
+
+            return false;
+
+        }
+
+
+        const instruction =
+            normalize(
+                state.evaluation[
+                    state.evaluationIndex
+                ]
+            );
+
+
+        const current =
+            normalize(
+                getDocumentText()
+            );
+
+
+        const baseline =
+            normalize(
+                state.baselineText
+            );
+
+
+        const changed =
+            current &&
+            current !== baseline;
+
+
+        const hasSelection =
+            state.currentSelections.length >
+            0;
+
+
+        const actions =
+            state.currentActions;
+
+
+        // -------------------------------------------------
+        // COPY / CUT / PASTE
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("copier") &&
+            instruction.includes("couper") &&
+            instruction.includes("coller")
+        ){
+
+            return (
+                actions.copy > 0 &&
+                actions.cut > 0 &&
+                actions.paste > 0 &&
+                hasSelection
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // FONT FAMILY + SIZE
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("type de police") &&
+            instruction.includes("taille de police")
+        ){
+
+            return (
+                actions["font-family"] > 0 &&
+                actions["font-size"] > 0 &&
+                hasSelection
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // BOLD / ITALIC / UNDERLINE
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("gras") &&
+            instruction.includes("italique") &&
+            instruction.includes("souligné")
+        ){
+
+            return (
+                actions.bold > 0 &&
+                actions.italic > 0 &&
+                actions.underline > 0 &&
+                hasSelection
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // COLOR + HIGHLIGHT
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("couleur de police") &&
+            instruction.includes("surbrillance")
+        ){
+
+            return (
+                actions.color > 0 &&
+                actions.highlight > 0 &&
+                hasSelection
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // COMPLETE DOCUMENT FORMATTING
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("mise en forme complète")
+        ){
+
+            return (
+                changed &&
+                actions.copy > 0 &&
+                actions.cut > 0 &&
+                actions.paste > 0 &&
+                actions["font-family"] > 0 &&
+                actions["font-size"] > 0 &&
+                actions.bold > 0 &&
+                actions.italic > 0 &&
+                actions.underline > 0 &&
+                actions.color > 0 &&
+                actions.highlight > 0
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // EXPLANATION / THEORY RESPONSE
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("expliquer") ||
+            instruction.includes("expliqu")
+        ){
+
+            return (
+                changed &&
+                current.length >= 25
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // IDENTIFY / GENERAL ROLE
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("identifier") ||
+            instruction.includes("rôle général")
+        ){
+
+            return (
+                changed &&
+                current.length >= 20
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // DEMONSTRATION
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("démontrer") ||
+            instruction.includes("démontr")
+        ){
+
+            return (
+                changed ||
+                hasSelection ||
+                Object.keys(actions).length > 0
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // AUTONOMOUS COMPLETION
+        // -------------------------------------------------
+
+        if(
+            instruction.includes("autonome")
+        ){
+
+            return (
+                changed ||
+                hasSelection ||
+                Object.keys(actions).length > 0
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // GENERIC EVALUATION
+        // -------------------------------------------------
+
+        return (
+            changed &&
+            current.length >= 20
+        );
+
+    }
+
+
+    // =====================================================
+    // SIMULATION CLICK
+    // =====================================================
+
+    function handleSimulationClick(event){
+
+        if(
+            !state.started ||
+            state.completed ||
+            state.speaking ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        const now =
+            Date.now();
+
+
+        if(
+            now -
+            state.lastActionTime <
+            80
+        ){
+
+            return;
+
+        }
+
+
+        state.lastActionTime =
+            now;
+
+
+        recordSelection();
+
+
+        const action =
+            ribbonAction(
+                event.target
+            );
+
+
+        if(action){
+
+            recordAction(action);
+
+        }
+
+
+        const data =
+            elementData(
+                event.target
+            );
+
+
+        if(
+            data.includes("font family") ||
+            data.includes("type de police") ||
+            data.includes("police")
+        ){
+
+            recordAction(
+                "font-family"
+            );
+
+        }
+
+
+        if(
+            data.includes("font size") ||
+            data.includes("taille de police")
+        ){
+
+            recordAction(
+                "font-size"
+            );
+
+        }
+
+
+        if(
+            data.includes("font color") ||
+            data.includes("couleur de police")
+        ){
+
+            recordAction(
+                "color"
+            );
+
+        }
+
+
+        if(
+            data.includes("highlight") ||
+            data.includes("surbrillance")
+        ){
+
+            recordAction(
+                "highlight"
+            );
+
+        }
+
+
+        setTimeout(function(){
+
+            if(
+                validateEvaluationItem()
+            ){
+
+                nextEvaluationItem();
+
+            }
+
+        },120);
+
+    }
+
+
+    // =====================================================
+    // INPUT
+    // =====================================================
+
+    function handleSimulationInput(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            state.speaking ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        setTimeout(function(){
+
+            if(
+                validateEvaluationItem()
+            ){
+
+                nextEvaluationItem();
+
+            }
+
+        },150);
+
+    }
+
+
+    // =====================================================
+    // LISTENERS
+    // =====================================================
+
+    function attachSimulationListeners(){
+
+        const doc =
+            state.simulationDocument;
+
+
+        if(
+            !doc ||
+            state.listenersAttached
+        ){
+
+            return;
+
+        }
+
+
+        doc.addEventListener(
+            "click",
+            handleSimulationClick,
+            true
+        );
+
+
+        doc.addEventListener(
+            "input",
+            handleSimulationInput,
+            true
+        );
+
+
+        doc.addEventListener(
+            "selectionchange",
+            recordSelection,
+            true
+        );
+
+
+        state.listenersAttached =
+            true;
+
+    }
+
+
+    // =====================================================
+    // SPEAK CURRENT EVALUATION
+    // =====================================================
+
+    async function speakCurrentEvaluation(){
+
+        if(
+            !state.evaluation ||
+            !state.evaluation[
+                state.evaluationIndex
+            ]
+        ){
+
+            return;
+
+        }
+
+
+        const instruction =
+            state.evaluation[
+                state.evaluationIndex
+            ];
+
+
+        state.waiting =
+            false;
+
+
+        resetEvaluationObservation();
+
+
+        await speak(
+
+            "Évaluation. " +
+            "Question " +
+            (
+                state.evaluationIndex + 1
+            ) +
+            " sur " +
+            state.evaluation.length +
+            ". " +
+            instruction +
+            " Prenez le temps de réaliser cette tâche dans la simulation Microsoft Word 2007. Je vérifierai votre réalisation avant de passer à la suivante."
+
+        );
+
+
+        if(
+            !state.completed
+        ){
+
+            resetEvaluationObservation();
+
+            state.waiting =
+                true;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CONFIRM CURRENT ITEM
+    // =====================================================
+
+    async function confirmEvaluationItem(){
+
+        state.waiting =
+            false;
+
+
+        await speak(
+            "Très bien. Cette partie de l’évaluation est correcte et validée."
+        );
+
+    }
+
+
+    // =====================================================
+    // NEXT EVALUATION ITEM
+    // =====================================================
+
+    async function nextEvaluationItem(){
+
+        if(
+            state.completed ||
+            state.processing ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        state.processing =
+            true;
+
+
+        try{
+
+            await confirmEvaluationItem();
+
+
+            if(
+                state.evaluationIndex <
+                state.evaluation.length - 1
+            ){
+
+                state.evaluationIndex++;
+
+                await speakCurrentEvaluation();
+
+                return;
+
+            }
+
+
+            // =================================================
+            // ALL EVALUATION ITEMS COMPLETED
+            // =================================================
+
+            state.completed =
+                true;
+
+
+            state.waiting =
+                false;
+
+
+            await speak(
+
+                "Excellent. Vous avez terminé et validé l’évaluation complète du " +
+                chapterName(
+                    state.chapterId
+                ) +
+                ". Toutes les parties du chapitre sont maintenant validées. Je vais enregistrer votre progression et déverrouiller automatiquement le chapitre suivant."
+
+            );
+
+
+            // =================================================
+            // FINAL BRIDGE
+            //
+            // EVALUATION → NEXT CHAPTER
+            //
+            // THE BRIDGE OWNS THE REAL UNLOCK,
+            // PROGRESS SAVE AND RENDER.
+            // =================================================
+
+            if(
+                typeof RaniseDynamicUnlockRenderBridge !==
+                "undefined" &&
+                RaniseDynamicUnlockRenderBridge &&
+                typeof RaniseDynamicUnlockRenderBridge.unlockNextPart ===
+                "function"
+            ){
+
+                RaniseDynamicUnlockRenderBridge.unlockNextPart(
+
+                    state.chapterId,
+
+                    "evaluation"
+
+                );
+
+            }else{
+
+                console.error(
+                    "RANISE BLOCK 10: Dynamic Unlock Bridge unavailable."
+                );
+
+            }
+
+
+        }finally{
+
+            state.processing =
+                false;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // START BLOCK 10
+    //
+    // CAN ONLY START AFTER:
+    //
+    //     BLOCK 9
+    //         ↓
+    //     unlockNextPart(chapterId,"homework")
+    //
+    // =====================================================
+
+    async function startBlock10Dynamic(chapterId){
+
+        if(
+            !state.unlockReceived
+        ){
+
+            console.warn(
+                "RANISE BLOCK 10: Start rejected. No current Homework → Evaluation handoff."
+            );
+
+            return false;
+
+        }
+
+
+        if(
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return false;
+
+        }
+
+
+        chapterId =
+            String(
+                chapterId
+            ).trim();
+
+
+        if(
+            state.bridgeHandoffChapterId &&
+            state.bridgeHandoffChapterId !==
+            chapterId
+        ){
+
+            console.warn(
+                "RANISE BLOCK 10: Chapter mismatch. Launch rejected."
+            );
+
+            return false;
+
+        }
+
+
+        if(
+            state.started &&
+            state.chapterId === chapterId
+        ){
+
+            return true;
+
+        }
+
+
+        const evaluation =
+            getChapterEvaluation(
+                chapterId
+            );
+
+
+        if(!evaluation){
+
+            console.warn(
+                "RANISE BLOCK 10: No evaluation found for",
+                chapterId
+            );
+
+            return false;
+
+        }
+
+
+        if(
+            !connectToSimulation()
+        ){
+
+            return false;
+
+        }
+
+
+        state.chapterId =
+            chapterId;
+
+
+        state.evaluation =
+            evaluation;
+
+
+        state.evaluationIndex =
+            0;
+
+
+        state.started =
+            true;
+
+
+        state.waiting =
+            false;
+
+
+        state.completed =
+            false;
+
+
+        state.speaking =
+            false;
+
+
+        state.processing =
+            false;
+
+
+        state.listenersAttached =
+            false;
+
+
+        attachSimulationListeners();
+
+
+        await speak(
+
+            "Bienvenue dans la partie Évaluation du " +
+            chapterName(
+                chapterId
+            ) +
+            ". Cette évaluation comporte " +
+            evaluation.length +
+            " étapes. Je vais vérifier chaque étape avant de vous permettre de poursuivre."
+
+        );
+
+
+        if(
+            !state.completed
+        ){
+
+            await speakCurrentEvaluation();
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // WAIT FOR SIMULATION
+    //
+    // NEVER CALLED AT PAGE LOAD.
+    //
+    // ONLY AFTER HOMEWORK → EVALUATION BRIDGE.
+    // =====================================================
+
+    function waitForSimulation(
+        chapterId,
+        maxAttempts
+    ){
+
+        if(
+            !state.unlockReceived ||
+            !state.launchPending ||
+            !chapterId ||
+            isChapter1(chapterId)
+        ){
+
+            return;
+
+        }
+
+
+        let attempts =
+            0;
+
+
+        const limit =
+            typeof maxAttempts ===
+            "number"
+            ?
+            maxAttempts
+            :
+            maxAttempts || 200;
+
+
+        const timer =
+            setInterval(function(){
+
+                attempts++;
+
+
+                if(
+                    state.started
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                if(
+                    !state.unlockReceived ||
+                    !state.launchPending ||
+                    state.bridgeHandoffChapterId !==
+                    chapterId
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                const activeChapter =
+                    detectCurrentChapterId();
+
+
+                if(
+                    activeChapter &&
+                    String(activeChapter).trim() !==
+                    chapterId
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                const frame =
+                    findSimulation();
+
+
+                if(!frame){
+
+                    if(
+                        attempts >= limit
+                    ){
+
+                        clearInterval(timer);
+
+                    }
+
+                    return;
+
+                }
+
+
+                try{
+
+                    const doc =
+                        frame.contentDocument ||
+                        (
+                            frame.contentWindow
+                            ?
+                            frame.contentWindow.document
+                            :
+                            null
+                        );
+
+
+                    if(
+                        doc &&
+                        doc.readyState !==
+                        "loading"
+                    ){
+
+                        clearInterval(timer);
+
+
+                        startBlock10Dynamic(
+                            chapterId
+                        );
+
+
+                        return;
+
+                    }
+
+                }catch(error){}
+
+
+                if(
+                    attempts >= limit
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                if(
+                    !frame.__raniseBlock10LoadAttached
+                ){
+
+                    frame.__raniseBlock10LoadAttached =
+                        true;
+
+
+                    frame.addEventListener(
+
+                        "load",
+
+                        function(){
+
+                            frame.__raniseBlock10LoadAttached =
+                                false;
+
+
+                            if(
+                                !state.started &&
+                                state.launchPending &&
+                                state.unlockReceived &&
+                                state.bridgeHandoffChapterId ===
+                                chapterId
+                            ){
+
+                                startBlock10Dynamic(
+                                    chapterId
+                                );
+
+                            }
+
+                        },
+
+                        {once:true}
+
+                    );
+
+                }
+
+            },100);
+
+    }
+
+
+    // =====================================================
+    // REAL BLOCK 9 → BLOCK 10 HANDOFF
+    //
+    // ONLY:
+    //
+    //     unlockNextPart(
+    //         chapterId,
+    //         "homework"
+    //     )
+    //
+    // =====================================================
+
+    function installBridgeHandoff(){
+
+        if(
+            state.bridgeWrapped
+        ){
+
+            return true;
+
+        }
+
+
+        if(
+            typeof RaniseDynamicUnlockRenderBridge ===
+            "undefined" ||
+            !RaniseDynamicUnlockRenderBridge
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            typeof RaniseDynamicUnlockRenderBridge.unlockNextPart !==
+            "function"
+        ){
+
+            return false;
+
+        }
+
+
+        const bridge =
+            RaniseDynamicUnlockRenderBridge;
+
+
+        const originalUnlock =
+            bridge.unlockNextPart;
+
+
+        if(
+            originalUnlock.__raniseBlock10Wrapped
+        ){
+
+            state.bridgeWrapped =
+                true;
+
+            return true;
+
+        }
+
+
+        function wrappedUnlockNextPart(
+            chapterId,
+            currentPart
+        ){
+
+            // -------------------------------------------------
+            // PRESERVE EXISTING BRIDGE BEHAVIOR FIRST.
+            // -------------------------------------------------
+
+            const result =
+                originalUnlock.apply(
+                    this,
+                    arguments
+                );
+
+
+            const normalizedPart =
+                normalize(
+                    currentPart
+                );
+
+
+            // -------------------------------------------------
+            // BLOCK 9 → BLOCK 10
+            //
+            // ONLY "HOMEWORK" AUTHORIZES EVALUATION.
+            // -------------------------------------------------
+
+            if(
+                normalizedPart !==
+                "homework"
+            ){
+
+                return result;
+
+            }
+
+
+            if(
+                !chapterId ||
+                isChapter1(chapterId)
+            ){
+
+                return result;
+
+            }
+
+
+            const targetChapterId =
+                String(
+                    chapterId
+                ).trim();
+
+
+            state.bridgeHandoffSequence++;
+
+
+            state.bridgeHandoffChapterId =
+                targetChapterId;
+
+
+            state.unlockReceived =
+                true;
+
+
+            state.launchPending =
+                true;
+
+
+            setTimeout(function(){
+
+                if(
+                    state.started
+                ){
+
+                    return;
+
+                }
+
+
+                if(
+                    !state.unlockReceived ||
+                    !state.launchPending
+                ){
+
+                    return;
+
+                }
+
+
+                if(
+                    state.bridgeHandoffChapterId !==
+                    targetChapterId
+                ){
+
+                    return;
+
+                }
+
+
+                const activeChapter =
+                    detectCurrentChapterId();
+
+
+                if(
+                    activeChapter &&
+                    String(activeChapter).trim() !==
+                    targetChapterId
+                ){
+
+                    console.warn(
+                        "RANISE BLOCK 10: Active chapter differs from Homework → Evaluation handoff."
+                    );
+
+                    return;
+
+                }
+
+
+                waitForSimulation(
+                    targetChapterId,
+                    200
+                );
+
+            },100);
+
+
+            return result;
+
+        }
+
+
+        wrappedUnlockNextPart.__raniseBlock10Wrapped =
+            true;
+
+
+        wrappedUnlockNextPart.__raniseBlock10Original =
+            originalUnlock;
+
+
+        bridge.unlockNextPart =
+            wrappedUnlockNextPart;
+
+
+        state.bridgeWrapped =
+            true;
+
+
+        console.log(
+            "RANISE BLOCK 10: Homework → Evaluation Bridge handoff installed."
+        );
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // WAIT FOR BRIDGE
+    //
+    // DOES NOT CHECK:
+    //     localStorage
+    //     evaluation unlock
+    //     simulation opening
+    //     chapter rendering
+    //
+    // ONLY INSTALLS THE REAL HANDOFF LISTENER.
+    // =====================================================
+
+    function waitForBridge(){
+
+        let attempts =
+            0;
+
+
+        const timer =
+            setInterval(function(){
+
+                attempts++;
+
+
+                if(
+                    installBridgeHandoff()
+                ){
+
+                    clearInterval(timer);
+
+                    return;
+
+                }
+
+
+                if(
+                    attempts >= 300
+                ){
+
+                    clearInterval(timer);
+
+                    console.warn(
+                        "RANISE BLOCK 10: Bridge handoff could not be installed."
+                    );
+
+                }
+
+            },100);
+
+    }
+
+
+    // =====================================================
+    // START LISTENER INSTALLATION
+    // =====================================================
+
+    waitForBridge();
+
+
+    // =====================================================
+    // PUBLIC API
+    // =====================================================
+
+    window.RaniseMoiseDynamicEvaluationEngine = {
+
+        start:
+            startBlock10Dynamic,
+
+
+        getState:function(){
+
+            return {
+
+                chapterId:
+                    state.chapterId,
+
+                started:
+                    state.started,
+
+                completed:
+                    state.completed,
+
+                evaluationIndex:
+                    state.evaluationIndex,
+
+                evaluationTotal:
+                    state.evaluation
+                    ?
+                    state.evaluation.length
+                    :
+                    0,
+
+                waiting:
+                    state.waiting,
+
+                speaking:
+                    state.speaking,
+
+                bridgeWrapped:
+                    state.bridgeWrapped,
+
+                unlockReceived:
+                    state.unlockReceived,
+
+                launchPending:
+                    state.launchPending,
+
+                bridgeHandoffChapterId:
+                    state.bridgeHandoffChapterId,
+
+                bridgeHandoffSequence:
+                    state.bridgeHandoffSequence
+
+            };
+
+        }
+
+    };
+
+
+})();
 
 
 
