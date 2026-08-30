@@ -30897,7 +30897,7 @@ return true;
 
 const launchButton =
     event.target.closest(
-        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn"
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn"
     );      
 
             if(!launchButton){
@@ -30943,7 +30943,7 @@ const launchButton =
 
 const launchButton =
     event.target.closest(
-        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn"
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn"
     );
             
 
