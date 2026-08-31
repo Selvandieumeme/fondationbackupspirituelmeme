@@ -29538,17 +29538,6 @@ if(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 // =========================================================
 // BLOCK 10 DYNAMIC EVALUATION
 // MICROSOFT WORD 2007 FORMATION
@@ -29560,26 +29549,68 @@ if(
 //
 // CHAPTER 2+:
 //     READS chapter.evaluation DYNAMICALLY
-//     LAUNCHES ONLY AFTER:
-//         HOMEWORK → EVALUATION BRIDGE
+//     READS chapter.objective DYNAMICALLY
+//     USES EXISTING WORD 2007 SIMULATION
+//     READS REAL DOCUMENT TEXT
+//     READS STUDENT TYPING IN REAL TIME
+//     MONITORS REAL WORD SIMULATION ACTIONS
+//     SCORES EVALUATION ON 100 POINTS
+//     DISPLAYS QUESTIONS IN FLOATING DRAGGABLE PANEL
+//     RANISE GUIDES THE STUDENT
+//     RANISE VALIDATES THE FINAL EVALUATION
+//     FINAL VALIDATION → BRIDGE → NEXT CHAPTER
 //
-// PIPELINE:
+// =========================================================
 //
+// ABSOLUTE PIPELINE:
+//
+//     SIMULATION OPENS
+//             ↓
+//     PRACTICE
+//             ↓
+//     BLOCK 7
+//             ↓
+//     EXERCISES
+//             ↓
+//     BLOCK 8
+//             ↓
+//     HOMEWORK
+//             ↓
 //     BLOCK 9
-//          ↓
-//     unlockNextPart(chapterId,"homework")
-//          ↓
+//             ↓
+//     HOMEWORK VALIDATED
+//             ↓
+//     BRIDGE
+//             ↓
+//     EVALUATION
+//             ↓
 //     BLOCK 10
-//          ↓
-//     EVALUATION VALIDATION
-//          ↓
-//     ALL EVALUATION ITEMS VALIDATED
-//          ↓
-//     unlockNextPart(chapterId,"evaluation")
-//          ↓
-//     CHAPTER COMPLETED
-//          ↓
-//     NEXT CHAPTER UNLOCKED
+//             ↓
+//     EVALUATION VALIDATED
+//             ↓
+//     BRIDGE
+//             ↓
+//     CHAPTER 3 UNLOCKED
+//
+// =========================================================
+//
+// CRITICAL LAUNCH RULE:
+//
+// BLOCK 10 MUST NEVER START BECAUSE:
+//
+//     evaluation === true
+//     localStorage
+//     simulation opens
+//     chapter renders
+//     homework exists
+//     Block 9 exists
+//
+// ONLY THIS REAL HANDOFF AUTHORIZES BLOCK 10:
+//
+//     RaniseDynamicUnlockRenderBridge.unlockNextPart(
+//         chapterId,
+//         "homework"
+//     )
 //
 // =========================================================
 
@@ -29602,7 +29633,9 @@ if(
 
         evaluation:null,
 
-        evaluationIndex:0,
+        objectives:null,
+
+        questionIndex:0,
 
         started:false,
 
@@ -29630,11 +29663,39 @@ if(
 
         currentAnswerText:"",
 
+        allAnswers:[],
+
         currentActions:{},
 
         currentSelections:[],
 
-        lastActionTime:0
+        clipboardEvents:{
+            copy:0,
+            cut:0,
+            paste:0
+        },
+
+        score:0,
+
+        questionScores:[],
+
+        questionValidated:false,
+
+        lastDocumentText:"",
+
+        lastActionTime:0,
+
+        panel:null,
+
+        panelClosed:false,
+
+        evaluationStartedAt:0,
+
+        noProgressChecks:0,
+
+        lastProgressText:"",
+
+        lastProgressTime:0
 
     };
 
@@ -29756,8 +29817,45 @@ if(
 
 
         return evaluation.length
-            ? evaluation
-            : null;
+            ?
+            evaluation
+            :
+            null;
+
+    }
+
+
+    // =====================================================
+    // GET OBJECTIVES DYNAMICALLY
+    // =====================================================
+
+    function getChapterObjectives(chapterId){
+
+        const chapter =
+            getChapter(chapterId);
+
+
+        if(
+            !chapter ||
+            !Array.isArray(
+                chapter.objective
+            )
+        ){
+
+            return [];
+
+        }
+
+
+        return chapter.objective
+            .map(function(item){
+
+                return String(
+                    item || ""
+                ).trim();
+
+            })
+            .filter(Boolean);
 
     }
 
@@ -29911,9 +30009,13 @@ if(
         }
 
 
-        return campusContent.querySelector(
-            "iframe"
-        ) || null;
+        frame =
+            campusContent.querySelector(
+                "iframe"
+            );
+
+
+        return frame || null;
 
     }
 
@@ -29977,7 +30079,7 @@ if(
 
 
     // =====================================================
-    // ACTIVE CHAPTER
+    // DETECT CURRENT CHAPTER
     // =====================================================
 
     function detectCurrentChapterId(){
@@ -30063,6 +30165,40 @@ if(
         }
 
 
+        if(!chapterId){
+
+            const candidates =
+                document.querySelectorAll(
+                    "[data-chapter-id], [data-chapter], [data-current-chapter]"
+                );
+
+
+            for(
+                let i = 0;
+                i < candidates.length;
+                i++
+            ){
+
+                const candidateId =
+                    getChapterIdFromElement(
+                        candidates[i]
+                    );
+
+
+                if(candidateId){
+
+                    chapterId =
+                        candidateId;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+
         if(
             !chapterId ||
             isChapter1(chapterId)
@@ -30131,6 +30267,7 @@ if(
                 error
             );
 
+
             return false;
 
         }
@@ -30139,7 +30276,7 @@ if(
 
 
     // =====================================================
-    // DOCUMENT TEXT
+    // READ COMPLETE DOCUMENT
     // =====================================================
 
     function getDocumentText(){
@@ -30173,7 +30310,7 @@ if(
                     );
 
                 })
-                .join(" ");
+                .join("\n");
 
         }
 
@@ -30206,7 +30343,7 @@ if(
                     );
 
                 })
-                .join(" ");
+                .join("\n");
 
         }
 
@@ -30225,7 +30362,7 @@ if(
 
 
     // =====================================================
-    // SELECTION
+    // READ CURRENT SELECTION
     // =====================================================
 
     function getSelectionText(){
@@ -30243,13 +30380,32 @@ if(
 
         try{
 
-            const selection =
+            let selection =
+                null;
+
+
+            if(
                 typeof doc.getSelection ===
                 "function"
-                ?
-                doc.getSelection()
-                :
-                null;
+            ){
+
+                selection =
+                    doc.getSelection();
+
+            }
+
+
+            if(
+                !selection &&
+                doc.defaultView &&
+                typeof doc.defaultView.getSelection ===
+                "function"
+            ){
+
+                selection =
+                    doc.defaultView.getSelection();
+
+            }
 
 
             return selection
@@ -30378,40 +30534,80 @@ if(
             }
 
 
-            if(
-                data.includes("copy") ||
-                data.includes("copier")
-            ){
+            if(data.includes("copy") ||
+               data.includes("copier")){
 
                 return "copy";
 
             }
 
 
-            if(
-                data.includes("cut") ||
-                data.includes("couper")
-            ){
+            if(data.includes("cut") ||
+               data.includes("couper")){
 
                 return "cut";
 
             }
 
 
-            if(
-                data.includes("paste") ||
-                data.includes("coller")
-            ){
+            if(data.includes("paste") ||
+               data.includes("coller")){
 
                 return "paste";
 
             }
 
 
-            if(
-                data.includes("font family") ||
-                data.includes("type de police")
-            ){
+            if(data.includes("font color") ||
+               data.includes("couleur de police")){
+
+                return "color";
+
+            }
+
+
+            if(data.includes("highlight") ||
+               data.includes("surbrillance")){
+
+                return "highlight";
+
+            }
+
+
+            if(data.includes("font size") ||
+               data.includes("taille de police")){
+
+                return "font-size";
+
+            }
+
+
+            if(data.includes("bold") ||
+               data.includes("gras")){
+
+                return "bold";
+
+            }
+
+
+            if(data.includes("italic") ||
+               data.includes("italique")){
+
+                return "italic";
+
+            }
+
+
+            if(data.includes("underline") ||
+               data.includes("soulign")){
+
+                return "underline";
+
+            }
+
+
+            if(data.includes("font family") ||
+               data.includes("type de police")){
 
                 return "font-family";
 
@@ -30419,61 +30615,10 @@ if(
 
 
             if(
-                data.includes("font size") ||
-                data.includes("taille de police")
+                data.includes("police")
             ){
 
-                return "font-size";
-
-            }
-
-
-            if(
-                data.includes("bold") ||
-                data.includes("gras")
-            ){
-
-                return "bold";
-
-            }
-
-
-            if(
-                data.includes("italic") ||
-                data.includes("italique")
-            ){
-
-                return "italic";
-
-            }
-
-
-            if(
-                data.includes("underline") ||
-                data.includes("soulign")
-            ){
-
-                return "underline";
-
-            }
-
-
-            if(
-                data.includes("font color") ||
-                data.includes("couleur de police")
-            ){
-
-                return "color";
-
-            }
-
-
-            if(
-                data.includes("highlight") ||
-                data.includes("surbrillance")
-            ){
-
-                return "highlight";
+                return "font-family";
 
             }
 
@@ -30485,34 +30630,6 @@ if(
 
 
         return "";
-
-    }
-
-
-    // =====================================================
-    // RESET CURRENT EVALUATION ITEM
-    // =====================================================
-
-    function resetEvaluationObservation(){
-
-        state.baselineText =
-            getDocumentText();
-
-
-        state.currentAnswerText =
-            "";
-
-
-        state.currentActions =
-            {};
-
-
-        state.currentSelections =
-            [];
-
-
-        state.lastActionTime =
-            0;
 
     }
 
@@ -30577,234 +30694,1221 @@ if(
 
 
     // =====================================================
-    // EVALUATION ITEM VALIDATION
+    // CLIPBOARD
     // =====================================================
 
-    function validateEvaluationItem(){
+    function handleClipboardEvent(event){
 
         if(
-            !state.evaluation ||
-            !state.evaluation[
-                state.evaluationIndex
-            ]
+            !state.started ||
+            state.completed ||
+            !state.waiting
         ){
 
-            return false;
+            return;
 
         }
 
 
-        const instruction =
-            normalize(
-                state.evaluation[
-                    state.evaluationIndex
-                ]
+        const type =
+            normalize(event.type);
+
+
+        if(
+            type === "copy" ||
+            type === "cut" ||
+            type === "paste"
+        ){
+
+            state.clipboardEvents[type]++;
+
+            recordAction(type);
+
+        }
+
+
+        evaluateCurrentQuestionSoon();
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT ANSWER
+    // =====================================================
+
+    function getCurrentAnswer(){
+
+        const full =
+            getDocumentText();
+
+
+        const base =
+            state.baselineText || "";
+
+
+        if(
+            !full
+        ){
+
+            return "";
+
+        }
+
+
+        if(
+            full.length >=
+            base.length &&
+            full.indexOf(base) === 0
+        ){
+
+            return full
+                .slice(
+                    base.length
+                )
+                .trim();
+
+        }
+
+
+        return full.trim();
+
+    }
+
+
+    // =====================================================
+    // KEYWORD EXTRACTION
+    // =====================================================
+
+    function expectedKeywords(text){
+
+        const value =
+            normalize(text);
+
+
+        const dictionary = [
+
+            "home",
+            "accueil",
+            "presse papiers",
+            "presse-papiers",
+            "clipboard",
+            "police",
+            "font",
+            "copy",
+            "copier",
+            "cut",
+            "couper",
+            "paste",
+            "coller",
+            "format painter",
+            "reproduire la mise en forme",
+            "taille",
+            "font size",
+            "gras",
+            "bold",
+            "italique",
+            "italic",
+            "souligner",
+            "underline",
+            "couleur",
+            "font color",
+            "surbrillance",
+            "highlight",
+            "selectionner",
+            "sélectionner",
+            "document",
+            "autonome",
+            "mise en forme",
+            "commande",
+            "operation",
+            "opération"
+
+        ];
+
+
+        return dictionary.filter(
+            function(word){
+
+                return value.includes(
+                    normalize(word)
+                );
+
+            }
+        );
+
+    }
+
+
+    // =====================================================
+    // LOCAL TEXT INTELLIGENCE
+    //
+    // The engine observes the actual text entered by
+    // the student and scores meaningful coverage.
+    // =====================================================
+
+    function scoreTextAnswer(answer,instruction){
+
+        const normalizedAnswer =
+            normalize(answer);
+
+
+        if(
+            !normalizedAnswer
+        ){
+
+            return 0;
+
+        }
+
+
+        const words =
+            normalizedAnswer
+                .split(/\s+/)
+                .filter(Boolean);
+
+
+        if(!words.length){
+
+            return 0;
+
+        }
+
+
+        const expected =
+            expectedKeywords(
+                instruction
             );
 
 
-        const current =
-            normalize(
-                getDocumentText()
-            );
-
-
-        const baseline =
-            normalize(
-                state.baselineText
-            );
-
-
-        const changed =
-            current &&
-            current !== baseline;
-
-
-        const hasSelection =
-            state.currentSelections.length >
+        let hits =
             0;
 
+
+        expected.forEach(
+            function(keyword){
+
+                if(
+                    normalizedAnswer.includes(
+                        normalize(keyword)
+                    )
+                ){
+
+                    hits++;
+
+                }
+
+            }
+        );
+
+
+        let score =
+            0;
+
+
+        if(
+            words.length >= 5
+        ){
+
+            score += 20;
+
+        }
+
+
+        if(
+            words.length >= 12
+        ){
+
+            score += 20;
+
+        }
+
+
+        if(
+            words.length >= 25
+        ){
+
+            score += 15;
+
+        }
+
+
+        if(
+            expected.length
+        ){
+
+            score += Math.min(
+                45,
+                Math.round(
+                    (
+                        hits /
+                        expected.length
+                    ) * 45
+                )
+            );
+
+        }
+
+
+        return Math.min(
+            100,
+            score
+        );
+
+    }
+
+
+    // =====================================================
+    // QUESTION WEIGHTS
+    // =====================================================
+
+    function questionWeight(index,total){
+
+        if(total <= 0){
+
+            return 0;
+
+        }
+
+
+        const weights = [
+
+            10,
+            12,
+            12,
+            14,
+            12,
+            18,
+            10,
+            12
+
+        ];
+
+
+        if(
+            index <
+            weights.length
+        ){
+
+            return weights[index];
+
+        }
+
+
+        return (
+            100 /
+            total
+        );
+
+    }
+
+
+    // =====================================================
+    // PRACTICAL SCORE
+    // =====================================================
+
+    function practicalScore(){
 
         const actions =
             state.currentActions;
 
 
-        // -------------------------------------------------
-        // COPY / CUT / PASTE
-        // -------------------------------------------------
+        let points =
+            0;
+
 
         if(
-            instruction.includes("copier") &&
-            instruction.includes("couper") &&
-            instruction.includes("coller")
+            actions.copy > 0
         ){
 
-            return (
-                actions.copy > 0 &&
-                actions.cut > 0 &&
-                actions.paste > 0 &&
-                hasSelection
+            points += 10;
+
+        }
+
+
+        if(
+            actions.cut > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions.paste > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions["font-family"] > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions["font-size"] > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions.bold > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions.italic > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions.underline > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions.color > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        if(
+            actions.highlight > 0
+        ){
+
+            points += 10;
+
+        }
+
+
+        return points;
+
+    }
+
+
+    // =====================================================
+    // QUESTION SCORE
+    // =====================================================
+
+    function calculateQuestionScore(){
+
+        if(
+            !state.evaluation ||
+            !state.evaluation[
+                state.questionIndex
+            ]
+        ){
+
+            return 0;
+
+        }
+
+
+        const instruction =
+            state.evaluation[
+                state.questionIndex
+            ];
+
+
+        const answer =
+            getCurrentAnswer();
+
+
+        const textScore =
+            scoreTextAnswer(
+                answer,
+                instruction
+            );
+
+
+        const practical =
+            practicalScore();
+
+
+        let finalScore =
+            textScore;
+
+
+        if(
+            practical >
+            0
+        ){
+
+            finalScore =
+                Math.max(
+                    finalScore,
+                    practical
+                );
+
+        }
+
+
+        if(
+            finalScore > 100
+        ){
+
+            finalScore =
+                100;
+
+        }
+
+
+        return finalScore;
+
+    }
+
+
+    // =====================================================
+    // PANEL
+    // =====================================================
+
+    function createEvaluationPanel(){
+
+        if(state.panel){
+
+            return state.panel;
+
+        }
+
+
+        const panel =
+            document.createElement(
+                "div"
+            );
+
+
+        panel.id =
+            "raniseBlock10EvaluationPanel";
+
+
+        panel.innerHTML =
+
+            '<div id="raniseBlock10Header">' +
+
+                '<span>📝 Evaluation — Ranise MOISE</span>' +
+
+                '<button id="raniseBlock10Close" ' +
+                'type="button" ' +
+                'aria-label="Fermer">✕</button>' +
+
+            '</div>' +
+
+            '<div id="raniseBlock10Body">' +
+
+                '<div id="raniseBlock10Progress">' +
+                'Question 1</div>' +
+
+                '<div id="raniseBlock10Question"></div>' +
+
+                '<div id="raniseBlock10Answer">' +
+                'Réponse attendue directement dans le document Word.' +
+                '</div>' +
+
+                '<div id="raniseBlock10Score">' +
+                'Score : 0 / 100</div>' +
+
+            '</div>';
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "raniseBlock10EvaluationStyle";
+
+
+        style.textContent =
+
+            "#raniseBlock10EvaluationPanel{" +
+
+                "position:fixed;" +
+                "z-index:2147483647;" +
+                "top:70px;" +
+                "right:12px;" +
+                "width:min(360px,calc(100vw - 24px));" +
+                "max-height:70vh;" +
+                "overflow:hidden;" +
+                "background:#fff;" +
+                "border:2px solid #333;" +
+                "border-radius:12px;" +
+                "box-shadow:0 8px 30px rgba(0,0,0,.28);" +
+                "font-family:Arial,sans-serif;" +
+                "font-size:14px;" +
+                "color:#222;" +
+
+            "}" +
+
+            "#raniseBlock10Header{" +
+
+                "display:flex;" +
+                "align-items:center;" +
+                "justify-content:space-between;" +
+                "gap:8px;" +
+                "padding:10px 12px;" +
+                "font-weight:700;" +
+                "cursor:move;" +
+                "user-select:none;" +
+                "touch-action:none;" +
+                "background:#f2f2f2;" +
+
+            "}" +
+
+            "#raniseBlock10Close{" +
+
+                "border:0;" +
+                "background:transparent;" +
+                "font-size:20px;" +
+                "font-weight:700;" +
+                "cursor:pointer;" +
+                "padding:2px 6px;" +
+
+            "}" +
+
+            "#raniseBlock10Body{" +
+
+                "padding:12px;" +
+                "overflow:auto;" +
+                "max-height:calc(70vh - 50px);" +
+
+            "}" +
+
+            "#raniseBlock10Progress{" +
+
+                "font-weight:700;" +
+                "margin-bottom:8px;" +
+
+            "}" +
+
+            "#raniseBlock10Question{" +
+
+                "line-height:1.45;" +
+                "margin-bottom:12px;" +
+
+            "}" +
+
+            "#raniseBlock10Answer{" +
+
+                "font-size:12px;" +
+                "opacity:.75;" +
+                "margin-bottom:10px;" +
+
+            "}" +
+
+            "#raniseBlock10Score{" +
+
+                "font-weight:700;" +
+                "border-top:1px solid #ddd;" +
+                "padding-top:9px;" +
+
+            "}" +
+
+            "@media(max-width:600px){" +
+
+                "#raniseBlock10EvaluationPanel{" +
+                    "top:58px;" +
+                    "right:6px;" +
+                    "width:calc(100vw - 12px);" +
+                    "max-height:52vh;" +
+                "}" +
+
+                "#raniseBlock10Body{" +
+                    "max-height:calc(52vh - 50px);" +
+                "}" +
+
+            "}";
+
+
+        if(
+            !document.getElementById(
+                "raniseBlock10EvaluationStyle"
+            )
+        ){
+
+            document.head.appendChild(
+                style
             );
 
         }
 
 
-        // -------------------------------------------------
-        // FONT FAMILY + SIZE
-        // -------------------------------------------------
+        document.body.appendChild(
+            panel
+        );
 
-        if(
-            instruction.includes("type de police") &&
-            instruction.includes("taille de police")
-        ){
 
-            return (
-                actions["font-family"] > 0 &&
-                actions["font-size"] > 0 &&
-                hasSelection
+        const closeButton =
+            panel.querySelector(
+                "#raniseBlock10Close"
             );
+
+
+        closeButton.addEventListener(
+            "click",
+            function(){
+
+                state.panelClosed =
+                    true;
+
+                panel.style.display =
+                    "none";
+
+            }
+        );
+
+
+        makePanelDraggable(
+            panel,
+            panel.querySelector(
+                "#raniseBlock10Header"
+            )
+        );
+
+
+        state.panel =
+            panel;
+
+
+        return panel;
+
+    }
+
+
+    // =====================================================
+    // DRAGGABLE PANEL
+    // =====================================================
+
+    function makePanelDraggable(
+        panel,
+        handle
+    ){
+
+        let dragging =
+            false;
+
+        let offsetX =
+            0;
+
+        let offsetY =
+            0;
+
+
+        function pointerDown(event){
+
+            if(
+                event.target &&
+                event.target.id ===
+                "raniseBlock10Close"
+            ){
+
+                return;
+
+            }
+
+
+            dragging =
+                true;
+
+
+            const rect =
+                panel.getBoundingClientRect();
+
+
+            const clientX =
+                event.clientX !== undefined
+                ?
+                event.clientX
+                :
+                (
+                    event.touches &&
+                    event.touches[0]
+                    ?
+                    event.touches[0].clientX
+                    :
+                    0
+                );
+
+
+            const clientY =
+                event.clientY !== undefined
+                ?
+                event.clientY
+                :
+                (
+                    event.touches &&
+                    event.touches[0]
+                    ?
+                    event.touches[0].clientY
+                    :
+                    0
+                );
+
+
+            offsetX =
+                clientX -
+                rect.left;
+
+
+            offsetY =
+                clientY -
+                rect.top;
+
+
+            if(
+                event.preventDefault
+            ){
+
+                event.preventDefault();
+
+            }
 
         }
 
 
-        // -------------------------------------------------
-        // BOLD / ITALIC / UNDERLINE
-        // -------------------------------------------------
+        function pointerMove(event){
 
-        if(
-            instruction.includes("gras") &&
-            instruction.includes("italique") &&
-            instruction.includes("souligné")
-        ){
+            if(!dragging){
 
-            return (
-                actions.bold > 0 &&
-                actions.italic > 0 &&
-                actions.underline > 0 &&
-                hasSelection
-            );
+                return;
 
-        }
+            }
 
 
-        // -------------------------------------------------
-        // COLOR + HIGHLIGHT
-        // -------------------------------------------------
-
-        if(
-            instruction.includes("couleur de police") &&
-            instruction.includes("surbrillance")
-        ){
-
-            return (
-                actions.color > 0 &&
-                actions.highlight > 0 &&
-                hasSelection
-            );
-
-        }
+            const clientX =
+                event.clientX !== undefined
+                ?
+                event.clientX
+                :
+                (
+                    event.touches &&
+                    event.touches[0]
+                    ?
+                    event.touches[0].clientX
+                    :
+                    0
+                );
 
 
-        // -------------------------------------------------
-        // COMPLETE DOCUMENT FORMATTING
-        // -------------------------------------------------
-
-        if(
-            instruction.includes("mise en forme complète")
-        ){
-
-            return (
-                changed &&
-                actions.copy > 0 &&
-                actions.cut > 0 &&
-                actions.paste > 0 &&
-                actions["font-family"] > 0 &&
-                actions["font-size"] > 0 &&
-                actions.bold > 0 &&
-                actions.italic > 0 &&
-                actions.underline > 0 &&
-                actions.color > 0 &&
-                actions.highlight > 0
-            );
-
-        }
+            const clientY =
+                event.clientY !== undefined
+                ?
+                event.clientY
+                :
+                (
+                    event.touches &&
+                    event.touches[0]
+                    ?
+                    event.touches[0].clientY
+                    :
+                    0
+                );
 
 
-        // -------------------------------------------------
-        // EXPLANATION / THEORY RESPONSE
-        // -------------------------------------------------
-
-        if(
-            instruction.includes("expliquer") ||
-            instruction.includes("expliqu")
-        ){
-
-            return (
-                changed &&
-                current.length >= 25
-            );
-
-        }
+            const maxX =
+                window.innerWidth -
+                panel.offsetWidth;
 
 
-        // -------------------------------------------------
-        // IDENTIFY / GENERAL ROLE
-        // -------------------------------------------------
+            const maxY =
+                window.innerHeight -
+                panel.offsetHeight;
 
-        if(
-            instruction.includes("identifier") ||
-            instruction.includes("rôle général")
-        ){
 
-            return (
-                changed &&
-                current.length >= 20
-            );
+            const left =
+                Math.max(
+                    0,
+                    Math.min(
+                        maxX,
+                        clientX -
+                        offsetX
+                    )
+                );
+
+
+            const top =
+                Math.max(
+                    0,
+                    Math.min(
+                        maxY,
+                        clientY -
+                        offsetY
+                    )
+                );
+
+
+            panel.style.left =
+                left + "px";
+
+
+            panel.style.top =
+                top + "px";
+
+
+            panel.style.right =
+                "auto";
 
         }
 
 
-        // -------------------------------------------------
-        // DEMONSTRATION
-        // -------------------------------------------------
+        function pointerUp(){
 
-        if(
-            instruction.includes("démontrer") ||
-            instruction.includes("démontr")
-        ){
-
-            return (
-                changed ||
-                hasSelection ||
-                Object.keys(actions).length > 0
-            );
+            dragging =
+                false;
 
         }
 
 
-        // -------------------------------------------------
-        // AUTONOMOUS COMPLETION
-        // -------------------------------------------------
+        handle.addEventListener(
+            "pointerdown",
+            pointerDown
+        );
+
+
+        document.addEventListener(
+            "pointermove",
+            pointerMove,
+            true
+        );
+
+
+        document.addEventListener(
+            "pointerup",
+            pointerUp,
+            true
+        );
+
+    }
+
+
+    // =====================================================
+    // UPDATE PANEL
+    // =====================================================
+
+    function updatePanel(){
+
+        const panel =
+            createEvaluationPanel();
+
 
         if(
-            instruction.includes("autonome")
+            !state.evaluation ||
+            !state.evaluation[
+                state.questionIndex
+            ]
         ){
 
-            return (
-                changed ||
-                hasSelection ||
-                Object.keys(actions).length > 0
-            );
+            return;
 
         }
 
 
-        // -------------------------------------------------
-        // GENERIC EVALUATION
-        // -------------------------------------------------
+        const total =
+            state.evaluation.length;
 
-        return (
-            changed &&
-            current.length >= 20
+
+        const question =
+            state.evaluation[
+                state.questionIndex
+            ];
+
+
+        const progress =
+            panel.querySelector(
+                "#raniseBlock10Progress"
+            );
+
+
+        const questionBox =
+            panel.querySelector(
+                "#raniseBlock10Question"
+            );
+
+
+        const scoreBox =
+            panel.querySelector(
+                "#raniseBlock10Score"
+            );
+
+
+        progress.textContent =
+            "Question " +
+            (
+                state.questionIndex + 1
+            ) +
+            " / " +
+            total;
+
+
+        questionBox.textContent =
+            question;
+
+
+        scoreBox.textContent =
+            "Score : " +
+            Math.round(
+                state.score
+            ) +
+            " / 100";
+
+    }
+
+
+    // =====================================================
+    // RESET QUESTION OBSERVATION
+    // =====================================================
+
+    function resetQuestionObservation(){
+
+        state.baselineText =
+            getDocumentText();
+
+
+        state.currentAnswerText =
+            "";
+
+
+        state.currentActions =
+            {};
+
+
+        state.currentSelections =
+            [];
+
+
+        state.clipboardEvents = {
+
+            copy:0,
+            cut:0,
+            paste:0
+
+        };
+
+
+        state.questionValidated =
+            false;
+
+
+        state.lastDocumentText =
+            state.baselineText;
+
+
+        state.noProgressChecks =
+            0;
+
+
+        state.lastProgressText =
+            "";
+
+
+        state.lastProgressTime =
+            Date.now();
+
+
+        state.lastActionTime =
+            0;
+
+    }
+
+
+    // =====================================================
+    // QUESTION INTRODUCTION
+    // =====================================================
+
+    async function speakCurrentQuestion(){
+
+        if(
+            !state.evaluation ||
+            !state.evaluation[
+                state.questionIndex
+            ]
+        ){
+
+            return;
+
+        }
+
+
+        state.waiting =
+            false;
+
+
+        resetQuestionObservation();
+
+        updatePanel();
+
+
+        const question =
+            state.evaluation[
+                state.questionIndex
+            ];
+
+
+        await speak(
+
+            "Question " +
+            (
+                state.questionIndex + 1
+            ) +
+            ". " +
+            question +
+            " Écrivez votre réponse directement dans le document Microsoft Word 2007. Je vais lire et analyser votre réponse ainsi que les opérations que vous réalisez."
+
+        );
+
+
+        if(
+            !state.completed
+        ){
+
+            state.waiting =
+                true;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // EVALUATE CURRENT QUESTION
+    // =====================================================
+
+    function evaluateCurrentQuestion(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting ||
+            state.questionValidated
+        ){
+
+            return;
+
+        }
+
+
+        const answer =
+            getCurrentAnswer();
+
+
+        state.currentAnswerText =
+            answer;
+
+
+        state.lastDocumentText =
+            getDocumentText();
+
+
+        if(
+            !answer ||
+            normalize(answer).length <
+            3
+        ){
+
+            return;
+
+        }
+
+
+        const score =
+            calculateQuestionScore();
+
+
+        const threshold =
+            60;
+
+
+        if(
+            score >= threshold
+        ){
+
+            state.questionValidated =
+                true;
+
+
+            state.questionScores[
+                state.questionIndex
+            ] =
+                score;
+
+
+            state.allAnswers[
+                state.questionIndex
+            ] =
+                answer;
+
+
+            const weight =
+                questionWeight(
+                    state.questionIndex,
+                    state.evaluation.length
+                );
+
+
+            state.score +=
+                (
+                    score /
+                    100
+                ) *
+                weight;
+
+
+            state.score =
+                Math.min(
+                    100,
+                    state.score
+                );
+
+
+            updatePanel();
+
+
+            nextEvaluationQuestion();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DELAYED EVALUATION
+    // =====================================================
+
+    function evaluateCurrentQuestionSoon(){
+
+        setTimeout(
+            function(){
+
+                evaluateCurrentQuestion();
+
+            },
+            180
         );
 
     }
@@ -30835,7 +31939,7 @@ if(
         if(
             now -
             state.lastActionTime <
-            80
+            70
         ){
 
             return;
@@ -30858,7 +31962,9 @@ if(
 
         if(action){
 
-            recordAction(action);
+            recordAction(
+                action
+            );
 
         }
 
@@ -30871,8 +31977,7 @@ if(
 
         if(
             data.includes("font family") ||
-            data.includes("type de police") ||
-            data.includes("police")
+            data.includes("type de police")
         ){
 
             recordAction(
@@ -30896,7 +32001,8 @@ if(
 
         if(
             data.includes("font color") ||
-            data.includes("couleur de police")
+            data.includes("couleur de police") ||
+            data.includes("color")
         ){
 
             recordAction(
@@ -30918,23 +32024,17 @@ if(
         }
 
 
-        setTimeout(function(){
-
-            if(
-                validateEvaluationItem()
-            ){
-
-                nextEvaluationItem();
-
-            }
-
-        },120);
+        evaluateCurrentQuestionSoon();
 
     }
 
 
     // =====================================================
     // INPUT
+    //
+    // Every input is observed.
+    // The complete current document is read again so
+    // Ranise can see the actual answer being entered.
     // =====================================================
 
     function handleSimulationInput(){
@@ -30951,23 +32051,52 @@ if(
         }
 
 
-        setTimeout(function(){
+        const current =
+            getDocumentText();
 
-            if(
-                validateEvaluationItem()
-            ){
 
-                nextEvaluationItem();
+        state.lastDocumentText =
+            current;
 
-            }
 
-        },150);
+        state.currentAnswerText =
+            getCurrentAnswer();
+
+
+        updatePanel();
+
+
+        evaluateCurrentQuestionSoon();
 
     }
 
 
     // =====================================================
-    // LISTENERS
+    // SELECTION CHANGE
+    // =====================================================
+
+    function handleSelectionChange(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        recordSelection();
+
+        evaluateCurrentQuestionSoon();
+
+    }
+
+
+    // =====================================================
+    // ATTACH LISTENERS
     // =====================================================
 
     function attachSimulationListeners(){
@@ -31001,8 +32130,29 @@ if(
 
 
         doc.addEventListener(
+            "copy",
+            handleClipboardEvent,
+            true
+        );
+
+
+        doc.addEventListener(
+            "cut",
+            handleClipboardEvent,
+            true
+        );
+
+
+        doc.addEventListener(
+            "paste",
+            handleClipboardEvent,
+            true
+        );
+
+
+        doc.addEventListener(
             "selectionchange",
-            recordSelection,
+            handleSelectionChange,
             true
         );
 
@@ -31014,16 +32164,52 @@ if(
 
 
     // =====================================================
-    // SPEAK CURRENT EVALUATION
+    // NEXT QUESTION
     // =====================================================
 
-    async function speakCurrentEvaluation(){
+    async function nextEvaluationQuestion(){
+
+        state.waiting =
+            false;
+
+
+        await speak(
+            "Très bien. J'ai analysé votre réponse et cette question est validée."
+        );
+
 
         if(
-            !state.evaluation ||
-            !state.evaluation[
-                state.evaluationIndex
-            ]
+            state.questionIndex <
+            state.evaluation.length - 1
+        ){
+
+            state.questionIndex++;
+
+
+            updatePanel();
+
+
+            await speakCurrentQuestion();
+
+
+            return;
+
+        }
+
+
+        finishEvaluation();
+
+    }
+
+
+    // =====================================================
+    // FINAL EVALUATION
+    // =====================================================
+
+    async function finishEvaluation(){
+
+        if(
+            state.completed
         ){
 
             return;
@@ -31031,75 +32217,85 @@ if(
         }
 
 
-        const instruction =
-            state.evaluation[
-                state.evaluationIndex
-            ];
-
-
         state.waiting =
             false;
 
 
-        resetEvaluationObservation();
+        const finalScore =
+            Math.round(
+                state.score
+            );
 
 
-        await speak(
+        updatePanel();
 
-            "Évaluation. " +
-            "Question " +
-            (
-                state.evaluationIndex + 1
-            ) +
-            " sur " +
-            state.evaluation.length +
-            ". " +
-            instruction +
-            " Prenez le temps de réaliser cette tâche dans la simulation Microsoft Word 2007. Je vérifierai votre réalisation avant de passer à la suivante."
 
-        );
-
+        // -------------------------------------------------
+        // 75/100 IS THE OFFICIAL PASSING SCORE.
+        // -------------------------------------------------
 
         if(
-            !state.completed
+            finalScore >= 75
         ){
 
-            resetEvaluationObservation();
-
-            state.waiting =
+            state.completed =
                 true;
+
+
+            await speak(
+
+                "Excellent. Vous avez obtenu " +
+                finalScore +
+                " points sur 100. Le minimum requis est de 75 points. Votre Evaluation est donc validée. Vous pouvez maintenant poursuivre votre formation."
+
+            );
+
+
+            unlockNextChapter();
+
+
+            return;
 
         }
 
-    }
 
-
-    // =====================================================
-    // CONFIRM CURRENT ITEM
-    // =====================================================
-
-    async function confirmEvaluationItem(){
-
-        state.waiting =
-            false;
-
+        // -------------------------------------------------
+        // BELOW 75:
+        //
+        // Ranise gives the student another opportunity.
+        // -------------------------------------------------
 
         await speak(
-            "Très bien. Cette partie de l’évaluation est correcte et validée."
+
+            "Votre score actuel est de " +
+            finalScore +
+            " points sur 100. Le seuil de validation est de 75 points. Je vais vous laisser reprendre les points qui peuvent encore être améliorés."
+
         );
+
+
+        state.noProgressChecks =
+            0;
+
+
+        state.waiting =
+            true;
 
     }
 
 
     // =====================================================
-    // NEXT EVALUATION ITEM
+    // NO-PROGRESS / STUCK DETECTION
+    //
+    // If the student reaches 75 or more and repeatedly
+    // cannot improve, validation is allowed.
     // =====================================================
 
-    async function nextEvaluationItem(){
+    function checkStudentProgress(){
 
         if(
+            !state.started ||
             state.completed ||
-            state.processing ||
             !state.waiting
         ){
 
@@ -31108,90 +32304,79 @@ if(
         }
 
 
-        state.processing =
-            true;
+        const answer =
+            getCurrentAnswer();
 
 
-        try{
-
-            await confirmEvaluationItem();
-
-
-            if(
-                state.evaluationIndex <
-                state.evaluation.length - 1
-            ){
-
-                state.evaluationIndex++;
-
-                await speakCurrentEvaluation();
-
-                return;
-
-            }
+        const normalized =
+            normalize(answer);
 
 
-            // =================================================
-            // ALL EVALUATION ITEMS COMPLETED
-            // =================================================
+        if(
+            normalized !==
+            state.lastProgressText
+        ){
 
-            state.completed =
-                true;
+            state.lastProgressText =
+                normalized;
 
+            state.lastProgressTime =
+                Date.now();
 
-            state.waiting =
-                false;
+            state.noProgressChecks =
+                0;
 
+            return;
 
-            await speak(
-
-                "Excellent. Vous avez terminé et validé l’évaluation complète du " +
-                chapterName(
-                    state.chapterId
-                ) +
-                ". Toutes les parties du chapitre sont maintenant validées. Je vais enregistrer votre progression et déverrouiller automatiquement le chapitre suivant."
-
-            );
+        }
 
 
-            // =================================================
-            // FINAL BRIDGE
-            //
-            // EVALUATION → NEXT CHAPTER
-            //
-            // THE BRIDGE OWNS THE REAL UNLOCK,
-            // PROGRESS SAVE AND RENDER.
-            // =================================================
+        const elapsed =
+            Date.now() -
+            state.lastProgressTime;
+
+
+        if(
+            elapsed >=
+            45000
+        ){
+
+            state.noProgressChecks++;
+
+
+            state.lastProgressTime =
+                Date.now();
+
+
+            // -------------------------------------------------
+            // NEVER force validation below 75.
+            // -------------------------------------------------
 
             if(
-                typeof RaniseDynamicUnlockRenderBridge !==
-                "undefined" &&
-                RaniseDynamicUnlockRenderBridge &&
-                typeof RaniseDynamicUnlockRenderBridge.unlockNextPart ===
-                "function"
+                state.score >= 75 &&
+                state.noProgressChecks >= 2
             ){
 
-                RaniseDynamicUnlockRenderBridge.unlockNextPart(
+                state.completed =
+                    true;
 
-                    state.chapterId,
+                state.waiting =
+                    false;
 
-                    "evaluation"
 
-                );
+                speak(
 
-            }else{
+                    "Je constate que votre progression est bloquée, mais vous avez déjà atteint le seuil de 75 points sur 100. Je valide donc votre Evaluation afin de vous permettre de poursuivre votre formation."
 
-                console.error(
-                    "RANISE BLOCK 10: Dynamic Unlock Bridge unavailable."
+                ).then(
+                    function(){
+
+                        unlockNextChapter();
+
+                    }
                 );
 
             }
-
-
-        }finally{
-
-            state.processing =
-                false;
 
         }
 
@@ -31199,14 +32384,64 @@ if(
 
 
     // =====================================================
+    // PROGRESS MONITOR
+    // =====================================================
+
+    function startProgressMonitor(){
+
+        setInterval(
+            function(){
+
+                checkStudentProgress();
+
+            },
+            5000
+        );
+
+    }
+
+
+    // =====================================================
+    // UNLOCK NEXT CHAPTER
+    //
+    // Evaluation completion is reported to the same
+    // Dynamic Unlock Render Bridge.
+    //
+    // The bridge remains responsible for progression.
+    // =====================================================
+
+    function unlockNextChapter(){
+
+        if(
+            typeof RaniseDynamicUnlockRenderBridge !==
+            "undefined" &&
+            RaniseDynamicUnlockRenderBridge &&
+            typeof RaniseDynamicUnlockRenderBridge.unlockNextPart ===
+            "function"
+        ){
+
+            RaniseDynamicUnlockRenderBridge.unlockNextPart(
+
+                state.chapterId,
+
+                "evaluation"
+
+            );
+
+            return;
+
+        }
+
+
+        console.error(
+            "RANISE BLOCK 10: Dynamic Unlock Bridge unavailable."
+        );
+
+    }
+
+
+    // =====================================================
     // START BLOCK 10
-    //
-    // CAN ONLY START AFTER:
-    //
-    //     BLOCK 9
-    //         ↓
-    //     unlockNextPart(chapterId,"homework")
-    //
     // =====================================================
 
     async function startBlock10Dynamic(chapterId){
@@ -31283,6 +32518,12 @@ if(
         }
 
 
+        const objectives =
+            getChapterObjectives(
+                chapterId
+            );
+
+
         if(
             !connectToSimulation()
         ){
@@ -31300,8 +32541,24 @@ if(
             evaluation;
 
 
-        state.evaluationIndex =
+        state.objectives =
+            objectives;
+
+
+        state.questionIndex =
             0;
+
+
+        state.score =
+            0;
+
+
+        state.questionScores =
+            [];
+
+
+        state.allAnswers =
+            [];
 
 
         state.started =
@@ -31316,30 +32573,37 @@ if(
             false;
 
 
-        state.speaking =
-            false;
-
-
         state.processing =
             false;
 
 
-        state.listenersAttached =
+        state.panelClosed =
             false;
+
+
+        state.evaluationStartedAt =
+            Date.now();
+
+
+        createEvaluationPanel();
+
+
+        updatePanel();
 
 
         attachSimulationListeners();
 
 
+        startProgressMonitor();
+
+
         await speak(
 
-            "Bienvenue dans la partie Évaluation du " +
+            "Bienvenue dans la partie Evaluation du " +
             chapterName(
                 chapterId
             ) +
-            ". Cette évaluation comporte " +
-            evaluation.length +
-            " étapes. Je vais vérifier chaque étape avant de vous permettre de poursuivre."
+            ". Cette Evaluation est notée sur 100 points. Le seuil de validation est de 75 points. Je vais vous poser les questions une par une. Lorsque je vous demanderai une réponse écrite, écrivez directement dans le document Microsoft Word 2007. Je lirai et analyserai ce que vous écrivez ainsi que les actions que vous réalisez dans la simulation."
 
         );
 
@@ -31348,7 +32612,7 @@ if(
             !state.completed
         ){
 
-            await speakCurrentEvaluation();
+            await speakCurrentQuestion();
 
         }
 
@@ -31360,10 +32624,6 @@ if(
 
     // =====================================================
     // WAIT FOR SIMULATION
-    //
-    // NEVER CALLED AT PAGE LOAD.
-    //
-    // ONLY AFTER HOMEWORK → EVALUATION BRIDGE.
     // =====================================================
 
     function waitForSimulation(
@@ -31393,62 +32653,130 @@ if(
             ?
             maxAttempts
             :
-            maxAttempts || 200;
+            200;
 
 
         const timer =
-            setInterval(function(){
+            setInterval(
+                function(){
 
-                attempts++;
-
-
-                if(
-                    state.started
-                ){
-
-                    clearInterval(timer);
-
-                    return;
-
-                }
+                    attempts++;
 
 
-                if(
-                    !state.unlockReceived ||
-                    !state.launchPending ||
-                    state.bridgeHandoffChapterId !==
-                    chapterId
-                ){
+                    if(
+                        state.started
+                    ){
 
-                    clearInterval(timer);
+                        clearInterval(timer);
 
-                    return;
+                        return;
 
-                }
+                    }
 
 
-                const activeChapter =
-                    detectCurrentChapterId();
+                    if(
+                        !state.unlockReceived ||
+                        !state.launchPending ||
+                        state.bridgeHandoffChapterId !==
+                        chapterId
+                    ){
+
+                        clearInterval(timer);
+
+                        return;
+
+                    }
 
 
-                if(
-                    activeChapter &&
-                    String(activeChapter).trim() !==
-                    chapterId
-                ){
-
-                    clearInterval(timer);
-
-                    return;
-
-                }
+                    const frame =
+                        findSimulation();
 
 
-                const frame =
-                    findSimulation();
+                    if(!frame){
+
+                        if(
+                            attempts >= limit
+                        ){
+
+                            clearInterval(timer);
+
+                        }
+
+                        return;
+
+                    }
 
 
-                if(!frame){
+                    try{
+
+                        const doc =
+                            frame.contentDocument ||
+                            (
+                                frame.contentWindow
+                                ?
+                                frame.contentWindow.document
+                                :
+                                null
+                            );
+
+
+                        if(
+                            doc &&
+                            doc.readyState !==
+                            "loading"
+                        ){
+
+                            clearInterval(timer);
+
+
+                            startBlock10Dynamic(
+                                chapterId
+                            );
+
+
+                            return;
+
+                        }
+
+                    }catch(error){}
+
+
+                    if(
+                        !frame.__raniseBlock10LoadAttached
+                    ){
+
+                        frame.__raniseBlock10LoadAttached =
+                            true;
+
+
+                        frame.addEventListener(
+                            "load",
+                            function(){
+
+                                frame.__raniseBlock10LoadAttached =
+                                    false;
+
+
+                                if(
+                                    !state.started &&
+                                    state.launchPending &&
+                                    state.unlockReceived &&
+                                    state.bridgeHandoffChapterId ===
+                                    chapterId
+                                ){
+
+                                    startBlock10Dynamic(
+                                        chapterId
+                                    );
+
+                                }
+
+                            },
+                            {once:true}
+                        );
+
+                    }
+
 
                     if(
                         attempts >= limit
@@ -31458,97 +32786,9 @@ if(
 
                     }
 
-                    return;
-
-                }
-
-
-                try{
-
-                    const doc =
-                        frame.contentDocument ||
-                        (
-                            frame.contentWindow
-                            ?
-                            frame.contentWindow.document
-                            :
-                            null
-                        );
-
-
-                    if(
-                        doc &&
-                        doc.readyState !==
-                        "loading"
-                    ){
-
-                        clearInterval(timer);
-
-
-                        startBlock10Dynamic(
-                            chapterId
-                        );
-
-
-                        return;
-
-                    }
-
-                }catch(error){}
-
-
-                if(
-                    attempts >= limit
-                ){
-
-                    clearInterval(timer);
-
-                    return;
-
-                }
-
-
-                if(
-                    !frame.__raniseBlock10LoadAttached
-                ){
-
-                    frame.__raniseBlock10LoadAttached =
-                        true;
-
-
-                    frame.addEventListener(
-
-                        "load",
-
-                        function(){
-
-                            frame.__raniseBlock10LoadAttached =
-                                false;
-
-
-                            if(
-                                !state.started &&
-                                state.launchPending &&
-                                state.unlockReceived &&
-                                state.bridgeHandoffChapterId ===
-                                chapterId
-                            ){
-
-                                startBlock10Dynamic(
-                                    chapterId
-                                );
-
-                            }
-
-                        },
-
-                        {once:true}
-
-                    );
-
-                }
-
-            },100);
+                },
+                100
+            );
 
     }
 
@@ -31556,13 +32796,16 @@ if(
     // =====================================================
     // REAL BLOCK 9 → BLOCK 10 HANDOFF
     //
-    // ONLY:
+    // THIS IS THE ONLY LAUNCH AUTHORIZATION.
+    //
+    // Block 9 calls:
     //
     //     unlockNextPart(
     //         chapterId,
     //         "homework"
     //     )
     //
+    // Block 10 receives that NEW runtime event.
     // =====================================================
 
     function installBridgeHandoff(){
@@ -31622,10 +32865,6 @@ if(
             currentPart
         ){
 
-            // -------------------------------------------------
-            // PRESERVE EXISTING BRIDGE BEHAVIOR FIRST.
-            // -------------------------------------------------
-
             const result =
                 originalUnlock.apply(
                     this,
@@ -31640,9 +32879,7 @@ if(
 
 
             // -------------------------------------------------
-            // BLOCK 9 → BLOCK 10
-            //
-            // ONLY "HOMEWORK" AUTHORIZES EVALUATION.
+            // ONLY HOMEWORK → EVALUATION
             // -------------------------------------------------
 
             if(
@@ -31671,6 +32908,10 @@ if(
                 ).trim();
 
 
+            // -------------------------------------------------
+            // NEW REAL HANDOFF
+            // -------------------------------------------------
+
             state.bridgeHandoffSequence++;
 
 
@@ -31686,62 +32927,67 @@ if(
                 true;
 
 
-            setTimeout(function(){
+            setTimeout(
+                function(){
 
-                if(
-                    state.started
-                ){
+                    if(
+                        state.started
+                    ){
 
-                    return;
+                        return;
 
-                }
-
-
-                if(
-                    !state.unlockReceived ||
-                    !state.launchPending
-                ){
-
-                    return;
-
-                }
+                    }
 
 
-                if(
-                    state.bridgeHandoffChapterId !==
-                    targetChapterId
-                ){
+                    if(
+                        !state.unlockReceived ||
+                        !state.launchPending
+                    ){
 
-                    return;
+                        return;
 
-                }
-
-
-                const activeChapter =
-                    detectCurrentChapterId();
+                    }
 
 
-                if(
-                    activeChapter &&
-                    String(activeChapter).trim() !==
-                    targetChapterId
-                ){
+                    if(
+                        state.bridgeHandoffChapterId !==
+                        targetChapterId
+                    ){
 
-                    console.warn(
-                        "RANISE BLOCK 10: Active chapter differs from Homework → Evaluation handoff."
+                        return;
+
+                    }
+
+
+                    const activeChapter =
+                        detectCurrentChapterId();
+
+
+                    if(
+                        activeChapter &&
+                        String(
+                            activeChapter
+                        ).trim() !==
+                        targetChapterId
+                    ){
+
+                        console.warn(
+                            "RANISE BLOCK 10: Active chapter differs from Bridge handoff. Launch rejected."
+                        );
+
+                        return;
+
+                    }
+
+
+                    waitForSimulation(
+                        targetChapterId,
+                        200
                     );
 
-                    return;
-
-                }
-
-
-                waitForSimulation(
-                    targetChapterId,
-                    200
-                );
-
-            },100);
+                },
+                100
+            );
 
 
             return result;
@@ -31778,13 +33024,8 @@ if(
     // =====================================================
     // WAIT FOR BRIDGE
     //
-    // DOES NOT CHECK:
-    //     localStorage
-    //     evaluation unlock
-    //     simulation opening
-    //     chapter rendering
-    //
-    // ONLY INSTALLS THE REAL HANDOFF LISTENER.
+    // THIS ONLY INSTALLS THE HANDOFF LISTENER.
+    // IT DOES NOT LAUNCH EVALUATION.
     // =====================================================
 
     function waitForBridge(){
@@ -31794,41 +33035,45 @@ if(
 
 
         const timer =
-            setInterval(function(){
+            setInterval(
+                function(){
 
-                attempts++;
-
-
-                if(
-                    installBridgeHandoff()
-                ){
-
-                    clearInterval(timer);
-
-                    return;
-
-                }
+                    attempts++;
 
 
-                if(
-                    attempts >= 300
-                ){
+                    if(
+                        installBridgeHandoff()
+                    ){
 
-                    clearInterval(timer);
+                        clearInterval(timer);
 
-                    console.warn(
-                        "RANISE BLOCK 10: Bridge handoff could not be installed."
-                    );
+                        return;
 
-                }
+                    }
 
-            },100);
+
+                    if(
+                        attempts >= 300
+                    ){
+
+                        clearInterval(timer);
+
+
+                        console.warn(
+                            "RANISE BLOCK 10: Bridge handoff could not be installed."
+                        );
+
+                    }
+
+                },
+                100
+            );
 
     }
 
 
     // =====================================================
-    // START LISTENER INSTALLATION
+    // INSTALL ONLY HANDOFF LISTENER
     // =====================================================
 
     waitForBridge();
@@ -31857,15 +33102,20 @@ if(
                 completed:
                     state.completed,
 
-                evaluationIndex:
-                    state.evaluationIndex,
+                questionIndex:
+                    state.questionIndex,
 
-                evaluationTotal:
+                evaluationLength:
                     state.evaluation
                     ?
                     state.evaluation.length
                     :
                     0,
+
+                score:
+                    Math.round(
+                        state.score
+                    ),
 
                 waiting:
                     state.waiting,
@@ -31886,7 +33136,14 @@ if(
                     state.bridgeHandoffChapterId,
 
                 bridgeHandoffSequence:
-                    state.bridgeHandoffSequence
+                    state.bridgeHandoffSequence,
+
+                panelVisible:
+                    !!(
+                        state.panel &&
+                        state.panel.style.display !==
+                        "none"
+                    )
 
             };
 
@@ -31896,6 +33153,14 @@ if(
 
 
 })();
+
+
+
+
+
+
+
+
 
 
 
