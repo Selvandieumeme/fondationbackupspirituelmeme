@@ -29538,6 +29538,18 @@ if(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================================================
 // BLOCK 10 DYNAMIC EVALUATION
 // MICROSOFT WORD 2007 FORMATION
@@ -31330,20 +31342,140 @@ if(
 
             "}" +
 
-            "@media(max-width:600px){" +
 
-                "#raniseBlock10EvaluationPanel{" +
-                    "top:58px;" +
-                    "right:6px;" +
-                    "width:calc(100vw - 12px);" +
-                    "max-height:52vh;" +
-                "}" +
 
-                "#raniseBlock10Body{" +
-                    "max-height:calc(52vh - 50px);" +
-                "}" +
 
-            "}";
+
+
+
+
+
+
+
+
+@media(max-width:600px){
+
+    #raniseBlock10EvaluationPanel{
+
+        position:fixed !important;
+
+        top:58px !important;
+        right:6px !important;
+        left:auto !important;
+
+        width:260px !important;
+        max-width:calc(100vw - 12px) !important;
+
+        height:auto !important;
+        max-height:42vh !important;
+
+        font-size:11px !important;
+
+        border-width:1px !important;
+        border-radius:9px !important;
+
+        box-shadow:0 4px 16px rgba(0,0,0,.22) !important;
+
+        overflow:hidden !important;
+
+    }
+
+
+    #raniseBlock10Header{
+
+        min-height:32px !important;
+
+        padding:6px 8px !important;
+
+        gap:5px !important;
+
+        font-size:11px !important;
+
+        line-height:1.2 !important;
+
+    }
+
+
+    #raniseBlock10Close{
+
+        width:24px !important;
+        height:24px !important;
+
+        min-width:24px !important;
+
+        padding:0 !important;
+
+        margin:0 !important;
+
+        font-size:16px !important;
+
+        line-height:24px !important;
+
+    }
+
+
+    #raniseBlock10Body{
+
+        padding:7px !important;
+
+        max-height:calc(42vh - 38px) !important;
+
+        overflow-y:auto !important;
+
+        overflow-x:hidden !important;
+
+    }
+
+
+    #raniseBlock10Progress{
+
+        font-size:11px !important;
+
+        margin-bottom:5px !important;
+
+    }
+
+
+    #raniseBlock10Question{
+
+        font-size:11px !important;
+
+        line-height:1.3 !important;
+
+        margin-bottom:6px !important;
+
+        overflow-wrap:anywhere !important;
+
+    }
+
+
+    #raniseBlock10Answer{
+
+        font-size:9px !important;
+
+        line-height:1.25 !important;
+
+        margin-bottom:5px !important;
+
+    }
+
+
+    #raniseBlock10Score{
+
+        font-size:10px !important;
+
+        padding-top:5px !important;
+
+    }
+
+}
+
+
+
+
+
+
+
 
 
         if(
