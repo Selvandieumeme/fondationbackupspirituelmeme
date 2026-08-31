@@ -453,15 +453,13 @@ homework: [
 
     "Expliquer la différence entre Copier (Copy), Couper (Cut) et Coller (Paste), puis démontrer correctement leur utilisation dans un document.",
 
-    "Démontrer la capacité à sélectionner un texte et à modifier son type de police (Font) ainsi que sa taille (Font Size).",
+   
 
-    "Démontrer l’utilisation correcte des commandes Gras (Bold), Italique (Italic) et Souligné (Underline) sur différentes parties d’un texte.",
-
-    "Démontrer la capacité à modifier la Couleur de police (Font Color) et à appliquer une Surbrillance (Text Highlight Color) à un texte sélectionné.",
+   
 
     "Réaliser une mise en forme complète d’un court document en utilisant correctement les commandes du groupe Presse-papiers (Clipboard) et du groupe Police (Font) étudiées dans cette formation.",
 
-    "Expliquer oralement ou par écrit les différentes opérations réalisées et justifier l’utilisation de chaque commande.",
+    
 
     "Réaliser l’ensemble de l’évaluation de manière autonome afin de démontrer la maîtrise des notions théoriques et pratiques étudiées dans cette partie du Chapitre 2."
 
