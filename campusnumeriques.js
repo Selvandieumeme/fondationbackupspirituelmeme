@@ -31195,6 +31195,8 @@ if(
     }
 
 
+
+```javascript
     // =====================================================
     // PANEL
     // =====================================================
@@ -31278,6 +31280,7 @@ if(
 
             "}" +
 
+
             "#raniseBlock10Header{" +
 
                 "display:flex;" +
@@ -31293,6 +31296,7 @@ if(
 
             "}" +
 
+
             "#raniseBlock10Close{" +
 
                 "border:0;" +
@@ -31304,6 +31308,7 @@ if(
 
             "}" +
 
+
             "#raniseBlock10Body{" +
 
                 "padding:12px;" +
@@ -31312,12 +31317,14 @@ if(
 
             "}" +
 
+
             "#raniseBlock10Progress{" +
 
                 "font-weight:700;" +
                 "margin-bottom:8px;" +
 
             "}" +
+
 
             "#raniseBlock10Question{" +
 
@@ -31326,6 +31333,7 @@ if(
 
             "}" +
 
+
             "#raniseBlock10Answer{" +
 
                 "font-size:12px;" +
@@ -31333,6 +31341,7 @@ if(
                 "margin-bottom:10px;" +
 
             "}" +
+
 
             "#raniseBlock10Score{" +
 
@@ -31343,139 +31352,100 @@ if(
             "}" +
 
 
+            // =================================================
+            // ANDROID / SMALL SCREENS
+            // =================================================
 
+            "@media(max-width:600px){" +
 
+                "#raniseBlock10EvaluationPanel{" +
 
+                    "position:fixed !important;" +
+                    "top:58px !important;" +
+                    "right:6px !important;" +
+                    "left:auto !important;" +
+                    "width:260px !important;" +
+                    "max-width:calc(100vw - 12px) !important;" +
+                    "height:auto !important;" +
+                    "max-height:42vh !important;" +
+                    "font-size:11px !important;" +
+                    "border-width:1px !important;" +
+                    "border-radius:9px !important;" +
+                    "box-shadow:0 4px 16px rgba(0,0,0,.22) !important;" +
+                    "overflow:hidden !important;" +
 
+                "}" +
 
 
+                "#raniseBlock10Header{" +
 
+                    "min-height:32px !important;" +
+                    "padding:6px 8px !important;" +
+                    "gap:5px !important;" +
+                    "font-size:11px !important;" +
+                    "line-height:1.2 !important;" +
 
+                "}" +
 
 
-@media(max-width:600px){
+                "#raniseBlock10Close{" +
 
-    #raniseBlock10EvaluationPanel{
+                    "width:24px !important;" +
+                    "height:24px !important;" +
+                    "min-width:24px !important;" +
+                    "padding:0 !important;" +
+                    "margin:0 !important;" +
+                    "font-size:16px !important;" +
+                    "line-height:24px !important;" +
 
-        position:fixed !important;
+                "}" +
 
-        top:58px !important;
-        right:6px !important;
-        left:auto !important;
 
-        width:260px !important;
-        max-width:calc(100vw - 12px) !important;
+                "#raniseBlock10Body{" +
 
-        height:auto !important;
-        max-height:42vh !important;
+                    "padding:7px !important;" +
+                    "max-height:calc(42vh - 38px) !important;" +
+                    "overflow-y:auto !important;" +
+                    "overflow-x:hidden !important;" +
 
-        font-size:11px !important;
+                "}" +
 
-        border-width:1px !important;
-        border-radius:9px !important;
 
-        box-shadow:0 4px 16px rgba(0,0,0,.22) !important;
+                "#raniseBlock10Progress{" +
 
-        overflow:hidden !important;
+                    "font-size:11px !important;" +
+                    "margin-bottom:5px !important;" +
 
-    }
+                "}" +
 
 
-    #raniseBlock10Header{
+                "#raniseBlock10Question{" +
 
-        min-height:32px !important;
+                    "font-size:11px !important;" +
+                    "line-height:1.3 !important;" +
+                    "margin-bottom:6px !important;" +
+                    "overflow-wrap:anywhere !important;" +
 
-        padding:6px 8px !important;
+                "}" +
 
-        gap:5px !important;
 
-        font-size:11px !important;
+                "#raniseBlock10Answer{" +
 
-        line-height:1.2 !important;
+                    "font-size:9px !important;" +
+                    "line-height:1.25 !important;" +
+                    "margin-bottom:5px !important;" +
 
-    }
+                "}" +
 
 
-    #raniseBlock10Close{
+                "#raniseBlock10Score{" +
 
-        width:24px !important;
-        height:24px !important;
+                    "font-size:10px !important;" +
+                    "padding-top:5px !important;" +
 
-        min-width:24px !important;
+                "}" +
 
-        padding:0 !important;
-
-        margin:0 !important;
-
-        font-size:16px !important;
-
-        line-height:24px !important;
-
-    }
-
-
-    #raniseBlock10Body{
-
-        padding:7px !important;
-
-        max-height:calc(42vh - 38px) !important;
-
-        overflow-y:auto !important;
-
-        overflow-x:hidden !important;
-
-    }
-
-
-    #raniseBlock10Progress{
-
-        font-size:11px !important;
-
-        margin-bottom:5px !important;
-
-    }
-
-
-    #raniseBlock10Question{
-
-        font-size:11px !important;
-
-        line-height:1.3 !important;
-
-        margin-bottom:6px !important;
-
-        overflow-wrap:anywhere !important;
-
-    }
-
-
-    #raniseBlock10Answer{
-
-        font-size:9px !important;
-
-        line-height:1.25 !important;
-
-        margin-bottom:5px !important;
-
-    }
-
-
-    #raniseBlock10Score{
-
-        font-size:10px !important;
-
-        padding-top:5px !important;
-
-    }
-
-}
-
-
-
-
-
-
-
+            "}";
 
 
         if(
@@ -31531,6 +31501,24 @@ if(
         return panel;
 
     }
+```
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+
+
+
 
 
     // =====================================================
