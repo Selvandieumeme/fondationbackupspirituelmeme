@@ -461,7 +461,8 @@ homework: [
 
     
 
-    "Réaliser l’ensemble de l’évaluation de manière autonome afin de démontrer la maîtrise des notions théoriques et pratiques étudiées dans cette partie du Chapitre 2."
+
+"Réaliser d’abord un court texte directement dans la simulation Microsoft Word 2007, puis appliquer les commandes Gras, Italique, Souligné et Couleur sur le texte afin de démontrer la maîtrise des notions pratiques étudiées dans cette partie du Chapitre 2."
 
 ],
 
@@ -31001,49 +31002,60 @@ if(
     }
 
 
-    // =====================================================
-    // QUESTION WEIGHTS
-    // =====================================================
-
-    function questionWeight(index,total){
-
-        if(total <= 0){
-
-            return 0;
-
-        }
 
 
-        const weights = [
-
-            10,
-            12,
-            12,
-            14,
-            12,
-            18,
-            10,
-            12
-
-        ];
 
 
-        if(
-            index <
-            weights.length
-        ){
-
-            return weights[index];
-
-        }
 
 
-        return (
-            100 /
-            total
-        );
+
+
+
+// =====================================================
+// QUESTION WEIGHTS
+//
+// EVALUATION = 4 QUESTIONS
+// EACH QUESTION = 25 POINTS
+// TOTAL = 100 POINTS
+// =====================================================
+
+function questionWeight(index,total){
+
+    // -------------------------------------------------
+    // The current Dynamic Evaluation contains
+    // exactly 4 questions.
+    //
+    // Each question is worth exactly 25 points.
+    //
+    // 25 + 25 + 25 + 25 = 100
+    // -------------------------------------------------
+
+    if(
+        !state.evaluation ||
+        !Array.isArray(state.evaluation) ||
+        state.evaluation.length <= 0
+    ){
+
+        return 0;
 
     }
+
+
+    // -------------------------------------------------
+    // Every question has the SAME weight.
+    // -------------------------------------------------
+
+    return 25;
+
+}
+
+
+
+
+
+
+
+
 
 
     // =====================================================
