@@ -34778,48 +34778,71 @@ function unlockNextChapter(){
 
 
 
+
+
+
+
 // =========================================================
 // MICROSOFT WORD 2007 FORMATION
 // RANISE — DYNAMIC UNLOCK / RENDER BRIDGE
 // =========================================================
-// PURPOSE:
-// PROGRESS VALIDATION
-//        ↓
-// UNLOCK NEXT PART
-//        ↓
-// SAVE PROGRESS
-//        ↓
-// RE-RENDER PARTS IMMEDIATELY
-//        ↓
-// FINAL EVALUATION
-//        ↓
-// UNLOCK NEXT CHAPTER DYNAMICALLY
 //
-// CHAPTER 1 COMPLETELY EXCLUDED
-// WORKS DYNAMICALLY FOR CHAPTER 2+
+// CHAPTER 1:
+//     COMPLETELY EXCLUDED
 //
-// SUPPORTS ALL 5 PARTS:
+// CHAPTER 2+:
+//     DYNAMIC PROGRESS SYSTEM
 //
-// THEORY
-// PRACTICE
-// EXERCISES
-// HOMEWORK
-// EVALUATION
+// 5 PARTS:
+//
+//     THEORY
+//     PRACTICE
+//     EXERCISES
+//     HOMEWORK
+//     EVALUATION
+//
+// NORMAL PIPELINE:
+//
+//     THEORY
+//        ↓
+//     PRACTICE
+//        ↓
+//     EXERCISES
+//        ↓
+//     HOMEWORK
+//        ↓
+//     EVALUATION
+//        ↓
+//     NEXT CHAPTER
 //
 // FINAL EVALUATION:
-// evaluation validated
-//        ↓
-// current chapter completed
-//        ↓
-// next chapter unlocked
-//        ↓
-// next chapter theory unlocked
-//        ↓
-// next 4 parts locked
 //
-// DOES NOT MODIFY BLOCK 4
-// DOES NOT MODIFY DYNAMIC BLOCK 5
-// DOES NOT MODIFY BLOCK 6
+//     evaluation validated
+//             ↓
+//     current chapter completed
+//             ↓
+//     next chapter unlocked
+//             ↓
+//     next chapter THEORY unlocked
+//             ↓
+//     PRACTICE locked
+//     EXERCISES locked
+//     HOMEWORK locked
+//     EVALUATION locked
+//
+// IMPORTANT:
+//
+//     Block 10 calls:
+//
+//     RaniseDynamicUnlockRenderBridge.unlockNextPart(
+//         chapterId,
+//         "evaluation"
+//     );
+//
+//     THIS BRIDGE OWNS THE FINAL CHAPTER UNLOCK.
+//
+//     Block 10 DOES NOT directly unlock the next chapter.
+//
 // =========================================================
 
 (function(){
@@ -34827,71 +34850,495 @@ function unlockNextChapter(){
     "use strict";
 
 
-    window.RaniseDynamicUnlockRenderBridge = {
+    // =====================================================
+    // CONSTANTS
+    // =====================================================
+
+    var CHAPTER1_ID = "chapitre1";
 
 
-        // =====================================================
-        // GET CHAPTER PROGRESS
-        // =====================================================
+    var PARTS = [
+        "theory",
+        "practice",
+        "exercises",
+        "homework",
+        "evaluation"
+    ];
 
-        getProgress:function(chapterId){
+
+    // =====================================================
+    // CHAPTER 1 PROTECTION
+    // =====================================================
+
+    function isChapter1(chapterId){
+
+        return String(
+            chapterId || ""
+        )
+        .toLowerCase()
+        .trim() === CHAPTER1_ID;
+
+    }
+
+
+    // =====================================================
+    // NORMALIZE CHAPTER ID
+    // =====================================================
+
+    function normalizeChapterId(chapterId){
+
+        return String(
+            chapterId || ""
+        ).trim();
+
+    }
+
+
+    // =====================================================
+    // GET COURSE
+    // =====================================================
+
+    function getCourse(){
+
+        if(
+            typeof microsoftWordCourse ===
+            "undefined"
+        ){
+
+            return null;
+
+        }
+
+
+        if(
+            !microsoftWordCourse ||
+            !Array.isArray(
+                microsoftWordCourse.chapters
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        return microsoftWordCourse;
+
+    }
+
+
+    // =====================================================
+    // GET CHAPTER
+    // =====================================================
+
+    function getChapter(chapterId){
+
+        var course =
+            getCourse();
+
+
+        if(!course){
+
+            return null;
+
+        }
+
+
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        if(
+            !id ||
+            isChapter1(id)
+        ){
+
+            return null;
+
+        }
+
+
+        for(
+            var i = 0;
+            i < course.chapters.length;
+            i++
+        ){
+
+            var chapter =
+                course.chapters[i];
+
 
             if(
-                !chapterId ||
-                chapterId === "chapitre1"
+                chapter &&
+                String(chapter.id) === id
             ){
 
-                return null;
+                return chapter;
 
             }
 
+        }
 
-            // ---------------------------------------------
-            // CHAPTER 2
-            // KEEP EXISTING CHAPTER 2 ENGINE COMPATIBILITY
-            // ---------------------------------------------
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // GET CHAPTER INDEX
+    // =====================================================
+
+    function getChapterIndex(chapterId){
+
+        var course =
+            getCourse();
+
+
+        if(!course){
+
+            return -1;
+
+        }
+
+
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        if(
+            !id ||
+            isChapter1(id)
+        ){
+
+            return -1;
+
+        }
+
+
+        for(
+            var i = 0;
+            i < course.chapters.length;
+            i++
+        ){
+
+            var chapter =
+                course.chapters[i];
+
 
             if(
-                chapterId === "chapitre2" &&
-                typeof WordChapter2PartsEngine !==
-                "undefined" &&
-                typeof WordChapter2PartsEngine.getProgress ===
-                "function"
+                chapter &&
+                String(chapter.id) === id
             ){
 
-                return WordChapter2PartsEngine.getProgress();
+                return i;
 
             }
 
-
-            // ---------------------------------------------
-            // GENERIC CHAPTER 2+
-            // ---------------------------------------------
-
-            const key =
-                "word_" +
-                chapterId +
-                "_partsProgress";
+        }
 
 
-            const defaultProgress = {
+        return -1;
 
-                theory:true,
-
-                practice:false,
-
-                exercises:false,
-
-                homework:false,
-
-                evaluation:false
-
-            };
+    }
 
 
-            const saved =
+    // =====================================================
+    // GET NEXT CHAPTER
+    // =====================================================
+
+    function getNextChapter(chapterId){
+
+        var course =
+            getCourse();
+
+
+        if(!course){
+
+            return null;
+
+        }
+
+
+        var currentIndex =
+            getChapterIndex(
+                chapterId
+            );
+
+
+        if(
+            currentIndex < 0
+        ){
+
+            return null;
+
+        }
+
+
+        var nextIndex =
+            currentIndex + 1;
+
+
+        if(
+            nextIndex >=
+            course.chapters.length
+        ){
+
+            return null;
+
+        }
+
+
+        var nextChapter =
+            course.chapters[
+                nextIndex
+            ];
+
+
+        if(
+            !nextChapter ||
+            !nextChapter.id
+        ){
+
+            return null;
+
+        }
+
+
+        return nextChapter;
+
+    }
+
+
+    // =====================================================
+    // DEFAULT PROGRESS
+    //
+    // ONLY THEORY OPEN.
+    // =====================================================
+
+    function createLockedChapterProgress(){
+
+        return {
+
+            theory:true,
+
+            practice:false,
+
+            exercises:false,
+
+            homework:false,
+
+            evaluation:false
+
+        };
+
+    }
+
+
+    // =====================================================
+    // DEFAULT CURRENT CHAPTER PROGRESS
+    // =====================================================
+
+    function createDefaultProgress(){
+
+        return {
+
+            theory:true,
+
+            practice:false,
+
+            exercises:false,
+
+            homework:false,
+
+            evaluation:false
+
+        };
+
+    }
+
+
+    // =====================================================
+    // GET PROGRESS KEY
+    // =====================================================
+
+    function getProgressKey(chapterId){
+
+        return (
+            "word_" +
+            chapterId +
+            "_partsProgress"
+        );
+
+    }
+
+
+    // =====================================================
+    // GET CHAPTER UNLOCK KEY
+    // =====================================================
+
+    function getChapterUnlockedKey(chapterId){
+
+        return (
+            "word_" +
+            chapterId +
+            "_unlocked"
+        );
+
+    }
+
+
+    // =====================================================
+    // GET NUMERIC UNLOCK KEY
+    //
+    // chapitre3
+    //     ↓
+    // wordChapter3Unlocked
+    // =====================================================
+
+    function getNumericUnlockKey(chapterId){
+
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        var number =
+            id.replace(
+                /^chapitre/i,
+                ""
+            );
+
+
+        if(!number){
+
+            return null;
+
+        }
+
+
+        return (
+            "wordChapter" +
+            number +
+            "Unlocked"
+        );
+
+    }
+
+
+    // =====================================================
+    // GET COMPLETED KEY
+    // =====================================================
+
+    function getCompletedKey(chapterId){
+
+        return (
+            "word_" +
+            chapterId +
+            "_completed"
+        );
+
+    }
+
+
+    // =====================================================
+    // GET PROGRESS
+    // =====================================================
+
+    function getProgress(chapterId){
+
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        if(
+            !id ||
+            isChapter1(id)
+        ){
+
+            return null;
+
+        }
+
+
+        // -------------------------------------------------
+        // EXISTING CHAPTER 2 ENGINE COMPATIBILITY
+        // -------------------------------------------------
+
+        if(
+            id === "chapitre2" &&
+            typeof WordChapter2PartsEngine !==
+            "undefined" &&
+            WordChapter2PartsEngine &&
+            typeof WordChapter2PartsEngine.getProgress ===
+            "function"
+        ){
+
+            try{
+
+                var chapter2Progress =
+                    WordChapter2PartsEngine.getProgress();
+
+
+                if(
+                    chapter2Progress &&
+                    typeof chapter2Progress ===
+                    "object"
+                ){
+
+                    return {
+
+                        theory:
+                            chapter2Progress.theory === true,
+
+                        practice:
+                            chapter2Progress.practice === true,
+
+                        exercises:
+                            chapter2Progress.exercises === true,
+
+                        homework:
+                            chapter2Progress.homework === true,
+
+                        evaluation:
+                            chapter2Progress.evaluation === true
+
+                    };
+
+                }
+
+            }catch(error){
+
+                console.error(
+                    "RANISE BRIDGE: CHAPTER 2 GET PROGRESS ERROR",
+                    error
+                );
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // GENERIC CHAPTER 2+
+        // -------------------------------------------------
+
+        var defaultProgress =
+            createDefaultProgress();
+
+
+        try{
+
+            var saved =
                 localStorage.getItem(
-                    key
+                    getProgressKey(id)
                 );
 
 
@@ -34902,130 +35349,98 @@ function unlockNextChapter(){
             }
 
 
-            try{
-
-                const existing =
-                    JSON.parse(
-                        saved
-                    );
-
-
-                if(
-                    existing &&
-                    typeof existing ===
-                    "object"
-                ){
-
-                    return {
-
-                        ...defaultProgress,
-                        ...existing
-
-                    };
-
-                }
-
-
-            }catch(error){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "PROGRESS READ ERROR",
-
-                    chapterId,
-                    error
-
+            var parsed =
+                JSON.parse(
+                    saved
                 );
 
+
+            if(
+                parsed &&
+                typeof parsed ===
+                "object"
+            ){
+
+                return {
+
+                    theory:
+                        parsed.theory === true,
+
+                    practice:
+                        parsed.practice === true,
+
+                    exercises:
+                        parsed.exercises === true,
+
+                    homework:
+                        parsed.homework === true,
+
+                    evaluation:
+                        parsed.evaluation === true
+
+                };
+
             }
 
+        }catch(error){
 
-            return defaultProgress;
+            console.error(
+                "RANISE BRIDGE: PROGRESS READ ERROR",
+                id,
+                error
+            );
 
-        },
+        }
 
 
+        return defaultProgress;
+
+    }
 
 
+    // =====================================================
+    // SAVE PROGRESS
+    // =====================================================
 
-        // =====================================================
-        // SAVE CHAPTER PROGRESS
-        // =====================================================
+    function saveProgress(
+        chapterId,
+        progress
+    ){
 
-        saveProgress:function(
-            chapterId,
-            progress
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        if(
+            !id ||
+            isChapter1(id) ||
+            !progress
         ){
 
-            if(
-                !chapterId ||
-                chapterId === "chapitre1" ||
-                !progress
-            ){
+            return false;
 
-                return false;
-
-            }
+        }
 
 
-            // ---------------------------------------------
-            // CHAPTER 2
-            // KEEP EXISTING ENGINE COMPATIBILITY
-            // ---------------------------------------------
+        // -------------------------------------------------
+        // CHAPTER 2 COMPATIBILITY
+        // -------------------------------------------------
 
-            if(
-                chapterId === "chapitre2" &&
-                typeof WordChapter2PartsEngine !==
-                "undefined" &&
-                typeof WordChapter2PartsEngine.saveProgress ===
-                "function"
-            ){
-
-                try{
-
-                    WordChapter2PartsEngine.saveProgress(
-                        progress
-                    );
-
-                    return true;
-
-                }catch(error){
-
-                    console.error(
-
-                        "RANISE UNLOCK BRIDGE: " +
-                        "CHAPTER 2 PROGRESS SAVE ERROR",
-
-                        error
-
-                    );
-
-                }
-
-            }
-
-
-            // ---------------------------------------------
-            // GENERIC CHAPTERS
-            // ---------------------------------------------
-
-            const key =
-                "word_" +
-                chapterId +
-                "_partsProgress";
-
+        if(
+            id === "chapitre2" &&
+            typeof WordChapter2PartsEngine !==
+            "undefined" &&
+            WordChapter2PartsEngine &&
+            typeof WordChapter2PartsEngine.saveProgress ===
+            "function"
+        ){
 
             try{
 
-                localStorage.setItem(
-
-                    key,
-
-                    JSON.stringify(
-                        progress
-                    )
-
+                WordChapter2PartsEngine.saveProgress(
+                    progress
                 );
 
                 return true;
@@ -35033,913 +35448,541 @@ function unlockNextChapter(){
             }catch(error){
 
                 console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "GENERIC PROGRESS SAVE ERROR",
-
-                    chapterId,
+                    "RANISE BRIDGE: CHAPTER 2 SAVE ERROR",
                     error
-
-                );
-
-                return false;
-
-            }
-
-        },
-
-
-
-
-
-        // =====================================================
-        // UNLOCK NEXT CHAPTER DYNAMICALLY
-        // =====================================================
-        //
-        // evaluation current chapter
-        //          ↓
-        // find next chapter in microsoftWordCourse
-        //          ↓
-        // nextChapter.unlocked = true
-        //          ↓
-        // next chapter parts:
-        //
-        // theory      = true
-        // practice    = false
-        // exercises   = false
-        // homework    = false
-        // evaluation  = false
-        //
-        // =====================================================
-
-        unlockNextChapter:function(
-            chapterId
-        ){
-
-            if(
-                !chapterId ||
-                chapterId === "chapitre1"
-            ){
-
-                return false;
-
-            }
-
-
-            if(
-                typeof microsoftWordCourse ===
-                "undefined"
-            ){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "COURSE OBJECT NOT FOUND"
-
-                );
-
-                return false;
-
-            }
-
-
-            if(
-                !Array.isArray(
-                    microsoftWordCourse.chapters
-                )
-            ){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "CHAPTER ARRAY NOT FOUND"
-
-                );
-
-                return false;
-
-            }
-
-
-            const chapters =
-                microsoftWordCourse.chapters;
-
-
-            // -------------------------------------------------
-            // FIND CURRENT CHAPTER
-            // -------------------------------------------------
-
-            const currentIndex =
-                chapters.findIndex(
-
-                    function(chapter){
-
-                        return (
-
-                            chapter &&
-                            chapter.id ===
-                            chapterId
-
-                        );
-
-                    }
-
-                );
-
-
-            if(
-                currentIndex < 0
-            ){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "CURRENT CHAPTER NOT FOUND",
-
-                    chapterId
-
-                );
-
-                return false;
-
-            }
-
-
-            // -------------------------------------------------
-            // GET NEXT CHAPTER
-            // -------------------------------------------------
-
-            const nextChapter =
-                chapters[
-                    currentIndex + 1
-                ];
-
-
-            // -------------------------------------------------
-            // NO NEXT CHAPTER
-            // -------------------------------------------------
-
-            if(
-                !nextChapter ||
-                !nextChapter.id
-            ){
-
-                console.log(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "CURRENT CHAPTER IS THE LAST CHAPTER",
-
-                    chapterId
-
-                );
-
-                return false;
-
-            }
-
-
-            const nextChapterId =
-                nextChapter.id;
-
-
-            // -------------------------------------------------
-            // DYNAMICALLY UNLOCK NEXT CHAPTER
-            // -------------------------------------------------
-
-            nextChapter.unlocked =
-                true;
-
-
-            // -------------------------------------------------
-            // INITIALIZE NEXT CHAPTER PARTS
-            //
-            // ONLY THEORY IS OPEN.
-            // OTHER 4 PARTS REMAIN LOCKED.
-            // -------------------------------------------------
-
-            const nextProgress = {
-
-                theory:true,
-
-                practice:false,
-
-                exercises:false,
-
-                homework:false,
-
-                evaluation:false
-
-            };
-
-
-            // -------------------------------------------------
-            // SAVE NEXT CHAPTER PART PROGRESS
-            // -------------------------------------------------
-
-            const progressSaved =
-                this.saveProgress(
-
-                    nextChapterId,
-
-                    nextProgress
-
-                );
-
-
-            // -------------------------------------------------
-            // SAVE EXPLICIT CHAPTER UNLOCK FLAG
-            // -------------------------------------------------
-
-            try{
-
-                localStorage.setItem(
-
-                    "word_" +
-                    nextChapterId +
-                    "_unlocked",
-
-                    "true"
-
-                );
-
-            }catch(error){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "NEXT CHAPTER UNLOCK FLAG ERROR",
-
-                    nextChapterId,
-                    error
-
                 );
 
             }
 
+        }
 
-            // -------------------------------------------------
-            // SAVE NUMERIC CHAPTER UNLOCK FLAG
-            //
-            // chapitre2 → wordChapter2Unlocked
-            // chapitre3 → wordChapter3Unlocked
-            // etc.
-            // -------------------------------------------------
 
-            try{
+        // -------------------------------------------------
+        // GENERIC SAVE
+        // -------------------------------------------------
 
-                const chapterNumber =
-                    String(
-                        nextChapterId
-                    ).replace(
-                        "chapitre",
-                        ""
-                    );
+        try{
 
+            localStorage.setItem(
 
-                if(
-                    chapterNumber
-                ){
+                getProgressKey(id),
 
-                    localStorage.setItem(
+                JSON.stringify({
 
-                        "wordChapter" +
-                        chapterNumber +
-                        "Unlocked",
+                    theory:
+                        progress.theory === true,
 
-                        "true"
+                    practice:
+                        progress.practice === true,
 
-                    );
+                    exercises:
+                        progress.exercises === true,
 
-                }
+                    homework:
+                        progress.homework === true,
 
-            }catch(error){}
+                    evaluation:
+                        progress.evaluation === true
 
-
-            // -------------------------------------------------
-            // SAVE CURRENT CHAPTER COMPLETION FLAG
-            // -------------------------------------------------
-
-            try{
-
-                localStorage.setItem(
-
-                    "word_" +
-                    chapterId +
-                    "_completed",
-
-                    "true"
-
-                );
-
-            }catch(error){}
-
-
-            // -------------------------------------------------
-            // SYNCHRONIZE COURSE OBJECT
-            // -------------------------------------------------
-
-            try{
-
-                const currentChapter =
-                    chapters[
-                        currentIndex
-                    ];
-
-
-                if(
-                    currentChapter
-                ){
-
-                    currentChapter.completed =
-                        true;
-
-                    currentChapter.evaluationCompleted =
-                        true;
-
-                }
-
-
-                nextChapter.unlocked =
-                    true;
-
-                nextChapter.completed =
-                    false;
-
-            }catch(error){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "COURSE OBJECT SYNC ERROR",
-
-                    error
-
-                );
-
-            }
-
-
-            // -------------------------------------------------
-            // ALSO SYNCHRONIZE COMMON PROGRESS ENGINE
-            // IF IT EXISTS.
-            // -------------------------------------------------
-
-            try{
-
-                if(
-                    typeof MicrosoftWordProgressEngine !==
-                    "undefined"
-                ){
-
-                    const progressEngine =
-                        MicrosoftWordProgressEngine;
-
-
-                    if(
-                        typeof progressEngine.get ===
-                        "function" &&
-                        typeof progressEngine.save ===
-                        "function"
-                    ){
-
-                        const globalProgress =
-                            progressEngine.get();
-
-
-                        if(
-                            globalProgress &&
-                            typeof globalProgress ===
-                            "object"
-                        ){
-
-                            if(
-                                !Array.isArray(
-                                    globalProgress.completedChapters
-                                )
-                            ){
-
-                                globalProgress.completedChapters =
-                                    [];
-
-                            }
-
-
-                            if(
-                                !globalProgress.completedChapters.includes(
-                                    chapterId
-                                )
-                            ){
-
-                                globalProgress.completedChapters.push(
-                                    chapterId
-                                );
-
-                            }
-
-
-                            if(
-                                !Array.isArray(
-                                    globalProgress.unlockedChapters
-                                )
-                            ){
-
-                                globalProgress.unlockedChapters =
-                                    [];
-
-                            }
-
-
-                            if(
-                                !globalProgress.unlockedChapters.includes(
-                                    nextChapterId
-                                )
-                            ){
-
-                                globalProgress.unlockedChapters.push(
-                                    nextChapterId
-                                );
-
-                            }
-
-
-                            progressEngine.save(
-                                globalProgress
-                            );
-
-                        }
-
-                    }
-
-                }
-
-            }catch(error){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "GLOBAL PROGRESS SYNC ERROR",
-
-                    error
-
-                );
-
-            }
-
-
-            // -------------------------------------------------
-            // EXISTING CHAPTER UNLOCK ENGINE
-            // -------------------------------------------------
-
-            try{
-
-                if(
-                    typeof WordChapterUnlockEngine !==
-                    "undefined" &&
-                    typeof WordChapterUnlockEngine.checkProgress ===
-                    "function"
-                ){
-
-                    WordChapterUnlockEngine
-                        .checkProgress();
-
-                }
-
-            }catch(error){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "CHAPTER UNLOCK ENGINE ERROR",
-
-                    error
-
-                );
-
-            }
-
-
-            // -------------------------------------------------
-            // FINAL LOG
-            // -------------------------------------------------
-
-            console.log(
-
-                "RANISE UNLOCK BRIDGE: " +
-                "NEXT CHAPTER DYNAMICALLY UNLOCKED",
-
-                {
-
-                    completedChapter:
-                        chapterId,
-
-                    unlockedChapter:
-                        nextChapterId,
-
-                    progressSaved:
-                        progressSaved,
-
-                    nextChapterProgress:
-                        nextProgress
-
-                }
-
-            );
-
-
-            // -------------------------------------------------
-            // REFRESH COURSE UI
-            //
-            // DO NOT DESTROY ACTIVE SIMULATION.
-            // -------------------------------------------------
-
-            setTimeout(
-
-                function(){
-
-                    const campusContent =
-                        document.getElementById(
-                            "campusContent"
-                        );
-
-
-                    if(
-                        campusContent &&
-                        campusContent.querySelector(
-                            "iframe"
-                        )
-                    ){
-
-                        console.log(
-
-                            "RANISE UNLOCK BRIDGE: " +
-                            "NEXT CHAPTER UNLOCKED — " +
-                            "ACTIVE SIMULATION PRESERVED",
-
-                            nextChapterId
-
-                        );
-
-                        return;
-
-                    }
-
-
-                    if(
-                        typeof renderMicrosoftWordCourse ===
-                        "function"
-                    ){
-
-                        try{
-
-                            renderMicrosoftWordCourse();
-
-                        }catch(error){
-
-                            console.error(
-
-                                "RANISE UNLOCK BRIDGE: " +
-                                "COURSE RENDER ERROR",
-
-                                error
-
-                            );
-
-                        }
-
-                    }
-
-                },
-
-                0
+                })
 
             );
 
 
             return true;
 
-        },
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: PROGRESS SAVE ERROR",
+                id,
+                error
+            );
 
 
+            return false;
+
+        }
+
+    }
 
 
+    // =====================================================
+    // SAVE CHAPTER UNLOCK FLAGS
+    // =====================================================
 
-        // =====================================================
-        // UNLOCK NEXT PART
-        // =====================================================
+    function saveChapterUnlockFlags(chapterId){
 
-        unlockNextPart:function(
-            chapterId,
-            completedPart
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        if(
+            !id ||
+            isChapter1(id)
         ){
 
-            // -------------------------------------------------
-            // ABSOLUTE CHAPTER 1 PROTECTION
-            // -------------------------------------------------
+            return false;
 
-            if(
-                !chapterId ||
-                chapterId === "chapitre1"
-            ){
-
-                return false;
-
-            }
+        }
 
 
-            // -------------------------------------------------
-            // VALID PARTS ONLY
-            // -------------------------------------------------
-
-            const validParts = [
-
-                "theory",
-                "practice",
-                "exercises",
-                "homework",
-                "evaluation"
-
-            ];
+        var success =
+            true;
 
 
-            if(
-                !validParts.includes(
-                    completedPart
-                )
-            ){
+        try{
 
-                console.error(
+            localStorage.setItem(
 
-                    "RANISE UNLOCK BRIDGE: " +
-                    "INVALID PART",
+                getChapterUnlockedKey(id),
 
-                    completedPart
+                "true"
 
-                );
+            );
 
-                return false;
+        }catch(error){
 
-            }
+            success =
+                false;
 
+            console.error(
+                "RANISE BRIDGE: CHAPTER UNLOCK FLAG ERROR",
+                id,
+                error
+            );
 
-            // -------------------------------------------------
-            // GET CURRENT PROGRESS
-            // -------------------------------------------------
-
-            const progress =
-                this.getProgress(
-                    chapterId
-                );
+        }
 
 
-            if(!progress){
+        try{
 
-                return false;
-
-            }
-
-
-            // -------------------------------------------------
-            // PART VALIDATION + NEXT PART UNLOCK
-            // -------------------------------------------------
-
-            if(
-                completedPart === "theory"
-            ){
-
-                progress.theory =
-                    true;
-
-                progress.practice =
-                    true;
-
-            }
+            var numericKey =
+                getNumericUnlockKey(id);
 
 
-            else if(
-                completedPart === "practice"
-            ){
+            if(numericKey){
 
-                progress.theory =
-                    true;
+                localStorage.setItem(
 
-                progress.practice =
-                    true;
+                    numericKey,
 
-                progress.exercises =
-                    true;
-
-            }
-
-
-            else if(
-                completedPart === "exercises"
-            ){
-
-                progress.theory =
-                    true;
-
-                progress.practice =
-                    true;
-
-                progress.exercises =
-                    true;
-
-                progress.homework =
-                    true;
-
-            }
-
-
-            else if(
-                completedPart === "homework"
-            ){
-
-                progress.theory =
-                    true;
-
-                progress.practice =
-                    true;
-
-                progress.exercises =
-                    true;
-
-                progress.homework =
-                    true;
-
-                progress.evaluation =
-                    true;
-
-            }
-
-
-            else if(
-                completedPart === "evaluation"
-            ){
-
-                progress.theory =
-                    true;
-
-                progress.practice =
-                    true;
-
-                progress.exercises =
-                    true;
-
-                progress.homework =
-                    true;
-
-                progress.evaluation =
-                    true;
-
-            }
-
-
-            // -------------------------------------------------
-            // SAVE CURRENT CHAPTER PROGRESS
-            // -------------------------------------------------
-
-            const saved =
-                this.saveProgress(
-
-                    chapterId,
-                    progress
+                    "true"
 
                 );
 
-
-            if(!saved){
-
-                console.error(
-
-                    "RANISE UNLOCK BRIDGE: " +
-                    "CURRENT CHAPTER PROGRESS WAS NOT SAVED",
-
-                    chapterId,
-                    completedPart
-
-                );
-
             }
 
+        }catch(error){
 
-            // -------------------------------------------------
-            // CURRENT CHAPTER COMPLETED WHEN EVALUATION
-            // -------------------------------------------------
+            success =
+                false;
 
-            if(
-                completedPart === "evaluation"
-            ){
+            console.error(
+                "RANISE BRIDGE: NUMERIC UNLOCK FLAG ERROR",
+                id,
+                error
+            );
 
-                try{
-
-                    localStorage.setItem(
-
-                        "word_" +
-                        chapterId +
-                        "_completed",
-
-                        "true"
-
-                    );
-
-                }catch(error){}
+        }
 
 
-                try{
+        return success;
 
-                    if(
-                        typeof microsoftWordCourse !==
-                        "undefined" &&
-                        Array.isArray(
-                            microsoftWordCourse.chapters
-                        )
-                    ){
-
-                        const currentChapter =
-                            microsoftWordCourse.chapters.find(
-
-                                function(chapter){
-
-                                    return (
-
-                                        chapter &&
-                                        chapter.id ===
-                                        chapterId
-
-                                    );
-
-                                }
-
-                            );
+    }
 
 
-                        if(
-                            currentChapter
-                        ){
+    // =====================================================
+    // SAVE CHAPTER COMPLETION
+    // =====================================================
 
-                            currentChapter.unlocked =
-                                true;
+    function saveChapterCompletion(chapterId){
 
-                            currentChapter.completed =
-                                true;
-
-                            currentChapter.evaluationCompleted =
-                                true;
-
-                        }
-
-                    }
-
-                }catch(error){}
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
 
 
-                // -------------------------------------------------
-                // CRITICAL:
-                //
-                // FINAL EVALUATION CALLS THE SAME BRIDGE
-                // TO UNLOCK THE NEXT CHAPTER.
-                // -------------------------------------------------
+        if(
+            !id ||
+            isChapter1(id)
+        ){
 
-                this.unlockNextChapter(
-                    chapterId
-                );
+            return false;
 
-            }
+        }
 
 
-            // -------------------------------------------------
-            // LOG
-            // -------------------------------------------------
+        try{
 
-            console.log(
+            localStorage.setItem(
 
-                "RANISE UNLOCK BRIDGE: " +
-                "PART VALIDATED + NEXT PART UNLOCKED",
+                getCompletedKey(id),
 
-                chapterId,
-                completedPart,
-                progress
+                "true"
 
             );
 
 
-            // -------------------------------------------------
-            // IMMEDIATE RE-RENDER
-            // -------------------------------------------------
+            return true;
 
-            const bridge =
-                this;
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: COMPLETION FLAG ERROR",
+                id,
+                error
+            );
 
 
-            setTimeout(
+            return false;
 
-                function(){
+        }
 
-                    const campusContent =
+    }
+
+
+    // =====================================================
+    // SYNCHRONIZE GLOBAL PROGRESS ENGINE
+    // =====================================================
+
+    function syncGlobalProgress(
+        completedChapterId,
+        unlockedChapterId
+    ){
+
+        try{
+
+            if(
+                typeof MicrosoftWordProgressEngine ===
+                "undefined"
+            ){
+
+                return;
+
+            }
+
+
+            var engine =
+                MicrosoftWordProgressEngine;
+
+
+            if(
+                !engine ||
+                typeof engine.get !==
+                "function" ||
+                typeof engine.save !==
+                "function"
+            ){
+
+                return;
+
+            }
+
+
+            var globalProgress =
+                engine.get();
+
+
+            if(
+                !globalProgress ||
+                typeof globalProgress !==
+                "object"
+            ){
+
+                return;
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    globalProgress.completedChapters
+                )
+            ){
+
+                globalProgress.completedChapters =
+                    [];
+
+            }
+
+
+            if(
+                completedChapterId &&
+                !globalProgress.completedChapters.includes(
+                    completedChapterId
+                )
+            ){
+
+                globalProgress.completedChapters.push(
+                    completedChapterId
+                );
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    globalProgress.unlockedChapters
+                )
+            ){
+
+                globalProgress.unlockedChapters =
+                    [];
+
+            }
+
+
+            if(
+                unlockedChapterId &&
+                !globalProgress.unlockedChapters.includes(
+                    unlockedChapterId
+                )
+            ){
+
+                globalProgress.unlockedChapters.push(
+                    unlockedChapterId
+                );
+
+            }
+
+
+            engine.save(
+                globalProgress
+            );
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: GLOBAL PROGRESS SYNC ERROR",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // SYNCHRONIZE COURSE OBJECT
+    // =====================================================
+
+    function syncCurrentChapter(
+        chapterId
+    ){
+
+        var chapter =
+            getChapter(
+                chapterId
+            );
+
+
+        if(!chapter){
+
+            return false;
+
+        }
+
+
+        try{
+
+            chapter.unlocked =
+                true;
+
+            chapter.completed =
+                true;
+
+            chapter.evaluationCompleted =
+                true;
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: CURRENT CHAPTER SYNC ERROR",
+                chapterId,
+                error
+            );
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // INITIALIZE NEXT CHAPTER
+    //
+    // VERY IMPORTANT:
+    //
+    // ONLY THEORY = TRUE
+    //
+    // OTHER FOUR = FALSE
+    // =====================================================
+
+    function initializeNextChapter(
+        nextChapter
+    ){
+
+        if(
+            !nextChapter ||
+            !nextChapter.id
+        ){
+
+            return false;
+
+        }
+
+
+        var nextChapterId =
+            String(
+                nextChapter.id
+            ).trim();
+
+
+        if(
+            !nextChapterId ||
+            isChapter1(nextChapterId)
+        ){
+
+            return false;
+
+        }
+
+
+        var nextProgress =
+            createLockedChapterProgress();
+
+
+        // -------------------------------------------------
+        // COURSE OBJECT
+        // -------------------------------------------------
+
+        try{
+
+            nextChapter.unlocked =
+                true;
+
+            nextChapter.completed =
+                false;
+
+            nextChapter.evaluationCompleted =
+                false;
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: NEXT CHAPTER OBJECT ERROR",
+                nextChapterId,
+                error
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // SAVE PART PROGRESS
+        // -------------------------------------------------
+
+        var progressSaved =
+            saveProgress(
+                nextChapterId,
+                nextProgress
+            );
+
+
+        // -------------------------------------------------
+        // SAVE UNLOCK FLAGS
+        // -------------------------------------------------
+
+        var unlockSaved =
+            saveChapterUnlockFlags(
+                nextChapterId
+            );
+
+
+        // -------------------------------------------------
+        // DO NOT MARK NEXT CHAPTER COMPLETED
+        // -------------------------------------------------
+
+        try{
+
+            localStorage.removeItem(
+
+                getCompletedKey(
+                    nextChapterId
+                )
+
+            );
+
+        }catch(error){}
+
+
+        console.log(
+
+            "RANISE BRIDGE: NEXT CHAPTER INITIALIZED",
+
+            {
+
+                chapterId:
+                    nextChapterId,
+
+                unlocked:
+                    true,
+
+                progress:
+                    nextProgress,
+
+                progressSaved:
+                    progressSaved,
+
+                unlockSaved:
+                    unlockSaved
+
+            }
+
+        );
+
+
+        return (
+            progressSaved &&
+            unlockSaved
+        );
+
+    }
+
+
+    // =====================================================
+    // REFRESH CHAPTER UI
+    //
+    // IMPORTANT:
+    // DO NOT DESTROY ACTIVE WORD SIMULATION.
+    // =====================================================
+
+    function refreshCourseUI(){
+
+        setTimeout(
+
+            function(){
+
+                try{
+
+                    var campusContent =
                         document.getElementById(
                             "campusContent"
                         );
 
+
+                    // -------------------------------------------------
+                    // IF ACTIVE SIMULATION EXISTS:
+                    // DO NOT RENDER OVER IT.
+                    // -------------------------------------------------
 
                     if(
                         campusContent &&
@@ -35950,14 +35993,81 @@ function unlockNextChapter(){
 
                         console.log(
 
-                            "RANISE UNLOCK BRIDGE: " +
-                            "NEXT PART UNLOCKED — " +
-                            "ACTIVE SIMULATION PRESERVED",
-
-                            chapterId,
-                            completedPart
+                            "RANISE BRIDGE: " +
+                            "ACTIVE SIMULATION PRESERVED"
 
                         );
+
+
+                        return;
+
+                    }
+
+
+                    // -------------------------------------------------
+                    // NORMAL COURSE RENDER
+                    // -------------------------------------------------
+
+                    if(
+                        typeof renderMicrosoftWordCourse ===
+                        "function"
+                    ){
+
+                        renderMicrosoftWordCourse();
+
+                        return;
+
+                    }
+
+
+                }catch(error){
+
+                    console.error(
+                        "RANISE BRIDGE: COURSE UI REFRESH ERROR",
+                        error
+                    );
+
+                }
+
+            },
+
+            0
+
+        );
+
+    }
+
+
+    // =====================================================
+    // REFRESH CURRENT CHAPTER PARTS
+    // =====================================================
+
+    function refreshCurrentChapterParts(
+        chapterId
+    ){
+
+        setTimeout(
+
+            function(){
+
+                try{
+
+                    var campusContent =
+                        document.getElementById(
+                            "campusContent"
+                        );
+
+
+                    // -------------------------------------------------
+                    // NEVER DESTROY ACTIVE SIMULATION
+                    // -------------------------------------------------
+
+                    if(
+                        campusContent &&
+                        campusContent.querySelector(
+                            "iframe"
+                        )
+                    ){
 
                         return;
 
@@ -35968,98 +36078,574 @@ function unlockNextChapter(){
                         chapterId
                     );
 
-                },
+                }catch(error){
 
-                0
+                    console.error(
+                        "RANISE BRIDGE: PARTS REFRESH ERROR",
+                        chapterId,
+                        error
+                    );
+
+                }
+
+            },
+
+            0
+
+        );
+
+    }
+
+
+    // =====================================================
+    // CHECK EXISTING CHAPTER UNLOCK ENGINE
+    // =====================================================
+
+    function synchronizeExistingUnlockEngine(){
+
+        try{
+
+            if(
+                typeof WordChapterUnlockEngine !==
+                "undefined" &&
+                WordChapterUnlockEngine &&
+                typeof WordChapterUnlockEngine.checkProgress ===
+                "function"
+            ){
+
+                WordChapterUnlockEngine.checkProgress();
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "RANISE BRIDGE: EXISTING UNLOCK ENGINE ERROR",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // UNLOCK NEXT CHAPTER
+    //
+    // THIS IS THE ONLY FUNCTION THAT OPENS THE NEXT
+    // CHAPTER AFTER FINAL EVALUATION.
+    // =====================================================
+
+    function unlockNextChapter(
+        chapterId
+    ){
+
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        // -------------------------------------------------
+        // CHAPTER 1 NEVER ENTERS THIS SYSTEM.
+        // -------------------------------------------------
+
+        if(
+            !id ||
+            isChapter1(id)
+        ){
+
+            return false;
+
+        }
+
+
+        var course =
+            getCourse();
+
+
+        if(!course){
+
+            console.error(
+                "RANISE BRIDGE: COURSE OBJECT NOT FOUND"
+            );
+
+            return false;
+
+        }
+
+
+        var currentIndex =
+            getChapterIndex(
+                id
+            );
+
+
+        if(
+            currentIndex < 0
+        ){
+
+            console.error(
+                "RANISE BRIDGE: CURRENT CHAPTER NOT FOUND",
+                id
+            );
+
+            return false;
+
+        }
+
+
+        var nextChapter =
+            getNextChapter(
+                id
+            );
+
+
+        // -------------------------------------------------
+        // LAST CHAPTER
+        // -------------------------------------------------
+
+        if(!nextChapter){
+
+            console.log(
+
+                "RANISE BRIDGE: " +
+                "CURRENT CHAPTER IS THE LAST CHAPTER",
+
+                id
 
             );
 
 
+            saveChapterCompletion(
+                id
+            );
+
+
+            syncCurrentChapter(
+                id
+            );
+
+
+            syncGlobalProgress(
+                id,
+                null
+            );
+
+
+            refreshCourseUI();
+
+
             return true;
 
-        },
+        }
 
 
+        var nextChapterId =
+            String(
+                nextChapter.id
+            ).trim();
 
 
+        // -------------------------------------------------
+        // MARK CURRENT CHAPTER COMPLETED
+        // -------------------------------------------------
 
-        // =====================================================
-        // RENDER CURRENT CHAPTER PARTS
-        // DYNAMIC CHAPTER 2+
-        // =====================================================
+        saveChapterCompletion(
+            id
+        );
 
-        renderChapterParts:function(
-            chapterId
+
+        syncCurrentChapter(
+            id
+        );
+
+
+        // -------------------------------------------------
+        // UNLOCK NEXT CHAPTER
+        //
+        // ONLY THEORY OPENS.
+        // -------------------------------------------------
+
+        var initialized =
+            initializeNextChapter(
+                nextChapter
+            );
+
+
+        if(!initialized){
+
+            console.error(
+
+                "RANISE BRIDGE: " +
+                "NEXT CHAPTER INITIALIZATION FAILED",
+
+                {
+
+                    completedChapter:
+                        id,
+
+                    nextChapter:
+                        nextChapterId
+
+                }
+
+            );
+
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // GLOBAL PROGRESS
+        // -------------------------------------------------
+
+        syncGlobalProgress(
+            id,
+            nextChapterId
+        );
+
+
+        // -------------------------------------------------
+        // EXISTING UNLOCK ENGINE
+        // -------------------------------------------------
+
+        synchronizeExistingUnlockEngine();
+
+
+        // -------------------------------------------------
+        // FINAL LOG
+        // -------------------------------------------------
+
+        console.log(
+
+            "================================================="
+
+        );
+
+
+        console.log(
+
+            "RANISE BRIDGE: FINAL EVALUATION → NEXT CHAPTER"
+
+        );
+
+
+        console.log(
+
+            "COMPLETED CHAPTER:",
+            id
+
+        );
+
+
+        console.log(
+
+            "UNLOCKED CHAPTER:",
+            nextChapterId
+
+        );
+
+
+        console.log(
+
+            "NEXT CHAPTER THEORY:",
+            true
+
+        );
+
+
+        console.log(
+
+            "NEXT CHAPTER PRACTICE:",
+            false
+
+        );
+
+
+        console.log(
+
+            "NEXT CHAPTER EXERCISES:",
+            false
+
+        );
+
+
+        console.log(
+
+            "NEXT CHAPTER HOMEWORK:",
+            false
+
+        );
+
+
+        console.log(
+
+            "NEXT CHAPTER EVALUATION:",
+            false
+
+        );
+
+
+        console.log(
+
+            "================================================="
+
+        );
+
+
+        // -------------------------------------------------
+        // REFRESH COURSE UI
+        // -------------------------------------------------
+
+        refreshCourseUI();
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // UNLOCK NEXT PART
+    //
+    // THIS IS THE FUNCTION USED BY:
+    //
+    // Block 7
+    // Block 8
+    // Block 9
+    // Block 10
+    //
+    // =====================================================
+
+    function unlockNextPart(
+        chapterId,
+        completedPart
+    ){
+
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        var part =
+            String(
+                completedPart || ""
+            )
+            .toLowerCase()
+            .trim();
+
+
+        // -------------------------------------------------
+        // CHAPTER 1 PROTECTION
+        // -------------------------------------------------
+
+        if(
+            !id ||
+            isChapter1(id)
+        ){
+
+            console.warn(
+                "RANISE BRIDGE: CHAPTER 1 EXCLUDED",
+                id
+            );
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // VALID PART
+        // -------------------------------------------------
+
+        if(
+            PARTS.indexOf(part) === -1
+        ){
+
+            console.error(
+
+                "RANISE BRIDGE: INVALID PART",
+
+                part
+
+            );
+
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // CURRENT PROGRESS
+        // -------------------------------------------------
+
+        var progress =
+            getProgress(
+                id
+            );
+
+
+        if(!progress){
+
+            console.error(
+                "RANISE BRIDGE: PROGRESS NOT AVAILABLE",
+                id
+            );
+
+            return false;
+
+        }
+
+
+        // =================================================
+        // THEORY → PRACTICE
+        // =================================================
+
+        if(
+            part === "theory"
+        ){
+
+            progress.theory =
+                true;
+
+            progress.practice =
+                true;
+
+        }
+
+
+        // =================================================
+        // PRACTICE → EXERCISES
+        // =================================================
+
+        else if(
+            part === "practice"
+        ){
+
+            progress.theory =
+                true;
+
+            progress.practice =
+                true;
+
+            progress.exercises =
+                true;
+
+        }
+
+
+        // =================================================
+        // EXERCISES → HOMEWORK
+        // =================================================
+
+        else if(
+            part === "exercises"
+        ){
+
+            progress.theory =
+                true;
+
+            progress.practice =
+                true;
+
+            progress.exercises =
+                true;
+
+            progress.homework =
+                true;
+
+        }
+
+
+        // =================================================
+        // HOMEWORK → EVALUATION
+        // =================================================
+
+        else if(
+            part === "homework"
+        ){
+
+            progress.theory =
+                true;
+
+            progress.practice =
+                true;
+
+            progress.exercises =
+                true;
+
+            progress.homework =
+                true;
+
+            progress.evaluation =
+                true;
+
+        }
+
+
+        // =================================================
+        // EVALUATION → NEXT CHAPTER
+        //
+        // IMPORTANT:
+        //
+        // Evaluation is marked complete first.
+        //
+        // Then the next chapter is unlocked.
+        //
+        // =================================================
+
+        else if(
+            part === "evaluation"
         ){
 
             // -------------------------------------------------
-            // CHAPTER 1 PROTECTION
+            // CURRENT CHAPTER:
+            // ALL FIVE PARTS COMPLETED
             // -------------------------------------------------
 
-            if(
-                !chapterId ||
-                chapterId === "chapitre1"
-            ){
+            progress.theory =
+                true;
 
-                return false;
+            progress.practice =
+                true;
 
-            }
+            progress.exercises =
+                true;
 
+            progress.homework =
+                true;
 
-            if(
-                typeof microsoftWordCourse ===
-                "undefined"
-            ){
-
-                return false;
-
-            }
+            progress.evaluation =
+                true;
 
 
-            if(
-                !Array.isArray(
-                    microsoftWordCourse.chapters
-                )
-            ){
+            // -------------------------------------------------
+            // SAVE CURRENT EVALUATION PROGRESS FIRST.
+            // -------------------------------------------------
 
-                return false;
-
-            }
-
-
-            const chapter =
-
-                microsoftWordCourse.chapters.find(
-
-                    function(item){
-
-                        return (
-
-                            item &&
-                            item.id ===
-                            chapterId
-
-                        );
-
-                    }
-
+            var evaluationSaved =
+                saveProgress(
+                    id,
+                    progress
                 );
 
 
-            if(!chapter){
+            if(!evaluationSaved){
 
-                return false;
+                console.error(
 
-            }
+                    "RANISE BRIDGE: " +
+                    "EVALUATION PROGRESS SAVE FAILED",
 
+                    id
 
-            const campusContent =
-                document.getElementById(
-                    "campusContent"
                 );
 
-
-            if(!campusContent){
 
                 return false;
 
@@ -36067,414 +36653,58 @@ function unlockNextChapter(){
 
 
             // -------------------------------------------------
-            // GET CURRENT PROGRESS
+            // MARK CURRENT CHAPTER COMPLETED.
             // -------------------------------------------------
 
-            const progress =
-                this.getProgress(
-                    chapterId
+            saveChapterCompletion(
+                id
+            );
+
+
+            syncCurrentChapter(
+                id
+            );
+
+
+            // -------------------------------------------------
+            // FINAL ACTION:
+            //
+            // UNLOCK NEXT CHAPTER.
+            //
+            // NO "HOMEWORK" HANDOFF.
+            // NO "THEORY" HANDOFF.
+            // NO SECOND BRIDGE.
+            // -------------------------------------------------
+
+            var nextChapterUnlocked =
+                unlockNextChapter(
+                    id
                 );
 
 
-            if(!progress){
+            if(!nextChapterUnlocked){
+
+                console.error(
+
+                    "RANISE BRIDGE: " +
+                    "FINAL EVALUATION COMPLETED BUT NEXT CHAPTER COULD NOT BE UNLOCKED",
+
+                    id
+
+                );
+
 
                 return false;
-
-            }
-
-
-            // -------------------------------------------------
-            // BUILD THEORY
-            // -------------------------------------------------
-
-            let theoryHTML = "";
-
-
-            if(
-                progress.theory === true &&
-                Array.isArray(
-                    chapter.theory
-                )
-            ){
-
-                chapter.theory.forEach(
-
-                    function(lesson){
-
-                        if(!lesson){
-
-                            return;
-
-                        }
-
-
-                        theoryHTML += `
-
-                            <div class="word-theory-card">
-
-                                <h4>
-                                    📘 ${lesson.title}
-                                </h4>
-
-                                <p>
-                                    ${lesson.content}
-                                </p>
-
-                            </div>
-
-                        `;
-
-                    }
-
-                );
-
-            }
-
-
-            // -------------------------------------------------
-            // BUILD PRACTICE
-            // -------------------------------------------------
-
-            let practiceHTML = "";
-
-
-            if(
-                progress.practice === true &&
-                Array.isArray(
-                    chapter.practice
-                )
-            ){
-
-                chapter.practice.forEach(
-
-                    function(activity){
-
-                        if(!activity){
-
-                            return;
-
-                        }
-
-
-                        let stepsHTML = "";
-
-
-                        if(
-                            Array.isArray(
-                                activity.steps
-                            )
-                        ){
-
-                            activity.steps.forEach(
-
-                                function(step){
-
-                                    stepsHTML += `
-
-                                        <li>
-                                            ${step}
-                                        </li>
-
-                                    `;
-
-                                }
-
-                            );
-
-                        }
-
-
-                        practiceHTML += `
-
-                            <div class="word-practice-card">
-
-                                <h4>
-                                    🖥️ ${activity.title || ""}
-                                </h4>
-
-                                <ol>
-                                    ${stepsHTML}
-                                </ol>
-
-                            </div>
-
-                        `;
-
-                    }
-
-                );
-
-            }
-
-
-            // -------------------------------------------------
-            // BUILD EXERCISES
-            // -------------------------------------------------
-
-            let exercisesHTML = "";
-
-
-            if(
-                progress.exercises === true &&
-                Array.isArray(
-                    chapter.exercises
-                )
-            ){
-
-                chapter.exercises.forEach(
-
-                    function(exercise){
-
-                        exercisesHTML += `
-
-                            <li>
-                                ${exercise}
-                            </li>
-
-                        `;
-
-                    }
-
-                );
-
-            }
-
-
-            // -------------------------------------------------
-            // BUILD HOMEWORK
-            // -------------------------------------------------
-
-            let homeworkHTML = "";
-
-
-            if(
-                progress.homework === true
-            ){
-
-                homeworkHTML = `
-
-                    <p>
-                        ${chapter.homework || ""}
-                    </p>
-
-                `;
-
-            }
-
-
-            // -------------------------------------------------
-            // BUILD EVALUATION
-            // -------------------------------------------------
-
-            let evaluationHTML = "";
-
-
-            if(
-                progress.evaluation === true &&
-                Array.isArray(
-                    chapter.evaluation
-                )
-            ){
-
-                chapter.evaluation.forEach(
-
-                    function(item){
-
-                        evaluationHTML += `
-
-                            <li>
-                                ${item}
-                            </li>
-
-                        `;
-
-                    }
-
-                );
-
-            }
-
-
-            // =================================================
-            // RENDER COMPLETE PART STRUCTURE
-            // =================================================
-
-            campusContent.innerHTML = `
-
-                <div class="microsoft-word-course">
-
-                    <button
-                        id="backToWordChaptersBtn"
-                        class="wordBackBtn">
-
-                        ⬅️ Retour aux chapitres
-
-                    </button>
-
-
-                    <h1>
-
-                        📘 ${chapter.title}
-
-                    </h1>
-
-
-                    <!-- THEORY -->
-
-                    <div class="word-section">
-
-                        <h3>
-
-                            📚 Théorie
-                            ${progress.theory !== true ? " 🔒" : ""}
-
-                        </h3>
-
-                        ${
-                            progress.theory === true
-                            ?
-                            theoryHTML
-                            :
-                            "<p>🔒 Partie Théorie verrouillée.</p>"
-                        }
-
-                    </div>
-
-
-                    <!-- PRACTICE -->
-
-                    <div class="word-section">
-
-                        <h3>
-
-                            🖥️ Pratique
-                            ${progress.practice !== true ? " 🔒" : ""}
-
-                        </h3>
-
-                        ${
-                            progress.practice === true
-                            ?
-                            practiceHTML
-                            :
-                            "<p>🔒 Partie Pratique verrouillée.</p>"
-                        }
-
-                    </div>
-
-
-                    <!-- EXERCISES -->
-
-                    <div class="word-section">
-
-                        <h3>
-
-                            ✏️ Exercices
-                            ${progress.exercises !== true ? " 🔒" : ""}
-
-                        </h3>
-
-                        ${
-                            progress.exercises === true
-                            ?
-                            `<ul>${exercisesHTML}</ul>`
-                            :
-                            "<p>🔒 Partie Exercices verrouillée.</p>"
-                        }
-
-                    </div>
-
-
-                    <!-- HOMEWORK -->
-
-                    <div class="word-section">
-
-                        <h3>
-
-                            🏠 Devoir
-                            ${progress.homework !== true ? " 🔒" : ""}
-
-                        </h3>
-
-                        ${
-                            progress.homework === true
-                            ?
-                            homeworkHTML
-                            :
-                            "<p>🔒 Partie Devoir verrouillée.</p>"
-                        }
-
-                    </div>
-
-
-                    <!-- EVALUATION -->
-
-                    <div class="word-section">
-
-                        <h3>
-
-                            🎓 Évaluation
-                            ${progress.evaluation !== true ? " 🔒" : ""}
-
-                        </h3>
-
-                        ${
-                            progress.evaluation === true
-                            ?
-                            `<ul>${evaluationHTML}</ul>`
-                            :
-                            "<p>🔒 Partie Évaluation verrouillée.</p>"
-                        }
-
-                    </div>
-
-
-                </div>
-
-            `;
-
-
-            // -------------------------------------------------
-            // BACK BUTTON
-            // -------------------------------------------------
-
-            const backButton =
-                document.getElementById(
-                    "backToWordChaptersBtn"
-                );
-
-
-            if(backButton){
-
-                backButton.addEventListener(
-
-                    "click",
-
-                    function(){
-
-                        if(
-                            typeof renderMicrosoftWordCourse ===
-                            "function"
-                        ){
-
-                            renderMicrosoftWordCourse();
-
-                        }
-
-                    }
-
-                );
 
             }
 
 
             console.log(
 
-                "RANISE UNLOCK BRIDGE: " +
-                "PARTS RENDERED",
+                "RANISE BRIDGE: " +
+                "EVALUATION VALIDATED → NEXT CHAPTER UNLOCKED",
 
-                chapterId,
-                progress
+                id
 
             );
 
@@ -36483,17 +36713,735 @@ function unlockNextChapter(){
 
         }
 
+
+        // =================================================
+        // SAVE NORMAL PART PROGRESS
+        // =================================================
+
+        var saved =
+            saveProgress(
+                id,
+                progress
+            );
+
+
+        if(!saved){
+
+            console.error(
+
+                "RANISE BRIDGE: " +
+                "PART PROGRESS SAVE FAILED",
+
+                {
+
+                    chapterId:
+                        id,
+
+                    completedPart:
+                        part
+
+                }
+
+            );
+
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // NORMAL PART LOG
+        // -------------------------------------------------
+
+        console.log(
+
+            "RANISE BRIDGE: " +
+            "PART VALIDATED → NEXT PART UNLOCKED",
+
+            {
+
+                chapterId:
+                    id,
+
+                completedPart:
+                    part,
+
+                progress:
+                    progress
+
+            }
+
+        );
+
+
+        // -------------------------------------------------
+        // REFRESH CURRENT CHAPTER PARTS
+        // -------------------------------------------------
+
+        refreshCurrentChapterParts(
+            id
+        );
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // RENDER CURRENT CHAPTER PARTS
+    // =====================================================
+
+    function renderChapterParts(
+        chapterId
+    ){
+
+        var id =
+            normalizeChapterId(
+                chapterId
+            );
+
+
+        if(
+            !id ||
+            isChapter1(id)
+        ){
+
+            return false;
+
+        }
+
+
+        var course =
+            getCourse();
+
+
+        if(!course){
+
+            return false;
+
+        }
+
+
+        var chapter =
+            getChapter(
+                id
+            );
+
+
+        if(!chapter){
+
+            return false;
+
+        }
+
+
+        var campusContent =
+            document.getElementById(
+                "campusContent"
+            );
+
+
+        if(!campusContent){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // NEVER DESTROY ACTIVE WORD SIMULATION.
+        // -------------------------------------------------
+
+        if(
+            campusContent.querySelector(
+                "iframe"
+            )
+        ){
+
+            return false;
+
+        }
+
+
+        var progress =
+            getProgress(
+                id
+            );
+
+
+        if(!progress){
+
+            return false;
+
+        }
+
+
+        // =================================================
+        // THEORY
+        // =================================================
+
+        var theoryHTML =
+            "";
+
+
+        if(
+            progress.theory === true &&
+            Array.isArray(
+                chapter.theory
+            )
+        ){
+
+            chapter.theory.forEach(
+
+                function(lesson){
+
+                    if(!lesson){
+
+                        return;
+
+                    }
+
+
+                    theoryHTML += `
+
+                        <div class="word-theory-card">
+
+                            <h4>
+                                📘 ${lesson.title || ""}
+                            </h4>
+
+                            <p>
+                                ${lesson.content || ""}
+                            </p>
+
+                        </div>
+
+                    `;
+
+                }
+
+            );
+
+        }
+
+
+        // =================================================
+        // PRACTICE
+        // =================================================
+
+        var practiceHTML =
+            "";
+
+
+        if(
+            progress.practice === true &&
+            Array.isArray(
+                chapter.practice
+            )
+        ){
+
+            chapter.practice.forEach(
+
+                function(activity){
+
+                    if(!activity){
+
+                        return;
+
+                    }
+
+
+                    var stepsHTML =
+                        "";
+
+
+                    if(
+                        Array.isArray(
+                            activity.steps
+                        )
+                    ){
+
+                        activity.steps.forEach(
+
+                            function(step){
+
+                                stepsHTML += `
+
+                                    <li>
+                                        ${step}
+                                    </li>
+
+                                `;
+
+                            }
+
+                        );
+
+                    }
+
+
+                    practiceHTML += `
+
+                        <div class="word-practice-card">
+
+                            <h4>
+                                🖥️ ${activity.title || ""}
+                            </h4>
+
+                            <ol>
+                                ${stepsHTML}
+                            </ol>
+
+                        </div>
+
+                    `;
+
+                }
+
+            );
+
+        }
+
+
+        // =================================================
+        // EXERCISES
+        // =================================================
+
+        var exercisesHTML =
+            "";
+
+
+        if(
+            progress.exercises === true &&
+            Array.isArray(
+                chapter.exercises
+            )
+        ){
+
+            chapter.exercises.forEach(
+
+                function(exercise){
+
+                    exercisesHTML += `
+
+                        <li>
+                            ${exercise || ""}
+                        </li>
+
+                    `;
+
+                }
+
+            );
+
+        }
+
+
+        // =================================================
+        // HOMEWORK
+        // =================================================
+
+        var homeworkHTML =
+            "";
+
+
+        if(
+            progress.homework === true
+        ){
+
+            homeworkHTML = `
+
+                <p>
+                    ${chapter.homework || ""}
+                </p>
+
+            `;
+
+        }
+
+
+        // =================================================
+        // EVALUATION
+        // =================================================
+
+        var evaluationHTML =
+            "";
+
+
+        if(
+            progress.evaluation === true &&
+            Array.isArray(
+                chapter.evaluation
+            )
+        ){
+
+            chapter.evaluation.forEach(
+
+                function(item){
+
+                    evaluationHTML += `
+
+                        <li>
+                            ${item || ""}
+                        </li>
+
+                    `;
+
+                }
+
+            );
+
+        }
+
+
+        // =================================================
+        // COMPLETE CHAPTER UI
+        // =================================================
+
+        campusContent.innerHTML = `
+
+            <div class="microsoft-word-course">
+
+                <button
+                    id="backToWordChaptersBtn"
+                    class="wordBackBtn">
+
+                    ⬅️ Retour aux chapitres
+
+                </button>
+
+
+                <h1>
+                    📘 ${chapter.title || ""}
+                </h1>
+
+
+                <!-- ===================================== -->
+                <!-- THEORY -->
+                <!-- ===================================== -->
+
+                <div class="word-section">
+
+                    <h3>
+
+                        📚 Théorie
+                        ${
+                            progress.theory !== true
+                            ? " 🔒"
+                            : ""
+                        }
+
+                    </h3>
+
+
+                    ${
+                        progress.theory === true
+                        ?
+                        theoryHTML
+                        :
+                        "<p>🔒 Partie Théorie verrouillée.</p>"
+                    }
+
+                </div>
+
+
+                <!-- ===================================== -->
+                <!-- PRACTICE -->
+                <!-- ===================================== -->
+
+                <div class="word-section">
+
+                    <h3>
+
+                        🖥️ Pratique
+                        ${
+                            progress.practice !== true
+                            ? " 🔒"
+                            : ""
+                        }
+
+                    </h3>
+
+
+                    ${
+                        progress.practice === true
+                        ?
+                        practiceHTML
+                        :
+                        "<p>🔒 Partie Pratique verrouillée.</p>"
+                    }
+
+                </div>
+
+
+                <!-- ===================================== -->
+                <!-- EXERCISES -->
+                <!-- ===================================== -->
+
+                <div class="word-section">
+
+                    <h3>
+
+                        ✏️ Exercices
+                        ${
+                            progress.exercises !== true
+                            ? " 🔒"
+                            : ""
+                        }
+
+                    </h3>
+
+
+                    ${
+                        progress.exercises === true
+                        ?
+                        `<ul>${exercisesHTML}</ul>`
+                        :
+                        "<p>🔒 Partie Exercices verrouillée.</p>"
+                    }
+
+                </div>
+
+
+                <!-- ===================================== -->
+                <!-- HOMEWORK -->
+                <!-- ===================================== -->
+
+                <div class="word-section">
+
+                    <h3>
+
+                        🏠 Devoir
+                        ${
+                            progress.homework !== true
+                            ? " 🔒"
+                            : ""
+                        }
+
+                    </h3>
+
+
+                    ${
+                        progress.homework === true
+                        ?
+                        homeworkHTML
+                        :
+                        "<p>🔒 Partie Devoir verrouillée.</p>"
+                    }
+
+                </div>
+
+
+                <!-- ===================================== -->
+                <!-- EVALUATION -->
+                <!-- ===================================== -->
+
+                <div class="word-section">
+
+                    <h3>
+
+                        🎓 Évaluation
+                        ${
+                            progress.evaluation !== true
+                            ? " 🔒"
+                            : ""
+                        }
+
+                    </h3>
+
+
+                    ${
+                        progress.evaluation === true
+                        ?
+                        `<ul>${evaluationHTML}</ul>`
+                        :
+                        "<p>🔒 Partie Évaluation verrouillée.</p>"
+                    }
+
+                </div>
+
+
+            </div>
+
+        `;
+
+
+        // =================================================
+        // BACK BUTTON
+        // =================================================
+
+        var backButton =
+            document.getElementById(
+                "backToWordChaptersBtn"
+            );
+
+
+        if(backButton){
+
+            backButton.addEventListener(
+
+                "click",
+
+                function(){
+
+                    if(
+                        typeof renderMicrosoftWordCourse ===
+                        "function"
+                    ){
+
+                        renderMicrosoftWordCourse();
+
+                    }
+
+                }
+
+            );
+
+        }
+
+
+        console.log(
+
+            "RANISE BRIDGE: " +
+            "CHAPTER PARTS RENDERED",
+
+            id,
+
+            progress
+
+        );
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // PUBLIC BRIDGE
+    // =====================================================
+
+    var bridge = {
+
+
+        // -------------------------------------------------
+        // PUBLIC GET PROGRESS
+        // -------------------------------------------------
+
+        getProgress:
+            getProgress,
+
+
+        // -------------------------------------------------
+        // PUBLIC SAVE PROGRESS
+        // -------------------------------------------------
+
+        saveProgress:
+            saveProgress,
+
+
+        // -------------------------------------------------
+        // PUBLIC UNLOCK NEXT PART
+        // -------------------------------------------------
+
+        unlockNextPart:
+            unlockNextPart,
+
+
+        // -------------------------------------------------
+        // PUBLIC UNLOCK NEXT CHAPTER
+        // -------------------------------------------------
+
+        unlockNextChapter:
+            unlockNextChapter,
+
+
+        // -------------------------------------------------
+        // PUBLIC RENDER
+        // -------------------------------------------------
+
+        renderChapterParts:
+            renderChapterParts
+
     };
 
 
+    // =====================================================
+    // GLOBAL BRIDGE
+    // =====================================================
+
+    window.RaniseDynamicUnlockRenderBridge =
+        bridge;
+
+
+    // =====================================================
+    // READY LOG
+    // =====================================================
+
+    console.log(
+
+        "================================================="
+
+    );
+
+
+    console.log(
+
+        "RANISE DYNAMIC UNLOCK / RENDER BRIDGE READY"
+
+    );
+
+
+    console.log(
+
+        "CHAPTER 1:",
+        "EXCLUDED"
+
+    );
+
+
+    console.log(
+
+        "CHAPTER 2+:",
+        "DYNAMIC"
+
+    );
+
+
+    console.log(
+
+        "5 PARTS:",
+        PARTS
+
+    );
+
+
+    console.log(
+
+        "FINAL FLOW:",
+        "EVALUATION → NEXT CHAPTER"
+
+    );
+
+
+    console.log(
+
+        "NEXT CHAPTER:",
+        "THEORY OPEN / 4 PARTS LOCKED"
+
+    );
+
+
+    console.log(
+
+        "================================================="
+
+    );
+
+
 })();
-
-
-
-
-
-
-
 
 
 
