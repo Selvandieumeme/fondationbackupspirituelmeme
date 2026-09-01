@@ -34778,7 +34778,6 @@ function unlockNextChapter(){
 
 
 
-
 // =========================================================
 // MICROSOFT WORD 2007 FORMATION
 // RANISE — DYNAMIC UNLOCK / RENDER BRIDGE
@@ -34791,9 +34790,14 @@ function unlockNextChapter(){
 // SAVE PROGRESS
 //        ↓
 // RE-RENDER PARTS IMMEDIATELY
+//        ↓
+// FINAL EVALUATION
+//        ↓
+// UNLOCK NEXT CHAPTER DYNAMICALLY
 //
 // CHAPTER 1 COMPLETELY EXCLUDED
 // WORKS DYNAMICALLY FOR CHAPTER 2+
+//
 // SUPPORTS ALL 5 PARTS:
 //
 // THEORY
@@ -34801,6 +34805,17 @@ function unlockNextChapter(){
 // EXERCISES
 // HOMEWORK
 // EVALUATION
+//
+// FINAL EVALUATION:
+// evaluation validated
+//        ↓
+// current chapter completed
+//        ↓
+// next chapter unlocked
+//        ↓
+// next chapter theory unlocked
+//        ↓
+// next 4 parts locked
 //
 // DOES NOT MODIFY BLOCK 4
 // DOES NOT MODIFY DYNAMIC BLOCK 5
@@ -34967,11 +34982,26 @@ function unlockNextChapter(){
                 "function"
             ){
 
-                WordChapter2PartsEngine.saveProgress(
-                    progress
-                );
+                try{
 
-                return true;
+                    WordChapter2PartsEngine.saveProgress(
+                        progress
+                    );
+
+                    return true;
+
+                }catch(error){
+
+                    console.error(
+
+                        "RANISE UNLOCK BRIDGE: " +
+                        "CHAPTER 2 PROGRESS SAVE ERROR",
+
+                        error
+
+                    );
+
+                }
 
             }
 
@@ -34986,13 +35016,601 @@ function unlockNextChapter(){
                 "_partsProgress";
 
 
-            localStorage.setItem(
+            try{
 
-                key,
+                localStorage.setItem(
 
-                JSON.stringify(
-                    progress
+                    key,
+
+                    JSON.stringify(
+                        progress
+                    )
+
+                );
+
+                return true;
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "GENERIC PROGRESS SAVE ERROR",
+
+                    chapterId,
+                    error
+
+                );
+
+                return false;
+
+            }
+
+        },
+
+
+
+
+
+        // =====================================================
+        // UNLOCK NEXT CHAPTER DYNAMICALLY
+        // =====================================================
+        //
+        // evaluation current chapter
+        //          ↓
+        // find next chapter in microsoftWordCourse
+        //          ↓
+        // nextChapter.unlocked = true
+        //          ↓
+        // next chapter parts:
+        //
+        // theory      = true
+        // practice    = false
+        // exercises   = false
+        // homework    = false
+        // evaluation  = false
+        //
+        // =====================================================
+
+        unlockNextChapter:function(
+            chapterId
+        ){
+
+            if(
+                !chapterId ||
+                chapterId === "chapitre1"
+            ){
+
+                return false;
+
+            }
+
+
+            if(
+                typeof microsoftWordCourse ===
+                "undefined"
+            ){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "COURSE OBJECT NOT FOUND"
+
+                );
+
+                return false;
+
+            }
+
+
+            if(
+                !Array.isArray(
+                    microsoftWordCourse.chapters
                 )
+            ){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "CHAPTER ARRAY NOT FOUND"
+
+                );
+
+                return false;
+
+            }
+
+
+            const chapters =
+                microsoftWordCourse.chapters;
+
+
+            // -------------------------------------------------
+            // FIND CURRENT CHAPTER
+            // -------------------------------------------------
+
+            const currentIndex =
+                chapters.findIndex(
+
+                    function(chapter){
+
+                        return (
+
+                            chapter &&
+                            chapter.id ===
+                            chapterId
+
+                        );
+
+                    }
+
+                );
+
+
+            if(
+                currentIndex < 0
+            ){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "CURRENT CHAPTER NOT FOUND",
+
+                    chapterId
+
+                );
+
+                return false;
+
+            }
+
+
+            // -------------------------------------------------
+            // GET NEXT CHAPTER
+            // -------------------------------------------------
+
+            const nextChapter =
+                chapters[
+                    currentIndex + 1
+                ];
+
+
+            // -------------------------------------------------
+            // NO NEXT CHAPTER
+            // -------------------------------------------------
+
+            if(
+                !nextChapter ||
+                !nextChapter.id
+            ){
+
+                console.log(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "CURRENT CHAPTER IS THE LAST CHAPTER",
+
+                    chapterId
+
+                );
+
+                return false;
+
+            }
+
+
+            const nextChapterId =
+                nextChapter.id;
+
+
+            // -------------------------------------------------
+            // DYNAMICALLY UNLOCK NEXT CHAPTER
+            // -------------------------------------------------
+
+            nextChapter.unlocked =
+                true;
+
+
+            // -------------------------------------------------
+            // INITIALIZE NEXT CHAPTER PARTS
+            //
+            // ONLY THEORY IS OPEN.
+            // OTHER 4 PARTS REMAIN LOCKED.
+            // -------------------------------------------------
+
+            const nextProgress = {
+
+                theory:true,
+
+                practice:false,
+
+                exercises:false,
+
+                homework:false,
+
+                evaluation:false
+
+            };
+
+
+            // -------------------------------------------------
+            // SAVE NEXT CHAPTER PART PROGRESS
+            // -------------------------------------------------
+
+            const progressSaved =
+                this.saveProgress(
+
+                    nextChapterId,
+
+                    nextProgress
+
+                );
+
+
+            // -------------------------------------------------
+            // SAVE EXPLICIT CHAPTER UNLOCK FLAG
+            // -------------------------------------------------
+
+            try{
+
+                localStorage.setItem(
+
+                    "word_" +
+                    nextChapterId +
+                    "_unlocked",
+
+                    "true"
+
+                );
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "NEXT CHAPTER UNLOCK FLAG ERROR",
+
+                    nextChapterId,
+                    error
+
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // SAVE NUMERIC CHAPTER UNLOCK FLAG
+            //
+            // chapitre2 → wordChapter2Unlocked
+            // chapitre3 → wordChapter3Unlocked
+            // etc.
+            // -------------------------------------------------
+
+            try{
+
+                const chapterNumber =
+                    String(
+                        nextChapterId
+                    ).replace(
+                        "chapitre",
+                        ""
+                    );
+
+
+                if(
+                    chapterNumber
+                ){
+
+                    localStorage.setItem(
+
+                        "wordChapter" +
+                        chapterNumber +
+                        "Unlocked",
+
+                        "true"
+
+                    );
+
+                }
+
+            }catch(error){}
+
+
+            // -------------------------------------------------
+            // SAVE CURRENT CHAPTER COMPLETION FLAG
+            // -------------------------------------------------
+
+            try{
+
+                localStorage.setItem(
+
+                    "word_" +
+                    chapterId +
+                    "_completed",
+
+                    "true"
+
+                );
+
+            }catch(error){}
+
+
+            // -------------------------------------------------
+            // SYNCHRONIZE COURSE OBJECT
+            // -------------------------------------------------
+
+            try{
+
+                const currentChapter =
+                    chapters[
+                        currentIndex
+                    ];
+
+
+                if(
+                    currentChapter
+                ){
+
+                    currentChapter.completed =
+                        true;
+
+                    currentChapter.evaluationCompleted =
+                        true;
+
+                }
+
+
+                nextChapter.unlocked =
+                    true;
+
+                nextChapter.completed =
+                    false;
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "COURSE OBJECT SYNC ERROR",
+
+                    error
+
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // ALSO SYNCHRONIZE COMMON PROGRESS ENGINE
+            // IF IT EXISTS.
+            // -------------------------------------------------
+
+            try{
+
+                if(
+                    typeof MicrosoftWordProgressEngine !==
+                    "undefined"
+                ){
+
+                    const progressEngine =
+                        MicrosoftWordProgressEngine;
+
+
+                    if(
+                        typeof progressEngine.get ===
+                        "function" &&
+                        typeof progressEngine.save ===
+                        "function"
+                    ){
+
+                        const globalProgress =
+                            progressEngine.get();
+
+
+                        if(
+                            globalProgress &&
+                            typeof globalProgress ===
+                            "object"
+                        ){
+
+                            if(
+                                !Array.isArray(
+                                    globalProgress.completedChapters
+                                )
+                            ){
+
+                                globalProgress.completedChapters =
+                                    [];
+
+                            }
+
+
+                            if(
+                                !globalProgress.completedChapters.includes(
+                                    chapterId
+                                )
+                            ){
+
+                                globalProgress.completedChapters.push(
+                                    chapterId
+                                );
+
+                            }
+
+
+                            if(
+                                !Array.isArray(
+                                    globalProgress.unlockedChapters
+                                )
+                            ){
+
+                                globalProgress.unlockedChapters =
+                                    [];
+
+                            }
+
+
+                            if(
+                                !globalProgress.unlockedChapters.includes(
+                                    nextChapterId
+                                )
+                            ){
+
+                                globalProgress.unlockedChapters.push(
+                                    nextChapterId
+                                );
+
+                            }
+
+
+                            progressEngine.save(
+                                globalProgress
+                            );
+
+                        }
+
+                    }
+
+                }
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "GLOBAL PROGRESS SYNC ERROR",
+
+                    error
+
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // EXISTING CHAPTER UNLOCK ENGINE
+            // -------------------------------------------------
+
+            try{
+
+                if(
+                    typeof WordChapterUnlockEngine !==
+                    "undefined" &&
+                    typeof WordChapterUnlockEngine.checkProgress ===
+                    "function"
+                ){
+
+                    WordChapterUnlockEngine
+                        .checkProgress();
+
+                }
+
+            }catch(error){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "CHAPTER UNLOCK ENGINE ERROR",
+
+                    error
+
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // FINAL LOG
+            // -------------------------------------------------
+
+            console.log(
+
+                "RANISE UNLOCK BRIDGE: " +
+                "NEXT CHAPTER DYNAMICALLY UNLOCKED",
+
+                {
+
+                    completedChapter:
+                        chapterId,
+
+                    unlockedChapter:
+                        nextChapterId,
+
+                    progressSaved:
+                        progressSaved,
+
+                    nextChapterProgress:
+                        nextProgress
+
+                }
+
+            );
+
+
+            // -------------------------------------------------
+            // REFRESH COURSE UI
+            //
+            // DO NOT DESTROY ACTIVE SIMULATION.
+            // -------------------------------------------------
+
+            setTimeout(
+
+                function(){
+
+                    const campusContent =
+                        document.getElementById(
+                            "campusContent"
+                        );
+
+
+                    if(
+                        campusContent &&
+                        campusContent.querySelector(
+                            "iframe"
+                        )
+                    ){
+
+                        console.log(
+
+                            "RANISE UNLOCK BRIDGE: " +
+                            "NEXT CHAPTER UNLOCKED — " +
+                            "ACTIVE SIMULATION PRESERVED",
+
+                            nextChapterId
+
+                        );
+
+                        return;
+
+                    }
+
+
+                    if(
+                        typeof renderMicrosoftWordCourse ===
+                        "function"
+                    ){
+
+                        try{
+
+                            renderMicrosoftWordCourse();
+
+                        }catch(error){
+
+                            console.error(
+
+                                "RANISE UNLOCK BRIDGE: " +
+                                "COURSE RENDER ERROR",
+
+                                error
+
+                            );
+
+                        }
+
+                    }
+
+                },
+
+                0
 
             );
 
@@ -35177,16 +35795,121 @@ function unlockNextChapter(){
 
 
             // -------------------------------------------------
-            // SAVE
+            // SAVE CURRENT CHAPTER PROGRESS
             // -------------------------------------------------
 
-            this.saveProgress(
+            const saved =
+                this.saveProgress(
 
-                chapterId,
-                progress
+                    chapterId,
+                    progress
 
-            );
+                );
 
+
+            if(!saved){
+
+                console.error(
+
+                    "RANISE UNLOCK BRIDGE: " +
+                    "CURRENT CHAPTER PROGRESS WAS NOT SAVED",
+
+                    chapterId,
+                    completedPart
+
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // CURRENT CHAPTER COMPLETED WHEN EVALUATION
+            // -------------------------------------------------
+
+            if(
+                completedPart === "evaluation"
+            ){
+
+                try{
+
+                    localStorage.setItem(
+
+                        "word_" +
+                        chapterId +
+                        "_completed",
+
+                        "true"
+
+                    );
+
+                }catch(error){}
+
+
+                try{
+
+                    if(
+                        typeof microsoftWordCourse !==
+                        "undefined" &&
+                        Array.isArray(
+                            microsoftWordCourse.chapters
+                        )
+                    ){
+
+                        const currentChapter =
+                            microsoftWordCourse.chapters.find(
+
+                                function(chapter){
+
+                                    return (
+
+                                        chapter &&
+                                        chapter.id ===
+                                        chapterId
+
+                                    );
+
+                                }
+
+                            );
+
+
+                        if(
+                            currentChapter
+                        ){
+
+                            currentChapter.unlocked =
+                                true;
+
+                            currentChapter.completed =
+                                true;
+
+                            currentChapter.evaluationCompleted =
+                                true;
+
+                        }
+
+                    }
+
+                }catch(error){}
+
+
+                // -------------------------------------------------
+                // CRITICAL:
+                //
+                // FINAL EVALUATION CALLS THE SAME BRIDGE
+                // TO UNLOCK THE NEXT CHAPTER.
+                // -------------------------------------------------
+
+                this.unlockNextChapter(
+                    chapterId
+                );
+
+            }
+
+
+            // -------------------------------------------------
+            // LOG
+            // -------------------------------------------------
 
             console.log(
 
@@ -35200,60 +35923,61 @@ function unlockNextChapter(){
             );
 
 
+            // -------------------------------------------------
+            // IMMEDIATE RE-RENDER
+            // -------------------------------------------------
+
+            const bridge =
+                this;
 
 
+            setTimeout(
 
-// -------------------------------------------------
-// IMMEDIATE RE-RENDER
-// -------------------------------------------------
+                function(){
 
-const bridge = this;
-
-setTimeout(function(){
-
-    const campusContent =
-        document.getElementById(
-            "campusContent"
-        );
-
-    if(
-        campusContent &&
-        campusContent.querySelector(
-            "iframe"
-        )
-    ){
-
-        console.log(
-            "RANISE UNLOCK BRIDGE: " +
-            "NEXT PART UNLOCKED — " +
-            "ACTIVE SIMULATION PRESERVED",
-            chapterId,
-            completedPart
-        );
-
-        return;
-
-    }
-
-    bridge.renderChapterParts(
-        chapterId
-    );
-
-},0);
+                    const campusContent =
+                        document.getElementById(
+                            "campusContent"
+                        );
 
 
-return true;
+                    if(
+                        campusContent &&
+                        campusContent.querySelector(
+                            "iframe"
+                        )
+                    ){
 
-},
+                        console.log(
+
+                            "RANISE UNLOCK BRIDGE: " +
+                            "NEXT PART UNLOCKED — " +
+                            "ACTIVE SIMULATION PRESERVED",
+
+                            chapterId,
+                            completedPart
+
+                        );
+
+                        return;
+
+                    }
 
 
+                    bridge.renderChapterParts(
+                        chapterId
+                    );
+
+                },
+
+                0
+
+            );
 
 
+            return true;
 
-
-
-
-
+        },
 
 
 
@@ -35307,9 +36031,17 @@ return true;
 
                 microsoftWordCourse.chapters.find(
 
-                    item =>
-                        item &&
-                        item.id === chapterId
+                    function(item){
+
+                        return (
+
+                            item &&
+                            item.id ===
+                            chapterId
+
+                        );
+
+                    }
 
                 );
 
@@ -35367,7 +36099,7 @@ return true;
 
                 chapter.theory.forEach(
 
-                    lesson => {
+                    function(lesson){
 
                         if(!lesson){
 
@@ -35415,7 +36147,7 @@ return true;
 
                 chapter.practice.forEach(
 
-                    activity => {
+                    function(activity){
 
                         if(!activity){
 
@@ -35435,7 +36167,7 @@ return true;
 
                             activity.steps.forEach(
 
-                                step => {
+                                function(step){
 
                                     stepsHTML += `
 
@@ -35491,7 +36223,7 @@ return true;
 
                 chapter.exercises.forEach(
 
-                    exercise => {
+                    function(exercise){
 
                         exercisesHTML += `
 
@@ -35546,7 +36278,7 @@ return true;
 
                 chapter.evaluation.forEach(
 
-                    item => {
+                    function(item){
 
                         evaluationHTML += `
 
@@ -35720,7 +36452,14 @@ return true;
 
                     function(){
 
-                        renderMicrosoftWordCourse();
+                        if(
+                            typeof renderMicrosoftWordCourse ===
+                            "function"
+                        ){
+
+                            renderMicrosoftWordCourse();
+
+                        }
 
                     }
 
@@ -35748,9 +36487,6 @@ return true;
 
 
 })();
-
-
-
 
 
 
