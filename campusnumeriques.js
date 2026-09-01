@@ -29540,7 +29540,6 @@ if(
 
 
 
-
 // =========================================================
 // BLOCK 10 DYNAMIC EVALUATION
 // MICROSOFT WORD 2007 FORMATION
@@ -29555,7 +29554,7 @@ if(
 //     READS chapter.objective DYNAMICALLY
 //     USES EXISTING WORD 2007 SIMULATION
 //     READS REAL DOCUMENT TEXT
-//     READS STUDENT TYPING
+//     READS REAL STUDENT TYPING
 //     MONITORS REAL WORD SIMULATION ACTIONS
 //
 // =========================================================
@@ -29569,17 +29568,16 @@ if(
 //     QUESTION 3 VALIDATED = 25 POINTS
 //     QUESTION 4 VALIDATED = 25 POINTS
 //
+//     3 VALIDATED QUESTIONS = 75 / 100
 //     4 VALIDATED QUESTIONS = 100 / 100
 //
 // IMPORTANT:
 //     NO PARTIAL SCORE
-//     NO 55
-//     NO 67
-//     NO 90
-//     NO TEXT SCORE
-//     NO PRACTICAL SCORE
-//     NO VARIABLE QUESTION WEIGHT
-//     NO SCORE COMBINATION
+//     NO RANDOM SCORE
+//     NO SCORE FROM A CLICK ALONE
+//     NO SCORE FROM WAITING
+//     NO SCORE FROM TIMEOUT
+//     NO AUTOMATIC VALIDATION FROM 3 CHARACTERS
 //
 // =========================================================
 //
@@ -29607,9 +29605,13 @@ if(
 //             ↓
 //     BLOCK 10
 //             ↓
-//     4 QUESTIONS VALIDATED
+//     REAL ANSWER / REAL WORD ACTION
 //             ↓
-//     100 / 100
+//     QUESTION VALIDATED
+//             ↓
+//     25 POINTS
+//             ↓
+//     75 OR 100
 //             ↓
 //     BRIDGE
 //             ↓
@@ -29699,9 +29701,25 @@ if(
         },
 
         // -------------------------------------------------
+        // REAL TEXT OBSERVATION
+        // -------------------------------------------------
+
+        textInputEvents:0,
+
+        typedCharacterCount:0,
+
+        textChanged:false,
+
+        lastObservedText:"",
+
+        lastInputType:"",
+
+        lastInputTime:0,
+
+        mutationObserver:null,
+
+        // -------------------------------------------------
         // OFFICIAL SCORE
-        //
-        // ONLY 4 x 25
         // -------------------------------------------------
 
         score:0,
@@ -29710,9 +29728,13 @@ if(
 
         questionValidated:false,
 
-        lastDocumentText:"",
+        // -------------------------------------------------
+        // FINAL UNLOCK PROTECTION
+        // -------------------------------------------------
 
-        lastActionTime:0,
+        finalUnlockRequested:false,
+
+        finalUnlockSucceeded:false,
 
         // -------------------------------------------------
         // MAIN RANISE EVALUATION PANEL
@@ -29736,7 +29758,9 @@ if(
 
         lastProgressText:"",
 
-        lastProgressTime:0
+        lastProgressTime:0,
+
+        progressMonitorStarted:false
 
     };
 
@@ -29846,9 +29870,7 @@ if(
     // =====================================================
     // GET EVALUATION DYNAMICALLY
     //
-    // IMPORTANT:
-    // THE OFFICIAL SYSTEM USES EXACTLY 4 QUESTIONS.
-    //
+    // OFFICIAL SYSTEM = EXACTLY 4 QUESTIONS
     // =====================================================
 
     function getChapterEvaluation(chapterId){
@@ -29894,12 +29916,6 @@ if(
 
         }
 
-
-        // -------------------------------------------------
-        // IMPORTANT:
-        // ONLY THE FIRST 4 QUESTIONS BELONG TO THE
-        // OFFICIAL 100-POINT EVALUATION.
-        // -------------------------------------------------
 
         return evaluation.slice(
             0,
@@ -30751,9 +30767,20 @@ if(
         }
 
 
-        state.currentActions[action] =
+        const normalized =
+            normalize(action);
+
+
+        if(!normalized){
+
+            return;
+
+        }
+
+
+        state.currentActions[normalized] =
             (
-                state.currentActions[action] ||
+                state.currentActions[normalized] ||
                 0
             ) + 1;
 
@@ -30828,6 +30855,9 @@ if(
 
             recordAction(type);
 
+            state.lastActionTime =
+                Date.now();
+
         }
 
 
@@ -30837,7 +30867,14 @@ if(
 
 
     // =====================================================
-    // DOCUMENT ANSWER
+    // CURRENT ANSWER
+    //
+    // IMPORTANT:
+    // The baseline is used only to identify a REAL
+    // document modification.
+    //
+    // We do NOT automatically validate because text
+    // contains 3 characters.
     // =====================================================
 
     function getCurrentAnswer(){
@@ -30858,6 +30895,21 @@ if(
 
 
         if(
+            full !== base
+        ){
+
+            state.textChanged =
+                true;
+
+        }
+
+
+        // -------------------------------------------------
+        // Normal case:
+        // student appended text after the baseline.
+        // -------------------------------------------------
+
+        if(
             full.length >= base.length &&
             full.indexOf(base) === 0
         ){
@@ -30871,34 +30923,701 @@ if(
         }
 
 
+        // -------------------------------------------------
+        // If text was inserted/edited elsewhere in the
+        // document, return the complete changed document.
+        // Validation still requires a REAL text-input event.
+        // -------------------------------------------------
+
         return full.trim();
 
     }
 
 
     // =====================================================
-    // QUESTION READINESS
+    // TEXT INPUT DETECTION
     //
-    // IMPORTANT:
-    // THIS FUNCTION DOES NOT CALCULATE POINTS.
+    // REAL STUDENT TYPING ONLY
+    // =====================================================
+
+    function markTextInput(event){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        const inputType =
+            normalize(
+                event &&
+                event.inputType
+            );
+
+
+        state.textInputEvents++;
+
+
+        state.lastInputType =
+            inputType;
+
+
+        state.lastInputTime =
+            Date.now();
+
+
+        if(
+            inputType === "inserttext" ||
+            inputType === "insertcompositiontext" ||
+            inputType === "insertfromcomposition"
+        ){
+
+            const data =
+                event &&
+                typeof event.data ===
+                "string"
+                ?
+                event.data
+                :
+                "";
+
+
+            state.typedCharacterCount +=
+                data.length;
+
+        }else{
+
+            // -------------------------------------------------
+            // Some older/custom Word simulation editors do not
+            // expose inputType correctly. The input event itself
+            // is still proof of a real editable-document change.
+            // -------------------------------------------------
+
+            const current =
+                getDocumentText();
+
+
+            const previous =
+                state.lastObservedText ||
+                state.baselineText ||
+                "";
+
+
+            if(
+                current !== previous
+            ){
+
+                const difference =
+                    Math.abs(
+                        current.length -
+                        previous.length
+                    );
+
+
+                state.typedCharacterCount +=
+                    Math.max(
+                        1,
+                        difference
+                    );
+
+            }
+
+        }
+
+
+        const currentText =
+            getDocumentText();
+
+
+        if(
+            currentText !==
+            state.baselineText
+        ){
+
+            state.textChanged =
+                true;
+
+        }
+
+
+        state.lastObservedText =
+            currentText;
+
+
+        state.currentAnswerText =
+            getCurrentAnswer();
+
+
+        updatePanel();
+
+
+        evaluateCurrentQuestionSoon();
+
+    }
+
+
+    // =====================================================
+    // BEFORE INPUT
+    // =====================================================
+
+    function handleBeforeInput(event){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        const inputType =
+            normalize(
+                event &&
+                event.inputType
+            );
+
+
+        if(
+            inputType.includes("insert") ||
+            inputType === "deletecontentbackward" ||
+            inputType === "deletecontentforward"
+        ){
+
+            state.lastInputType =
+                inputType;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // KEYBOARD FALLBACK
     //
-    // It only determines whether the current question
-    // has received an actual student response/action.
+    // Android/custom simulation may not always expose
+    // useful inputType values.
+    // =====================================================
+
+    function handleSimulationKeydown(event){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !event ||
+            event.ctrlKey ||
+            event.altKey ||
+            event.metaKey
+        ){
+
+            return;
+
+        }
+
+
+        const key =
+            String(
+                event.key || ""
+            );
+
+
+        if(
+            key.length === 1
+        ){
+
+            state.typedCharacterCount++;
+
+            state.textInputEvents++;
+
+            state.lastInputTime =
+                Date.now();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT MUTATION FALLBACK
     //
-    // Once Ranise validates it:
-    // EXACTLY 25 POINTS are awarded.
+    // Used when the simulation editor changes its DOM
+    // without emitting a normal input event.
+    // =====================================================
+
+    function handleDocumentMutation(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting
+        ){
+
+            return;
+
+        }
+
+
+        const current =
+            getDocumentText();
+
+
+        if(
+            current !==
+            state.baselineText
+        ){
+
+            state.textChanged =
+                true;
+
+            state.lastObservedText =
+                current;
+
+            state.currentAnswerText =
+                getCurrentAnswer();
+
+            updatePanel();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // INSTALL MUTATION OBSERVER
+    // =====================================================
+
+    function attachMutationObserver(){
+
+        if(
+            !state.simulationDocument ||
+            typeof MutationObserver ===
+            "undefined"
+        ){
+
+            return;
+
+        }
+
+
+        if(state.mutationObserver){
+
+            try{
+
+                state.mutationObserver.disconnect();
+
+            }catch(error){}
+
+        }
+
+
+        try{
+
+            state.mutationObserver =
+                new MutationObserver(
+                    function(){
+
+                        handleDocumentMutation();
+
+                    }
+                );
+
+
+            state.mutationObserver.observe(
+                state.simulationDocument.body,
+                {
+                    subtree:true,
+                    childList:true,
+                    characterData:true
+                }
+            );
+
+        }catch(error){
+
+            state.mutationObserver =
+                null;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // QUESTION TYPE DETECTION
+    //
+    // Ranise dynamically determines whether the current
+    // question expects:
+    //
+    //     TEXT
+    //     ACTION
+    //     TEXT + ACTION
     //
     // =====================================================
 
-    function hasCurrentResponse(){
+    function detectQuestionRequirements(question){
+
+        const q =
+            normalize(question);
+
+
+        const requirements = {
+
+            text:false,
+
+            actions:[],
+
+            mixed:false
+
+        };
+
+
+        // -------------------------------------------------
+        // TEXT / WRITTEN RESPONSE INDICATORS
+        // -------------------------------------------------
+
+        const textPatterns = [
+
+            "ecrire",
+            "écrire",
+            "repondre",
+            "répondre",
+            "expliquez",
+            "expliquer",
+            "expliquer",
+            "explique",
+            "decrire",
+            "décrire",
+            "identifier",
+            "quelle est",
+            "quelle",
+            "qu est ce",
+            "qu'est ce",
+            "difference",
+            "différence",
+            "role",
+            "rôle",
+            "pourquoi",
+            "comment",
+            "definir",
+            "définir",
+            "citer",
+            "justifier",
+            "par ecrit",
+            "par écrit"
+
+        ];
+
+
+        for(
+            let i = 0;
+            i < textPatterns.length;
+            i++
+        ){
+
+            if(
+                q.includes(
+                    normalize(
+                        textPatterns[i]
+                    )
+                )
+            ){
+
+                requirements.text =
+                    true;
+
+                break;
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // WORD ACTION INDICATORS
+        // -------------------------------------------------
+
+        const actionPatterns = [
+
+            {
+                names:[
+                    "copier",
+                    "copy"
+                ],
+                action:"copy"
+            },
+
+            {
+                names:[
+                    "couper",
+                    "cut"
+                ],
+                action:"cut"
+            },
+
+            {
+                names:[
+                    "coller",
+                    "paste"
+                ],
+                action:"paste"
+            },
+
+            {
+                names:[
+                    "gras",
+                    "bold"
+                ],
+                action:"bold"
+            },
+
+            {
+                names:[
+                    "italique",
+                    "italic"
+                ],
+                action:"italic"
+            },
+
+            {
+                names:[
+                    "souligne",
+                    "souligné",
+                    "souligner",
+                    "underline"
+                ],
+                action:"underline"
+            },
+
+            {
+                names:[
+                    "couleur de police",
+                    "font color"
+                ],
+                action:"color"
+            },
+
+            {
+                names:[
+                    "surbrillance",
+                    "highlight",
+                    "text highlight"
+                ],
+                action:"highlight"
+            },
+
+            {
+                names:[
+                    "taille de police",
+                    "font size"
+                ],
+                action:"font-size"
+            },
+
+            {
+                names:[
+                    "type de police",
+                    "font family",
+                    "police"
+                ],
+                action:"font-family"
+            }
+
+        ];
+
+
+        for(
+            let i = 0;
+            i < actionPatterns.length;
+            i++
+        ){
+
+            const pattern =
+                actionPatterns[i];
+
+
+            for(
+                let j = 0;
+                j < pattern.names.length;
+                j++
+            ){
+
+                if(
+                    q.includes(
+                        normalize(
+                            pattern.names[j]
+                        )
+                    )
+                ){
+
+                    if(
+                        !requirements.actions.includes(
+                            pattern.action
+                        )
+                    ){
+
+                        requirements.actions.push(
+                            pattern.action
+                        );
+
+                    }
+
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // "DEMONTRER / APPLIQUER / UTILISER" USUALLY MEANS
+        // REAL WORD ACTION, NOT JUST A CLICK.
+        // -------------------------------------------------
+
+        if(
+            q.includes("demontrer") ||
+            q.includes("démontrer") ||
+            q.includes("appliquer") ||
+            q.includes("utiliser") ||
+            q.includes("effectuer") ||
+            q.includes("realiser") ||
+            q.includes("réaliser") ||
+            q.includes("demonstrer") ||
+            q.includes("montrer")
+        ){
+
+            if(
+                requirements.actions.length
+            ){
+
+                // Existing detected actions remain.
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // IF NO SPECIFIC WORD ACTION WAS DETECTED AND THE
+        // QUESTION IS PEDAGOGICAL/THEORETICAL, REQUIRE TEXT.
+        // -------------------------------------------------
+
+        if(
+            !requirements.actions.length
+        ){
+
+            requirements.text =
+                true;
+
+        }
+
+
+        requirements.mixed =
+            requirements.text &&
+            requirements.actions.length > 0;
+
+
+        return requirements;
+
+    }
+
+
+    // =====================================================
+    // REAL TEXT RESPONSE VALIDATION
+    // =====================================================
+
+    function hasRealTextResponse(){
 
         const answer =
             getCurrentAnswer();
 
 
         if(
-            answer &&
-            normalize(answer).length >= 3
+            !answer ||
+            !normalize(answer)
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // CRITICAL:
+        // Text must have appeared/changed AFTER the
+        // current question was introduced.
+        // -------------------------------------------------
+
+        if(
+            !state.textChanged
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            state.textInputEvents <= 0 &&
+            state.typedCharacterCount <= 0
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // Avoid accepting an accidental one-character event.
+        // The 3-character rule is NOT the validation rule;
+        // it is only a minimum sanity threshold for actual
+        // text that was entered.
+        // -------------------------------------------------
+
+        if(
+            normalize(answer).length <
+            3
+        ){
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // REAL ACTION VALIDATION
+    // =====================================================
+
+    function hasRequiredActions(requirements){
+
+        if(
+            !requirements ||
+            !Array.isArray(
+                requirements.actions
+            ) ||
+            !requirements.actions.length
         ){
 
             return true;
@@ -30910,27 +31629,209 @@ if(
             state.currentActions || {};
 
 
-        const actionKeys =
-            Object.keys(actions);
-
-
         for(
             let i = 0;
-            i < actionKeys.length;
+            i < requirements.actions.length;
             i++
         ){
 
-            const key =
-                actionKeys[i];
+            const required =
+                normalize(
+                    requirements.actions[i]
+                );
 
 
             if(
-                actions[key] > 0
+                !required ||
+                !actions[required] ||
+                actions[required] <= 0
             ){
 
-                return true;
+                return false;
 
             }
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // SELECTION REQUIREMENT
+    //
+    // Formatting/copy/cut/paste questions generally need
+    // a real selected text before the action.
+    // =====================================================
+
+    function actionNeedsSelection(action){
+
+        const normalized =
+            normalize(action);
+
+
+        return (
+            normalized === "bold" ||
+            normalized === "italic" ||
+            normalized === "underline" ||
+            normalized === "color" ||
+            normalized === "highlight" ||
+            normalized === "font-size" ||
+            normalized === "font-family" ||
+            normalized === "copy" ||
+            normalized === "cut"
+        );
+
+    }
+
+
+    // =====================================================
+    // VALIDATE CURRENT QUESTION REQUIREMENTS
+    // =====================================================
+
+    function currentQuestionRequirements(){
+
+        if(
+            !state.evaluation ||
+            !state.evaluation[
+                state.questionIndex
+            ]
+        ){
+
+            return {
+
+                text:true,
+
+                actions:[],
+
+                mixed:false
+
+            };
+
+        }
+
+
+        return detectQuestionRequirements(
+            state.evaluation[
+                state.questionIndex
+            ]
+        );
+
+    }
+
+
+    // =====================================================
+    // REAL STUDENT RESPONSE CHECK
+    //
+    // IMPORTANT:
+    // A CLICK ALONE CAN NEVER PASS.
+    // =====================================================
+
+    function hasCurrentResponse(){
+
+        const requirements =
+            currentQuestionRequirements();
+
+
+        // -------------------------------------------------
+        // TEXT QUESTION
+        // -------------------------------------------------
+
+        if(
+            requirements.text &&
+            !requirements.actions.length
+        ){
+
+            return hasRealTextResponse();
+
+        }
+
+
+        // -------------------------------------------------
+        // ACTION QUESTION
+        // -------------------------------------------------
+
+        if(
+            !requirements.text &&
+            requirements.actions.length
+        ){
+
+            if(
+                !hasRequiredActions(
+                    requirements
+                )
+            ){
+
+                return false;
+
+            }
+
+
+            // -------------------------------------------------
+            // For formatting/copy/cut actions, ensure there
+            // was a real selection when applicable.
+            // -------------------------------------------------
+
+            for(
+                let i = 0;
+                i < requirements.actions.length;
+                i++
+            ){
+
+                const action =
+                    requirements.actions[i];
+
+
+                if(
+                    actionNeedsSelection(
+                        action
+                    ) &&
+                    state.currentSelections.length === 0
+                ){
+
+                    return false;
+
+                }
+
+            }
+
+
+            return true;
+
+        }
+
+
+        // -------------------------------------------------
+        // MIXED QUESTION
+        // -------------------------------------------------
+
+        if(
+            requirements.mixed
+        ){
+
+            if(
+                !hasRealTextResponse()
+            ){
+
+                return false;
+
+            }
+
+
+            if(
+                !hasRequiredActions(
+                    requirements
+                )
+            ){
+
+                return false;
+
+            }
+
+
+            return true;
 
         }
 
@@ -30943,11 +31844,7 @@ if(
     // =====================================================
     // OFFICIAL QUESTION VALIDATION
     //
-    // NO SCORE CALCULATION IS DONE HERE.
-    //
-    // Validation = YES
-    // Points = exactly 25
-    //
+    // EXACTLY 25 POINTS PER VALIDATED QUESTION.
     // =====================================================
 
     function validateCurrentQuestion(){
@@ -30956,13 +31853,33 @@ if(
             !state.started ||
             state.completed ||
             !state.waiting ||
-            state.questionValidated
+            state.questionValidated ||
+            state.processing
         ){
 
             return false;
 
         }
 
+
+        // -------------------------------------------------
+        // NEVER VALIDATE WHILE RANISE IS SPEAKING.
+        // -------------------------------------------------
+
+        if(
+            state.speaking
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // CRITICAL:
+        // VALIDATION REQUIRES THE REAL REQUIREMENTS OF
+        // THE CURRENT QUESTION.
+        // -------------------------------------------------
 
         if(
             !hasCurrentResponse()
@@ -30971,6 +31888,10 @@ if(
             return false;
 
         }
+
+
+        state.processing =
+            true;
 
 
         // -------------------------------------------------
@@ -30998,39 +31919,30 @@ if(
 
 
         // -------------------------------------------------
-        // OFFICIAL SCORE:
-        //
-        // ONE VALIDATED QUESTION = EXACTLY 25 POINTS.
-        //
+        // OFFICIAL SCORE
         // -------------------------------------------------
 
         state.score =
-            (
-                state.questionScores
-                    .reduce(
-                        function(total,points){
+            state.questionScores
+                .reduce(
+                    function(total,points){
 
-                            return (
-                                total +
-                                (
-                                    points ===
-                                    OFFICIAL_POINTS_PER_QUESTION
-                                    ?
-                                    OFFICIAL_POINTS_PER_QUESTION
-                                    :
-                                    0
-                                )
-                            );
+                        return (
+                            total +
+                            (
+                                points ===
+                                OFFICIAL_POINTS_PER_QUESTION
+                                ?
+                                OFFICIAL_POINTS_PER_QUESTION
+                                :
+                                0
+                            )
+                        );
 
-                        },
-                        0
-                    )
-            );
+                    },
+                    0
+                );
 
-
-        // -------------------------------------------------
-        // NEVER ALLOW SCORE ABOVE 100.
-        // -------------------------------------------------
 
         state.score =
             Math.min(
@@ -31042,7 +31954,18 @@ if(
         updatePanel();
 
 
-        nextEvaluationQuestion();
+        // -------------------------------------------------
+        // Continue asynchronously.
+        // -------------------------------------------------
+
+        setTimeout(
+            function(){
+
+                nextEvaluationQuestion();
+
+            },
+            0
+        );
 
 
         return true;
@@ -31052,6 +31975,8 @@ if(
 
     // =====================================================
     // DELAYED QUESTION VALIDATION
+    //
+    // No automatic score from waiting.
     // =====================================================
 
     function evaluateCurrentQuestionSoon(){
@@ -31060,7 +31985,8 @@ if(
             !state.started ||
             state.completed ||
             !state.waiting ||
-            state.questionValidated
+            state.questionValidated ||
+            state.processing
         ){
 
             return;
@@ -31071,10 +31997,23 @@ if(
         setTimeout(
             function(){
 
+                if(
+                    !state.started ||
+                    state.completed ||
+                    !state.waiting ||
+                    state.questionValidated ||
+                    state.processing
+                ){
+
+                    return;
+
+                }
+
+
                 validateCurrentQuestion();
 
             },
-            180
+            250
         );
 
     }
@@ -31082,6 +32021,10 @@ if(
 
     // =====================================================
     // SIMULATION CLICK
+    //
+    // IMPORTANT:
+    // CLICK IS OBSERVATION ONLY.
+    // IT IS NEVER ENOUGH BY ITSELF.
     // =====================================================
 
     function handleSimulationClick(event){
@@ -31190,6 +32133,15 @@ if(
         }
 
 
+        // -------------------------------------------------
+        // IMPORTANT:
+        // No generic "click" is recorded.
+        // Only recognized Word actions are recorded.
+        // -------------------------------------------------
+
+        updatePanel();
+
+
         evaluateCurrentQuestionSoon();
 
     }
@@ -31199,7 +32151,7 @@ if(
     // INPUT
     // =====================================================
 
-    function handleSimulationInput(){
+    function handleSimulationInput(event){
 
         if(
             !state.started ||
@@ -31213,22 +32165,9 @@ if(
         }
 
 
-        const current =
-            getDocumentText();
-
-
-        state.lastDocumentText =
-            current;
-
-
-        state.currentAnswerText =
-            getCurrentAnswer();
-
-
-        updatePanel();
-
-
-        evaluateCurrentQuestionSoon();
+        markTextInput(
+            event
+        );
 
     }
 
@@ -31267,10 +32206,23 @@ if(
             state.simulationDocument;
 
 
+        if(!doc){
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // Prevent duplicate listeners if simulation iframe
+        // remains the same.
+        // -------------------------------------------------
+
         if(
-            !doc ||
             state.listenersAttached
         ){
+
+            attachMutationObserver();
 
             return;
 
@@ -31287,6 +32239,20 @@ if(
         doc.addEventListener(
             "input",
             handleSimulationInput,
+            true
+        );
+
+
+        doc.addEventListener(
+            "beforeinput",
+            handleBeforeInput,
+            true
+        );
+
+
+        doc.addEventListener(
+            "keydown",
+            handleSimulationKeydown,
             true
         );
 
@@ -31322,6 +32288,9 @@ if(
         state.listenersAttached =
             true;
 
+
+        attachMutationObserver();
+
     }
 
 
@@ -31336,8 +32305,55 @@ if(
 
 
         await speak(
-            "Très bien. J'ai validé cette question. Elle vaut exactement 25 points."
+            "Très bien. J'ai vérifié votre réalisation et validé cette question. Elle vaut exactement 25 points."
         );
+
+
+        // -------------------------------------------------
+        // PASSING THRESHOLD REACHED
+        //
+        // 3 validated questions = 75
+        // -------------------------------------------------
+
+        if(
+            state.score >=
+            OFFICIAL_PASSING_SCORE
+        ){
+
+            // -------------------------------------------------
+            // If question 4 is also completed, score can be
+            // 100. Otherwise 75 is enough to validate the
+            // Evaluation.
+            // -------------------------------------------------
+
+            if(
+                state.questionIndex >=
+                OFFICIAL_QUESTION_COUNT - 1
+            ){
+
+                finishEvaluation();
+
+                return;
+
+            }
+
+
+            // -------------------------------------------------
+            // At least 3 questions validated.
+            // Evaluation is officially passed.
+            // -------------------------------------------------
+
+            if(
+                state.questionIndex >= 2
+            ){
+
+                finishEvaluation();
+
+                return;
+
+            }
+
+        }
 
 
         // -------------------------------------------------
@@ -31351,12 +32367,12 @@ if(
 
             state.questionIndex++;
 
+            state.processing =
+                false;
 
             updatePanel();
 
-
             await speakCurrentQuestion();
-
 
             return;
 
@@ -31375,8 +32391,11 @@ if(
     // =====================================================
     // FINAL EVALUATION
     //
-    // THE ONLY POSSIBLE FINAL SCORE AFTER 4 VALIDATIONS
-    // IS 100 / 100.
+    // VALID FINAL SCORES:
+    //
+    //     75 / 100
+    //     100 / 100
+    //
     // =====================================================
 
     async function finishEvaluation(){
@@ -31394,49 +32413,100 @@ if(
             false;
 
 
+        state.processing =
+            true;
+
+
+        const validatedCount =
+            state.questionScores
+                .filter(
+                    function(points){
+
+                        return (
+                            points ===
+                            OFFICIAL_POINTS_PER_QUESTION
+                        );
+
+                    }
+                )
+                .length;
+
+
         // -------------------------------------------------
-        // FORCE OFFICIAL FINAL SCORE.
-        //
-        // 4 x 25 = 100
-        //
-        // No other calculation exists.
+        // SCORE IS NEVER INVENTED.
         // -------------------------------------------------
 
-        state.questionScores = [
-
-            OFFICIAL_POINTS_PER_QUESTION,
-            OFFICIAL_POINTS_PER_QUESTION,
-            OFFICIAL_POINTS_PER_QUESTION,
-            OFFICIAL_POINTS_PER_QUESTION
-
-        ];
+        state.score =
+            validatedCount *
+            OFFICIAL_POINTS_PER_QUESTION;
 
 
         state.score =
-            OFFICIAL_TOTAL_SCORE;
+            Math.min(
+                OFFICIAL_TOTAL_SCORE,
+                state.score
+            );
 
 
-        const finalScore =
-            OFFICIAL_TOTAL_SCORE;
+        // -------------------------------------------------
+        // Evaluation is passed only at 75 or 100.
+        // -------------------------------------------------
+
+        if(
+            state.score <
+            OFFICIAL_PASSING_SCORE
+        ){
+
+            state.processing =
+                false;
+
+            state.waiting =
+                true;
+
+            return;
+
+        }
 
 
         state.completed =
             true;
 
 
+        state.processing =
+            false;
+
+
         updatePanel();
 
 
-        // -------------------------------------------------
-        // OFFICIAL SUCCESS MESSAGE
-        // -------------------------------------------------
+        let finalMessage =
+            "";
+
+
+        if(
+            state.score >=
+            OFFICIAL_TOTAL_SCORE
+        ){
+
+            finalMessage =
+                "Excellent. Vous avez validé les quatre questions. Chaque question vaut 25 points. Votre note finale est de 100 points sur 100. Votre Evaluation est validée. Je vais maintenant enregistrer votre progression et déverrouiller automatiquement le chapitre suivant.";
+
+        }else{
+
+            finalMessage =
+                "Très bien. Vous avez validé trois questions sur quatre. Votre note finale est de 75 points sur 100. Le seuil de réussite est atteint. Votre Evaluation est validée. Je vais maintenant enregistrer votre progression et déverrouiller automatiquement le chapitre suivant.";
+
+        }
+
 
         await speak(
-
-            "Excellent. Vous avez validé les quatre questions. Chaque question vaut 25 points. Votre note finale est donc de 100 points sur 100. Votre Evaluation est validée. Vous pouvez maintenant poursuivre votre formation."
-
+            finalMessage
         );
 
+
+        // -------------------------------------------------
+        // FINAL BRIDGE
+        // -------------------------------------------------
 
         unlockNextChapter();
 
@@ -31447,13 +32517,8 @@ if(
     // NO-PROGRESS / STUCK DETECTION
     //
     // IMPORTANT:
-    // This mechanism NEVER creates points.
-    // It only gives Ranise another opportunity to guide
-    // the student.
-    //
-    // It can NEVER validate a question merely because
-    // the score is high.
-    //
+    // THIS NEVER VALIDATES ANYTHING.
+    // IT ONLY GUIDES THE STUDENT.
     // =====================================================
 
     function checkStudentProgress(){
@@ -31513,11 +32578,6 @@ if(
                 Date.now();
 
 
-            // -------------------------------------------------
-            // IMPORTANT:
-            // NEVER auto-complete from accumulated score.
-            // -------------------------------------------------
-
             if(
                 state.noProgressChecks >= 2
             ){
@@ -31528,7 +32588,7 @@ if(
 
                 speak(
 
-                    "Je constate que votre progression est momentanément bloquée. Prenez votre temps et poursuivez la question actuelle. Je suis là pour vous guider."
+                    "Prenez votre temps pour réaliser la question actuelle. Je vérifierai votre véritable réponse ou l'action demandée dans la simulation avant de la valider."
 
                 );
 
@@ -31546,7 +32606,7 @@ if(
     function startProgressMonitor(){
 
         if(
-            state.__progressMonitorStarted
+            state.progressMonitorStarted
         ){
 
             return;
@@ -31554,7 +32614,7 @@ if(
         }
 
 
-        state.__progressMonitorStarted =
+        state.progressMonitorStarted =
             true;
 
 
@@ -31570,38 +32630,350 @@ if(
     }
 
 
-    // =====================================================
-    // UNLOCK NEXT CHAPTER
-    // =====================================================
 
-    function unlockNextChapter(){
 
-        if(
-            typeof RaniseDynamicUnlockRenderBridge !==
-            "undefined" &&
-            RaniseDynamicUnlockRenderBridge &&
-            typeof RaniseDynamicUnlockRenderBridge.unlockNextPart ===
-            "function"
-        ){
 
-            RaniseDynamicUnlockRenderBridge.unlockNextPart(
 
-                state.chapterId,
 
-                "evaluation"
 
-            );
 
-            return;
 
-        }
 
+
+// =====================================================
+// FINAL BRIDGE
+//
+// BLOCK 10 → EVALUATION VALIDATED
+//              ↓
+//     SCORE ALREADY CALCULATED
+//              ↓
+//     RANISE ALREADY GAVE SCORE
+//              ↓
+//     EXISTING BRIDGE
+//              ↓
+//     SAVE PROGRESS
+//              ↓
+//     UNLOCK NEXT CHAPTER
+//              ↓
+//     RENDER NEXT CHAPTER
+//
+// IMPORTANT:
+//
+// Block 10 does NOT unlock the next chapter itself.
+// Block 10 does NOT modify chapter locks directly.
+// Block 10 does NOT render the next chapter.
+//
+// The existing Dynamic Unlock Render Bridge owns:
+//
+//     progression
+//     saving
+//     evaluation validation
+//     next chapter unlock
+//     next chapter rendering
+//
+// The ONLY final handoff is:
+//
+//     unlockNextPart(
+//         chapterId,
+//         "evaluation"
+//     )
+//
+// =====================================================
+
+function unlockNextChapter(){
+
+    // -------------------------------------------------
+    // NEVER SEND THE FINAL UNLOCK MORE THAN ONCE.
+    // -------------------------------------------------
+
+    if(
+        state.finalUnlockRequested
+    ){
+
+        return false;
+
+    }
+
+
+    // -------------------------------------------------
+    // EVALUATION MUST REALLY BE PASSED.
+    //
+    // Official passing scores:
+    //
+    //     75 / 100
+    //     100 / 100
+    // -------------------------------------------------
+
+    if(
+        !state.completed ||
+        (
+            state.score !== 75 &&
+            state.score !== 100
+        )
+    ){
+
+        console.warn(
+            "RANISE BLOCK 10: Final Bridge rejected. Evaluation is not officially passed."
+        );
+
+        return false;
+
+    }
+
+
+    // -------------------------------------------------
+    // EXISTING DYNAMIC UNLOCK BRIDGE MUST EXIST.
+    // -------------------------------------------------
+
+    if(
+        typeof RaniseDynamicUnlockRenderBridge ===
+        "undefined" ||
+        !RaniseDynamicUnlockRenderBridge
+    ){
 
         console.error(
             "RANISE BLOCK 10: Dynamic Unlock Bridge unavailable."
         );
 
+        return false;
+
     }
+
+
+    if(
+        typeof RaniseDynamicUnlockRenderBridge.unlockNextPart !==
+        "function"
+    ){
+
+        console.error(
+            "RANISE BLOCK 10: Dynamic Unlock Bridge unlockNextPart unavailable."
+        );
+
+        return false;
+
+    }
+
+
+    // -------------------------------------------------
+    // VALIDATE CHAPTER ID.
+    // -------------------------------------------------
+
+    const chapterId =
+        String(
+            state.chapterId || ""
+        ).trim();
+
+
+    if(
+        !chapterId ||
+        isChapter1(chapterId)
+    ){
+
+        console.error(
+            "RANISE BLOCK 10: Invalid chapterId for final Evaluation handoff."
+        );
+
+        return false;
+
+    }
+
+
+    // -------------------------------------------------
+    // LOCK THE REQUEST.
+    // -------------------------------------------------
+
+    state.finalUnlockRequested =
+        true;
+
+
+    state.finalUnlockSucceeded =
+        false;
+
+
+    // -------------------------------------------------
+    // OFFICIAL FINAL HANDOFF.
+    //
+    // THIS IS THE CRITICAL LINE:
+    //
+    //     chapterId
+    //     "evaluation"
+    //
+    // NOT "homework".
+    // NOT "exercises".
+    // NOT "practice".
+    //
+    // The Bridge receives the completed Evaluation and
+    // is responsible for unlocking/rendering the NEXT
+    // chapter dynamically.
+    // -------------------------------------------------
+
+    try{
+
+        const result =
+            RaniseDynamicUnlockRenderBridge.unlockNextPart(
+
+                chapterId,
+
+                "evaluation"
+
+            );
+
+
+        // -------------------------------------------------
+        // ASYNCHRONOUS BRIDGE
+        // -------------------------------------------------
+
+        if(
+            result &&
+            typeof result.then ===
+            "function"
+        ){
+
+            result.then(
+                function(bridgeResult){
+
+                    // -------------------------------------
+                    // Explicit Bridge rejection.
+                    // -------------------------------------
+
+                    if(
+                        bridgeResult === false
+                    ){
+
+                        state.finalUnlockRequested =
+                            false;
+
+                        state.finalUnlockSucceeded =
+                            false;
+
+                        console.error(
+                            "RANISE BLOCK 10: Dynamic Unlock Bridge rejected Evaluation.",
+                            chapterId,
+                            state.score
+                        );
+
+                        return;
+
+                    }
+
+
+                    // -------------------------------------
+                    // SUCCESS
+                    // -------------------------------------
+
+                    state.finalUnlockSucceeded =
+                        true;
+
+
+                    console.log(
+                        "RANISE BLOCK 10: EVALUATION VALIDATED — SCORE:",
+                        state.score,
+                        "/",
+                        OFFICIAL_TOTAL_SCORE,
+                        "— NEXT CHAPTER UNLOCK REQUEST SENT TO BRIDGE:",
+                        chapterId
+                    );
+
+                }
+            ).catch(
+                function(error){
+
+                    state.finalUnlockRequested =
+                        false;
+
+                    state.finalUnlockSucceeded =
+                        false;
+
+                    console.error(
+                        "RANISE BLOCK 10: Final Dynamic Unlock Bridge error.",
+                        error
+                    );
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        // -------------------------------------------------
+        // SYNCHRONOUS BRIDGE
+        //
+        // IMPORTANT:
+        // false = rejected
+        // anything else = accepted
+        // -------------------------------------------------
+
+        if(
+            result === false
+        ){
+
+            state.finalUnlockRequested =
+                false;
+
+            state.finalUnlockSucceeded =
+                false;
+
+            console.error(
+                "RANISE BLOCK 10: Dynamic Unlock Bridge rejected Evaluation.",
+                chapterId,
+                state.score
+            );
+
+            return false;
+
+        }
+
+
+        state.finalUnlockSucceeded =
+            true;
+
+
+        console.log(
+            "RANISE BLOCK 10: EVALUATION VALIDATED — SCORE:",
+            state.score,
+            "/",
+            OFFICIAL_TOTAL_SCORE,
+            "— NEXT CHAPTER UNLOCK REQUEST SENT TO BRIDGE:",
+            chapterId
+        );
+
+
+        return true;
+
+
+    }catch(error){
+
+        state.finalUnlockRequested =
+            false;
+
+        state.finalUnlockSucceeded =
+            false;
+
+
+        console.error(
+            "RANISE BLOCK 10: Final Dynamic Unlock Bridge error.",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
 
 
     // =====================================================
@@ -31684,8 +33056,7 @@ if(
 
 
         // -------------------------------------------------
-        // SAFETY CHECK:
-        // EXACTLY 4 QUESTIONS ARE USED.
+        // OFFICIAL SYSTEM = EXACTLY 4 QUESTIONS
         // -------------------------------------------------
 
         if(
@@ -31769,11 +33140,23 @@ if(
             false;
 
 
+        state.finalUnlockRequested =
+            false;
+
+
+        state.finalUnlockSucceeded =
+            false;
+
+
         state.evaluationStartedAt =
             Date.now();
 
 
-        state.__progressMonitorStarted =
+        state.progressMonitorStarted =
+            false;
+
+
+        state.listenersAttached =
             false;
 
 
@@ -31806,7 +33189,7 @@ if(
             chapterName(
                 chapterId
             ) +
-            ". Cette Evaluation comporte exactement quatre questions. Chaque question validée vaut exactement 25 points. Lorsque les quatre questions seront validées, votre note finale sera de 100 points sur 100. Je vais vous poser les questions une par une."
+            ". Cette Evaluation comporte exactement quatre questions. Chaque question validée vaut exactement 25 points. Le seuil de réussite est de 75 points sur 100. Je vais vérifier votre véritable réponse dans le document ou l'action réelle demandée dans la simulation Microsoft Word 2007. Un simple clic ne suffit pas pour valider une question. Prenez le temps nécessaire pour réaliser chaque tâche."
 
         );
 
@@ -31998,9 +33381,6 @@ if(
 
     // =====================================================
     // MAIN RANISE EVALUATION PANEL
-    //
-    // IMPORTANT:
-    // ORIGINAL IDS ARE PRESERVED.
     // =====================================================
 
     function createEvaluationPanel(){
@@ -32042,7 +33422,7 @@ if(
                 '<div id="raniseBlock10Question"></div>' +
 
                 '<div id="raniseBlock10Answer">' +
-                'Réponse attendue directement dans le document Word.' +
+                'Ranise vérifiera votre réponse ou votre action réelle dans le document Word.' +
                 '</div>' +
 
                 '<div id="raniseBlock10Score">' +
@@ -32700,6 +34080,12 @@ if(
             );
 
 
+        const answerBox =
+            panel.querySelector(
+                "#raniseBlock10Answer"
+            );
+
+
         if(progress){
 
             progress.textContent =
@@ -32717,6 +34103,38 @@ if(
 
             questionBox.textContent =
                 question;
+
+        }
+
+
+        if(answerBox){
+
+            const requirements =
+                detectQuestionRequirements(
+                    question
+                );
+
+
+            if(
+                requirements.mixed
+            ){
+
+                answerBox.textContent =
+                    "Réponse attendue : texte réel + action Word réelle.";
+
+            }else if(
+                requirements.actions.length
+            ){
+
+                answerBox.textContent =
+                    "Ranise attend l'action Word réelle demandée dans la simulation.";
+
+            }else{
+
+                answerBox.textContent =
+                    "Ranise attend un texte réellement saisi dans le document Word.";
+
+            }
 
         }
 
@@ -32749,6 +34167,10 @@ if(
             getDocumentText();
 
 
+        state.lastObservedText =
+            state.baselineText;
+
+
         state.currentAnswerText =
             "";
 
@@ -32768,6 +34190,26 @@ if(
             paste:0
 
         };
+
+
+        state.textInputEvents =
+            0;
+
+
+        state.typedCharacterCount =
+            0;
+
+
+        state.textChanged =
+            false;
+
+
+        state.lastInputType =
+            "";
+
+
+        state.lastInputTime =
+            0;
 
 
         state.questionValidated =
@@ -32792,6 +34234,22 @@ if(
 
         state.lastActionTime =
             0;
+
+
+        if(
+            state.mutationObserver
+        ){
+
+            try{
+
+                state.mutationObserver.disconnect();
+
+            }catch(error){}
+
+        }
+
+
+        attachMutationObserver();
 
     }
 
@@ -32818,7 +34276,12 @@ if(
             false;
 
 
+        state.processing =
+            false;
+
+
         resetQuestionObservation();
+
 
         updatePanel();
 
@@ -32829,6 +34292,38 @@ if(
             ];
 
 
+        const requirements =
+            detectQuestionRequirements(
+                question
+            );
+
+
+        let instruction =
+            "";
+
+
+        if(
+            requirements.mixed
+        ){
+
+            instruction =
+                "Cette question demande une réponse écrite et une ou plusieurs actions réelles dans la simulation. Je vérifierai les deux avant de valider.";
+
+        }else if(
+            requirements.actions.length
+        ){
+
+            instruction =
+                "Cette question demande une action réelle dans la simulation Microsoft Word 2007. Un simple clic quelconque ne sera pas considéré comme une réponse.";
+
+        }else{
+
+            instruction =
+                "Cette question demande une réponse écrite. Tapez réellement votre réponse dans le document Microsoft Word 2007. Je vérifierai le texte saisi avant de valider.";
+
+        }
+
+
         await speak(
 
             "Question " +
@@ -32837,7 +34332,9 @@ if(
             ) +
             ". " +
             question +
-            " Écrivez votre réponse directement dans le document Microsoft Word 2007. Lorsque votre réponse est prête, je vais la valider."
+            " " +
+            instruction +
+            " Prenez le temps nécessaire. Lorsque votre réalisation sera réellement détectée et conforme à la demande, je validerai la question."
 
         );
 
@@ -32846,8 +34343,18 @@ if(
             !state.completed
         ){
 
+            resetQuestionObservation();
+
+
             state.waiting =
                 true;
+
+
+            state.processing =
+                false;
+
+
+            updatePanel();
 
         }
 
@@ -32917,6 +34424,10 @@ if(
             currentPart
         ){
 
+            // -------------------------------------------------
+            // PRESERVE EXISTING BRIDGE BEHAVIOR FIRST.
+            // -------------------------------------------------
+
             const result =
                 originalUnlock.apply(
                     this,
@@ -32931,7 +34442,7 @@ if(
 
 
             // -------------------------------------------------
-            // ONLY HOMEWORK → EVALUATION
+            // ONLY HOMEWORK → EVALUATION.
             // -------------------------------------------------
 
             if(
@@ -32961,7 +34472,7 @@ if(
 
 
             // -------------------------------------------------
-            // NEW REAL HANDOFF
+            // NEW REAL HANDOFF.
             // -------------------------------------------------
 
             state.bridgeHandoffSequence++;
@@ -33024,7 +34535,7 @@ if(
                     ){
 
                         console.warn(
-                            "RANISE BLOCK 10: Active chapter differs from Bridge handoff. Launch rejected."
+                            "RANISE BLOCK 10: Active chapter differs from Homework → Evaluation handoff."
                         );
 
                         return;
@@ -33172,6 +34683,9 @@ if(
                 speaking:
                     state.speaking,
 
+                processing:
+                    state.processing,
+
                 bridgeWrapped:
                     state.bridgeWrapped,
 
@@ -33189,6 +34703,21 @@ if(
 
                 questionScores:
                     state.questionScores.slice(),
+
+                textInputEvents:
+                    state.textInputEvents,
+
+                typedCharacterCount:
+                    state.typedCharacterCount,
+
+                textChanged:
+                    state.textChanged,
+
+                finalUnlockRequested:
+                    state.finalUnlockRequested,
+
+                finalUnlockSucceeded:
+                    state.finalUnlockSucceeded,
 
                 panelVisible:
                     !!(
