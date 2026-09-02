@@ -20895,6 +20895,1673 @@ window.RaniseMoiseEvaluationEngine = {
 
 
 
+// =========================================================
+// UNIVERSAL PRACTICE ACTION REGISTRY
+// MICROSOFT WORD 2007 FORMATION
+// RANISE MOISE — UNIVERSAL SIMULATION ACTION LAYER
+// =========================================================
+//
+// PURPOSE:
+//     Provides one universal technical dictionary for
+//     ALL dynamic practice chapters.
+//
+// IMPORTANT:
+//     - Does NOT start practice.
+//     - Does NOT replace Block 7.
+//     - Does NOT replace the Dynamic Unlock Bridge.
+//     - Does NOT create chapter-specific engines.
+//     - Does NOT modify Chapter 1.
+//     - Does NOT contain debug/test code.
+//
+// BLOCK 7 remains the ONLY dynamic practice engine.
+//
+// =========================================================
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // NORMALIZE
+    // =====================================================
+
+    function normalize(value){
+
+        return String(value || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g,"")
+            .toLowerCase()
+            .replace(/\s+/g," ")
+            .trim();
+
+    }
+
+
+
+    // =====================================================
+    // UNIVERSAL ACTION DEFINITIONS
+    // =====================================================
+
+    const actions = {
+
+        // -------------------------------------------------
+        // CLIPBOARD
+        // -------------------------------------------------
+
+        copy:{
+            type:"copy",
+            dataActions:[
+                "copy"
+            ]
+        },
+
+        cut:{
+            type:"cut",
+            dataActions:[
+                "cut"
+            ]
+        },
+
+        paste:{
+            type:"paste",
+            dataActions:[
+                "paste"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // FONT
+        // -------------------------------------------------
+
+        fontFamily:{
+            type:"font-family",
+            dataActions:[
+                "font-family",
+                "fontfamily",
+                "font"
+            ]
+        },
+
+        fontSize:{
+            type:"font-size",
+            dataActions:[
+                "font-size"
+            ]
+        },
+
+        growFont:{
+            type:"grow-font",
+            dataActions:[
+                "grow-font"
+            ]
+        },
+
+        shrinkFont:{
+            type:"shrink-font",
+            dataActions:[
+                "shrink-font"
+            ]
+        },
+
+        bold:{
+            type:"bold",
+            dataActions:[
+                "bold"
+            ]
+        },
+
+        italic:{
+            type:"italic",
+            dataActions:[
+                "italic"
+            ]
+        },
+
+        underline:{
+            type:"underline",
+            dataActions:[
+                "underline"
+            ]
+        },
+
+        strike:{
+            type:"strike",
+            dataActions:[
+                "strike"
+            ]
+        },
+
+        superscript:{
+            type:"superscript",
+            dataActions:[
+                "superscript"
+            ]
+        },
+
+        subscript:{
+            type:"subscript",
+            dataActions:[
+                "subscript"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // COLOR / HIGHLIGHT
+        // -------------------------------------------------
+
+        fontColor:{
+            type:"font-color",
+            dataActions:[
+                "color",
+                "font-color",
+                "fontcolor"
+            ]
+        },
+
+        highlight:{
+            type:"highlight",
+            dataActions:[
+                "highlight",
+                "text-highlight",
+                "text-highlight-color"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // PARAGRAPH
+        // -------------------------------------------------
+
+        alignLeft:{
+            type:"align-left",
+            dataActions:[
+                "align-left"
+            ]
+        },
+
+        alignCenter:{
+            type:"align-center",
+            dataActions:[
+                "align-center"
+            ]
+        },
+
+        alignRight:{
+            type:"align-right",
+            dataActions:[
+                "align-right"
+            ]
+        },
+
+        justify:{
+            type:"justify",
+            dataActions:[
+                "justify"
+            ]
+        },
+
+        bullet:{
+            type:"bullet",
+            dataActions:[
+                "bullet"
+            ]
+        },
+
+        numbering:{
+            type:"numbering",
+            dataActions:[
+                "numbering"
+            ]
+        },
+
+        indentIncrease:{
+            type:"indent-increase",
+            dataActions:[
+                "indent-increase"
+            ]
+        },
+
+        indentDecrease:{
+            type:"indent-decrease",
+            dataActions:[
+                "indent-decrease"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // STYLES
+        // -------------------------------------------------
+
+        styleNormal:{
+            type:"style-normal",
+            dataActions:[
+                "style-normal"
+            ]
+        },
+
+        styleH1:{
+            type:"style-h1",
+            dataActions:[
+                "style-h1"
+            ]
+        },
+
+        styleH2:{
+            type:"style-h2",
+            dataActions:[
+                "style-h2"
+            ]
+        },
+
+        styleTitle:{
+            type:"style-title",
+            dataActions:[
+                "style-title"
+            ]
+        },
+
+        styleSubtitle:{
+            type:"style-subtitle",
+            dataActions:[
+                "style-subtitle"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // PAGES
+        // -------------------------------------------------
+
+        insertCover:{
+            type:"insert-cover",
+            dataActions:[
+                "insert-cover"
+            ]
+        },
+
+        insertBlank:{
+            type:"insert-blank",
+            dataActions:[
+                "insert-blank"
+            ]
+        },
+
+        pageBreak:{
+            type:"page-break",
+            dataActions:[
+                "page-break"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // TABLES
+        // -------------------------------------------------
+
+        drawTable:{
+            type:"draw-table",
+            dataActions:[
+                "draw-table"
+            ]
+        },
+
+        excelSpreadsheet:{
+            type:"excel-spreadsheet",
+            dataActions:[
+                "excel-spreadsheet"
+            ]
+        },
+
+        convertTextTable:{
+            type:"convert-text-table",
+            dataActions:[
+                "convert-text-table"
+            ]
+        },
+
+        tableEraser:{
+            type:"table-eraser",
+            dataActions:[
+                "table-eraser"
+            ]
+        },
+
+        tableCustom:{
+            type:"table-custom",
+            dataActions:[
+                "table-custom"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // ILLUSTRATIONS
+        // -------------------------------------------------
+
+        picture:{
+            type:"insert-picture",
+            dataActions:[
+                "insert-picture"
+            ]
+        },
+
+        clipArt:{
+            type:"insert-clipart",
+            dataActions:[
+                "insert-clipart"
+            ]
+        },
+
+        wrapText:{
+            type:"image-wrap-text",
+            dataActions:[
+                "image-wrap-text"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // SMARTART
+        // -------------------------------------------------
+
+        smartArtList:{
+            type:"smartart-list",
+            dataActions:[
+                "smartart-list"
+            ]
+        },
+
+        smartArtProcess:{
+            type:"smartart-process",
+            dataActions:[
+                "smartart-process"
+            ]
+        },
+
+        smartArtCycle:{
+            type:"smartart-cycle",
+            dataActions:[
+                "smartart-cycle"
+            ]
+        },
+
+        smartArtHierarchy:{
+            type:"smartart-hierarchy",
+            dataActions:[
+                "smartart-hierarchy"
+            ]
+        },
+
+        smartArtPyramid:{
+            type:"smartart-pyramid",
+            dataActions:[
+                "smartart-pyramid"
+            ]
+        },
+
+
+        // -------------------------------------------------
+        // EDITING
+        // -------------------------------------------------
+
+        find:{
+            type:"find",
+            dataActions:[
+                "find"
+            ]
+        },
+
+        replace:{
+            type:"replace",
+            dataActions:[
+                "replace"
+            ]
+        },
+
+        select:{
+            type:"select",
+            dataActions:[
+                "select"
+            ]
+        },
+
+        selectObjects:{
+            type:"select-objects",
+            dataActions:[
+                "select-objects"
+            ]
+        },
+
+        selectAll:{
+            type:"select-all",
+            dataActions:[
+                "select-all"
+            ]
+        }
+
+    };
+
+
+
+    // =====================================================
+    // TABLE ACTIONS — 1x1 TO 15x15
+    // =====================================================
+
+    for(
+        let rows = 1;
+        rows <= 15;
+        rows++
+    ){
+
+        for(
+            let columns = 1;
+            columns <= 15;
+            columns++
+        ){
+
+            const key =
+                "table-" +
+                rows +
+                "x" +
+                columns;
+
+            actions[key] = {
+
+                type:key,
+
+                dataActions:[
+                    key
+                ]
+
+            };
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // WRAP VALUES
+    // =====================================================
+
+    const wrapValues = {
+
+        inline:"inline",
+
+        square:"square",
+
+        tight:"tight",
+
+        behind:"behind",
+
+        front:"front"
+
+    };
+
+
+
+    // =====================================================
+    // HIGHLIGHT / FONT COLOR VALUES
+    // =====================================================
+
+    const colorValues = {
+
+        black:"black",
+
+        white:"white",
+
+        red:"red",
+
+        orange:"orange",
+
+        yellow:"yellow",
+
+        green:"green",
+
+        blue:"blue",
+
+        purple:"purple",
+
+        gray:"gray",
+
+        grey:"gray",
+
+        none:"none"
+
+    };
+
+
+
+    // =====================================================
+    // SHAPES
+    // =====================================================
+
+    const shapeNames = [
+
+        "shape-rect",
+        "shape-rounded-rect",
+        "shape-circle",
+        "shape-triangle",
+        "shape-right-triangle",
+        "shape-diamond",
+        "shape-parallelogram",
+        "shape-trapezoid",
+        "shape-hexagon",
+        "shape-octagon",
+        "shape-star",
+        "shape-star-5",
+        "shape-arrow",
+        "shape-left-right-arrow",
+        "shape-line",
+        "shape-elbow-connector",
+        "shape-cloud",
+        "shape-heart",
+        "shape-lightning",
+        "shape-sun",
+        "shape-moon",
+        "shape-smiley",
+        "shape-bracket",
+        "shape-callout",
+        "shape-wedge-callout",
+        "shape-frame",
+        "shape-cross",
+        "shape-folder",
+        "shape-document"
+
+    ];
+
+
+
+    // =====================================================
+    // FIND ACTION BY DATA-ACTION
+    // =====================================================
+
+    function matchesDataAction(
+        target,
+        expectedActions
+    ){
+
+        if(
+            !target ||
+            !Array.isArray(expectedActions)
+        ){
+
+            return false;
+
+        }
+
+
+        let element =
+            target;
+
+
+        for(
+            let i = 0;
+            i < 8 && element;
+            i++
+        ){
+
+            const dataAction =
+                normalize(
+                    element.getAttribute &&
+                    element.getAttribute(
+                        "data-action"
+                    )
+                );
+
+
+            if(
+                dataAction &&
+                expectedActions.includes(
+                    dataAction
+                )
+            ){
+
+                return true;
+
+            }
+
+
+            const dataCommand =
+                normalize(
+                    element.getAttribute &&
+                    element.getAttribute(
+                        "data-command"
+                    )
+                );
+
+
+            if(
+                dataCommand &&
+                expectedActions.includes(
+                    dataCommand
+                )
+            ){
+
+                return true;
+
+            }
+
+
+            element =
+                element.parentElement;
+
+        }
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // FIND WRAP VALUE
+    // =====================================================
+
+    function matchesWrapValue(
+        target,
+        expectedValue
+    ){
+
+        if(
+            !target ||
+            !expectedValue
+        ){
+
+            return false;
+
+        }
+
+
+        let element =
+            target;
+
+
+        for(
+            let i = 0;
+            i < 8 && element;
+            i++
+        ){
+
+            const value =
+                normalize(
+                    element.getAttribute &&
+                    element.getAttribute(
+                        "data-wrap"
+                    )
+                );
+
+
+            if(
+                value ===
+                normalize(
+                    expectedValue
+                )
+            ){
+
+                return true;
+
+            }
+
+
+            element =
+                element.parentElement;
+
+        }
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // FIND COLOR VALUE
+    // =====================================================
+
+    function matchesColorValue(
+        target,
+        expectedValue
+    ){
+
+        if(
+            !target ||
+            !expectedValue
+        ){
+
+            return false;
+
+        }
+
+
+        let element =
+            target;
+
+
+        for(
+            let i = 0;
+            i < 8 && element;
+            i++
+        ){
+
+            const value =
+                normalize(
+                    element.getAttribute &&
+                    element.getAttribute(
+                        "data-color"
+                    )
+                );
+
+
+            if(
+                value ===
+                normalize(
+                    expectedValue
+                )
+            ){
+
+                return true;
+
+            }
+
+
+            element =
+                element.parentElement;
+
+        }
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // RESOLVE NATURAL-LANGUAGE STEP
+    // =====================================================
+
+    function resolveStep(
+        step
+    ){
+
+        const text =
+            normalize(step);
+
+
+        if(!text){
+
+            return null;
+
+        }
+
+
+        // -------------------------------------------------
+        // FONT
+        // -------------------------------------------------
+
+        if(
+            text.includes("grow font") ||
+            text.includes("augmenter la taille") ||
+            text.includes("augmenter la taille du texte") ||
+            text.includes("agrandir la taille")
+        ){
+
+            return {
+                type:"grow-font",
+                dataActions:["grow-font"]
+            };
+
+        }
+
+
+        if(
+            text.includes("shrink font") ||
+            text.includes("reduire la taille") ||
+            text.includes("réduire la taille") ||
+            text.includes("diminution de la taille")
+        ){
+
+            return {
+                type:"shrink-font",
+                dataActions:["shrink-font"]
+            };
+
+        }
+
+
+        if(
+            text.includes("superscript") ||
+            text.includes("exposant")
+        ){
+
+            return {
+                type:"superscript",
+                dataActions:["superscript"]
+            };
+
+        }
+
+
+        if(
+            text.includes("subscript") ||
+            text.includes("indice")
+        ){
+
+            return {
+                type:"subscript",
+                dataActions:["subscript"]
+            };
+
+        }
+
+
+        if(
+            text.includes("strikethrough") ||
+            text.includes("barré") ||
+            text.includes("barre") ||
+            text.includes("strike")
+        ){
+
+            return {
+                type:"strike",
+                dataActions:["strike"]
+            };
+
+        }
+
+
+        if(
+            text.includes("gras") ||
+            text.includes("bold")
+        ){
+
+            return {
+                type:"bold",
+                dataActions:["bold"]
+            };
+
+        }
+
+
+        if(
+            text.includes("italique") ||
+            text.includes("italic")
+        ){
+
+            return {
+                type:"italic",
+                dataActions:["italic"]
+            };
+
+        }
+
+
+        if(
+            text.includes("soulign") ||
+            text.includes("underline")
+        ){
+
+            return {
+                type:"underline",
+                dataActions:["underline"]
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // COLOR
+        // -------------------------------------------------
+
+        if(
+            text.includes("couleur de police") ||
+            text.includes("font color") ||
+            text.includes("couleur des caracteres") ||
+            text.includes("couleur des caractères")
+        ){
+
+            return {
+                type:"font-color",
+                dataActions:[
+                    "color",
+                    "font-color",
+                    "fontcolor"
+                ]
+            };
+
+        }
+
+
+        if(
+            text.includes("surbrillance") ||
+            text.includes("highlight")
+        ){
+
+            return {
+                type:"highlight",
+                dataActions:[
+                    "highlight",
+                    "text-highlight",
+                    "text-highlight-color"
+                ]
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // PARAGRAPH
+        // -------------------------------------------------
+
+        if(
+            text.includes("alignement gauche") ||
+            text.includes("aligner à gauche") ||
+            text.includes("align left")
+        ){
+
+            return {
+                type:"align-left",
+                dataActions:["align-left"]
+            };
+
+        }
+
+
+        if(
+            text.includes("centrer") ||
+            text.includes("align center")
+        ){
+
+            return {
+                type:"align-center",
+                dataActions:["align-center"]
+            };
+
+        }
+
+
+        if(
+            text.includes("aligner à droite") ||
+            text.includes("align right")
+        ){
+
+            return {
+                type:"align-right",
+                dataActions:["align-right"]
+            };
+
+        }
+
+
+        if(
+            text.includes("justifier") ||
+            text.includes("justify")
+        ){
+
+            return {
+                type:"justify",
+                dataActions:["justify"]
+            };
+
+        }
+
+
+        if(
+            text.includes("puces") ||
+            text.includes("bullet")
+        ){
+
+            return {
+                type:"bullet",
+                dataActions:["bullet"]
+            };
+
+        }
+
+
+        if(
+            text.includes("numérotation") ||
+            text.includes("numerotation") ||
+            text.includes("numbering")
+        ){
+
+            return {
+                type:"numbering",
+                dataActions:["numbering"]
+            };
+
+        }
+
+
+        if(
+            text.includes("augmenter le retrait") ||
+            text.includes("indent increase")
+        ){
+
+            return {
+                type:"indent-increase",
+                dataActions:["indent-increase"]
+            };
+
+        }
+
+
+        if(
+            text.includes("diminuer le retrait") ||
+            text.includes("indent decrease")
+        ){
+
+            return {
+                type:"indent-decrease",
+                dataActions:["indent-decrease"]
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // STYLES
+        // -------------------------------------------------
+
+        if(
+            text.includes("style normal") ||
+            text === "normal"
+        ){
+
+            return {
+                type:"style-normal",
+                dataActions:["style-normal"]
+            };
+
+        }
+
+
+        if(
+            text.includes("style h1") ||
+            text.includes("heading 1")
+        ){
+
+            return {
+                type:"style-h1",
+                dataActions:["style-h1"]
+            };
+
+        }
+
+
+        if(
+            text.includes("style h2") ||
+            text.includes("heading 2")
+        ){
+
+            return {
+                type:"style-h2",
+                dataActions:["style-h2"]
+            };
+
+        }
+
+
+        if(
+            text.includes("style title") ||
+            text.includes("titre")
+        ){
+
+            return {
+                type:"style-title",
+                dataActions:["style-title"]
+            };
+
+        }
+
+
+        if(
+            text.includes("style subtitle") ||
+            text.includes("sous-titre")
+        ){
+
+            return {
+                type:"style-subtitle",
+                dataActions:["style-subtitle"]
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // PAGES
+        // -------------------------------------------------
+
+        if(
+            text.includes("cover page") ||
+            text.includes("page de couverture")
+        ){
+
+            return {
+                type:"insert-cover",
+                dataActions:["insert-cover"]
+            };
+
+        }
+
+
+        if(
+            text.includes("blank page") ||
+            text.includes("page vierge")
+        ){
+
+            return {
+                type:"insert-blank",
+                dataActions:["insert-blank"]
+            };
+
+        }
+
+
+        if(
+            text.includes("page break") ||
+            text.includes("saut de page")
+        ){
+
+            return {
+                type:"page-break",
+                dataActions:["page-break"]
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // TABLES
+        // -------------------------------------------------
+
+        const tableMatch =
+            text.match(
+                /(?:tableau|table)[^0-9]{0,20}(\d{1,2})\s*[x×]\s*(\d{1,2})/
+            );
+
+
+        if(tableMatch){
+
+            const rows =
+                parseInt(
+                    tableMatch[1],
+                    10
+                );
+
+            const columns =
+                parseInt(
+                    tableMatch[2],
+                    10
+                );
+
+
+            if(
+                rows >= 1 &&
+                rows <= 15 &&
+                columns >= 1 &&
+                columns <= 15
+            ){
+
+                return {
+                    type:
+                        "table-" +
+                        rows +
+                        "x" +
+                        columns,
+
+                    dataActions:[
+                        "table-" +
+                        rows +
+                        "x" +
+                        columns
+                    ]
+
+                };
+
+            }
+
+        }
+
+
+        if(
+            text.includes("draw table") ||
+            text.includes("dessiner un tableau")
+        ){
+
+            return {
+                type:"draw-table",
+                dataActions:["draw-table"]
+            };
+
+        }
+
+
+        if(
+            text.includes("excel spreadsheet") ||
+            text.includes("feuille excel")
+        ){
+
+            return {
+                type:"excel-spreadsheet",
+                dataActions:["excel-spreadsheet"]
+            };
+
+        }
+
+
+        if(
+            text.includes("convert text to table") ||
+            text.includes("convertir le texte en tableau")
+        ){
+
+            return {
+                type:"convert-text-table",
+                dataActions:["convert-text-table"]
+            };
+
+        }
+
+
+        if(
+            text.includes("eraser") ||
+            text.includes("gomme du tableau") ||
+            text.includes("effaceur du tableau")
+        ){
+
+            return {
+                type:"table-eraser",
+                dataActions:["table-eraser"]
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // ILLUSTRATIONS
+        // -------------------------------------------------
+
+        if(
+            text.includes("picture") ||
+            text.includes("image")
+        ){
+
+            return {
+                type:"insert-picture",
+                dataActions:["insert-picture"]
+            };
+
+        }
+
+
+        if(
+            text.includes("clip art") ||
+            text.includes("clipart")
+        ){
+
+            return {
+                type:"insert-clipart",
+                dataActions:["insert-clipart"]
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // WRAP TEXT
+        // -------------------------------------------------
+
+        if(
+            text.includes("wrap text") ||
+            text.includes("habillage")
+        ){
+
+            return {
+                type:"image-wrap-text",
+                dataActions:["image-wrap-text"]
+            };
+
+        }
+
+
+        for(
+            const key in wrapValues
+        ){
+
+            if(
+                text.includes(key)
+            ){
+
+                return {
+                    type:"wrap-value",
+                    dataWrap:wrapValues[key]
+                };
+
+            }
+
+        }
+
+
+        if(
+            text.includes("in line with text") ||
+            text.includes("aligné sur le texte")
+        ){
+
+            return {
+                type:"wrap-value",
+                dataWrap:"inline"
+            };
+
+        }
+
+
+        if(
+            text.includes("square") ||
+            text.includes("carré")
+        ){
+
+            return {
+                type:"wrap-value",
+                dataWrap:"square"
+            };
+
+        }
+
+
+        if(
+            text.includes("tight") ||
+            text.includes("rapproché")
+        ){
+
+            return {
+                type:"wrap-value",
+                dataWrap:"tight"
+            };
+
+        }
+
+
+        if(
+            text.includes("behind text") ||
+            text.includes("derrière le texte")
+        ){
+
+            return {
+                type:"wrap-value",
+                dataWrap:"behind"
+            };
+
+        }
+
+
+        if(
+            text.includes("in front of text") ||
+            text.includes("devant le texte")
+        ){
+
+            return {
+                type:"wrap-value",
+                dataWrap:"front"
+            };
+
+        }
+
+
+        // -------------------------------------------------
+        // SMARTART
+        // -------------------------------------------------
+
+        const smartArtTypes = [
+
+            "list",
+            "process",
+            "cycle",
+            "hierarchy",
+            "pyramid"
+
+        ];
+
+
+        for(
+            const smartType of smartArtTypes
+        ){
+
+            if(
+                text.includes(
+                    "smartart-" +
+                    smartType
+                ) ||
+                text.includes(
+                    "smartart " +
+                    smartType
+                )
+            ){
+
+                return {
+                    type:
+                        "smartart-" +
+                        smartType,
+
+                    dataActions:[
+                        "smartart-" +
+                        smartType
+                    ]
+
+                };
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // SHAPES
+        // -------------------------------------------------
+
+        for(
+            const shape of shapeNames
+        ){
+
+            const readable =
+                shape
+                    .replace(
+                        "shape-",
+                        ""
+                    )
+                    .replace(
+                        /-/g,
+                        " "
+                    );
+
+
+            if(
+                text.includes(shape) ||
+                text.includes(readable)
+            ){
+
+                return {
+                    type:shape,
+                    dataActions:[shape]
+                };
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // EDITING
+        // -------------------------------------------------
+
+        if(
+            text.includes("find") ||
+            text.includes("rechercher")
+        ){
+
+            return {
+                type:"find",
+                dataActions:["find"]
+            };
+
+        }
+
+
+        if(
+            text.includes("replace") ||
+            text.includes("remplacer")
+        ){
+
+            return {
+                type:"replace",
+                dataActions:["replace"]
+            };
+
+        }
+
+
+        if(
+            text.includes("select all") ||
+            text.includes("sélectionner tout") ||
+            text.includes("selectionner tout")
+        ){
+
+            return {
+                type:"select-all",
+                dataActions:["select-all"]
+            };
+
+        }
+
+
+        if(
+            text.includes("select objects") ||
+            text.includes("sélectionner les objets") ||
+            text.includes("selectionner les objets")
+        ){
+
+            return {
+                type:"select-objects",
+                dataActions:["select-objects"]
+            };
+
+        }
+
+
+        return null;
+
+    }
+
+
+
+    // =====================================================
+    // VALIDATE TARGET AGAINST RESOLVED STEP
+    // =====================================================
+
+    function matchesStep(
+        target,
+        step
+    ){
+
+        const resolved =
+            resolveStep(step);
+
+
+        if(
+            !resolved ||
+            !target
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            Array.isArray(
+                resolved.dataActions
+            ) &&
+            matchesDataAction(
+                target,
+                resolved.dataActions
+            )
+        ){
+
+            return true;
+
+        }
+
+
+        if(
+            resolved.dataWrap &&
+            matchesWrapValue(
+                target,
+                resolved.dataWrap
+            )
+        ){
+
+            return true;
+
+        }
+
+
+        if(
+            resolved.dataColor &&
+            matchesColorValue(
+                target,
+                resolved.dataColor
+            )
+        ){
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+
+    // =====================================================
+    // PUBLIC UNIVERSAL API
+    // =====================================================
+
+    window.RaniseUniversalPracticeActionRegistry = {
+
+        actions:actions,
+
+        wrapValues:wrapValues,
+
+        colorValues:colorValues,
+
+        shapes:shapeNames,
+
+        resolveStep:resolveStep,
+
+        matchesStep:matchesStep
+
+    };
+
+})();
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -23658,6 +25325,93 @@ function validateFormattingResult(type){
                 getCurrentStep()
             );
 
+
+
+
+// =================================================
+// UNIVERSAL PRACTICE ACTION BRIDGE
+// Safe connector for Block 7.
+// Block 7 remains the only practice engine.
+// Existing Block 7 actions keep their original logic.
+// =================================================
+
+if(
+    typeof window.RaniseUniversalPracticeActionRegistry !==
+    "undefined" &&
+    window.RaniseUniversalPracticeActionRegistry &&
+    typeof window.RaniseUniversalPracticeActionRegistry
+        .matchesStep ===
+    "function"
+){
+
+    var currentStep =
+        getCurrentStep();
+
+    var universalType = null;
+
+    if(
+        typeof window.RaniseUniversalPracticeActionRegistry
+            .resolveStep ===
+        "function"
+    ){
+
+        var universalResult =
+            window.RaniseUniversalPracticeActionRegistry
+                .resolveStep(
+                    currentStep
+                );
+
+        if(
+            universalResult &&
+            typeof universalResult === "object"
+        ){
+
+            universalType =
+                universalResult.type || null;
+
+        }
+    }
+
+    /*
+     * Only use the universal bridge when:
+     *
+     * 1. Block 7 does not recognize the step, OR
+     * 2. the universal registry gives a more specific
+     *    command than the generic legacy font-size type.
+     *
+     * Existing Block 7 validation remains untouched.
+     */
+
+    var useUniversalBridge =
+        type === "unknown" ||
+        (
+            type === "font-size" &&
+            (
+                universalType === "grow-font" ||
+                universalType === "shrink-font"
+            )
+        );
+
+    if(
+        useUniversalBridge &&
+        window.RaniseUniversalPracticeActionRegistry
+            .matchesStep(
+                event.target,
+                currentStep
+            )
+    ){
+
+        state.lastValidationTime =
+            now;
+
+        nextPracticeStep();
+
+        return;
+    }
+}
+
+
+      
 
         // -------------------------------------------------
         // Formatting actions
