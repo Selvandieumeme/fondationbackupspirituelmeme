@@ -1092,10 +1092,6 @@ function syncMicrosoftWordProgress(){
 
 
 
-
-
-
-
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
@@ -1254,6 +1250,34 @@ function syncMicrosoftWordProgress(){
                 return false;
             }
 
+            // =====================================
+            // PHASE 3 — LECTURE PRATIQUE DYNAMIQUE
+            // =====================================
+
+            const updatedProgress =
+                RaniseDynamicUnlockRenderBridge.getProgress(
+                    chapterId
+                );
+
+            if(
+                updatedProgress &&
+                updatedProgress.practice === true &&
+                typeof RaniseDynamicPracticeTeachingEngine !==
+                "undefined" &&
+                typeof RaniseDynamicPracticeTeachingEngine
+                    .teachPractice ===
+                    "function"
+            ){
+
+                const practiceFinished =
+                    await RaniseDynamicPracticeTeachingEngine
+                        .teachPractice(chapterId);
+
+                if(practiceFinished !== true){
+                    return false;
+                }
+            }
+
             return true;
         }
     };
@@ -1262,6 +1286,8 @@ function syncMicrosoftWordProgress(){
 
 
 function renderMicrosoftWordCourse(){
+
+
 
 
 
