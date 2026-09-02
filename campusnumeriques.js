@@ -1094,13 +1094,6 @@ function syncMicrosoftWordProgress(){
 
 
 
-
-
-
-
-
-
-
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
@@ -1144,7 +1137,15 @@ function syncMicrosoftWordProgress(){
                 return false;
             }
 
+            // PREMIERS DEUX CHAPITRES EXCLUS
             if(chapterIndex < 2){
+                return false;
+            }
+
+            const chapter =
+                chapters[chapterIndex];
+
+            if(!chapter){
                 return false;
             }
 
@@ -1169,6 +1170,37 @@ function syncMicrosoftWordProgress(){
                 return false;
             }
 
+            // =====================================
+            // RANISE — INTRODUCTION DU CHAPITRE
+            // =====================================
+
+            if(
+                typeof speakProfessorIAWithMaryTTS !==
+                "function"
+            ){
+                console.error(
+                    "RANISE FUTURE CHAPTER CONNECTION: " +
+                    "MARYTTS FUNCTION NOT AVAILABLE"
+                );
+                return false;
+            }
+
+            const introduction =
+                "Bienvenue dans " +
+                chapter.title +
+                ". " +
+                "Je suis Ranise MOISE, votre Professeure IA. " +
+                "Je vais vous accompagner étape par étape " +
+                "tout au long de ce chapitre.";
+
+            await speakProfessorIAWithMaryTTS(
+                introduction
+            );
+
+            // =====================================
+            // PHASE 1 — THÉORIE DYNAMIQUE
+            // =====================================
+
             if(
                 typeof RaniseDynamicTheoryTeachingEngine !==
                 "undefined" &&
@@ -1179,6 +1211,10 @@ function syncMicrosoftWordProgress(){
                 const theoryFinished =
                     await RaniseDynamicTheoryTeachingEngine
                         .teachTheory(chapterId);
+
+                // =====================================
+                // PHASE 2 — EXPLICATION PÉDAGOGIQUE
+                // =====================================
 
                 if(
                     theoryFinished === true &&
@@ -1192,6 +1228,10 @@ function syncMicrosoftWordProgress(){
                     await RaniseDynamicPedagogicalExplanationEngine
                         .teachExplanation(chapterId);
                 }
+
+                // =====================================
+                // PHASE 3 — PRATIQUE SI DÉJÀ DÉVERROUILLÉE
+                // =====================================
 
                 if(
                     progress.practice === true &&
@@ -1215,6 +1255,9 @@ function syncMicrosoftWordProgress(){
 
 
 function renderMicrosoftWordCourse(){
+
+
+
 
 
     const campusContent =
