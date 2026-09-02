@@ -1094,6 +1094,8 @@ function syncMicrosoftWordProgress(){
 
 
 
+
+
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
@@ -1182,6 +1184,7 @@ function syncMicrosoftWordProgress(){
                     "RANISE FUTURE CHAPTER CONNECTION: " +
                     "MARYTTS FUNCTION NOT AVAILABLE"
                 );
+
                 return false;
             }
 
@@ -1202,49 +1205,53 @@ function syncMicrosoftWordProgress(){
             // =====================================
 
             if(
-                typeof RaniseDynamicTheoryTeachingEngine !==
-                "undefined" &&
-                typeof RaniseDynamicTheoryTeachingEngine.teachTheory ===
+                typeof RaniseDynamicTheoryTeachingEngine ===
+                "undefined" ||
+                typeof RaniseDynamicTheoryTeachingEngine.teachTheory !==
                 "function"
             ){
+                console.error(
+                    "RANISE FUTURE CHAPTER CONNECTION: " +
+                    "DYNAMIC THEORY ENGINE NOT AVAILABLE"
+                );
 
-                const theoryFinished =
-                    await RaniseDynamicTheoryTeachingEngine
-                        .teachTheory(chapterId);
+                return false;
+            }
 
-                // =====================================
-                // PHASE 2 — EXPLICATION PÉDAGOGIQUE
-                // =====================================
+            const theoryFinished =
+                await RaniseDynamicTheoryTeachingEngine
+                    .teachTheory(chapterId);
 
-                if(
-                    theoryFinished === true &&
-                    typeof RaniseDynamicPedagogicalExplanationEngine !==
-                    "undefined" &&
-                    typeof RaniseDynamicPedagogicalExplanationEngine
-                        .teachExplanation ===
+            if(theoryFinished !== true){
+                return false;
+            }
+
+            // =====================================
+            // PHASE 2 — EXPLICATION PÉDAGOGIQUE
+            // =====================================
+
+            if(
+                typeof RaniseDynamicPedagogicalExplanationEngine ===
+                "undefined" ||
+                typeof RaniseDynamicPedagogicalExplanationEngine
+                    .teachExplanation !==
                     "function"
-                ){
+            ){
+                console.error(
+                    "RANISE FUTURE CHAPTER CONNECTION: " +
+                    "DYNAMIC PEDAGOGICAL EXPLANATION ENGINE " +
+                    "NOT AVAILABLE"
+                );
 
-                    await RaniseDynamicPedagogicalExplanationEngine
-                        .teachExplanation(chapterId);
-                }
+                return false;
+            }
 
-                // =====================================
-                // PHASE 3 — PRATIQUE SI DÉJÀ DÉVERROUILLÉE
-                // =====================================
+            const explanationFinished =
+                await RaniseDynamicPedagogicalExplanationEngine
+                    .teachExplanation(chapterId);
 
-                if(
-                    progress.practice === true &&
-                    typeof RaniseDynamicPracticeTeachingEngine !==
-                    "undefined" &&
-                    typeof RaniseDynamicPracticeTeachingEngine
-                        .teachPractice ===
-                    "function"
-                ){
-
-                    await RaniseDynamicPracticeTeachingEngine
-                        .teachPractice(chapterId);
-                }
+            if(explanationFinished !== true){
+                return false;
             }
 
             return true;
@@ -1255,8 +1262,6 @@ function syncMicrosoftWordProgress(){
 
 
 function renderMicrosoftWordCourse(){
-
-
 
 
 
