@@ -1295,13 +1295,28 @@ function syncMicrosoftWordProgress(){
 
 
 
-var practiceSimulationStarted =
-    window.RaniseFuturePracticeLauncher
-        .start(chapterId);
 
-if(practiceSimulationStarted !== true){
-    return false;
+// =====================================
+// PHASE 4 — LAUNCH BLOCK 7
+// =====================================
+
+if(
+    typeof window.RaniseFuturePracticeLauncher !==
+    "undefined" &&
+    typeof window.RaniseFuturePracticeLauncher.start ===
+    "function"
+){
+
+    var practiceSimulationStarted =
+        window.RaniseFuturePracticeLauncher
+            .start(chapterId);
+
+    if(practiceSimulationStarted !== true){
+        return false;
+    }
 }
+
+
 
 
 
