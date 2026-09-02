@@ -1101,16 +1101,117 @@ function syncMicrosoftWordProgress(){
 
 
 
-
-
-
-
-
-
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
 // =====================================
+
+
+// =====================================
+// RANISE FUTURE CHAPTERS CONNECTION
+// =====================================
+
+(function(){
+
+    "use strict";
+
+    window.RaniseDynamicFutureChapterConnection = {
+
+        start: async function(chapterId){
+
+            if(!chapterId){
+                return false;
+            }
+
+            if(
+                typeof microsoftWordCourse === "undefined" ||
+                !Array.isArray(microsoftWordCourse.chapters)
+            ){
+                return false;
+            }
+
+            const chapters =
+                microsoftWordCourse.chapters;
+
+            const chapterIndex =
+                chapters.findIndex(
+                    chapter =>
+                        chapter &&
+                        chapter.id === chapterId
+                );
+
+            if(chapterIndex < 0){
+                return false;
+            }
+
+            if(chapterIndex < 2){
+                return false;
+            }
+
+            if(
+                typeof RaniseDynamicUnlockRenderBridge ===
+                "undefined" ||
+                typeof RaniseDynamicUnlockRenderBridge.getProgress !==
+                "function"
+            ){
+                return false;
+            }
+
+            const progress =
+                RaniseDynamicUnlockRenderBridge.getProgress(
+                    chapterId
+                );
+
+            if(
+                !progress ||
+                progress.theory !== true
+            ){
+                return false;
+            }
+
+            if(
+                typeof RaniseDynamicTheoryTeachingEngine !==
+                "undefined" &&
+                typeof RaniseDynamicTheoryTeachingEngine.teachTheory ===
+                "function"
+            ){
+
+                const theoryFinished =
+                    await RaniseDynamicTheoryTeachingEngine
+                        .teachTheory(chapterId);
+
+                if(
+                    theoryFinished === true &&
+                    typeof RaniseDynamicPedagogicalExplanationEngine !==
+                    "undefined" &&
+                    typeof RaniseDynamicPedagogicalExplanationEngine
+                        .teachExplanation ===
+                    "function"
+                ){
+
+                    await RaniseDynamicPedagogicalExplanationEngine
+                        .teachExplanation(chapterId);
+                }
+
+                if(
+                    progress.practice === true &&
+                    typeof RaniseDynamicPracticeTeachingEngine !==
+                    "undefined" &&
+                    typeof RaniseDynamicPracticeTeachingEngine
+                        .teachPractice ===
+                    "function"
+                ){
+
+                    await RaniseDynamicPracticeTeachingEngine
+                        .teachPractice(chapterId);
+                }
+            }
+
+            return true;
+        }
+    };
+
+})();
 
 
 function renderMicrosoftWordCourse(){
@@ -1377,6 +1478,28 @@ document.querySelectorAll(
                 const chapterId =
 
                 button.dataset.chapter;
+
+
+
+
+
+
+
+        if(
+            typeof RaniseDynamicFutureChapterConnection !==
+            "undefined" &&
+            typeof RaniseDynamicFutureChapterConnection.start ===
+            "function"
+        ){
+
+            setTimeout(function(){
+
+                RaniseDynamicFutureChapterConnection
+                    .start(chapterId);
+
+            },100);
+
+        }
 
 
 
