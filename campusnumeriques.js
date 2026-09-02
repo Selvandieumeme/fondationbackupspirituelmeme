@@ -1295,9 +1295,13 @@ function syncMicrosoftWordProgress(){
 
 
 
+var practiceSimulationStarted =
+    window.RaniseFuturePracticeLauncher
+        .start(chapterId);
 
-
-
+if(practiceSimulationStarted !== true){
+    return false;
+}
 
 
 
@@ -1311,7 +1315,90 @@ function syncMicrosoftWordProgress(){
 })();
 
 
+
+
+
+// =====================================
+// RANISE — PHASE 4
+// FUTURE CHAPTER PRACTICE LAUNCHER
+// Course Renderer → Block 7 Dynamic Practice
+// =====================================
+
+(function(){
+
+    "use strict";
+
+    window.RaniseFuturePracticeLauncher = {
+
+        start: function(chapterId){
+
+            if(!chapterId){
+                return false;
+            }
+
+            // Chapter 1 ak Chapter 2 rete sou sistèm pa yo.
+            if(
+                chapterId === "chapitre1" ||
+                chapterId === "chapitre2"
+            ){
+                return false;
+            }
+
+            // Verifye Course Data.
+            if(
+                typeof microsoftWordCourse === "undefined" ||
+                !Array.isArray(microsoftWordCourse.chapters)
+            ){
+                return false;
+            }
+
+            // Verifye chapter aktyèl la.
+            var chapter =
+                microsoftWordCourse.chapters.find(
+                    function(item){
+                        return item &&
+                               item.id === chapterId;
+                    }
+                );
+
+            if(!chapter){
+                return false;
+            }
+
+            // Practice dwe egziste pou chapter la.
+            if(
+                !Array.isArray(chapter.practice) ||
+                chapter.practice.length === 0
+            ){
+                return false;
+            }
+
+            // =====================================
+            // LAUNCH BLOCK 7 DYNAMIC PRACTICE
+            // =====================================
+
+            if(
+                typeof window.RaniseMoiseDynamicPracticeGuidanceEngine ===
+                    "undefined" ||
+                typeof window.RaniseMoiseDynamicPracticeGuidanceEngine
+                    .start !== "function"
+            ){
+                return false;
+            }
+
+            return window.RaniseMoiseDynamicPracticeGuidanceEngine
+                .start(chapterId);
+        }
+    };
+
+})();
+
+
+
+
 function renderMicrosoftWordCourse(){
+
+
 
 
 
