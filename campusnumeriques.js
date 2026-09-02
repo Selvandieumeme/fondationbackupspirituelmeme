@@ -1098,14 +1098,6 @@ function syncMicrosoftWordProgress(){
 
 
 
-
-
-
-
-
-
-
-
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
@@ -1292,36 +1284,37 @@ function syncMicrosoftWordProgress(){
                 }
             }
 
+            // =====================================
+            // PHASE 4 — GENERAL REAL PRACTICE
+            // =====================================
 
+            if(
+                typeof window.RaniseFuturePracticeLauncher ===
+                "undefined" ||
+                typeof window.RaniseFuturePracticeLauncher.start !==
+                "function"
+            ){
+                console.error(
+                    "RANISE FUTURE CHAPTER CONNECTION: " +
+                    "PHASE 4 PRACTICE LAUNCHER NOT AVAILABLE"
+                );
 
+                return false;
+            }
 
+            const practiceSimulationStarted =
+                window.RaniseFuturePracticeLauncher
+                    .start(chapterId);
 
-// =====================================
-// PHASE 4 — LAUNCH BLOCK 7
-// =====================================
+            if(practiceSimulationStarted !== true){
+                console.error(
+                    "RANISE FUTURE CHAPTER CONNECTION: " +
+                    "PHASE 4 PRACTICE SIMULATION FAILED",
+                    chapterId
+                );
 
-if(
-    typeof window.RaniseFuturePracticeLauncher !==
-    "undefined" &&
-    typeof window.RaniseFuturePracticeLauncher.start ===
-    "function"
-){
-
-    var practiceSimulationStarted =
-        window.RaniseFuturePracticeLauncher
-            .start(chapterId);
-
-    if(practiceSimulationStarted !== true){
-        return false;
-    }
-}
-
-
-
-
-
-
-
+                return false;
+            }
 
             return true;
         }
@@ -1330,13 +1323,10 @@ if(
 })();
 
 
-
-
-
 // =====================================
 // RANISE — PHASE 4
-// FUTURE CHAPTER PRACTICE LAUNCHER
-// Course Renderer → Block 7 Dynamic Practice
+// GENERAL FUTURE CHAPTER PRACTICE LAUNCHER
+// Course Renderer → Dynamic Practice Guidance
 // =====================================
 
 (function(){
@@ -1351,15 +1341,11 @@ if(
                 return false;
             }
 
-            // Chapter 1 ak Chapter 2 rete sou sistèm pa yo.
-            if(
-                chapterId === "chapitre1" ||
-                chapterId === "chapitre2"
-            ){
+            // PREMIERS DEUX CHAPITRES EXCLUS
+            if(chapterId === "chapitre1"){
                 return false;
             }
 
-            // Verifye Course Data.
             if(
                 typeof microsoftWordCourse === "undefined" ||
                 !Array.isArray(microsoftWordCourse.chapters)
@@ -1367,53 +1353,84 @@ if(
                 return false;
             }
 
-            // Verifye chapter aktyèl la.
-            var chapter =
-                microsoftWordCourse.chapters.find(
+            // =====================================
+            // VERIFY CURRENT CHAPTER
+            // =====================================
+
+            const chapters =
+                microsoftWordCourse.chapters;
+
+            const chapterIndex =
+                chapters.findIndex(
                     function(item){
                         return item &&
                                item.id === chapterId;
                     }
                 );
 
+            if(chapterIndex < 2){
+                return false;
+            }
+
+            const chapter =
+                chapters[chapterIndex];
+
             if(!chapter){
                 return false;
             }
 
-            // Practice dwe egziste pou chapter la.
+            // =====================================
+            // VERIFY CURRENT CHAPTER PRACTICE
+            // =====================================
+
             if(
                 !Array.isArray(chapter.practice) ||
                 chapter.practice.length === 0
             ){
+                console.error(
+                    "RANISE PHASE 4: " +
+                    "CURRENT CHAPTER PRACTICE NOT AVAILABLE",
+                    chapterId
+                );
+
                 return false;
             }
 
             // =====================================
-            // LAUNCH BLOCK 7 DYNAMIC PRACTICE
+            // CONNECT TO GENERAL BLOCK 7
             // =====================================
 
             if(
                 typeof window.RaniseMoiseDynamicPracticeGuidanceEngine ===
-                    "undefined" ||
+                "undefined" ||
                 typeof window.RaniseMoiseDynamicPracticeGuidanceEngine
-                    .start !== "function"
+                    .start !==
+                    "function"
             ){
+                console.error(
+                    "RANISE PHASE 4: " +
+                    "DYNAMIC PRACTICE GUIDANCE ENGINE NOT AVAILABLE"
+                );
+
                 return false;
             }
 
-            return window.RaniseMoiseDynamicPracticeGuidanceEngine
+            // =====================================
+            // BLOCK 7 HANDLES SIMULATION WAITING
+            // AND STARTS WITH THE CURRENT CHAPTER
+            // =====================================
+
+            window.RaniseMoiseDynamicPracticeGuidanceEngine
                 .start(chapterId);
+
+            return true;
         }
     };
 
 })();
 
 
-
-
 function renderMicrosoftWordCourse(){
-
-
 
 
 
