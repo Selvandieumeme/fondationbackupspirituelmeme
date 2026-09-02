@@ -1101,92 +1101,6 @@ function syncMicrosoftWordProgress(){
 
 
 
-// =====================================
-// RANISE — PHASE 4
-// GENERAL FUTURE CHAPTER PRACTICE SIMULATION CONNECTION
-// =====================================
-
-(function(){
-
-    "use strict";
-
-    window.RaniseDynamicFuturePracticeSimulationEngine = {
-
-        start: function(chapterId){
-
-            if(!chapterId){
-                return false;
-            }
-
-            // Chapter 1 ak Chapter 2 pa antre nan nouvo
-            // sistèm jeneral sa a.
-            if(chapterId === "chapitre1" ||
-               chapterId === "chapitre2"){
-                return false;
-            }
-
-            if(
-                typeof microsoftWordCourse === "undefined" ||
-                !Array.isArray(microsoftWordCourse.chapters)
-            ){
-                return false;
-            }
-
-            const chapter =
-                microsoftWordCourse.chapters.find(
-                    function(item){
-                        return item &&
-                               item.id === chapterId;
-                    }
-                );
-
-            if(!chapter){
-                console.error(
-                    "RANISE PHASE 4: CHAPTER NOT FOUND",
-                    chapterId
-                );
-                return false;
-            }
-
-            if(
-                !Array.isArray(chapter.practice) ||
-                chapter.practice.length === 0
-            ){
-                console.error(
-                    "RANISE PHASE 4: PRACTICE NOT AVAILABLE",
-                    chapterId
-                );
-                return false;
-            }
-
-            // =====================================
-            // VERIFY DYNAMIC PRACTICE ENGINE
-            // =====================================
-
-            if(
-                typeof RaniseMoiseDynamicPracticeGuidanceEngine ===
-                "undefined" ||
-                typeof RaniseMoiseDynamicPracticeGuidanceEngine.start !==
-                "function"
-            ){
-                console.error(
-                    "RANISE PHASE 4: " +
-                    "GENERAL PRACTICE GUIDANCE ENGINE NOT AVAILABLE"
-                );
-                return false;
-            }
-
-            // =====================================
-            // PASS THE CURRENT CHAPTER DIRECTLY
-            // =====================================
-
-            return RaniseMoiseDynamicPracticeGuidanceEngine.start(
-                chapterId
-            );
-        }
-    };
-
-})();
 
 
 
@@ -1381,27 +1295,6 @@ function syncMicrosoftWordProgress(){
 
 
 
-
-// =====================================
-// PHASE 4 — REAL PRACTICE IN SIMULATION
-// =====================================
-
-if(
-    typeof RaniseDynamicFuturePracticeSimulationEngine !==
-    "undefined" &&
-    typeof RaniseDynamicFuturePracticeSimulationEngine.start ===
-    "function"
-){
-
-    const simulationPracticeStarted =
-        RaniseDynamicFuturePracticeSimulationEngine.start(
-            chapterId
-        );
-
-    if(simulationPracticeStarted !== true){
-        return false;
-    }
-}
 
 
 
