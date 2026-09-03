@@ -28221,76 +28221,6 @@ if(
 
 
 
-// =================================================
-// UNIVERSAL EXERCISE ACTION BRIDGE
-// Safe connector for Block 8.
-// Existing Block 8 exercise logic remains untouched.
-// =================================================
-
-if(
-    typeof window.RaniseUniversalPracticeActionRegistry !==
-    "undefined" &&
-    window.RaniseUniversalPracticeActionRegistry &&
-    typeof window.RaniseUniversalPracticeActionRegistry
-        .matchesStep ===
-        "function"
-){
-
-    var currentExercise =
-        state.exercises[
-            state.exerciseIndex
-        ];
-
-    var universalType = null;
-
-    if(
-        typeof window.RaniseUniversalPracticeActionRegistry
-            .resolveStep ===
-            "function"
-    ){
-
-        var universalResult =
-            window.RaniseUniversalPracticeActionRegistry
-                .resolveStep(
-                    currentExercise
-                );
-
-        if(
-            universalResult &&
-            typeof universalResult === "object"
-        ){
-
-            universalType =
-                universalResult.type || null;
-
-        }
-    }
-
-    var useUniversalBridge =
-        type === "generic" ||
-        (
-            type === "font-size" &&
-            (
-                universalType === "grow-font" ||
-                universalType === "shrink-font"
-            )
-        );
-
-    if(
-        useUniversalBridge &&
-        window.RaniseUniversalPracticeActionRegistry
-            .matchesStep(
-                event.target,
-                currentExercise
-            )
-    ){
-
-        nextExercise();
-
-        return;
-    }
-}
-
 
 
 
@@ -28319,6 +28249,134 @@ if(
     }
 
 
+
+
+
+
+// =====================================================
+// UNIVERSAL REAL SIMULATION ACTION BRIDGE
+// BLOCK 8 ONLY
+//
+// Connects the current exercise directly to the
+// Universal Practice Action Registry.
+//
+// Does not modify Block 7.
+// Does not modify the simulation.
+// Does not modify the Dynamic Unlock Bridge.
+// Works dynamically for Chapter 2+.
+// =====================================================
+
+function handleUniversalExerciseAction(event){
+
+    if(
+        !state.started ||
+        state.completed ||
+        state.speaking ||
+        !state.waiting
+    ){
+        return;
+    }
+
+    if(
+        typeof window.RaniseUniversalPracticeActionRegistry ===
+        "undefined"
+    ){
+        return;
+    }
+
+    const exercise =
+        state.exercises[state.exerciseIndex];
+
+    if(!exercise){
+        return;
+    }
+
+    const type =
+        exerciseType(exercise);
+
+    // These exercise types already require multiple
+    // actions or written answers. The universal bridge
+    // must never validate them after only one click.
+    if(
+        type === "answer-clipboard-role" ||
+        type === "answer-copy-cut" ||
+        type === "copy-paste" ||
+        type === "cut-paste" ||
+        type === "three-format" ||
+        type === "complete-format"
+    ){
+        return;
+    }
+
+    const registry =
+        window.RaniseUniversalPracticeActionRegistry;
+
+    if(
+        typeof registry.resolveStep !==
+        "function" ||
+        typeof registry.matchesStep !==
+        "function"
+    ){
+        return;
+    }
+
+    let resolved = null;
+
+    try{
+        resolved =
+            registry.resolveStep(exercise);
+    }catch(error){
+        return;
+    }
+
+    if(!resolved){
+        return;
+    }
+
+    let matched = false;
+
+    try{
+        matched =
+            registry.matchesStep(
+                event.target,
+                exercise
+            ) === true;
+    }catch(error){
+        matched = false;
+    }
+
+    if(!matched){
+        return;
+    }
+
+    // The student's real simulation click has matched
+    // the action required by the current exercise.
+    setTimeout(function(){
+
+        if(
+            !state.started ||
+            state.completed ||
+            !state.waiting
+        ){
+            return;
+        }
+
+        if(
+            state.processing
+        ){
+            return;
+        }
+
+        nextExercise();
+
+    },100);
+}
+
+
+
+
+  
+
     // =====================================================
     // ATTACH SIMULATION LISTENERS
     // =====================================================
@@ -28346,6 +28404,15 @@ if(
         );
 
 
+doc.addEventListener(
+    "click",
+    handleUniversalExerciseAction,
+    true
+);
+
+
+
+      
         doc.addEventListener(
             "input",
             handleSimulationInput,
