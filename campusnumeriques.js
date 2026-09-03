@@ -26298,8 +26298,9 @@ if(
 const launchButton =
     event.target.closest(
         "#launchMicrosoftWordSimulationBtn, " +
-        "#launchMicrosoftWordChapter2SimulationBtn"
-    );
+        "#launchMicrosoftWordChapter2SimulationBtn, "
+ + "#launchMicrosoftWordChapter3SimulationBtn"
+   );
 
 if(!launchButton){
 
@@ -26330,6 +26331,13 @@ if(
 
 
 
+
+if(
+    launchButton.id ===
+    "launchMicrosoftWordChapter3SimulationBtn"
+){
+    chapterId = "chapitre3";
+}
 
 
 
