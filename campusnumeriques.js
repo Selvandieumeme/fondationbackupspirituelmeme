@@ -610,9 +610,9 @@ homework: [
 
 
     exercises:[
-        "Sélectionner un texte et utiliser Grow Font (Augmenter la taille) afin d’augmenter progressivement sa taille.",
+        "Sélectionner un texte et utiliser Grow Font (Augmenter la taille) .",
 
-        "Sélectionner une autre partie du texte et utiliser Shrink Font (Réduire la taille) afin de diminuer progressivement sa taille.",
+        "Sélectionner une autre partie du texte et utiliser Shrink Font (Réduire la taille).",
 
         "Sélectionner une partie d’un texte et appliquer Strikethrough (Barré).",
 
