@@ -610,7 +610,7 @@ homework: [
 
 
     exercises:[
-        "Sélectionner un texte et utiliser Grow Font (Augmenter la taille) .",
+        
 
         "Sélectionner une autre partie du texte et utiliser Shrink Font (Réduire la taille).",
 
