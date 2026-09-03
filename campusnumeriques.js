@@ -30605,19 +30605,19 @@ doc.addEventListener(
 
 
 
+
 // =====================================================
 // UNIVERSAL REAL SIMULATION ACTION BRIDGE
 // BLOCK 9 ONLY
 //
-// Connects Block 9 to the Universal Practice Action Registry.
+// Connects the current homework directly to the
+// Universal Practice Action Registry.
 //
-// IMPORTANT:
-// - Does NOT modify Block 7.
-// - Does NOT modify Block 8.
-// - Does NOT modify the Dynamic Unlock Bridge.
-// - Does NOT modify the Word simulation.
-// - Does NOT directly validate or complete homework.
-// - Only observes the real simulation action and records it.
+// Does not modify Block 7.
+// Does not modify Block 8.
+// Does not modify the simulation.
+// Does not modify the Dynamic Unlock Bridge.
+// Works dynamically for Chapter 2+ and future chapters.
 // =====================================================
 
 function handleUniversalHomeworkAction(event){
@@ -30632,16 +30632,16 @@ function handleUniversalHomeworkAction(event){
     }
 
     if(
-        !event ||
-        !event.target
+        typeof window.RaniseUniversalPracticeActionRegistry ===
+        "undefined"
     ){
         return;
     }
 
-    if(
-        typeof window.RaniseUniversalPracticeActionRegistry ===
-        "undefined"
-    ){
+    const homework =
+        state.homework[state.homeworkIndex];
+
+    if(!homework){
         return;
     }
 
@@ -30657,14 +30657,6 @@ function handleUniversalHomeworkAction(event){
         return;
     }
 
-    const homework =
-        state.homework &&
-        state.homework[state.homeworkIndex];
-
-    if(!homework){
-        return;
-    }
-
     let resolved = null;
 
     try{
@@ -30676,7 +30668,7 @@ function handleUniversalHomeworkAction(event){
 
     }catch(error){
 
-        resolved = null;
+        return;
 
     }
 
@@ -30705,13 +30697,15 @@ function handleUniversalHomeworkAction(event){
     }
 
     /*
-     * The real simulation button/action has been
-     * recognized by the Universal Registry.
+     * The student's REAL simulation action has matched
+     * the action required by the current homework.
      *
-     * We record it only.
+     * The Universal Bridge only records the action.
      *
-     * validateHomework() remains the ONLY authority
-     * that decides whether the homework is complete.
+     * It does NOT validate or complete the homework.
+     *
+     * The existing Block 9 homework validator remains
+     * the authority responsible for determining completion.
      */
 
     let action = null;
@@ -30731,13 +30725,14 @@ function handleUniversalHomeworkAction(event){
         return;
     }
 
-    recordAction(action);
+    recordAction(
+        action
+    );
 
     state.lastActionTime =
         Date.now();
 
 }
-
 
 
   
