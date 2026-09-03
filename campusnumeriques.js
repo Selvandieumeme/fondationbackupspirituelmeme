@@ -30610,14 +30610,20 @@ doc.addEventListener(
 // UNIVERSAL REAL SIMULATION ACTION BRIDGE
 // BLOCK 9 ONLY
 //
-// Connects the current homework directly to the
-// Universal Practice Action Registry.
+// Connects Block 9 directly to the Universal Practice
+// Action Registry.
 //
-// Does not modify Block 7.
-// Does not modify Block 8.
-// Does not modify the simulation.
-// Does not modify the Dynamic Unlock Bridge.
-// Works dynamically for Chapter 2+ and future chapters.
+// IMPORTANT:
+// - Does NOT modify Block 7.
+// - Does NOT modify Block 8.
+// - Does NOT modify the simulation.
+// - Does NOT modify the Dynamic Unlock Bridge.
+// - Does NOT modify validateHomework().
+// - Does NOT use homework text as one single action.
+// - Does NOT use Chapter-specific mappings.
+// - Detects the REAL clicked simulation action.
+// - Works dynamically for current and future chapters.
+// - Uses the Universal Practice Action Registry only.
 // =====================================================
 
 function handleUniversalHomeworkAction(event){
@@ -30632,16 +30638,9 @@ function handleUniversalHomeworkAction(event){
     }
 
     if(
-        typeof window.RaniseUniversalPracticeActionRegistry ===
-        "undefined"
+        !event ||
+        !event.target
     ){
-        return;
-    }
-
-    const homework =
-        state.homework[state.homeworkIndex];
-
-    if(!homework){
         return;
     }
 
@@ -30649,90 +30648,203 @@ function handleUniversalHomeworkAction(event){
         window.RaniseUniversalPracticeActionRegistry;
 
     if(
-        typeof registry.resolveStep !==
-        "function" ||
-        typeof registry.matchesStep !==
-        "function"
+        !registry ||
+        !registry.actions ||
+        typeof registry.actions !== "object"
     ){
         return;
     }
 
-    let resolved = null;
+    let element =
+        event.target;
 
-    try{
+    let matchedAction =
+        null;
 
-        resolved =
-            registry.resolveStep(
-                homework
+    /*
+     * Walk upward from the REAL clicked element.
+     *
+     * This is important because the student may click:
+     * - an SVG icon
+     * - a span
+     * - an image
+     * - an inner label
+     *
+     * while the actual data-action/data-command is
+     * located on the parent button.
+     */
+    for(
+        let level = 0;
+        level < 8 && element;
+        level++
+    ){
+
+        let dataAction = "";
+
+        let dataCommand = "";
+
+        try{
+
+            if(
+                typeof element.getAttribute ===
+                "function"
+            ){
+
+                dataAction =
+                    String(
+                        element.getAttribute(
+                            "data-action"
+                        ) || ""
+                    )
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g,"")
+                    .toLowerCase()
+                    .replace(/\s+/g," ")
+                    .trim();
+
+                dataCommand =
+                    String(
+                        element.getAttribute(
+                            "data-command"
+                        ) || ""
+                    )
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g,"")
+                    .toLowerCase()
+                    .replace(/\s+/g," ")
+                    .trim();
+            }
+
+        }catch(error){
+
+            dataAction = "";
+            dataCommand = "";
+        }
+
+        /*
+         * Compare the REAL simulation action against
+         * every action registered by the universal registry.
+         *
+         * No Chapter-specific mapping is used here.
+         */
+        const actionKeys =
+            Object.keys(
+                registry.actions
             );
 
-    }catch(error){
+        for(
+            let i = 0;
+            i < actionKeys.length;
+            i++
+        ){
 
-        return;
+            const key =
+                actionKeys[i];
 
+            const definition =
+                registry.actions[key];
+
+            if(
+                !definition ||
+                !Array.isArray(
+                    definition.dataActions
+                )
+            ){
+                continue;
+            }
+
+            const registeredActions =
+                definition.dataActions.map(
+                    function(value){
+
+                        return String(
+                            value || ""
+                        )
+                        .normalize("NFD")
+                        .replace(
+                            /[\u0300-\u036f]/g,
+                            ""
+                        )
+                        .toLowerCase()
+                        .replace(
+                            /\s+/g,
+                            " "
+                        )
+                        .trim();
+
+                    }
+                );
+
+            if(
+                (
+                    dataAction &&
+                    registeredActions.includes(
+                        dataAction
+                    )
+                ) ||
+                (
+                    dataCommand &&
+                    registeredActions.includes(
+                        dataCommand
+                    )
+                )
+            ){
+
+                matchedAction =
+                    definition;
+
+                break;
+            }
+        }
+
+        if(matchedAction){
+            break;
+        }
+
+        element =
+            element.parentElement;
     }
 
-    if(!resolved){
-        return;
-    }
-
-    let matched = false;
-
-    try{
-
-        matched =
-            registry.matchesStep(
-                event.target,
-                homework
-            ) === true;
-
-    }catch(error){
-
-        matched = false;
-
-    }
-
-    if(!matched){
+    /*
+     * Nothing registered means this click is not a
+     * universal homework action.
+     */
+    if(!matchedAction){
         return;
     }
 
     /*
-     * The student's REAL simulation action has matched
-     * the action required by the current homework.
-     *
-     * The Universal Bridge only records the action.
-     *
-     * It does NOT validate or complete the homework.
-     *
-     * The existing Block 9 homework validator remains
-     * the authority responsible for determining completion.
+     * The registry itself is the source of truth for
+     * the detected action type.
      */
+    const actionType =
+        String(
+            matchedAction.type || ""
+        ).trim();
 
-    let action = null;
-
-    if(
-        resolved.type
-    ){
-
-        action =
-            String(
-                resolved.type
-            ).trim();
-
-    }
-
-    if(!action){
+    if(!actionType){
         return;
     }
 
+    /*
+     * Record the REAL action.
+     *
+     * We do not validate the homework here.
+     * validateHomework() remains the existing authority.
+     */
     recordAction(
-        action
+        actionType
     );
 
     state.lastActionTime =
         Date.now();
-
 }
+
+
+
+
+
+
 
 
   
