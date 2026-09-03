@@ -612,9 +612,9 @@ homework: [
     exercises:[
         
 
-        "Sélectionner une autre partie du texte et utiliser Shrink Font (Réduire la taille).",
+        "Sélectionner une autre partie du texte et utiliser la Commande Shrink Font (Réduire la taille).",
 
-        "Sélectionner une partie d’un texte et appliquer Strikethrough (Barré).",
+        "Sélectionner une partie d’un texte et appliquerla Commande Strikethrough (Barré).",
 
         "Créer une expression contenant un caractère ou un nombre devant être placé en indice et utiliser Subscript (Indice).",
 
