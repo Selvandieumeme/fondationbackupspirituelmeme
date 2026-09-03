@@ -554,8 +554,9 @@ homework: [
             title:"Pratique — Shrink Font / Réduire la taille",
             steps:[
                 "Sélectionner un texte déjà mis en forme.",
-                "Repérer la commande Shrink Font (Réduire la taille) dans le groupe Police.",
-                "Cliquer sur Shrink Font.",
+
+"Utiliser la commande  Shrink Font  (Réduire la taille).",
+               
                 
                 
             ]
