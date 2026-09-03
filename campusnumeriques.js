@@ -546,8 +546,7 @@ homework: [
                 "Repérer le groupe Police (Font).",
                 "Saisir ou sélectionner un texte dans le document.",
                 "Utiliser la commande Grow Font (Augmenter la taille).",
-                "Observer l’augmentation de la taille du texte sélectionné.",
-                "Répéter l’opération afin d’observer les différentes augmentations."
+           
             ]
         },
 
@@ -557,8 +556,8 @@ homework: [
                 "Sélectionner un texte déjà mis en forme.",
                 "Repérer la commande Shrink Font (Réduire la taille) dans le groupe Police.",
                 "Cliquer sur Shrink Font.",
-                "Observer la diminution de la taille du texte.",
-                "Répéter l’opération afin de vérifier la diminution progressive."
+                
+                
             ]
         },
 
@@ -568,7 +567,7 @@ homework: [
                 "Saisir une phrase dans le document.",
                 "Sélectionner une partie de la phrase.",
                 "Activer Strikethrough (Barré).",
-                "Observer la ligne traversant le texte sélectionné.",
+                
                 "Sélectionner une autre partie du texte et appliquer également Barré."
             ]
         },
@@ -579,8 +578,8 @@ homework: [
                 "Saisir une expression nécessitant un indice.",
                 "Sélectionner le caractère ou le nombre concerné.",
                 "Activer Subscript (Indice).",
-                "Observer le déplacement du caractère sous la ligne normale.",
-                "Vérifier que le reste du texte n’est pas modifié."
+                
+                
             ]
         },
 
@@ -590,8 +589,7 @@ homework: [
                 "Saisir une expression nécessitant un exposant.",
                 "Sélectionner le caractère ou le nombre concerné.",
                 "Activer Superscript (Exposant).",
-                "Observer le déplacement du caractère au-dessus de la ligne normale.",
-                "Vérifier que seul le texte sélectionné est concerné."
+                
             ]
         },
 
@@ -604,7 +602,7 @@ homework: [
                 "Appliquer Strikethrough à une partie du texte.",
                 "Appliquer Subscript au caractère ou au nombre approprié.",
                 "Appliquer Superscript au caractère ou au nombre approprié.",
-                "Vérifier visuellement chaque résultat."
+                
             ]
         }
     ],
