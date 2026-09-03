@@ -542,7 +542,7 @@ homework: [
         {
             title:"Pratique — Grow Font / Augmenter la taille",
             steps:[
-                "Ouvrir l’onglet Home (Accueil).",
+            
                 "Repérer le groupe Police (Font).",
                 "Saisir ou sélectionner un texte dans le document.",
                 "Utiliser la commande Grow Font (Augmenter la taille).",
