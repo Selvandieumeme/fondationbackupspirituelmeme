@@ -28219,6 +28219,81 @@ if(
             );
 
 
+
+
+// =================================================
+// UNIVERSAL EXERCISE ACTION BRIDGE
+// Safe connector for Block 8.
+// Existing Block 8 exercise logic remains untouched.
+// =================================================
+
+if(
+    typeof window.RaniseUniversalPracticeActionRegistry !==
+    "undefined" &&
+    window.RaniseUniversalPracticeActionRegistry &&
+    typeof window.RaniseUniversalPracticeActionRegistry
+        .matchesStep ===
+        "function"
+){
+
+    var currentExercise =
+        state.exercises[
+            state.exerciseIndex
+        ];
+
+    var universalType = null;
+
+    if(
+        typeof window.RaniseUniversalPracticeActionRegistry
+            .resolveStep ===
+            "function"
+    ){
+
+        var universalResult =
+            window.RaniseUniversalPracticeActionRegistry
+                .resolveStep(
+                    currentExercise
+                );
+
+        if(
+            universalResult &&
+            typeof universalResult === "object"
+        ){
+
+            universalType =
+                universalResult.type || null;
+
+        }
+    }
+
+    var useUniversalBridge =
+        type === "generic" ||
+        (
+            type === "font-size" &&
+            (
+                universalType === "grow-font" ||
+                universalType === "shrink-font"
+            )
+        );
+
+    if(
+        useUniversalBridge &&
+        window.RaniseUniversalPracticeActionRegistry
+            .matchesStep(
+                event.target,
+                currentExercise
+            )
+    ){
+
+        nextExercise();
+
+        return;
+    }
+}
+
+
+
+
         if(
             type !== "answer-clipboard-role" &&
             type !== "answer-copy-cut"
