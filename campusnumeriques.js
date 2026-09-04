@@ -624,9 +624,11 @@ homework: [
     ],
 
 
-    homework:[
-        "Réaliser un document Microsoft Word 2007 permettant de démontrer la maîtrise des commandes avancées étudiées dans le groupe Police (Font). L’élève doit saisir un court texte puis utiliser Grow Font (Augmenter la taille), Shrink Font (Réduire la taille), Strikethrough (Barré), Subscript (Indice) et Superscript (Exposant) sur différentes parties du document. Le document final doit présenter clairement les différentes transformations réalisées."
-    ],
+homework:[
+    "Saisir un court texte dans le document, sélectionner le texte saisi, puis appliquer la commande Superscript (Exposant)."
+],
+
+
 
 
     evaluation:[
