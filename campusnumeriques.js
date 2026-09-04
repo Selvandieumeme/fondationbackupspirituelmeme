@@ -1829,6 +1829,46 @@ if(launchChapter3Button){
 
 
 
+
+// =====================================
+// CHAPTER 4 SIMULATION LAUNCH
+// =====================================
+
+const launchChapter4Button =
+    document.getElementById(
+        "launchMicrosoftWordChapter4SimulationBtn"
+    );
+
+if(launchChapter4Button){
+
+    launchChapter4Button.addEventListener(
+        "click",
+        function(){
+
+            campusContent.innerHTML = `
+
+                <iframe
+                    src="https://fondationbackupspirituel.com/campusword2007simulation"
+                    style="
+                        width:100%;
+                        height:900px;
+                        border:none;
+                        border-radius:12px;
+                    "
+                    title="Microsoft Word Simulation — Chapitre 4">
+                </iframe>
+
+            `;
+
+        }
+    );
+
+}
+
+
+  
+
+
 document.querySelectorAll(
 
     ".wordChapterBtn"
@@ -40415,7 +40455,7 @@ function unlockNextChapter(){
 
 const launchButton =
     event.target.closest(
-        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn"
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn"
     );      
 
             if(!launchButton){
@@ -40461,7 +40501,7 @@ const launchButton =
 
 const launchButton =
     event.target.closest(
-        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn"
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn"
     );
             
 
