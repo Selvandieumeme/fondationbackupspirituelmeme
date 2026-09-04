@@ -34895,6 +34895,181 @@ doc.addEventListener(
 
 
 
+// =====================================================
+// UNIVERSAL REAL SIMULATION ACTION BRIDGE
+// BLOCK 10 ONLY
+//
+// Connects Block 10 to the Universal Practice Action Registry.
+//
+// IMPORTANT:
+// - Does NOT modify Block 7.
+// - Does NOT modify Block 8.
+// - Does NOT modify Block 9.
+// - Does NOT modify the Dynamic Unlock Bridge.
+// - Does NOT modify the Word simulation.
+// - Does NOT directly validate a question.
+// - Does NOT award 25 points.
+// - Only observes and records real simulation actions.
+//
+// The official Block 10 question validator remains
+// the ONLY authority allowed to validate a question
+// and award the official 25 points.
+// =====================================================
+
+function handleUniversalEvaluationAction(event){
+
+    if(
+        !state.started ||
+        state.completed ||
+        state.speaking ||
+        !state.waiting ||
+        state.processing
+    ){
+        return;
+    }
+
+
+    if(
+        !event ||
+        !event.target
+    ){
+        return;
+    }
+
+
+    if(
+        typeof window.RaniseUniversalPracticeActionRegistry ===
+        "undefined"
+    ){
+        return;
+    }
+
+
+    const registry =
+        window.RaniseUniversalPracticeActionRegistry;
+
+
+    if(
+        typeof registry.resolveStep !==
+        "function" ||
+        typeof registry.matchesStep !==
+        "function"
+    ){
+        return;
+    }
+
+
+    const question =
+        state.evaluation &&
+        state.evaluation[
+            state.questionIndex
+        ];
+
+
+    if(!question){
+        return;
+    }
+
+
+    /*
+     * Determine whether the current question contains
+     * a recognizable Universal Registry action.
+     */
+
+    let resolved = null;
+
+    try{
+
+        resolved =
+            registry.resolveStep(
+                question
+            );
+
+    }catch(error){
+
+        resolved = null;
+
+    }
+
+
+    if(!resolved){
+        return;
+    }
+
+
+    /*
+     * Check the REAL element clicked by the student
+     * against the current evaluation question.
+     */
+
+    let matched = false;
+
+    try{
+
+        matched =
+            registry.matchesStep(
+                event.target,
+                question
+            ) === true;
+
+    }catch(error){
+
+        matched = false;
+
+    }
+
+
+    if(!matched){
+        return;
+    }
+
+
+    /*
+     * The student has performed a real simulation action
+     * recognized by the Universal Registry.
+     *
+     * Record it only.
+     *
+     * NEVER validate the question here.
+     * NEVER award points here.
+     */
+
+    let action = null;
+
+
+    if(
+        resolved &&
+        resolved.type
+    ){
+
+        action =
+            String(
+                resolved.type
+            ).trim();
+
+    }
+
+
+    if(!action){
+        return;
+    }
+
+
+    recordAction(
+        action
+    );
+
+
+    state.lastActionTime =
+        Date.now();
+
+}
+
+
+
+
+
+  
 
   
     // =====================================================
@@ -34937,6 +35112,12 @@ doc.addEventListener(
         );
 
 
+doc.addEventListener(
+    "click",
+    handleUniversalEvaluationAction,
+    true
+);
+      
 
         doc.addEventListener(
             "input",
