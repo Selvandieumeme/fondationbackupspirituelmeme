@@ -671,6 +671,149 @@ homework:[
 
         "Être capable d’expliquer théoriquement chaque commande avant de l’appliquer dans la simulation."
     ]
+},
+
+
+
+{
+    id:"chapitre4",
+
+    unlocked:false,
+
+    title:"Microsoft Word 2007 — Onglet Home : Groupe Paragraph — Alignement du texte",
+
+    theory:[
+        {
+            title:"Align Left / Aligner à gauche",
+            content:
+                "La commande Align Left (Aligner à gauche) permet d’aligner le texte sélectionné sur la marge gauche du document. Elle est couramment utilisée pour présenter normalement les paragraphes."
+        },
+
+        {
+            title:"Center / Centrer",
+            content:
+                "La commande Center (Centrer) permet de placer le texte sélectionné au centre de la largeur disponible entre les marges. Elle est notamment utile pour présenter des titres ou des éléments qui doivent être centrés."
+        },
+
+        {
+            title:"Align Right / Aligner à droite",
+            content:
+                "La commande Align Right (Aligner à droite) permet d’aligner le texte sélectionné sur la marge droite du document. Elle peut être utilisée lorsque le contenu doit être positionné du côté droit."
+        },
+
+        {
+            title:"Justify / Justifier",
+            content:
+                "La commande Justify (Justifier) permet d’aligner le texte sur les marges gauche et droite en répartissant l’espacement entre les mots. Elle permet d’obtenir une présentation régulière des paragraphes."
+        },
+
+        {
+            title:"Maîtrise de l’alignement du texte",
+            content:
+                "Le groupe Paragraph de l’onglet Home contient les commandes d’alignement permettant de contrôler la position du texte dans le document. Dans ce chapitre, l’étudiant doit maîtriser Align Left, Center, Align Right et Justify."
+        }
+    ],
+
+
+    practice:[
+        {
+            title:"Pratique — Align Left / Aligner à gauche",
+            steps:[
+                "Repérer le groupe Paragraph de l’onglet Home.",
+                "Saisir un court texte dans le document.",
+                "Sélectionner le texte saisi.",
+                "Utiliser la commande Align Left (Aligner à gauche)."
+            ]
+        },
+
+        {
+            title:"Pratique — Center / Centrer",
+            steps:[
+                "Saisir un court texte dans le document.",
+                "Sélectionner le texte saisi.",
+                "Utiliser la commande Center (Centrer)."
+            ]
+        },
+
+        {
+            title:"Pratique — Align Right / Aligner à droite",
+            steps:[
+                "Saisir un court texte dans le document.",
+                "Sélectionner le texte saisi.",
+                "Utiliser la commande Align Right (Aligner à droite)."
+            ]
+        },
+
+        {
+            title:"Pratique — Justify / Justifier",
+            steps:[
+                "Saisir un paragraphe dans le document.",
+                "Sélectionner le paragraphe.",
+                "Utiliser la commande Justify (Justifier)."
+            ]
+        },
+
+        {
+            title:"Pratique — Synthèse des commandes d’alignement",
+            steps:[
+                "Créer un court document contenant plusieurs paragraphes.",
+                "Sélectionner un paragraphe et utiliser Align Left (Aligner à gauche).",
+                "Sélectionner un autre paragraphe et utiliser Center (Centrer).",
+                "Sélectionner un autre paragraphe et utiliser Align Right (Aligner à droite).",
+                "Sélectionner un paragraphe et utiliser Justify (Justifier)."
+            ]
+        }
+    ],
+
+
+    exercises:[
+        "Saisir un court texte, sélectionner le texte saisi puis utiliser la commande Align Left (Aligner à gauche).",
+
+        "Saisir un autre texte, le sélectionner puis utiliser la commande Center (Centrer).",
+
+        "Saisir un autre texte, le sélectionner puis utiliser la commande Align Right (Aligner à droite).",
+
+        "Saisir un paragraphe, le sélectionner puis utiliser la commande Justify (Justifier).",
+
+        "Réaliser un court document démontrant l’utilisation correcte de Align Left, Center, Align Right et Justify."
+    ],
+
+
+    homework:[
+        "Saisir un court paragraphe dans le document, sélectionner le paragraphe, puis appliquer la commande Justify (Justifier)."
+    ],
+
+
+    evaluation:[
+        "Démontrer correctement l’utilisation de Align Left (Aligner à gauche) sur un texte sélectionné.",
+
+        "Démontrer correctement l’utilisation de Center (Centrer) sur un texte sélectionné.",
+
+        "Démontrer correctement l’utilisation de Align Right (Aligner à droite) sur un texte sélectionné.",
+
+        "Démontrer correctement l’utilisation de Justify (Justifier) sur un paragraphe sélectionné.",
+
+        "Réaliser une mise en forme correcte d’un document en utilisant les quatre commandes d’alignement étudiées.",
+
+        "Expliquer le rôle de Align Left, Center, Align Right et Justify."
+    ],
+
+
+    objective:[
+        "Identifier le groupe Paragraph de l’onglet Home (Accueil) de Microsoft Word 2007.",
+
+        "Comprendre et utiliser Align Left (Aligner à gauche).",
+
+        "Comprendre et utiliser Center (Centrer).",
+
+        "Comprendre et utiliser Align Right (Aligner à droite).",
+
+        "Comprendre et utiliser Justify (Justifier).",
+
+        "Être capable de choisir la commande d’alignement appropriée selon le résultat recherché.",
+
+        "Être capable d’utiliser les quatre commandes d’alignement de manière autonome dans la simulation."
+    ]
 }
 
 
