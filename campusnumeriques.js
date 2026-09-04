@@ -646,8 +646,7 @@ homework:[
 
         "Réaliser une mise en forme complète d’un court document en utilisant correctement Grow Font, Shrink Font, Strikethrough, Subscript et Superscript.",
 
-        "Expliquer oralement ou par écrit le rôle de chacune des cinq commandes utilisées et justifier leur utilisation.",
-
+        
        
     ],
 
