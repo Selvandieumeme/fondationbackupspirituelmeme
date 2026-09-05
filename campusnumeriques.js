@@ -1234,6 +1234,9 @@ function syncMicrosoftWordProgress(){
 
 
 
+
+
+
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
