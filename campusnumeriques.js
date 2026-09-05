@@ -1234,13 +1234,6 @@ function syncMicrosoftWordProgress(){
 
 
 
-
-
-
-
-
-
-
 // =====================================
 // MICROSOFT WORD 2007 FORMATION
 // COURSE RENDERER ENGINE
@@ -1446,7 +1439,7 @@ function syncMicrosoftWordProgress(){
             }
 
             const practiceSimulationStarted =
-                window.RaniseFuturePracticeLauncher
+                await window.RaniseFuturePracticeLauncher
                     .start(chapterId);
 
             if(practiceSimulationStarted !== true){
@@ -1478,7 +1471,7 @@ function syncMicrosoftWordProgress(){
 
     window.RaniseFuturePracticeLauncher = {
 
-        start: function(chapterId){
+        start: async function(chapterId){
 
             if(!chapterId){
                 return false;
@@ -1563,8 +1556,19 @@ function syncMicrosoftWordProgress(){
             // AND STARTS WITH THE CURRENT CHAPTER
             // =====================================
 
-            window.RaniseMoiseDynamicPracticeGuidanceEngine
-                .start(chapterId);
+            const practiceStarted =
+                await window.RaniseMoiseDynamicPracticeGuidanceEngine
+                    .start(chapterId);
+
+            if(practiceStarted !== true){
+                console.error(
+                    "RANISE PHASE 4: " +
+                    "BLOCK 7 DID NOT START PRACTICE",
+                    chapterId
+                );
+
+                return false;
+            }
 
             return true;
         }
@@ -1574,6 +1578,15 @@ function syncMicrosoftWordProgress(){
 
 
 function renderMicrosoftWordCourse(){
+
+
+
+
+
+
+
+
+
 
 
 
