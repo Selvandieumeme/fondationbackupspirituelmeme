@@ -718,7 +718,7 @@ homework:[
         {
             title:"Pratique — Align Left / Aligner à gauche",
             steps:[
-                "Repérer le groupe Paragraph de l’onglet Home.",
+             
                 "Saisir un court texte dans le document.",
                 "Sélectionner le texte saisi.",
                 "Utiliser la commande Align Left (Aligner à gauche)."
