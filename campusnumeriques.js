@@ -40860,11 +40860,15 @@ function unlockNextChapter(){
         function(event){
 
 
+
+
 const launchButton =
     event.target.closest(
-        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn, 
-#launchMicrosoftWordChapter5SimulationBtn"
-    );      
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn, " +
+        "#launchMicrosoftWordChapter5SimulationBtn"
+    );
+
+          
 
             if(!launchButton){
 
