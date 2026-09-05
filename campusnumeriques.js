@@ -779,7 +779,7 @@ homework:[
 
 
     homework:[
-        "Saisir un court paragraphe dans le document, sélectionner le paragraphe, puis appliquer la commande Justify (Justifier)."
+        "Saisir un court texte dans le document, sélectionner le texte, puis appliquer la commande Justify (Justifier)."
     ],
 
 
@@ -813,7 +813,155 @@ homework:[
 
         "Être capable d’utiliser les quatre commandes d’alignement de manière autonome dans la simulation."
     ]
+},
+
+
+
+
+
+
+
+
+{
+    id:"chapitre5",
+
+    unlocked:false,
+
+    title:"Microsoft Word 2007 — Onglet Home : Groupe Paragraph — Puces, Numérotation et Retraits",
+
+    theory:[
+        {
+            title:"Bullets / Puces",
+            content:
+                "La commande Bullets (Puces) permet de créer une liste à puces à partir de plusieurs éléments ou paragraphes. Chaque élément de la liste est précédé d’un symbole afin de faciliter la présentation et la lecture des informations."
+        },
+
+        {
+            title:"Numbering / Numérotation",
+            content:
+                "La commande Numbering (Numérotation) permet de créer une liste numérotée. Les éléments sont automatiquement précédés de numéros dans un ordre séquentiel, ce qui est particulièrement utile pour présenter des étapes, des procédures ou des informations classées."
+        },
+
+        {
+            title:"Indent + / Augmenter le retrait",
+            content:
+                "La commande Indent + permet d’augmenter le retrait du paragraphe ou du texte sélectionné. Elle déplace progressivement le contenu vers l’intérieur du document afin de créer une hiérarchie ou une présentation structurée."
+        },
+
+        {
+            title:"Indent - / Diminuer le retrait",
+            content:
+                "La commande Indent - permet de diminuer le retrait du paragraphe ou du texte sélectionné. Elle rapproche progressivement le contenu de la marge afin de réduire le niveau de retrait précédemment appliqué."
+        },
+
+        {
+            title:"Maîtrise des listes et des retraits",
+            content:
+                "Le groupe Paragraph de l’onglet Home contient des commandes permettant de structurer et d’organiser les informations dans un document. Dans ce chapitre, l’étudiant doit maîtriser Bullets, Numbering, Indent + et Indent - afin de créer des listes et de contrôler le niveau de retrait des paragraphes."
+        }
+    ],
+
+
+    practice:[
+        {
+            title:"Pratique — Bullets / Puces",
+            steps:[
+                "Saisir plusieurs éléments courts dans le document, un élément par ligne.",
+                "Sélectionner les éléments saisis.",
+                "Utiliser la commande Bullets (Puces)."
+            ]
+        },
+
+        {
+            title:"Pratique — Numbering / Numérotation",
+            steps:[
+                "Saisir plusieurs étapes courtes dans le document, une étape par ligne.",
+                "Sélectionner les étapes saisies.",
+                "Utiliser la commande Numbering (Numérotation)."
+            ]
+        },
+
+        {
+            title:"Pratique — Indent + / Augmenter le retrait",
+            steps:[
+                "Saisir un court paragraphe dans le document.",
+                "Sélectionner le paragraphe saisi.",
+                "Utiliser la commande Indent + pour augmenter le retrait."
+            ]
+        },
+
+        {
+            title:"Pratique — Indent - / Diminuer le retrait",
+            steps:[
+                "Saisir un paragraphe avec un retrait.",
+                "Sélectionner le paragraphe.",
+                "Utiliser la commande Indent - pour diminuer le retrait."
+            ]
+        },
+
+        {
+            title:"Pratique — Synthèse des commandes de structure",
+            steps:[
+                "Créer un court document contenant plusieurs éléments organisés en lignes.",
+                "Sélectionner plusieurs éléments et utiliser Bullets (Puces).",
+                "Créer une autre liste et utiliser Numbering (Numérotation).",
+                "Sélectionner un paragraphe et utiliser Indent + pour augmenter son retrait.",
+                "Utiliser Indent - pour diminuer le retrait du paragraphe."
+            ]
+        }
+    ],
+
+
+    exercises:[
+        "Saisir plusieurs éléments, les sélectionner puis utiliser la commande Bullets (Puces).",
+
+        "Saisir plusieurs étapes, les sélectionner puis utiliser la commande Numbering (Numérotation).",
+
+        "Saisir un paragraphe, le sélectionner puis utiliser la commande Indent + pour augmenter son retrait.",
+
+        "Sélectionner un paragraphe avec un retrait puis utiliser la commande Indent - pour diminuer son retrait.",
+
+        "Réaliser un court document démontrant l’utilisation correcte de Bullets, Numbering, Indent + et Indent -."
+    ],
+
+
+    homework:[
+        "Créer un court document contenant une liste à puces et une liste numérotée, puis appliquer Indent + et Indent - à des paragraphes sélectionnés afin de démontrer la maîtrise des quatre commandes."
+    ],
+
+
+    evaluation:[
+        "Démontrer correctement l’utilisation de Bullets (Puces) sur plusieurs éléments sélectionnés.",
+
+        "Démontrer correctement l’utilisation de Numbering (Numérotation) sur plusieurs éléments sélectionnés.",
+
+        "Démontrer correctement l’utilisation de Indent + pour augmenter le retrait d’un paragraphe sélectionné.",
+
+        "Démontrer correctement l’utilisation de Indent - pour diminuer le retrait d’un paragraphe sélectionné.",
+
+        "Réaliser une mise en forme correcte d’un document en utilisant Bullets, Numbering, Indent + et Indent -.",
+
+        "Expliquer le rôle de Bullets, Numbering, Indent + et Indent -."
+    ],
+
+
+    objective:[
+        "Identifier les commandes Bullets, Numbering, Indent + et Indent - dans le groupe Paragraph de l’onglet Home (Accueil) de Microsoft Word 2007.",
+
+        "Comprendre et utiliser Bullets (Puces).",
+
+        "Comprendre et utiliser Numbering (Numérotation).",
+
+        "Comprendre et utiliser Indent + pour augmenter le retrait.",
+
+        "Comprendre et utiliser Indent - pour diminuer le retrait.",
+
+        "Être capable de choisir la commande appropriée pour organiser et structurer les informations dans un document.",
+
+        "Être capable d’utiliser Bullets, Numbering, Indent + et Indent - de manière autonome dans la simulation."
+    ]
 }
+
 
 
 
@@ -1729,6 +1877,20 @@ ${!unlocked ? "🔒" : "📘"} ${chapter.title}
     </button>
 
 
+
+
+ <button
+        id="launchMicrosoftWordChapter5SimulationBtn"
+        class="cwLaunchWordSimulationBtn">
+
+        🚀 Ouvrir Microsoft Word Simulation — Chapitre 5
+
+    </button>
+
+
+
+
+
     </div>
 
 </div>
@@ -1864,6 +2026,53 @@ if(launchChapter4Button){
 
 
   
+
+
+
+
+
+
+
+
+// =====================================
+// CHAPTER 5 SIMULATION LAUNCH
+// =====================================
+
+const launchChapter5Button =
+    document.getElementById(
+        "launchMicrosoftWordChapter5SimulationBtn"
+    );
+
+if(launchChapter5Button){
+
+    launchChapter5Button.addEventListener(
+        "click",
+        function(){
+
+            campusContent.innerHTML = `
+
+                <iframe
+                    src="https://fondationbackupspirituel.com/campusword2007simulation"
+                    style="
+                        width:100%;
+                        height:900px;
+                        border:none;
+                        border-radius:12px;
+                    "
+                    title="Microsoft Word Simulation — Chapitre 5">
+                </iframe>
+
+            `;
+
+        }
+    );
+
+}
+
+
+
+
+
 
 
 document.querySelectorAll(
@@ -26491,8 +26700,10 @@ const launchButton =
         "#launchMicrosoftWordSimulationBtn, " +
         "#launchMicrosoftWordChapter2SimulationBtn, "
  + "#launchMicrosoftWordChapter3SimulationBtn, " 
-+         "#launchMicrosoftWordChapter4SimulationBtn"
-  
++         "#launchMicrosoftWordChapter4SimulationBtn, "
+ +  "#launchMicrosoftWordChapter5SimulationBtn"
+
+
    );
 
 if(!launchButton){
@@ -26538,6 +26749,18 @@ if(
 if(launchButton.id === "launchMicrosoftWordChapter4SimulationBtn"){
     chapterId = "chapitre4";
 }
+
+
+
+if(
+    launchButton.id ===
+    "launchMicrosoftWordChapter5SimulationBtn"
+){
+    chapterId = "chapitre5";
+}
+
+
+
 
 
 
@@ -40639,7 +40862,8 @@ function unlockNextChapter(){
 
 const launchButton =
     event.target.closest(
-        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn"
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn, 
+#launchMicrosoftWordChapter5SimulationBtn"
     );      
 
             if(!launchButton){
@@ -40685,7 +40909,7 @@ const launchButton =
 
 const launchButton =
     event.target.closest(
-        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn"
+        "#launchMicrosoftWordSimulationBtn, #launchMicrosoftWordChapter2SimulationBtn, #launchMicrosoftWordChapter3SimulationBtn, #launchMicrosoftWordChapter4SimulationBtn, #launchMicrosoftWordChapter5SimulationBtn"
     );
             
 
