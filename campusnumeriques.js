@@ -1459,10 +1459,27 @@ function syncMicrosoftWordProgress(){
 })();
 
 
+
+
 // =====================================
 // RANISE — PHASE 4
-// GENERAL FUTURE CHAPTER PRACTICE LAUNCHER
-// Course Renderer → Dynamic Practice Guidance
+// UNIVERSAL FUTURE CHAPTER PRACTICE LAUNCHER
+//
+// COURSE RENDERER
+//      ↓
+// CURRENT CHAPTER
+//      ↓
+// DYNAMIC PRACTICE
+//      ↓
+// BLOCK 7
+//
+// IMPORTANT:
+// - Phase 1 NOT MODIFIED
+// - Phase 2 NOT MODIFIED
+// - Phase 3 NOT MODIFIED
+// - Dynamic Unlock Bridge NOT MODIFIED
+// - Block 7 NOT MODIFIED
+// - Works for Chapter 3+ automatically
 // =====================================
 
 (function(){
@@ -1477,20 +1494,24 @@ function syncMicrosoftWordProgress(){
                 return false;
             }
 
-            // PREMIERS DEUX CHAPITRES EXCLUS
-            if(chapterId === "chapitre1"){
-                return false;
-            }
+            // =====================================
+            // VERIFY COURSE
+            // =====================================
 
             if(
                 typeof microsoftWordCourse === "undefined" ||
                 !Array.isArray(microsoftWordCourse.chapters)
             ){
+                console.error(
+                    "RANISE PHASE 4: " +
+                    "COURSE DATA NOT AVAILABLE"
+                );
+
                 return false;
             }
 
             // =====================================
-            // VERIFY CURRENT CHAPTER
+            // FIND CURRENT CHAPTER
             // =====================================
 
             const chapters =
@@ -1504,6 +1525,11 @@ function syncMicrosoftWordProgress(){
                     }
                 );
 
+            // =====================================
+            // CHAPTER 1 + CHAPTER 2 EXCLUDED
+            // CHAPTER 3+ DYNAMIC
+            // =====================================
+
             if(chapterIndex < 2){
                 return false;
             }
@@ -1516,7 +1542,7 @@ function syncMicrosoftWordProgress(){
             }
 
             // =====================================
-            // VERIFY CURRENT CHAPTER PRACTICE
+            // VERIFY PRACTICE DATA
             // =====================================
 
             if(
@@ -1533,7 +1559,7 @@ function syncMicrosoftWordProgress(){
             }
 
             // =====================================
-            // CONNECT TO GENERAL BLOCK 7
+            // VERIFY GENERAL BLOCK 7
             // =====================================
 
             if(
@@ -1552,29 +1578,89 @@ function syncMicrosoftWordProgress(){
             }
 
             // =====================================
-            // BLOCK 7 HANDLES SIMULATION WAITING
-            // AND STARTS WITH THE CURRENT CHAPTER
+            // WAIT FOR ACTIVE WORD SIMULATION
+            //
+            // Phase 4 must not send the chapter to
+            // Block 7 before the simulation context
+            // has had time to become available.
             // =====================================
 
-            const practiceStarted =
-                await window.RaniseMoiseDynamicPracticeGuidanceEngine
-                    .start(chapterId);
+            const maxAttempts = 40;
+            const delay = 250;
 
-            if(practiceStarted !== true){
-                console.error(
-                    "RANISE PHASE 4: " +
-                    "BLOCK 7 DID NOT START PRACTICE",
-                    chapterId
+            for(
+                let attempt = 0;
+                attempt < maxAttempts;
+                attempt++
+            ){
+
+                // =====================================
+                // TRY DYNAMIC BLOCK 7
+                //
+                // Block 7 itself remains the authority
+                // for locating/connecting to simulation.
+                // =====================================
+
+                try{
+
+                    const practiceStarted =
+                        await window
+                            .RaniseMoiseDynamicPracticeGuidanceEngine
+                            .start(chapterId);
+
+                    if(practiceStarted === true){
+
+                        console.log(
+                            "RANISE PHASE 4: " +
+                            "DYNAMIC PRACTICE STARTED",
+                            chapterId
+                        );
+
+                        return true;
+                    }
+
+                }catch(error){
+
+                    console.warn(
+                        "RANISE PHASE 4: " +
+                        "PRACTICE START ATTEMPT FAILED",
+                        chapterId,
+                        error
+                    );
+
+                }
+
+                // =====================================
+                // WAIT BEFORE NEXT HAND-OFF ATTEMPT
+                // =====================================
+
+                await new Promise(
+                    function(resolve){
+                        setTimeout(
+                            resolve,
+                            delay
+                        );
+                    }
                 );
-
-                return false;
             }
 
-            return true;
+            // =====================================
+            // FINAL FAILURE
+            // =====================================
+
+            console.error(
+                "RANISE PHASE 4: " +
+                "COULD NOT START DYNAMIC PRACTICE",
+                chapterId
+            );
+
+            return false;
         }
     };
 
 })();
+
+
 
 
 function renderMicrosoftWordCourse(){
