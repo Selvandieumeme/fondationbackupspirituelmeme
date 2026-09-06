@@ -9940,3 +9940,1216 @@
     }
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// FOBAS CYBERSECURITY SIMULATION
+// WIFI CONFIGURATION INSPECTION ENGINE
+// ACTION: wifi.inspect_configuration
+//
+// Rôle :
+// - Inspecter la configuration virtuelle du réseau Wi-Fi
+//   après l'évaluation de sécurité.
+// - Utiliser exclusivement les données déjà présentes
+//   dans la simulation.
+// - Ne réalise aucune opération Wi-Fi réelle.
+//
+// Chaîne officielle :
+//
+// wifi.scan
+//      ↓
+// wifi.select_target
+//      ↓
+// wifi.analyze_target
+//      ↓
+// wifi.assess_security
+//      ↓
+// wifi.inspect_configuration
+//
+// IMPORTANT :
+// - Ne modifie PAS wifi.select_target.
+// - Ne modifie PAS wifi.analyze_target.
+// - Ne modifie PAS wifi.assess_security.
+// - Ne réalise aucun scan réel.
+// - Ne capture aucun paquet.
+// - Ne tente aucune authentification.
+// - Ne tente aucune connexion.
+// - Ne réalise aucune attaque.
+// ============================================================
+
+(function(){
+
+    "use strict";
+
+    // ========================================================
+    // 1. DÉPENDANCES
+    // ========================================================
+
+    const FOBAS =
+        window.FOBASCybersecuritySimulation;
+
+    const CyberActionBridge =
+        window.FOBASCyberActionBridge;
+
+    const WiFiSecurityAssessment =
+        window.FOBASWiFiSecurityAssessment;
+
+
+    // ========================================================
+    // 2. VÉRIFICATION DES DÉPENDANCES
+    // ========================================================
+
+    if(!FOBAS){
+
+        console.error(
+            "[FOBAS] Le moteur principal de simulation cybersécurité est introuvable."
+        );
+
+        return;
+    }
+
+    if(!CyberActionBridge){
+
+        console.error(
+            "[FOBAS] Le CyberActionBridge est introuvable."
+        );
+
+        return;
+    }
+
+    if(!WiFiSecurityAssessment){
+
+        console.error(
+            "[FOBAS] Le moteur wifi.assess_security est introuvable."
+        );
+
+        return;
+    }
+
+
+    // ========================================================
+    // 3. IDENTIFIANTS STABLES
+    // ========================================================
+
+    const ENGINE_VERSION = "1.0.0";
+
+    const ACTION_ID =
+        "wifi.inspect_configuration";
+
+    const SIMULATION_ID =
+        "fobas-ethical-hacking-simulation";
+
+    const LAB_ID =
+        "wifi";
+
+
+    // ========================================================
+    // 4. ÉTAT INTERNE DU MOTEUR
+    // ========================================================
+
+    const state = {
+
+        initialized: false,
+
+        inspectedTargetId: null,
+
+        inspectedNetworkId: null,
+
+        lastInspectionAt: null,
+
+        lastResult: null
+
+    };
+
+
+    // ========================================================
+    // 5. OUTIL : NORMALISATION D'UNE VALEUR
+    // ========================================================
+
+    function normalize(value){
+
+        if(value === null || value === undefined){
+
+            return "";
+        }
+
+        return String(value).trim();
+    }
+
+
+    // ========================================================
+    // 6. OUTIL : NORMALISATION DE L'ENCRYPTION
+    // ========================================================
+
+    function normalizeEncryption(network){
+
+        if(!network){
+
+            return "UNKNOWN";
+        }
+
+        const encryption =
+            normalize(
+                network.encryption ||
+                network.security ||
+                network.securityType
+            ).toUpperCase();
+
+        if(!encryption){
+
+            return "UNKNOWN";
+        }
+
+        if(
+            encryption.includes("WPA3")
+        ){
+
+            return "WPA3";
+        }
+
+        if(
+            encryption.includes("WPA2")
+        ){
+
+            return "WPA2";
+        }
+
+        if(
+            encryption === "WPA" ||
+            encryption.includes("WPA-")
+        ){
+
+            return "WPA";
+        }
+
+        if(
+            encryption.includes("WEP")
+        ){
+
+            return "WEP";
+        }
+
+        if(
+            encryption.includes("OPEN") ||
+            encryption.includes("NONE")
+        ){
+
+            return "OPEN";
+        }
+
+        return encryption;
+    }
+
+
+    // ========================================================
+    // 7. OUTIL : RÉCUPÉRATION DU STATUT DE SÉCURITÉ
+    // ========================================================
+
+    function resolveSecurityStatus(network){
+
+        if(!network){
+
+            return "unknown";
+        }
+
+        try{
+
+            if(
+                FOBAS.wifi &&
+                typeof FOBAS.wifi.getSecurityStatus === "function"
+            ){
+
+                const result =
+                    FOBAS.wifi.getSecurityStatus(network);
+
+                if(result){
+
+                    return normalize(result).toLowerCase();
+                }
+            }
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS] Impossible de récupérer le statut de sécurité du réseau.",
+                error
+            );
+        }
+
+
+        const encryption =
+            normalizeEncryption(network);
+
+
+        if(
+            encryption === "OPEN" ||
+            encryption === "WEP"
+        ){
+
+            return "vulnerable";
+        }
+
+        if(
+            encryption === "WPA"
+        ){
+
+            return "warning";
+        }
+
+        if(
+            encryption === "WPA2" ||
+            encryption === "WPA3"
+        ){
+
+            return "secure";
+        }
+
+        return "unknown";
+    }
+
+
+    // ========================================================
+    // 8. OUTIL : RÉCUPÉRATION DU RÉSEAU
+    // ========================================================
+
+    function getNetworkById(networkId){
+
+        if(!networkId){
+
+            return null;
+        }
+
+        if(
+            !FOBAS.wifi ||
+            !Array.isArray(FOBAS.wifi.networks)
+        ){
+
+            return null;
+        }
+
+        return (
+            FOBAS.wifi.networks.find(function(network){
+
+                return (
+                    network &&
+                    (
+                        network.id === networkId ||
+                        network.networkId === networkId ||
+                        network.targetId === networkId
+                    )
+                );
+
+            }) || null
+        );
+    }
+
+
+    // ========================================================
+    // 9. RÉCUPÉRATION DE L'ÉVALUATION PRÉCÉDENTE
+    // ========================================================
+
+    function getLastValidAssessment(){
+
+        let assessment = null;
+
+        try{
+
+            if(
+                typeof WiFiSecurityAssessment.getLastAssessment ===
+                "function"
+            ){
+
+                assessment =
+                    WiFiSecurityAssessment.getLastAssessment();
+            }
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS] Impossible de récupérer la dernière évaluation Wi-Fi.",
+                error
+            );
+        }
+
+
+        if(!assessment){
+
+            return null;
+        }
+
+
+        if(
+            assessment.actionId !==
+            "wifi.assess_security"
+        ){
+
+            return null;
+        }
+
+
+        if(
+            assessment.resultState !==
+            "wifi_security_assessed"
+        ){
+
+            return null;
+        }
+
+
+        return assessment;
+    }
+
+
+    // ========================================================
+    // 10. CONSTRUCTION DE L'INSPECTION
+    // ========================================================
+
+    function buildInspection(assessment){
+
+        if(!assessment){
+
+            return null;
+        }
+
+
+        const networkId =
+            assessment.networkId ||
+            assessment.targetNetworkId ||
+            null;
+
+
+        const network =
+            getNetworkById(networkId);
+
+
+        const encryption =
+            normalizeEncryption(network || assessment);
+
+
+        const securityStatus =
+            resolveSecurityStatus(
+                network || assessment
+            );
+
+
+        const inspectionItems = [];
+
+
+        // ----------------------------------------------------
+        // SSID
+        // ----------------------------------------------------
+
+        inspectionItems.push({
+
+            parameter: "SSID",
+
+            value:
+                normalize(
+                    assessment.SSID ||
+                    (network && network.SSID)
+                ) || "Non renseigné",
+
+            status: "inspecté",
+
+            description:
+                "Le nom du réseau virtuel a été identifié."
+
+        });
+
+
+        // ----------------------------------------------------
+        // BSSID
+        // ----------------------------------------------------
+
+        inspectionItems.push({
+
+            parameter: "BSSID",
+
+            value:
+                normalize(
+                    assessment.BSSID ||
+                    (network && network.BSSID)
+                ) || "Non renseigné",
+
+            status: "inspecté",
+
+            description:
+                "L'identifiant matériel virtuel du point d'accès a été identifié."
+
+        });
+
+
+        // ----------------------------------------------------
+        // CANAL
+        // ----------------------------------------------------
+
+        inspectionItems.push({
+
+            parameter: "Canal",
+
+            value:
+                normalize(
+                    assessment.channel ||
+                    (network && network.channel)
+                ) || "Non renseigné",
+
+            status: "inspecté",
+
+            description:
+                "Le canal radio virtuel associé au réseau a été identifié."
+
+        });
+
+
+        // ----------------------------------------------------
+        // CHIFFREMENT
+        // ----------------------------------------------------
+
+        let encryptionStatus =
+            "inconnu";
+
+
+        if(encryption === "OPEN"){
+
+            encryptionStatus =
+                "critique";
+
+        }else if(encryption === "WEP"){
+
+            encryptionStatus =
+                "faible";
+
+        }else if(encryption === "WPA"){
+
+            encryptionStatus =
+                "ancien";
+
+        }else if(encryption === "WPA2"){
+
+            encryptionStatus =
+                "moderne";
+
+        }else if(encryption === "WPA3"){
+
+            encryptionStatus =
+                "renforcé";
+        }
+
+
+        inspectionItems.push({
+
+            parameter: "Chiffrement",
+
+            value: encryption,
+
+            status: encryptionStatus,
+
+            description:
+                "Le mécanisme de protection virtuelle du réseau a été inspecté."
+
+        });
+
+
+        // ----------------------------------------------------
+        // STATUT DE SÉCURITÉ
+        // ----------------------------------------------------
+
+        inspectionItems.push({
+
+            parameter: "Statut de sécurité",
+
+            value:
+                securityStatus,
+
+            status:
+                securityStatus === "secure"
+                    ? "satisfaisant"
+                    : securityStatus === "warning"
+                        ? "à surveiller"
+                        : securityStatus === "vulnerable"
+                            ? "vulnérable"
+                            : "indéterminé",
+
+            description:
+                "Le niveau de sécurité déjà évalué a été confirmé à partir des données de la simulation."
+
+        });
+
+
+        // ----------------------------------------------------
+        // SIGNAL
+        // ----------------------------------------------------
+
+        const signal =
+            assessment.signal !== undefined
+                ? assessment.signal
+                : (
+                    network &&
+                    network.signal !== undefined
+                        ? network.signal
+                        : null
+                );
+
+
+        inspectionItems.push({
+
+            parameter: "Signal",
+
+            value:
+                signal !== null &&
+                signal !== undefined &&
+                signal !== ""
+                    ? signal
+                    : "Non renseigné",
+
+            status: "inspecté",
+
+            description:
+                "La valeur du signal virtuel disponible dans la simulation a été relevée."
+
+        });
+
+
+        // ====================================================
+        // 11. OBSERVATIONS
+        // ====================================================
+
+        const observations = [];
+
+
+        if(encryption === "OPEN"){
+
+            observations.push(
+                "Le réseau virtuel ne présente aucun mécanisme de chiffrement."
+            );
+
+        }else if(encryption === "WEP"){
+
+            observations.push(
+                "Le réseau virtuel utilise WEP, une protection considérée comme obsolète."
+            );
+
+        }else if(encryption === "WPA"){
+
+            observations.push(
+                "Le réseau virtuel utilise WPA, une protection ancienne qui doit être surveillée."
+            );
+
+        }else if(encryption === "WPA2"){
+
+            observations.push(
+                "Le réseau virtuel utilise WPA2, une protection moderne couramment utilisée."
+            );
+
+        }else if(encryption === "WPA3"){
+
+            observations.push(
+                "Le réseau virtuel utilise WPA3, une protection renforcée."
+            );
+
+        }else{
+
+            observations.push(
+                "Le mécanisme de protection du réseau virtuel n'a pas pu être déterminé."
+            );
+        }
+
+
+        if(securityStatus === "secure"){
+
+            observations.push(
+                "L'évaluation précédente indique un niveau de sécurité satisfaisant."
+            );
+
+        }else if(securityStatus === "warning"){
+
+            observations.push(
+                "L'évaluation précédente indique qu'une vigilance supplémentaire est nécessaire."
+            );
+
+        }else if(securityStatus === "vulnerable"){
+
+            observations.push(
+                "L'évaluation précédente indique la présence d'une faiblesse de sécurité."
+            );
+
+        }else{
+
+            observations.push(
+                "Le statut de sécurité reste indéterminé."
+            );
+        }
+
+
+        // ====================================================
+        // 12. RECOMMANDATIONS PÉDAGOGIQUES
+        // ====================================================
+
+        const recommendations = [];
+
+
+        if(encryption === "OPEN"){
+
+            recommendations.push(
+                "Activer une protection Wi-Fi moderne."
+            );
+
+            recommendations.push(
+                "Éviter l'utilisation d'un réseau ouvert pour des communications sensibles."
+            );
+
+        }else if(encryption === "WEP"){
+
+            recommendations.push(
+                "Remplacer WEP par une protection Wi-Fi moderne."
+            );
+
+            recommendations.push(
+                "Privilégier WPA2 ou WPA3 selon les capacités du réseau."
+            );
+
+        }else if(encryption === "WPA"){
+
+            recommendations.push(
+                "Envisager une migration vers WPA2 ou WPA3."
+            );
+
+            recommendations.push(
+                "Vérifier régulièrement la configuration de sécurité."
+            );
+
+        }else if(encryption === "WPA2"){
+
+            recommendations.push(
+                "Maintenir WPA2 correctement configuré."
+            );
+
+            recommendations.push(
+                "Utiliser WPA3 lorsque l'infrastructure le permet."
+            );
+
+        }else if(encryption === "WPA3"){
+
+            recommendations.push(
+                "Maintenir WPA3 activé et correctement configuré."
+            );
+
+            recommendations.push(
+                "Continuer les vérifications périodiques de la configuration."
+            );
+
+        }else{
+
+            recommendations.push(
+                "Identifier précisément le mécanisme de protection avant toute décision de sécurité."
+            );
+        }
+
+
+        // ====================================================
+        // 13. RAPPORT FINAL D'INSPECTION
+        // ====================================================
+
+        return {
+
+            inspectionType:
+                "virtual_wifi_configuration_inspection",
+
+            inspectionVersion:
+                ENGINE_VERSION,
+
+            targetId:
+                assessment.targetId || null,
+
+            networkId:
+                networkId,
+
+            SSID:
+                assessment.SSID ||
+                (network && network.SSID) ||
+                null,
+
+            BSSID:
+                assessment.BSSID ||
+                (network && network.BSSID) ||
+                null,
+
+            channel:
+                assessment.channel ||
+                (network && network.channel) ||
+                null,
+
+            encryption:
+                encryption,
+
+            signal:
+                signal,
+
+            signalQuality:
+                assessment.signalQuality ||
+                null,
+
+            securityStatus:
+                securityStatus,
+
+            inspectionItems:
+                inspectionItems,
+
+            inspectionItemCount:
+                inspectionItems.length,
+
+            observations:
+                observations,
+
+            observationCount:
+                observations.length,
+
+            recommendations:
+                recommendations,
+
+            recommendationCount:
+                recommendations.length,
+
+            virtual:
+                true,
+
+            realWiFiOperation:
+                false,
+
+            packetCapture:
+                false,
+
+            authenticationAttempt:
+                false,
+
+            connectionAttempt:
+                false,
+
+            attackExecution:
+                false,
+
+            inspectedAt:
+                new Date().toISOString()
+
+        };
+    }
+
+
+    // ========================================================
+    // 14. INSPECTER LA DERNIÈRE ÉVALUATION
+    // ========================================================
+
+    function inspectLastAssessment(){
+
+        const assessment =
+            getLastValidAssessment();
+
+
+        if(!assessment){
+
+            console.warn(
+                "[FOBAS] L'inspection de configuration nécessite une évaluation de sécurité Wi-Fi valide."
+            );
+
+            return null;
+        }
+
+
+        const inspection =
+            buildInspection(assessment);
+
+
+        if(!inspection){
+
+            console.warn(
+                "[FOBAS] Impossible de construire l'inspection de configuration."
+            );
+
+            return null;
+        }
+
+
+        state.inspectedTargetId =
+            inspection.targetId;
+
+        state.inspectedNetworkId =
+            inspection.networkId;
+
+        state.lastInspectionAt =
+            inspection.inspectedAt;
+
+
+        // ====================================================
+        // 15. ÉVÉNEMENT STANDARDISÉ
+        // ====================================================
+
+        const event = {
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            actionId:
+                ACTION_ID,
+
+            actionType:
+                "inspect_configuration",
+
+            status:
+                "completed",
+
+            timestamp:
+                inspection.inspectedAt,
+
+            targetId:
+                inspection.targetId,
+
+            targetNetworkId:
+                inspection.networkId,
+
+            targetSSID:
+                inspection.SSID,
+
+            BSSID:
+                inspection.BSSID,
+
+            channel:
+                inspection.channel,
+
+            encryption:
+                inspection.encryption,
+
+            securityStatus:
+                inspection.securityStatus,
+
+            inspection:
+                inspection,
+
+            resultState:
+                "wifi_configuration_inspected",
+
+            validationKey:
+                "WIFI_CONFIGURATION_INSPECTED"
+
+        };
+
+
+        state.lastResult =
+            event;
+
+
+        // ====================================================
+        // 16. ENREGISTREMENT DANS LE CYBER ACTION BRIDGE
+        // ====================================================
+
+        try{
+
+            if(
+                typeof CyberActionBridge.recordAction ===
+                "function"
+            ){
+
+                CyberActionBridge.recordAction(event);
+            }
+
+        }catch(error){
+
+            console.error(
+                "[FOBAS] Erreur lors de l'enregistrement de wifi.inspect_configuration.",
+                error
+            );
+
+            return null;
+        }
+
+
+        // ====================================================
+        // 17. ÉVÉNEMENTS GLOBAUX
+        // ====================================================
+
+        try{
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "FOBAS:CyberSimulationAction",
+                    {
+                        detail: event
+                    }
+                )
+            );
+
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "FOBAS:WiFiConfigurationInspected",
+                    {
+                        detail: event
+                    }
+                )
+            );
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS] Impossible d'émettre les événements globaux.",
+                error
+            );
+        }
+
+
+        console.log(
+            "[FOBAS] Inspection de configuration Wi-Fi terminée.",
+            event
+        );
+
+
+        return event;
+    }
+
+
+    // ========================================================
+    // 18. INSPECTER UNE CIBLE PRÉCISE
+    // ========================================================
+
+    function inspectTarget(targetId){
+
+        const assessment =
+            getLastValidAssessment();
+
+
+        if(!assessment){
+
+            console.warn(
+                "[FOBAS] Aucune évaluation de sécurité valide n'est disponible."
+            );
+
+            return null;
+        }
+
+
+        if(
+            targetId &&
+            assessment.targetId !== targetId
+        ){
+
+            console.warn(
+                "[FOBAS] La cible demandée n'est pas la cible actuellement évaluée."
+            );
+
+            return null;
+        }
+
+
+        return inspectLastAssessment();
+    }
+
+
+    // ========================================================
+    // 19. ACCÈS AU DERNIER RÉSULTAT
+    // ========================================================
+
+    function getLastInspection(){
+
+        return state.lastResult;
+    }
+
+
+    // ========================================================
+    // 20. ACCÈS AU RAPPORT D'INSPECTION
+    // ========================================================
+
+    function getInspectionReport(){
+
+        if(
+            !state.lastResult
+        ){
+
+            return null;
+        }
+
+
+        return (
+            state.lastResult.inspection ||
+            null
+        );
+    }
+
+
+    // ========================================================
+    // 21. INITIALISATION
+    // ========================================================
+
+    function initialize(){
+
+        if(state.initialized){
+
+            return true;
+        }
+
+
+        // ----------------------------------------------------
+        // Vérification du registre d'actions
+        // ----------------------------------------------------
+
+        if(
+            !CyberActionBridge.actions
+        ){
+
+            CyberActionBridge.actions = {};
+        }
+
+
+        // ====================================================
+        // 22. ENREGISTREMENT OFFICIEL DE L'ACTION
+        // ====================================================
+
+        CyberActionBridge.actions[ACTION_ID] = {
+
+            actionId:
+                ACTION_ID,
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            elementId:
+                null,
+
+            actionType:
+                "inspect_configuration",
+
+            target:
+                "virtual_wifi_network",
+
+            requiredState:
+                "wifi_security_assessed",
+
+            resultState:
+                "wifi_configuration_inspected",
+
+            validationKey:
+                "WIFI_CONFIGURATION_INSPECTED",
+
+            enabled:
+                true
+
+        };
+
+
+        state.initialized =
+            true;
+
+
+        console.log(
+            "[FOBAS] wifi.inspect_configuration initialisé."
+        );
+
+
+        return true;
+    }
+
+
+    // ========================================================
+    // 23. API PUBLIQUE
+    // ========================================================
+
+    const PublicAPI = {
+
+        initialize:
+
+            initialize,
+
+        inspectLastAssessment:
+
+            inspectLastAssessment,
+
+        inspectTarget:
+
+            inspectTarget,
+
+        getLastInspection:
+
+            getLastInspection,
+
+        getInspectionReport:
+
+            getInspectionReport,
+
+        getInspectedTargetId:
+
+            function(){
+
+                return state.inspectedTargetId;
+
+            },
+
+        getInspectedNetworkId:
+
+            function(){
+
+                return state.inspectedNetworkId;
+
+            },
+
+        getLastInspectionAt:
+
+            function(){
+
+                return state.lastInspectionAt;
+
+            },
+
+        getEngineVersion:
+
+            function(){
+
+                return ENGINE_VERSION;
+
+            }
+
+    };
+
+
+    // ========================================================
+    // 24. EXPOSITION GLOBALE
+    // ========================================================
+
+    window.FOBASWiFiConfigurationInspection =
+        PublicAPI;
+
+
+    // ========================================================
+    // 25. EXPOSITION DANS FOBAS.WIFI
+    // ========================================================
+
+    if(!FOBAS.wifi){
+
+        FOBAS.wifi = {};
+    }
+
+
+    FOBAS.wifi.configurationInspection =
+        PublicAPI;
+
+
+    // ========================================================
+    // 26. INITIALISATION AUTOMATIQUE
+    // ========================================================
+
+    initialize();
+
+
+})();
