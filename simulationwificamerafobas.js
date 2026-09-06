@@ -7284,3 +7284,1405 @@
     }
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   FOBAS SIMULATION DE PIRATAGE ÉTHIQUE
+   EXTENSION D'ÉVALUATION DE LA SÉCURITÉ WI-FI
+   ACTION : wifi.assess_security
+   VERSION 1.0.0
+
+   OBJECTIF :
+   - Évaluer le résultat de l'analyse du target Wi-Fi virtuel.
+   - Utiliser uniquement les données produites par
+     wifi.analyze_target.
+   - Produire une évaluation de sécurité entièrement virtuelle.
+   - Étendre le Cyber Action Bridge existant.
+   - Ne réaliser aucune opération Wi-Fi réelle.
+   - Ne pas effectuer de scan.
+   - Ne pas effectuer de capture de paquets.
+   - Ne pas effectuer de tentative d'authentification.
+   - Ne pas effectuer de tentative de connexion.
+   - Ne pas modifier le Core Engine.
+   - Ne pas modifier wifi.select_target.
+   - Ne pas modifier wifi.analyze_target.
+   - Ne pas modifier les systèmes pédagogiques de Ranise.
+========================================================= */
+
+(function () {
+
+    "use strict";
+
+
+    /* =====================================================
+       VALIDATION DES DÉPENDANCES
+    ===================================================== */
+
+    if (!window.FOBASCybersecuritySimulation) {
+
+        console.error(
+            "[FOBAS Wi-Fi Security] " +
+            "Moteur principal de simulation introuvable."
+        );
+
+        return;
+    }
+
+
+    if (!window.FOBASCyberActionBridge) {
+
+        console.error(
+            "[FOBAS Wi-Fi Security] " +
+            "Cyber Action Bridge introuvable."
+        );
+
+        return;
+    }
+
+
+    if (!window.FOBASWiFiTargetAnalysis) {
+
+        console.error(
+            "[FOBAS Wi-Fi Security] " +
+            "Extension d'analyse du target Wi-Fi introuvable."
+        );
+
+        return;
+    }
+
+
+    const FOBAS =
+        window.FOBASCybersecuritySimulation;
+
+    const CyberActionBridge =
+        window.FOBASCyberActionBridge;
+
+    const WiFiTargetAnalysis =
+        window.FOBASWiFiTargetAnalysis;
+
+
+    /* =====================================================
+       CONFIGURATION
+    ===================================================== */
+
+    const ENGINE_VERSION =
+        "1.0.0";
+
+    const ACTION_ID =
+        "wifi.assess_security";
+
+    const SIMULATION_ID =
+        "fobas-ethical-hacking-simulation";
+
+    const LAB_ID =
+        "wifi";
+
+
+    /* =====================================================
+       ÉTAT INTERNE
+    ===================================================== */
+
+    const securityAssessmentState = {
+
+        initialized:
+            false,
+
+        assessedTargetId:
+            null,
+
+        assessedNetworkId:
+            null,
+
+        lastAssessmentAt:
+            null,
+
+        lastResult:
+            null
+
+    };
+
+
+    /* =====================================================
+       RÉSOLUTION DE LA DERNIÈRE ANALYSE
+    ===================================================== */
+
+    function resolveLastAnalysis() {
+
+        if (
+            !WiFiTargetAnalysis ||
+            typeof WiFiTargetAnalysis.getLastAnalysis !==
+                "function"
+        ) {
+
+            return null;
+
+        }
+
+
+        const lastAnalysis =
+            WiFiTargetAnalysis.getLastAnalysis();
+
+
+        if (!lastAnalysis) {
+
+            return null;
+
+        }
+
+
+        /*
+         * Une évaluation n'est autorisée que si l'action
+         * précédente est bien wifi.analyze_target.
+         */
+
+        if (
+            String(
+                lastAnalysis.actionId ||
+                ""
+            ) !==
+            "wifi.analyze_target"
+        ) {
+
+            return null;
+
+        }
+
+
+        /*
+         * Vérification supplémentaire de l'état produit
+         * par l'analyse précédente.
+         */
+
+        if (
+            String(
+                lastAnalysis.resultState ||
+                ""
+            ) !==
+            "wifi_target_analyzed"
+        ) {
+
+            return null;
+
+        }
+
+
+        return lastAnalysis;
+
+    }
+
+
+    /* =====================================================
+       RÉSOLUTION DE L'ÉTAT DE SÉCURITÉ
+    ===================================================== */
+
+    function resolveSecurityStatus(
+        analysis
+    ) {
+
+        if (
+            !analysis
+        ) {
+
+            return "unknown";
+
+        }
+
+
+        return String(
+            analysis.securityStatus ||
+            "unknown"
+        ).toLowerCase();
+
+    }
+
+
+    /* =====================================================
+       NORMALISATION DU NIVEAU DE SÉCURITÉ
+    ===================================================== */
+
+    function resolveSecurityLevel(
+        analysis
+    ) {
+
+        if (
+            !analysis
+        ) {
+
+            return "inconnu";
+
+        }
+
+
+        const level =
+            String(
+                analysis.securityLevel ||
+                ""
+            ).toLowerCase();
+
+
+        if (level === "élevé") {
+
+            return "élevé";
+
+        }
+
+
+        if (level === "moyen") {
+
+            return "moyen";
+
+        }
+
+
+        if (level === "faible") {
+
+            return "faible";
+
+        }
+
+
+        return "inconnu";
+
+    }
+
+
+    /* =====================================================
+       RÉSOLUTION DU NIVEAU DE RISQUE
+    ===================================================== */
+
+    function resolveRiskLevel(
+        analysis
+    ) {
+
+        const securityStatus =
+            resolveSecurityStatus(
+                analysis
+            );
+
+
+        const encryption =
+            String(
+                analysis.encryption ||
+                ""
+            ).toUpperCase();
+
+
+        /*
+         * Réseau ouvert :
+         * niveau de risque élevé.
+         */
+
+        if (
+            encryption === "OPEN" ||
+            securityStatus === "vulnerable"
+        ) {
+
+            return {
+
+                code:
+                    "HIGH",
+
+                label:
+                    "Risque élevé",
+
+                score:
+                    90
+
+            };
+
+        }
+
+
+        /*
+         * WEP :
+         * niveau de risque élevé.
+         */
+
+        if (
+            encryption === "WEP"
+        ) {
+
+            return {
+
+                code:
+                    "HIGH",
+
+                label:
+                    "Risque élevé",
+
+                score:
+                    85
+
+            };
+
+        }
+
+
+        /*
+         * WPA :
+         * niveau de risque moyen.
+         */
+
+        if (
+            encryption === "WPA" ||
+            securityStatus === "warning"
+        ) {
+
+            return {
+
+                code:
+                    "MEDIUM",
+
+                label:
+                    "Risque moyen",
+
+                score:
+                    60
+
+            };
+
+        }
+
+
+        /*
+         * WPA2 :
+         * niveau de risque faible dans le cadre
+         * de cette simulation pédagogique.
+         */
+
+        if (
+            encryption === "WPA2"
+        ) {
+
+            return {
+
+                code:
+                    "LOW",
+
+                label:
+                    "Risque faible",
+
+                score:
+                    25
+
+            };
+
+        }
+
+
+        /*
+         * WPA3 :
+         * niveau de risque faible.
+         */
+
+        if (
+            encryption === "WPA3"
+        ) {
+
+            return {
+
+                code:
+                    "LOW",
+
+                label:
+                    "Risque faible",
+
+                score:
+                    15
+
+            };
+
+        }
+
+
+        /*
+         * Données insuffisantes.
+         */
+
+        return {
+
+            code:
+                "UNKNOWN",
+
+            label:
+                "Risque indéterminé",
+
+            score:
+                null
+
+        };
+
+    }
+
+
+    /* =====================================================
+       RÉSOLUTION DU NIVEAU DE PROTECTION
+    ===================================================== */
+
+    function resolveProtectionLevel(
+        analysis
+    ) {
+
+        const encryption =
+            String(
+                analysis &&
+                analysis.encryption
+                    ? analysis.encryption
+                    : ""
+            ).toUpperCase();
+
+
+        switch (encryption) {
+
+            case "OPEN":
+
+                return "Aucune protection";
+
+            case "WEP":
+
+                return "Protection faible";
+
+            case "WPA":
+
+                return "Protection ancienne";
+
+            case "WPA2":
+
+                return "Protection moderne";
+
+            case "WPA3":
+
+                return "Protection renforcée";
+
+            default:
+
+                return "Protection inconnue";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       RECOMMANDATIONS DE SÉCURITÉ
+    ===================================================== */
+
+    function generateRecommendations(
+        analysis,
+        risk
+    ) {
+
+        const recommendations = [];
+
+
+        const encryption =
+            String(
+                analysis &&
+                analysis.encryption
+                    ? analysis.encryption
+                    : ""
+            ).toUpperCase();
+
+
+        /* -------------------------------------------------
+           RÉSEAU OUVERT
+        ------------------------------------------------- */
+
+        if (
+            encryption === "OPEN"
+        ) {
+
+            recommendations.push(
+                "Activer un mécanisme de chiffrement Wi-Fi moderne."
+            );
+
+            recommendations.push(
+                "Éviter l'utilisation d'un réseau sans protection pour les communications sensibles."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           WEP
+        ------------------------------------------------- */
+
+        else if (
+            encryption === "WEP"
+        ) {
+
+            recommendations.push(
+                "Remplacer WEP par une protection Wi-Fi moderne."
+            );
+
+            recommendations.push(
+                "Privilégier WPA2 ou WPA3 selon les capacités du réseau."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           WPA
+        ------------------------------------------------- */
+
+        else if (
+            encryption === "WPA"
+        ) {
+
+            recommendations.push(
+                "Migrer vers une protection Wi-Fi plus moderne."
+            );
+
+            recommendations.push(
+                "Privilégier WPA2 ou WPA3 lorsque cela est possible."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           WPA2
+        ------------------------------------------------- */
+
+        else if (
+            encryption === "WPA2"
+        ) {
+
+            recommendations.push(
+                "Maintenir une configuration WPA2 correctement protégée."
+            );
+
+            recommendations.push(
+                "Utiliser un mot de passe robuste et unique."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           WPA3
+        ------------------------------------------------- */
+
+        else if (
+            encryption === "WPA3"
+        ) {
+
+            recommendations.push(
+                "Maintenir la configuration WPA3 à jour."
+            );
+
+            recommendations.push(
+                "Conserver une politique de mot de passe robuste."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           PROTECTION INCONNUE
+        ------------------------------------------------- */
+
+        else {
+
+            recommendations.push(
+                "Identifier précisément le mécanisme de protection du réseau."
+            );
+
+            recommendations.push(
+                "Effectuer une vérification de configuration dans un environnement autorisé."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           RECOMMANDATION GÉNÉRALE
+        ------------------------------------------------- */
+
+        if (
+            risk &&
+            risk.code === "HIGH"
+        ) {
+
+            recommendations.push(
+                "Prioriser la correction des faiblesses identifiées dans cet environnement virtuel."
+            );
+
+        }
+
+
+        return recommendations;
+
+    }
+
+
+    /* =====================================================
+       CRÉATION DU RAPPORT D'ÉVALUATION
+    ===================================================== */
+
+    function createSecurityAssessment(
+        analysis
+    ) {
+
+        if (
+            !analysis
+        ) {
+
+            return null;
+
+        }
+
+
+        const securityStatus =
+            resolveSecurityStatus(
+                analysis
+            );
+
+
+        const securityLevel =
+            resolveSecurityLevel(
+                analysis
+            );
+
+
+        const risk =
+            resolveRiskLevel(
+                analysis
+            );
+
+
+        const protectionLevel =
+            resolveProtectionLevel(
+                analysis
+            );
+
+
+        const recommendations =
+            generateRecommendations(
+                analysis,
+                risk
+            );
+
+
+        return {
+
+            assessmentType:
+                "virtual_wifi_security_assessment",
+
+            assessmentVersion:
+                ENGINE_VERSION,
+
+            targetId:
+                analysis.targetId ||
+                null,
+
+            networkId:
+                analysis.targetNetworkId ||
+                analysis.networkId ||
+                null,
+
+            SSID:
+                analysis.targetSSID ||
+                analysis.SSID ||
+                "",
+
+            BSSID:
+                analysis.BSSID ||
+                "",
+
+            channel:
+                analysis.channel !== undefined
+                    ? analysis.channel
+                    : null,
+
+            encryption:
+                analysis.encryption ||
+                "UNKNOWN",
+
+            signal:
+                analysis.signal !== undefined
+                    ? analysis.signal
+                    : null,
+
+            signalQuality:
+                analysis.signalQuality ||
+                "inconnue",
+
+            securityStatus:
+                securityStatus,
+
+            securityLevel:
+                securityLevel,
+
+            protectionLevel:
+                protectionLevel,
+
+            riskCode:
+                risk.code,
+
+            riskLevel:
+                risk.label,
+
+            riskScore:
+                risk.score,
+
+            findings:
+                Array.isArray(
+                    analysis.analysis &&
+                    analysis.analysis.findings
+                )
+                    ? analysis.analysis.findings
+                    : [],
+
+            findingCount:
+                Array.isArray(
+                    analysis.analysis &&
+                    analysis.analysis.findings
+                )
+                    ? analysis.analysis.findings.length
+                    : 0,
+
+            recommendations:
+                recommendations,
+
+            virtual:
+                true,
+
+            realWiFiOperation:
+                false,
+
+            packetCapture:
+                false,
+
+            authenticationAttempt:
+                false,
+
+            connectionAttempt:
+                false,
+
+            generatedAt:
+                new Date().toISOString()
+
+        };
+
+    }
+
+
+    /* =====================================================
+       CRÉATION DE L'ÉVÉNEMENT D'ACTION
+    ===================================================== */
+
+    function createAssessmentEvent(
+        analysis,
+        assessment
+    ) {
+
+        if (
+            !analysis ||
+            !assessment
+        ) {
+
+            return null;
+
+        }
+
+
+        return {
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            actionId:
+                ACTION_ID,
+
+            actionType:
+                "assess_security",
+
+            status:
+                "completed",
+
+            timestamp:
+                assessment.generatedAt,
+
+            targetId:
+                assessment.targetId,
+
+            targetNetworkId:
+                assessment.networkId,
+
+            targetSSID:
+                assessment.SSID,
+
+            BSSID:
+                assessment.BSSID,
+
+            channel:
+                assessment.channel,
+
+            encryption:
+                assessment.encryption,
+
+            signal:
+                assessment.signal,
+
+            signalQuality:
+                assessment.signalQuality,
+
+            securityStatus:
+                assessment.securityStatus,
+
+            securityLevel:
+                assessment.securityLevel,
+
+            protectionLevel:
+                assessment.protectionLevel,
+
+            riskCode:
+                assessment.riskCode,
+
+            riskLevel:
+                assessment.riskLevel,
+
+            riskScore:
+                assessment.riskScore,
+
+            findingCount:
+                assessment.findingCount,
+
+            findings:
+                assessment.findings,
+
+            recommendations:
+                assessment.recommendations,
+
+            assessment:
+                assessment,
+
+            resultState:
+                "wifi_security_assessed",
+
+            validationKey:
+                "WIFI_SECURITY_ASSESSED"
+
+        };
+
+    }
+
+
+    /* =====================================================
+       ENREGISTREMENT DE L'ÉVALUATION
+    ===================================================== */
+
+    function recordSecurityAssessment(
+        analysis,
+        assessment
+    ) {
+
+        if (
+            !analysis ||
+            !assessment
+        ) {
+
+            return null;
+
+        }
+
+
+        const event =
+            createAssessmentEvent(
+                analysis,
+                assessment
+            );
+
+
+        if (!event) {
+
+            return null;
+
+        }
+
+
+        securityAssessmentState.assessedTargetId =
+            event.targetId;
+
+
+        securityAssessmentState.assessedNetworkId =
+            event.targetNetworkId;
+
+
+        securityAssessmentState.lastAssessmentAt =
+            event.timestamp;
+
+
+        securityAssessmentState.lastResult =
+            event;
+
+
+        /* =================================================
+           ENREGISTREMENT DANS LE CYBER ACTION BRIDGE
+        ================================================= */
+
+        if (
+            CyberActionBridge &&
+            typeof CyberActionBridge.recordAction ===
+                "function"
+        ) {
+
+            CyberActionBridge.recordAction(
+                event
+            );
+
+        }
+
+
+        /* =================================================
+           ÉVÉNEMENT CYBERSÉCURITÉ STANDARD
+        ================================================= */
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "FOBAS:CyberSimulationAction",
+                {
+                    detail:
+                        event
+                }
+            )
+        );
+
+
+        /* =================================================
+           ÉVÉNEMENT SPÉCIFIQUE À L'ÉVALUATION WI-FI
+        ================================================= */
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "FOBAS:WiFiSecurityAssessed",
+                {
+                    detail:
+                        event
+                }
+            )
+        );
+
+
+        return event;
+
+    }
+
+
+    /* =====================================================
+       ÉVALUER LA DERNIÈRE ANALYSE
+    ===================================================== */
+
+    function assessLastAnalysis() {
+
+        /*
+         * L'action ne peut commencer qu'après
+         * wifi.analyze_target.
+         */
+
+        const analysis =
+            resolveLastAnalysis();
+
+
+        if (!analysis) {
+
+            console.warn(
+                "[FOBAS Wi-Fi Security] " +
+                "Aucune analyse Wi-Fi virtuelle valide n'est disponible."
+            );
+
+            return null;
+
+        }
+
+
+        const assessment =
+            createSecurityAssessment(
+                analysis
+            );
+
+
+        if (!assessment) {
+
+            return null;
+
+        }
+
+
+        return recordSecurityAssessment(
+            analysis,
+            assessment
+        );
+
+    }
+
+
+    /* =====================================================
+       ÉVALUER UNE ANALYSE PAR TARGET ID
+    ===================================================== */
+
+    function assessTarget(
+        targetId
+    ) {
+
+        if (
+            targetId === undefined ||
+            targetId === null ||
+            targetId === ""
+        ) {
+
+            return null;
+
+        }
+
+
+        const analysis =
+            resolveLastAnalysis();
+
+
+        if (!analysis) {
+
+            console.warn(
+                "[FOBAS Wi-Fi Security] " +
+                "Aucune analyse précédente valide."
+            );
+
+            return null;
+
+        }
+
+
+        if (
+            String(
+                analysis.targetId ||
+                ""
+            ) !==
+            String(
+                targetId
+            )
+        ) {
+
+            console.warn(
+                "[FOBAS Wi-Fi Security] " +
+                "Le target demandé ne correspond pas au target analysé."
+            );
+
+            return null;
+
+        }
+
+
+        const assessment =
+            createSecurityAssessment(
+                analysis
+            );
+
+
+        if (!assessment) {
+
+            return null;
+
+        }
+
+
+        return recordSecurityAssessment(
+            analysis,
+            assessment
+        );
+
+    }
+
+
+    /* =====================================================
+       ENREGISTREMENT DE L'ACTION DANS LE REGISTRE
+    ===================================================== */
+
+    function registerAction() {
+
+        if (
+            !CyberActionBridge ||
+            !CyberActionBridge.actions
+        ) {
+
+            console.error(
+                "[FOBAS Wi-Fi Security] " +
+                "Registre des actions Cyber indisponible."
+            );
+
+            return false;
+
+        }
+
+
+        /*
+         * Ajout d'une seule nouvelle action.
+         *
+         * Les actions existantes ne sont ni remplacées
+         * ni modifiées.
+         */
+
+        CyberActionBridge.actions[ACTION_ID] = {
+
+            actionId:
+                ACTION_ID,
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            elementId:
+                null,
+
+            actionType:
+                "assess_security",
+
+            target:
+                "virtual_wifi_network",
+
+            requiredState:
+                "wifi_target_analyzed",
+
+            resultState:
+                "wifi_security_assessed",
+
+            validationKey:
+                "WIFI_SECURITY_ASSESSED",
+
+            enabled:
+                true
+
+        };
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       RÉCUPÉRER LA DERNIÈRE ÉVALUATION
+    ===================================================== */
+
+    function getLastAssessment() {
+
+        return securityAssessmentState.lastResult;
+
+    }
+
+
+    /* =====================================================
+       RÉCUPÉRER LE RAPPORT D'ÉVALUATION
+    ===================================================== */
+
+    function getAssessmentReport() {
+
+        if (
+            !securityAssessmentState.lastResult
+        ) {
+
+            return null;
+
+        }
+
+
+        return (
+            securityAssessmentState
+                .lastResult
+                .assessment ||
+            null
+        );
+
+    }
+
+
+    /* =====================================================
+       API PUBLIQUE
+    ===================================================== */
+
+    const WiFiSecurityAssessmentExtension = {
+
+        version:
+            ENGINE_VERSION,
+
+        id:
+            ACTION_ID,
+
+        state:
+            securityAssessmentState,
+
+        initialize:
+            function () {
+
+                if (
+                    securityAssessmentState.initialized
+                ) {
+
+                    return true;
+
+                }
+
+
+                if (!FOBAS.wifi) {
+
+                    console.error(
+                        "[FOBAS Wi-Fi Security] " +
+                        "Moteur Wi-Fi indisponible."
+                    );
+
+                    return false;
+
+                }
+
+
+                if (
+                    !WiFiTargetAnalysis
+                ) {
+
+                    console.error(
+                        "[FOBAS Wi-Fi Security] " +
+                        "Extension d'analyse Wi-Fi indisponible."
+                    );
+
+                    return false;
+
+                }
+
+
+                /*
+                 * Enregistrer uniquement la nouvelle action.
+                 */
+
+                if (
+                    !registerAction()
+                ) {
+
+                    return false;
+
+                }
+
+
+                securityAssessmentState.initialized =
+                    true;
+
+
+                console.log(
+                    "[FOBAS Wi-Fi Security] " +
+                    "Extension d'évaluation de sécurité initialisée avec succès. " +
+                    ENGINE_VERSION
+                );
+
+
+                return true;
+
+            },
+
+
+        assessLastAnalysis:
+            assessLastAnalysis,
+
+
+        assessTarget:
+            assessTarget,
+
+
+        getLastAssessment:
+            getLastAssessment,
+
+
+        getAssessmentReport:
+            getAssessmentReport
+
+    };
+
+
+    /* =====================================================
+       API GLOBALE PUBLIQUE
+    ===================================================== */
+
+    window.FOBASWiFiSecurityAssessment =
+        WiFiSecurityAssessmentExtension;
+
+
+    if (FOBAS.wifi) {
+
+        FOBAS.wifi.securityAssessment =
+            WiFiSecurityAssessmentExtension;
+
+    }
+
+
+    /* =====================================================
+       INITIALISATION
+    ===================================================== */
+
+    function initializeWiFiSecurityAssessment() {
+
+        WiFiSecurityAssessmentExtension.initialize();
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeWiFiSecurityAssessment,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initializeWiFiSecurityAssessment();
+
+    }
+
+})();
