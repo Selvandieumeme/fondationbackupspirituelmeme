@@ -11153,3 +11153,1391 @@
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =====================================================
+// FOBAS ETHICAL HACKING SIMULATION
+// WIFI CONFIGURATION HARDENING ENGINE
+//
+// ACTION:
+// wifi.harden_configuration
+//
+// OBJECTIF:
+// Appliquer une remédiation défensive virtuelle à la
+// configuration Wi-Fi après son inspection.
+//
+// IMPORTANT :
+// - Simulation 100 % virtuelle
+// - Aucune connexion Wi-Fi réelle
+// - Aucun scan réel
+// - Aucune capture de paquets
+// - Aucune tentative d'authentification
+// - Aucun craquage de mot de passe
+// - Aucune exécution d'attaque
+// - Ne modifie pas les moteurs précédents
+// - Nécessite wifi.inspect_configuration
+// - Produit wifi_configuration_hardened
+// =====================================================
+
+(function () {
+
+    "use strict";
+
+
+    // =====================================================
+    // DÉPENDANCES
+    // =====================================================
+
+    const FOBAS =
+        window.FOBASCybersecuritySimulation;
+
+    const CyberActionBridge =
+        window.FOBASCyberActionBridge;
+
+    const WiFiConfigurationInspection =
+        window.FOBASWiFiConfigurationInspection;
+
+
+    // =====================================================
+    // VALIDATION DES DÉPENDANCES
+    // =====================================================
+
+    if (!FOBAS) {
+
+        console.error(
+            "[FOBAS] Le moteur principal de simulation cybersécurité est introuvable."
+        );
+
+        return;
+    }
+
+
+    if (!CyberActionBridge) {
+
+        console.error(
+            "[FOBAS] Le Cyber Action Bridge est introuvable."
+        );
+
+        return;
+    }
+
+
+    if (!WiFiConfigurationInspection) {
+
+        console.error(
+            "[FOBAS] Le moteur d'inspection de configuration Wi-Fi est introuvable."
+        );
+
+        return;
+    }
+
+
+    // =====================================================
+    // CONSTANTES
+    // =====================================================
+
+    const ENGINE_VERSION =
+        "1.0.0";
+
+    const ACTION_ID =
+        "wifi.harden_configuration";
+
+    const SIMULATION_ID =
+        "fobas-ethical-hacking-simulation";
+
+    const LAB_ID =
+        "wifi";
+
+
+    // =====================================================
+    // ÉTAT INTERNE
+    // =====================================================
+
+    let initialized = false;
+
+    let hardenedTargetId = null;
+
+    let hardenedNetworkId = null;
+
+    let lastHardeningAt = null;
+
+    let lastResult = null;
+
+
+    // =====================================================
+    // OUTIL : HORODATAGE
+    // =====================================================
+
+    function now() {
+
+        return new Date().toISOString();
+
+    }
+
+
+    // =====================================================
+    // RÉCUPÉRATION DE LA DERNIÈRE INSPECTION
+    // =====================================================
+
+    function getLastInspection() {
+
+        if (
+            typeof WiFiConfigurationInspection
+                .getLastInspection !==
+            "function"
+        ) {
+
+            return null;
+        }
+
+
+        const inspection =
+            WiFiConfigurationInspection
+                .getLastInspection();
+
+
+        if (!inspection) {
+
+            return null;
+
+        }
+
+
+        if (
+            inspection.actionId !==
+            "wifi.inspect_configuration"
+        ) {
+
+            return null;
+
+        }
+
+
+        if (
+            inspection.resultState !==
+            "wifi_configuration_inspected"
+        ) {
+
+            return null;
+
+        }
+
+
+        return inspection;
+
+    }
+
+
+    // =====================================================
+    // RÉCUPÉRATION DU RAPPORT D'INSPECTION
+    // =====================================================
+
+    function getInspectionReport() {
+
+        const inspection =
+            getLastInspection();
+
+
+        if (!inspection) {
+
+            return null;
+
+        }
+
+
+        if (
+            inspection.inspection
+        ) {
+
+            return inspection.inspection;
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // NORMALISATION DU CHIFFREMENT
+    // =====================================================
+
+    function normalizeEncryption(
+        encryption
+    ) {
+
+        if (
+            encryption === null ||
+            encryption === undefined
+        ) {
+
+            return "UNKNOWN";
+
+        }
+
+
+        return String(encryption)
+            .trim()
+            .toUpperCase();
+
+    }
+
+
+    // =====================================================
+    // DÉTERMINATION DE LA CONFIGURATION CIBLE
+    // =====================================================
+
+    function determineTargetConfiguration(
+        report
+    ) {
+
+        const encryption =
+            normalizeEncryption(
+                report &&
+                report.encryption
+            );
+
+
+        let targetEncryption =
+            encryption;
+
+
+        let remediationRequired =
+            false;
+
+
+        let remediationReason =
+            "Aucune modification nécessaire.";
+
+
+        // -------------------------------------------------
+        // OPEN
+        // -------------------------------------------------
+
+        if (
+            encryption === "OPEN"
+        ) {
+
+            targetEncryption =
+                "WPA3";
+
+            remediationRequired =
+                true;
+
+            remediationReason =
+                "Le réseau simulé ne dispose d'aucune protection.";
+
+        }
+
+
+        // -------------------------------------------------
+        // WEP
+        // -------------------------------------------------
+
+        else if (
+            encryption === "WEP"
+        ) {
+
+            targetEncryption =
+                "WPA3";
+
+            remediationRequired =
+                true;
+
+            remediationReason =
+                "Le réseau simulé utilise un mécanisme de chiffrement obsolète.";
+
+        }
+
+
+        // -------------------------------------------------
+        // WPA
+        // -------------------------------------------------
+
+        else if (
+            encryption === "WPA"
+        ) {
+
+            targetEncryption =
+                "WPA2";
+
+            remediationRequired =
+                true;
+
+            remediationReason =
+                "Le réseau simulé utilise une protection ancienne.";
+
+        }
+
+
+        // -------------------------------------------------
+        // WPA2
+        // -------------------------------------------------
+
+        else if (
+            encryption === "WPA2"
+        ) {
+
+            targetEncryption =
+                "WPA2";
+
+            remediationRequired =
+                false;
+
+            remediationReason =
+                "La configuration WPA2 est conservée dans la simulation.";
+
+        }
+
+
+        // -------------------------------------------------
+        // WPA3
+        // -------------------------------------------------
+
+        else if (
+            encryption === "WPA3"
+        ) {
+
+            targetEncryption =
+                "WPA3";
+
+            remediationRequired =
+                false;
+
+            remediationReason =
+                "La configuration WPA3 est déjà renforcée.";
+
+        }
+
+
+        // -------------------------------------------------
+        // INCONNU
+        // -------------------------------------------------
+
+        else {
+
+            targetEncryption =
+                "WPA2";
+
+            remediationRequired =
+                true;
+
+            remediationReason =
+                "Le mécanisme de protection n'est pas déterminé.";
+
+        }
+
+
+        return {
+
+            originalEncryption:
+                encryption,
+
+            targetEncryption:
+                targetEncryption,
+
+            remediationRequired:
+                remediationRequired,
+
+            remediationReason:
+                remediationReason
+
+        };
+
+    }
+
+
+    // =====================================================
+    // DÉTERMINATION DU STATUT WPS
+    // =====================================================
+
+    function determineWPSConfiguration(
+        report
+    ) {
+
+        let originalStatus =
+            "unknown";
+
+
+        if (
+            report &&
+            report.wpsStatus
+        ) {
+
+            originalStatus =
+                String(
+                    report.wpsStatus
+                ).toLowerCase();
+
+        }
+
+
+        if (
+            originalStatus ===
+            "enabled"
+        ) {
+
+            return {
+
+                originalStatus:
+                    "enabled",
+
+                targetStatus:
+                    "disabled",
+
+                remediationRequired:
+                    true,
+
+                reason:
+                    "Le WPS est activé et sera désactivé dans la simulation."
+
+            };
+
+        }
+
+
+        if (
+            originalStatus ===
+            "disabled"
+        ) {
+
+            return {
+
+                originalStatus:
+                    "disabled",
+
+                targetStatus:
+                    "disabled",
+
+                remediationRequired:
+                    false,
+
+                reason:
+                    "Le WPS est déjà désactivé dans la simulation."
+
+            };
+
+        }
+
+
+        return {
+
+            originalStatus:
+                "unknown",
+
+            targetStatus:
+                "disabled",
+
+            remediationRequired:
+                true,
+
+            reason:
+                "L'état du WPS est inconnu ; la configuration cible simulée le désactive."
+
+        };
+
+    }
+
+
+    // =====================================================
+    // GÉNÉRATION DES MODIFICATIONS
+    // =====================================================
+
+    function buildChanges(
+        report
+    ) {
+
+        const encryptionConfiguration =
+            determineTargetConfiguration(
+                report
+            );
+
+
+        const wpsConfiguration =
+            determineWPSConfiguration(
+                report
+            );
+
+
+        const changes = [];
+
+
+        // -------------------------------------------------
+        // Chiffrement
+        // -------------------------------------------------
+
+        changes.push({
+
+            category:
+                "chiffrement",
+
+            parameter:
+                "encryption",
+
+            previousValue:
+                encryptionConfiguration
+                    .originalEncryption,
+
+            newValue:
+                encryptionConfiguration
+                    .targetEncryption,
+
+            changed:
+                encryptionConfiguration
+                    .originalEncryption !==
+                encryptionConfiguration
+                    .targetEncryption,
+
+            reason:
+                encryptionConfiguration
+                    .remediationReason
+
+        });
+
+
+        // -------------------------------------------------
+        // WPS
+        // -------------------------------------------------
+
+        changes.push({
+
+            category:
+                "wps",
+
+            parameter:
+                "wps",
+
+            previousValue:
+                wpsConfiguration
+                    .originalStatus,
+
+            newValue:
+                wpsConfiguration
+                    .targetStatus,
+
+            changed:
+                wpsConfiguration
+                    .originalStatus !==
+                wpsConfiguration
+                    .targetStatus,
+
+            reason:
+                wpsConfiguration
+                    .reason
+
+        });
+
+
+        return changes;
+
+    }
+
+
+    // =====================================================
+    // GÉNÉRATION DU NOUVEAU NIVEAU DE SÉCURITÉ
+    // =====================================================
+
+    function determineSecurityLevel(
+        encryption
+    ) {
+
+        switch (
+            normalizeEncryption(
+                encryption
+            )
+        ) {
+
+            case "WPA3":
+
+                return "faible";
+
+            case "WPA2":
+
+                return "faible";
+
+            case "WPA":
+
+                return "moyen";
+
+            case "WEP":
+
+                return "élevé";
+
+            case "OPEN":
+
+                return "élevé";
+
+            default:
+
+                return "inconnu";
+
+        }
+
+    }
+
+
+    // =====================================================
+    // GÉNÉRATION DU NOUVEAU RISQUE
+    // =====================================================
+
+    function determineRisk(
+        encryption
+    ) {
+
+        switch (
+            normalizeEncryption(
+                encryption
+            )
+        ) {
+
+            case "WPA3":
+
+                return {
+
+                    riskCode:
+                        "LOW",
+
+                    riskLevel:
+                        "Risque faible",
+
+                    riskScore:
+                        15
+
+                };
+
+
+            case "WPA2":
+
+                return {
+
+                    riskCode:
+                        "LOW",
+
+                    riskLevel:
+                        "Risque faible",
+
+                    riskScore:
+                        25
+
+                };
+
+
+            case "WPA":
+
+                return {
+
+                    riskCode:
+                        "MEDIUM",
+
+                    riskLevel:
+                        "Risque moyen",
+
+                    riskScore:
+                        60
+
+                };
+
+
+            case "WEP":
+
+                return {
+
+                    riskCode:
+                        "HIGH",
+
+                    riskLevel:
+                        "Risque élevé",
+
+                    riskScore:
+                        85
+
+                };
+
+
+            case "OPEN":
+
+                return {
+
+                    riskCode:
+                        "HIGH",
+
+                    riskLevel:
+                        "Risque élevé",
+
+                    riskScore:
+                        90
+
+                };
+
+
+            default:
+
+                return {
+
+                    riskCode:
+                        "UNKNOWN",
+
+                    riskLevel:
+                        "Risque indéterminé",
+
+                    riskScore:
+                        null
+
+                };
+
+        }
+
+    }
+
+
+    // =====================================================
+    // GÉNÉRATION DES RECOMMANDATIONS POST-HARDENING
+    // =====================================================
+
+    function buildPostHardeningRecommendations(
+        encryption
+    ) {
+
+        const recommendations = [];
+
+
+        const normalized =
+            normalizeEncryption(
+                encryption
+            );
+
+
+        if (
+            normalized === "WPA3"
+        ) {
+
+            recommendations.push(
+                "Maintenir WPA3 comme mécanisme de protection principal."
+            );
+
+            recommendations.push(
+                "Maintenir WPS désactivé lorsque cette fonction n'est pas nécessaire."
+            );
+
+        }
+
+
+        else if (
+            normalized === "WPA2"
+        ) {
+
+            recommendations.push(
+                "Maintenir WPA2 avec une configuration correctement protégée."
+            );
+
+            recommendations.push(
+                "Évaluer une migration vers WPA3 lorsque l'environnement le permet."
+            );
+
+        }
+
+
+        else {
+
+            recommendations.push(
+                "Vérifier à nouveau la configuration de sécurité."
+            );
+
+        }
+
+
+        recommendations.push(
+            "Effectuer une nouvelle vérification après toute modification de configuration."
+        );
+
+
+        return recommendations;
+
+    }
+
+
+    // =====================================================
+    // CRÉATION DU RAPPORT DE HARDENING
+    // =====================================================
+
+    function createHardeningReport(
+        inspection
+    ) {
+
+        const report =
+            inspection.inspection ||
+            {};
+
+
+        const changes =
+            buildChanges(
+                report
+            );
+
+
+        const encryptionConfiguration =
+            determineTargetConfiguration(
+                report
+            );
+
+
+        const wpsConfiguration =
+            determineWPSConfiguration(
+                report
+            );
+
+
+        const targetEncryption =
+            encryptionConfiguration
+                .targetEncryption;
+
+
+        const risk =
+            determineRisk(
+                targetEncryption
+            );
+
+
+        const changedCount =
+            changes.filter(
+                function (change) {
+
+                    return change.changed === true;
+
+                }
+            ).length;
+
+
+        const recommendations =
+            buildPostHardeningRecommendations(
+                targetEncryption
+            );
+
+
+        return {
+
+            hardeningType:
+                "virtual_wifi_configuration_hardening",
+
+            hardeningVersion:
+                ENGINE_VERSION,
+
+            targetId:
+                inspection.targetId ||
+                null,
+
+            networkId:
+                inspection.networkId ||
+                null,
+
+            SSID:
+                inspection.SSID ||
+                null,
+
+            BSSID:
+                inspection.BSSID ||
+                null,
+
+            channel:
+                inspection.channel ||
+                null,
+
+            previousEncryption:
+                encryptionConfiguration
+                    .originalEncryption,
+
+            resultingEncryption:
+                targetEncryption,
+
+            previousWPSStatus:
+                wpsConfiguration
+                    .originalStatus,
+
+            resultingWPSStatus:
+                wpsConfiguration
+                    .targetStatus,
+
+            securityLevel:
+                determineSecurityLevel(
+                    targetEncryption
+                ),
+
+            riskCode:
+                risk.riskCode,
+
+            riskLevel:
+                risk.riskLevel,
+
+            riskScore:
+                risk.riskScore,
+
+            changes:
+                changes,
+
+            changeCount:
+                changes.length,
+
+            changedCount:
+                changedCount,
+
+            remediationApplied:
+                changedCount > 0,
+
+            remediationStatus:
+                changedCount > 0
+                    ? "completed"
+                    : "already_hardened",
+
+            recommendations:
+                recommendations,
+
+            virtual:
+                true,
+
+            realWiFiOperation:
+                false,
+
+            packetCapture:
+                false,
+
+            authenticationAttempt:
+                false,
+
+            connectionAttempt:
+                false,
+
+            attackExecution:
+                false,
+
+            credentialRecovery:
+                false,
+
+            generatedAt:
+                now()
+
+        };
+
+    }
+
+
+    // =====================================================
+    // ENREGISTREMENT DE L'ACTION
+    // =====================================================
+
+    function recordHardening(
+        hardeningReport
+    ) {
+
+        const event = {
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            actionId:
+                ACTION_ID,
+
+            actionType:
+                "harden_configuration",
+
+            status:
+                "completed",
+
+            timestamp:
+                now(),
+
+            targetId:
+                hardeningReport.targetId,
+
+            targetNetworkId:
+                hardeningReport.networkId,
+
+            targetSSID:
+                hardeningReport.SSID,
+
+            BSSID:
+                hardeningReport.BSSID,
+
+            channel:
+                hardeningReport.channel,
+
+            previousEncryption:
+                hardeningReport.previousEncryption,
+
+            resultingEncryption:
+                hardeningReport.resultingEncryption,
+
+            previousWPSStatus:
+                hardeningReport.previousWPSStatus,
+
+            resultingWPSStatus:
+                hardeningReport.resultingWPSStatus,
+
+            securityLevel:
+                hardeningReport.securityLevel,
+
+            riskCode:
+                hardeningReport.riskCode,
+
+            riskLevel:
+                hardeningReport.riskLevel,
+
+            riskScore:
+                hardeningReport.riskScore,
+
+            remediationApplied:
+                hardeningReport.remediationApplied,
+
+            remediationStatus:
+                hardeningReport.remediationStatus,
+
+            hardening:
+                hardeningReport,
+
+            resultState:
+                "wifi_configuration_hardened",
+
+            validationKey:
+                "WIFI_CONFIGURATION_HARDENED"
+
+        };
+
+
+        // -------------------------------------------------
+        // Enregistrement dans le Cyber Action Bridge
+        // -------------------------------------------------
+
+        if (
+            typeof CyberActionBridge.recordAction ===
+            "function"
+        ) {
+
+            CyberActionBridge.recordAction(
+                event
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // Événement global
+        // -------------------------------------------------
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "FOBAS:CyberSimulationAction",
+                {
+                    detail:
+                        event
+                }
+            )
+        );
+
+
+        // -------------------------------------------------
+        // Événement spécifique Wi-Fi
+        // -------------------------------------------------
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "FOBAS:WiFiConfigurationHardened",
+                {
+                    detail:
+                        event
+                }
+            )
+        );
+
+
+        return event;
+
+    }
+
+
+    // =====================================================
+    // HARDENING DE LA DERNIÈRE INSPECTION
+    // =====================================================
+
+    function hardenLastInspection() {
+
+        const inspection =
+            getLastInspection();
+
+
+        if (!inspection) {
+
+            console.warn(
+                "[FOBAS] Impossible d'appliquer le hardening : aucune inspection Wi-Fi valide n'est disponible."
+            );
+
+            return null;
+
+        }
+
+
+        const hardeningReport =
+            createHardeningReport(
+                inspection
+            );
+
+
+        const event =
+            recordHardening(
+                hardeningReport
+            );
+
+
+        hardenedTargetId =
+            hardeningReport.targetId;
+
+
+        hardenedNetworkId =
+            hardeningReport.networkId;
+
+
+        lastHardeningAt =
+            event.timestamp;
+
+
+        lastResult =
+            event;
+
+
+        return event;
+
+    }
+
+
+    // =====================================================
+    // HARDENING D'UNE CIBLE
+    // =====================================================
+
+    function hardenTarget(
+        targetId
+    ) {
+
+        const inspection =
+            getLastInspection();
+
+
+        if (!inspection) {
+
+            console.warn(
+                "[FOBAS] Aucune inspection Wi-Fi valide n'est disponible."
+            );
+
+            return null;
+
+        }
+
+
+        if (
+            targetId &&
+            inspection.targetId !==
+            targetId
+        ) {
+
+            console.warn(
+                "[FOBAS] La cible demandée ne correspond pas à la dernière cible inspectée."
+            );
+
+            return null;
+
+        }
+
+
+        return hardenLastInspection();
+
+    }
+
+
+    // =====================================================
+    // INITIALISATION
+    // =====================================================
+
+    function initialize() {
+
+        if (initialized) {
+
+            return true;
+
+        }
+
+
+        initialized = true;
+
+
+        // -------------------------------------------------
+        // Registre central des actions
+        // -------------------------------------------------
+
+        CyberActionBridge.actions =
+            CyberActionBridge.actions ||
+            {};
+
+
+        CyberActionBridge.actions[
+            ACTION_ID
+        ] = {
+
+            actionId:
+                ACTION_ID,
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            elementId:
+                null,
+
+            actionType:
+                "harden_configuration",
+
+            target:
+                "virtual_wifi_network",
+
+            requiredState:
+                "wifi_configuration_inspected",
+
+            resultState:
+                "wifi_configuration_hardened",
+
+            validationKey:
+                "WIFI_CONFIGURATION_HARDENED",
+
+            enabled:
+                true
+
+        };
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // API PUBLIQUE
+    // =====================================================
+
+    const API = {
+
+        engineVersion:
+            ENGINE_VERSION,
+
+        actionId:
+            ACTION_ID,
+
+        simulationId:
+            SIMULATION_ID,
+
+        labId:
+            LAB_ID,
+
+        initialize:
+            initialize,
+
+        hardenLastInspection:
+            hardenLastInspection,
+
+        hardenTarget:
+            hardenTarget,
+
+        getLastHardening:
+            function () {
+
+                return lastResult;
+
+            },
+
+        getHardeningReport:
+            function () {
+
+                if (!lastResult) {
+
+                    return null;
+
+                }
+
+
+                return lastResult.hardening ||
+                    null;
+
+            },
+
+        getHardenedTarget:
+            function () {
+
+                return {
+
+                    targetId:
+                        hardenedTargetId,
+
+                    networkId:
+                        hardenedNetworkId,
+
+                    hardenedAt:
+                        lastHardeningAt
+
+                };
+
+            }
+
+    };
+
+
+    // =====================================================
+    // EXPOSITION GLOBALE
+    // =====================================================
+
+    window.FOBASWiFiConfigurationHardening =
+        API;
+
+
+    // =====================================================
+    // INTÉGRATION DANS FOBAS.WIFI
+    // =====================================================
+
+    FOBAS.wifi =
+        FOBAS.wifi ||
+        {};
+
+
+    FOBAS.wifi.configurationHardening =
+        API;
+
+
+    // =====================================================
+    // INITIALISATION AUTOMATIQUE
+    // =====================================================
+
+    initialize();
+
+
+    // =====================================================
+    // MESSAGE DE CONTRÔLE
+    // =====================================================
+
+    console.info(
+        "[FOBAS] wifi.harden_configuration initialisé avec succès."
+    );
+
+
+})();
