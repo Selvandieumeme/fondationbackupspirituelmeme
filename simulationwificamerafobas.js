@@ -13955,3 +13955,1020 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+// =====================================================
+// FOBAS WIFI MISSION COMPLETION ENGINE
+// ACTION: wifi.complete_mission
+//
+// FINAL BLOCK OF THE WIFI LAB
+//
+// PIPELINE:
+// wifi.verify_hardening
+//        ↓
+// wifi_hardening_verified
+//        ↓
+// wifi.complete_mission
+//        ↓
+// wifi_mission_completed
+//
+// IMPORTANT:
+// - Virtual simulation only.
+// - Does NOT perform real Wi-Fi operations.
+// - Does NOT connect to real networks.
+// - Does NOT capture packets.
+// - Does NOT attempt authentication.
+// - Does NOT recover credentials.
+// - Does NOT execute attacks.
+// - Does NOT automatically launch another laboratory.
+// =====================================================
+
+(function(){
+
+    "use strict";
+
+    // =================================================
+    // DEPENDENCIES
+    // =================================================
+
+    const Simulation =
+        window.FOBASCybersecuritySimulation;
+
+    const CyberActionBridge =
+        window.FOBASCyberActionBridge;
+
+    const HardeningVerification =
+        window.FOBASWiFiHardeningVerification;
+
+
+    // =================================================
+    // SAFETY CHECK
+    // =================================================
+
+    if(!Simulation){
+
+        console.warn(
+            "[FOBAS WiFi Mission Completion] " +
+            "FOBASCybersecuritySimulation introuvable."
+        );
+
+        return;
+    }
+
+    if(!CyberActionBridge){
+
+        console.warn(
+            "[FOBAS WiFi Mission Completion] " +
+            "FOBASCyberActionBridge introuvable."
+        );
+
+        return;
+    }
+
+    if(!HardeningVerification){
+
+        console.warn(
+            "[FOBAS WiFi Mission Completion] " +
+            "FOBASWiFiHardeningVerification introuvable."
+        );
+
+        return;
+    }
+
+
+    // =================================================
+    // CONSTANTES
+    // =================================================
+
+    const ENGINE_VERSION = "1.0.0";
+
+    const ACTION_ID =
+        "wifi.complete_mission";
+
+    const SIMULATION_ID =
+        "fobas-ethical-hacking-simulation";
+
+    const LAB_ID =
+        "wifi";
+
+    const REQUIRED_STATE =
+        "wifi_hardening_verified";
+
+    const RESULT_STATE =
+        "wifi_mission_completed";
+
+    const VALIDATION_KEY =
+        "WIFI_MISSION_COMPLETED";
+
+
+    // =================================================
+    // ETAT INTERNE
+    // =================================================
+
+    let initialized = false;
+
+    let missionCompleted = false;
+
+    let completedTargetId = null;
+
+    let completedNetworkId = null;
+
+    let lastCompletionAt = null;
+
+    let lastResult = null;
+
+
+    // =================================================
+    // UTILITAIRES
+    // =================================================
+
+    function now(){
+
+        return new Date().toISOString();
+    }
+
+
+    function safeString(value){
+
+        if(
+            value === null ||
+            value === undefined
+        ){
+
+            return "";
+        }
+
+        return String(value);
+    }
+
+
+    function normalizeEncryption(value){
+
+        const encryption =
+            safeString(value)
+                .trim()
+                .toUpperCase();
+
+        if(!encryption){
+
+            return "UNKNOWN";
+        }
+
+        return encryption;
+    }
+
+
+    function normalizeVerificationStatus(value){
+
+        const status =
+            safeString(value)
+                .trim()
+                .toLowerCase();
+
+        if(
+            status === "verified"
+        ){
+
+            return "verified";
+        }
+
+        return status || "unknown";
+    }
+
+
+    // =================================================
+    // RECUPERATION DE LA DERNIERE VERIFICATION
+    // =================================================
+
+    function getLastSuccessfulVerification(){
+
+        try{
+
+            if(
+                typeof HardeningVerification
+                    .getLastVerification !==
+                "function"
+            ){
+
+                return null;
+            }
+
+            const verification =
+                HardeningVerification
+                    .getLastVerification();
+
+            if(!verification){
+
+                return null;
+            }
+
+            if(
+                verification.actionId !==
+                "wifi.verify_hardening"
+            ){
+
+                return null;
+            }
+
+            if(
+                verification.resultState !==
+                REQUIRED_STATE
+            ){
+
+                return null;
+            }
+
+            if(
+                verification.verified !== true
+            ){
+
+                return null;
+            }
+
+            return verification;
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "Impossible de récupérer la vérification finale.",
+                error
+            );
+
+            return null;
+        }
+    }
+
+
+    // =================================================
+    // CONSTRUCTION DU RAPPORT FINAL
+    // =================================================
+
+    function buildCompletionReport(
+        verification
+    ){
+
+        const targetId =
+            verification.targetId ||
+            null;
+
+        const networkId =
+            verification.networkId ||
+            null;
+
+        const resultingEncryption =
+            normalizeEncryption(
+                verification.resultingEncryption
+            );
+
+        const resultingWPSStatus =
+            safeString(
+                verification.resultingWPSStatus
+            ) || "unknown";
+
+        const verificationStatus =
+            normalizeVerificationStatus(
+                verification.verificationStatus
+            );
+
+        const verificationCode =
+            safeString(
+                verification.verificationCode
+            ) || "HARDENING_VERIFIED";
+
+        const residualRiskCode =
+            safeString(
+                verification.residualRiskCode
+            ) || "UNKNOWN";
+
+        const residualRiskLevel =
+            safeString(
+                verification.residualRiskLevel
+            ) || "inconnu";
+
+        const residualRiskScore =
+            typeof verification.residualRiskScore ===
+            "number"
+                ? verification.residualRiskScore
+                : null;
+
+
+        return {
+
+            // -----------------------------------------
+            // IDENTIFICATION
+            // -----------------------------------------
+
+            completionType:
+                "virtual_wifi_mission_completion",
+
+            engineVersion:
+                ENGINE_VERSION,
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            actionId:
+                ACTION_ID,
+
+
+            // -----------------------------------------
+            // CIBLE
+            // -----------------------------------------
+
+            targetId:
+                targetId,
+
+            networkId:
+                networkId,
+
+            SSID:
+                verification.SSID || null,
+
+            BSSID:
+                verification.BSSID || null,
+
+            channel:
+                verification.channel || null,
+
+
+            // -----------------------------------------
+            // CONFIGURATION FINALE
+            // -----------------------------------------
+
+            resultingEncryption:
+                resultingEncryption,
+
+            resultingWPSStatus:
+                resultingWPSStatus,
+
+
+            // -----------------------------------------
+            // VERIFICATION FINALE
+            // -----------------------------------------
+
+            verificationStatus:
+                verificationStatus,
+
+            verificationCode:
+                verificationCode,
+
+            verified:
+                true,
+
+
+            // -----------------------------------------
+            // RISQUE RESIDUEL
+            // -----------------------------------------
+
+            residualRiskCode:
+                residualRiskCode,
+
+            residualRiskLevel:
+                residualRiskLevel,
+
+            residualRiskScore:
+                residualRiskScore,
+
+
+            // -----------------------------------------
+            // RESULTAT DE LA MISSION
+            // -----------------------------------------
+
+            missionCompleted:
+                true,
+
+            passed:
+                true,
+
+            completionStatus:
+                "completed",
+
+            completionLabel:
+                "Mission Wi-Fi terminée avec succès",
+
+
+            // -----------------------------------------
+            // ETAPE SUIVANTE
+            // -----------------------------------------
+
+            nextStage:
+                "next_lab",
+
+
+            // -----------------------------------------
+            // SECURITE / VIRTUALISATION
+            // -----------------------------------------
+
+            virtual:
+                true,
+
+            realWiFiOperation:
+                false,
+
+            packetCapture:
+                false,
+
+            authenticationAttempt:
+                false,
+
+            connectionAttempt:
+                false,
+
+            attackExecution:
+                false,
+
+            credentialRecovery:
+                false,
+
+
+            // -----------------------------------------
+            // HORODATAGE
+            // -----------------------------------------
+
+            completedAt:
+                now()
+        };
+    }
+
+
+    // =================================================
+    // ENREGISTREMENT DE L'ACTION
+    // =================================================
+
+    function recordCompletion(
+        completionReport
+    ){
+
+        const event = {
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            actionId:
+                ACTION_ID,
+
+            actionType:
+                "complete_mission",
+
+            status:
+                "completed",
+
+            timestamp:
+                completionReport.completedAt,
+
+
+            // -----------------------------------------
+            // CIBLE
+            // -----------------------------------------
+
+            targetId:
+                completionReport.targetId,
+
+            targetNetworkId:
+                completionReport.networkId,
+
+            targetSSID:
+                completionReport.SSID,
+
+            targetBSSID:
+                completionReport.BSSID,
+
+            channel:
+                completionReport.channel,
+
+
+            // -----------------------------------------
+            // ETAT FINAL
+            // -----------------------------------------
+
+            resultingEncryption:
+                completionReport.resultingEncryption,
+
+            resultingWPSStatus:
+                completionReport.resultingWPSStatus,
+
+            verificationStatus:
+                completionReport.verificationStatus,
+
+            verificationCode:
+                completionReport.verificationCode,
+
+            verified:
+                true,
+
+
+            // -----------------------------------------
+            // MISSION
+            // -----------------------------------------
+
+            missionCompleted:
+                true,
+
+            passed:
+                true,
+
+            completionStatus:
+                "completed",
+
+
+            // -----------------------------------------
+            // RISQUE
+            // -----------------------------------------
+
+            residualRiskCode:
+                completionReport.residualRiskCode,
+
+            residualRiskLevel:
+                completionReport.residualRiskLevel,
+
+            residualRiskScore:
+                completionReport.residualRiskScore,
+
+
+            // -----------------------------------------
+            // RAPPORT COMPLET
+            // -----------------------------------------
+
+            completion:
+                completionReport,
+
+
+            // -----------------------------------------
+            // ETATS DU PIPELINE
+            // -----------------------------------------
+
+            requiredState:
+                REQUIRED_STATE,
+
+            resultState:
+                RESULT_STATE,
+
+            validationKey:
+                VALIDATION_KEY,
+
+
+            // -----------------------------------------
+            // SECURITE
+            // -----------------------------------------
+
+            virtual:
+                true,
+
+            realWiFiOperation:
+                false,
+
+            packetCapture:
+                false,
+
+            authenticationAttempt:
+                false,
+
+            connectionAttempt:
+                false,
+
+            attackExecution:
+                false,
+
+            credentialRecovery:
+                false
+        };
+
+
+        try{
+
+            if(
+                typeof CyberActionBridge.recordAction ===
+                "function"
+            ){
+
+                CyberActionBridge.recordAction(
+                    event
+                );
+            }
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "Erreur lors de l'enregistrement de l'action.",
+                error
+            );
+        }
+
+
+        // =============================================
+        // EVENEMENT GLOBAL
+        // =============================================
+
+        try{
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "FOBAS:CyberSimulationAction",
+                    {
+                        detail: event
+                    }
+                )
+            );
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "Impossible d'émettre l'événement global.",
+                error
+            );
+        }
+
+
+        // =============================================
+        // EVENEMENT SPECIFIQUE WIFI
+        // =============================================
+
+        try{
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "FOBAS:WiFiMissionCompleted",
+                    {
+                        detail: event
+                    }
+                )
+            );
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "Impossible d'émettre l'événement Wi-Fi.",
+                error
+            );
+        }
+
+
+        return event;
+    }
+
+
+    // =================================================
+    // COMPLETION DE LA MISSION
+    // =================================================
+
+    function completeMission(){
+
+        // ---------------------------------------------
+        // EVITER UNE DOUBLE COMPLETION
+        // ---------------------------------------------
+
+        if(missionCompleted){
+
+            return lastResult;
+        }
+
+
+        // ---------------------------------------------
+        // RECUPERER LA VERIFICATION
+        // ---------------------------------------------
+
+        const verification =
+            getLastSuccessfulVerification();
+
+
+        if(!verification){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "La mission ne peut pas être terminée."
+            );
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "La vérification Hardening doit être réussie."
+            );
+
+            return null;
+        }
+
+
+        // ---------------------------------------------
+        // VERIFICATION STRICTE DE L'ETAT
+        // ---------------------------------------------
+
+        if(
+            verification.resultState !==
+            REQUIRED_STATE
+        ){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "Etat requis non atteint : " +
+                REQUIRED_STATE
+            );
+
+            return null;
+        }
+
+
+        if(
+            verification.verified !== true
+        ){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "La vérification finale n'est pas validée."
+            );
+
+            return null;
+        }
+
+
+        // ---------------------------------------------
+        // CONSTRUCTION DU RAPPORT
+        // ---------------------------------------------
+
+        const completionReport =
+            buildCompletionReport(
+                verification
+            );
+
+
+        // ---------------------------------------------
+        // MISE A JOUR DE L'ETAT INTERNE
+        // ---------------------------------------------
+
+        missionCompleted =
+            true;
+
+        completedTargetId =
+            completionReport.targetId;
+
+        completedNetworkId =
+            completionReport.networkId;
+
+        lastCompletionAt =
+            completionReport.completedAt;
+
+
+        // ---------------------------------------------
+        // ENREGISTREMENT
+        // ---------------------------------------------
+
+        const event =
+            recordCompletion(
+                completionReport
+            );
+
+
+        lastResult = {
+
+            actionId:
+                ACTION_ID,
+
+            status:
+                "completed",
+
+            resultState:
+                RESULT_STATE,
+
+            validationKey:
+                VALIDATION_KEY,
+
+            missionCompleted:
+                true,
+
+            passed:
+                true,
+
+            targetId:
+                completionReport.targetId,
+
+            networkId:
+                completionReport.networkId,
+
+            completion:
+                completionReport,
+
+            event:
+                event
+        };
+
+
+        return lastResult;
+    }
+
+
+    // =================================================
+    // INITIALISATION
+    // =================================================
+
+    function initialize(){
+
+        if(initialized){
+
+            return true;
+        }
+
+
+        // ---------------------------------------------
+        // REGISTRE ACTION
+        // ---------------------------------------------
+
+        try{
+
+            if(
+                !CyberActionBridge.actions
+            ){
+
+                CyberActionBridge.actions = {};
+            }
+
+
+            CyberActionBridge.actions[
+                ACTION_ID
+            ] = {
+
+                actionId:
+                    ACTION_ID,
+
+                simulationId:
+                    SIMULATION_ID,
+
+                labId:
+                    LAB_ID,
+
+                elementId:
+                    null,
+
+                actionType:
+                    "complete_mission",
+
+                target:
+                    "virtual_wifi_mission",
+
+                requiredState:
+                    REQUIRED_STATE,
+
+                resultState:
+                    RESULT_STATE,
+
+                validationKey:
+                    VALIDATION_KEY,
+
+                enabled:
+                    true
+            };
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS WiFi Mission Completion] " +
+                "Impossible d'enregistrer l'action.",
+                error
+            );
+        }
+
+
+        initialized = true;
+
+        return true;
+    }
+
+
+    // =================================================
+    // API PUBLIQUE
+    // =================================================
+
+    const API = {
+
+        initialize:
+
+            initialize,
+
+
+        completeMission:
+
+            completeMission,
+
+
+        getLastCompletion:
+
+            function(){
+
+                return lastResult;
+            },
+
+
+        getCompletionReport:
+
+            function(){
+
+                return lastResult &&
+                       lastResult.completion
+                    ? lastResult.completion
+                    : null;
+            },
+
+
+        isMissionCompleted:
+
+            function(){
+
+                return missionCompleted === true;
+            },
+
+
+        getCompletedTarget:
+
+            function(){
+
+                return {
+
+                    targetId:
+                        completedTargetId,
+
+                    networkId:
+                        completedNetworkId
+                };
+            },
+
+
+        getLastCompletionAt:
+
+            function(){
+
+                return lastCompletionAt;
+            }
+    };
+
+
+    // =================================================
+    // EXPOSITION GLOBALE
+    // =================================================
+
+    window.FOBASWiFiMissionCompletion =
+        API;
+
+
+    // =================================================
+    // EXPOSITION DANS FOBAS.WIFI
+    // =================================================
+
+    window.FOBAS =
+        window.FOBAS || {};
+
+    window.FOBAS.wifi =
+        window.FOBAS.wifi || {};
+
+    window.FOBAS.wifi.missionCompletion =
+        API;
+
+
+    // =================================================
+    // INITIALISATION AUTOMATIQUE
+    // =================================================
+
+    initialize();
+
+
+    // =================================================
+    // CONFIRMATION TECHNIQUE
+    // =================================================
+
+    console.log(
+        "[FOBAS WiFi Mission Completion] " +
+        "Module initialisé avec succès.",
+        {
+            actionId:
+                ACTION_ID,
+
+            requiredState:
+                REQUIRED_STATE,
+
+            resultState:
+                RESULT_STATE,
+
+            validationKey:
+                VALIDATION_KEY,
+
+            virtual:
+                true
+        }
+    );
+
+
+})();
