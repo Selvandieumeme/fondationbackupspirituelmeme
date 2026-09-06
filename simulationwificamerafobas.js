@@ -5325,3 +5325,1203 @@
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================
+// FOBAS ETHICAL HACKING SIMULATION
+// CYBERSECURITY ACTION BRIDGE
+// PHASE 3.1 — UNIVERSAL CYBER ACTION LAYER
+// VERSION 1.0.0
+// =========================================================
+//
+// PURPOSE:
+//     Creates the first technical action layer for the
+//     FOBAS Cybersecurity Simulation.
+//
+// CURRENT SCOPE:
+//     - Wi-Fi Virtual Scan
+//
+// IMPORTANT:
+//     - Does NOT modify the existing Word Universal Registry.
+//     - Does NOT modify Ranise IA.
+//     - Does NOT modify Campus pedagogical engines.
+//     - Does NOT create pedagogical content.
+//     - Does NOT perform real Wi-Fi scanning.
+//     - Does NOT access real network hardware.
+//     - Does NOT execute real cybersecurity attacks.
+//     - Uses only the existing virtual FOBAS simulation.
+//
+// ARCHITECTURE:
+//
+//     BUTTON
+//        ↓
+//     ACTION ID
+//        ↓
+//     CYBER ACTION LAYER
+//        ↓
+//     WIFI LAB ENGINE
+//        ↓
+//     SIMULATION STATE
+//        ↓
+//     SIMULATION EVENT
+//
+// CURRENT ACTION:
+//
+//     wifi.scan
+//
+// =========================================================
+
+
+(function(){
+
+    "use strict";
+
+
+    // =====================================================
+    // DEPENDENCY CHECK
+    // =====================================================
+
+    if(
+        !window.FOBASCybersecuritySimulation
+    ){
+
+        console.error(
+            "[FOBAS Cyber Action Bridge] " +
+            "FOBAS Cybersecurity Simulation Core not found."
+        );
+
+        return;
+
+    }
+
+
+    const FOBAS =
+        window.FOBASCybersecuritySimulation;
+
+
+    // =====================================================
+    // ENGINE CONFIGURATION
+    // =====================================================
+
+    const ENGINE_VERSION =
+        "1.0.0";
+
+
+    const ENGINE_ID =
+        "fobas-cyber-action-bridge";
+
+
+    const SIMULATION_ID =
+        "fobas-ethical-hacking-simulation";
+
+
+    const WIFI_LAB_ID =
+        "wifi";
+
+
+    // =====================================================
+    // ACTION DEFINITIONS
+    // =====================================================
+
+    const ACTIONS = {
+
+        "wifi.scan":{
+
+            actionId:
+                "wifi.scan",
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                WIFI_LAB_ID,
+
+            elementId:
+                "fobasWifiScanButton",
+
+            actionType:
+                "scan",
+
+            target:
+                "virtual_networks",
+
+            requiredState:
+                "wifi_ready",
+
+            resultState:
+                "wifi_scan_completed",
+
+            validationKey:
+                "WIFI_SCAN_COMPLETED",
+
+            enabled:
+                true
+
+        }
+
+    };
+
+
+    // =====================================================
+    // INTERNAL STATE
+    // =====================================================
+
+    const state = {
+
+        initialized:
+            false,
+
+        lastActionId:
+            null,
+
+        lastActionStatus:
+            null,
+
+        lastActionAt:
+            null,
+
+        actionCount:
+            0
+
+    };
+
+
+    // =====================================================
+    // EVENT LISTENERS
+    // =====================================================
+
+    const listeners = {};
+
+
+    // =====================================================
+    // NORMALIZE
+    // =====================================================
+
+    function normalize(
+        value
+    ){
+
+        return String(
+            value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+    }
+
+
+    // =====================================================
+    // GET ACTION DEFINITION
+    // =====================================================
+
+    function getAction(
+        actionId
+    ){
+
+        const key =
+            normalize(
+                actionId
+            );
+
+
+        return ACTIONS[key] ||
+            null;
+
+    }
+
+
+    // =====================================================
+    // EMIT SIMULATION EVENT
+    // =====================================================
+
+    function emit(
+        eventName,
+        payload
+    ){
+
+        const eventListeners =
+            listeners[eventName];
+
+
+        if(
+            Array.isArray(
+                eventListeners
+            )
+        ){
+
+            eventListeners
+                .slice()
+                .forEach(
+                    function(listener){
+
+                        try{
+
+                            listener(
+                                payload
+                            );
+
+                        }
+                        catch(error){
+
+                            console.error(
+                                "[FOBAS Cyber Action Bridge] " +
+                                "Event listener error:",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        // -------------------------------------------------
+        // GLOBAL CUSTOM EVENT
+        // -------------------------------------------------
+
+        try{
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "FOBAS:CyberSimulationAction",
+                    {
+                        detail:payload
+                    }
+                )
+            );
+
+        }
+        catch(error){
+
+            console.warn(
+                "[FOBAS Cyber Action Bridge] " +
+                "Custom event unavailable.",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // SUBSCRIBE TO EVENT
+    // =====================================================
+
+    function on(
+        eventName,
+        listener
+    ){
+
+        if(
+            typeof listener !==
+            "function"
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            !listeners[eventName]
+        ){
+
+            listeners[eventName] =
+                [];
+
+        }
+
+
+        listeners[eventName]
+            .push(
+                listener
+            );
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // CREATE ACTION EVENT
+    // =====================================================
+
+    function createActionEvent(
+        action,
+        status,
+        extraData
+    ){
+
+        const eventData = {
+
+            eventType:
+                "simulation_action",
+
+            eventVersion:
+                "1.0.0",
+
+            timestamp:
+                new Date()
+                    .toISOString(),
+
+            simulationId:
+                action.simulationId,
+
+            labId:
+                action.labId,
+
+            actionId:
+                action.actionId,
+
+            elementId:
+                action.elementId,
+
+            actionType:
+                action.actionType,
+
+            target:
+                action.target,
+
+            requiredState:
+                action.requiredState,
+
+            resultState:
+                action.resultState,
+
+            validationKey:
+                action.validationKey,
+
+            status:
+                status
+
+        };
+
+
+        if(
+            extraData &&
+            typeof extraData ===
+            "object"
+        ){
+
+            Object.keys(
+                extraData
+            )
+            .forEach(
+                function(key){
+
+                    eventData[key] =
+                        extraData[key];
+
+                }
+            );
+
+        }
+
+
+        return eventData;
+
+    }
+
+
+    // =====================================================
+    // RECORD ACTION
+    // =====================================================
+
+    function recordAction(
+        action,
+        status,
+        extraData
+    ){
+
+        state.lastActionId =
+            action.actionId;
+
+        state.lastActionStatus =
+            status;
+
+        state.lastActionAt =
+            new Date()
+                .toISOString();
+
+        state.actionCount +=
+            1;
+
+
+        const eventData =
+            createActionEvent(
+                action,
+                status,
+                extraData
+            );
+
+
+        emit(
+            "action",
+            eventData
+        );
+
+
+        return eventData;
+
+    }
+
+
+    // =====================================================
+    // RESOLVE ACTION FROM ELEMENT
+    // =====================================================
+
+    function resolveActionFromElement(
+        element
+    ){
+
+        if(
+            !element
+        ){
+
+            return null;
+
+        }
+
+
+        let current =
+            element;
+
+
+        for(
+            let level = 0;
+            level < 8 &&
+            current;
+            level++
+        ){
+
+            if(
+                current.getAttribute
+            ){
+
+                const dataAction =
+                    normalize(
+                        current.getAttribute(
+                            "data-action"
+                        )
+                    );
+
+
+                if(
+                    dataAction &&
+                    ACTIONS[dataAction]
+                ){
+
+                    return ACTIONS[
+                        dataAction
+                    ];
+
+                }
+
+            }
+
+
+            current =
+                current.parentElement;
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // GET WIFI ENGINE
+    // =====================================================
+
+    function getWiFiEngine(){
+
+        if(
+            FOBAS.wifi
+        ){
+
+            return FOBAS.wifi;
+
+        }
+
+
+        if(
+            window.FOBASWiFiLabEngine
+        ){
+
+            return window.FOBASWiFiLabEngine;
+
+        }
+
+
+        return null;
+
+    }
+
+
+    // =====================================================
+    // EXECUTE WIFI SCAN
+    // =====================================================
+
+    function executeWiFiScan(
+        action
+    ){
+
+        if(
+            !action
+        ){
+
+            return Promise.resolve(
+                false
+            );
+
+        }
+
+
+        const wifiEngine =
+            getWiFiEngine();
+
+
+        if(
+            !wifiEngine ||
+            typeof wifiEngine.scan !==
+            "function"
+        ){
+
+            console.error(
+                "[FOBAS Cyber Action Bridge] " +
+                "Wi-Fi Lab Engine is unavailable."
+            );
+
+
+            recordAction(
+                action,
+                "failed",
+                {
+                    error:
+                        "wifi_engine_unavailable"
+                }
+            );
+
+
+            return Promise.resolve(
+                false
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // ACTION START
+        // -------------------------------------------------
+
+        recordAction(
+            action,
+            "started"
+        );
+
+
+        let scanResult;
+
+
+        try{
+
+            scanResult =
+                wifiEngine.scan();
+
+        }
+        catch(error){
+
+            recordAction(
+                action,
+                "failed",
+                {
+                    error:
+                        error &&
+                        error.message
+                            ? error.message
+                            : "scan_execution_error"
+                }
+            );
+
+
+            console.error(
+                "[FOBAS Cyber Action Bridge] " +
+                "Wi-Fi scan execution error:",
+                error
+            );
+
+
+            return Promise.resolve(
+                false
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // HANDLE PROMISE RESULT
+        // -------------------------------------------------
+
+        if(
+            scanResult &&
+            typeof scanResult.then ===
+            "function"
+        ){
+
+            return scanResult
+                .then(
+                    function(result){
+
+                        recordAction(
+                            action,
+                            "completed",
+                            {
+                                result:
+                                    result ===
+                                    undefined
+                                        ? true
+                                        : result
+                            }
+                        );
+
+
+                        return (
+                            result ===
+                            undefined
+                                ? true
+                                : result
+                        );
+
+                    }
+                )
+                .catch(
+                    function(error){
+
+                        recordAction(
+                            action,
+                            "failed",
+                            {
+                                error:
+                                    error &&
+                                    error.message
+                                        ? error.message
+                                        : "scan_failed"
+                            }
+                        );
+
+
+                        console.error(
+                            "[FOBAS Cyber Action Bridge] " +
+                            "Wi-Fi scan failed:",
+                            error
+                        );
+
+
+                        return false;
+
+                    }
+                );
+
+        }
+
+
+        // -------------------------------------------------
+        // HANDLE SYNCHRONOUS RESULT
+        // -------------------------------------------------
+
+        recordAction(
+            action,
+            "completed",
+            {
+                result:
+                    scanResult ===
+                    undefined
+                        ? true
+                        : scanResult
+            }
+        );
+
+
+        return Promise.resolve(
+            scanResult ===
+            undefined
+                ? true
+                : scanResult
+        );
+
+    }
+
+
+    // =====================================================
+    // EXECUTE ACTION
+    // =====================================================
+
+    function execute(
+        actionId
+    ){
+
+        const action =
+            getAction(
+                actionId
+            );
+
+
+        if(
+            !action
+        ){
+
+            console.warn(
+                "[FOBAS Cyber Action Bridge] " +
+                "Unknown action:",
+                actionId
+            );
+
+
+            return Promise.resolve(
+                false
+            );
+
+        }
+
+
+        if(
+            !action.enabled
+        ){
+
+            recordAction(
+                action,
+                "disabled"
+            );
+
+
+            return Promise.resolve(
+                false
+            );
+
+        }
+
+
+        switch(
+            action.actionId
+        ){
+
+            case "wifi.scan":
+
+                return executeWiFiScan(
+                    action
+                );
+
+
+            default:
+
+                console.warn(
+                    "[FOBAS Cyber Action Bridge] " +
+                    "No executor registered for:",
+                    action.actionId
+                );
+
+
+                recordAction(
+                    action,
+                    "unsupported"
+                );
+
+
+                return Promise.resolve(
+                    false
+                );
+
+        }
+
+    }
+
+
+    // =====================================================
+    // HANDLE ACTION ELEMENT
+    // =====================================================
+
+    function handleActionElement(
+        element
+    ){
+
+        const action =
+            resolveActionFromElement(
+                element
+            );
+
+
+        if(
+            !action
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            action.actionId !==
+            "wifi.scan"
+        ){
+
+            return false;
+
+        }
+
+
+        // -------------------------------------------------
+        // PROTECT AGAINST DUPLICATE EXECUTION
+        // -------------------------------------------------
+
+        if(
+            element.dataset &&
+            element.dataset.fobasCyberActionBound ===
+            "true"
+        ){
+
+            return false;
+
+        }
+
+
+        if(
+            element.dataset
+        ){
+
+            element.dataset
+                .fobasCyberActionBound =
+                "true";
+
+        }
+
+
+        execute(
+            action.actionId
+        );
+
+
+        return true;
+
+    }
+
+
+    // =====================================================
+    // DOCUMENT ACTION BRIDGE
+    // =====================================================
+
+    function handleDocumentClick(
+        event
+    ){
+
+        if(
+            !event ||
+            !event.target
+        ){
+
+            return;
+
+        }
+
+
+        const action =
+            resolveActionFromElement(
+                event.target
+            );
+
+
+        if(
+            !action
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            action.actionId !==
+            "wifi.scan"
+        ){
+
+            return;
+
+        }
+
+
+        // -------------------------------------------------
+        // IMPORTANT:
+        // The Wi-Fi Lab Engine already owns the actual
+        // scan implementation.
+        //
+        // This bridge only records and exposes the
+        // technical action.
+        //
+        // We therefore DO NOT execute the scan here.
+        // The original Wi-Fi engine listener continues
+        // to execute the scan normally.
+        // -------------------------------------------------
+
+        recordAction(
+            action,
+            "requested"
+        );
+
+    }
+
+
+    // =====================================================
+    // OBSERVE SIMULATION ACTIONS
+    // =====================================================
+
+    function bindDocumentBridge(){
+
+        document.addEventListener(
+            "click",
+            handleDocumentClick,
+            true
+        );
+
+    }
+
+
+    // =====================================================
+    // REGISTER ACTIONS ON UI
+    // =====================================================
+
+    function annotateActionElements(){
+
+        const elements =
+            document.querySelectorAll(
+                '[data-action="wifi.scan"]'
+            );
+
+
+        elements.forEach(
+            function(element){
+
+                if(
+                    element.dataset
+                ){
+
+                    element.dataset
+                        .simulationId =
+                        SIMULATION_ID;
+
+                    element.dataset
+                        .labId =
+                        WIFI_LAB_ID;
+
+                    element.dataset
+                        .actionId =
+                        "wifi.scan";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // =====================================================
+    // PUBLIC API
+    // =====================================================
+
+    const CyberActionBridge = {
+
+        version:
+            ENGINE_VERSION,
+
+        id:
+            ENGINE_ID,
+
+        simulationId:
+            SIMULATION_ID,
+
+        state:
+            state,
+
+        actions:
+            ACTIONS,
+
+        getAction:
+            getAction,
+
+        resolveActionFromElement:
+            resolveActionFromElement,
+
+        execute:
+            execute,
+
+        recordAction:
+            recordAction,
+
+        on:
+            on,
+
+        emit:
+            emit,
+
+        annotate:
+            annotateActionElements
+
+    };
+
+
+    // =====================================================
+    // REGISTER GLOBAL API
+    // =====================================================
+
+    window.FOBASCyberActionBridge =
+        CyberActionBridge;
+
+
+    // =====================================================
+    // REGISTER INSIDE FOBAS CORE
+    // =====================================================
+
+    FOBAS.cyberActions =
+        CyberActionBridge;
+
+
+    // =====================================================
+    // INITIALIZATION
+    // =====================================================
+
+    function initializeCyberActionBridge(){
+
+        bindDocumentBridge();
+
+        annotateActionElements();
+
+        state.initialized =
+            true;
+
+
+        console.log(
+            "[FOBAS Cyber Action Bridge] " +
+            "Initialized successfully.",
+            ENGINE_VERSION
+        );
+
+    }
+
+
+    // =====================================================
+    // DOM READY
+    // =====================================================
+
+    if(
+        document.readyState ===
+        "loading"
+    ){
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeCyberActionBridge,
+            {
+                once:true
+            }
+        );
+
+    }
+    else{
+
+        initializeCyberActionBridge();
+
+    }
+
+
+})();
+```
+
+### ⚠️ Yon detay enpòtan nan premye vèsyon sa a
+
+Mwen fè `wifi.scan` la kòm yon **Bridge/Observer**, li **pa lanse scan lan yon dezyèm fwa**.
+
+Sa enpòtan anpil paske Wi-Fi Lab Engine ou genyen deja gen pwòp:
+
+```js
+FOBAS.wifi.scan()
+```
+
+Si nou ta fè nouvo bridge la rele `scan()` epi ansyen bouton an rele `scan()` tou, nou ta riske fè **double execution**.
+
+Se poutèt sa achitekti a kounye a se:
+
+```text
+Klike SCAN
+      ↓
+Cyber Action Bridge
+      ↓
+anrejistre:
+wifi.scan
+      ↓
+Wi-Fi Lab Engine ki deja egziste
+      ↓
+scan virtuel la egzekite
+```
+
+Sa pwoteje travay Phase 2 a pandan nou kòmanse konstwi metadata/action layer Phase 3 a.
+
+### Sa nou dwe verifye apre ou mete blok la
+
+Lè paj la chaje, console la dwe montre:
+
+```text
+[FOBAS Cyber Action Bridge] Initialized successfully. 1.0.0
+```
+
+Epi lè ou klike:
+
+**SCAN VIRTUAL NETWORKS**
+
+bridge la dwe anrejistre:
+
+```text
+simulationId:
+fobas-ethical-hacking-simulation
+
+labId:
+wifi
+
+actionId:
+wifi.scan
+
+actionType:
+scan
+
+target:
+virtual_networks
+
+validationKey:
+WIFI_SCAN_COMPLETED
+```
+
+**Scan lan dwe kontinye mache menm jan li te mache anvan.**
+
+Apre sa, pwochen blok nou pa bezwen kreye ankò jiskaske `wifi.scan` sa a konfime li mache; pwochen aksyon teknik la ap se **`wifi.select_target`**, kote nou pral bay chak rezo yon `targetId` estab epi fè seleksyon elèv la vin yon vrè simulation action.
