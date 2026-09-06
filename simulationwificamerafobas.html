@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#050a12"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS Ethical Hacking Simulation — White Hat Cybersecurity Virtual Laboratory"
+    >
+
+    <title>
+        FOBAS — Ethical Hacking Simulation
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="simulationwificamerafobas.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         FOBAS ETHICAL HACKING SIMULATION
+         APPLICATION ROOT
+    ====================================================== -->
+
+    <div id="fobasSimulationApp">
+
+
+        <!-- =================================================
+             GLOBAL APPLICATION HEADER
+        ================================================== -->
+
+        <header class="simulationHeader">
+
+
+            <!-- =============================================
+                 FOBAS BRAND
+            ============================================== -->
+
+            <div class="brandBlock">
+
+                <div
+                    class="brandLogo"
+                    aria-label="FOBAS"
+                >
+                    FOBAS
+                </div>
+
+
+                <div class="brandText">
+
+                    <h1>
+                        FOBAS Ethical Hacking
+                    </h1>
+
+                    <p>
+                        White Hat Cybersecurity Laboratory
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 LIVE SYSTEM STATUS
+            ============================================== -->
+
+            <div class="headerStatus">
+
+                <span
+                    id="simulationStatus"
+                    class="statusBadge"
+                    aria-live="polite"
+                >
+                    READY
+                </span>
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- =================================================
+             COMMAND NAVIGATION
+        ================================================== -->
+
+        <nav
+            id="simulationNavigation"
+            class="simulationNavigation"
+            aria-label="Simulation Navigation"
+        >
+
+
+            <!-- =============================================
+                 DASHBOARD
+            ============================================== -->
+
+            <button
+                type="button"
+                class="navButton active"
+                data-lab="dashboard"
+                aria-label="Open Dashboard"
+            >
+
+                <span
+                    class="navIcon"
+                    aria-hidden="true"
+                >
+                    🏠
+                </span>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </button>
+
+
+
+            <!-- =============================================
+                 WIFI SECURITY
+            ============================================== -->
+
+            <button
+                type="button"
+                class="navButton"
+                data-lab="wifi"
+                aria-label="Open Wi-Fi Security Laboratory"
+            >
+
+                <span
+                    class="navIcon"
+                    aria-hidden="true"
+                >
+                    📶
+                </span>
+
+                <span>
+                    Wi-Fi Security
+                </span>
+
+            </button>
+
+
+
+            <!-- =============================================
+                 CAMERA ESPION
+            ============================================== -->
+
+            <button
+                type="button"
+                class="navButton"
+                data-lab="cameraEspion"
+                aria-label="Open Camera Espion Laboratory"
+            >
+
+                <span
+                    class="navIcon"
+                    aria-hidden="true"
+                >
+                    📷
+                </span>
+
+                <span>
+                    Camera Espion
+                </span>
+
+            </button>
+
+
+
+            <!-- =============================================
+                 CAMERA SURVEILLANCE
+            ============================================== -->
+
+            <button
+                type="button"
+                class="navButton"
+                data-lab="cameraSurveillance"
+                aria-label="Open Camera Surveillance Laboratory"
+            >
+
+                <span
+                    class="navIcon"
+                    aria-hidden="true"
+                >
+                    🎥
+                </span>
+
+                <span>
+                    Camera Surveillance
+                </span>
+
+            </button>
+
+
+        </nav>
+
+
+
+        <!-- =================================================
+             MAIN SIMULATION CONTENT
+        ================================================== -->
+
+        <main class="simulationMain">
+
+
+            <!-- =================================================
+                 DASHBOARD SCREEN
+            ================================================== -->
+
+            <section
+                id="dashboardScreen"
+                class="simulationScreen activeScreen"
+                data-screen="dashboard"
+            >
+
+
+                <!-- =============================================
+                     COMMAND CENTER HERO
+                ============================================== -->
+
+                <div class="welcomePanel">
+
+
+                    <div
+                        class="welcomeIcon"
+                        aria-hidden="true"
+                    >
+                        🛡️
+                    </div>
+
+
+                    <h2>
+                        FOBAS Cybersecurity
+                        Simulation Center
+                    </h2>
+
+
+                    <p>
+                        Bienvenue dans votre laboratoire
+                        virtuel de cybersécurité
+                        White Hat.
+                    </p>
+
+
+                    <p class="secondaryText">
+                        Sélectionnez un laboratoire
+                        pour commencer votre mission.
+                    </p>
+
+
+                </div>
+
+
+
+                <!-- =================================================
+                     LABORATORY MODULES
+                ================================================== -->
+
+                <div class="labCards">
+
+
+                    <!-- =============================================
+                         WIFI SECURITY LAB
+                    ============================================== -->
+
+                    <article
+                        class="labCard"
+                        data-open-lab="wifi"
+                    >
+
+
+                        <div
+                            class="labCardIcon"
+                            aria-hidden="true"
+                        >
+                            📶
+                        </div>
+
+
+                        <h3>
+                            Wi-Fi Security Lab
+                        </h3>
+
+
+                        <p>
+                            Analyse et évaluation de la
+                            sécurité des réseaux Wi-Fi
+                            dans un environnement
+                            virtuel contrôlé.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="launchButton"
+                            data-launch-lab="wifi"
+                            aria-label="Enter Wi-Fi Security Laboratory"
+                        >
+                            ENTER LAB
+                        </button>
+
+
+                    </article>
+
+
+
+                    <!-- =============================================
+                         CAMERA ESPION LAB
+                    ============================================== -->
+
+                    <article
+                        class="labCard"
+                        data-open-lab="cameraEspion"
+                    >
+
+
+                        <div
+                            class="labCardIcon"
+                            aria-hidden="true"
+                        >
+                            📷
+                        </div>
+
+
+                        <h3>
+                            Camera Espion Lab
+                        </h3>
+
+
+                        <p>
+                            Détection, identification
+                            et analyse de dispositifs
+                            de caméra cachée dans un
+                            environnement de simulation.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="launchButton"
+                            data-launch-lab="cameraEspion"
+                            aria-label="Enter Camera Espion Laboratory"
+                        >
+                            ENTER LAB
+                        </button>
+
+
+                    </article>
+
+
+
+                    <!-- =============================================
+                         CAMERA SURVEILLANCE LAB
+                    ============================================== -->
+
+                    <article
+                        class="labCard"
+                        data-open-lab="cameraSurveillance"
+                    >
+
+
+                        <div
+                            class="labCardIcon"
+                            aria-hidden="true"
+                        >
+                            🎥
+                        </div>
+
+
+                        <h3>
+                            Camera Surveillance Lab
+                        </h3>
+
+
+                        <p>
+                            Analyse des systèmes de
+                            vidéosurveillance et
+                            identification des risques
+                            de sécurité dans le laboratoire.
+                        </p>
+
+
+                        <button
+                            type="button"
+                            class="launchButton"
+                            data-launch-lab="cameraSurveillance"
+                            aria-label="Enter Camera Surveillance Laboratory"
+                        >
+                            ENTER LAB
+                        </button>
+
+
+                    </article>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 WIFI SECURITY LAB SCREEN
+            ================================================== -->
+
+            <section
+                id="wifiScreen"
+                class="simulationScreen"
+                data-screen="wifi"
+            >
+
+
+                <div class="screenHeader">
+
+
+                    <div>
+
+                        <span class="sectionLabel">
+                            LABORATORY 01
+                        </span>
+
+
+                        <h2>
+                            Wi-Fi Security Simulation
+                        </h2>
+
+
+                        <p>
+                            Environnement Wi-Fi virtuel
+                            dédié à l'analyse de sécurité
+                            et à la pratique White Hat.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div
+                    id="wifiLabContainer"
+                    class="labWorkspace"
+                >
+
+
+                    <div class="emptyLab">
+
+
+                        <div
+                            class="emptyLabIcon"
+                            aria-hidden="true"
+                        >
+                            📶
+                        </div>
+
+
+                        <h3>
+                            Wi-Fi Laboratory Ready
+                        </h3>
+
+
+                        <p>
+                            Le moteur de simulation Wi-Fi
+                            est prêt à recevoir les modules
+                            pratiques et les missions
+                            de cybersécurité.
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 CAMERA ESPION LAB SCREEN
+            ================================================== -->
+
+            <section
+                id="cameraEspionScreen"
+                class="simulationScreen"
+                data-screen="cameraEspion"
+            >
+
+
+                <div class="screenHeader">
+
+
+                    <div>
+
+                        <span class="sectionLabel">
+                            LABORATORY 02
+                        </span>
+
+
+                        <h2>
+                            Camera Espion Simulation
+                        </h2>
+
+
+                        <p>
+                            Laboratoire virtuel de
+                            détection, identification
+                            et analyse de caméras cachées.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div
+                    id="cameraEspionLabContainer"
+                    class="labWorkspace"
+                >
+
+
+                    <div class="emptyLab">
+
+
+                        <div
+                            class="emptyLabIcon"
+                            aria-hidden="true"
+                        >
+                            📷
+                        </div>
+
+
+                        <h3>
+                            Camera Espion Laboratory Ready
+                        </h3>
+
+
+                        <p>
+                            Le moteur de simulation Camera
+                            Espion est prêt à recevoir les
+                            modules de détection et
+                            d'analyse.
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 CAMERA SURVEILLANCE LAB SCREEN
+            ================================================== -->
+
+            <section
+                id="cameraSurveillanceScreen"
+                class="simulationScreen"
+                data-screen="cameraSurveillance"
+            >
+
+
+                <div class="screenHeader">
+
+
+                    <div>
+
+                        <span class="sectionLabel">
+                            LABORATORY 03
+                        </span>
+
+
+                        <h2>
+                            Camera Surveillance Simulation
+                        </h2>
+
+
+                        <p>
+                            Laboratoire virtuel consacré
+                            à l'analyse des systèmes de
+                            vidéosurveillance.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <div
+                    id="cameraSurveillanceLabContainer"
+                    class="labWorkspace"
+                >
+
+
+                    <div class="emptyLab">
+
+
+                        <div
+                            class="emptyLabIcon"
+                            aria-hidden="true"
+                        >
+                            🎥
+                        </div>
+
+
+                        <h3>
+                            Camera Surveillance Laboratory Ready
+                        </h3>
+
+
+                        <p>
+                            Le moteur de simulation
+                            Surveillance est prêt à
+                            recevoir les modules techniques.
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+
+        <!-- =================================================
+             GLOBAL SIMULATION CONTROL BAR
+        ================================================== -->
+
+        <footer class="simulationFooter">
+
+
+            <!-- =============================================
+                 GLOBAL STATE
+            ============================================== -->
+
+            <div class="footerInfo">
+
+                <span>
+                    Simulation State:
+                </span>
+
+
+                <strong
+                    id="stateIndicator"
+                    aria-live="polite"
+                >
+                    INITIALIZED
+                </strong>
+
+            </div>
+
+
+
+            <!-- =============================================
+                 SIMULATION CONTROLS
+            ============================================== -->
+
+            <div class="footerControls">
+
+
+                <button
+                    type="button"
+                    id="saveSimulationBtn"
+                    class="controlButton"
+                    aria-label="Save Simulation"
+                >
+                    💾 Save
+                </button>
+
+
+                <button
+                    type="button"
+                    id="loadSimulationBtn"
+                    class="controlButton"
+                    aria-label="Load Simulation"
+                >
+                    📂 Load
+                </button>
+
+
+                <button
+                    type="button"
+                    id="resetSimulationBtn"
+                    class="controlButton dangerButton"
+                    aria-label="Reset Simulation"
+                >
+                    🔄 Reset
+                </button>
+
+
+            </div>
+
+
+        </footer>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         FOBAS ETHICAL HACKING SIMULATION CORE ENGINE
+    ====================================================== -->
+
+    <script
+        src="simulationwificamerafobas.js"
+    ></script>
+
+
+</body>
+
+</html>
