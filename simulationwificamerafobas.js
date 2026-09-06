@@ -2779,3 +2779,2549 @@
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   FOBAS ETHICAL HACKING SIMULATION
+   WI-FI SECURITY LAB ENGINE
+   PHASE 2 — TECHNICAL WORKSPACE
+   VERSION 1.0.0
+
+   PURPOSE:
+   - Creates the technical Wi-Fi laboratory workspace.
+   - Displays virtual Wi-Fi networks.
+   - Displays SSID, BSSID, Channel, Encryption and Signal.
+   - Calculates simulation security status.
+   - Integrates with FOBAS Core Engine v2.0.
+   - Does NOT interact with real Wi-Fi hardware.
+   - Does NOT perform real network scanning.
+========================================================= */
+
+(function () {
+
+    "use strict";
+
+
+    /* =====================================================
+       DEPENDENCY CHECK
+    ====================================================== */
+
+    if (
+        !window.FOBASCybersecuritySimulation
+    ) {
+
+        console.error(
+            "[FOBAS Wi-Fi Lab] Core Simulation Engine not found."
+        );
+
+        return;
+
+    }
+
+
+    const FOBAS =
+        window.FOBASCybersecuritySimulation;
+
+
+    if (
+        !FOBAS.labs ||
+        !FOBAS.state
+    ) {
+
+        console.error(
+            "[FOBAS Wi-Fi Lab] Required FOBAS Core APIs are unavailable."
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       ENGINE CONFIGURATION
+    ====================================================== */
+
+    const ENGINE_VERSION =
+        "1.0.0";
+
+    const LAB_ID =
+        "wifi";
+
+    const LAB_STATE =
+        "labStates";
+
+
+    /* =====================================================
+       VIRTUAL WI-FI NETWORK DATABASE
+       
+       IMPORTANT:
+       These are simulated networks only.
+       No real wireless network is accessed.
+    ====================================================== */
+
+    const VIRTUAL_WIFI_NETWORKS = [
+
+        {
+
+            id:
+                "wifi_target_alpha",
+
+            ssid:
+                "FOBAS-LAB-01",
+
+            bssid:
+                "02:FO:BA:5A:01:01",
+
+            channel:
+                6,
+
+            encryption:
+                "WPA2-PSK",
+
+            signal:
+                -48,
+
+            security:
+                "secure",
+
+            securityScore:
+                92
+
+        },
+
+        {
+
+            id:
+                "wifi_target_beta",
+
+            ssid:
+                "CyberLab-Training",
+
+            bssid:
+                "02:FO:BA:5A:02:02",
+
+            channel:
+                11,
+
+            encryption:
+                "WPA2-PSK",
+
+            signal:
+                -61,
+
+            security:
+                "secure",
+
+            securityScore:
+                86
+
+        },
+
+        {
+
+            id:
+                "wifi_target_gamma",
+
+            ssid:
+                "FOBAS-GUEST",
+
+            bssid:
+                "02:FO:BA:5A:03:03",
+
+            channel:
+                1,
+
+            encryption:
+                "WPA",
+
+            signal:
+                -57,
+
+            security:
+                "warning",
+
+            securityScore:
+                58
+
+        },
+
+        {
+
+            id:
+                "wifi_target_delta",
+
+            ssid:
+                "Training-Network",
+
+            bssid:
+                "02:FO:BA:5A:04:04",
+
+            channel:
+                3,
+
+            encryption:
+                "WEP",
+
+            signal:
+                -66,
+
+            security:
+                "vulnerable",
+
+            securityScore:
+                24
+
+        },
+
+        {
+
+            id:
+                "wifi_target_epsilon",
+
+            ssid:
+                "Open-Lab-Network",
+
+            bssid:
+                "02:FO:BA:5A:05:05",
+
+            channel:
+                9,
+
+            encryption:
+                "OPEN",
+
+            signal:
+                -73,
+
+            security:
+                "vulnerable",
+
+            securityScore:
+                8
+
+        }
+
+    ];
+
+
+    /* =====================================================
+       INTERNAL ENGINE STATE
+    ====================================================== */
+
+    const engineState = {
+
+        initialized:
+            false,
+
+        scanning:
+            false,
+
+        scanCompleted:
+            false,
+
+        networks:
+            [],
+
+        selectedNetworkId:
+            null,
+
+        lastScanAt:
+            null
+
+    };
+
+
+    /* =====================================================
+       STATE INITIALIZATION
+    ====================================================== */
+
+    function ensureLabState() {
+
+        const state =
+            FOBAS.state.getState();
+
+        if (
+            !state.labStates
+        ) {
+
+            state.labStates = {};
+
+        }
+
+        if (
+            !state.labStates[LAB_ID]
+        ) {
+
+            state.labStates[LAB_ID] = {
+
+                initialized:
+                    false,
+
+                active:
+                    false,
+
+                progress:
+                    0
+
+            };
+
+        }
+
+        const wifiState =
+            state.labStates[LAB_ID];
+
+
+        if (
+            typeof wifiState.progress !==
+            "number"
+        ) {
+
+            wifiState.progress =
+                0;
+
+        }
+
+
+        if (
+            typeof wifiState.initialized !==
+            "boolean"
+        ) {
+
+            wifiState.initialized =
+                false;
+
+        }
+
+
+        if (
+            typeof wifiState.active !==
+            "boolean"
+        ) {
+
+            wifiState.active =
+                false;
+
+        }
+
+
+        return wifiState;
+
+    }
+
+
+    /* =====================================================
+       SECURITY STATUS FORMATTER
+    ====================================================== */
+
+    function getSecurityStatus(
+        network
+    ) {
+
+        if (
+            !network
+        ) {
+
+            return {
+
+                key:
+                    "unknown",
+
+                label:
+                    "UNKNOWN"
+
+            };
+
+        }
+
+
+        const encryption =
+            String(
+                network.encryption ||
+                ""
+            ).toUpperCase();
+
+
+        /*
+         * Simulation security classification.
+         */
+
+        if (
+            encryption === "OPEN" ||
+            encryption === "WEP"
+        ) {
+
+            return {
+
+                key:
+                    "vulnerable",
+
+                label:
+                    "VULNERABLE"
+
+            };
+
+        }
+
+
+        if (
+            encryption === "WPA"
+        ) {
+
+            return {
+
+                key:
+                    "warning",
+
+                label:
+                    "WARNING"
+
+            };
+
+        }
+
+
+        return {
+
+            key:
+                "secure",
+
+            label:
+                "SECURE"
+
+        };
+
+    }
+
+
+    /* =====================================================
+       SIGNAL QUALITY
+    ====================================================== */
+
+    function getSignalQuality(
+        signal
+    ) {
+
+        const value =
+            Number(signal);
+
+
+        if (
+            !Number.isFinite(value)
+        ) {
+
+            return {
+
+                percentage:
+                    0,
+
+                label:
+                    "UNKNOWN"
+
+            };
+
+        }
+
+
+        /*
+         * Typical Wi-Fi RSSI range used
+         * only for visual simulation.
+         */
+
+        const minimum =
+            -100;
+
+        const maximum =
+            -30;
+
+
+        let percentage =
+            (
+                (value - minimum) /
+                (maximum - minimum)
+            ) * 100;
+
+
+        percentage =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round(
+                        percentage
+                    )
+                )
+            );
+
+
+        let label =
+            "WEAK";
+
+
+        if (
+            percentage >= 75
+        ) {
+
+            label =
+                "EXCELLENT";
+
+        } else if (
+            percentage >= 55
+        ) {
+
+            label =
+                "GOOD";
+
+        } else if (
+            percentage >= 35
+        ) {
+
+            label =
+                "FAIR";
+
+        }
+
+
+        return {
+
+            percentage:
+                percentage,
+
+            label:
+                label
+
+        };
+
+    }
+
+
+    /* =====================================================
+       HTML ESCAPE
+       Prevents virtual network data from
+       being interpreted as HTML.
+    ====================================================== */
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(
+            value == null
+                ? ""
+                : value
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+    }
+
+
+    /* =====================================================
+       ENGINE STYLE INJECTION
+       
+       Keeps Phase 2 visually self-contained.
+    ====================================================== */
+
+    function injectStyles() {
+
+        if (
+            document.getElementById(
+                "fobasWifiLabEngineStyles"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "fobasWifiLabEngineStyles";
+
+
+        style.textContent = `
+
+            /* =========================================
+               WIFI LAB WORKSPACE
+            ========================================== */
+
+            .fobasWifiWorkspace {
+
+                width:100%;
+                min-height:520px;
+
+                display:flex;
+                flex-direction:column;
+
+                gap:18px;
+
+                position:relative;
+
+            }
+
+
+            /* =========================================
+               TOP TECHNICAL HEADER
+            ========================================== */
+
+            .fobasWifiLabTopbar {
+
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+
+                gap:18px;
+
+                padding:18px 20px;
+
+                border:1px solid
+                    rgba(76,201,240,.18);
+
+                border-radius:16px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        rgba(9,24,40,.96),
+                        rgba(5,14,25,.96)
+                    );
+
+                box-shadow:
+                    0 18px 45px
+                    rgba(0,0,0,.25);
+
+            }
+
+
+            .fobasWifiLabIdentity {
+
+                display:flex;
+                align-items:center;
+
+                gap:13px;
+
+                min-width:0;
+
+            }
+
+
+            .fobasWifiLabIdentityIcon {
+
+                width:46px;
+                height:46px;
+
+                display:grid;
+                place-items:center;
+
+                border-radius:13px;
+
+                background:
+                    rgba(76,201,240,.10);
+
+                border:1px solid
+                    rgba(76,201,240,.25);
+
+                font-size:22px;
+
+                flex-shrink:0;
+
+            }
+
+
+            .fobasWifiLabIdentityText {
+
+                min-width:0;
+
+            }
+
+
+            .fobasWifiLabIdentityText strong {
+
+                display:block;
+
+                color:#f3fbff;
+
+                font-size:14px;
+
+                letter-spacing:.8px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            .fobasWifiLabIdentityText span {
+
+                display:block;
+
+                margin-top:4px;
+
+                color:#7e9bad;
+
+                font-size:10px;
+
+                letter-spacing:1.1px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            /* =========================================
+               SCAN STATUS
+            ========================================== */
+
+            .fobasWifiScanStatus {
+
+                display:flex;
+                align-items:center;
+
+                gap:9px;
+
+                padding:9px 12px;
+
+                border-radius:999px;
+
+                border:1px solid
+                    rgba(76,201,240,.18);
+
+                background:
+                    rgba(76,201,240,.06);
+
+                color:#9edff4;
+
+                font-size:10px;
+
+                font-weight:900;
+
+                letter-spacing:1px;
+
+                white-space:nowrap;
+
+            }
+
+
+            .fobasWifiScanDot {
+
+                width:7px;
+                height:7px;
+
+                border-radius:50%;
+
+                background:#4cc9f0;
+
+                box-shadow:
+                    0 0 12px
+                    rgba(76,201,240,.8);
+
+            }
+
+
+            .fobasWifiScanStatus.scanning
+            .fobasWifiScanDot {
+
+                animation:
+                    fobasWifiScanPulse
+                    .8s infinite;
+
+            }
+
+
+            @keyframes fobasWifiScanPulse {
+
+                0% {
+                    opacity:.35;
+                    transform:scale(.8);
+                }
+
+                50% {
+                    opacity:1;
+                    transform:scale(1.35);
+                }
+
+                100% {
+                    opacity:.35;
+                    transform:scale(.8);
+                }
+
+            }
+
+
+            /* =========================================
+               CONTROL BAR
+            ========================================== */
+
+            .fobasWifiControlBar {
+
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+
+                gap:14px;
+
+                flex-wrap:wrap;
+
+                padding:14px 16px;
+
+                border:1px solid
+                    rgba(255,255,255,.07);
+
+                border-radius:14px;
+
+                background:
+                    rgba(255,255,255,.025);
+
+            }
+
+
+            .fobasWifiControlInfo {
+
+                color:#7890a0;
+
+                font-size:10px;
+
+                font-weight:700;
+
+                letter-spacing:.8px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            .fobasWifiScanButton {
+
+                min-height:42px;
+
+                padding:0 18px;
+
+                border:1px solid
+                    rgba(76,201,240,.35);
+
+                border-radius:10px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        rgba(76,201,240,.16),
+                        rgba(76,201,240,.05)
+                    );
+
+                color:#eafaff;
+
+                font-size:11px;
+
+                font-weight:900;
+
+                letter-spacing:1px;
+
+                cursor:pointer;
+
+                transition:
+                    transform .18s ease,
+                    border-color .18s ease,
+                    box-shadow .18s ease;
+
+                touch-action:manipulation;
+
+            }
+
+
+            .fobasWifiScanButton:hover {
+
+                transform:
+                    translateY(-2px);
+
+                border-color:
+                    rgba(76,201,240,.65);
+
+                box-shadow:
+                    0 10px 25px
+                    rgba(76,201,240,.10);
+
+            }
+
+
+            .fobasWifiScanButton:active {
+
+                transform:
+                    translateY(0);
+
+            }
+
+
+            .fobasWifiScanButton:disabled {
+
+                opacity:.55;
+
+                cursor:wait;
+
+                transform:none;
+
+            }
+
+
+            /* =========================================
+               NETWORK TABLE CONTAINER
+            ========================================== */
+
+            .fobasWifiNetworkPanel {
+
+                overflow:hidden;
+
+                border:1px solid
+                    rgba(76,201,240,.12);
+
+                border-radius:16px;
+
+                background:
+                    rgba(3,10,18,.78);
+
+                box-shadow:
+                    0 20px 50px
+                    rgba(0,0,0,.20);
+
+            }
+
+
+            .fobasWifiPanelHeader {
+
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+
+                gap:12px;
+
+                padding:16px 18px;
+
+                border-bottom:1px solid
+                    rgba(255,255,255,.06);
+
+            }
+
+
+            .fobasWifiPanelTitle {
+
+                color:#eaf8ff;
+
+                font-size:11px;
+
+                font-weight:900;
+
+                letter-spacing:1.2px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            .fobasWifiNetworkCount {
+
+                color:#4cc9f0;
+
+                font-size:10px;
+
+                font-weight:900;
+
+                letter-spacing:1px;
+
+            }
+
+
+            /* =========================================
+               NETWORK LIST
+            ========================================== */
+
+            .fobasWifiNetworkList {
+
+                display:flex;
+
+                flex-direction:column;
+
+            }
+
+
+            .fobasWifiNetworkRow {
+
+                display:grid;
+
+                grid-template-columns:
+                    minmax(145px,1.4fr)
+                    minmax(145px,1.3fr)
+                    80px
+                    minmax(105px,1fr)
+                    110px
+                    120px;
+
+                gap:12px;
+
+                align-items:center;
+
+                padding:15px 18px;
+
+                border-bottom:1px solid
+                    rgba(255,255,255,.045);
+
+                cursor:pointer;
+
+                transition:
+                    background .18s ease,
+                    transform .18s ease;
+
+            }
+
+
+            .fobasWifiNetworkRow:last-child {
+
+                border-bottom:none;
+
+            }
+
+
+            .fobasWifiNetworkRow:hover {
+
+                background:
+                    rgba(76,201,240,.045);
+
+            }
+
+
+            .fobasWifiNetworkRow.selected {
+
+                background:
+                    linear-gradient(
+                        90deg,
+                        rgba(76,201,240,.09),
+                        rgba(76,201,240,.025)
+                    );
+
+                box-shadow:
+                    inset 3px 0 0
+                    #4cc9f0;
+
+            }
+
+
+            .fobasWifiNetworkHeader {
+
+                background:
+                    rgba(255,255,255,.025);
+
+                cursor:default;
+
+            }
+
+
+            .fobasWifiNetworkHeader:hover {
+
+                background:
+                    rgba(255,255,255,.025);
+
+            }
+
+
+            .fobasWifiCell {
+
+                min-width:0;
+
+                color:#9bb1bf;
+
+                font-size:10px;
+
+                font-weight:700;
+
+                overflow:hidden;
+
+                text-overflow:ellipsis;
+
+                white-space:nowrap;
+
+            }
+
+
+            .fobasWifiNetworkHeader
+            .fobasWifiCell {
+
+                color:#587080;
+
+                font-size:9px;
+
+                font-weight:900;
+
+                letter-spacing:.9px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            .fobasWifiSSID {
+
+                display:flex;
+                align-items:center;
+
+                gap:9px;
+
+                color:#edfaff;
+
+                font-weight:900;
+
+            }
+
+
+            .fobasWifiSSIDIcon {
+
+                width:27px;
+                height:27px;
+
+                display:grid;
+                place-items:center;
+
+                border-radius:8px;
+
+                background:
+                    rgba(76,201,240,.08);
+
+                border:1px solid
+                    rgba(76,201,240,.14);
+
+                flex-shrink:0;
+
+                font-size:12px;
+
+            }
+
+
+            .fobasWifiBSSID {
+
+                font-family:
+                    ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    Monaco,
+                    Consolas,
+                    monospace;
+
+                font-size:9px;
+
+                letter-spacing:.3px;
+
+                color:#7895a6;
+
+            }
+
+
+            /* =========================================
+               SIGNAL METER
+            ========================================== */
+
+            .fobasWifiSignal {
+
+                display:flex;
+
+                align-items:center;
+
+                gap:8px;
+
+            }
+
+
+            .fobasWifiSignalBars {
+
+                width:38px;
+                height:18px;
+
+                display:flex;
+
+                align-items:flex-end;
+
+                gap:2px;
+
+            }
+
+
+            .fobasWifiSignalBar {
+
+                width:7px;
+
+                border-radius:2px 2px 0 0;
+
+                background:
+                    rgba(120,144,157,.20);
+
+            }
+
+
+            .fobasWifiSignalBar:nth-child(1) {
+                height:5px;
+            }
+
+            .fobasWifiSignalBar:nth-child(2) {
+                height:9px;
+            }
+
+            .fobasWifiSignalBar:nth-child(3) {
+                height:13px;
+            }
+
+            .fobasWifiSignalBar:nth-child(4) {
+                height:18px;
+            }
+
+
+            .fobasWifiSignalBar.active {
+
+                background:#4cc9f0;
+
+                box-shadow:
+                    0 0 8px
+                    rgba(76,201,240,.25);
+
+            }
+
+
+            .fobasWifiSignalText {
+
+                color:#93aeba;
+
+                font-size:9px;
+
+                font-weight:900;
+
+            }
+
+
+            /* =========================================
+               SECURITY BADGES
+            ========================================== */
+
+            .fobasWifiSecurityBadge {
+
+                display:inline-flex;
+
+                align-items:center;
+
+                justify-content:center;
+
+                width:max-content;
+
+                min-width:82px;
+
+                padding:6px 9px;
+
+                border-radius:999px;
+
+                font-size:8px;
+
+                font-weight:900;
+
+                letter-spacing:.8px;
+
+            }
+
+
+            .fobasWifiSecurityBadge.secure {
+
+                color:#9bf2c2;
+
+                background:
+                    rgba(72,199,142,.09);
+
+                border:1px solid
+                    rgba(72,199,142,.18);
+
+            }
+
+
+            .fobasWifiSecurityBadge.warning {
+
+                color:#ffd58a;
+
+                background:
+                    rgba(255,193,7,.08);
+
+                border:1px solid
+                    rgba(255,193,7,.18);
+
+            }
+
+
+            .fobasWifiSecurityBadge.vulnerable {
+
+                color:#ff9d9d;
+
+                background:
+                    rgba(255,82,82,.08);
+
+                border:1px solid
+                    rgba(255,82,82,.18);
+
+            }
+
+
+            /* =========================================
+               EMPTY / SCANNING STATE
+            ========================================== */
+
+            .fobasWifiEmptyState {
+
+                min-height:220px;
+
+                display:flex;
+
+                flex-direction:column;
+
+                align-items:center;
+
+                justify-content:center;
+
+                gap:10px;
+
+                padding:30px;
+
+                text-align:center;
+
+            }
+
+
+            .fobasWifiEmptyIcon {
+
+                width:56px;
+                height:56px;
+
+                display:grid;
+                place-items:center;
+
+                border-radius:16px;
+
+                border:1px solid
+                    rgba(76,201,240,.16);
+
+                background:
+                    rgba(76,201,240,.06);
+
+                font-size:25px;
+
+            }
+
+
+            .fobasWifiEmptyState strong {
+
+                color:#eaf8ff;
+
+                font-size:13px;
+
+                letter-spacing:.5px;
+
+            }
+
+
+            .fobasWifiEmptyState span {
+
+                max-width:430px;
+
+                color:#6e8594;
+
+                font-size:10px;
+
+                line-height:1.7;
+
+            }
+
+
+            /* =========================================
+               RESPONSIVE TABLET / MOBILE
+            ========================================== */
+
+            @media (max-width:1050px) {
+
+                .fobasWifiNetworkRow {
+
+                    grid-template-columns:
+                        minmax(145px,1.3fr)
+                        minmax(125px,1.2fr)
+                        70px
+                        minmax(95px,1fr)
+                        100px;
+
+                }
+
+                .fobasWifiNetworkRow
+                .fobasWifiCell:nth-child(6) {
+
+                    display:none;
+
+                }
+
+                .fobasWifiNetworkHeader
+                .fobasWifiCell:nth-child(6) {
+
+                    display:none;
+
+                }
+
+            }
+
+
+            @media (max-width:760px) {
+
+                .fobasWifiLabTopbar {
+
+                    align-items:flex-start;
+
+                    flex-direction:column;
+
+                }
+
+
+                .fobasWifiScanStatus {
+
+                    width:100%;
+
+                    justify-content:center;
+
+                }
+
+
+                .fobasWifiNetworkPanel {
+
+                    overflow-x:auto;
+
+                }
+
+
+                .fobasWifiNetworkList {
+
+                    min-width:700px;
+
+                }
+
+            }
+
+
+            @media (max-width:560px) {
+
+                .fobasWifiControlBar {
+
+                    align-items:stretch;
+
+                    flex-direction:column;
+
+                }
+
+
+                .fobasWifiScanButton {
+
+                    width:100%;
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+
+    /* =====================================================
+       SIGNAL HTML
+    ====================================================== */
+
+    function renderSignal(
+        signal
+    ) {
+
+        const quality =
+            getSignalQuality(
+                signal
+            );
+
+
+        const thresholds = [
+
+            25,
+            50,
+            75,
+            100
+
+        ];
+
+
+        const bars =
+            thresholds.map(
+                function (
+                    threshold
+                ) {
+
+                    const active =
+                        quality.percentage >=
+                        threshold;
+
+                    return `
+
+                        <span
+                            class="fobasWifiSignalBar ${
+                                active
+                                    ? "active"
+                                    : ""
+                            }"
+                        ></span>
+
+                    `;
+
+                }
+            ).join("");
+
+
+        return `
+
+            <div
+                class="fobasWifiSignal"
+                title="Signal ${escapeHTML(signal)} dBm"
+            >
+
+                <div
+                    class="fobasWifiSignalBars"
+                    aria-hidden="true"
+                >
+                    ${bars}
+                </div>
+
+                <span
+                    class="fobasWifiSignalText"
+                >
+                    ${escapeHTML(signal)} dBm
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =====================================================
+       NETWORK ROW
+    ====================================================== */
+
+    function renderNetworkRow(
+        network,
+        selected
+    ) {
+
+        const security =
+            getSecurityStatus(
+                network
+            );
+
+
+        return `
+
+            <div
+                class="
+                    fobasWifiNetworkRow
+                    ${
+                        selected
+                            ? "selected"
+                            : ""
+                    }
+                "
+                data-wifi-network-id="${escapeHTML(
+                    network.id
+                )}"
+                role="button"
+                tabindex="0"
+                aria-selected="${
+                    selected
+                        ? "true"
+                        : "false"
+                }"
+            >
+
+                <div
+                    class="
+                        fobasWifiCell
+                        fobasWifiSSID
+                    "
+                >
+
+                    <span
+                        class="fobasWifiSSIDIcon"
+                        aria-hidden="true"
+                    >
+                        📶
+                    </span>
+
+                    <span>
+                        ${escapeHTML(
+                            network.ssid
+                        )}
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="
+                        fobasWifiCell
+                        fobasWifiBSSID
+                    "
+                >
+                    ${escapeHTML(
+                        network.bssid
+                    )}
+                </div>
+
+
+                <div
+                    class="fobasWifiCell"
+                >
+                    CH ${escapeHTML(
+                        network.channel
+                    )}
+                </div>
+
+
+                <div
+                    class="fobasWifiCell"
+                >
+                    ${escapeHTML(
+                        network.encryption
+                    )}
+                </div>
+
+
+                <div
+                    class="fobasWifiCell"
+                >
+                    ${renderSignal(
+                        network.signal
+                    )}
+                </div>
+
+
+                <div
+                    class="fobasWifiCell"
+                >
+
+                    <span
+                        class="
+                            fobasWifiSecurityBadge
+                            ${security.key}
+                        "
+                    >
+                        ${security.label}
+                    </span>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =====================================================
+       NETWORK TABLE
+    ====================================================== */
+
+    function renderNetworkTable() {
+
+        const networks =
+            engineState.networks;
+
+
+        if (
+            !engineState.scanCompleted ||
+            !networks.length
+        ) {
+
+            return `
+
+                <div
+                    class="fobasWifiEmptyState"
+                >
+
+                    <div
+                        class="fobasWifiEmptyIcon"
+                        aria-hidden="true"
+                    >
+                        📡
+                    </div>
+
+                    <strong>
+                        Wi-Fi Environment Ready
+                    </strong>
+
+                    <span>
+                        Launch a virtual scan to
+                        discover simulated wireless
+                        networks inside the FOBAS
+                        training environment.
+                    </span>
+
+                </div>
+
+            `;
+
+        }
+
+
+        const rows =
+            networks.map(
+                function (
+                    network
+                ) {
+
+                    return renderNetworkRow(
+                        network,
+                        network.id ===
+                        engineState.selectedNetworkId
+                    );
+
+                }
+            ).join("");
+
+
+        return `
+
+            <div
+                class="
+                    fobasWifiNetworkRow
+                    fobasWifiNetworkHeader
+                "
+                aria-hidden="true"
+            >
+
+                <div class="fobasWifiCell">
+                    SSID
+                </div>
+
+                <div class="fobasWifiCell">
+                    BSSID
+                </div>
+
+                <div class="fobasWifiCell">
+                    CHANNEL
+                </div>
+
+                <div class="fobasWifiCell">
+                    ENCRYPTION
+                </div>
+
+                <div class="fobasWifiCell">
+                    SIGNAL
+                </div>
+
+                <div class="fobasWifiCell">
+                    SECURITY
+                </div>
+
+            </div>
+
+
+            ${rows}
+
+        `;
+
+    }
+
+
+    /* =====================================================
+       MAIN WORKSPACE RENDERER
+    ====================================================== */
+
+    function renderWorkspace() {
+
+        const container =
+            document.getElementById(
+                "wifiLabContainer"
+            );
+
+
+        if (!container) {
+
+            return;
+
+        }
+
+
+        const wifiState =
+            ensureLabState();
+
+
+        const scanStatus =
+            engineState.scanning
+                ? "SCANNING"
+                : (
+                    engineState.scanCompleted
+                        ? "SCAN COMPLETE"
+                        : "READY"
+                );
+
+
+        const lastScan =
+            engineState.lastScanAt
+                ? new Date(
+                    engineState.lastScanAt
+                ).toLocaleTimeString()
+                : "—";
+
+
+        container.innerHTML = `
+
+            <div
+                class="fobasWifiWorkspace"
+                data-engine="wifi"
+                data-engine-version="${ENGINE_VERSION}"
+            >
+
+                <!-- =====================================
+                     TECHNICAL LAB TOPBAR
+                ====================================== -->
+
+                <div
+                    class="fobasWifiLabTopbar"
+                >
+
+                    <div
+                        class="fobasWifiLabIdentity"
+                    >
+
+                        <div
+                            class="fobasWifiLabIdentityIcon"
+                            aria-hidden="true"
+                        >
+                            📡
+                        </div>
+
+                        <div
+                            class="fobasWifiLabIdentityText"
+                        >
+
+                            <strong>
+                                Wi-Fi Security Laboratory
+                            </strong>
+
+                            <span>
+                                Virtual Wireless Analysis Environment
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            fobasWifiScanStatus
+                            ${
+                                engineState.scanning
+                                    ? "scanning"
+                                    : ""
+                            }
+                        "
+                    >
+
+                        <span
+                            class="fobasWifiScanDot"
+                            aria-hidden="true"
+                        ></span>
+
+                        <span>
+                            ${scanStatus}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================
+                     CONTROL BAR
+                ====================================== -->
+
+                <div
+                    class="fobasWifiControlBar"
+                >
+
+                    <div
+                        class="fobasWifiControlInfo"
+                    >
+
+                        Virtual environment
+                        · Last scan:
+                        ${escapeHTML(lastScan)}
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="fobasWifiScanNetworksBtn"
+                        class="fobasWifiScanButton"
+                        ${
+                            engineState.scanning
+                                ? "disabled"
+                                : ""
+                        }
+                    >
+
+                        ${
+                            engineState.scanning
+                                ? "SCANNING..."
+                                : "SCAN VIRTUAL NETWORKS"
+                        }
+
+                    </button>
+
+                </div>
+
+
+                <!-- =====================================
+                     NETWORK DISCOVERY PANEL
+                ====================================== -->
+
+                <section
+                    class="fobasWifiNetworkPanel"
+                    aria-label="Virtual Wi-Fi Networks"
+                >
+
+                    <div
+                        class="fobasWifiPanelHeader"
+                    >
+
+                        <span
+                            class="fobasWifiPanelTitle"
+                        >
+                            Discovered Networks
+                        </span>
+
+                        <span
+                            class="fobasWifiNetworkCount"
+                        >
+                            ${
+                                engineState.networks.length
+                            }
+                            NETWORKS
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="fobasWifiNetworkList"
+                        id="fobasWifiNetworkList"
+                    >
+
+                        ${renderNetworkTable()}
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        `;
+
+
+        bindWorkspaceEvents();
+
+
+        /*
+         * Keep Core state synchronized.
+         */
+
+        wifiState.initialized =
+            true;
+
+        wifiState.active =
+            true;
+
+        wifiState.progress =
+            engineState.scanCompleted
+                ? 25
+                : 0;
+
+    }
+
+
+    /* =====================================================
+       NETWORK SELECTION
+    ====================================================== */
+
+    function selectNetwork(
+        networkId
+    ) {
+
+        const network =
+            engineState.networks.find(
+                function (
+                    item
+                ) {
+
+                    return item.id ===
+                        networkId;
+
+                }
+            );
+
+
+        if (!network) {
+
+            return false;
+
+        }
+
+
+        engineState.selectedNetworkId =
+            networkId;
+
+
+        renderWorkspace();
+
+
+        console.log(
+            "[FOBAS Wi-Fi Lab] Selected virtual network:",
+            network.ssid
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       NETWORK ROW EVENTS
+    ====================================================== */
+
+    function bindNetworkSelection() {
+
+        const rows =
+            document.querySelectorAll(
+                "[data-wifi-network-id]"
+            );
+
+
+        rows.forEach(
+            function (
+                row
+            ) {
+
+                row.addEventListener(
+                    "click",
+                    function () {
+
+                        selectNetwork(
+                            row.dataset.wifiNetworkId
+                        );
+
+                    }
+                );
+
+
+                row.addEventListener(
+                    "keydown",
+                    function (
+                        event
+                    ) {
+
+                        if (
+                            event.key ===
+                            "Enter" ||
+                            event.key ===
+                            " "
+                        ) {
+
+                            event.preventDefault();
+
+                            selectNetwork(
+                                row.dataset.wifiNetworkId
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       SCAN SIMULATION
+    ====================================================== */
+
+    function startVirtualScan() {
+
+        if (
+            engineState.scanning
+        ) {
+
+            return false;
+
+        }
+
+
+        engineState.scanning =
+            true;
+
+        engineState.scanCompleted =
+            false;
+
+        engineState.networks =
+            [];
+
+        engineState.selectedNetworkId =
+            null;
+
+
+        renderWorkspace();
+
+
+        /*
+         * Simulated scanning delay.
+         * No real network API is used.
+         */
+
+        window.setTimeout(
+            function () {
+
+                engineState.networks =
+                    VIRTUAL_WIFI_NETWORKS.map(
+                        function (
+                            network
+                        ) {
+
+                            return {
+                                ...network
+                            };
+
+                        }
+                    );
+
+
+                engineState.scanning =
+                    false;
+
+                engineState.scanCompleted =
+                    true;
+
+                engineState.lastScanAt =
+                    new Date().toISOString();
+
+
+                const wifiState =
+                    ensureLabState();
+
+
+                wifiState.initialized =
+                    true;
+
+                wifiState.active =
+                    true;
+
+                wifiState.progress =
+                    25;
+
+
+                renderWorkspace();
+
+
+                if (
+                    FOBAS.ui &&
+                    typeof FOBAS.ui.notify ===
+                    "function"
+                ) {
+
+                    FOBAS.ui.notify(
+                        "Virtual Wi-Fi scan completed. Networks discovered.",
+                        "success"
+                    );
+
+                }
+
+
+                console.log(
+                    "[FOBAS Wi-Fi Lab] Virtual scan completed.",
+                    engineState.networks
+                );
+
+            },
+            1200
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       WORKSPACE EVENTS
+    ====================================================== */
+
+    function bindWorkspaceEvents() {
+
+        const scanButton =
+            document.getElementById(
+                "fobasWifiScanNetworksBtn"
+            );
+
+
+        if (scanButton) {
+
+            scanButton.addEventListener(
+                "click",
+                function () {
+
+                    startVirtualScan();
+
+                }
+            );
+
+        }
+
+
+        bindNetworkSelection();
+
+    }
+
+
+    /* =====================================================
+       PATCH CORE LAB RENDERER
+       
+       We preserve the original renderer for
+       Camera Espion and Camera Surveillance.
+    ====================================================== */
+
+    function integrateWithCore() {
+
+        if (
+            !FOBAS.labs ||
+            typeof FOBAS.labs.renderLab !==
+            "function"
+        ) {
+
+            console.error(
+                "[FOBAS Wi-Fi Lab] Core Lab Renderer unavailable."
+            );
+
+            return false;
+
+        }
+
+
+        const originalRenderLab =
+            FOBAS.labs.renderLab;
+
+
+        if (
+            FOBAS.labs.__wifiEngineIntegrated
+        ) {
+
+            return true;
+
+        }
+
+
+        FOBAS.labs.renderLab =
+            function (
+                labId
+            ) {
+
+                if (
+                    labId ===
+                    LAB_ID
+                ) {
+
+                    renderWorkspace();
+
+                    return;
+
+                }
+
+
+                /*
+                 * All non-Wi-Fi laboratories
+                 * continue using the original
+                 * FOBAS Core renderer.
+                 */
+
+                return originalRenderLab.call(
+                    FOBAS.labs,
+                    labId
+                );
+
+            };
+
+
+        FOBAS.labs.__wifiEngineIntegrated =
+            true;
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       PUBLIC WI-FI ENGINE API
+    ====================================================== */
+
+    const WiFiLabEngine = {
+
+        version:
+            ENGINE_VERSION,
+
+        id:
+            LAB_ID,
+
+        state:
+            engineState,
+
+        networks:
+            VIRTUAL_WIFI_NETWORKS,
+
+        initialize:
+            function () {
+
+                injectStyles();
+
+                ensureLabState();
+
+                integrateWithCore();
+
+                engineState.initialized =
+                    true;
+
+                return true;
+
+            },
+
+        render:
+            function () {
+
+                renderWorkspace();
+
+            },
+
+        scan:
+            function () {
+
+                return startVirtualScan();
+
+            },
+
+        selectNetwork:
+            function (
+                networkId
+            ) {
+
+                return selectNetwork(
+                    networkId
+                );
+
+            },
+
+        getSelectedNetwork:
+            function () {
+
+                if (
+                    !engineState.selectedNetworkId
+                ) {
+
+                    return null;
+
+                }
+
+                return (
+                    engineState.networks.find(
+                        function (
+                            network
+                        ) {
+
+                            return network.id ===
+                                engineState.selectedNetworkId;
+
+                        }
+                    ) ||
+                    null
+                );
+
+            },
+
+        getNetworks:
+            function () {
+
+                return engineState.networks.map(
+                    function (
+                        network
+                    ) {
+
+                        return {
+                            ...network
+                        };
+
+                    }
+                );
+
+            },
+
+        getSecurityStatus:
+            function (
+                network
+            ) {
+
+                return getSecurityStatus(
+                    network
+                );
+
+            },
+
+        getSignalQuality:
+            function (
+                signal
+            ) {
+
+                return getSignalQuality(
+                    signal
+                );
+
+            }
+
+    };
+
+
+    /* =====================================================
+       REGISTER GLOBAL ENGINE
+    ====================================================== */
+
+    FOBAS.wifi =
+        WiFiLabEngine;
+
+
+    window.FOBASWiFiLabEngine =
+        WiFiLabEngine;
+
+
+    /* =====================================================
+       INITIALIZE ENGINE
+    ====================================================== */
+
+    function initializeWiFiLabEngine() {
+
+        if (
+            !WiFiLabEngine.initialize()
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * If the user is already inside the
+         * Wi-Fi laboratory when this block loads,
+         * render immediately.
+         */
+
+        const state =
+            FOBAS.state.getState();
+
+
+        if (
+            state.currentLab ===
+            LAB_ID
+        ) {
+
+            renderWorkspace();
+
+        }
+
+
+        console.log(
+            "FOBAS Wi-Fi Lab Engine initialized.",
+            ENGINE_VERSION
+        );
+
+    }
+
+
+    /* =====================================================
+       SAFE INITIALIZATION
+    ====================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeWiFiLabEngine,
+            {
+                once:true
+            }
+        );
+
+    } else {
+
+        initializeWiFiLabEngine();
+
+    }
+
+
+})();
