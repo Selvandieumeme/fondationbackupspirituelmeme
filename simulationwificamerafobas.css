@@ -2386,3 +2386,46 @@ button {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#fobasWifiPracticalPanel .fobasWifiStep {
+    appearance:none;
+    -webkit-appearance:none;
+    width:100%;
+    font-family:inherit;
+    cursor:pointer;
+    touch-action:manipulation;
+}
+
+#fobasWifiPracticalPanel .fobasWifiStep:hover {
+    transform:translateY(-1px);
+    border-color:rgba(76,201,240,0.45);
+    background:rgba(76,201,240,0.08);
+}
+
+#fobasWifiPracticalPanel .fobasWifiStep.active {
+    border-color:rgba(76,201,240,0.65);
+    background:rgba(76,201,240,0.12);
+    color:#4cc9f0;
+}
+
+#fobasWifiPracticalPanel .fobasWifiStep.completed {
+    border-color:rgba(80,220,150,0.45);
+    background:rgba(80,220,150,0.08);
+    color:#7ff0b0;
+}
