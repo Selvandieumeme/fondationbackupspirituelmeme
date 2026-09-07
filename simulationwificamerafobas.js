@@ -16809,22 +16809,30 @@
 
 
 
+
+
+
+
+
+
+
 /* =========================================================
    FOBAS ETHICAL HACKING SIMULATION
    WI-FI PRACTICAL ANALYSIS DISPLAY BRIDGE
-   ACTION: wifi.analyze_target → UI DISPLAY
-   VERSION 1.0.0
+   COMPATIBLE WITH:
+   - FOBAS WIFI PRACTICAL SELECTION PANEL v1.0.0
+   - wifi.analyze_target v1.0.0
+
+   VERSION: 1.0.1
 
    PURPOSE:
-   - Connects the practical ANALYZE TARGET button
-     to the existing Wi-Fi Target Analysis Engine.
-   - Displays the virtual analysis result inside
-     the practical Wi-Fi panel.
-   - Uses the existing Cyber Action Bridge event.
-   - Does NOT replace any existing engine.
-   - Does NOT modify wifi.select_target.
-   - Does NOT modify wifi.analyze_target.
-   - Does NOT perform any real Wi-Fi operation.
+   - Uses the REAL ANALYZE TARGET button ID.
+   - Does NOT replace the practical panel.
+   - Does NOT replace wifi.analyze_target.
+   - Displays the virtual analysis result after
+     wifi.analyze_target succeeds.
+   - Uses the existing FOBAS:WiFiTargetAnalyzed event.
+   - 100% virtual.
 ========================================================= */
 
 (function () {
@@ -16839,44 +16847,20 @@
     const PANEL_ID =
         "fobasWifiPracticalPanel";
 
+    /*
+     * IMPORTANT:
+     * This is the REAL ID used by the existing
+     * FOBAS Wi-Fi Practical Selection Panel.
+     */
     const ANALYZE_BUTTON_ID =
-        "fobasWifiPracticalAnalyzeButton";
+        "fobasWifiAnalyzeButton";
 
     const REPORT_ID =
         "fobasWifiPracticalAnalysisReport";
 
-    const ANALYSIS_ENGINE =
-        "FOBASWiFiTargetAnalysis";
-
 
     /* =====================================================
-       DEPENDENCY VALIDATION
-    ===================================================== */
-
-    function getAnalysisEngine() {
-
-        return window[
-            ANALYSIS_ENGINE
-        ] || null;
-
-    }
-
-
-    /* =====================================================
-       FIND PRACTICAL PANEL
-    ===================================================== */
-
-    function getPanel() {
-
-        return document.getElementById(
-            PANEL_ID
-        );
-
-    }
-
-
-    /* =====================================================
-       ESCAPE HTML
+       HTML ESCAPE
     ===================================================== */
 
     function escapeHTML(value) {
@@ -16912,24 +16896,90 @@
 
 
     /* =====================================================
+       GET PRACTICAL PANEL
+    ===================================================== */
+
+    function getPanel() {
+
+        return document.getElementById(
+            PANEL_ID
+        );
+
+    }
+
+
+    /* =====================================================
+       GET ANALYSIS ENGINE
+    ===================================================== */
+
+    function getAnalysisEngine() {
+
+        return window.FOBASWiFiTargetAnalysis || null;
+
+    }
+
+
+    /* =====================================================
        SECURITY LEVEL LABEL
     ===================================================== */
 
-    function securityLevelLabel(
+    function getSecurityLevelLabel(
         level
     ) {
 
         const normalized =
             String(
                 level || ""
-            ).toLowerCase();
+            )
+            .toLowerCase();
+
+
+        switch (normalized) {
+
+            case "élevé":
+
+                return "Risque élevé";
+
+
+            case "moyen":
+
+                return "Risque moyen";
+
+
+            case "faible":
+
+                return "Risque faible";
+
+
+            default:
+
+                return "Risque indéterminé";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SECURITY LEVEL CLASS
+    ===================================================== */
+
+    function getSecurityLevelClass(
+        level
+    ) {
+
+        const normalized =
+            String(
+                level || ""
+            )
+            .toLowerCase();
 
 
         if (
             normalized === "élevé"
         ) {
 
-            return "Risque élevé";
+            return "high";
 
         }
 
@@ -16938,7 +16988,7 @@
             normalized === "moyen"
         ) {
 
-            return "Risque moyen";
+            return "medium";
 
         }
 
@@ -16947,18 +16997,434 @@
             normalized === "faible"
         ) {
 
-            return "Risque faible";
+            return "low";
 
         }
 
 
-        return "Risque indéterminé";
+        return "unknown";
 
     }
 
 
     /* =====================================================
-       DISPLAY ANALYSIS REPORT
+       INSTALL REPORT STYLES
+    ===================================================== */
+
+    function installReportStyles() {
+
+        const styleId =
+            "fobasWifiAnalysisReportStyle";
+
+
+        if (
+            document.getElementById(
+                styleId
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            styleId;
+
+
+        style.textContent = `
+
+            #${REPORT_ID} {
+
+                width:100%;
+
+                margin-top:18px;
+
+                box-sizing:border-box;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisBox {
+
+                padding:20px;
+
+                border:1px solid
+                    rgba(76,201,240,0.24);
+
+                border-radius:16px;
+
+                background:
+                    linear-gradient(
+                        145deg,
+                        rgba(8,20,34,0.98),
+                        rgba(5,12,23,0.98)
+                    );
+
+                box-sizing:border-box;
+
+                animation:
+                    fobasAnalysisIn
+                    260ms
+                    ease
+                    both;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisEyebrow {
+
+                margin-bottom:6px;
+
+                color:#4cc9f0;
+
+                font-size:10px;
+
+                font-weight:900;
+
+                letter-spacing:1.5px;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisTitle {
+
+                margin:0;
+
+                color:#ffffff;
+
+                font-size:19px;
+
+                font-weight:900;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisSubtitle {
+
+                margin:7px 0 18px;
+
+                color:#91a9bc;
+
+                font-size:12px;
+
+                line-height:1.6;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisGrid {
+
+                display:grid;
+
+                grid-template-columns:
+                    repeat(
+                        4,
+                        minmax(0,1fr)
+                    );
+
+                gap:10px;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisItem {
+
+                min-width:0;
+
+                padding:12px;
+
+                border:1px solid
+                    rgba(255,255,255,0.07);
+
+                border-radius:11px;
+
+                background:
+                    rgba(255,255,255,0.025);
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisLabel {
+
+                display:block;
+
+                margin-bottom:5px;
+
+                color:#71899c;
+
+                font-size:9px;
+
+                font-weight:800;
+
+                letter-spacing:1px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasAnalysisValue {
+
+                display:block;
+
+                overflow:hidden;
+
+                color:#f4fbff;
+
+                font-size:12px;
+
+                font-weight:800;
+
+                text-overflow:ellipsis;
+
+                white-space:nowrap;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasRisk {
+
+                margin-top:16px;
+
+                padding:15px;
+
+                border-radius:12px;
+
+                background:
+                    rgba(255,255,255,0.035);
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasRiskLabel {
+
+                color:#71899c;
+
+                font-size:9px;
+
+                font-weight:900;
+
+                letter-spacing:1px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasRiskValue {
+
+                margin-top:5px;
+
+                font-size:17px;
+
+                font-weight:900;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasRiskValue.high {
+
+                color:#ff7b7b;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasRiskValue.medium {
+
+                color:#ffd166;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasRiskValue.low {
+
+                color:#72e6a8;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasRiskValue.unknown {
+
+                color:#a8b6c2;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasFindingsTitle {
+
+                margin-top:18px;
+
+                margin-bottom:9px;
+
+                color:#ffffff;
+
+                font-size:11px;
+
+                font-weight:900;
+
+                letter-spacing:1px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasFinding {
+
+                margin-top:9px;
+
+                padding:13px;
+
+                border:1px solid
+                    rgba(255,255,255,0.07);
+
+                border-radius:11px;
+
+                background:
+                    rgba(255,255,255,0.025);
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasFindingTitle {
+
+                color:#ffffff;
+
+                font-size:12px;
+
+                font-weight:900;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasFindingDescription {
+
+                margin-top:5px;
+
+                color:#91a9bc;
+
+                font-size:11px;
+
+                line-height:1.6;
+
+            }
+
+
+            #${REPORT_ID}
+            .fobasVirtualNotice {
+
+                margin-top:15px;
+
+                padding:11px 13px;
+
+                border-radius:10px;
+
+                background:
+                    rgba(76,201,240,0.045);
+
+                color:#91a9bc;
+
+                font-size:10px;
+
+                line-height:1.6;
+
+            }
+
+
+            @keyframes fobasAnalysisIn {
+
+                from {
+
+                    opacity:0;
+
+                    transform:
+                        translateY(8px);
+
+                }
+
+                to {
+
+                    opacity:1;
+
+                    transform:
+                        translateY(0);
+
+                }
+
+            }
+
+
+            @media (max-width:900px) {
+
+                #${REPORT_ID}
+                .fobasAnalysisGrid {
+
+                    grid-template-columns:
+                        repeat(2,minmax(0,1fr));
+
+                }
+
+            }
+
+
+            @media (max-width:560px) {
+
+                #${REPORT_ID}
+                .fobasAnalysisBox {
+
+                    padding:15px;
+
+                }
+
+
+                #${REPORT_ID}
+                .fobasAnalysisGrid {
+
+                    grid-template-columns:
+                        1fr 1fr;
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+
+    /* =====================================================
+       DISPLAY ANALYSIS
     ===================================================== */
 
     function displayAnalysis(
@@ -16993,6 +17459,9 @@
             return false;
 
         }
+
+
+        installReportStyles();
 
 
         let reportContainer =
@@ -17039,29 +17508,23 @@
                         function (finding) {
 
                             return `
-                                <div style="
-                                    padding:14px;
-                                    margin-top:10px;
-                                    border:1px solid rgba(255,255,255,.08);
-                                    border-radius:12px;
-                                    background:rgba(255,255,255,.03);
-                                ">
 
-                                    <div style="
-                                        font-weight:800;
-                                        margin-bottom:6px;
-                                    ">
+                                <div
+                                    class="fobasFinding"
+                                >
+
+                                    <div
+                                        class="fobasFindingTitle"
+                                    >
                                         ${escapeHTML(
                                             finding.title ||
                                             "Observation de sécurité"
                                         )}
                                     </div>
 
-                                    <div style="
-                                        font-size:13px;
-                                        line-height:1.6;
-                                        opacity:.86;
-                                    ">
+                                    <div
+                                        class="fobasFindingDescription"
+                                    >
                                         ${escapeHTML(
                                             finding.description ||
                                             ""
@@ -17069,6 +17532,7 @@
                                     </div>
 
                                 </div>
+
                             `;
 
                         }
@@ -17078,180 +17542,252 @@
         } else {
 
             findingsHTML = `
-                <div style="
-                    padding:14px;
-                    margin-top:10px;
-                    border-radius:12px;
-                    background:rgba(255,255,255,.03);
-                    font-size:13px;
-                ">
-                    Aucune observation supplémentaire n'a été générée.
+
+                <div
+                    class="fobasFinding"
+                >
+
+                    <div
+                        class="fobasFindingTitle"
+                    >
+                        Aucune observation supplémentaire
+                    </div>
+
+                    <div
+                        class="fobasFindingDescription"
+                    >
+                        L'analyse virtuelle n'a généré
+                        aucune observation supplémentaire.
+                    </div>
+
                 </div>
+
             `;
 
         }
 
 
+        const securityLevel =
+            getSecurityLevelLabel(
+                report.securityLevel
+            );
+
+
+        const securityClass =
+            getSecurityLevelClass(
+                report.securityLevel
+            );
+
+
         reportContainer.innerHTML = `
 
-            <div style="
-                margin-top:20px;
-                padding:18px;
-                border-radius:16px;
-                border:1px solid rgba(80,180,255,.25);
-                background:linear-gradient(
-                    135deg,
-                    rgba(20,35,60,.96),
-                    rgba(8,16,30,.96)
-                );
-            ">
+            <div
+                class="fobasAnalysisBox"
+            >
 
-                <div style="
-                    font-size:11px;
-                    letter-spacing:1.5px;
-                    font-weight:800;
-                    opacity:.7;
-                    margin-bottom:7px;
-                ">
-                    RÉSULTAT DE L'ANALYSE VIRTUELLE
+                <div
+                    class="fobasAnalysisEyebrow"
+                >
+                    ÉTAPE 2 · ANALYSE
                 </div>
 
-                <div style="
-                    font-size:20px;
-                    font-weight:900;
-                    margin-bottom:16px;
-                ">
+
+                <h4
+                    class="fobasAnalysisTitle"
+                >
                     Analyse de sécurité terminée
-                </div>
+                </h4>
 
 
-                <div style="
-                    display:grid;
-                    grid-template-columns:
-                        repeat(
-                            auto-fit,
-                            minmax(150px,1fr)
-                        );
-                    gap:10px;
-                ">
+                <p
+                    class="fobasAnalysisSubtitle"
+                >
+                    La cible Wi-Fi virtuelle a été analysée
+                    avec succès. Les résultats ci-dessous
+                    proviennent exclusivement du moteur
+                    de simulation.
+                </p>
 
-                    <div style="
-                        padding:12px;
-                        border-radius:11px;
-                        background:rgba(255,255,255,.04);
-                    ">
-                        <div style="
-                            font-size:10px;
-                            opacity:.6;
-                            margin-bottom:5px;
-                        ">
+
+                <div
+                    class="fobasAnalysisGrid"
+                >
+
+                    <div
+                        class="fobasAnalysisItem"
+                    >
+
+                        <span
+                            class="fobasAnalysisLabel"
+                        >
                             SSID
-                        </div>
+                        </span>
 
-                        <strong>
+                        <span
+                            class="fobasAnalysisValue"
+                            title="${escapeHTML(
+                                report.SSID
+                            )}"
+                        >
                             ${escapeHTML(
                                 report.SSID
                             )}
-                        </strong>
+                        </span>
+
                     </div>
 
 
-                    <div style="
-                        padding:12px;
-                        border-radius:11px;
-                        background:rgba(255,255,255,.04);
-                    ">
-                        <div style="
-                            font-size:10px;
-                            opacity:.6;
-                            margin-bottom:5px;
-                        ">
-                            CHIFFREMENT
-                        </div>
+                    <div
+                        class="fobasAnalysisItem"
+                    >
 
-                        <strong>
+                        <span
+                            class="fobasAnalysisLabel"
+                        >
+                            Chiffrement
+                        </span>
+
+                        <span
+                            class="fobasAnalysisValue"
+                        >
                             ${escapeHTML(
                                 report.encryption
                             )}
-                        </strong>
+                        </span>
+
                     </div>
 
 
-                    <div style="
-                        padding:12px;
-                        border-radius:11px;
-                        background:rgba(255,255,255,.04);
-                    ">
-                        <div style="
-                            font-size:10px;
-                            opacity:.6;
-                            margin-bottom:5px;
-                        ">
-                            NIVEAU DE RISQUE
-                        </div>
+                    <div
+                        class="fobasAnalysisItem"
+                    >
 
-                        <strong>
+                        <span
+                            class="fobasAnalysisLabel"
+                        >
+                            Canal
+                        </span>
+
+                        <span
+                            class="fobasAnalysisValue"
+                        >
                             ${escapeHTML(
-                                securityLevelLabel(
-                                    report.securityLevel
-                                )
+                                report.channel
                             )}
-                        </strong>
+                        </span>
+
                     </div>
 
 
-                    <div style="
-                        padding:12px;
-                        border-radius:11px;
-                        background:rgba(255,255,255,.04);
-                    ">
-                        <div style="
-                            font-size:10px;
-                            opacity:.6;
-                            margin-bottom:5px;
-                        ">
-                            QUALITÉ DU SIGNAL
-                        </div>
+                    <div
+                        class="fobasAnalysisItem"
+                    >
 
-                        <strong>
+                        <span
+                            class="fobasAnalysisLabel"
+                        >
+                            Signal
+                        </span>
+
+                        <span
+                            class="fobasAnalysisValue"
+                        >
                             ${escapeHTML(
-                                report.signalQuality
+                                report.signal
                             )}
-                        </strong>
+                            dBm
+                        </span>
+
                     </div>
 
                 </div>
 
 
-                <div style="
-                    margin-top:18px;
-                    font-size:13px;
-                    font-weight:800;
-                ">
+                <div
+                    class="fobasRisk"
+                >
+
+                    <div
+                        class="fobasRiskLabel"
+                    >
+                        Niveau de sécurité
+                    </div>
+
+                    <div
+                        class="fobasRiskValue ${securityClass}"
+                    >
+                        ${escapeHTML(
+                            securityLevel
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="fobasFindingsTitle"
+                >
                     Observations de sécurité
                 </div>
+
 
                 ${findingsHTML}
 
 
-                <div style="
-                    margin-top:16px;
-                    padding:12px;
-                    border-radius:10px;
-                    background:rgba(255,255,255,.025);
-                    font-size:12px;
-                    line-height:1.6;
-                    opacity:.78;
-                ">
-                    Cette analyse est entièrement virtuelle.
-                    Aucune opération Wi-Fi réelle,
-                    capture de paquets ou tentative
-                    d'authentification n'a été effectuée.
+                <div
+                    class="fobasVirtualNotice"
+                >
+                    Analyse 100 % virtuelle :
+                    aucune connexion réelle,
+                    aucune capture de paquets et
+                    aucune tentative d'authentification
+                    n'ont été effectuées.
                 </div>
 
             </div>
 
         `;
+
+
+        /*
+         * Update the action text of the existing
+         * practical panel.
+         */
+
+        const actionText =
+            panel.querySelector(
+                ".fobasWifiActionText"
+            );
+
+
+        if (actionText) {
+
+            actionText.textContent =
+                "Analyse terminée. La cible peut maintenant passer à l'étape d'évaluation de sécurité.";
+
+        }
+
+
+        /*
+         * Update the existing button without
+         * creating another button.
+         */
+
+        const analyzeButton =
+            document.getElementById(
+                ANALYZE_BUTTON_ID
+            );
+
+
+        if (analyzeButton) {
+
+            analyzeButton.textContent =
+                "ANALYSIS COMPLETED";
+
+            analyzeButton.dataset.analysisCompleted =
+                "true";
+
+        }
 
 
         return true;
@@ -17260,144 +17796,17 @@
 
 
     /* =====================================================
-       ANALYZE TARGET
-    ===================================================== */
-
-    function executeAnalysis() {
-
-        const engine =
-            getAnalysisEngine();
-
-
-        if (
-            !engine ||
-            typeof engine.analyzeSelectedTarget !==
-                "function"
-        ) {
-
-            console.error(
-                "[FOBAS Wi-Fi Analysis UI] " +
-                "Moteur wifi.analyze_target indisponible."
-            );
-
-            return null;
-
-        }
-
-
-        const result =
-            engine.analyzeSelectedTarget();
-
-
-        if (!result) {
-
-            console.warn(
-                "[FOBAS Wi-Fi Analysis UI] " +
-                "Aucune cible Wi-Fi virtuelle sélectionnée."
-            );
-
-            return null;
-
-        }
-
-
-        displayAnalysis(
-            result
-        );
-
-
-        return result;
-
-    }
-
-
-    /* =====================================================
-       BUTTON HANDLER
-    ===================================================== */
-
-    function handleClick(
-        event
-    ) {
-
-        const button =
-            event.target.closest(
-                "#" +
-                ANALYZE_BUTTON_ID
-            );
-
-
-        if (!button) {
-
-            return;
-
-        }
-
-
-        event.preventDefault();
-        event.stopPropagation();
-
-
-        if (
-            button.dataset.analysisRunning ===
-            "true"
-        ) {
-
-            return;
-
-        }
-
-
-        button.dataset.analysisRunning =
-            "true";
-
-
-        const originalText =
-            button.textContent;
-
-
-        button.textContent =
-            "Analyse en cours...";
-
-
-        const result =
-            executeAnalysis();
-
-
-        if (result) {
-
-            button.textContent =
-                "Analyse terminée";
-
-        } else {
-
-            button.textContent =
-                originalText;
-
-        }
-
-
-        setTimeout(
-            function () {
-
-                button.dataset.analysisRunning =
-                    "false";
-
-            },
-            400
-        );
-
-    }
-
-
-    /* =====================================================
-       EVENT BRIDGE
+       LISTEN TO THE EXISTING ANALYSIS EVENT
     ===================================================== */
 
     function handleAnalysisEvent(
         event
     ) {
 
-        if (!event || !event.detail) {
+        if (
+            !event ||
+            !event.detail
+        ) {
 
             return;
 
@@ -17407,6 +17816,12 @@
         const detail =
             event.detail;
 
+
+        /*
+         * Accept ONLY the official action
+         * and result state produced by
+         * wifi.analyze_target.
+         */
 
         if (
             detail.actionId !==
@@ -17441,13 +17856,6 @@
 
     function initialize() {
 
-        document.addEventListener(
-            "click",
-            handleClick,
-            true
-        );
-
-
         window.addEventListener(
             "FOBAS:WiFiTargetAnalyzed",
             handleAnalysisEvent
@@ -17456,7 +17864,9 @@
 
         console.log(
             "[FOBAS Wi-Fi Analysis UI] " +
-            "Practical Analysis Display Bridge initialized successfully."
+            "Compatible analysis display bridge initialized. " +
+            "Button ID: " +
+            ANALYZE_BUTTON_ID
         );
 
     }
@@ -17469,10 +17879,7 @@
     window.FOBASWiFiPracticalAnalysisDisplay = {
 
         version:
-            "1.0.0",
-
-        analyze:
-            executeAnalysis,
+            "1.0.1",
 
         display:
             displayAnalysis
@@ -17481,7 +17888,7 @@
 
 
     /* =====================================================
-       START
+       SAFE START
     ===================================================== */
 
     if (
@@ -17493,8 +17900,7 @@
             "DOMContentLoaded",
             initialize,
             {
-                once:
-                    true
+                once:true
             }
         );
 
@@ -17505,4 +17911,3 @@
     }
 
 })();
-
