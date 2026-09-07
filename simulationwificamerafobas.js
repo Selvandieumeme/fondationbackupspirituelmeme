@@ -14987,10 +14987,1806 @@
 
 
 
+/* =========================================================
+   FOBAS WIFI PRACTICAL SELECTION PANEL
+   SAFE UI ADD-ON v1.0.0
+
+   OBJECTIVE:
+   - Does NOT replace the Wi-Fi renderer.
+   - Does NOT modify the Core Engine.
+   - Does NOT modify existing Wi-Fi scan logic.
+   - Does NOT create a second Wi-Fi simulation.
+   - Displays the practical panel only after a
+     virtual Wi-Fi network is selected.
+
+   IMPORTANT:
+   - 100% virtual simulation.
+   - No real Wi-Fi operation.
+========================================================= */
+
+(function () {
+
+    "use strict";
 
 
+    /* =====================================================
+       CONFIGURATION
+    ====================================================== */
+
+    const CONTAINER_ID =
+        "wifiLabContainer";
+
+    const PANEL_ID =
+        "fobasWifiPracticalPanel";
+
+    const STYLE_ID =
+        "fobasWifiPracticalPanelStyle";
 
 
+    /* =====================================================
+       INTERNAL STATE
+    ====================================================== */
+
+    let selectedNetwork =
+        null;
+
+
+    /* =====================================================
+       GET WIFI CONTAINER
+    ====================================================== */
+
+    function getWiFiContainer() {
+
+        return document.getElementById(
+            CONTAINER_ID
+        );
+
+    }
+
+
+    /* =====================================================
+       GET WIFI NETWORK DATA
+       Uses the existing virtual Wi-Fi data whenever
+       available.
+    ====================================================== */
+
+    function getAvailableNetworks() {
+
+        try {
+
+            if (
+                window.FOBASCybersecuritySimulation &&
+                window.FOBASCybersecuritySimulation.wifi &&
+                Array.isArray(
+                    window.FOBASCybersecuritySimulation.wifi.networks
+                )
+            ) {
+
+                return (
+                    window.FOBASCybersecuritySimulation.wifi.networks
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS Wi-Fi Panel] Unable to read Core Wi-Fi networks.",
+                error
+            );
+
+        }
+
+
+        try {
+
+            if (
+                window.FOBAS &&
+                window.FOBAS.wifi &&
+                Array.isArray(
+                    window.FOBAS.wifi.networks
+                )
+            ) {
+
+                return (
+                    window.FOBAS.wifi.networks
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS Wi-Fi Panel] Unable to read FOBAS Wi-Fi networks.",
+                error
+            );
+
+        }
+
+
+        return [];
+
+    }
+
+
+    /* =====================================================
+       NORMALIZE TEXT
+    ====================================================== */
+
+    function normalizeText(value) {
+
+        return String(
+            value || ""
+        )
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+
+    }
+
+
+    /* =====================================================
+       FIND NETWORK FROM CLICKED ELEMENT
+    ====================================================== */
+
+    function findNetworkFromElement(
+        element
+    ) {
+
+        const networks =
+            getAvailableNetworks();
+
+
+        if (
+            !networks.length ||
+            !element
+        ) {
+
+            return null;
+
+        }
+
+
+        /*
+         * First try explicit data attributes.
+         */
+
+        let current =
+            element;
+
+
+        for (
+            let depth = 0;
+            current &&
+            depth < 8;
+            depth += 1
+        ) {
+
+            const networkId =
+                current.dataset
+                    ? (
+                        current.dataset.networkId ||
+                        current.dataset.targetId
+                    )
+                    : null;
+
+
+            if (networkId) {
+
+                const found =
+                    networks.find(
+                        function (network) {
+
+                            return (
+                                String(
+                                    network.id ||
+                                    network.networkId ||
+                                    network.targetId
+                                ) ===
+                                String(networkId)
+                            );
+
+                        }
+                    );
+
+
+                if (found) {
+
+                    return found;
+
+                }
+
+            }
+
+
+            current =
+                current.parentElement;
+
+        }
+
+
+        /*
+         * Second method:
+         * Match the SSID contained in the clicked
+         * network element.
+         */
+
+        current =
+            element;
+
+
+        for (
+            let depth = 0;
+            current &&
+            depth < 8;
+            depth += 1
+        ) {
+
+            const text =
+                normalizeText(
+                    current.textContent
+                );
+
+
+            if (text) {
+
+                const found =
+                    networks.find(
+                        function (network) {
+
+                            const ssid =
+                                normalizeText(
+                                    network.ssid ||
+                                    network.SSID ||
+                                    network.name
+                                );
+
+
+                            if (!ssid) {
+
+                                return false;
+
+                            }
+
+
+                            return text.includes(
+                                ssid
+                            );
+
+                        }
+                    );
+
+
+                if (found) {
+
+                    return found;
+
+                }
+
+            }
+
+
+            current =
+                current.parentElement;
+
+        }
+
+
+        /*
+         * Third method:
+         * If the existing renderer uses a table,
+         * compare the clicked row with the known
+         * SSIDs.
+         */
+
+        const row =
+            element.closest
+                ? element.closest("tr")
+                : null;
+
+
+        if (row) {
+
+            const rowText =
+                normalizeText(
+                    row.textContent
+                );
+
+
+            const found =
+                networks.find(
+                    function (network) {
+
+                        const ssid =
+                            normalizeText(
+                                network.ssid ||
+                                network.SSID ||
+                                network.name
+                            );
+
+
+                        return (
+                            ssid &&
+                            rowText.includes(ssid)
+                        );
+
+                    }
+                );
+
+
+            if (found) {
+
+                return found;
+
+            }
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* =====================================================
+       NORMALIZE NETWORK OBJECT
+    ====================================================== */
+
+    function normalizeNetwork(
+        network
+    ) {
+
+        if (!network) {
+
+            return null;
+
+        }
+
+
+        return {
+
+            id:
+                network.id ||
+                network.networkId ||
+                network.targetId ||
+                null,
+
+            targetId:
+                network.targetId ||
+                network.id ||
+                network.networkId ||
+                null,
+
+            ssid:
+                network.ssid ||
+                network.SSID ||
+                network.name ||
+                "Réseau Wi-Fi virtuel",
+
+            bssid:
+                network.bssid ||
+                network.BSSID ||
+                "—",
+
+            channel:
+                network.channel ||
+                network.channelNumber ||
+                network.chan ||
+                "—",
+
+            encryption:
+                network.encryption ||
+                network.security ||
+                network.securityType ||
+                "—",
+
+            signal:
+                network.signal ||
+                network.signalStrength ||
+                network.rssi ||
+                "—"
+
+        };
+
+    }
+
+
+    /* =====================================================
+       CREATE STYLE
+    ====================================================== */
+
+    function installStyles() {
+
+        if (
+            document.getElementById(
+                STYLE_ID
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            STYLE_ID;
+
+
+        style.textContent = `
+
+            #${PANEL_ID} {
+
+                width:100%;
+
+                margin:28px 0 0;
+
+                padding:0;
+
+                box-sizing:border-box;
+
+                animation:
+                    fobasWifiPanelIn
+                    240ms
+                    ease
+                    both;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiPanelShell {
+
+                width:100%;
+
+                box-sizing:border-box;
+
+                padding:22px;
+
+                border:1px solid
+                    rgba(76,201,240,0.25);
+
+                border-radius:18px;
+
+                background:
+                    linear-gradient(
+                        145deg,
+                        rgba(8,20,34,0.98),
+                        rgba(5,12,23,0.98)
+                    );
+
+                box-shadow:
+                    0 20px 50px
+                    rgba(0,0,0,0.35),
+
+                    inset 0 1px 0
+                    rgba(255,255,255,0.04);
+
+                color:#eaf8ff;
+
+                box-sizing:border-box;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiPanelHeader {
+
+                display:flex;
+
+                align-items:flex-start;
+
+                justify-content:space-between;
+
+                gap:18px;
+
+                margin-bottom:20px;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiPanelEyebrow {
+
+                display:block;
+
+                margin-bottom:7px;
+
+                color:#4cc9f0;
+
+                font-size:10px;
+
+                font-weight:900;
+
+                letter-spacing:1.8px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiPanelTitle {
+
+                margin:0;
+
+                color:#ffffff;
+
+                font-size:20px;
+
+                line-height:1.25;
+
+                font-weight:900;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiPanelSubtitle {
+
+                margin:7px 0 0;
+
+                color:#91a9bc;
+
+                font-size:12px;
+
+                line-height:1.6;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiTargetBadge {
+
+                flex:0 0 auto;
+
+                padding:7px 10px;
+
+                border:1px solid
+                    rgba(76,201,240,0.28);
+
+                border-radius:999px;
+
+                background:
+                    rgba(76,201,240,0.08);
+
+                color:#4cc9f0;
+
+                font-size:9px;
+
+                font-weight:900;
+
+                letter-spacing:1px;
+
+                white-space:nowrap;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiTargetGrid {
+
+                display:grid;
+
+                grid-template-columns:
+                    repeat(5, minmax(0, 1fr));
+
+                gap:10px;
+
+                margin-bottom:20px;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiTargetItem {
+
+                min-width:0;
+
+                padding:13px;
+
+                border:1px solid
+                    rgba(255,255,255,0.07);
+
+                border-radius:12px;
+
+                background:
+                    rgba(255,255,255,0.025);
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiTargetLabel {
+
+                display:block;
+
+                margin-bottom:6px;
+
+                color:#71899c;
+
+                font-size:9px;
+
+                font-weight:800;
+
+                letter-spacing:1px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiTargetValue {
+
+                display:block;
+
+                overflow:hidden;
+
+                color:#f4fbff;
+
+                font-size:12px;
+
+                font-weight:800;
+
+                text-overflow:ellipsis;
+
+                white-space:nowrap;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiMission {
+
+                padding:17px;
+
+                border:1px solid
+                    rgba(76,201,240,0.14);
+
+                border-radius:14px;
+
+                background:
+                    rgba(76,201,240,0.035);
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiMissionTitle {
+
+                margin:0 0 13px;
+
+                color:#ffffff;
+
+                font-size:11px;
+
+                font-weight:900;
+
+                letter-spacing:1.2px;
+
+                text-transform:uppercase;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiSteps {
+
+                display:grid;
+
+                grid-template-columns:
+                    repeat(7, minmax(0, 1fr));
+
+                gap:7px;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiStep {
+
+                min-height:58px;
+
+                display:flex;
+
+                flex-direction:column;
+
+                align-items:center;
+
+                justify-content:center;
+
+                gap:5px;
+
+                padding:8px 5px;
+
+                border:1px solid
+                    rgba(255,255,255,0.06);
+
+                border-radius:10px;
+
+                background:
+                    rgba(255,255,255,0.025);
+
+                color:#667d90;
+
+                text-align:center;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiStepNumber {
+
+                font-size:10px;
+
+                font-weight:900;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiStepName {
+
+                font-size:8px;
+
+                font-weight:800;
+
+                line-height:1.2;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiActionArea {
+
+                margin-top:17px;
+
+                display:flex;
+
+                align-items:center;
+
+                justify-content:space-between;
+
+                gap:15px;
+
+                padding-top:17px;
+
+                border-top:1px solid
+                    rgba(255,255,255,0.06);
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiActionText {
+
+                color:#91a9bc;
+
+                font-size:11px;
+
+                line-height:1.5;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiActionButton {
+
+                flex:0 0 auto;
+
+                border:1px solid
+                    rgba(76,201,240,0.38);
+
+                border-radius:10px;
+
+                padding:11px 16px;
+
+                background:
+                    rgba(76,201,240,0.10);
+
+                color:#4cc9f0;
+
+                font-family:inherit;
+
+                font-size:10px;
+
+                font-weight:900;
+
+                letter-spacing:0.8px;
+
+                cursor:pointer;
+
+                transition:
+                    transform 160ms ease,
+                    background 160ms ease,
+                    border-color 160ms ease;
+
+            }
+
+
+            #${PANEL_ID}
+            .fobasWifiActionButton:hover {
+
+                transform:translateY(-1px);
+
+                background:
+                    rgba(76,201,240,0.17);
+
+                border-color:
+                    rgba(76,201,240,0.62);
+
+            }
+
+
+            @keyframes fobasWifiPanelIn {
+
+                from {
+
+                    opacity:0;
+
+                    transform:
+                        translateY(10px);
+
+                }
+
+                to {
+
+                    opacity:1;
+
+                    transform:
+                        translateY(0);
+
+                }
+
+            }
+
+
+            @media (max-width: 900px) {
+
+                #${PANEL_ID}
+                .fobasWifiTargetGrid {
+
+                    grid-template-columns:
+                        repeat(2, minmax(0, 1fr));
+
+                }
+
+
+                #${PANEL_ID}
+                .fobasWifiSteps {
+
+                    grid-template-columns:
+                        repeat(4, minmax(0, 1fr));
+
+                }
+
+            }
+
+
+            @media (max-width: 560px) {
+
+                #${PANEL_ID} {
+
+                    margin-top:20px;
+
+                }
+
+
+                #${PANEL_ID}
+                .fobasWifiPanelShell {
+
+                    padding:16px;
+
+                    border-radius:14px;
+
+                }
+
+
+                #${PANEL_ID}
+                .fobasWifiPanelHeader {
+
+                    flex-direction:column;
+
+                }
+
+
+                #${PANEL_ID}
+                .fobasWifiTargetGrid {
+
+                    grid-template-columns:
+                        1fr 1fr;
+
+                }
+
+
+                #${PANEL_ID}
+                .fobasWifiSteps {
+
+                    grid-template-columns:
+                        repeat(2, minmax(0, 1fr));
+
+                }
+
+
+                #${PANEL_ID}
+                .fobasWifiActionArea {
+
+                    flex-direction:column;
+
+                    align-items:stretch;
+
+                }
+
+
+                #${PANEL_ID}
+                .fobasWifiActionButton {
+
+                    width:100%;
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+
+    /* =====================================================
+       CREATE PRACTICAL PANEL
+    ====================================================== */
+
+    function renderPanel(
+        network
+    ) {
+
+        const container =
+            getWiFiContainer();
+
+
+        if (
+            !container ||
+            !network
+        ) {
+
+            return false;
+
+        }
+
+
+        const normalized =
+            normalizeNetwork(
+                network
+            );
+
+
+        if (!normalized) {
+
+            return false;
+
+        }
+
+
+        selectedNetwork =
+            normalized;
+
+
+        installStyles();
+
+
+        let panel =
+            document.getElementById(
+                PANEL_ID
+            );
+
+
+        if (!panel) {
+
+            panel =
+                document.createElement(
+                    "section"
+                );
+
+
+            panel.id =
+                PANEL_ID;
+
+
+            panel.setAttribute(
+                "aria-label",
+                "Espace pratique Wi-Fi"
+            );
+
+
+            container.appendChild(
+                panel
+            );
+
+        }
+
+
+        panel.innerHTML = `
+
+            <div
+                class="fobasWifiPanelShell"
+            >
+
+                <div
+                    class="fobasWifiPanelHeader"
+                >
+
+                    <div>
+
+                        <span
+                            class="fobasWifiPanelEyebrow"
+                        >
+                            LABORATOIRE 01 · ESPACE PRATIQUE
+                        </span>
+
+                        <h3
+                            class="fobasWifiPanelTitle"
+                        >
+                            Poste d'analyse Wi-Fi virtuel
+                        </h3>
+
+                        <p
+                            class="fobasWifiPanelSubtitle"
+                        >
+                            Cible virtuelle sélectionnée.
+                            L'élève peut maintenant commencer
+                            le parcours pédagogique d'analyse
+                            et de renforcement.
+                        </p>
+
+                    </div>
+
+                    <span
+                        class="fobasWifiTargetBadge"
+                    >
+                        CIBLE SÉLECTIONNÉE
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="fobasWifiTargetGrid"
+                >
+
+                    <div
+                        class="fobasWifiTargetItem"
+                    >
+
+                        <span
+                            class="fobasWifiTargetLabel"
+                        >
+                            SSID
+                        </span>
+
+                        <span
+                            class="fobasWifiTargetValue"
+                            title="${escapeHtml(normalized.ssid)}"
+                        >
+                            ${escapeHtml(normalized.ssid)}
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="fobasWifiTargetItem"
+                    >
+
+                        <span
+                            class="fobasWifiTargetLabel"
+                        >
+                            BSSID
+                        </span>
+
+                        <span
+                            class="fobasWifiTargetValue"
+                            title="${escapeHtml(normalized.bssid)}"
+                        >
+                            ${escapeHtml(normalized.bssid)}
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="fobasWifiTargetItem"
+                    >
+
+                        <span
+                            class="fobasWifiTargetLabel"
+                        >
+                            Canal
+                        </span>
+
+                        <span
+                            class="fobasWifiTargetValue"
+                        >
+                            ${escapeHtml(normalized.channel)}
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="fobasWifiTargetItem"
+                    >
+
+                        <span
+                            class="fobasWifiTargetLabel"
+                        >
+                            Chiffrement
+                        </span>
+
+                        <span
+                            class="fobasWifiTargetValue"
+                            title="${escapeHtml(normalized.encryption)}"
+                        >
+                            ${escapeHtml(normalized.encryption)}
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="fobasWifiTargetItem"
+                    >
+
+                        <span
+                            class="fobasWifiTargetLabel"
+                        >
+                            Signal
+                        </span>
+
+                        <span
+                            class="fobasWifiTargetValue"
+                        >
+                            ${escapeHtml(normalized.signal)}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="fobasWifiMission"
+                >
+
+                    <p
+                        class="fobasWifiMissionTitle"
+                    >
+                        PARCOURS DE LA MISSION
+                    </p>
+
+
+                    <div
+                        class="fobasWifiSteps"
+                    >
+
+                        <div class="fobasWifiStep">
+
+                            <span
+                                class="fobasWifiStepNumber"
+                            >
+                                1
+                            </span>
+
+                            <span
+                                class="fobasWifiStepName"
+                            >
+                                Cible
+                            </span>
+
+                        </div>
+
+
+                        <div class="fobasWifiStep">
+
+                            <span
+                                class="fobasWifiStepNumber"
+                            >
+                                2
+                            </span>
+
+                            <span
+                                class="fobasWifiStepName"
+                            >
+                                Analyse
+                            </span>
+
+                        </div>
+
+
+                        <div class="fobasWifiStep">
+
+                            <span
+                                class="fobasWifiStepNumber"
+                            >
+                                3
+                            </span>
+
+                            <span
+                                class="fobasWifiStepName"
+                            >
+                                Évaluation
+                            </span>
+
+                        </div>
+
+
+                        <div class="fobasWifiStep">
+
+                            <span
+                                class="fobasWifiStepNumber"
+                            >
+                                4
+                            </span>
+
+                            <span
+                                class="fobasWifiStepName"
+                            >
+                                Inspection
+                            </span>
+
+                        </div>
+
+
+                        <div class="fobasWifiStep">
+
+                            <span
+                                class="fobasWifiStepNumber"
+                            >
+                                5
+                            </span>
+
+                            <span
+                                class="fobasWifiStepName"
+                            >
+                                Durcissement
+                            </span>
+
+                        </div>
+
+
+                        <div class="fobasWifiStep">
+
+                            <span
+                                class="fobasWifiStepNumber"
+                            >
+                                6
+                            </span>
+
+                            <span
+                                class="fobasWifiStepName"
+                            >
+                                Vérification
+                            </span>
+
+                        </div>
+
+
+                        <div class="fobasWifiStep">
+
+                            <span
+                                class="fobasWifiStepNumber"
+                            >
+                                7
+                            </span>
+
+                            <span
+                                class="fobasWifiStepName"
+                            >
+                                Mission
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="fobasWifiActionArea"
+                    >
+
+                        <div
+                            class="fobasWifiActionText"
+                        >
+                            Cible prête.
+                            L'étape suivante consiste
+                            à analyser virtuellement
+                            sa sécurité.
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="fobasWifiActionButton"
+                            id="fobasWifiAnalyzeButton"
+                        >
+                            ANALYZE TARGET
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        const analyzeButton =
+            document.getElementById(
+                "fobasWifiAnalyzeButton"
+            );
+
+
+        if (analyzeButton) {
+
+            analyzeButton.addEventListener(
+                "click",
+                function () {
+
+                    runAnalysis();
+
+                }
+            );
+
+        }
+
+
+        /*
+         * Keep the practical panel visible.
+         */
+
+        window.setTimeout(
+            function () {
+
+                try {
+
+                    panel.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest"
+                    });
+
+                } catch (error) {
+
+                    /* Silent compatibility fallback. */
+
+                }
+
+            },
+            40
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       HTML ESCAPE
+    ====================================================== */
+
+    function escapeHtml(
+        value
+    ) {
+
+        return String(
+            value === null ||
+            value === undefined
+                ? "—"
+                : value
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* =====================================================
+       REGISTER TARGET WITH EXISTING SELECTION ENGINE
+    ====================================================== */
+
+    function registerTargetSelection(
+        network
+    ) {
+
+        const targetId =
+            network.targetId ||
+            network.id;
+
+
+        if (!targetId) {
+
+            return;
+
+        }
+
+
+        try {
+
+            if (
+                window.FOBASWiFiTargetSelection &&
+                typeof
+                    window.FOBASWiFiTargetSelection.recordSelection ===
+                    "function"
+            ) {
+
+                window.FOBASWiFiTargetSelection
+                    .recordSelection(
+                        targetId
+                    );
+
+                return;
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS Wi-Fi Panel] Target selection bridge unavailable.",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ANALYZE BUTTON
+       Only launches the existing virtual analysis
+       engine when available.
+    ====================================================== */
+
+    function runAnalysis() {
+
+        if (!selectedNetwork) {
+
+            return;
+
+        }
+
+
+        registerTargetSelection(
+            selectedNetwork
+        );
+
+
+        try {
+
+            if (
+                window.FOBASWiFiTargetAnalysis &&
+                typeof
+                    window.FOBASWiFiTargetAnalysis
+                        .analyzeSelectedTarget ===
+                    "function"
+            ) {
+
+                const result =
+                    window.FOBASWiFiTargetAnalysis
+                        .analyzeSelectedTarget();
+
+
+                if (result) {
+
+                    updateActionMessage(
+                        "Analyse virtuelle terminée. L'étape suivante est l'évaluation de sécurité."
+                    );
+
+                }
+
+                return;
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "[FOBAS Wi-Fi Panel] Virtual analysis failed:",
+                error
+            );
+
+        }
+
+
+        updateActionMessage(
+            "Le moteur d'analyse virtuelle est en attente de connexion."
+        );
+
+    }
+
+
+    /* =====================================================
+       UPDATE ACTION MESSAGE
+    ====================================================== */
+
+    function updateActionMessage(
+        message
+    ) {
+
+        const element =
+            document.querySelector(
+                "#" +
+                PANEL_ID +
+                " .fobasWifiActionText"
+            );
+
+
+        if (element) {
+
+            element.textContent =
+                message;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       NETWORK CLICK HANDLER
+       Event delegation means this also works when
+       the five networks are dynamically rendered later.
+    ====================================================== */
+
+    function handleNetworkClick(
+        event
+    ) {
+
+        const container =
+            getWiFiContainer();
+
+
+        if (
+            !container
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Do not interfere with buttons inside
+         * the practical panel itself.
+         */
+
+        if (
+            event.target.closest &&
+            event.target.closest(
+                "#" + PANEL_ID
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const network =
+            findNetworkFromElement(
+                event.target
+            );
+
+
+        if (!network) {
+
+            return;
+
+        }
+
+
+        const normalized =
+            normalizeNetwork(
+                network
+            );
+
+
+        if (!normalized) {
+
+            return;
+
+        }
+
+
+        registerTargetSelection(
+            normalized
+        );
+
+
+        renderPanel(
+            normalized
+        );
+
+    }
+
+
+    /* =====================================================
+       INITIALIZATION
+    ====================================================== */
+
+    function initialize() {
+
+        const container =
+            getWiFiContainer();
+
+
+        if (!container) {
+
+            return;
+
+        }
+
+
+        /*
+         * Event delegation.
+         * No modification of existing network renderer.
+         */
+
+        if (
+            container.dataset
+                .fobasPracticalPanelBound !==
+            "true"
+        ) {
+
+            container.addEventListener(
+                "click",
+                handleNetworkClick
+            );
+
+
+            container.dataset
+                .fobasPracticalPanelBound =
+                "true";
+
+        }
+
+
+        console.log(
+            "[FOBAS Wi-Fi Practical Panel] Ready."
+        );
+
+    }
+
+
+    /* =====================================================
+       PUBLIC API
+    ====================================================== */
+
+    window.FOBASWiFiPracticalPanel = {
+
+        version:
+            "1.0.0",
+
+        initialize:
+            initialize,
+
+        getSelectedNetwork:
+            function () {
+
+                return selectedNetwork;
+
+            },
+
+        showForNetwork:
+            function (network) {
+
+                if (!network) {
+
+                    return false;
+
+                }
+
+
+                const normalized =
+                    normalizeNetwork(
+                        network
+                    );
+
+
+                if (!normalized) {
+
+                    return false;
+
+                }
+
+
+                registerTargetSelection(
+                    normalized
+                );
+
+
+                return renderPanel(
+                    normalized
+                );
+
+            },
+
+        hide:
+            function () {
+
+                const panel =
+                    document.getElementById(
+                        PANEL_ID
+                    );
+
+
+                if (panel) {
+
+                    panel.remove();
+
+                }
+
+
+                selectedNetwork =
+                    null;
+
+            }
+
+    };
+
+
+    /* =====================================================
+       SAFE START
+    ====================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
 
 
 
