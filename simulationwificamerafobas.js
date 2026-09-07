@@ -16175,127 +16175,77 @@
                     </p>
 
 
-                    <div
-                        class="fobasWifiSteps"
-                    >
 
-                        <div class="fobasWifiStep">
+<div
+    class="fobasWifiSteps"
+>
 
-                            <span
-                                class="fobasWifiStepNumber"
-                            >
-                                1
-                            </span>
+    <button
+        type="button"
+        class="fobasWifiStep"
+        data-step="1"
+    >
+        <span class="fobasWifiStepNumber">1</span>
+        <span class="fobasWifiStepName">Cible</span>
+    </button>
 
-                            <span
-                                class="fobasWifiStepName"
-                            >
-                                Cible
-                            </span>
+    <button
+        type="button"
+        class="fobasWifiStep"
+        data-step="2"
+    >
+        <span class="fobasWifiStepNumber">2</span>
+        <span class="fobasWifiStepName">Analyse</span>
+    </button>
 
-                        </div>
+    <button
+        type="button"
+        class="fobasWifiStep"
+        data-step="3"
+    >
+        <span class="fobasWifiStepNumber">3</span>
+        <span class="fobasWifiStepName">Évaluation</span>
+    </button>
 
+    <button
+        type="button"
+        class="fobasWifiStep"
+        data-step="4"
+    >
+        <span class="fobasWifiStepNumber">4</span>
+        <span class="fobasWifiStepName">Inspection</span>
+    </button>
 
-                        <div class="fobasWifiStep">
+    <button
+        type="button"
+        class="fobasWifiStep"
+        data-step="5"
+    >
+        <span class="fobasWifiStepNumber">5</span>
+        <span class="fobasWifiStepName">Durcissement</span>
+    </button>
 
-                            <span
-                                class="fobasWifiStepNumber"
-                            >
-                                2
-                            </span>
+    <button
+        type="button"
+        class="fobasWifiStep"
+        data-step="6"
+    >
+        <span class="fobasWifiStepNumber">6</span>
+        <span class="fobasWifiStepName">Vérification</span>
+    </button>
 
-                            <span
-                                class="fobasWifiStepName"
-                            >
-                                Analyse
-                            </span>
+    <button
+        type="button"
+        class="fobasWifiStep"
+        data-step="7"
+    >
+        <span class="fobasWifiStepNumber">7</span>
+        <span class="fobasWifiStepName">Mission</span>
+    </button>
 
-                        </div>
-
-
-                        <div class="fobasWifiStep">
-
-                            <span
-                                class="fobasWifiStepNumber"
-                            >
-                                3
-                            </span>
-
-                            <span
-                                class="fobasWifiStepName"
-                            >
-                                Évaluation
-                            </span>
-
-                        </div>
-
-
-                        <div class="fobasWifiStep">
-
-                            <span
-                                class="fobasWifiStepNumber"
-                            >
-                                4
-                            </span>
-
-                            <span
-                                class="fobasWifiStepName"
-                            >
-                                Inspection
-                            </span>
-
-                        </div>
-
-
-                        <div class="fobasWifiStep">
-
-                            <span
-                                class="fobasWifiStepNumber"
-                            >
-                                5
-                            </span>
-
-                            <span
-                                class="fobasWifiStepName"
-                            >
-                                Durcissement
-                            </span>
-
-                        </div>
+</div>
 
 
-                        <div class="fobasWifiStep">
-
-                            <span
-                                class="fobasWifiStepNumber"
-                            >
-                                6
-                            </span>
-
-                            <span
-                                class="fobasWifiStepName"
-                            >
-                                Vérification
-                            </span>
-
-                        </div>
-
-
-                        <div class="fobasWifiStep">
-
-                            <span
-                                class="fobasWifiStepNumber"
-                            >
-                                7
-                            </span>
-
-                            <span
-                                class="fobasWifiStepName"
-                            >
-                                Mission
-                            </span>
-
-                        </div>
 
                     </div>
 
