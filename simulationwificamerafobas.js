@@ -16800,22 +16800,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================================================
    FOBAS ETHICAL HACKING SIMULATION
    WI-FI PRACTICAL ANALYSIS DISPLAY BRIDGE
@@ -17911,3 +17895,16 @@
     }
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
