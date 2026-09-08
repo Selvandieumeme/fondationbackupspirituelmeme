@@ -16834,3 +16834,1957 @@ function runAnalysis() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================================
+// FOBAS WIFI → RANISE MOISE ADAPTER BRIDGE
+// VERSION 1.0.0
+// ============================================================================
+//
+// OBJECTIF
+// --------
+// Connecter le module Wi-Fi à l'architecture pédagogique dynamique de
+// Ranise MOISE sans créer un nouveau système Ranise et sans modifier
+// l'architecture Microsoft Word existante.
+//
+// ARCHITECTURE
+// ------------
+//
+// WIFI SIMULATION
+//      ↓
+// CyberSimulationAction
+//      ↓
+// Wi-Fi Action Adapter
+//      ↓
+// Normalisation de l'action
+//      ↓
+// Event pédagogique Wi-Fi
+//      ↓
+// Ranise Dynamic System
+//
+// IMPORTANT
+// ---------
+// - 100 % simulation virtuelle.
+// - Aucune connexion Wi-Fi réelle.
+// - Aucun scan matériel réel.
+// - Aucune capture réelle de paquets.
+// - Aucune authentification réelle.
+// - Aucune attaque réelle.
+// - Ne modifie pas Microsoft Word.
+// - Ne modifie pas le Universal Practice Action Registry de Word.
+// - Ne remplace pas Ranise.
+// - Ne crée pas un second professeur IA.
+// - Ne crée pas un second moteur pédagogique.
+//
+// ============================================================================
+
+(function(){
+
+    "use strict";
+
+    // ========================================================================
+    // 1. DEPENDANCES
+    // ========================================================================
+
+    const FOBAS =
+        window.FOBASCybersecuritySimulation;
+
+    if(!FOBAS){
+
+        console.warn(
+            "[FOBAS Wi-Fi Ranise Bridge] " +
+            "FOBASCybersecuritySimulation introuvable."
+        );
+
+        return;
+    }
+
+
+    const CyberActionBridge =
+        window.FOBASCyberActionBridge || null;
+
+
+    // ========================================================================
+    // 2. CONFIGURATION
+    // ========================================================================
+
+    const ENGINE_VERSION = "1.0.0";
+
+    const ENGINE_ID =
+        "fobas-wifi-ranise-adapter";
+
+    const SIMULATION_ID =
+        "fobas-ethical-hacking-simulation";
+
+    const LAB_ID =
+        "wifi";
+
+    const EVENT_NAME =
+        "FOBAS:WiFiPedagogicalAction";
+
+    const GENERIC_EVENT_NAME =
+        "FOBAS:CyberSimulationAction";
+
+
+    // ========================================================================
+    // 3. ACTIONS WIFI OFFICIELLES
+    // ========================================================================
+
+    const WIFI_ACTIONS = {
+
+        "wifi.scan": {
+
+            actionId:
+                "wifi.scan",
+
+            resultState:
+                "wifi_scan_completed",
+
+            validationKey:
+                "WIFI_SCAN_COMPLETED",
+
+            pedagogicalKey:
+                "SCAN_WIFI",
+
+            order:1
+
+        },
+
+
+        "wifi.select_target": {
+
+            actionId:
+                "wifi.select_target",
+
+            resultState:
+                "wifi_target_selected",
+
+            validationKey:
+                "WIFI_TARGET_SELECTED",
+
+            pedagogicalKey:
+                "SELECT_TARGET",
+
+            order:2
+
+        },
+
+
+        "wifi.analyze_target": {
+
+            actionId:
+                "wifi.analyze_target",
+
+            resultState:
+                "wifi_target_analyzed",
+
+            validationKey:
+                "WIFI_TARGET_ANALYZED",
+
+            pedagogicalKey:
+                "ANALYZE_TARGET",
+
+            order:3
+
+        },
+
+
+        "wifi.assess_security": {
+
+            actionId:
+                "wifi.assess_security",
+
+            resultState:
+                "wifi_security_assessed",
+
+            validationKey:
+                "WIFI_SECURITY_ASSESSED",
+
+            pedagogicalKey:
+                "ASSESS_SECURITY",
+
+            order:4
+
+        },
+
+
+        "wifi.inspect_configuration": {
+
+            actionId:
+                "wifi.inspect_configuration",
+
+            resultState:
+                "wifi_configuration_inspected",
+
+            validationKey:
+                "WIFI_CONFIGURATION_INSPECTED",
+
+            pedagogicalKey:
+                "INSPECT_CONFIGURATION",
+
+            order:5
+
+        },
+
+
+        "wifi.harden_configuration": {
+
+            actionId:
+                "wifi.harden_configuration",
+
+            resultState:
+                "wifi_configuration_hardened",
+
+            validationKey:
+                "WIFI_CONFIGURATION_HARDENED",
+
+            pedagogicalKey:
+                "HARDEN_CONFIGURATION",
+
+            order:6
+
+        },
+
+
+        "wifi.verify_hardening": {
+
+            actionId:
+                "wifi.verify_hardening",
+
+            resultState:
+                "wifi_hardening_verified",
+
+            validationKey:
+                "WIFI_HARDENING_VERIFIED",
+
+            pedagogicalKey:
+                "VERIFY_HARDENING",
+
+            order:7
+
+        },
+
+
+        "wifi.complete_mission": {
+
+            actionId:
+                "wifi.complete_mission",
+
+            resultState:
+                "wifi_mission_completed",
+
+            validationKey:
+                "WIFI_MISSION_COMPLETED",
+
+            pedagogicalKey:
+                "COMPLETE_MISSION",
+
+            order:8
+
+        }
+
+    };
+
+
+    // ========================================================================
+    // 4. ETAT INTERNE DU BRIDGE
+    // ========================================================================
+
+    const bridgeState = {
+
+        initialized:false,
+
+        lastAction:null,
+
+        lastValidAction:null,
+
+        actionHistory:[],
+
+        currentActionIndex:0,
+
+        currentActionId:null,
+
+        completedActions:[],
+
+        currentChapterId:null,
+
+        currentPracticeIndex:0,
+
+        lastEventAt:null
+
+    };
+
+
+    // ========================================================================
+    // 5. UTILITAIRES
+    // ========================================================================
+
+    function now(){
+
+        return new Date().toISOString();
+
+    }
+
+
+    function cloneSafe(value){
+
+        if(value === undefined){
+
+            return null;
+
+        }
+
+        try{
+
+            return JSON.parse(
+                JSON.stringify(value)
+            );
+
+        }catch(error){
+
+            return null;
+
+        }
+
+    }
+
+
+    function normalizeActionId(actionId){
+
+        if(!actionId){
+
+            return null;
+
+        }
+
+        return String(actionId)
+            .trim()
+            .toLowerCase();
+
+    }
+
+
+    function getActionDefinition(actionId){
+
+        const normalized =
+            normalizeActionId(actionId);
+
+        if(!normalized){
+
+            return null;
+
+        }
+
+        return (
+            WIFI_ACTIONS[normalized] ||
+            null
+        );
+
+    }
+
+
+    function isWiFiAction(actionId){
+
+        return Boolean(
+            getActionDefinition(actionId)
+        );
+
+    }
+
+
+    // ========================================================================
+    // 6. NORMALISATION DES ACTIONS
+    // ========================================================================
+
+    function normalizeActionEvent(rawEvent){
+
+        if(!rawEvent){
+
+            return null;
+
+        }
+
+
+        const raw =
+            rawEvent.detail &&
+            typeof rawEvent.detail === "object"
+
+                ? rawEvent.detail
+
+                : rawEvent;
+
+
+        const actionId =
+            normalizeActionId(
+                raw.actionId ||
+                raw.action ||
+                raw.type
+            );
+
+
+        if(!isWiFiAction(actionId)){
+
+            return null;
+
+        }
+
+
+        const definition =
+            getActionDefinition(actionId);
+
+
+        const normalized = {
+
+            bridgeId:
+                ENGINE_ID,
+
+            bridgeVersion:
+                ENGINE_VERSION,
+
+            simulationId:
+                raw.simulationId ||
+                SIMULATION_ID,
+
+            labId:
+                raw.labId ||
+                LAB_ID,
+
+            actionId:
+                actionId,
+
+            actionType:
+                raw.actionType ||
+                actionId.split(".")[1] ||
+                "unknown",
+
+            status:
+                raw.status ||
+                "completed",
+
+            resultState:
+                raw.resultState ||
+                definition.resultState,
+
+            validationKey:
+                raw.validationKey ||
+                definition.validationKey,
+
+            pedagogicalKey:
+                definition.pedagogicalKey,
+
+            order:
+                definition.order,
+
+            targetId:
+                raw.targetId ||
+                raw.targetNetworkId ||
+                null,
+
+            targetNetworkId:
+                raw.targetNetworkId ||
+                null,
+
+            targetSSID:
+                raw.targetSSID ||
+                raw.ssid ||
+                null,
+
+            bssid:
+                raw.bssid ||
+                null,
+
+            channel:
+                raw.channel !== undefined
+                    ? raw.channel
+                    : null,
+
+            encryption:
+                raw.encryption ||
+                null,
+
+            signal:
+                raw.signal !== undefined
+                    ? raw.signal
+                    : null,
+
+            securityStatus:
+                raw.securityStatus ||
+                null,
+
+            timestamp:
+                raw.timestamp ||
+                now(),
+
+            virtual:
+                raw.virtual !== false,
+
+            realWiFiOperation:
+                raw.realWiFiOperation === true,
+
+            packetCapture:
+                raw.packetCapture === true,
+
+            authenticationAttempt:
+                raw.authenticationAttempt === true,
+
+            connectionAttempt:
+                raw.connectionAttempt === true,
+
+            attackExecution:
+                raw.attackExecution === true,
+
+            source:
+                raw.source ||
+                "wifi-simulation",
+
+            originalEvent:
+                cloneSafe(raw)
+
+        };
+
+
+        return normalized;
+
+    }
+
+
+    // ========================================================================
+    // 7. CONTROLE DE SECURITE
+    // ========================================================================
+
+    function isSafeVirtualAction(action){
+
+        if(!action){
+
+            return false;
+
+        }
+
+
+        if(action.virtual !== true){
+
+            return false;
+
+        }
+
+
+        if(action.realWiFiOperation === true){
+
+            return false;
+
+        }
+
+
+        if(action.packetCapture === true){
+
+            return false;
+
+        }
+
+
+        if(action.authenticationAttempt === true){
+
+            return false;
+
+        }
+
+
+        if(action.connectionAttempt === true){
+
+            return false;
+
+        }
+
+
+        if(action.attackExecution === true){
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    // ========================================================================
+    // 8. ENREGISTREMENT DE L'ACTION
+    // ========================================================================
+
+    function rememberAction(action){
+
+        if(!action){
+
+            return;
+
+        }
+
+
+        bridgeState.lastAction =
+            action;
+
+
+        bridgeState.lastEventAt =
+            action.timestamp;
+
+
+        bridgeState.actionHistory.push(
+            action
+        );
+
+
+        if(
+            bridgeState.actionHistory.length
+            > 100
+        ){
+
+            bridgeState.actionHistory.shift();
+
+        }
+
+
+        if(
+            action.status === "completed"
+        ){
+
+            bridgeState.lastValidAction =
+                action;
+
+
+            if(
+                !bridgeState.completedActions
+                    .includes(action.actionId)
+            ){
+
+                bridgeState.completedActions.push(
+                    action.actionId
+                );
+
+            }
+
+
+            bridgeState.currentActionId =
+                action.actionId;
+
+
+            bridgeState.currentActionIndex =
+                action.order;
+
+        }
+
+    }
+
+
+    // ========================================================================
+    // 9. CREATION DE L'EVENT PEDAGOGIQUE
+    // ========================================================================
+
+    function createPedagogicalEvent(action){
+
+        if(!action){
+
+            return null;
+
+        }
+
+
+        return {
+
+            source:
+                ENGINE_ID,
+
+            version:
+                ENGINE_VERSION,
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            module:
+                "PIRATAGE_ETHIQUE_WIFI",
+
+            actionId:
+                action.actionId,
+
+            actionType:
+                action.actionType,
+
+            status:
+                action.status,
+
+            resultState:
+                action.resultState,
+
+            validationKey:
+                action.validationKey,
+
+            pedagogicalKey:
+                action.pedagogicalKey,
+
+            order:
+                action.order,
+
+            targetId:
+                action.targetId,
+
+            targetNetworkId:
+                action.targetNetworkId,
+
+            targetSSID:
+                action.targetSSID,
+
+            bssid:
+                action.bssid,
+
+            channel:
+                action.channel,
+
+            encryption:
+                action.encryption,
+
+            signal:
+                action.signal,
+
+            securityStatus:
+                action.securityStatus,
+
+            timestamp:
+                action.timestamp,
+
+            virtual:
+                true,
+
+            realWiFiOperation:
+                false,
+
+            packetCapture:
+                false,
+
+            authenticationAttempt:
+                false,
+
+            connectionAttempt:
+                false,
+
+            attackExecution:
+                false
+
+        };
+
+    }
+
+
+    // ========================================================================
+    // 10. EMISSION VERS RANISE
+    // ========================================================================
+
+    function emitToRanise(action){
+
+        if(!action){
+
+            return null;
+
+        }
+
+
+        const pedagogicalEvent =
+            createPedagogicalEvent(
+                action
+            );
+
+
+        if(!pedagogicalEvent){
+
+            return null;
+
+        }
+
+
+        // ------------------------------------------------------------
+        // Event spécifique Wi-Fi
+        // ------------------------------------------------------------
+
+        try{
+
+            window.dispatchEvent(
+
+                new CustomEvent(
+                    EVENT_NAME,
+                    {
+                        detail:
+                            pedagogicalEvent
+                    }
+                )
+
+            );
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS Wi-Fi Ranise Bridge] " +
+                "Emission event Wi-Fi impossible.",
+                error
+            );
+
+        }
+
+
+        // ------------------------------------------------------------
+        // Event générique compatible avec
+        // l'écosystème de simulation FOBAS
+        // ------------------------------------------------------------
+
+        try{
+
+            window.dispatchEvent(
+
+                new CustomEvent(
+                    "FOBAS:RanisePedagogicalAction",
+                    {
+                        detail:
+                            pedagogicalEvent
+                    }
+                )
+
+            );
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS Wi-Fi Ranise Bridge] " +
+                "Emission event pédagogique impossible.",
+                error
+            );
+
+        }
+
+
+        return pedagogicalEvent;
+
+    }
+
+
+    // ========================================================================
+    // 11. TRAITEMENT CENTRAL D'UNE ACTION WIFI
+    // ========================================================================
+
+    function processAction(rawEvent){
+
+        const action =
+            normalizeActionEvent(
+                rawEvent
+            );
+
+
+        if(!action){
+
+            return false;
+
+        }
+
+
+        if(!isSafeVirtualAction(action)){
+
+            console.warn(
+                "[FOBAS Wi-Fi Ranise Bridge] " +
+                "Action refusée : opération non virtuelle."
+            );
+
+            return false;
+
+        }
+
+
+        rememberAction(action);
+
+
+        emitToRanise(action);
+
+
+        return true;
+
+    }
+
+
+    // ========================================================================
+    // 12. ECOUTE DES EVENTS TECHNIQUES WIFI
+    // ========================================================================
+
+    function handleCyberSimulationAction(event){
+
+        if(!event){
+
+            return;
+
+        }
+
+
+        const detail =
+            event.detail;
+
+
+        if(!detail){
+
+            return;
+
+        }
+
+
+        const actionId =
+            normalizeActionId(
+                detail.actionId
+            );
+
+
+        if(!isWiFiAction(actionId)){
+
+            return;
+
+        }
+
+
+        processAction(
+            detail
+        );
+
+    }
+
+
+    // ========================================================================
+    // 13. ECOUTE DE L'EVENT WIFI DIRECT
+    // ========================================================================
+
+    function handleWiFiAction(event){
+
+        if(!event){
+
+            return;
+
+        }
+
+
+        const detail =
+            event.detail;
+
+
+        if(!detail){
+
+            return;
+
+        }
+
+
+        const actionId =
+            normalizeActionId(
+                detail.actionId
+            );
+
+
+        if(!isWiFiAction(actionId)){
+
+            return;
+
+        }
+
+
+        processAction(
+            detail
+        );
+
+    }
+
+
+    // ========================================================================
+    // 14. ECOUTE D'UN EVENT PEDAGOGIQUE DEJA NORMALISE
+    // ========================================================================
+
+    function handlePedagogicalAction(event){
+
+        if(!event){
+
+            return;
+
+        }
+
+
+        const detail =
+            event.detail;
+
+
+        if(!detail){
+
+            return;
+
+        }
+
+
+        const actionId =
+            normalizeActionId(
+                detail.actionId
+            );
+
+
+        if(!isWiFiAction(actionId)){
+
+            return;
+
+        }
+
+
+        /*
+         * Protection contre une double transformation :
+         *
+         * Wi-Fi Action
+         *      ↓
+         * Bridge
+         *      ↓
+         * RanisePedagogicalAction
+         *
+         * L'event pédagogique ne doit pas être
+         * retraité comme une nouvelle action technique.
+         */
+
+        if(
+            detail.source === ENGINE_ID
+        ){
+
+            return;
+
+        }
+
+    }
+
+
+    // ========================================================================
+    // 15. BRANCHEMENT DES LISTENERS
+    // ========================================================================
+
+    function attachListeners(){
+
+        window.addEventListener(
+            GENERIC_EVENT_NAME,
+            handleCyberSimulationAction
+        );
+
+
+        window.addEventListener(
+            EVENT_NAME,
+            handleWiFiAction
+        );
+
+
+        window.addEventListener(
+            "FOBAS:RanisePedagogicalAction",
+            handlePedagogicalAction
+        );
+
+
+        bridgeState.initialized =
+            true;
+
+    }
+
+
+    // ========================================================================
+    // 16. IDENTIFICATION DU MOTEUR RANISE EXISTANT
+    // ========================================================================
+
+    function getExistingRaniseEngines(){
+
+        const engines = [];
+
+
+        const possibleNames = [
+
+            "RaniseMoiseDynamicPracticeGuidanceEngine",
+
+            "RaniseDynamicPracticeGuidanceEngine",
+
+            "RaniseDynamicTheoryTeachingEngine",
+
+            "RaniseDynamicFutureChapterConnection",
+
+            "RaniseFuturePracticeLauncher"
+
+        ];
+
+
+        possibleNames.forEach(
+            name => {
+
+                if(
+                    window[name]
+                ){
+
+                    engines.push({
+                        name:name,
+                        engine:window[name]
+                    });
+
+                }
+
+            }
+        );
+
+
+        return engines;
+
+    }
+
+
+    // ========================================================================
+    // 17. ETAT DE RANISE
+    // ========================================================================
+
+    function getRaniseConnectionStatus(){
+
+        const engines =
+            getExistingRaniseEngines();
+
+
+        return {
+
+            connected:
+                engines.length > 0,
+
+            engines:
+                engines.map(
+                    item => item.name
+                ),
+
+            eventBridge:
+                true,
+
+            wifiAdapter:
+                true
+
+        };
+
+    }
+
+
+    // ========================================================================
+    // 18. DEMANDE DE DEMARRAGE PRATIQUE WIFI
+    // ========================================================================
+
+    function createPracticeStartEvent(
+        chapterId
+    ){
+
+        const resolvedChapterId =
+            chapterId ||
+            bridgeState.currentChapterId ||
+            "chapitre1_wifi";
+
+
+        return {
+
+            source:
+                ENGINE_ID,
+
+            version:
+                ENGINE_VERSION,
+
+            simulationId:
+                SIMULATION_ID,
+
+            labId:
+                LAB_ID,
+
+            module:
+                "PIRATAGE_ETHIQUE_WIFI",
+
+            eventType:
+                "WIFI_PRACTICE_START",
+
+            chapterId:
+                resolvedChapterId,
+
+            pedagogicalMode:
+                "dynamic",
+
+            ranise:
+                true,
+
+            virtualSimulation:
+                true,
+
+            timestamp:
+                now()
+
+        };
+
+    }
+
+
+    function requestPracticeStart(
+        chapterId
+    ){
+
+        bridgeState.currentChapterId =
+            chapterId ||
+            "chapitre1_wifi";
+
+
+        const detail =
+            createPracticeStartEvent(
+                bridgeState.currentChapterId
+            );
+
+
+        try{
+
+            window.dispatchEvent(
+
+                new CustomEvent(
+                    "FOBAS:WiFiPracticeStart",
+                    {
+                        detail:detail
+                    }
+                )
+
+            );
+
+        }catch(error){
+
+            console.warn(
+                "[FOBAS Wi-Fi Ranise Bridge] " +
+                "Impossible de lancer l'événement pratique.",
+                error
+            );
+
+        }
+
+
+        return detail;
+
+    }
+
+
+    // ========================================================================
+    // 19. DEFINITION DYNAMIQUE D'UNE ETAPE WIFI
+    // ========================================================================
+
+    function createPracticeStep(
+        actionId,
+        instruction,
+        successMessage
+    ){
+
+        const definition =
+            getActionDefinition(
+                actionId
+            );
+
+
+        if(!definition){
+
+            return null;
+
+        }
+
+
+        return {
+
+            actionId:
+                definition.actionId,
+
+            validationKey:
+                definition.validationKey,
+
+            resultState:
+                definition.resultState,
+
+            pedagogicalKey:
+                definition.pedagogicalKey,
+
+            order:
+                definition.order,
+
+            instruction:
+                instruction || "",
+
+            successMessage:
+                successMessage || "",
+
+            validate:function(
+                payload
+            ){
+
+                if(!payload){
+
+                    return false;
+
+                }
+
+
+                const normalized =
+                    normalizeActionEvent(
+                        payload
+                    );
+
+
+                if(!normalized){
+
+                    return false;
+
+                }
+
+
+                return (
+                    normalized.actionId ===
+                    definition.actionId
+                );
+
+            }
+
+        };
+
+    }
+
+
+    // ========================================================================
+    // 20. MODELE DES ETAPES OFFICIELLES WIFI
+    // ========================================================================
+
+    const WIFI_PRACTICE_ACTION_SEQUENCE = [
+
+        createPracticeStep(
+
+            "wifi.scan",
+
+            "Lancez le scan du laboratoire Wi-Fi virtuel afin d’identifier les réseaux disponibles.",
+
+            "Scan terminé. Les réseaux Wi-Fi virtuels ont été identifiés."
+
+        ),
+
+
+        createPracticeStep(
+
+            "wifi.select_target",
+
+            "Sélectionnez la cible Wi-Fi virtuelle que vous allez analyser.",
+
+            "Cible sélectionnée. Vous pouvez maintenant procéder à son analyse."
+
+        ),
+
+
+        createPracticeStep(
+
+            "wifi.analyze_target",
+
+            "Analysez la cible Wi-Fi sélectionnée afin d’examiner ses caractéristiques de sécurité.",
+
+            "Analyse terminée. Les caractéristiques de sécurité de la cible sont disponibles."
+
+        ),
+
+
+        createPracticeStep(
+
+            "wifi.assess_security",
+
+            "Évaluez le niveau de sécurité de la configuration Wi-Fi analysée.",
+
+            "Évaluation terminée. Le niveau de risque de la configuration est déterminé."
+
+        ),
+
+
+        createPracticeStep(
+
+            "wifi.inspect_configuration",
+
+            "Inspectez la configuration détaillée de la cible Wi-Fi virtuelle.",
+
+            "Inspection terminée. La configuration a été examinée."
+
+        ),
+
+
+        createPracticeStep(
+
+            "wifi.harden_configuration",
+
+            "Appliquez les mesures de durcissement proposées à la configuration Wi-Fi virtuelle.",
+
+            "Durcissement terminé. Les mesures de protection ont été appliquées dans le laboratoire virtuel."
+
+        ),
+
+
+        createPracticeStep(
+
+            "wifi.verify_hardening",
+
+            "Vérifiez que les mesures de durcissement ont correctement renforcé la configuration.",
+
+            "Vérification terminée. La configuration renforcée a été contrôlée."
+
+        ),
+
+
+        createPracticeStep(
+
+            "wifi.complete_mission",
+
+            "Terminez la mission Wi-Fi après la validation complète des mesures de sécurité.",
+
+            "Mission Wi-Fi terminée avec succès."
+
+        )
+
+    ].filter(Boolean);
+
+
+    // ========================================================================
+    // 21. OBTENIR LES ETAPES WIFI
+    // ========================================================================
+
+    function getPracticeSteps(){
+
+        return WIFI_PRACTICE_ACTION_SEQUENCE
+            .map(
+                step => ({
+                    actionId:
+                        step.actionId,
+
+                    validationKey:
+                        step.validationKey,
+
+                    resultState:
+                        step.resultState,
+
+                    pedagogicalKey:
+                        step.pedagogicalKey,
+
+                    order:
+                        step.order,
+
+                    instruction:
+                        step.instruction,
+
+                    successMessage:
+                        step.successMessage
+
+                })
+            );
+
+    }
+
+
+    // ========================================================================
+    // 22. VERIFICATION D'UNE ACTION PAR ETAPE
+    // ========================================================================
+
+    function validatePracticeStep(
+        stepIndex,
+        payload
+    ){
+
+        const step =
+            WIFI_PRACTICE_ACTION_SEQUENCE[
+                stepIndex
+            ];
+
+
+        if(!step){
+
+            return {
+
+                valid:false,
+
+                reason:
+                    "Étape pratique inexistante."
+
+            };
+
+        }
+
+
+        const normalized =
+            normalizeActionEvent(
+                payload
+            );
+
+
+        if(!normalized){
+
+            return {
+
+                valid:false,
+
+                reason:
+                    "Action Wi-Fi non reconnue."
+
+            };
+
+        }
+
+
+        const valid =
+            step.validate(
+                normalized
+            );
+
+
+        if(!valid){
+
+            return {
+
+                valid:false,
+
+                reason:
+                    "Cette action ne correspond pas à l'étape actuelle.",
+
+                expectedAction:
+                    step.actionId,
+
+                receivedAction:
+                    normalized.actionId
+
+            };
+
+        }
+
+
+        return {
+
+            valid:true,
+
+            actionId:
+                normalized.actionId,
+
+            validationKey:
+                normalized.validationKey,
+
+            resultState:
+                normalized.resultState,
+
+            order:
+                step.order,
+
+            message:
+                step.successMessage
+
+        };
+
+    }
+
+
+    // ========================================================================
+    // 23. OBTENIR L'ACTION ACTUELLE
+    // ========================================================================
+
+    function getCurrentPracticeStep(){
+
+        const index =
+            bridgeState.currentPracticeIndex;
+
+
+        const step =
+            WIFI_PRACTICE_ACTION_SEQUENCE[
+                index
+            ];
+
+
+        if(!step){
+
+            return null;
+
+        }
+
+
+        return {
+
+            index:index,
+
+            actionId:
+                step.actionId,
+
+            validationKey:
+                step.validationKey,
+
+            resultState:
+                step.resultState,
+
+            pedagogicalKey:
+                step.pedagogicalKey,
+
+            order:
+                step.order,
+
+            instruction:
+                step.instruction,
+
+            successMessage:
+                step.successMessage
+
+        };
+
+    }
+
+
+    // ========================================================================
+    // 24. AVANCER DANS LA PRATIQUE
+    // ========================================================================
+
+    function advancePractice(
+        actionId
+    ){
+
+        const normalized =
+            normalizeActionId(
+                actionId
+            );
+
+
+        const current =
+            getCurrentPracticeStep();
+
+
+        if(!current){
+
+            return {
+
+                completed:true,
+
+                message:
+                    "Toutes les étapes de la pratique Wi-Fi sont terminées."
+
+            };
+
+        }
+
+
+        if(
+            normalized !==
+            current.actionId
+        ){
+
+            return {
+
+                completed:false,
+
+                advanced:false,
+
+                expectedAction:
+                    current.actionId,
+
+                receivedAction:
+                    normalized
+
+            };
+
+        }
+
+
+        if(
+            !bridgeState.completedActions
+                .includes(normalized)
+        ){
+
+            bridgeState.completedActions.push(
+                normalized
+            );
+
+        }
+
+
+        bridgeState.currentPracticeIndex++;
+
+
+        const next =
+            getCurrentPracticeStep();
+
+
+        if(!next){
+
+            return {
+
+                completed:true,
+
+                advanced:true,
+
+                previousAction:
+                    normalized,
+
+                message:
+                    "Toutes les étapes de la pratique Wi-Fi sont terminées."
+
+            };
+
+        }
+
+
+        return {
+
+            completed:false,
+
+            advanced:true,
+
+            previousAction:
+                normalized,
+
+            nextStep:
+                next
+
+        };
+
+    }
+
+
+    // ========================================================================
+    // 25. REINITIALISATION PEDAGOGIQUE WIFI
+    // ========================================================================
+
+    function resetPractice(){
+
+        bridgeState.currentPracticeIndex =
+            0;
+
+        bridgeState.completedActions =
+            [];
+
+        bridgeState.lastAction =
+            null;
+
+        bridgeState.lastValidAction =
+            null;
+
+        bridgeState.currentActionId =
+            null;
+
+        return true;
+
+    }
+
+
+    // ========================================================================
+    // 26. API PUBLIQUE
+    // ========================================================================
+
+    const API = {
+
+        version:
+            ENGINE_VERSION,
+
+        id:
+            ENGINE_ID,
+
+        simulationId:
+            SIMULATION_ID,
+
+        labId:
+            LAB_ID,
+
+        state:
+            bridgeState,
+
+        actions:
+            WIFI_ACTIONS,
+
+        practiceSteps:
+            WIFI_PRACTICE_ACTION_SEQUENCE,
+
+        initialize:function(){
+
+            if(
+                bridgeState.initialized
+            ){
+
+                return true;
+
+            }
+
+
+            attachListeners();
+
+
+            console.log(
+                "[FOBAS Wi-Fi Ranise Bridge] " +
+                "Initialisé avec succès."
+            );
+
+
+            return true;
+
+        },
+
+
+        processAction:
+            processAction,
+
+
+        normalizeAction:
+            normalizeActionEvent,
+
+
+        validatePracticeStep:
+            validatePracticeStep,
+
+
+        getCurrentPracticeStep:
+            getCurrentPracticeStep,
+
+
+        advancePractice:
+            advancePractice,
+
+
+        getPracticeSteps:
+            getPracticeSteps,
+
+
+        requestPracticeStart:
+            requestPracticeStart,
+
+
+        resetPractice:
+            resetPractice,
+
+
+        getRaniseConnectionStatus:
+            getRaniseConnectionStatus,
+
+
+        getLastAction:function(){
+
+            return (
+                bridgeState.lastAction
+                ? cloneSafe(
+                    bridgeState.lastAction
+                )
+                : null
+            );
+
+        },
+
+
+        getLastValidAction:function(){
+
+            return (
+                bridgeState.lastValidAction
+                ? cloneSafe(
+                    bridgeState.lastValidAction
+                )
+                : null
+            );
+
+        },
+
+
+        getHistory:function(){
+
+            return cloneSafe(
+                bridgeState.actionHistory
+            ) || [];
+
+        }
+
+    };
+
+
+    // ========================================================================
+    // 27. EXPOSITION GLOBALE
+    // ========================================================================
+
+    window.FOBASWiFiRaniseAdapter =
+        API;
+
+
+    if(
+        !FOBAS.wifi
+    ){
+
+        FOBAS.wifi = {};
+
+    }
+
+
+    FOBAS.wifi.raniseAdapter =
+        API;
+
+
+    // ========================================================================
+    // 28. INITIALISATION
+    // ========================================================================
+
+    API.initialize();
+
+
+    // ========================================================================
+    // 29. RAPPORT DE CONTROLE
+    // ========================================================================
+
+    console.log(
+        "[FOBAS Wi-Fi Ranise Bridge] " +
+        "Version " +
+        ENGINE_VERSION +
+        " prête."
+    );
+
+
+    console.log(
+        "[FOBAS Wi-Fi Ranise Bridge] " +
+        "Étapes pédagogiques Wi-Fi :",
+        WIFI_PRACTICE_ACTION_SEQUENCE.length
+    );
+
+
+})();
+
