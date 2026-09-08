@@ -4239,6 +4239,38 @@ function loadMicrosoftWordFormation(){
 
 
 
+// =====================================
+// PIRATAGE ETHIQUE
+// FORMATION MODULE
+// =====================================
+
+formations.innerHTML += `
+    <div class="formation-card">
+
+        <h3>
+            🛡️ PIRATAGE ETHIQUE
+        </h3>
+
+        <p>
+            Formation pratique dédiée à la
+            cybersécurité et au piratage éthique.
+        </p>
+
+        <button
+            id="openEthicalHackingBtn">
+
+            Commencez la Formation
+
+        </button>
+
+    </div>
+`;
+
+
+
+
+
+
     const button =
         document.getElementById(
             "openMicrosoftWordBtn"
