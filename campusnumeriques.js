@@ -960,7 +960,7 @@ homework:[
 
         "Être capable d’utiliser Bullets, Numbering, Indent + et Indent - de manière autonome dans la simulation."
     ]
-},
+};
 
 
 
@@ -1296,11 +1296,6 @@ const ethicalHackingCourse = {
                 "Respecter les principes du piratage éthique en travaillant exclusivement dans un environnement virtuel autorisé et contrôlé."
             ]
         }
-
-    ]
-}
-
-
 
 
 
