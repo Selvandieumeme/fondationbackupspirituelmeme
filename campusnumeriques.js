@@ -960,7 +960,327 @@ homework:[
 
         "Être capable d’utiliser Bullets, Numbering, Indent + et Indent - de manière autonome dans la simulation."
     ]
+},
+
+
+
+
+
+
+
+
+
+{
+    id: "chapitre1_wifi",
+
+    unlocked: false,
+
+    title:
+        "Chapitre 1 — Fondamentaux et analyse de la sécurité Wi-Fi",
+
+    theory: [
+
+        {
+            title:
+                "Introduction à la sécurité Wi-Fi",
+
+            content:
+                "La sécurité Wi-Fi consiste à protéger les communications sans fil contre les accès non autorisés, les mauvaises configurations et les vulnérabilités. Dans cette formation, toutes les opérations pratiques sont réalisées exclusivement dans un laboratoire virtuel contrôlé."
+        },
+
+        {
+            title:
+                "SSID et BSSID",
+
+            content:
+                "Le SSID correspond au nom visible d’un réseau Wi-Fi. Le BSSID identifie de manière unique un point d’accès dans l’environnement réseau. Ces informations permettent à l’analyste d’identifier correctement les réseaux virtuels disponibles dans le laboratoire."
+        },
+
+        {
+            title:
+                "Canal Wi-Fi",
+
+            content:
+                "Un réseau Wi-Fi utilise un canal radio pour communiquer. L’identification du canal permet à l’analyste de comprendre l’environnement radio simulé et d’observer les caractéristiques techniques de chaque réseau virtuel."
+        },
+
+        {
+            title:
+                "Chiffrement Wi-Fi",
+
+            content:
+                "Le chiffrement protège les communications sans fil. Dans le laboratoire virtuel, l’étudiant peut rencontrer différentes configurations de sécurité telles que OPEN, WEP, WPA et WPA2-PSK. L’objectif pédagogique est d’identifier le niveau de sécurité associé à chaque configuration."
+        },
+
+        {
+            title:
+                "Analyse du signal",
+
+            content:
+                "La puissance du signal est exprimée en dBm. Une valeur moins négative indique généralement un signal plus puissant. L’analyse du signal complète l’observation technique d’un réseau Wi-Fi virtuel."
+        },
+
+        {
+            title:
+                "Évaluation de la sécurité",
+
+            content:
+                "Après avoir identifié une cible virtuelle, l’analyste examine son chiffrement, son niveau de sécurité et ses caractéristiques techniques afin d’évaluer les risques et de déterminer les mesures de protection appropriées."
+        },
+
+        {
+            title:
+                "Inspection de la configuration",
+
+            content:
+                "L’inspection de configuration permet de vérifier les paramètres essentiels d’un réseau Wi-Fi virtuel : SSID, BSSID, canal, chiffrement, signal et état de sécurité. Cette analyse prépare l’étape de renforcement."
+        },
+
+        {
+            title:
+                "Durcissement de la configuration",
+
+            content:
+                "Le durcissement consiste à améliorer la sécurité d’une configuration vulnérable ou insuffisamment protégée. Dans le laboratoire virtuel, l’étudiant applique uniquement les mesures de sécurité prévues par la simulation."
+        },
+
+        {
+            title:
+                "Vérification du durcissement",
+
+            content:
+                "Après le renforcement, l’analyste vérifie que les nouvelles mesures de sécurité sont effectivement appliquées et que la configuration renforcée respecte les paramètres de sécurité attendus."
+        },
+
+        {
+            title:
+                "Cadre du laboratoire éthique",
+
+            content:
+                "Toutes les activités pratiques de ce chapitre sont limitées aux réseaux Wi-Fi entièrement virtuels fournis par la simulation FOBAS. Aucun réseau réel, aucun équipement réel et aucune connexion Wi-Fi réelle ne sont utilisés."
+        }
+
+    ],
+
+    practice: [
+
+        {
+            title:
+                "Pratique 1 — Rechercher les réseaux Wi-Fi virtuels",
+
+            steps: [
+
+                "Ouvrir le laboratoire Wi-Fi virtuel.",
+
+                "Lancer la commande SCAN VIRTUAL NETWORKS.",
+
+                "Observer la liste des réseaux Wi-Fi virtuels détectés.",
+
+                "Identifier le SSID, le BSSID, le canal, le chiffrement et le signal de chaque réseau."
+
+            ],
+
+            actionId:
+                "wifi.scan"
+        },
+
+        {
+            title:
+                "Pratique 2 — Sélectionner une cible virtuelle",
+
+            steps: [
+
+                "Observer les réseaux Wi-Fi virtuels disponibles.",
+
+                "Sélectionner un réseau dans la liste.",
+
+                "Vérifier les informations techniques de la cible sélectionnée.",
+
+                "Confirmer que la cible appartient au laboratoire virtuel."
+
+            ],
+
+            actionId:
+                "wifi.select_target"
+        },
+
+        {
+            title:
+                "Pratique 3 — Analyser la cible Wi-Fi",
+
+            steps: [
+
+                "Vérifier que la cible virtuelle est sélectionnée.",
+
+                "Utiliser la commande ANALYZE TARGET.",
+
+                "Observer le rapport d’analyse généré par le laboratoire.",
+
+                "Identifier le niveau de sécurité de la cible."
+
+            ],
+
+            actionId:
+                "wifi.analyze_target"
+        },
+
+        {
+            title:
+                "Pratique 4 — Évaluer la sécurité",
+
+            steps: [
+
+                "Examiner les informations de sécurité de la cible.",
+
+                "Évaluer le niveau de risque associé à sa configuration.",
+
+                "Identifier le niveau de protection du chiffrement utilisé.",
+
+                "Déterminer si une amélioration de la configuration est nécessaire."
+
+            ],
+
+            actionId:
+                "wifi.assess_security"
+        },
+
+        {
+            title:
+                "Pratique 5 — Inspecter la configuration",
+
+            steps: [
+
+                "Ouvrir l’inspection de configuration de la cible.",
+
+                "Vérifier le SSID et le BSSID.",
+
+                "Vérifier le canal et le signal.",
+
+                "Vérifier le type de chiffrement.",
+
+                "Observer les recommandations de sécurité."
+
+            ],
+
+            actionId:
+                "wifi.inspect_configuration"
+        },
+
+        {
+            title:
+                "Pratique 6 — Renforcer la configuration",
+
+            steps: [
+
+                "Examiner les recommandations de sécurité.",
+
+                "Appliquer le durcissement de la configuration Wi-Fi virtuelle.",
+
+                "Vérifier que la configuration de sécurité a été améliorée.",
+
+                "Observer le nouvel état de sécurité."
+
+            ],
+
+            actionId:
+                "wifi.harden_configuration"
+        },
+
+        {
+            title:
+                "Pratique 7 — Vérifier le durcissement",
+
+            steps: [
+
+                "Lancer la vérification du durcissement.",
+
+                "Vérifier que le chiffrement attendu est appliqué.",
+
+                "Vérifier que les paramètres de sécurité attendus sont actifs.",
+
+                "Confirmer que la configuration renforcée est valide."
+
+            ],
+
+            actionId:
+                "wifi.verify_hardening"
+        },
+
+        {
+            title:
+                "Pratique 8 — Terminer la mission",
+
+            steps: [
+
+                "Vérifier que toutes les étapes précédentes sont validées.",
+
+                "Confirmer que le durcissement a été correctement vérifié.",
+
+                "Terminer la mission du laboratoire Wi-Fi virtuel.",
+
+                "Consulter le résultat final de la mission."
+
+            ],
+
+            actionId:
+                "wifi.complete_mission"
+        }
+
+    ],
+
+    exercises: [
+
+        "Après avoir effectué un scan virtuel, identifier le SSID, le BSSID, le canal et le chiffrement d’un réseau Wi-Fi virtuel.",
+
+        "Sélectionner une cible virtuelle et expliquer pourquoi son identification correcte est importante lors d’un audit de sécurité Wi-Fi.",
+
+        "Analyser une cible Wi-Fi virtuelle et déterminer son niveau général de sécurité à partir de son chiffrement et de ses caractéristiques techniques.",
+
+        "Inspecter la configuration d’une cible virtuelle, identifier les éventuelles faiblesses et appliquer les mesures de durcissement proposées par le laboratoire.",
+
+        "Effectuer l’ensemble du parcours pratique, du scan virtuel jusqu’à la vérification du durcissement, puis terminer correctement la mission."
+
+    ],
+
+    homework: [
+
+        "Réaliser un compte rendu d’audit du réseau Wi-Fi virtuel étudié dans le laboratoire. Présenter son SSID, son BSSID, son canal, son chiffrement, son niveau de sécurité, les éventuelles faiblesses identifiées, les mesures de durcissement appliquées et le résultat de la vérification finale."
+
+    ],
+
+    evaluation: [
+
+        "Identifier correctement les principales informations techniques d’une cible Wi-Fi virtuelle : SSID, BSSID, canal, chiffrement et signal.",
+
+        "Analyser correctement la sécurité d’une cible Wi-Fi virtuelle et identifier son niveau de risque.",
+
+        "Inspecter et renforcer correctement la configuration de sécurité d’une cible Wi-Fi virtuelle.",
+
+        "Vérifier correctement le durcissement appliqué et terminer la mission uniquement après validation de la configuration renforcée."
+
+    ],
+
+    objective: [
+
+        "Comprendre les principes fondamentaux de la sécurité des réseaux Wi-Fi.",
+
+        "Identifier le rôle du SSID, du BSSID, du canal, du chiffrement et du signal.",
+
+        "Analyser la configuration et le niveau de sécurité d’un réseau Wi-Fi virtuel.",
+
+        "Identifier les configurations Wi-Fi faibles ou vulnérables dans un environnement contrôlé.",
+
+        "Comprendre le principe du durcissement d’une configuration Wi-Fi.",
+
+        "Vérifier qu’une configuration renforcée respecte les mesures de sécurité attendues.",
+
+        "Réaliser de manière autonome un parcours d’analyse et de renforcement d’un réseau Wi-Fi virtuel.",
+
+        "Respecter les principes du piratage éthique en travaillant exclusivement dans un environnement virtuel autorisé et contrôlé."
+
+    ]
 }
+
 
 ]
 
