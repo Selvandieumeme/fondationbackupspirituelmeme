@@ -1,4090 +1,4625 @@
 /* ============================================================
    SIMULATION ÉLECTRICITÉ FOBAS
-   Professional Virtual Electrical Laboratory
-   Version 1.0
-
-   APPLICATION INDÉPENDANTE
-
-   IMPORTANT:
-   - Aucun lien avec Campus Numérique FOBAS.
-   - Aucun lien avec Microsoft Word.
-   - Aucun système pédagogique externe.
-   - Aucun système Ranise.
-   - Simulation 100 % virtuelle.
-   ============================================================ */
-
-"use strict";
-
-
-/* ============================================================
-   APPLICATION STATE
-   ============================================================ */
-
-const ElectriciteFOBAS = {
-
-    version: "1.0",
-
-    storageKey:
-        "FOBAS_ELECTRICITE_SIMULATION_STATE",
-
-    activeView: "laboratoire",
-
-    activeTool: "select",
-
-    running: false,
-
-    voltage: 230,
-
-    zoom: 1,
-
-    selectedComponentId: null,
-
-    wireStart: null,
-
-    components: [],
-
-    wires: [],
-
-    missions: [],
-
-    activeMissionId: null,
-
-    measurements: {
-
-        voltage: 230,
-
-        current: 0,
-
-        resistance: Infinity,
-
-        power: 0,
-
-        frequency: 50,
-
-        circuitState: "OUVERT"
-
-    }
-
-};
-
-
-/* ============================================================
-   COMPONENT DEFINITIONS
-   ============================================================ */
-
-const COMPONENT_DEFINITIONS = {
-
-    source: {
-
-        name: "Source",
-
-        icon: "🔋",
-
-        description:
-            "Source d'alimentation virtuelle du circuit.",
-
-        resistance: 0,
-
-        power: 0,
-
-        terminals: 2
-
-    },
-
-
-    switch: {
-
-        name: "Interrupteur",
-
-        icon: "⏻",
-
-        description:
-            "Commande permettant d'ouvrir ou de fermer le circuit.",
-
-        resistance: 0.05,
-
-        power: 0,
-
-        terminals: 2,
-
-        switchState: "off"
-
-    },
-
-
-    lamp: {
-
-        name: "Lampe",
-
-        icon: "💡",
-
-        description:
-            "Récepteur lumineux représentant une lampe électrique.",
-
-        resistance: 883,
-
-        power: 60,
-
-        terminals: 2
-
-    },
-
-
-    resistor: {
-
-        name: "Résistance",
-
-        icon: "▱",
-
-        description:
-            "Charge résistive utilisée pour les exercices électriques.",
-
-        resistance: 100,
-
-        power: 0,
-
-        terminals: 2
-
-    },
-
-
-    outlet: {
-
-        name: "Prise",
-
-        icon: "⊙",
-
-        description:
-            "Point de connexion simulé pour une installation électrique.",
-
-        resistance: 0,
-
-        power: 0,
-
-        terminals: 2
-
-    },
-
-
-    breaker: {
-
-        name: "Disjoncteur",
-
-        icon: "▣",
-
-        description:
-            "Protection électrique virtuelle contre les surintensités.",
-
-        resistance: 0.05,
-
-        power: 0,
-
-        terminals: 2,
-
-        switchState: "off"
-
-    },
-
-
-    ground: {
-
-        name: "Terre",
-
-        icon: "⏚",
-
-        description:
-            "Point de référence et de protection du circuit.",
-
-        resistance: 0,
-
-        power: 0,
-
-        terminals: 1
-
-    },
-
-
-    motor: {
-
-        name: "Moteur",
-
-        icon: "⚙",
-
-        description:
-            "Récepteur électromécanique virtuel.",
-
-        resistance: 46,
-
-        power: 1150,
-
-        terminals: 2
-
-    }
-
-};
-
-
-/* ============================================================
-   MISSIONS
-   ============================================================ */
-
-ElectriciteFOBAS.missions = [
-
-    {
-
-        id: "mission-001",
-
-        number: "MISSION 01",
-
-        title:
-            "Allumer une lampe",
-
-        description:
-            "Construisez un circuit simple permettant d'alimenter une lampe.",
-
-        objective:
-            "Créer une source, un interrupteur et une lampe avec des connexions cohérentes, puis fermer l'interrupteur.",
-
-        requiredComponents: [
-            "source",
-            "switch",
-            "lamp"
-        ]
-
-    },
-
-
-    {
-
-        id: "mission-002",
-
-        number: "MISSION 02",
-
-        title:
-            "Circuit protégé",
-
-        description:
-            "Construisez un circuit comprenant une protection électrique.",
-
-        objective:
-            "Créer une source, un disjoncteur, un interrupteur et une lampe.",
-
-        requiredComponents: [
-            "source",
-            "breaker",
-            "switch",
-            "lamp"
-        ]
-
-    },
-
-
-    {
-
-        id: "mission-003",
-
-        number: "MISSION 03",
-
-        title:
-            "Mesurer une charge",
-
-        description:
-            "Construisez une charge résistive et analysez ses valeurs électriques.",
-
-        objective:
-            "Créer une source et une résistance puis lancer la simulation.",
-
-        requiredComponents: [
-            "source",
-            "resistor"
-        ]
-
-    },
-
-
-    {
-
-        id: "mission-004",
-
-        number: "MISSION 04",
-
-        title:
-            "Commande d'un moteur",
-
-        description:
-            "Simulez une commande simple d'un moteur électrique.",
-
-        objective:
-            "Créer une source, un interrupteur et un moteur.",
-
-        requiredComponents: [
-            "source",
-            "switch",
-            "motor"
-        ]
-
-    }
-
-];
-
-
-/* ============================================================
-   DOM HELPERS
-   ============================================================ */
-
-const $ = selector =>
-    document.querySelector(selector);
-
-
-const $$ = selector =>
-    Array.from(
-        document.querySelectorAll(selector)
-    );
-
-
-/* ============================================================
-   INITIALISATION
-   ============================================================ */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        initializeApplication();
-
-    }
-);
-
-
-function initializeApplication() {
-
-    bindNavigation();
-
-    bindTools();
-
-    bindComponentPalette();
-
-    bindToolbar();
-
-    bindInspector();
-
-    bindTableau();
-
-    bindDiagnostic();
-
-    bindMissions();
-
-    bindSearch();
-
-    bindZoom();
-
-    loadSimulation();
-
-    renderMissionCards();
-
-    renderLargeComponents();
-
-    renderAll();
-
-    updateMeasurements();
-
-    updateStatus(
-        "Simulation prête",
-        "ready"
-    );
-
-}
-
-
-/* ============================================================
-   NAVIGATION
-   ============================================================ */
-
-function bindNavigation() {
-
-    $$(".nav-item").forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const view =
-                    button.dataset.view;
-
-                switchView(view);
-
-            }
-        );
-
-    });
-
-}
-
-
-function switchView(viewName) {
-
-    ElectriciteFOBAS.activeView =
-        viewName;
-
-
-    $$(".nav-item").forEach(button => {
-
-        button.classList.toggle(
-            "active",
-            button.dataset.view === viewName
-        );
-
-    });
-
-
-    $$(".app-view").forEach(view => {
-
-        view.classList.toggle(
-            "active",
-            view.id ===
-            `view-${viewName}`
-        );
-
-    });
-
-
-    if (
-        viewName === "mesures"
-    ) {
-
-        updateMeasurements();
-
-    }
-
-
-    if (
-        viewName === "diagnostic"
-    ) {
-
-        renderDiagnosticPreview();
-
-    }
-
-}
-
-
-/* ============================================================
-   TOOL MANAGEMENT
-   ============================================================ */
-
-function bindTools() {
-
-    $$(".tool-button[data-tool]").forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                activateTool(
-                    button.dataset.tool
-                );
-
-            }
-        );
-
-    });
-
-
-    $$("[data-tool-select]").forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                activateTool(
-                    button.dataset.toolSelect
-                );
-
-                switchView(
-                    "laboratoire"
-                );
-
-            }
-        );
-
-    });
-
-}
-
-
-function activateTool(tool) {
-
-    ElectriciteFOBAS.activeTool =
-        tool;
-
-
-    $$(".tool-button[data-tool]").forEach(
-        button => {
-
-            button.classList.toggle(
-                "active",
-                button.dataset.tool === tool
-            );
-
+   ------------------------------------------------------------
+   Moteur principal indépendant
+   Compatible avec :
+   simulationelectricitefobas.html
+   simulationelectricitefobas.css
+
+   Architecture :
+   - Moteur topologique
+   - Phase / Neutre / Terre
+   - Composants
+   - Câblage
+   - Tableau électrique
+   - Protections
+   - Mesures
+   - Multimètre
+   - Diagnostic
+   - Missions
+   - Sauvegarde / réinitialisation
+   - Interface dynamique
+
+   IMPORTANT :
+   Ce fichier est totalement indépendant du Campus Numérique FOBAS.
+============================================================ */
+
+(() => {
+    "use strict";
+
+    /* =========================================================
+       1. CONFIGURATION
+    ========================================================= */
+
+    const APP_KEY = "FOBAS_ELECTRICITE_TOPOLOGICAL_SIMULATION_V3";
+    const VERSION = "3.0.0";
+
+    const CONFIG = {
+        defaultVoltage: 230,
+        minVoltage: 0,
+        maxVoltage: 400,
+
+        grid: 20,
+        majorGrid: 100,
+
+        defaultZoom: 1,
+        minZoom: 0.5,
+        maxZoom: 2,
+
+        defaultBreakerRating: 16,
+        defaultRcdRating: 30,
+
+        simulationInterval: 250,
+
+        wireResistance: 0.01,
+
+        colors: {
+            phase: "#ff5d73",
+            neutral: "#5ee7ff",
+            earth: "#25d695",
+            wire: "#8ca7c5",
+            energized: "#ff647a",
+            selected: "#ffffff"
         }
-    );
-
-
-    const toolNames = {
-
-        select: "Select",
-
-        wire: "Wire",
-
-        delete: "Delete"
-
     };
 
+    /* =========================================================
+       2. OUTILS DOM
+    ========================================================= */
 
-    $("#toolModeLabel").textContent =
-        `Outil : ${toolNames[tool] || tool}`;
+    const $ = (selector, root = document) => root.querySelector(selector);
 
+    const $$ = (selector, root = document) =>
+        Array.from(root.querySelectorAll(selector));
 
-    $("#footerMode").textContent =
-        tool === "select"
-            ? "Sélection"
-            : tool === "wire"
-                ? "Connexion"
-                : "Suppression";
+    const byId = id => document.getElementById(id);
 
+    const exists = id => !!byId(id);
 
-    if (
-        tool !== "wire"
-    ) {
-
-        ElectriciteFOBAS.wireStart =
-            null;
-
-        clearTemporaryWire();
-
-    }
-
-}
-
-
-/* ============================================================
-   COMPONENT PALETTE
-   ============================================================ */
-
-function bindComponentPalette() {
-
-    $$(".component-card").forEach(card => {
-
-        card.addEventListener(
-            "click",
-            () => {
-
-                addComponent(
-                    card.dataset.component
-                );
-
-            }
-        );
-
-    });
-
-}
-
-
-function addComponent(type) {
-
-    const definition =
-        COMPONENT_DEFINITIONS[type];
-
-    if (!definition) {
-
-        return;
-
-    }
-
-
-    const index =
-        ElectriciteFOBAS.components.length;
-
-
-    const position =
-        calculateNewComponentPosition(
-            index
-        );
-
-
-    const component = {
-
-        id:
-            `${type}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-
-        type,
-
-        name:
-            definition.name,
-
-        icon:
-            definition.icon,
-
-        description:
-            definition.description,
-
-        x:
-            position.x,
-
-        y:
-            position.y,
-
-        resistance:
-            definition.resistance || 0,
-
-        power:
-            definition.power || 0,
-
-        switchState:
-            definition.switchState || "off",
-
-        rotation: 0
-
+    const text = (id, value) => {
+        const el = byId(id);
+        if (el) el.textContent = value;
     };
 
-
-    ElectriciteFOBAS.components.push(
-        component
-    );
-
-
-    ElectriciteFOBAS.selectedComponentId =
-        component.id;
-
-
-    renderAll();
-
-    showToast(
-        `${definition.name} ajouté au laboratoire.`,
-        "success"
-    );
-
-
-    saveSimulationSilently();
-
-}
-
-
-function calculateNewComponentPosition(index) {
-
-    const columns = 4;
-
-    const spacingX = 230;
-
-    const spacingY = 150;
-
-    const column =
-        index % columns;
-
-    const row =
-        Math.floor(index / columns);
-
-
-    return {
-
-        x:
-            150 +
-            column * spacingX,
-
-        y:
-            150 +
-            row * spacingY
-
+    const html = (id, value) => {
+        const el = byId(id);
+        if (el) el.innerHTML = value;
     };
 
-}
+    const show = id => {
+        const el = byId(id);
+        if (el) el.classList.remove("hidden");
+    };
 
+    const hide = id => {
+        const el = byId(id);
+        if (el) el.classList.add("hidden");
+    };
 
-/* ============================================================
-   COMPONENT RENDERING
-   ============================================================ */
+    const setValue = (id, value) => {
+        const el = byId(id);
+        if (el) el.value = value;
+    };
 
-function renderAll() {
+    const clamp = (value, min, max) =>
+        Math.max(min, Math.min(max, value));
 
-    renderComponents();
+    const round = (value, decimals = 2) => {
+        const p = Math.pow(10, decimals);
+        return Math.round(value * p) / p;
+    };
 
-    renderWires();
+    const uid = prefix =>
+        `${prefix}_${Date.now().toString(36)}_${Math.random()
+            .toString(36)
+            .slice(2, 8)}`;
 
-    updateCounters();
+    const escapeHTML = value =>
+        String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
-    updateInspector();
+    /* =========================================================
+       3. TYPES DE COMPOSANTS
+    ========================================================= */
 
-    updateCanvasEmptyState();
+    const TYPES = {
+        source: {
+            label: "Source d'alimentation",
+            icon: "⚡",
+            description:
+                "Source monophasée virtuelle fournissant la phase et le neutre.",
+            terminals: ["L", "N"],
+            defaultResistance: 0
+        },
 
-    updateSidebarState();
+        breaker: {
+            label: "Disjoncteur",
+            icon: "🛡️",
+            description:
+                "Protection contre les surintensités et les courts-circuits.",
+            terminals: ["L_IN", "L_OUT"],
+            defaultRating: 16
+        },
 
-}
+        rcd: {
+            label: "Interrupteur différentiel",
+            icon: "🛡️",
+            description:
+                "Protection différentielle contre les courants de fuite vers la terre.",
+            terminals: ["L_IN", "L_OUT", "N_IN", "N_OUT"],
+            defaultRating: 30
+        },
 
+        switch: {
+            label: "Interrupteur simple",
+            icon: "🔘",
+            description:
+                "Commande un circuit d'éclairage.",
+            terminals: ["L_IN", "L_OUT"]
+        },
 
-function renderComponents() {
+        twoWaySwitch: {
+            label: "Va-et-vient",
+            icon: "↔️",
+            description:
+                "Permet de commander un même éclairage depuis deux points.",
+            terminals: ["COM", "L1", "L2"]
+        },
 
-    const layer =
-        $("#componentsLayer");
+        lamp: {
+            label: "Lampe",
+            icon: "💡",
+            description:
+                "Récepteur lumineux monophasé.",
+            terminals: ["L", "N"],
+            defaultPower: 60
+        },
 
-    if (!layer) {
+        outlet: {
+            label: "Prise 2P+T",
+            icon: "🔌",
+            description:
+                "Prise de courant avec phase, neutre et terre.",
+            terminals: ["L", "N", "PE"],
+            defaultPower: 1200
+        },
 
-        return;
+        resistor: {
+            label: "Résistance",
+            icon: "Ω",
+            description:
+                "Charge résistive réglable.",
+            terminals: ["L", "N"],
+            defaultResistance: 100
+        },
 
-    }
+        motor: {
+            label: "Moteur monophasé",
+            icon: "⚙️",
+            description:
+                "Récepteur moteur monophasé.",
+            terminals: ["L", "N", "PE"],
+            defaultPower: 750
+        },
 
+        ground: {
+            label: "Terre",
+            icon: "⏚",
+            description:
+                "Point de raccordement au conducteur de protection.",
+            terminals: ["PE"]
+        },
 
-    layer.innerHTML = "";
+        neutralBus: {
+            label: "Barrette neutre",
+            icon: "N",
+            description:
+                "Barrette de distribution du neutre.",
+            terminals: ["N"]
+        },
 
-
-    ElectriciteFOBAS.components.forEach(
-        component => {
-
-            const group =
-                createComponentSVG(
-                    component
-                );
-
-            layer.appendChild(
-                group
-            );
-
+        earthBus: {
+            label: "Barrette de terre",
+            icon: "⏚",
+            description:
+                "Barrette de distribution du conducteur de protection.",
+            terminals: ["PE"]
         }
-    );
-
-}
-
-
-function createComponentSVG(component) {
-
-    const group =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "g"
-        );
-
-
-    group.setAttribute(
-        "class",
-        "component-node"
-    );
-
-
-    group.dataset.componentId =
-        component.id;
-
-
-    group.setAttribute(
-        "transform",
-        `translate(${component.x} ${component.y})`
-    );
-
-
-    if (
-        ElectriciteFOBAS.selectedComponentId ===
-        component.id
-    ) {
-
-        group.classList.add(
-            "selected"
-        );
-
-    }
-
-
-    if (
-        isComponentPowered(component)
-    ) {
-
-        group.classList.add(
-            "powered"
-        );
-
-    }
-
-
-    const body =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "rect"
-        );
-
-
-    body.setAttribute(
-        "class",
-        "component-body"
-    );
-
-
-    body.setAttribute(
-        "x",
-        "-48"
-    );
-
-
-    body.setAttribute(
-        "y",
-        "-32"
-    );
-
-
-    body.setAttribute(
-        "width",
-        "96"
-    );
-
-
-    body.setAttribute(
-        "height",
-        "64"
-    );
-
-
-    body.setAttribute(
-        "rx",
-        "12"
-    );
-
-
-    group.appendChild(
-        body
-    );
-
-
-    if (
-        component.type === "lamp"
-    ) {
-
-        const glow =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "circle"
-            );
-
-        glow.setAttribute(
-            "class",
-            "lamp-glow"
-        );
-
-        glow.setAttribute(
-            "cx",
-            "0"
-        );
-
-        glow.setAttribute(
-            "cy",
-            "-3"
-        );
-
-        glow.setAttribute(
-            "r",
-            "15"
-        );
-
-        group.appendChild(
-            glow
-        );
-
-    }
-
-
-    const iconText =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "text"
-        );
-
-
-    iconText.setAttribute(
-        "x",
-        "0"
-    );
-
-
-    iconText.setAttribute(
-        "y",
-        "7"
-    );
-
-
-    iconText.setAttribute(
-        "text-anchor",
-        "middle"
-    );
-
-
-    iconText.setAttribute(
-        "font-size",
-        "22"
-    );
-
-
-    iconText.textContent =
-        component.icon;
-
-
-    group.appendChild(
-        iconText
-    );
-
-
-    const label =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "text"
-        );
-
-
-    label.setAttribute(
-        "class",
-        "component-label"
-    );
-
-
-    label.setAttribute(
-        "x",
-        "0"
-    );
-
-
-    label.setAttribute(
-        "y",
-        "52"
-    );
-
-
-    label.setAttribute(
-        "text-anchor",
-        "middle"
-    );
-
-
-    label.textContent =
-        component.name;
-
-
-    group.appendChild(
-        label
-    );
-
-
-    createTerminals(
-        group,
-        component
-    );
-
-
-    group.addEventListener(
-        "pointerdown",
-        event => {
-
-            handleComponentPointerDown(
-                event,
-                component
-            );
-
+    };
+
+    /* =========================================================
+       4. ÉTAT GLOBAL
+    ========================================================= */
+
+    const state = {
+        version: VERSION,
+
+        voltage: CONFIG.defaultVoltage,
+
+        running: false,
+
+        activeView: "laboratoire",
+
+        tool: "select",
+
+        meterMode: "voltage",
+
+        zoom: CONFIG.defaultZoom,
+
+        panX: 0,
+        panY: 0,
+
+        selectedComponentId: null,
+        selectedWireId: null,
+
+        wireStart: null,
+
+        meterPointA: null,
+        meterPointB: null,
+
+        components: [],
+
+        wires: [],
+
+        faults: {
+            shortCircuit: false,
+            earthFault: false,
+            overload: false,
+            openConductor: false
+        },
+
+        trips: {
+            main: false,
+            rcd: false,
+            lighting: false,
+            outlet: false,
+            heating: false,
+            motor: false
+        },
+
+        measurements: {
+            voltage: 0,
+            current: 0,
+            resistance: Infinity,
+            power: 0,
+            continuity: false,
+            leakage: 0
+        },
+
+        diagnostic: {
+            status: "unknown",
+            title: "Diagnostic non exécuté",
+            summary: "Lancez le diagnostic pour analyser le circuit.",
+            details: [],
+            procedure: []
+        },
+
+        mission: {
+            activeId: null,
+            level: "Tous niveaux",
+            stepIndex: 0,
+            score: 0,
+            completed: false
+        },
+
+        logs: []
+    };
+
+    /* =========================================================
+       5. MISSIONS
+    ========================================================= */
+
+    const MISSIONS = [
+        {
+            id: "mission-1",
+            title: "Alimentation sécurisée",
+            level: "Débutant",
+            description:
+                "Construisez une alimentation protégée avec source, disjoncteur et récepteur.",
+            objective:
+                "Réaliser un circuit simple correctement protégé.",
+            steps: [
+                "Ajouter une source",
+                "Ajouter un disjoncteur",
+                "Ajouter une lampe",
+                "Relier correctement la phase",
+                "Relier correctement le neutre",
+                "Démarrer la simulation"
+            ]
+        },
+
+        {
+            id: "mission-2",
+            title: "Simple allumage",
+            level: "Débutant",
+            description:
+                "Réalisez un circuit d'éclairage commandé par un interrupteur.",
+            objective:
+                "La lampe doit être alimentée à travers l'interrupteur.",
+            steps: [
+                "Ajouter une source",
+                "Ajouter un disjoncteur",
+                "Ajouter un interrupteur",
+                "Ajouter une lampe",
+                "Câbler la phase",
+                "Câbler le neutre",
+                "Fermer l'interrupteur",
+                "Démarrer la simulation"
+            ]
+        },
+
+        {
+            id: "mission-3",
+            title: "Prise 2P+T",
+            level: "Débutant",
+            description:
+                "Construisez une prise avec phase, neutre et conducteur de protection.",
+            objective:
+                "La prise doit recevoir L, N et PE.",
+            steps: [
+                "Ajouter une source",
+                "Ajouter un disjoncteur",
+                "Ajouter une prise 2P+T",
+                "Connecter la phase",
+                "Connecter le neutre",
+                "Connecter la terre",
+                "Démarrer la simulation"
+            ]
+        },
+
+        {
+            id: "mission-4",
+            title: "Diagnostic de surcharge",
+            level: "Intermédiaire",
+            description:
+                "Identifiez une charge dépassant le calibre de protection.",
+            objective:
+                "Détecter une surcharge et identifier la protection concernée.",
+            steps: [
+                "Installer un disjoncteur 16 A",
+                "Installer une charge importante",
+                "Alimenter le circuit",
+                "Observer le courant",
+                "Identifier le déclenchement",
+                "Lancer le diagnostic"
+            ]
+        },
+
+        {
+            id: "mission-5",
+            title: "Défaut Phase-Terre",
+            level: "Avancé",
+            description:
+                "Analysez un défaut d'isolement entre la phase et la terre.",
+            objective:
+                "Identifier la fuite vers la terre et la réaction différentielle.",
+            steps: [
+                "Construire le circuit",
+                "Relier le conducteur de protection",
+                "Activer le défaut Phase-Terre",
+                "Démarrer la simulation",
+                "Observer le différentiel",
+                "Lancer le diagnostic"
+            ]
+        },
+
+        {
+            id: "mission-6",
+            title: "Continuité et conducteur coupé",
+            level: "Intermédiaire",
+            description:
+                "Utilisez le multimètre pour localiser un conducteur interrompu.",
+            objective:
+                "Identifier une rupture de continuité.",
+            steps: [
+                "Construire un circuit",
+                "Sélectionner le mode continuité",
+                "Tester le circuit",
+                "Activer un conducteur coupé",
+                "Tester à nouveau",
+                "Localiser la rupture"
+            ]
+        },
+
+        {
+            id: "mission-7",
+            title: "Moteur monophasé",
+            level: "Avancé",
+            description:
+                "Réalisez l'alimentation protégée d'un moteur monophasé.",
+            objective:
+                "Alimenter le moteur avec protection et terre.",
+            steps: [
+                "Ajouter la source",
+                "Ajouter la protection",
+                "Ajouter le moteur",
+                "Connecter la phase",
+                "Connecter le neutre",
+                "Connecter la terre",
+                "Démarrer la simulation",
+                "Vérifier les mesures"
+            ]
         }
-    );
+    ];
 
+    /* =========================================================
+       6. JOURNAL
+    ========================================================= */
 
-    group.addEventListener(
-        "click",
-        event => {
+    function log(message, type = "info") {
+        state.logs.unshift({
+            id: uid("log"),
+            time: new Date().toLocaleTimeString("fr-FR"),
+            message,
+            type
+        });
 
-            event.stopPropagation();
-
+        if (state.logs.length > 100) {
+            state.logs.length = 100;
         }
-    );
 
+        renderConsole();
+    }
 
-    return group;
+    /* =========================================================
+       7. NOTIFICATIONS
+    ========================================================= */
 
-}
+    function toast(message, type = "info") {
+        const container = byId("toastContainer");
 
+        if (!container) return;
 
-function createTerminals(
-    group,
-    component
-) {
+        const item = document.createElement("div");
 
-    if (
-        component.type === "ground"
-    ) {
+        item.className = `fobas-toast fobas-toast-${type}`;
 
-        const terminal =
-            createTerminal(
+        item.textContent = message;
+
+        container.appendChild(item);
+
+        requestAnimationFrame(() => {
+            item.classList.add("show");
+        });
+
+        setTimeout(() => {
+            item.classList.remove("show");
+
+            setTimeout(() => {
+                item.remove();
+            }, 250);
+        }, 3000);
+    }
+
+    /* =========================================================
+       8. CRÉATION DE COMPOSANTS
+    ========================================================= */
+
+    function createComponent(type, x = 250, y = 180) {
+        const definition = TYPES[type];
+
+        if (!definition) {
+            toast("Type de composant inconnu.", "danger");
+            return null;
+        }
+
+        const component = {
+            id: uid(type),
+
+            type,
+
+            name: definition.label,
+
+            x,
+
+            y,
+
+            rotation: 0,
+
+            resistance:
+                definition.defaultResistance ??
+                100,
+
+            power:
+                definition.defaultPower ??
                 0,
-                32,
-                0
+
+            rating:
+                definition.defaultRating ??
+                CONFIG.defaultBreakerRating,
+
+            rcdRating:
+                type === "rcd"
+                    ? CONFIG.defaultRcdRating
+                    : 30,
+
+            state:
+                type === "switch" ||
+                type === "twoWaySwitch"
+                    ? "open"
+                    : "on",
+
+            terminals:
+                definition.terminals.map(name => ({
+                    name
+                })),
+
+            selected: false
+        };
+
+        state.components.push(component);
+
+        log(`Composant ajouté : ${definition.label}.`, "success");
+
+        renderAll();
+
+        return component;
+    }
+
+    function addComponent(type) {
+        const offset =
+            state.components.length * 18;
+
+        return createComponent(
+            type,
+            180 + (offset % 360),
+            150 + (offset % 240)
+        );
+    }
+
+    function deleteComponent(id) {
+        const component =
+            state.components.find(c => c.id === id);
+
+        if (!component) return;
+
+        state.wires =
+            state.wires.filter(
+                wire =>
+                    wire.from.componentId !== id &&
+                    wire.to.componentId !== id
             );
 
-        group.appendChild(
-            terminal
-        );
-
-        return;
-
-    }
-
-
-    const left =
-        createTerminal(
-            -62,
-            0,
-            0
-        );
-
-
-    const right =
-        createTerminal(
-            62,
-            0,
-            1
-        );
-
-
-    group.appendChild(
-        left
-    );
-
-    group.appendChild(
-        right
-    );
-
-}
-
-
-function createTerminal(
-    x,
-    y,
-    index
-) {
-
-    const terminal =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "circle"
-        );
-
-
-    terminal.setAttribute(
-        "class",
-        "component-terminal"
-    );
-
-
-    terminal.setAttribute(
-        "cx",
-        x
-    );
-
-
-    terminal.setAttribute(
-        "cy",
-        y
-    );
-
-
-    terminal.setAttribute(
-        "r",
-        "6"
-    );
-
-
-    terminal.dataset.terminalIndex =
-        index;
-
-
-    return terminal;
-
-}
-
-
-/* ============================================================
-   COMPONENT INTERACTION
-   ============================================================ */
-
-function handleComponentPointerDown(
-    event,
-    component
-) {
-
-    event.stopPropagation();
-
-
-    if (
-        ElectriciteFOBAS.activeTool ===
-        "delete"
-    ) {
-
-        deleteComponent(
-            component.id
-        );
-
-        return;
-
-    }
-
-
-    if (
-        ElectriciteFOBAS.activeTool ===
-        "wire"
-    ) {
-
-        handleWireStart(
-            component
-        );
-
-        return;
-
-    }
-
-
-    selectComponent(
-        component.id
-    );
-
-
-    startComponentDrag(
-        event,
-        component
-    );
-
-}
-
-
-function selectComponent(id) {
-
-    ElectriciteFOBAS.selectedComponentId =
-        id;
-
-
-    renderComponents();
-
-    updateInspector();
-
-}
-
-
-/* ============================================================
-   COMPONENT DRAG
-   ============================================================ */
-
-function startComponentDrag(
-    event,
-    component
-) {
-
-    if (
-        ElectriciteFOBAS.activeTool !==
-        "select"
-    ) {
-
-        return;
-
-    }
-
-
-    const svg =
-        $("#circuitCanvas");
-
-    const startPoint =
-        getSVGPoint(
-            svg,
-            event.clientX,
-            event.clientY
-        );
-
-
-    const originalX =
-        component.x;
-
-    const originalY =
-        component.y;
-
-
-    function move(
-        moveEvent
-    ) {
-
-        const point =
-            getSVGPoint(
-                svg,
-                moveEvent.clientX,
-                moveEvent.clientY
+        state.components =
+            state.components.filter(
+                c => c.id !== id
             );
 
+        if (state.selectedComponentId === id) {
+            state.selectedComponentId = null;
+        }
 
-        component.x =
-            Math.max(
-                60,
-                Math.min(
-                    1140,
-                    originalX +
-                    (
-                        point.x -
-                        startPoint.x
-                    )
-                )
-            );
-
-
-        component.y =
-            Math.max(
-                60,
-                Math.min(
-                    640,
-                    originalY +
-                    (
-                        point.y -
-                        startPoint.y
-                    )
-                )
-            );
-
-
-        renderComponents();
-
-        renderWires();
-
-    }
-
-
-    function stop() {
-
-        document.removeEventListener(
-            "pointermove",
-            move
-        );
-
-
-        document.removeEventListener(
-            "pointerup",
-            stop
-        );
-
-
-        saveSimulationSilently();
-
-    }
-
-
-    document.addEventListener(
-        "pointermove",
-        move
-    );
-
-
-    document.addEventListener(
-        "pointerup",
-        stop
-    );
-
-}
-
-
-/* ============================================================
-   SVG POINT
-   ============================================================ */
-
-function getSVGPoint(
-    svg,
-    clientX,
-    clientY
-) {
-
-    const rect =
-        svg.getBoundingClientRect();
-
-
-    return {
-
-        x:
-            (
-                (
-                    clientX -
-                    rect.left
-                ) /
-                rect.width
-            ) *
-            1200,
-
-        y:
-            (
-                (
-                    clientY -
-                    rect.top
-                ) /
-                rect.height
-            ) *
-            700
-
-    };
-
-}
-
-
-/* ============================================================
-   WIRING
-   ============================================================ */
-
-function handleWireStart(
-    component
-) {
-
-    if (
-        !ElectriciteFOBAS.wireStart
-    ) {
-
-        ElectriciteFOBAS.wireStart =
-            component;
-
-        showToast(
-            `Point de départ sélectionné : ${component.name}.`,
-            "success"
-        );
-
-        return;
-
-    }
-
-
-    const start =
-        ElectriciteFOBAS.wireStart;
-
-
-    if (
-        start.id === component.id
-    ) {
-
-        ElectriciteFOBAS.wireStart =
-            null;
-
-        return;
-
-    }
-
-
-    const exists =
-        ElectriciteFOBAS.wires.some(
-            wire =>
-                (
-                    wire.from === start.id &&
-                    wire.to === component.id
-                ) ||
-                (
-                    wire.from === component.id &&
-                    wire.to === start.id
-                )
-        );
-
-
-    if (exists) {
-
-        showToast(
-            "Cette connexion existe déjà.",
+        log(
+            `Composant supprimé : ${component.name}.`,
             "warning"
         );
 
-        ElectriciteFOBAS.wireStart =
-            null;
-
-        return;
-
+        renderAll();
     }
 
+    /* =========================================================
+       9. TOPOLOGIE
+    ========================================================= */
 
-    ElectriciteFOBAS.wires.push({
-
-        id:
-            `wire-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-
-        from:
-            start.id,
-
-        to:
-            component.id
-
-    });
-
-
-    ElectriciteFOBAS.wireStart =
-        null;
-
-
-    renderAll();
-
-    showToast(
-        `Connexion créée entre ${start.name} et ${component.name}.`,
-        "success"
-    );
-
-
-    saveSimulationSilently();
-
-}
-
-
-function renderWires() {
-
-    const layer =
-        $("#wiresLayer");
-
-    if (!layer) {
-
-        return;
-
+    function terminalKey(componentId, terminal) {
+        return `${componentId}:${terminal}`;
     }
 
+    function getComponent(id) {
+        return state.components.find(
+            component => component.id === id
+        );
+    }
 
-    layer.innerHTML = "";
+    function getTerminal(componentId, terminalName) {
+        const component = getComponent(componentId);
 
+        if (!component) return null;
 
-    ElectriciteFOBAS.wires.forEach(
-        wire => {
+        return {
+            componentId,
+            terminal: terminalName,
+            key: terminalKey(componentId, terminalName)
+        };
+    }
 
-            const from =
-                getComponent(
-                    wire.from
-                );
+    function hasWireBetween(a, b) {
+        return state.wires.some(wire => {
+            const direct =
+                wire.from.key === a.key &&
+                wire.to.key === b.key;
 
-            const to =
-                getComponent(
-                    wire.to
-                );
+            const reverse =
+                wire.from.key === b.key &&
+                wire.to.key === a.key;
 
+            return direct || reverse;
+        });
+    }
 
-            if (
-                !from ||
-                !to
-            ) {
+    function createWire(from, to, gauge = "2.5 mm²") {
+        if (!from || !to) return null;
 
-                return;
+        if (from.key === to.key) {
+            toast(
+                "Impossible de connecter une borne à elle-même.",
+                "warning"
+            );
+            return null;
+        }
 
+        if (hasWireBetween(from, to)) {
+            toast("Cette connexion existe déjà.", "warning");
+            return null;
+        }
+
+        const wire = {
+            id: uid("wire"),
+
+            from: {
+                componentId: from.componentId,
+                terminal: from.terminal,
+                key: from.key
+            },
+
+            to: {
+                componentId: to.componentId,
+                terminal: to.terminal,
+                key: to.key
+            },
+
+            gauge,
+
+            continuity: true,
+
+            resistance: CONFIG.wireResistance
+        };
+
+        state.wires.push(wire);
+
+        log(
+            `Connexion créée : ${from.terminal} → ${to.terminal}.`,
+            "success"
+        );
+
+        calculate();
+        renderAll();
+
+        return wire;
+    }
+
+    function deleteWire(id) {
+        const wire =
+            state.wires.find(w => w.id === id);
+
+        if (!wire) return;
+
+        state.wires =
+            state.wires.filter(w => w.id !== id);
+
+        if (state.selectedWireId === id) {
+            state.selectedWireId = null;
+        }
+
+        log("Conducteur supprimé.", "warning");
+
+        calculate();
+        renderAll();
+    }
+
+    function neighbors(key) {
+        const result = [];
+
+        for (const wire of state.wires) {
+            if (!wire.continuity) continue;
+
+            if (wire.from.key === key) {
+                result.push(wire.to.key);
             }
 
+            if (wire.to.key === key) {
+                result.push(wire.from.key);
+            }
+        }
+
+        return result;
+    }
+
+    function reachable(startKey) {
+        const visited = new Set();
+
+        const queue = [startKey];
+
+        while (queue.length) {
+            const current = queue.shift();
+
+            if (visited.has(current)) continue;
+
+            visited.add(current);
+
+            for (const next of neighbors(current)) {
+                if (!visited.has(next)) {
+                    queue.push(next);
+                }
+            }
+        }
+
+        return visited;
+    }
+
+    function connected(a, b) {
+        if (!a || !b) return false;
+
+        return reachable(a.key).has(b.key);
+    }
+
+    function connectedToType(component, type, terminalName) {
+        if (!component) return false;
+
+        const terminal =
+            terminalName ||
+            TYPES[component.type]?.terminals?.[0];
+
+        if (!terminal) return false;
+
+        const start =
+            terminalKey(component.id, terminal);
+
+        const nodes = reachable(start);
+
+        return state.components.some(c => {
+            if (c.type !== type) return false;
+
+            return TYPES[type].terminals.some(t =>
+                nodes.has(terminalKey(c.id, t))
+            );
+        });
+    }
+
+    function findSource() {
+        return state.components.find(
+            c => c.type === "source"
+        );
+    }
+
+    function findNeutralNode() {
+        const source = findSource();
+
+        if (!source) return null;
+
+        return terminalKey(source.id, "N");
+    }
+
+    function findPhaseNode() {
+        const source = findSource();
+
+        if (!source) return null;
+
+        return terminalKey(source.id, "L");
+    }
+
+    function findEarthNode() {
+        const earth =
+            state.components.find(
+                c => c.type === "earthBus"
+            ) ||
+            state.components.find(
+                c => c.type === "ground"
+            );
+
+        if (!earth) return null;
+
+        return terminalKey(
+            earth.id,
+            TYPES[earth.type].terminals[0]
+        );
+    }
+
+    /* =========================================================
+       10. ÉTAT DES INTERRUPTEURS
+    ========================================================= */
+
+    function isComponentClosed(component) {
+        if (!component) return false;
+
+        if (
+            component.type === "switch" ||
+            component.type === "twoWaySwitch"
+        ) {
+            return component.state === "closed";
+        }
+
+        return true;
+    }
+
+    function isBreakerClosed(component) {
+        if (!component) return false;
+
+        if (component.type !== "breaker") {
+            return true;
+        }
+
+        return (
+            component.state !== "tripped" &&
+            component.state !== "off"
+        );
+    }
+
+    function findBreakers() {
+        return state.components.filter(
+            c => c.type === "breaker"
+        );
+    }
+
+    function findRCDs() {
+        return state.components.filter(
+            c => c.type === "rcd"
+        );
+    }
+
+    /* =========================================================
+       11. CALCUL ÉLECTRIQUE
+    ========================================================= */
+
+    function calculate() {
+        const source = findSource();
+
+        if (!source) {
+            state.measurements.voltage = 0;
+            state.measurements.current = 0;
+            state.measurements.power = 0;
+            state.measurements.resistance = Infinity;
+            state.measurements.continuity = false;
+            state.measurements.leakage = 0;
+
+            updateProtectionState();
+
+            return state.measurements;
+        }
+
+        const voltage = state.voltage;
+
+        let totalPower = 0;
+
+        let energizedLoads = [];
+
+        const phaseNodes =
+            reachable(
+                terminalKey(source.id, "L")
+            );
+
+        const neutralNodes =
+            reachable(
+                terminalKey(source.id, "N")
+            );
+
+        for (const component of state.components) {
+            if (
+                ![
+                    "lamp",
+                    "outlet",
+                    "resistor",
+                    "motor"
+                ].includes(component.type)
+            ) {
+                continue;
+            }
+
+            const terminals =
+                TYPES[component.type].terminals;
+
+            if (!terminals.includes("L") ||
+                !terminals.includes("N")) {
+                continue;
+            }
+
+            const lKey =
+                terminalKey(component.id, "L");
+
+            const nKey =
+                terminalKey(component.id, "N");
+
+            const phaseConnected =
+                phaseNodes.has(lKey);
+
+            const neutralConnected =
+                neutralNodes.has(nKey);
+
+            const energized =
+                phaseConnected &&
+                neutralConnected &&
+                state.running &&
+                !state.trips.main &&
+                !state.trips.rcd;
+
+            if (energized) {
+                const power =
+                    Number(component.power) || 0;
+
+                totalPower += power;
+
+                energizedLoads.push({
+                    component,
+                    power
+                });
+            }
+        }
+
+        let current =
+            voltage > 0
+                ? totalPower / voltage
+                : 0;
+
+        if (state.faults.shortCircuit) {
+            current = 999;
+        }
+
+        if (state.faults.earthFault) {
+            state.measurements.leakage =
+                Math.min(500, voltage / 0.5);
+        } else {
+            state.measurements.leakage = 0;
+        }
+
+        if (state.faults.overload) {
+            current = Math.max(
+                current,
+                30
+            );
+        }
+
+        const resistance =
+            current > 0
+                ? voltage / current
+                : Infinity;
+
+        state.measurements.voltage =
+            energizedLoads.length > 0
+                ? voltage
+                : 0;
+
+        state.measurements.current =
+            round(current, 3);
+
+        state.measurements.power =
+            round(totalPower, 1);
+
+        state.measurements.resistance =
+            resistance === Infinity
+                ? Infinity
+                : round(resistance, 2);
+
+        state.measurements.continuity =
+            calculateGlobalContinuity();
+
+        updateProtectionState();
+
+        return state.measurements;
+    }
+
+    function calculateGlobalContinuity() {
+        const source = findSource();
+
+        if (!source) return false;
+
+        const phase =
+            terminalKey(source.id, "L");
+
+        const neutral =
+            terminalKey(source.id, "N");
+
+        if (state.faults.openConductor) {
+            return false;
+        }
+
+        const phaseNodes =
+            reachable(phase);
+
+        const neutralNodes =
+            reachable(neutral);
+
+        return (
+            phaseNodes.size > 1 &&
+            neutralNodes.size > 1
+        );
+    }
+
+    /* =========================================================
+       12. PROTECTIONS
+    ========================================================= */
+
+    function updateProtectionState() {
+        const current =
+            state.measurements.current;
+
+        const breakers =
+            findBreakers();
+
+        let mainBreaker =
+            breakers[0] || null;
+
+        if (mainBreaker) {
+            const rating =
+                Number(mainBreaker.rating) || 16;
+
+            if (
+                state.faults.shortCircuit ||
+                current > rating * 1.15 ||
+                state.faults.overload
+            ) {
+                state.trips.main = true;
+                mainBreaker.state = "tripped";
+            }
+        }
+
+        const rcd =
+            findRCDs()[0] || null;
+
+        if (rcd) {
+            if (
+                state.faults.earthFault ||
+                state.measurements.leakage >
+                    Number(rcd.rcdRating || 30) / 1000
+            ) {
+                state.trips.rcd = true;
+                rcd.state = "tripped";
+            }
+        }
+    }
+
+    function resetProtections() {
+        state.trips.main = false;
+        state.trips.rcd = false;
+
+        state.trips.lighting = false;
+        state.trips.outlet = false;
+        state.trips.heating = false;
+        state.trips.motor = false;
+
+        for (const component of state.components) {
+            if (
+                component.type === "breaker" ||
+                component.type === "rcd"
+            ) {
+                component.state = "on";
+            }
+        }
+
+        log("Protections réarmées.", "success");
+
+        calculate();
+        renderAll();
+    }
+
+    /* =========================================================
+       13. SVG
+    ========================================================= */
+
+    function svgNS() {
+        return "http://www.w3.org/2000/svg";
+    }
+
+    function svgElement(name, attributes = {}) {
+        const element =
+            document.createElementNS(
+                svgNS(),
+                name
+            );
+
+        for (const [key, value] of Object.entries(
+            attributes
+        )) {
+            element.setAttribute(
+                key,
+                String(value)
+            );
+        }
+
+        return element;
+    }
+
+    function componentPosition(component) {
+        return {
+            x: Number(component.x) || 0,
+            y: Number(component.y) || 0
+        };
+    }
+
+    function terminalPosition(component, terminal) {
+        const { x, y } =
+            componentPosition(component);
+
+        const terminals =
+            TYPES[component.type]?.terminals || [];
+
+        const index =
+            terminals.indexOf(terminal);
+
+        if (index === -1) {
+            return { x, y };
+        }
+
+        const count = terminals.length;
+
+        if (count === 1) {
+            return {
+                x,
+                y: y + 45
+            };
+        }
+
+        if (count === 2) {
+            return {
+                x:
+                    x +
+                    (index === 0
+                        ? -50
+                        : 50),
+                y
+            };
+        }
+
+        return {
+            x:
+                x +
+                (index === 0
+                    ? -55
+                    : index === 1
+                    ? 0
+                    : 55),
+            y: y + 42
+        };
+    }
+
+    function renderCircuit() {
+        const svg =
+            byId("circuitCanvas");
+
+        if (!svg) return;
+
+        const wiresLayer =
+            byId("wiresLayer");
+
+        const componentsLayer =
+            byId("componentsLayer");
+
+        const terminalsLayer =
+            byId("terminalsLayer");
+
+        if (!wiresLayer ||
+            !componentsLayer ||
+            !terminalsLayer) {
+            return;
+        }
+
+        wiresLayer.innerHTML = "";
+        componentsLayer.innerHTML = "";
+        terminalsLayer.innerHTML = "";
+
+        renderWires(wiresLayer);
+
+        for (const component of state.components) {
+            renderComponent(
+                componentsLayer,
+                terminalsLayer,
+                component
+            );
+        }
+
+        renderTemporaryWire();
+        updateSVGTransform();
+        updateEmptyCanvas();
+    }
+
+    function renderWires(layer) {
+        for (const wire of state.wires) {
+            const fromComponent =
+                getComponent(
+                    wire.from.componentId
+                );
+
+            const toComponent =
+                getComponent(
+                    wire.to.componentId
+                );
+
+            if (!fromComponent ||
+                !toComponent) {
+                continue;
+            }
+
+            const p1 =
+                terminalPosition(
+                    fromComponent,
+                    wire.from.terminal
+                );
+
+            const p2 =
+                terminalPosition(
+                    toComponent,
+                    wire.to.terminal
+                );
+
+            const selected =
+                state.selectedWireId === wire.id;
 
             const line =
-                document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "line"
+                svgElement("line", {
+                    x1: p1.x,
+                    y1: p1.y,
+                    x2: p2.x,
+                    y2: p2.y,
+                    class:
+                        `circuit-wire ${
+                            selected
+                                ? "selected"
+                                : ""
+                        } ${
+                            wire.continuity
+                                ? ""
+                                : "broken"
+                        }`,
+                    "data-wire-id": wire.id
+                });
+
+            line.style.stroke =
+                selected
+                    ? CONFIG.colors.selected
+                    : CONFIG.colors.wire;
+
+            line.style.strokeWidth =
+                selected ? "5" : "3";
+
+            if (!wire.continuity) {
+                line.setAttribute(
+                    "stroke-dasharray",
+                    "8 8"
                 );
-
-
-            line.setAttribute(
-                "class",
-                "wire-line"
-            );
-
-
-            if (
-                ElectriciteFOBAS.running &&
-                isCircuitConnected()
-            ) {
-
-                line.classList.add(
-                    "powered"
-                );
-
             }
-
-
-            line.setAttribute(
-                "x1",
-                from.x
-            );
-
-
-            line.setAttribute(
-                "y1",
-                from.y
-            );
-
-
-            line.setAttribute(
-                "x2",
-                to.x
-            );
-
-
-            line.setAttribute(
-                "y2",
-                to.y
-            );
-
-
-            line.dataset.wireId =
-                wire.id;
-
 
             line.addEventListener(
                 "click",
                 event => {
-
                     event.stopPropagation();
 
-                    if (
-                        ElectriciteFOBAS.activeTool ===
-                        "delete"
-                    ) {
-
-                        deleteWire(
-                            wire.id
-                        );
-
+                    if (state.tool === "delete") {
+                        deleteWire(wire.id);
+                        return;
                     }
 
+                    state.selectedWireId = wire.id;
+                    state.selectedComponentId = null;
+
+                    renderInspector();
+                    renderCircuit();
                 }
             );
 
+            layer.appendChild(line);
+        }
+    }
 
-            layer.appendChild(
-                line
+    function renderComponent(
+        componentLayer,
+        terminalsLayer,
+        component
+    ) {
+        const group =
+            svgElement("g", {
+                class:
+                    `circuit-component ${
+                        state.selectedComponentId ===
+                        component.id
+                            ? "selected"
+                            : ""
+                    }`,
+                "data-component-id":
+                    component.id,
+                transform:
+                    `translate(${component.x},${component.y})`
+            });
+
+        const box =
+            svgElement("rect", {
+                x: -42,
+                y: -28,
+                width: 84,
+                height: 56,
+                rx: 10,
+                class: "component-body"
+            });
+
+        const icon =
+            svgElement("text", {
+                x: 0,
+                y: -2,
+                "text-anchor": "middle",
+                class: "component-icon"
+            });
+
+        icon.textContent =
+            TYPES[component.type]?.icon || "?";
+
+        const label =
+            svgElement("text", {
+                x: 0,
+                y: 45,
+                "text-anchor": "middle",
+                class: "component-label"
+            });
+
+        label.textContent =
+            component.name;
+
+        group.appendChild(box);
+        group.appendChild(icon);
+        group.appendChild(label);
+
+        group.addEventListener(
+            "click",
+            event => {
+                event.stopPropagation();
+
+                if (state.tool === "delete") {
+                    deleteComponent(component.id);
+                    return;
+                }
+
+                if (state.tool === "wire") {
+                    startWireFromComponent(component);
+                    return;
+                }
+
+                state.selectedComponentId =
+                    component.id;
+
+                state.selectedWireId = null;
+
+                renderInspector();
+                renderCircuit();
+            }
+        );
+
+        componentLayer.appendChild(group);
+
+        const terminals =
+            TYPES[component.type]?.terminals || [];
+
+        terminals.forEach(
+            terminalName => {
+                const local =
+                    terminalPosition(
+                        {
+                            ...component,
+                            x: 0,
+                            y: 0
+                        },
+                        terminalName
+                    );
+
+                const circle =
+                    svgElement("circle", {
+                        cx:
+                            component.x +
+                            local.x,
+                        cy:
+                            component.y +
+                            local.y,
+                        r: 7,
+                        class:
+                            `component-terminal terminal-${terminalName}`,
+                        "data-component-id":
+                            component.id,
+                        "data-terminal":
+                            terminalName
+                    });
+
+                circle.addEventListener(
+                    "click",
+                    event => {
+                        event.stopPropagation();
+
+                        if (
+                            state.tool ===
+                            "wire"
+                        ) {
+                            selectTerminal(
+                                component.id,
+                                terminalName
+                            );
+                        }
+                    }
+                );
+
+                terminalsLayer.appendChild(circle);
+            }
+        );
+    }
+
+    function startWireFromComponent(component) {
+        const terminals =
+            TYPES[component.type]?.terminals || [];
+
+        if (!terminals.length) return;
+
+        selectTerminal(
+            component.id,
+            terminals[0]
+        );
+    }
+
+    function selectTerminal(
+        componentId,
+        terminalName
+    ) {
+        const point =
+            getTerminal(
+                componentId,
+                terminalName
             );
 
+        if (!point) return;
+
+        if (!state.wireStart) {
+            state.wireStart = point;
+
+            toast(
+                `Première borne sélectionnée : ${terminalName}.`,
+                "info"
+            );
+
+            renderWireHelp();
+            return;
         }
-    );
 
-}
+        createWire(
+            state.wireStart,
+            point
+        );
 
+        state.wireStart = null;
 
-/* ============================================================
-   DELETE
-   ============================================================ */
-
-function deleteComponent(id) {
-
-    const component =
-        getComponent(id);
-
-
-    if (!component) {
-
-        return;
-
+        renderWireHelp();
     }
 
+    function renderTemporaryWire() {
+        const layer =
+            byId("temporaryWireLayer");
 
-    ElectriciteFOBAS.components =
-        ElectriciteFOBAS.components.filter(
-            item =>
-                item.id !== id
-        );
+        if (!layer) return;
 
+        layer.innerHTML = "";
 
-    ElectriciteFOBAS.wires =
-        ElectriciteFOBAS.wires.filter(
-            wire =>
-                wire.from !== id &&
-                wire.to !== id
-        );
+        if (!state.wireStart) return;
 
+        const component =
+            getComponent(
+                state.wireStart.componentId
+            );
 
-    if (
-        ElectriciteFOBAS.selectedComponentId ===
-        id
-    ) {
+        if (!component) return;
 
-        ElectriciteFOBAS.selectedComponentId =
-            null;
+        const p =
+            terminalPosition(
+                component,
+                state.wireStart.terminal
+            );
 
+        const circle =
+            svgElement("circle", {
+                cx: p.x,
+                cy: p.y,
+                r: 10,
+                class: "wire-start-marker"
+            });
+
+        layer.appendChild(circle);
     }
 
+    function renderWireHelp() {
+        const help =
+            byId("canvasWireHelp");
 
-    renderAll();
+        if (!help) return;
 
-    showToast(
-        `${component.name} supprimé.`,
-        "warning"
-    );
+        if (state.tool === "wire") {
+            help.classList.remove("hidden");
+        } else {
+            help.classList.add("hidden");
+        }
+    }
 
+    function updateEmptyCanvas() {
+        const message =
+            byId("canvasEmptyMessage");
 
-    saveSimulationSilently();
+        if (!message) return;
 
-}
+        if (state.components.length === 0) {
+            message.classList.remove("hidden");
+        } else {
+            message.classList.add("hidden");
+        }
+    }
 
+    function updateSVGTransform() {
+        const svg =
+            byId("circuitCanvas");
 
-function deleteWire(id) {
+        if (!svg) return;
 
-    ElectriciteFOBAS.wires =
-        ElectriciteFOBAS.wires.filter(
-            wire =>
-                wire.id !== id
-        );
+        const group =
+            svg.querySelector(
+                ".simulation-transform-group"
+            );
 
+        if (!group) {
+            const g =
+                svgElement("g", {
+                    class:
+                        "simulation-transform-group"
+                });
 
-    renderAll();
-
-    showToast(
-        "Connexion supprimée.",
-        "warning"
-    );
-
-
-    saveSimulationSilently();
-
-}
-
-
-/* ============================================================
-   INSPECTOR
-   ============================================================ */
-
-function bindInspector() {
-
-    $("#deleteSelectedBtn")
-        .addEventListener(
-            "click",
-            () => {
+            while (svg.firstChild) {
+                const child =
+                    svg.firstChild;
 
                 if (
-                    ElectriciteFOBAS.selectedComponentId
+                    child.id ===
+                    "gridPattern"
                 ) {
-
-                    deleteComponent(
-                        ElectriciteFOBAS.selectedComponentId
-                    );
-
+                    break;
                 }
 
+                svg.removeChild(child);
             }
-        );
-
-
-    $("#inspectorResistance")
-        .addEventListener(
-            "change",
-            event => {
-
-                const component =
-                    getSelectedComponent();
-
-                if (!component) {
-
-                    return;
-
-                }
-
-
-                component.resistance =
-                    Math.max(
-                        .1,
-                        Number(
-                            event.target.value
-                        ) || .1
-                    );
-
-
-                renderAll();
-
-                updateMeasurements();
-
-                saveSimulationSilently();
-
-            }
-        );
-
-
-    $("#inspectorPower")
-        .addEventListener(
-            "change",
-            event => {
-
-                const component =
-                    getSelectedComponent();
-
-                if (!component) {
-
-                    return;
-
-                }
-
-
-                component.power =
-                    Math.max(
-                        1,
-                        Number(
-                            event.target.value
-                        ) || 1
-                    );
-
-
-                renderAll();
-
-                updateMeasurements();
-
-                saveSimulationSilently();
-
-            }
-        );
-
-
-    $("#inspectorSwitchState")
-        .addEventListener(
-            "change",
-            event => {
-
-                const component =
-                    getSelectedComponent();
-
-                if (!component) {
-
-                    return;
-
-                }
-
-
-                component.switchState =
-                    event.target.value;
-
-
-                renderAll();
-
-                updateMeasurements();
-
-                saveSimulationSilently();
-
-            }
-        );
-
-}
-
-
-function updateInspector() {
-
-    const component =
-        getSelectedComponent();
-
-
-    if (!component) {
-
-        $("#inspectorEmpty")
-            .classList.remove(
-                "hidden"
-            );
-
-        $("#inspectorContent")
-            .classList.add(
-                "hidden"
-            );
-
-        return;
-
+        }
     }
 
+    /* =========================================================
+       14. INSPECTEUR
+    ========================================================= */
 
-    $("#inspectorEmpty")
-        .classList.add(
-            "hidden"
+    function renderInspector() {
+        const component =
+            getComponent(
+                state.selectedComponentId
+            );
+
+        if (!component) {
+            hide("inspectorContent");
+            show("inspectorEmpty");
+            renderWireInspector();
+            return;
+        }
+
+        show("inspectorContent");
+        hide("inspectorEmpty");
+        hide("wireInspectorContent");
+
+        text(
+            "inspectorIcon",
+            TYPES[component.type]?.icon || "⚡"
         );
 
-
-    $("#inspectorContent")
-        .classList.remove(
-            "hidden"
+        text(
+            "inspectorTitle",
+            component.name
         );
 
-
-    $("#inspectorIcon")
-        .textContent =
-        component.icon;
-
-
-    $("#inspectorTitle")
-        .textContent =
-        component.name;
-
-
-    $("#inspectorDescription")
-        .textContent =
-        component.description;
-
-
-    $("#inspectorId")
-        .value =
-        component.id;
-
-
-    $("#inspectorResistance")
-        .value =
-        component.resistance || "";
-
-
-    $("#inspectorPower")
-        .value =
-        component.power || "";
-
-
-    $("#inspectorSwitchState")
-        .value =
-        component.switchState || "off";
-
-
-    $("#resistanceProperty")
-        .style.display =
-        (
-            component.type === "resistor" ||
-            component.type === "lamp" ||
-            component.type === "motor"
-        )
-            ? "block"
-            : "none";
-
-
-    $("#powerProperty")
-        .style.display =
-        (
-            component.type === "lamp" ||
-            component.type === "motor"
-        )
-            ? "block"
-            : "none";
-
-
-    $("#switchProperty")
-        .style.display =
-        (
-            component.type === "switch" ||
-            component.type === "breaker"
-        )
-            ? "block"
-            : "none";
-
-}
-
-
-/* ============================================================
-   TOOLBAR
-   ============================================================ */
-
-function bindToolbar() {
-
-    $("#runSimulationBtn")
-        .addEventListener(
-            "click",
-            runSimulation
+        text(
+            "inspectorDescription",
+            TYPES[component.type]?.description || ""
         );
 
-
-    $("#stopSimulationBtn")
-        .addEventListener(
-            "click",
-            stopSimulation
+        text(
+            "inspectorId",
+            component.id
         );
 
+        text(
+            "inspectorType",
+            component.type
+        );
 
-    $("#voltageSelector")
-        .addEventListener(
-            "change",
-            event => {
+        setValue(
+            "inspectorX",
+            Math.round(component.x)
+        );
 
-                ElectriciteFOBAS.voltage =
-                    Number(
-                        event.target.value
+        setValue(
+            "inspectorY",
+            Math.round(component.y)
+        );
+
+        hide("resistanceProperty");
+        hide("powerProperty");
+        hide("breakerRatingProperty");
+        hide("rcdRatingProperty");
+        hide("switchProperty");
+        hide("breakerStateProperty");
+
+        if (
+            component.type ===
+            "resistor"
+        ) {
+            show("resistanceProperty");
+
+            setValue(
+                "inspectorResistance",
+                component.resistance
+            );
+        }
+
+        if (
+            [
+                "lamp",
+                "outlet",
+                "motor"
+            ].includes(component.type)
+        ) {
+            show("powerProperty");
+
+            setValue(
+                "inspectorPower",
+                component.power
+            );
+        }
+
+        if (
+            component.type ===
+            "breaker"
+        ) {
+            show("breakerRatingProperty");
+            show("breakerStateProperty");
+
+            setValue(
+                "inspectorBreakerRating",
+                component.rating
+            );
+
+            setValue(
+                "inspectorBreakerState",
+                component.state
+            );
+        }
+
+        if (
+            component.type ===
+            "rcd"
+        ) {
+            show("rcdRatingProperty");
+
+            setValue(
+                "inspectorRcdRating",
+                component.rcdRating
+            );
+        }
+
+        if (
+            component.type ===
+            "switch" ||
+            component.type ===
+            "twoWaySwitch"
+        ) {
+            show("switchProperty");
+
+            setValue(
+                "inspectorSwitchState",
+                component.state
+            );
+        }
+
+        renderWireInspector();
+    }
+
+    function renderWireInspector() {
+        const wire =
+            state.wires.find(
+                w =>
+                    w.id ===
+                    state.selectedWireId
+            );
+
+        if (!wire) {
+            hide("wireInspectorContent");
+            return;
+        }
+
+        hide("inspectorContent");
+        hide("inspectorEmpty");
+        show("wireInspectorContent");
+
+        text(
+            "inspectorWireId",
+            wire.id
+        );
+
+        text(
+            "inspectorWireFrom",
+            `${wire.from.componentId} / ${wire.from.terminal}`
+        );
+
+        text(
+            "inspectorWireTo",
+            `${wire.to.componentId} / ${wire.to.terminal}`
+        );
+
+        setValue(
+            "inspectorWireGauge",
+            wire.gauge
+        );
+
+        setValue(
+            "inspectorWireContinuity",
+            wire.continuity
+                ? "true"
+                : "false"
+        );
+    }
+
+    function updateSelectedComponentProperty(
+        property,
+        value
+    ) {
+        const component =
+            getComponent(
+                state.selectedComponentId
+            );
+
+        if (!component) return;
+
+        if (
+            [
+                "x",
+                "y",
+                "power",
+                "resistance",
+                "rating",
+                "rcdRating"
+            ].includes(property)
+        ) {
+            value = Number(value);
+        }
+
+        component[property] = value;
+
+        calculate();
+        renderAll();
+    }
+
+    /* =========================================================
+       15. VUES
+    ========================================================= */
+
+    function setView(view) {
+        state.activeView = view;
+
+        $$(".nav-item").forEach(item => {
+            item.classList.toggle(
+                "active",
+                item.dataset.view === view
+            );
+        });
+
+        $$(".app-view").forEach(item => {
+            item.classList.toggle(
+                "active",
+                item.id === `view-${view}`
+            );
+        });
+
+        renderAll();
+    }
+
+    /* =========================================================
+       16. OUTILS
+    ========================================================= */
+
+    function setTool(tool) {
+        state.tool = tool;
+
+        $$(".tool-button").forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.tool === tool
+            );
+        });
+
+        $$(".tool-large-card").forEach(card => {
+            card.classList.toggle(
+                "active",
+                card.dataset.toolSelect === tool
+            );
+        });
+
+        text(
+            "toolModeLabel",
+            toolLabel(tool)
+        );
+
+        if (tool !== "wire") {
+            state.wireStart = null;
+        }
+
+        renderWireHelp();
+        renderCircuit();
+    }
+
+    function toolLabel(tool) {
+        const labels = {
+            select: "Sélection",
+            wire: "Câblage",
+            delete: "Suppression",
+            voltmeter: "Voltmètre",
+            ammeter: "Ampèremètre",
+            ohmmeter: "Ohmmètre",
+            continuity: "Continuité"
+        };
+
+        return labels[tool] || tool;
+    }
+
+    /* =========================================================
+       17. MULTIMÈTRE
+    ========================================================= */
+
+    function setMeterMode(mode) {
+        state.meterMode = mode;
+
+        $$(".meter-mode-button").forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.meterMode === mode
+            );
+        });
+
+        text(
+            "multimeterMode",
+            meterModeLabel(mode)
+        );
+
+        calculateMeter();
+
+        toast(
+            `Mode multimètre : ${meterModeLabel(mode)}.`,
+            "info"
+        );
+    }
+
+    function meterModeLabel(mode) {
+        return {
+            voltage: "Tension",
+            current: "Courant",
+            resistance: "Résistance",
+            continuity: "Continuité"
+        }[mode] || mode;
+    }
+
+    function calculateMeter() {
+        calculate();
+
+        let value = 0;
+        let unit = "";
+
+        switch (state.meterMode) {
+            case "voltage":
+                value =
+                    state.measurements.voltage;
+                unit = "V";
+                break;
+
+            case "current":
+                value =
+                    state.measurements.current;
+                unit = "A";
+                break;
+
+            case "resistance":
+                value =
+                    state.measurements.resistance;
+
+                unit =
+                    value === Infinity
+                        ? "OL"
+                        : "Ω";
+                break;
+
+            case "continuity":
+                value =
+                    state.measurements.continuity
+                        ? "BEEP"
+                        : "OPEN";
+
+                unit = "";
+                break;
+        }
+
+        text(
+            "multimeterValue",
+            typeof value === "number"
+                ? round(value, 3)
+                : value
+        );
+
+        text(
+            "multimeterUnit",
+            unit
+        );
+
+        text(
+            "multimeterDisplay",
+            typeof value === "number"
+                ? `${round(value, 3)} ${unit}`
+                : value
+        );
+    }
+
+    /* =========================================================
+       18. TABLEAU ÉLECTRIQUE
+    ========================================================= */
+
+    function updatePanel() {
+        const current =
+            state.measurements.current;
+
+        const power =
+            state.measurements.power;
+
+        const protection =
+            state.trips.main
+                ? "Disjoncteur déclenché"
+                : state.trips.rcd
+                ? "Différentiel déclenché"
+                : "Protection normale";
+
+        text(
+            "mainBreakerStatus",
+            state.trips.main
+                ? "TRIPPED"
+                : "ON"
+        );
+
+        text(
+            "mainBreakerRating",
+            `${getMainBreakerRating()} A`
+        );
+
+        text(
+            "rcdStatus",
+            state.trips.rcd
+                ? "TRIPPED"
+                : "ON"
+        );
+
+        text(
+            "rcdSensitivity",
+            `${getRcdRating()} mA`
+        );
+
+        text(
+            "rcdFaultIndicator",
+            state.faults.earthFault
+                ? "DÉFAUT"
+                : "OK"
+        );
+
+        text(
+            "phaseBusState",
+            state.trips.main
+                ? "COUPÉ"
+                : "ACTIF"
+        );
+
+        text(
+            "neutralBusState",
+            "ACTIF"
+        );
+
+        text(
+            "earthBusState",
+            "ACTIF"
+        );
+
+        text(
+            "panelVoltage",
+            `${round(state.voltage, 1)} V`
+        );
+
+        text(
+            "panelCurrent",
+            `${round(current, 3)} A`
+        );
+
+        text(
+            "panelPower",
+            `${round(power, 1)} W`
+        );
+
+        text(
+            "panelProtectionState",
+            protection
+        );
+
+        updateBranchBreaker(
+            "lighting",
+            state.trips.lighting
+        );
+
+        updateBranchBreaker(
+            "outlet",
+            state.trips.outlet
+        );
+
+        updateBranchBreaker(
+            "heating",
+            state.trips.heating
+        );
+
+        updateBranchBreaker(
+            "motor",
+            state.trips.motor
+        );
+    }
+
+    function updateBranchBreaker(name, tripped) {
+        text(
+            `${name}BreakerIndicator`,
+            tripped ? "●" : "●"
+        );
+
+        text(
+            `${name}BreakerState`,
+            tripped ? "TRIPPED" : "ON"
+        );
+    }
+
+    function getMainBreakerRating() {
+        const breaker =
+            findBreakers()[0];
+
+        return Number(
+            breaker?.rating ||
+            CONFIG.defaultBreakerRating
+        );
+    }
+
+    function getRcdRating() {
+        const rcd =
+            findRCDs()[0];
+
+        return Number(
+            rcd?.rcdRating ||
+            CONFIG.defaultRcdRating
+        );
+    }
+
+    function toggleMainBreaker() {
+        if (state.trips.main) {
+            state.trips.main = false;
+
+            const breaker =
+                findBreakers()[0];
+
+            if (breaker) {
+                breaker.state = "on";
+            }
+
+            toast(
+                "Disjoncteur principal réarmé.",
+                "success"
+            );
+        } else {
+            state.trips.main = true;
+
+            const breaker =
+                findBreakers()[0];
+
+            if (breaker) {
+                breaker.state = "tripped";
+            }
+
+            toast(
+                "Disjoncteur principal ouvert.",
+                "warning"
+            );
+        }
+
+        calculate();
+        renderAll();
+    }
+
+    /* =========================================================
+       19. MESURES
+    ========================================================= */
+
+    function renderMeasurements() {
+        calculate();
+
+        text(
+            "measureVoltage",
+            `${round(state.measurements.voltage, 2)} V`
+        );
+
+        text(
+            "measureCurrent",
+            `${round(state.measurements.current, 3)} A`
+        );
+
+        text(
+            "measureResistance",
+            state.measurements.resistance === Infinity
+                ? "∞ Ω"
+                : `${round(
+                    state.measurements.resistance,
+                    2
+                )} Ω`
+        );
+
+        text(
+            "measurePower",
+            `${round(state.measurements.power, 1)} W`
+        );
+
+        text(
+            "measureCircuitState",
+            state.running
+                ? "Simulation active"
+                : "Simulation arrêtée"
+        );
+
+        text(
+            "measureContinuity",
+            state.measurements.continuity
+                ? "CONTINUE"
+                : "OUVERTE"
+        );
+
+        text(
+            "measureLeakage",
+            `${round(
+                state.measurements.leakage,
+                3
+            )} A`
+        );
+
+        renderMeasurementLog();
+    }
+
+    function renderMeasurementLog() {
+        const container =
+            byId("measurementLog");
+
+        if (!container) return;
+
+        const entries =
+            state.logs.filter(
+                entry =>
+                    entry.type === "measurement"
+            );
+
+        if (!entries.length) {
+            container.innerHTML =
+                "<div>Aucune mesure enregistrée.</div>";
+
+            return;
+        }
+
+        container.innerHTML =
+            entries
+                .slice(0, 20)
+                .map(
+                    entry =>
+                        `<div class="measurement-log-entry">
+                            <span>${escapeHTML(entry.time)}</span>
+                            <strong>${escapeHTML(entry.message)}</strong>
+                        </div>`
+                )
+                .join("");
+    }
+
+    /* =========================================================
+       20. DIAGNOSTIC
+    ========================================================= */
+
+    function runDiagnostic() {
+        calculate();
+
+        const details = [];
+        const procedure = [];
+
+        let status = "ok";
+        let title = "Circuit conforme";
+        let summary =
+            "Aucune anomalie critique détectée.";
+
+        if (state.faults.shortCircuit) {
+            status = "danger";
+
+            title = "Court-circuit détecté";
+
+            summary =
+                "Une liaison anormale provoque une très forte surintensité.";
+
+            details.push(
+                "Présence d'un défaut Phase-Neutre."
+            );
+
+            procedure.push(
+                "Mettre le circuit hors tension."
+            );
+
+            procedure.push(
+                "Localiser la liaison directe entre phase et neutre."
+            );
+
+            procedure.push(
+                "Supprimer le défaut avant réarmement."
+            );
+        } else if (state.faults.earthFault) {
+            status = "warning";
+
+            title = "Défaut Phase-Terre";
+
+            summary =
+                "Une fuite de courant vers le conducteur de protection est détectée.";
+
+            details.push(
+                "Le différentiel peut déclencher."
+            );
+
+            procedure.push(
+                "Couper l'alimentation."
+            );
+
+            procedure.push(
+                "Contrôler l'isolement du circuit."
+            );
+
+            procedure.push(
+                "Identifier l'appareil en défaut."
+            );
+        } else if (
+            state.faults.overload ||
+            state.measurements.current >
+                getMainBreakerRating()
+        ) {
+            status = "warning";
+
+            title = "Surcharge détectée";
+
+            summary =
+                "Le courant demandé dépasse le calibre de protection.";
+
+            details.push(
+                `Courant mesuré : ${round(
+                    state.measurements.current,
+                    3
+                )} A.`
+            );
+
+            details.push(
+                `Calibre : ${getMainBreakerRating()} A.`
+            );
+
+            procedure.push(
+                "Identifier les charges connectées."
+            );
+
+            procedure.push(
+                "Réduire la puissance demandée."
+            );
+
+            procedure.push(
+                "Vérifier le calibre du disjoncteur."
+            );
+        } else if (
+            state.faults.openConductor
+        ) {
+            status = "warning";
+
+            title = "Conducteur coupé";
+
+            summary =
+                "La continuité du circuit est interrompue.";
+
+            details.push(
+                "Le test de continuité indique une ouverture."
+            );
+
+            procedure.push(
+                "Effectuer un test de continuité segment par segment."
+            );
+
+            procedure.push(
+                "Localiser le conducteur interrompu."
+            );
+        } else if (
+            state.components.length === 0
+        ) {
+            status = "warning";
+
+            title = "Aucun circuit";
+
+            summary =
+                "Ajoutez des composants afin de construire un circuit.";
+        }
+
+        state.diagnostic = {
+            status,
+            title,
+            summary,
+            details,
+            procedure
+        };
+
+        renderDiagnostic();
+
+        log(
+            `Diagnostic : ${title}.`,
+            status === "danger"
+                ? "danger"
+                : status === "warning"
+                ? "warning"
+                : "success"
+        );
+
+        toast(
+            title,
+            status === "danger"
+                ? "danger"
+                : status === "warning"
+                ? "warning"
+                : "success"
+        );
+    }
+
+    function renderDiagnostic() {
+        text(
+            "diagnosticTitle",
+            state.diagnostic.title
+        );
+
+        text(
+            "diagnosticSummary",
+            state.diagnostic.summary
+        );
+
+        html(
+            "diagnosticDetails",
+            state.diagnostic.details.length
+                ? state.diagnostic.details
+                    .map(
+                        item =>
+                            `<div>• ${escapeHTML(item)}</div>`
+                    )
+                    .join("")
+                : "<div>Aucun défaut critique.</div>"
+        );
+
+        html(
+            "diagnosticProcedure",
+            state.diagnostic.procedure.length
+                ? state.diagnostic.procedure
+                    .map(
+                        (item, index) =>
+                            `<div>
+                                <strong>${index + 1}.</strong>
+                                ${escapeHTML(item)}
+                            </div>`
+                    )
+                    .join("")
+                : "<div>Le circuit peut être vérifié normalement.</div>"
+        );
+
+        const icon =
+            byId("diagnosticIcon");
+
+        if (icon) {
+            icon.textContent =
+                state.diagnostic.status ===
+                "danger"
+                    ? "⚠️"
+                    : state.diagnostic.status ===
+                      "warning"
+                    ? "🔎"
+                    : "✓";
+        }
+    }
+
+    /* =========================================================
+       21. DÉFAUTS
+    ========================================================= */
+
+    function toggleFault(name) {
+        if (
+            !Object.prototype.hasOwnProperty.call(
+                state.faults,
+                name
+            )
+        ) {
+            return;
+        }
+
+        state.faults[name] =
+            !state.faults[name];
+
+        log(
+            `${name} : ${
+                state.faults[name]
+                    ? "ACTIVÉ"
+                    : "DÉSACTIVÉ"
+            }`,
+            state.faults[name]
+                ? "warning"
+                : "info"
+        );
+
+        calculate();
+        renderAll();
+    }
+
+    /* =========================================================
+       22. MISSIONS
+    ========================================================= */
+
+    function renderMissionGrid() {
+        const grid =
+            byId("missionGrid");
+
+        if (!grid) return;
+
+        const filter =
+            document.querySelector(
+                ".mission-filter.active"
+            )?.dataset.missionLevel ||
+            "all";
+
+        const missions =
+            MISSIONS.filter(
+                mission =>
+                    filter === "all" ||
+                    mission.level === filter
+            );
+
+        grid.innerHTML =
+            missions
+                .map(
+                    mission => `
+                    <button
+                        class="mission-card"
+                        type="button"
+                        data-mission-id="${mission.id}">
+                        <span class="mission-card-icon">⚡</span>
+                        <strong>${escapeHTML(
+                            mission.title
+                        )}</strong>
+                        <small>${escapeHTML(
+                            mission.level
+                        )}</small>
+                        <p>${escapeHTML(
+                            mission.description
+                        )}</p>
+                    </button>
+                `
+                )
+                .join("");
+
+        $$(".mission-card", grid).forEach(card => {
+            card.addEventListener(
+                "click",
+                () =>
+                    startMission(
+                        card.dataset.missionId
+                    )
+            );
+        });
+
+        const progress =
+            MISSIONS.filter(
+                mission =>
+                    localStorage.getItem(
+                        `${APP_KEY}_${mission.id}_completed`
+                    ) === "true"
+            ).length;
+
+        text(
+            "missionProgressValue",
+            `${progress}/${MISSIONS.length}`
+        );
+    }
+
+    function startMission(id) {
+        const mission =
+            MISSIONS.find(
+                item => item.id === id
+            );
+
+        if (!mission) return;
+
+        state.mission = {
+            activeId: id,
+            level: mission.level,
+            stepIndex: 0,
+            score: 0,
+            completed: false
+        };
+
+        show("missionWorkspace");
+
+        text(
+            "activeMissionTitle",
+            mission.title
+        );
+
+        text(
+            "activeMissionDescription",
+            mission.description
+        );
+
+        text(
+            "activeMissionObjective",
+            mission.objective
+        );
+
+        text(
+            "activeMissionLevel",
+            mission.level
+        );
+
+        text(
+            "activeMissionStepCount",
+            `${mission.steps.length} étapes`
+        );
+
+        text(
+            "activeMissionScore",
+            "0"
+        );
+
+        text(
+            "activeMissionState",
+            "En cours"
+        );
+
+        renderMissionSteps();
+
+        toast(
+            `Mission ouverte : ${mission.title}.`,
+            "info"
+        );
+    }
+
+    function renderMissionSteps() {
+        const container =
+            byId("missionSteps");
+
+        if (!container) return;
+
+        const mission =
+            MISSIONS.find(
+                item =>
+                    item.id ===
+                    state.mission.activeId
+            );
+
+        if (!mission) return;
+
+        container.innerHTML =
+            mission.steps
+                .map(
+                    (step, index) => `
+                    <div class="
+                        mission-step
+                        ${
+                            index <
+                            state.mission.stepIndex
+                                ? "completed"
+                                : ""
+                        }
+                        ${
+                            index ===
+                            state.mission.stepIndex
+                                ? "current"
+                                : ""
+                        }">
+                        <span>${index + 1}</span>
+                        <strong>${escapeHTML(
+                            step
+                        )}</strong>
+                    </div>
+                `
+                )
+                .join("");
+    }
+
+    function validateMission() {
+        const mission =
+            MISSIONS.find(
+                item =>
+                    item.id ===
+                    state.mission.activeId
+            );
+
+        if (!mission) {
+            toast(
+                "Aucune mission active.",
+                "warning"
+            );
+            return;
+        }
+
+        const valid =
+            evaluateMission(mission);
+
+        if (!valid) {
+            text(
+                "missionFeedback",
+                "Les conditions de cette étape ne sont pas encore satisfaites."
+            );
+
+            toast(
+                "Étape non validée.",
+                "warning"
+            );
+
+            return;
+        }
+
+        state.mission.score += 100;
+
+        state.mission.stepIndex++;
+
+        if (
+            state.mission.stepIndex >=
+            mission.steps.length
+        ) {
+            state.mission.completed = true;
+
+            localStorage.setItem(
+                `${APP_KEY}_${mission.id}_completed`,
+                "true"
+            );
+
+            text(
+                "activeMissionState",
+                "Mission terminée"
+            );
+
+            text(
+                "missionFeedback",
+                "Mission réussie. Toutes les étapes ont été validées."
+            );
+
+            toast(
+                "Mission réussie !",
+                "success"
+            );
+        } else {
+            text(
+                "missionFeedback",
+                "Étape validée. Continuez avec l'étape suivante."
+            );
+
+            toast(
+                "Étape validée.",
+                "success"
+            );
+        }
+
+        text(
+            "activeMissionScore",
+            String(state.mission.score)
+        );
+
+        renderMissionSteps();
+        renderMissionGrid();
+    }
+
+    function evaluateMission(mission) {
+        const index =
+            state.mission.stepIndex;
+
+        const components =
+            state.components;
+
+        switch (mission.id) {
+            case "mission-1":
+                return evaluateMission1(
+                    index,
+                    components
+                );
+
+            case "mission-2":
+                return evaluateMission2(
+                    index,
+                    components
+                );
+
+            case "mission-3":
+                return evaluateMission3(
+                    index,
+                    components
+                );
+
+            case "mission-4":
+                return evaluateMission4(
+                    index
+                );
+
+            case "mission-5":
+                return evaluateMission5(
+                    index
+                );
+
+            case "mission-6":
+                return evaluateMission6(
+                    index
+                );
+
+            case "mission-7":
+                return evaluateMission7(
+                    index,
+                    components
+                );
+
+            default:
+                return false;
+        }
+    }
+
+    function hasType(type) {
+        return state.components.some(
+            c => c.type === type
+        );
+    }
+
+    function evaluateMission1(index, components) {
+        switch (index) {
+            case 0:
+                return hasType("source");
+
+            case 1:
+                return hasType("breaker");
+
+            case 2:
+                return hasType("lamp");
+
+            case 3:
+                return hasPhasePath();
+
+            case 4:
+                return hasNeutralPath();
+
+            case 5:
+                return state.running;
+
+            default:
+                return false;
+        }
+    }
+
+    function evaluateMission2(index) {
+        switch (index) {
+            case 0:
+                return hasType("source");
+
+            case 1:
+                return hasType("breaker");
+
+            case 2:
+                return hasType("switch");
+
+            case 3:
+                return hasType("lamp");
+
+            case 4:
+                return hasPhasePath();
+
+            case 5:
+                return hasNeutralPath();
+
+            case 6: {
+                const sw =
+                    state.components.find(
+                        c => c.type === "switch"
                     );
 
+                return sw?.state === "closed";
+            }
 
-                $("#sidebarVoltage")
-                    .textContent =
-                    `${ElectriciteFOBAS.voltage} V`;
+            case 7:
+                return (
+                    state.running &&
+                    state.measurements.power > 0
+                );
 
+            default:
+                return false;
+        }
+    }
 
-                $("#footerVoltage")
-                    .textContent =
-                    `${ElectriciteFOBAS.voltage} V AC`;
+    function evaluateMission3(index) {
+        switch (index) {
+            case 0:
+                return hasType("source");
 
+            case 1:
+                return hasType("breaker");
 
-                updateMeasurements();
+            case 2:
+                return hasType("outlet");
 
-                saveSimulationSilently();
+            case 3:
+                return hasPhasePath();
 
+            case 4:
+                return hasNeutralPath();
+
+            case 5:
+                return hasEarthPath();
+
+            case 6:
+                return state.running;
+
+            default:
+                return false;
+        }
+    }
+
+    function evaluateMission4(index) {
+        switch (index) {
+            case 0:
+                return (
+                    getMainBreakerRating() ===
+                    16
+                );
+
+            case 1:
+                return (
+                    state.measurements.power >
+                    16 * state.voltage
+                );
+
+            case 2:
+                return state.running;
+
+            case 3:
+                return (
+                    state.measurements.current >
+                    16
+                );
+
+            case 4:
+                return state.trips.main;
+
+            case 5:
+                runDiagnostic();
+
+                return (
+                    state.diagnostic.title ===
+                    "Surcharge détectée"
+                );
+
+            default:
+                return false;
+        }
+    }
+
+    function evaluateMission5(index) {
+        switch (index) {
+            case 0:
+                return (
+                    hasType("source") &&
+                    hasType("breaker")
+                );
+
+            case 1:
+                return hasEarthPath();
+
+            case 2:
+                return state.faults.earthFault;
+
+            case 3:
+                return state.running;
+
+            case 4:
+                return state.trips.rcd;
+
+            case 5:
+                runDiagnostic();
+
+                return (
+                    state.diagnostic.title ===
+                    "Défaut Phase-Terre"
+                );
+
+            default:
+                return false;
+        }
+    }
+
+    function evaluateMission6(index) {
+        switch (index) {
+            case 0:
+                return state.components.length >= 2;
+
+            case 1:
+                return (
+                    state.meterMode ===
+                    "continuity"
+                );
+
+            case 2:
+                return true;
+
+            case 3:
+                return state.faults.openConductor;
+
+            case 4:
+                return (
+                    !state.measurements.continuity
+                );
+
+            case 5:
+                return (
+                    !state.measurements.continuity
+                );
+
+            default:
+                return false;
+        }
+    }
+
+    function evaluateMission7(index) {
+        switch (index) {
+            case 0:
+                return hasType("source");
+
+            case 1:
+                return hasType("breaker");
+
+            case 2:
+                return hasType("motor");
+
+            case 3:
+                return hasPhasePath();
+
+            case 4:
+                return hasNeutralPath();
+
+            case 5:
+                return hasEarthPath();
+
+            case 6:
+                return (
+                    state.running &&
+                    state.measurements.power > 0
+                );
+
+            case 7:
+                return (
+                    state.measurements.voltage >
+                    0
+                );
+
+            default:
+                return false;
+        }
+    }
+
+    function hasPhasePath() {
+        const source =
+            findSource();
+
+        if (!source) return false;
+
+        const nodes =
+            reachable(
+                terminalKey(
+                    source.id,
+                    "L"
+                )
+            );
+
+        return state.components.some(
+            component => {
+                if (
+                    [
+                        "source",
+                        "ground",
+                        "neutralBus",
+                        "earthBus"
+                    ].includes(component.type)
+                ) {
+                    return false;
+                }
+
+                return nodes.has(
+                    terminalKey(
+                        component.id,
+                        TYPES[
+                            component.type
+                        ]?.terminals?.[0]
+                    )
+                );
             }
         );
+    }
 
+    function hasNeutralPath() {
+        const source =
+            findSource();
 
-    $("#saveSimulationBtn")
-        .addEventListener(
-            "click",
-            () => {
+        if (!source) return false;
 
-                saveSimulation();
+        const nodes =
+            reachable(
+                terminalKey(
+                    source.id,
+                    "N"
+                )
+            );
 
-            }
+        return state.components.some(
+            component =>
+                ["lamp", "outlet", "resistor", "motor"]
+                    .includes(component.type) &&
+                nodes.has(
+                    terminalKey(
+                        component.id,
+                        "N"
+                    )
+                )
+        );
+    }
+
+    function hasEarthPath() {
+        const earthNode =
+            findEarthNode();
+
+        if (!earthNode) return false;
+
+        const nodes =
+            reachable(earthNode);
+
+        return state.components.some(
+            component =>
+                [
+                    "outlet",
+                    "motor"
+                ].includes(component.type) &&
+                nodes.has(
+                    terminalKey(
+                        component.id,
+                        "PE"
+                    )
+                )
+        );
+    }
+
+    /* =========================================================
+       23. CONSOLE
+    ========================================================= */
+
+    function renderConsole() {
+        const consoleElement =
+            byId("topologyConsole");
+
+        if (!consoleElement) return;
+
+        consoleElement.innerHTML =
+            state.logs
+                .slice(0, 30)
+                .map(
+                    entry => `
+                    <div class="console-line console-${escapeHTML(
+                        entry.type
+                    )}">
+                        <span>[${escapeHTML(
+                            entry.time
+                        )}]</span>
+                        ${escapeHTML(
+                            entry.message
+                        )}
+                    </div>
+                `
+                )
+                .join("");
+    }
+
+    /* =========================================================
+       24. STATISTIQUES
+    ========================================================= */
+
+    function renderStats() {
+        text(
+            "componentCount",
+            String(state.components.length)
         );
 
-
-    $("#resetSimulationBtn")
-        .addEventListener(
-            "click",
-            openResetModal
+        text(
+            "connectionCount",
+            String(state.wires.length)
         );
 
-
-    $("#cancelResetBtn")
-        .addEventListener(
-            "click",
-            closeResetModal
+        text(
+            "currentValue",
+            `${round(
+                state.measurements.current,
+                3
+            )} A`
         );
 
-
-    $("#confirmResetBtn")
-        .addEventListener(
-            "click",
-            resetSimulation
+        text(
+            "powerValue",
+            `${round(
+                state.measurements.power,
+                1
+            )} W`
         );
 
-}
-
-
-/* ============================================================
-   SIMULATION ENGINE
-   ============================================================ */
-
-function runSimulation() {
-
-    ElectriciteFOBAS.running =
-        true;
-
-
-    const diagnostic =
-        calculateCircuit();
-
-
-    if (
-        diagnostic.error
-    ) {
-
-        ElectriciteFOBAS.running =
-            false;
-
-
-        updateStatus(
-            diagnostic.message,
-            "error"
+        text(
+            "sidebarVoltage",
+            `${round(state.voltage, 1)} V`
         );
 
-
-        showToast(
-            diagnostic.message,
-            "error"
+        text(
+            "sidebarPhaseState",
+            state.trips.main
+                ? "Coupée"
+                : "Active"
         );
 
-    } else {
-
-        updateStatus(
-            "Simulation en cours",
-            "running"
+        text(
+            "sidebarNeutralState",
+            "Active"
         );
 
+        text(
+            "sidebarEarthState",
+            "Active"
+        );
 
-        showToast(
+        text(
+            "sidebarCircuitState",
+            state.running
+                ? "En marche"
+                : "Arrêté"
+        );
+
+        text(
+            "footerMode",
+            toolLabel(state.tool)
+        );
+
+        text(
+            "footerVoltage",
+            `${round(state.voltage, 1)} V`
+        );
+
+        text(
+            "footerTopologyState",
+            state.components.length
+                ? `${state.components.length} composants / ${state.wires.length} connexions`
+                : "Circuit vide"
+        );
+    }
+
+    /* =========================================================
+       25. COMPOSANTS — VUE CATALOGUE
+    ========================================================= */
+
+    function renderLargeComponentGrid() {
+        const grid =
+            byId("largeComponentGrid");
+
+        if (!grid) return;
+
+        grid.innerHTML =
+            Object.entries(TYPES)
+                .map(
+                    ([type, definition]) => `
+                    <button
+                        type="button"
+                        class="large-component-card"
+                        data-component="${type}">
+                        <span class="large-component-icon">
+                            ${definition.icon}
+                        </span>
+                        <strong>
+                            ${escapeHTML(
+                                definition.label
+                            )}
+                        </strong>
+                        <small>
+                            ${escapeHTML(
+                                definition.description
+                            )}
+                        </small>
+                    </button>
+                `
+                )
+                .join("");
+
+        $$(
+            "[data-component]",
+            grid
+        ).forEach(button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    addComponent(
+                        button.dataset.component
+                    );
+
+                    setView("laboratoire");
+                }
+            );
+        });
+    }
+
+    /* =========================================================
+       26. RECHERCHE COMPOSANTS
+    ========================================================= */
+
+    function filterComponentList(query) {
+        const value =
+            String(query || "")
+                .trim()
+                .toLowerCase();
+
+        $(
+            "#componentList"
+        )?.querySelectorAll(
+            "[data-component]"
+        ).forEach(button => {
+            const type =
+                button.dataset.component;
+
+            const label =
+                TYPES[type]?.label || "";
+
+            const visible =
+                !value ||
+                label
+                    .toLowerCase()
+                    .includes(value) ||
+                type
+                    .toLowerCase()
+                    .includes(value);
+
+            button.style.display =
+                visible ? "" : "none";
+        });
+    }
+
+    /* =========================================================
+       27. MODALE COMPOSANT
+    ========================================================= */
+
+    let componentInfoType = null;
+
+    function openComponentInfo(type) {
+        const definition =
+            TYPES[type];
+
+        if (!definition) return;
+
+        componentInfoType = type;
+
+        text(
+            "componentInfoIcon",
+            definition.icon
+        );
+
+        text(
+            "componentInfoTitle",
+            definition.label
+        );
+
+        text(
+            "componentInfoDescription",
+            definition.description
+        );
+
+        text(
+            "componentInfoTerminals",
+            definition.terminals.join(" • ")
+        );
+
+        show("componentInfoModal");
+    }
+
+    function closeComponentInfo() {
+        hide("componentInfoModal");
+
+        componentInfoType = null;
+    }
+
+    function addComponentFromInfo() {
+        if (!componentInfoType) return;
+
+        addComponent(
+            componentInfoType
+        );
+
+        closeComponentInfo();
+
+        setView("laboratoire");
+    }
+
+    /* =========================================================
+       28. SIMULATION
+    ========================================================= */
+
+    function runSimulation() {
+        state.running = true;
+
+        calculate();
+
+        text(
+            "simulationStatusText",
+            "Simulation active"
+        );
+
+        const light =
+            byId("simulationStatusLight");
+
+        if (light) {
+            light.classList.add("active");
+        }
+
+        log(
             "Simulation démarrée.",
             "success"
         );
 
-    }
-
-
-    updateMeasurements();
-
-    renderAll();
-
-}
-
-
-function stopSimulation() {
-
-    ElectriciteFOBAS.running =
-        false;
-
-
-    updateStatus(
-        "Simulation arrêtée",
-        "ready"
-    );
-
-
-    renderAll();
-
-    updateMeasurements();
-
-    showToast(
-        "Simulation arrêtée.",
-        "warning"
-    );
-
-}
-
-
-/* ============================================================
-   CIRCUIT CALCULATION
-   ============================================================ */
-
-function calculateCircuit() {
-
-    const source =
-        ElectriciteFOBAS.components.find(
-            component =>
-                component.type === "source"
-        );
-
-
-    if (!source) {
-
-        return {
-
-            error: true,
-
-            message:
-                "Aucune source d'alimentation n'est présente."
-
-        };
-
-    }
-
-
-    if (
-        ElectriciteFOBAS.wires.length === 0
-    ) {
-
-        return {
-
-            error: true,
-
-            message:
-                "Aucune connexion électrique n'est présente."
-
-        };
-
-    }
-
-
-    if (
-        !isCircuitConnected()
-    ) {
-
-        return {
-
-            error: true,
-
-            message:
-                "Le circuit ne forme pas encore un chemin électrique cohérent."
-
-        };
-
-    }
-
-
-    const switches =
-        ElectriciteFOBAS.components.filter(
-            component =>
-                (
-                    component.type === "switch" ||
-                    component.type === "breaker"
-                )
-        );
-
-
-    const openSwitch =
-        switches.some(
-            component =>
-                component.switchState !== "on"
-        );
-
-
-    if (openSwitch) {
-
-        return {
-
-            error: false,
-
-            open:
-                true,
-
-            message:
-                "Le circuit est correctement connecté mais une commande est ouverte."
-
-        };
-
-    }
-
-
-    return {
-
-        error: false,
-
-        open: false,
-
-        message:
-            "Circuit fermé et prêt pour la simulation."
-
-    };
-
-}
-
-
-/* ============================================================
-   GRAPH CONNECTIVITY
-   ============================================================ */
-
-function isCircuitConnected() {
-
-    if (
-        ElectriciteFOBAS.components.length < 2
-    ) {
-
-        return false;
-
-    }
-
-
-    const source =
-        ElectriciteFOBAS.components.find(
-            component =>
-                component.type === "source"
-        );
-
-
-    if (!source) {
-
-        return false;
-
-    }
-
-
-    const adjacency =
-        new Map();
-
-
-    ElectriciteFOBAS.components.forEach(
-        component => {
-
-            adjacency.set(
-                component.id,
-                []
-            );
-
-        }
-    );
-
-
-    ElectriciteFOBAS.wires.forEach(
-        wire => {
-
-            if (
-                adjacency.has(wire.from) &&
-                adjacency.has(wire.to)
-            ) {
-
-                adjacency
-                    .get(wire.from)
-                    .push(wire.to);
-
-                adjacency
-                    .get(wire.to)
-                    .push(wire.from);
-
-            }
-
-        }
-    );
-
-
-    const visited =
-        new Set();
-
-
-    const queue =
-        [source.id];
-
-
-    while (
-        queue.length > 0
-    ) {
-
-        const current =
-            queue.shift();
-
-
-        if (
-            visited.has(current)
-        ) {
-
-            continue;
-
-        }
-
-
-        visited.add(current);
-
-
-        const neighbors =
-            adjacency.get(current) || [];
-
-
-        neighbors.forEach(
-            neighbor => {
-
-                if (
-                    !visited.has(neighbor)
-                ) {
-
-                    queue.push(
-                        neighbor
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-    const activeReceivers =
-        ElectriciteFOBAS.components.filter(
-            component =>
-                (
-                    component.type === "lamp" ||
-                    component.type === "resistor" ||
-                    component.type === "motor"
-                )
-        );
-
-
-    if (
-        activeReceivers.length === 0
-    ) {
-
-        return false;
-
-    }
-
-
-    return activeReceivers.some(
-        receiver =>
-            visited.has(
-                receiver.id
-            )
-    );
-
-}
-
-
-/* ============================================================
-   POWERED STATE
-   ============================================================ */
-
-function isComponentPowered(
-    component
-) {
-
-    if (
-        !ElectriciteFOBAS.running
-    ) {
-
-        return false;
-
-    }
-
-
-    if (
-        !isCircuitConnected()
-    ) {
-
-        return false;
-
-    }
-
-
-    const calculation =
-        calculateCircuit();
-
-
-    if (
-        calculation.open
-    ) {
-
-        return false;
-
-    }
-
-
-    return (
-        component.type === "lamp" ||
-        component.type === "resistor" ||
-        component.type === "motor" ||
-        component.type === "outlet"
-    );
-
-}
-
-
-/* ============================================================
-   MEASUREMENTS
-   ============================================================ */
-
-function updateMeasurements() {
-
-    const result =
-        calculateMeasurementValues();
-
-
-    ElectriciteFOBAS.measurements =
-        result;
-
-
-    $("#measureVoltage")
-        .textContent =
-        formatNumber(
-            result.voltage,
-            2
-        );
-
-
-    $("#measureCurrent")
-        .textContent =
-        formatNumber(
-            result.current,
-            2
-        );
-
-
-    $("#measureResistance")
-        .textContent =
-        result.resistance === Infinity
-            ? "∞"
-            : formatNumber(
-                result.resistance,
-                2
-            );
-
-
-    $("#measurePower")
-        .textContent =
-        formatNumber(
-            result.power,
-            2
-        );
-
-
-    $("#powerValue")
-        .textContent =
-        `${formatNumber(result.power, 1)} W`;
-
-
-    $("#measureCircuitState")
-        .textContent =
-        result.circuitState;
-
-
-    addMeasurementLog(
-        result
-    );
-
-}
-
-
-function calculateMeasurementValues() {
-
-    const voltage =
-        ElectriciteFOBAS.voltage;
-
-
-    const calculation =
-        calculateCircuit();
-
-
-    if (
-        calculation.error ||
-        calculation.open
-    ) {
-
-        return {
-
-            voltage,
-
-            current: 0,
-
-            resistance: Infinity,
-
-            power: 0,
-
-            frequency: 50,
-
-            circuitState:
-                calculation.error
-                    ? "OUVERT"
-                    : "OUVERT"
-
-        };
-
-    }
-
-
-    const receivers =
-        ElectriciteFOBAS.components.filter(
-            component =>
-                (
-                    component.type === "lamp" ||
-                    component.type === "resistor" ||
-                    component.type === "motor"
-                )
-        );
-
-
-    if (
-        receivers.length === 0
-    ) {
-
-        return {
-
-            voltage,
-
-            current: 0,
-
-            resistance: Infinity,
-
-            power: 0,
-
-            frequency: 50,
-
-            circuitState: "OUVERT"
-
-        };
-
-    }
-
-
-    const totalResistance =
-        receivers.reduce(
-            (
-                total,
-                component
-            ) => {
-
-                return total +
-                    Math.max(
-                        .1,
-                        Number(
-                            component.resistance
-                        ) || .1
-                    );
-
-            },
-            0
-        );
-
-
-    const current =
-        voltage /
-        totalResistance;
-
-
-    const power =
-        voltage *
-        current;
-
-
-    return {
-
-        voltage,
-
-        current,
-
-        resistance:
-            totalResistance,
-
-        power,
-
-        frequency: 50,
-
-        circuitState:
-            "FERMÉ"
-
-    };
-
-}
-
-
-function addMeasurementLog(
-    values
-) {
-
-    const log =
-        $("#measurementLog");
-
-
-    if (!log) {
-
-        return;
-
-    }
-
-
-    const now =
-        new Date();
-
-
-    const time =
-        now.toLocaleTimeString(
-            "fr-FR",
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }
-        );
-
-
-    log.innerHTML = `
-        <div>
-            [${time}] Tension : ${formatNumber(values.voltage, 2)} V
-        </div>
-
-        <div>
-            [${time}] Courant : ${formatNumber(values.current, 3)} A
-        </div>
-
-        <div>
-            [${time}] Résistance : ${
-                values.resistance === Infinity
-                    ? "∞"
-                    : formatNumber(values.resistance, 2)
-            } Ω
-        </div>
-
-        <div>
-            [${time}] Puissance : ${formatNumber(values.power, 2)} W
-        </div>
-
-        <div>
-            [${time}] État : ${values.circuitState}
-        </div>
-    `;
-
-}
-
-
-function formatNumber(
-    value,
-    decimals
-) {
-
-    if (
-        !Number.isFinite(value)
-    ) {
-
-        return "0";
-
-    }
-
-
-    return Number(value)
-        .toFixed(decimals);
-
-}
-
-
-/* ============================================================
-   SIDEBAR STATUS
-   ============================================================ */
-
-function updateSidebarState() {
-
-    const calculation =
-        calculateCircuit();
-
-
-    $("#sidebarCircuitState")
-        .textContent =
-        calculation.error
-            ? "Ouvert"
-            : calculation.open
-                ? "Ouvert"
-                : "Fermé";
-
-
-    $("#sidebarVoltage")
-        .textContent =
-        `${ElectriciteFOBAS.voltage} V`;
-
-}
-
-
-/* ============================================================
-   STATUS
-   ============================================================ */
-
-function updateStatus(
-    message,
-    state
-) {
-
-    $("#simulationStatusText")
-        .textContent =
-        message;
-
-
-    const light =
-        $("#simulationStatusLight");
-
-
-    light.classList.remove(
-        "running",
-        "error"
-    );
-
-
-    if (
-        state === "running"
-    ) {
-
-        light.classList.add(
-            "running"
-        );
-
-    }
-
-
-    if (
-        state === "error"
-    ) {
-
-        light.classList.add(
-            "error"
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   COUNTERS
-   ============================================================ */
-
-function updateCounters() {
-
-    $("#componentCount")
-        .textContent =
-        ElectriciteFOBAS.components.length;
-
-
-    $("#connectionCount")
-        .textContent =
-        ElectriciteFOBAS.wires.length;
-
-}
-
-
-/* ============================================================
-   EMPTY CANVAS
-   ============================================================ */
-
-function updateCanvasEmptyState() {
-
-    const message =
-        $("#canvasEmptyMessage");
-
-
-    if (
-        ElectriciteFOBAS.components.length > 0
-    ) {
-
-        message.classList.add(
-            "hidden"
-        );
-
-    } else {
-
-        message.classList.remove(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   SEARCH
-   ============================================================ */
-
-function bindSearch() {
-
-    $("#componentSearch")
-        .addEventListener(
-            "input",
-            event => {
-
-                const query =
-                    event.target.value
-                        .trim()
-                        .toLowerCase();
-
-
-                $$(".component-card")
-                    .forEach(
-                        card => {
-
-                            const text =
-                                card.textContent
-                                    .toLowerCase();
-
-
-                            card.style.display =
-                                text.includes(query)
-                                    ? "flex"
-                                    : "none";
-
-                        }
-                    );
-
-            }
-        );
-
-}
-
-
-/* ============================================================
-   ZOOM
-   ============================================================ */
-
-function bindZoom() {
-
-    $("#zoomInBtn")
-        .addEventListener(
-            "click",
-            () => {
-
-                ElectriciteFOBAS.zoom =
-                    Math.min(
-                        1.8,
-                        ElectriciteFOBAS.zoom + .1
-                    );
-
-                applyZoom();
-
-            }
-        );
-
-
-    $("#zoomOutBtn")
-        .addEventListener(
-            "click",
-            () => {
-
-                ElectriciteFOBAS.zoom =
-                    Math.max(
-                        .6,
-                        ElectriciteFOBAS.zoom - .1
-                    );
-
-                applyZoom();
-
-            }
-        );
-
-
-    $("#centerCircuitBtn")
-        .addEventListener(
-            "click",
-            () => {
-
-                centerCircuit();
-
-            }
-        );
-
-}
-
-
-function applyZoom() {
-
-    $("#zoomValue")
-        .textContent =
-        `${Math.round(
-            ElectriciteFOBAS.zoom * 100
-        )}%`;
-
-
-    const svg =
-        $("#circuitCanvas");
-
-
-    svg.style.transform =
-        `scale(${ElectriciteFOBAS.zoom})`;
-
-
-    svg.style.transformOrigin =
-        "center center";
-
-}
-
-
-function centerCircuit() {
-
-    const components =
-        ElectriciteFOBAS.components;
-
-
-    if (
-        components.length === 0
-    ) {
-
-        return;
-
-    }
-
-
-    const minX =
-        Math.min(
-            ...components.map(
-                component =>
-                    component.x
-            )
-        );
-
-
-    const maxX =
-        Math.max(
-            ...components.map(
-                component =>
-                    component.x
-            )
-        );
-
-
-    const minY =
-        Math.min(
-            ...components.map(
-                component =>
-                    component.y
-            )
-        );
-
-
-    const maxY =
-        Math.max(
-            ...components.map(
-                component =>
-                    component.y
-            )
-        );
-
-
-    const centerX =
-        (minX + maxX) / 2;
-
-
-    const centerY =
-        (minY + maxY) / 2;
-
-
-    const offsetX =
-        600 - centerX;
-
-
-    const offsetY =
-        350 - centerY;
-
-
-    components.forEach(
-        component => {
-
-            component.x =
-                Math.max(
-                    60,
-                    Math.min(
-                        1140,
-                        component.x + offsetX
-                    )
-                );
-
-
-            component.y =
-                Math.max(
-                    60,
-                    Math.min(
-                        640,
-                        component.y + offsetY
-                    )
-                );
-
-        }
-    );
-
-
-    renderAll();
-
-    saveSimulationSilently();
-
-}
-
-
-/* ============================================================
-   TABLEAU ÉLECTRIQUE
-   ============================================================ */
-
-function bindTableau() {
-
-    $("#mainBreakerToggle")
-        .addEventListener(
-            "click",
-            toggleMainBreaker
-        );
-
-}
-
-
-function toggleMainBreaker() {
-
-    const breaker =
-        ElectriciteFOBAS.components.find(
-            component =>
-                component.type === "breaker"
-        );
-
-
-    if (!breaker) {
-
-        addComponent("breaker");
-
-        showToast(
-            "Disjoncteur principal ajouté au laboratoire.",
+        toast(
+            "Simulation démarrée.",
             "success"
         );
 
-        return;
-
+        renderAll();
     }
 
+    function stopSimulation() {
+        state.running = false;
 
-    breaker.switchState =
-        breaker.switchState === "on"
-            ? "off"
-            : "on";
-
-
-    updateBreakerUI();
-
-    renderAll();
-
-    updateMeasurements();
-
-    saveSimulationSilently();
-
-}
-
-
-function updateBreakerUI() {
-
-    const breaker =
-        ElectriciteFOBAS.components.find(
-            component =>
-                component.type === "breaker"
+        text(
+            "simulationStatusText",
+            "Simulation arrêtée"
         );
 
+        const light =
+            byId("simulationStatusLight");
 
-    const button =
-        $("#mainBreakerToggle");
+        if (light) {
+            light.classList.remove("active");
+        }
 
-
-    const status =
-        $("#mainBreakerStatus");
-
-
-    const isOn =
-        breaker &&
-        breaker.switchState === "on";
-
-
-    button.classList.toggle(
-        "on",
-        Boolean(isOn)
-    );
-
-
-    status.textContent =
-        isOn
-            ? "ON"
-            : "OFF";
-
-
-    status.classList.toggle(
-        "on",
-        Boolean(isOn)
-    );
-
-
-    status.classList.toggle(
-        "off",
-        !isOn
-    );
-
-
-    $$(".breaker-indicator")
-        .forEach(
-            indicator => {
-
-                indicator.classList.toggle(
-                    "on",
-                    Boolean(isOn)
-                );
-
-            }
+        log(
+            "Simulation arrêtée.",
+            "warning"
         );
 
-}
-
-
-/* ============================================================
-   DIAGNOSTIC
-   ============================================================ */
-
-function bindDiagnostic() {
-
-    $("#runDiagnosticBtn")
-        .addEventListener(
-            "click",
-            runDiagnostic
+        toast(
+            "Simulation arrêtée.",
+            "info"
         );
 
-}
-
-
-function runDiagnostic() {
-
-    const details =
-        [];
-
-
-    const components =
-        ElectriciteFOBAS.components;
-
-
-    const wires =
-        ElectriciteFOBAS.wires;
-
-
-    const source =
-        components.find(
-            component =>
-                component.type === "source"
-        );
-
-
-    if (source) {
-
-        details.push({
-            type: "ok",
-            text:
-                "Source d'alimentation détectée."
-        });
-
-    } else {
-
-        details.push({
-            type: "error",
-            text:
-                "Aucune source d'alimentation n'est présente."
-        });
-
+        renderAll();
     }
 
-
-    if (
-        wires.length > 0
-    ) {
-
-        details.push({
-            type: "ok",
-            text:
-                `${wires.length} connexion(s) détectée(s).`
-        });
-
-    } else {
-
-        details.push({
-            type: "warning",
-            text:
-                "Aucune connexion n'a encore été créée."
-        });
-
-    }
-
-
-    const receiver =
-        components.some(
-            component =>
-                (
-                    component.type === "lamp" ||
-                    component.type === "resistor" ||
-                    component.type === "motor"
-                )
-        );
-
-
-    if (receiver) {
-
-        details.push({
-            type: "ok",
-            text:
-                "Au moins un récepteur électrique est présent."
-        });
-
-    } else {
-
-        details.push({
-            type: "warning",
-            text:
-                "Aucun récepteur électrique détecté."
-        });
-
-    }
-
-
-    const connected =
-        isCircuitConnected();
-
-
-    if (connected) {
-
-        details.push({
-            type: "ok",
-            text:
-                "Un chemin électrique entre la source et un récepteur a été détecté."
-        });
-
-    } else {
-
-        details.push({
-            type: "warning",
-            text:
-                "Le circuit ne forme pas encore un chemin complet."
-        });
-
-    }
-
-
-    const result =
-        $("#diagnosticResult");
-
-
-    const hasError =
-        details.some(
-            item =>
-                item.type === "error"
-        );
-
-
-    const hasWarning =
-        details.some(
-            item =>
-                item.type === "warning"
-        );
-
-
-    result.innerHTML = `
-
-        <div class="diagnostic-icon">
-            ${hasError ? "!" : hasWarning ? "⚠" : "✓"}
-        </div>
-
-        <div>
-
-            <h2>
-                ${
-                    hasError
-                        ? "Problème détecté"
-                        : hasWarning
-                            ? "Analyse terminée avec avertissements"
-                            : "Circuit correctement analysé"
-                }
-            </h2>
-
-            <p>
-                Diagnostic automatique du laboratoire virtuel.
-            </p>
-
-        </div>
-
-    `;
-
-
-    $("#diagnosticDetails")
-        .innerHTML =
-        details.map(
-            item => `
-                <div class="diagnostic-item ${item.type}">
-                    ${item.text}
-                </div>
-            `
-        ).join("");
-
-}
-
-
-function renderDiagnosticPreview() {
-
-    if (
-        $("#diagnosticDetails").children.length === 0
-    ) {
-
-        $("#diagnosticDetails")
-            .innerHTML = `
-                <div class="diagnostic-item warning">
-                    Aucun diagnostic récent. Cliquez sur
-                    "Run Diagnostic" pour analyser le circuit.
-                </div>
-            `;
-
-    }
-
-}
-
-
-/* ============================================================
-   MISSIONS
-   ============================================================ */
-
-function bindMissions() {
-
-    $("#closeMissionBtn")
-        .addEventListener(
-            "click",
-            closeMission
-        );
-
-
-    $("#validateMissionBtn")
-        .addEventListener(
-            "click",
-            validateActiveMission
-        );
-
-}
-
-
-function renderMissionCards() {
-
-    const grid =
-        $("#missionGrid");
-
-
-    if (!grid) {
-
-        return;
-
-    }
-
-
-    grid.innerHTML =
-        ElectriciteFOBAS.missions.map(
-            mission => `
-
-                <article class="mission-card">
-
-                    <div class="mission-number">
-                        ${mission.number}
-                    </div>
-
-                    <h3>
-                        ${mission.title}
-                    </h3>
-
-                    <p>
-                        ${mission.description}
-                    </p>
-
-                    <button
-                        type="button"
-                        class="tool-button primary"
-                        data-start-mission="${mission.id}"
-                    >
-                        Start Mission
-                    </button>
-
-                </article>
-
-            `
-        ).join("");
-
-
-    $$("[data-start-mission]")
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        startMission(
-                            button.dataset.startMission
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-function startMission(id) {
-
-    const mission =
-        ElectriciteFOBAS.missions.find(
-            item =>
-                item.id === id
-        );
-
-
-    if (!mission) {
-
-        return;
-
-    }
-
-
-    ElectriciteFOBAS.activeMissionId =
-        id;
-
-
-    $("#activeMissionTitle")
-        .textContent =
-        mission.title;
-
-
-    $("#activeMissionDescription")
-        .textContent =
-        mission.description;
-
-
-    $("#activeMissionObjective")
-        .textContent =
-        mission.objective;
-
-
-    $("#missionFeedback")
-        .innerHTML =
-        "";
-
-
-    $("#missionWorkspace")
-        .classList.remove(
-            "hidden"
-        );
-
-
-    showToast(
-        `${mission.number} démarrée.`,
-        "success"
-    );
-
-}
-
-
-function closeMission() {
-
-    ElectriciteFOBAS.activeMissionId =
-        null;
-
-
-    $("#missionWorkspace")
-        .classList.add(
-            "hidden"
-        );
-
-}
-
-
-function validateActiveMission() {
-
-    const mission =
-        ElectriciteFOBAS.missions.find(
-            item =>
-                item.id ===
-                ElectriciteFOBAS.activeMissionId
-        );
-
-
-    if (!mission) {
-
-        return;
-
-    }
-
-
-    const presentTypes =
-        new Set(
-            ElectriciteFOBAS.components.map(
-                component =>
-                    component.type
-            )
-        );
-
-
-    const missing =
-        mission.requiredComponents.filter(
-            type =>
-                !presentTypes.has(type)
-        );
-
-
-    if (
-        missing.length > 0
-    ) {
-
-        const names =
-            missing.map(
-                type =>
-                    COMPONENT_DEFINITIONS[type].name
+    /* =========================================================
+       29. ZOOM
+    ========================================================= */
+
+    function changeZoom(delta) {
+        state.zoom =
+            clamp(
+                round(
+                    state.zoom + delta,
+                    2
+                ),
+                CONFIG.minZoom,
+                CONFIG.maxZoom
             );
 
+        text(
+            "zoomValue",
+            `${Math.round(
+                state.zoom * 100
+            )}%`
+        );
 
-        $("#missionFeedback")
-            .innerHTML = `
-                <div class="feedback-error">
-                    Mission non validée.
-                    Composants manquants :
-                    ${names.join(", ")}.
-                </div>
-            `;
+        const svg =
+            byId("circuitCanvas");
 
-        return;
-
+        if (svg) {
+            svg.style.transform =
+                `scale(${state.zoom})`;
+            svg.style.transformOrigin =
+                "center center";
+        }
     }
 
+    function centerCircuit() {
+        state.zoom = 1;
 
-    if (
-        mission.id === "mission-001"
-    ) {
+        text(
+            "zoomValue",
+            "100%"
+        );
 
-        const switchComponent =
-            getFirstComponent(
-                "switch"
-            );
+        const svg =
+            byId("circuitCanvas");
 
-
-        if (
-            !switchComponent ||
-            switchComponent.switchState !== "on"
-        ) {
-
-            $("#missionFeedback")
-                .innerHTML = `
-                    <div class="feedback-warning">
-                        Les composants sont présents,
-                        mais l'interrupteur doit être sur ON.
-                    </div>
-                `;
-
-            return;
-
+        if (svg) {
+            svg.style.transform =
+                "scale(1)";
+            svg.style.transformOrigin =
+                "center center";
         }
 
+        toast(
+            "Vue du circuit recentrée.",
+            "info"
+        );
     }
 
-
-    $("#missionFeedback")
-        .innerHTML = `
-            <div class="feedback-success">
-                Mission validée avec succès.
-                La configuration demandée est présente
-                dans le laboratoire virtuel.
-            </div>
-        `;
-
-
-    showToast(
-        "Mission validée.",
-        "success"
-    );
-
-}
-
-
-/* ============================================================
-   LARGE COMPONENT LIBRARY
-   ============================================================ */
-
-function renderLargeComponents() {
-
-    const grid =
-        $("#largeComponentGrid");
-
-
-    if (!grid) {
-
-        return;
-
-    }
-
-
-    grid.innerHTML =
-        Object.entries(
-            COMPONENT_DEFINITIONS
-        ).map(
-            (
-                [type, definition]
-            ) => `
-
-                <article
-                    class="large-component-card"
-                    data-library-component="${type}"
-                >
-
-                    <div
-                        class="large-component-card-icon"
-                    >
-                        ${definition.icon}
-                    </div>
-
-                    <h3>
-                        ${definition.name}
-                    </h3>
-
-                    <p>
-                        ${definition.description}
-                    </p>
-
-                </article>
-
-            `
-        ).join("");
-
-
-    $$("[data-library-component]")
-        .forEach(
-            card => {
-
-                card.addEventListener(
-                    "click",
-                    () => {
-
-                        addComponent(
-                            card.dataset.libraryComponent
-                        );
-
-                        switchView(
-                            "laboratoire"
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-}
-
-
-/* ============================================================
-   RESET
-   ============================================================ */
-
-function openResetModal() {
-
-    $("#confirmationModal")
-        .classList.remove(
-            "hidden"
-        );
-
-}
-
-
-function closeResetModal() {
-
-    $("#confirmationModal")
-        .classList.add(
-            "hidden"
-        );
-
-}
-
-
-function resetSimulation() {
-
-    ElectriciteFOBAS.components =
-        [];
-
-
-    ElectriciteFOBAS.wires =
-        [];
-
-
-    ElectriciteFOBAS.selectedComponentId =
-        null;
-
-
-    ElectriciteFOBAS.wireStart =
-        null;
-
-
-    ElectriciteFOBAS.running =
-        false;
-
-
-    ElectriciteFOBAS.voltage =
-        230;
-
-
-    ElectriciteFOBAS.activeMissionId =
-        null;
-
-
-    localStorage.removeItem(
-        ElectriciteFOBAS.storageKey
-    );
-
-
-    $("#voltageSelector")
-        .value =
-        "230";
-
-
-    $("#missionWorkspace")
-        .classList.add(
-            "hidden"
-        );
-
-
-    closeResetModal();
-
-    activateTool(
-        "select"
-    );
-
-
-    updateStatus(
-        "Simulation prête",
-        "ready"
-    );
-
-
-    renderAll();
-
-    updateMeasurements();
-
-    updateBreakerUI();
-
-
-    showToast(
-        "Simulation réinitialisée.",
-        "success"
-    );
-
-}
-
-
-/* ============================================================
-   SAVE / LOAD
-   ============================================================ */
-
-function createSaveData() {
-
-    return {
-
-        version:
-            ElectriciteFOBAS.version,
-
-        voltage:
-            ElectriciteFOBAS.voltage,
-
-        components:
-            ElectriciteFOBAS.components,
-
-        wires:
-            ElectriciteFOBAS.wires
-
-    };
-
-}
-
-
-function saveSimulation() {
-
-    try {
-
-        localStorage.setItem(
-            ElectriciteFOBAS.storageKey,
-            JSON.stringify(
-                createSaveData()
-            )
-        );
-
-
-        showToast(
-            "Simulation sauvegardée localement.",
-            "success"
-        );
-
-    } catch (error) {
-
-        showToast(
-            "Impossible de sauvegarder la simulation.",
-            "error"
-        );
-
-    }
-
-}
-
-
-function saveSimulationSilently() {
-
-    try {
-
-        localStorage.setItem(
-            ElectriciteFOBAS.storageKey,
-            JSON.stringify(
-                createSaveData()
-            )
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "FOBAS Electricité: sauvegarde locale impossible.",
-            error
-        );
-
-    }
-
-}
-
-
-function loadSimulation() {
-
-    try {
-
-        const saved =
-            localStorage.getItem(
-                ElectriciteFOBAS.storageKey
-            );
-
-
-        if (!saved) {
-
-            return;
-
-        }
-
-
-        const data =
-            JSON.parse(saved);
-
-
-        if (
-            !data ||
-            typeof data !== "object"
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            Number.isFinite(
-                Number(
-                    data.voltage
-                )
-            )
-        ) {
-
-            ElectriciteFOBAS.voltage =
-                Number(
-                    data.voltage
-                );
-
-        }
-
-
-        if (
-            Array.isArray(
-                data.components
-            )
-        ) {
-
-            ElectriciteFOBAS.components =
-                data.components;
-
-        }
-
-
-        if (
-            Array.isArray(
-                data.wires
-            )
-        ) {
-
-            ElectriciteFOBAS.wires =
-                data.wires;
-
-        }
-
-
-        $("#voltageSelector")
-            .value =
-            String(
-                ElectriciteFOBAS.voltage
-            );
-
-
-        showToast(
-            "Simulation précédente restaurée.",
-            "success"
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "FOBAS Electricité: données de sauvegarde invalides.",
-            error
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   HELPERS
-   ============================================================ */
-
-function getComponent(id) {
-
-    return ElectriciteFOBAS.components.find(
-        component =>
-            component.id === id
-    );
-
-}
-
-
-function getSelectedComponent() {
-
-    return getComponent(
-        ElectriciteFOBAS.selectedComponentId
-    );
-
-}
-
-
-function getFirstComponent(type) {
-
-    return ElectriciteFOBAS.components.find(
-        component =>
-            component.type === type
-    );
-
-}
-
-
-/* ============================================================
-   TEMPORARY WIRE
-   ============================================================ */
-
-function clearTemporaryWire() {
-
-    const layer =
-        $("#temporaryWireLayer");
-
-
-    if (layer) {
-
-        layer.innerHTML = "";
-
-    }
-
-}
-
-
-/* ============================================================
-   TOAST
-   ============================================================ */
-
-function showToast(
-    message,
-    type = "success"
-) {
-
-    const container =
-        $("#toastContainer");
-
-
-    const toast =
-        document.createElement(
-            "div"
-        );
-
-
-    toast.className =
-        `toast ${type}`;
-
-
-    toast.textContent =
-        message;
-
-
-    container.appendChild(
-        toast
-    );
-
-
-    window.setTimeout(
-        () => {
-
-            toast.style.opacity =
-                "0";
-
-            toast.style.transform =
-                "translateY(6px)";
-
-
-            window.setTimeout(
-                () => {
-
-                    toast.remove();
-
+    /* =========================================================
+       30. SAUVEGARDE
+    ========================================================= */
+
+    function saveSimulation() {
+        const data = {
+            version: VERSION,
+            state: {
+                ...state,
+
+                diagnostic: {
+                    ...state.diagnostic
                 },
-                220
+
+                mission: {
+                    ...state.mission
+                }
+            }
+        };
+
+        try {
+            localStorage.setItem(
+                APP_KEY,
+                JSON.stringify(data)
             );
 
-        },
-        2800
-    );
+            log(
+                "Simulation sauvegardée.",
+                "success"
+            );
 
-}
+            toast(
+                "Simulation sauvegardée.",
+                "success"
+            );
+        } catch (error) {
+            console.error(error);
 
+            toast(
+                "Impossible de sauvegarder la simulation.",
+                "danger"
+            );
+        }
+    }
 
-/* ============================================================
-   GLOBAL CANVAS CLICK
-   ============================================================ */
+    function loadSimulation() {
+        try {
+            const raw =
+                localStorage.getItem(
+                    APP_KEY
+                );
 
-$("#circuitCanvas")
-    ?.addEventListener(
-        "pointerdown",
-        event => {
+            if (!raw) return false;
 
-            if (
-                event.target ===
-                $("#circuitCanvas")
-            ) {
+            const data =
+                JSON.parse(raw);
 
-                ElectriciteFOBAS.selectedComponentId =
-                    null;
-
-                ElectriciteFOBAS.wireStart =
-                    null;
-
-                clearTemporaryWire();
-
-                renderAll();
-
+            if (!data?.state) {
+                return false;
             }
 
-        }
-    );
+            Object.assign(
+                state,
+                data.state
+            );
 
-
-/* ============================================================
-   KEYBOARD SHORTCUTS
-   ============================================================ */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            ElectriciteFOBAS.selectedComponentId =
-                null;
-
-            ElectriciteFOBAS.wireStart =
-                null;
-
-            clearTemporaryWire();
+            log(
+                "Simulation restaurée.",
+                "success"
+            );
 
             renderAll();
 
-        }
+            return true;
+        } catch (error) {
+            console.error(error);
 
-
-        if (
-            event.key === "Delete"
-        ) {
-
-            if (
-                ElectriciteFOBAS.selectedComponentId
-            ) {
-
-                deleteComponent(
-                    ElectriciteFOBAS.selectedComponentId
-                );
-
-            }
-
-        }
-
-
-        if (
-            event.key.toLowerCase() === "w" &&
-            !isTypingTarget(event.target)
-        ) {
-
-            activateTool(
-                "wire"
+            toast(
+                "La sauvegarde est invalide.",
+                "danger"
             );
 
+            return false;
         }
-
-
-        if (
-            event.key.toLowerCase() === "v" &&
-            !isTypingTarget(event.target)
-        ) {
-
-            activateTool(
-                "select"
-            );
-
-        }
-
     }
-);
 
+    /* =========================================================
+       31. RESET
+    ========================================================= */
 
-function isTypingTarget(
-    target
-) {
+    function openResetModal() {
+        show("confirmationModal");
+    }
 
-    return (
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement
-    );
+    function closeResetModal() {
+        hide("confirmationModal");
+    }
 
-}
+    function resetSimulation() {
+        state.running = false;
 
+        state.voltage =
+            CONFIG.defaultVoltage;
 
-/* ============================================================
-   EXPORT DEBUG ACCESS
-   ============================================================ */
+        state.tool = "select";
 
-window.FOBASElectricite =
-    ElectriciteFOBAS;
+        state.meterMode = "voltage";
 
+        state.zoom =
+            CONFIG.defaultZoom;
 
-/* ============================================================
-   FIN DU MOTEUR
-   ============================================================ */
+        state.selectedComponentId = null;
 
+        state.selectedWireId = null;
 
+        state.wireStart = null;
 
+        state.meterPointA = null;
+        state.meterPointB = null;
+
+        state.components = [];
+        state.wires = [];
+
+        state.faults = {
+            shortCircuit: false,
+            earthFault: false,
+            overload: false,
+            openConductor: false
+        };
+
+        state.trips = {
+            main: false,
+            rcd: false,
+            lighting: false,
+            outlet: false,
+            heating: false,
+            motor: false
+        };
+
+        state.measurements = {
+            voltage: 0,
+            current: 0,
+            resistance: Infinity,
+            power: 0,
+            continuity: false,
+            leakage: 0
+        };
+
+        state.diagnostic = {
+            status: "unknown",
+            title: "Diagnostic non exécuté",
+            summary:
+                "Lancez le diagnostic pour analyser le circuit.",
+            details: [],
+            procedure: []
+        };
+
+        state.logs = [];
+
+        state.mission = {
+            activeId: null,
+            level: "Tous niveaux",
+            stepIndex: 0,
+            score: 0,
+            completed: false
+        };
+
+        localStorage.removeItem(
+            APP_KEY
+        );
+
+        closeResetModal();
+
+        log(
+            "Simulation réinitialisée.",
+            "info"
+        );
+
+        toast(
+            "Simulation réinitialisée.",
+            "success"
+        );
+
+        setView("laboratoire");
+
+        renderAll();
+    }
+
+    /* =========================================================
+       32. VOLTAGE
+    ========================================================= */
+
+    function setVoltage(value) {
+        const voltage =
+            Number(value);
+
+        if (!Number.isFinite(voltage)) {
+            return;
+        }
+
+        state.voltage =
+            clamp(
+                voltage,
+                CONFIG.minVoltage,
+                CONFIG.maxVoltage
+            );
+
+        const selector =
+            byId("voltageSelector");
+
+        if (
+            selector &&
+            selector.value !==
+                String(state.voltage)
+        ) {
+            selector.value =
+                String(state.voltage);
+        }
+
+        calculate();
+
+        log(
+            `Tension réglée à ${state.voltage} V.`,
+            "info"
+        );
+
+        renderAll();
+    }
+
+    /* =========================================================
+       33. EVENTS
+    ========================================================= */
+
+    function bindNavigation() {
+        $$(".nav-item").forEach(item => {
+            item.addEventListener(
+                "click",
+                () =>
+                    setView(
+                        item.dataset.view
+                    )
+            );
+        });
+    }
+
+    function bindToolbar() {
+        $$(
+            ".tool-button"
+        ).forEach(button => {
+            button.addEventListener(
+                "click",
+                () =>
+                    setTool(
+                        button.dataset.tool
+                    )
+            );
+        });
+
+        byId("voltageSelector")
+            ?.addEventListener(
+                "change",
+                event =>
+                    setVoltage(
+                        event.target.value
+                    )
+            );
+
+        byId("runSimulationBtn")
+            ?.addEventListener(
+                "click",
+                runSimulation
+            );
+
+        byId("stopSimulationBtn")
+            ?.addEventListener(
+                "click",
+                stopSimulation
+            );
+    }
+
+    function bindHeader() {
+        byId("saveSimulationBtn")
+            ?.addEventListener(
+                "click",
+                saveSimulation
+            );
+
+        byId("resetSimulationBtn")
+            ?.addEventListener(
+                "click",
+                openResetModal
+            );
+
+        byId("cancelResetBtn")
+            ?.addEventListener(
+                "click",
+                closeResetModal
+            );
+
+        byId("confirmResetBtn")
+            ?.addEventListener(
+                "click",
+                resetSimulation
+            );
+    }
+
+    function bindComponentButtons() {
+        $$(
+            "#componentList [data-component]"
+        ).forEach(button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    addComponent(
+                        button.dataset.component
+                    );
+                }
+            );
+
+            button.addEventListener(
+                "contextmenu",
+                event => {
+                    event.preventDefault();
+
+                    openComponentInfo(
+                        button.dataset.component
+                    );
+                }
+            );
+        });
+
+        $$("#largeComponentGrid [data-component]")
+            .forEach(button => {
+                button.addEventListener(
+                    "contextmenu",
+                    event => {
+                        event.preventDefault();
+
+                        openComponentInfo(
+                            button.dataset.component
+                        );
+                    }
+                );
+            });
+    }
+
+    function bindSearch() {
+        byId("componentSearch")
+            ?.addEventListener(
+                "input",
+                event =>
+                    filterComponentList(
+                        event.target.value
+                    )
+            );
+    }
+
+    function bindInspector() {
+        const bindings = {
+            inspectorX: "x",
+            inspectorY: "y",
+            inspectorResistance:
+                "resistance",
+            inspectorPower: "power",
+            inspectorBreakerRating:
+                "rating",
+            inspectorRcdRating:
+                "rcdRating",
+            inspectorSwitchState:
+                "state",
+            inspectorBreakerState:
+                "state"
+        };
+
+        for (
+            const [id, property]
+            of Object.entries(bindings)
+        ) {
+            byId(id)?.addEventListener(
+                "change",
+                event =>
+                    updateSelectedComponentProperty(
+                        property,
+                        event.target.value
+                    )
+            );
+        }
+
+        byId("deleteSelectedBtn")
+            ?.addEventListener(
+                "click",
+                () => {
+                    if (
+                        state.selectedComponentId
+                    ) {
+                        deleteComponent(
+                            state.selectedComponentId
+                        );
+                    }
+                }
+            );
+
+        byId("deleteSelectedWireBtn")
+            ?.addEventListener(
+                "click",
+                () => {
+                    if (
+                        state.selectedWireId
+                    ) {
+                        deleteWire(
+                            state.selectedWireId
+                        );
+                    }
+                }
+            );
+
+        byId("inspectorWireGauge")
+            ?.addEventListener(
+                "change",
+                event => {
+                    const wire =
+                        state.wires.find(
+                            w =>
+                                w.id ===
+                                state.selectedWireId
+                        );
+
+                    if (!wire) return;
+
+                    wire.gauge =
+                        event.target.value;
+
+                    renderAll();
+                }
+            );
+
+        byId("inspectorWireContinuity")
+            ?.addEventListener(
+                "change",
+                event => {
+                    const wire =
+                        state.wires.find(
+                            w =>
+                                w.id ===
+                                state.selectedWireId
+                        );
+
+                    if (!wire) return;
+
+                    wire.continuity =
+                        event.target.value ===
+                        "true";
+
+                    calculate();
+                    renderAll();
+                }
+            );
+    }
+
+    function bindToolsView() {
+        $$(".tool-large-card").forEach(card => {
+            card.addEventListener(
+                "click",
+                () => {
+                    setTool(
+                        card.dataset.toolSelect
+                    );
+
+                    if (
+                        card.dataset.toolSelect ===
+                        "voltmeter"
+                    ) {
+                        setMeterMode(
+                            "voltage"
+                        );
+                    }
+
+                    if (
+                        card.dataset.toolSelect ===
+                        "ammeter"
+                    ) {
+                        setMeterMode(
+                            "current"
+                        );
+                    }
+
+                    if (
+                        card.dataset.toolSelect ===
+                        "ohmmeter"
+                    ) {
+                        setMeterMode(
+                            "resistance"
+                        );
+                    }
+
+                    if (
+                        card.dataset.toolSelect ===
+                        "continuity"
+                    ) {
+                        setMeterMode(
+                            "continuity"
+                        );
+                    }
+                }
+            );
+        });
+
+        $$(".meter-mode-button")
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () =>
+                        setMeterMode(
+                            button.dataset.meterMode
+                        )
+                );
+            });
+    }
+
+    function bindPanel() {
+        byId("mainBreakerToggle")
+            ?.addEventListener(
+                "click",
+                toggleMainBreaker
+            );
+    }
+
+    function bindMeasurements() {
+        const measurementCards = [
+            "measureVoltage",
+            "measureCurrent",
+            "measureResistance",
+            "measurePower",
+            "measureCircuitState",
+            "measureContinuity",
+            "measureLeakage"
+        ];
+
+        measurementCards.forEach(id => {
+            byId(id)?.addEventListener(
+                "click",
+                () => {
+                    calculateMeter();
+
+                    state.logs.unshift({
+                        id: uid("measurement"),
+                        time:
+                            new Date()
+                                .toLocaleTimeString(
+                                    "fr-FR"
+                                ),
+                        message:
+                            `${id} : mesure consultée`,
+                        type: "measurement"
+                    });
+
+                    renderMeasurementLog();
+                }
+            );
+        });
+    }
+
+    function bindDiagnostic() {
+        byId("runDiagnosticBtn")
+            ?.addEventListener(
+                "click",
+                runDiagnostic
+            );
+    }
+
+    function bindMissionFilters() {
+        $$(".mission-filter")
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        $$(".mission-filter")
+                            .forEach(
+                                item =>
+                                    item.classList.remove(
+                                        "active"
+                                    )
+                            );
+
+                        button.classList.add(
+                            "active"
+                        );
+
+                        renderMissionGrid();
+                    }
+                );
+            });
+    }
+
+    function bindMissions() {
+        byId("validateMissionBtn")
+            ?.addEventListener(
+                "click",
+                validateMission
+            );
+
+        byId("missionResetCircuitBtn")
+            ?.addEventListener(
+                "click",
+                () => {
+                    resetCircuitForMission();
+                }
+            );
+
+        byId("closeMissionBtn")
+            ?.addEventListener(
+                "click",
+                () => {
+                    state.mission.activeId =
+                        null;
+
+                    hide("missionWorkspace");
+
+                    renderMissionGrid();
+                }
+            );
+
+        bindMissionFilters();
+    }
+
+    function resetCircuitForMission() {
+        state.components = [];
+        state.wires = [];
+
+        state.running = false;
+
+        state.trips.main = false;
+        state.trips.rcd = false;
+
+        state.faults = {
+            shortCircuit: false,
+            earthFault: false,
+            overload: false,
+            openConductor: false
+        };
+
+        state.selectedComponentId = null;
+        state.selectedWireId = null;
+
+        state.wireStart = null;
+
+        calculate();
+
+        renderAll();
+
+        toast(
+            "Circuit de mission réinitialisé.",
+            "info"
+        );
+    }
+
+    function bindCanvas() {
+        const svg =
+            byId("circuitCanvas");
+
+        if (!svg) return;
+
+        svg.addEventListener(
+            "click",
+            event => {
+                if (
+                    event.target === svg
+                ) {
+                    state.selectedComponentId =
+                        null;
+
+                    state.selectedWireId =
+                        null;
+
+                    renderInspector();
+                    renderCircuit();
+                }
+            }
+        );
+    }
+
+    function bindZoom() {
+        byId("zoomOutBtn")
+            ?.addEventListener(
+                "click",
+                () => changeZoom(-0.1)
+            );
+
+        byId("zoomInBtn")
+            ?.addEventListener(
+                "click",
+                () => changeZoom(0.1)
+            );
+
+        byId("centerCircuitBtn")
+            ?.addEventListener(
+                "click",
+                centerCircuit
+            );
+    }
+
+    function bindComponentInfo() {
+        byId("closeComponentInfoBtn")
+            ?.addEventListener(
+                "click",
+                closeComponentInfo
+            );
+
+        byId("addComponentFromInfoBtn")
+            ?.addEventListener(
+                "click",
+                addComponentFromInfo
+            );
+    }
+
+    /* =========================================================
+       34. RACCOURCIS CLAVIER
+    ========================================================= */
+
+    function bindKeyboard() {
+        document.addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.target.matches(
+                        "input, select, textarea"
+                    )
+                ) {
+                    return;
+                }
+
+                switch (
+                    event.key.toLowerCase()
+                ) {
+                    case "v":
+                        setTool("select");
+                        break;
+
+                    case "w":
+                        setTool("wire");
+                        break;
+
+                    case "delete":
+                    case "backspace":
+                        if (
+                            state.selectedComponentId
+                        ) {
+                            deleteComponent(
+                                state.selectedComponentId
+                            );
+                        } else if (
+                            state.selectedWireId
+                        ) {
+                            deleteWire(
+                                state.selectedWireId
+                            );
+                        }
+                        break;
+
+                    case "+":
+                        changeZoom(0.1);
+                        break;
+
+                    case "-":
+                        changeZoom(-0.1);
+                        break;
+
+                    case "escape":
+                        state.wireStart =
+                            null;
+
+                        state.selectedComponentId =
+                            null;
+
+                        state.selectedWireId =
+                            null;
+
+                        renderInspector();
+                        renderCircuit();
+                        break;
+                }
+            }
+        );
+    }
+
+    /* =========================================================
+       35. RENDU GLOBAL
+    ========================================================= */
+
+    function renderAll() {
+        calculate();
+
+        renderCircuit();
+
+        renderInspector();
+
+        renderStats();
+
+        renderMeasurements();
+
+        renderDiagnostic();
+
+        renderConsole();
+
+        renderMissionGrid();
+
+        updatePanel();
+
+        calculateMeter();
+
+        renderWireHelp();
+
+        text(
+            "zoomValue",
+            `${Math.round(
+                state.zoom * 100
+            )}%`
+        );
+
+        const selector =
+            byId("voltageSelector");
+
+        if (selector) {
+            selector.value =
+                String(state.voltage);
+        }
+
+        $$(".tool-button").forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.tool ===
+                    state.tool
+            );
+        });
+
+        $$(".meter-mode-button")
+            .forEach(button => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.meterMode ===
+                        state.meterMode
+                );
+            });
+    }
+
+    /* =========================================================
+       36. BOUCLE DE SIMULATION
+    ========================================================= */
+
+    let simulationTimer = null;
+
+    function startSimulationLoop() {
+        if (simulationTimer) {
+            clearInterval(
+                simulationTimer
+            );
+        }
+
+        simulationTimer =
+            setInterval(() => {
+                if (!state.running) return;
+
+                calculate();
+
+                renderStats();
+
+                updatePanel();
+
+                renderMeasurements();
+
+                calculateMeter();
+
+                if (
+                    state.faults.shortCircuit ||
+                    state.faults.earthFault ||
+                    state.faults.overload
+                ) {
+                    renderDiagnostic();
+                }
+            }, CONFIG.simulationInterval);
+    }
+
+    /* =========================================================
+       37. INITIALISATION D'UN CIRCUIT EXEMPLE
+    ========================================================= */
+
+    function createInitialCircuit() {
+        if (state.components.length) {
+            return;
+        }
+
+        const source =
+            createComponent(
+                "source",
+                120,
+                220
+            );
+
+        const breaker =
+            createComponent(
+                "breaker",
+                280,
+                180
+            );
+
+        const rcd =
+            createComponent(
+                "rcd",
+                430,
+                180
+            );
+
+        const switchComponent =
+            createComponent(
+                "switch",
+                580,
+                180
+            );
+
+        const lamp =
+            createComponent(
+                "lamp",
+                730,
+                180
+            );
+
+        const neutralBus =
+            createComponent(
+                "neutralBus",
+                430,
+                330
+            );
+
+        if (
+            source &&
+            breaker &&
+            rcd &&
+            switchComponent &&
+            lamp &&
+            neutralBus
+        ) {
+            createWire(
+                getTerminal(
+                    source.id,
+                    "L"
+                ),
+                getTerminal(
+                    breaker.id,
+                    "L_IN"
+                )
+            );
+
+            createWire(
+                getTerminal(
+                    breaker.id,
+                    "L_OUT"
+                ),
+                getTerminal(
+                    rcd.id,
+                    "L_IN"
+                )
+            );
+
+            createWire(
+                getTerminal(
+                    rcd.id,
+                    "L_OUT"
+                ),
+                getTerminal(
+                    switchComponent.id,
+                    "L_IN"
+                )
+            );
+
+            createWire(
+                getTerminal(
+                    switchComponent.id,
+                    "L_OUT"
+                ),
+                getTerminal(
+                    lamp.id,
+                    "L"
+                )
+            );
+
+            createWire(
+                getTerminal(
+                    source.id,
+                    "N"
+                ),
+                getTerminal(
+                    rcd.id,
+                    "N_IN"
+                )
+            );
+
+            createWire(
+                getTerminal(
+                    rcd.id,
+                    "N_OUT"
+                ),
+                getTerminal(
+                    neutralBus.id,
+                    "N"
+                )
+            );
+
+            createWire(
+                getTerminal(
+                    neutralBus.id,
+                    "N"
+                ),
+                getTerminal(
+                    lamp.id,
+                    "N"
+                )
+            );
+
+            switchComponent.state =
+                "closed";
+
+            log(
+                "Circuit de démonstration créé.",
+                "success"
+            );
+        }
+    }
+
+    /* =========================================================
+       38. API GLOBALE DE DEBUG
+    ========================================================= */
+
+    window.FOBASElectricite = {
+        version: VERSION,
+
+        state,
+
+        types: TYPES,
+
+        missions: MISSIONS,
+
+        addComponent,
+
+        createComponent,
+
+        deleteComponent,
+
+        createWire,
+
+        deleteWire,
+
+        runSimulation,
+
+        stopSimulation,
+
+        resetSimulation,
+
+        saveSimulation,
+
+        loadSimulation,
+
+        runDiagnostic,
+
+        calculate,
+
+        toggleFault,
+
+        setTool,
+
+        setMeterMode,
+
+        setVoltage,
+
+        resetProtections,
+
+        startMission,
+
+        validateMission,
+
+        renderAll
+    };
+
+    /* =========================================================
+       39. INITIALISATION
+    ========================================================= */
+
+    function init() {
+        bindNavigation();
+
+        bindToolbar();
+
+        bindHeader();
+
+        bindComponentButtons();
+
+        bindSearch();
+
+        bindInspector();
+
+        bindToolsView();
+
+        bindPanel();
+
+        bindMeasurements();
+
+        bindDiagnostic();
+
+        bindMissions();
+
+        bindCanvas();
+
+        bindZoom();
+
+        bindComponentInfo();
+
+        bindKeyboard();
+
+        renderLargeComponentGrid();
+
+        setTool("select");
+
+        setMeterMode("voltage");
+
+        if (!loadSimulation()) {
+            renderAll();
+        }
+
+        startSimulationLoop();
+
+        log(
+            `SIMULATION ÉLECTRICITÉ FOBAS ${VERSION} initialisée.`,
+            "success"
+        );
+
+        renderAll();
+    }
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+        document.addEventListener(
+            "DOMContentLoaded",
+            init,
+            { once: true }
+        );
+    } else {
+        init();
+    }
+
+})();
