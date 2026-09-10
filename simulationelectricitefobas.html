@@ -10,7 +10,7 @@
 
     <meta
         name="description"
-        content="Simulation Électricité FOBAS - laboratoire virtuel de pratique électrique."
+        content="Simulation Électricité FOBAS — laboratoire électrique virtuel professionnel avec moteur topologique, mesures, protections, diagnostic et missions pratiques."
     >
 
     <meta
@@ -28,20 +28,27 @@
 
 <body>
 
-<div id="electriciteApp" class="electricite-app">
+<div
+    id="electriciteApp"
+    class="electricite-app"
+>
 
     <!-- =========================================================
-         TOP HEADER
+         HEADER PRINCIPAL
          ========================================================= -->
     <header class="app-header">
 
         <div class="brand-area">
 
-            <div class="brand-icon">
+            <div
+                class="brand-icon"
+                aria-hidden="true"
+            >
                 ⚡
             </div>
 
             <div class="brand-text">
+
                 <div class="brand-title">
                     SIMULATION ÉLECTRICITÉ FOBAS
                 </div>
@@ -49,18 +56,27 @@
                 <div class="brand-subtitle">
                     Laboratoire électrique virtuel professionnel
                 </div>
+
             </div>
 
         </div>
 
+
         <div class="header-status">
 
             <div class="simulation-status">
-                <span id="simulationStatusLight"></span>
+
+                <span
+                    id="simulationStatusLight"
+                    class="status-light"
+                ></span>
+
                 <span id="simulationStatusText">
                     Simulation prête
                 </span>
+
             </div>
+
 
             <button
                 type="button"
@@ -69,6 +85,7 @@
             >
                 Save
             </button>
+
 
             <button
                 type="button"
@@ -84,12 +101,13 @@
 
 
     <!-- =========================================================
-         MAIN APPLICATION
+         APPLICATION PRINCIPALE
          ========================================================= -->
     <main class="app-main">
 
+
         <!-- =====================================================
-             LEFT SIDEBAR
+             SIDEBAR GAUCHE
              ===================================================== -->
         <aside class="left-sidebar">
 
@@ -97,103 +115,234 @@
                 LABORATOIRE
             </div>
 
+
             <button
                 type="button"
                 class="nav-item active"
                 data-view="laboratoire"
             >
-                <span class="nav-icon">⚡</span>
-                <span>Laboratoire</span>
+                <span
+                    class="nav-icon"
+                    aria-hidden="true"
+                >
+                    ⚡
+                </span>
+
+                <span>
+                    Laboratoire
+                </span>
             </button>
+
 
             <button
                 type="button"
                 class="nav-item"
                 data-view="composants"
             >
-                <span class="nav-icon">◈</span>
-                <span>Composants</span>
+                <span
+                    class="nav-icon"
+                    aria-hidden="true"
+                >
+                    ◈
+                </span>
+
+                <span>
+                    Composants
+                </span>
             </button>
+
 
             <button
                 type="button"
                 class="nav-item"
                 data-view="outils"
             >
-                <span class="nav-icon">🔧</span>
-                <span>Outils</span>
+                <span
+                    class="nav-icon"
+                    aria-hidden="true"
+                >
+                    🔧
+                </span>
+
+                <span>
+                    Outils
+                </span>
             </button>
+
 
             <button
                 type="button"
                 class="nav-item"
                 data-view="tableau"
             >
-                <span class="nav-icon">▦</span>
-                <span>Tableau électrique</span>
+                <span
+                    class="nav-icon"
+                    aria-hidden="true"
+                >
+                    ▦
+                </span>
+
+                <span>
+                    Tableau électrique
+                </span>
             </button>
+
 
             <button
                 type="button"
                 class="nav-item"
                 data-view="mesures"
             >
-                <span class="nav-icon">⌁</span>
-                <span>Mesures</span>
+                <span
+                    class="nav-icon"
+                    aria-hidden="true"
+                >
+                    ⌁
+                </span>
+
+                <span>
+                    Mesures
+                </span>
             </button>
+
 
             <button
                 type="button"
                 class="nav-item"
                 data-view="diagnostic"
             >
-                <span class="nav-icon">◉</span>
-                <span>Diagnostic</span>
+                <span
+                    class="nav-icon"
+                    aria-hidden="true"
+                >
+                    ◉
+                </span>
+
+                <span>
+                    Diagnostic
+                </span>
             </button>
+
 
             <button
                 type="button"
                 class="nav-item"
                 data-view="missions"
             >
-                <span class="nav-icon">★</span>
-                <span>Missions pratiques</span>
+                <span
+                    class="nav-icon"
+                    aria-hidden="true"
+                >
+                    ★
+                </span>
+
+                <span>
+                    Missions pratiques
+                </span>
             </button>
 
 
             <div class="sidebar-divider"></div>
 
 
+            <!-- =================================================
+                 ENVIRONNEMENT
+                 ================================================= -->
             <div class="sidebar-info">
 
                 <div class="sidebar-info-title">
                     ENVIRONNEMENT
                 </div>
 
-                <div class="environment-line">
-                    <span>Mode</span>
-                    <strong>Virtuel</strong>
-                </div>
 
                 <div class="environment-line">
-                    <span>Alimentation</span>
+
+                    <span>
+                        Mode
+                    </span>
+
+                    <strong>
+                        Virtuel
+                    </strong>
+
+                </div>
+
+
+                <div class="environment-line">
+
+                    <span>
+                        Alimentation
+                    </span>
+
                     <strong id="sidebarVoltage">
                         230 V
                     </strong>
+
                 </div>
 
+
                 <div class="environment-line">
-                    <span>Fréquence</span>
+
+                    <span>
+                        Fréquence
+                    </span>
+
                     <strong>
                         50 Hz
                     </strong>
+
                 </div>
 
+
                 <div class="environment-line">
-                    <span>État</span>
+
+                    <span>
+                        Phase
+                    </span>
+
+                    <strong id="sidebarPhaseState">
+                        Disponible
+                    </strong>
+
+                </div>
+
+
+                <div class="environment-line">
+
+                    <span>
+                        Neutre
+                    </span>
+
+                    <strong id="sidebarNeutralState">
+                        Disponible
+                    </strong>
+
+                </div>
+
+
+                <div class="environment-line">
+
+                    <span>
+                        Terre
+                    </span>
+
+                    <strong id="sidebarEarthState">
+                        Disponible
+                    </strong>
+
+                </div>
+
+
+                <div class="environment-line">
+
+                    <span>
+                        État
+                    </span>
+
                     <strong id="sidebarCircuitState">
                         Ouvert
                     </strong>
+
                 </div>
 
             </div>
@@ -202,16 +351,18 @@
 
 
         <!-- =====================================================
-             WORKSPACE
+             ESPACE DE TRAVAIL
              ===================================================== -->
         <section class="workspace">
 
+
             <!-- =================================================
-                 TOOLBAR
+                 BARRE D'OUTILS
                  ================================================= -->
             <div class="workspace-toolbar">
 
                 <div class="toolbar-group">
+
 
                     <button
                         type="button"
@@ -222,6 +373,7 @@
                         Select
                     </button>
 
+
                     <button
                         type="button"
                         class="tool-button"
@@ -230,6 +382,7 @@
                     >
                         Wire
                     </button>
+
 
                     <button
                         type="button"
@@ -245,17 +398,37 @@
 
                 <div class="toolbar-group">
 
+
                     <label
                         class="toolbar-control"
                         for="voltageSelector"
                     >
-                        <span>Tension</span>
+
+                        <span>
+                            Tension
+                        </span>
 
                         <select id="voltageSelector">
-                            <option value="12">12 V</option>
-                            <option value="24">24 V</option>
-                            <option value="120">120 V</option>
-                            <option value="230" selected>230 V</option>
+
+                            <option value="12">
+                                12 V
+                            </option>
+
+                            <option value="24">
+                                24 V
+                            </option>
+
+                            <option value="120">
+                                120 V
+                            </option>
+
+                            <option
+                                value="230"
+                                selected
+                            >
+                                230 V
+                            </option>
+
                         </select>
 
                     </label>
@@ -268,6 +441,7 @@
                     >
                         ▶ Run Simulation
                     </button>
+
 
                     <button
                         type="button"
@@ -283,15 +457,16 @@
 
 
             <!-- =================================================
-                 VIEW CONTAINER
+                 CONTENEUR DES VUES
                  ================================================= -->
             <div
                 class="view-container"
                 id="viewContainer"
             >
 
+
                 <!-- =================================================
-                     LABORATOIRE VIEW
+                     VUE LABORATOIRE
                      ================================================= -->
                 <section
                     class="app-view active"
@@ -301,6 +476,7 @@
                     <div class="view-header">
 
                         <div>
+
                             <div class="view-kicker">
                                 LABORATOIRE VIRTUEL
                             </div>
@@ -310,34 +486,70 @@
                             </h1>
 
                             <p>
-                                Construisez, connectez et testez
-                                votre circuit dans un environnement
+                                Construisez, connectez, alimentez,
+                                mesurez et diagnostiquez votre
+                                installation dans un environnement
                                 virtuel sécurisé.
                             </p>
+
                         </div>
 
 
+                        <!-- =========================================
+                             STATISTIQUES RAPIDES
+                             ========================================= -->
                         <div class="quick-stats">
 
+
                             <div class="quick-stat">
-                                <span>Composants</span>
+
+                                <span>
+                                    Composants
+                                </span>
+
                                 <strong id="componentCount">
                                     0
                                 </strong>
+
                             </div>
 
+
                             <div class="quick-stat">
-                                <span>Connexions</span>
+
+                                <span>
+                                    Connexions
+                                </span>
+
                                 <strong id="connectionCount">
                                     0
                                 </strong>
+
                             </div>
 
+
                             <div class="quick-stat">
-                                <span>Puissance</span>
+
+                                <span>
+                                    Courant
+                                </span>
+
+                                <strong id="currentValue">
+                                    0.00 A
+                                </strong>
+
+                            </div>
+
+
+                            <div class="quick-stat">
+
+                                <span>
+                                    Puissance
+                                </span>
+
                                 <strong id="powerValue">
                                     0 W
                                 </strong>
+
                             </div>
 
                         </div>
@@ -347,8 +559,9 @@
 
                     <div class="laboratory-layout">
 
+
                         <!-- =========================================
-                             COMPONENT PALETTE
+                             PALETTE DES COMPOSANTS
                              ========================================= -->
                         <aside class="component-panel">
 
@@ -356,13 +569,16 @@
                                 COMPOSANTS
                             </div>
 
+
                             <div class="component-search">
+
                                 <input
                                     type="search"
                                     id="componentSearch"
                                     placeholder="Rechercher un composant..."
                                     autocomplete="off"
                                 >
+
                             </div>
 
 
@@ -371,152 +587,396 @@
                                 id="componentList"
                             >
 
+
+                                <!-- SOURCE -->
                                 <button
                                     type="button"
                                     class="component-card"
                                     data-component="source"
+                                    title="Ajouter une source AC"
                                 >
-                                    <span class="component-symbol">
-                                        🔋
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        ⚡
                                     </span>
 
                                     <span>
-                                        <strong>Source</strong>
-                                        <small>Alimentation</small>
+
+                                        <strong>
+                                            Source AC
+                                        </strong>
+
+                                        <small>
+                                            L / N / PE
+                                        </small>
+
                                     </span>
+
                                 </button>
 
 
-                                <button
-                                    type="button"
-                                    class="component-card"
-                                    data-component="switch"
-                                >
-                                    <span class="component-symbol">
-                                        ⏻
-                                    </span>
-
-                                    <span>
-                                        <strong>Interrupteur</strong>
-                                        <small>Commande</small>
-                                    </span>
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    class="component-card"
-                                    data-component="lamp"
-                                >
-                                    <span class="component-symbol">
-                                        💡
-                                    </span>
-
-                                    <span>
-                                        <strong>Lampe</strong>
-                                        <small>Éclairage</small>
-                                    </span>
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    class="component-card"
-                                    data-component="resistor"
-                                >
-                                    <span class="component-symbol">
-                                        ▱
-                                    </span>
-
-                                    <span>
-                                        <strong>Résistance</strong>
-                                        <small>Charge</small>
-                                    </span>
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    class="component-card"
-                                    data-component="outlet"
-                                >
-                                    <span class="component-symbol">
-                                        ⊙
-                                    </span>
-
-                                    <span>
-                                        <strong>Prise</strong>
-                                        <small>Point de connexion</small>
-                                    </span>
-                                </button>
-
-
+                                <!-- DISJONCTEUR -->
                                 <button
                                     type="button"
                                     class="component-card"
                                     data-component="breaker"
+                                    title="Ajouter un disjoncteur"
                                 >
-                                    <span class="component-symbol">
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
                                         ▣
                                     </span>
 
                                     <span>
-                                        <strong>Disjoncteur</strong>
-                                        <small>Protection</small>
+
+                                        <strong>
+                                            Disjoncteur
+                                        </strong>
+
+                                        <small>
+                                            Protection surintensité
+                                        </small>
+
                                     </span>
+
                                 </button>
 
 
+                                <!-- DDR -->
                                 <button
                                     type="button"
                                     class="component-card"
-                                    data-component="ground"
+                                    data-component="rcd"
+                                    title="Ajouter un dispositif différentiel"
                                 >
-                                    <span class="component-symbol">
-                                        ⏚
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        ◉
                                     </span>
 
                                     <span>
-                                        <strong>Terre</strong>
-                                        <small>Protection</small>
+
+                                        <strong>
+                                            DDR
+                                        </strong>
+
+                                        <small>
+                                            Différentiel 30 mA
+                                        </small>
+
                                     </span>
+
                                 </button>
 
 
+                                <!-- INTERRUPTEUR -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="switch"
+                                    title="Ajouter un interrupteur simple"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        ⏻
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Interrupteur
+                                        </strong>
+
+                                        <small>
+                                            Simple allumage
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                <!-- VA-ET-VIENT -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="twoWaySwitch"
+                                    title="Ajouter un va-et-vient"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        ⇄
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Va-et-vient
+                                        </strong>
+
+                                        <small>
+                                            Commutation deux points
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                <!-- LAMPE -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="lamp"
+                                    title="Ajouter une lampe"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        💡
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Lampe
+                                        </strong>
+
+                                        <small>
+                                            Éclairage
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                <!-- PRISE -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="outlet"
+                                    title="Ajouter une prise 2P+T"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        ⊙
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Prise 2P+T
+                                        </strong>
+
+                                        <small>
+                                            L / N / PE
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                <!-- RESISTANCE -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="resistor"
+                                    title="Ajouter une résistance"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        ▱
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Résistance
+                                        </strong>
+
+                                        <small>
+                                            Charge résistive
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                <!-- MOTEUR -->
                                 <button
                                     type="button"
                                     class="component-card"
                                     data-component="motor"
+                                    title="Ajouter un moteur monophasé"
                                 >
-                                    <span class="component-symbol">
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
                                         ⚙
                                     </span>
 
                                     <span>
-                                        <strong>Moteur</strong>
-                                        <small>Récepteur</small>
+
+                                        <strong>
+                                            Moteur
+                                        </strong>
+
+                                        <small>
+                                            Récepteur monophasé
+                                        </small>
+
                                     </span>
+
                                 </button>
+
+
+                                <!-- TERRE -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="ground"
+                                    title="Ajouter une terre"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        ⏚
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Terre
+                                        </strong>
+
+                                        <small>
+                                            PE / protection
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                <!-- BARRETTE NEUTRE -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="neutralBus"
+                                    title="Ajouter une barrette neutre"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        N
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Barrette N
+                                        </strong>
+
+                                        <small>
+                                            Distribution neutre
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
+
+                                <!-- BARRETTE TERRE -->
+                                <button
+                                    type="button"
+                                    class="component-card"
+                                    data-component="earthBus"
+                                    title="Ajouter une barrette de terre"
+                                >
+
+                                    <span
+                                        class="component-symbol"
+                                        aria-hidden="true"
+                                    >
+                                        PE
+                                    </span>
+
+                                    <span>
+
+                                        <strong>
+                                            Barrette PE
+                                        </strong>
+
+                                        <small>
+                                            Distribution terre
+                                        </small>
+
+                                    </span>
+
+                                </button>
+
 
                             </div>
 
 
                             <div class="panel-hint">
-                                Cliquez sur un composant pour
-                                l'ajouter au laboratoire.
+
+                                <strong>
+                                    Conseil :
+                                </strong>
+
+                                ajoutez les composants puis utilisez
+                                <b>Wire</b> pour relier leurs bornes
+                                électriques.
+
                             </div>
 
                         </aside>
 
 
                         <!-- =========================================
-                             CIRCUIT WORKBENCH
+                             PLAN DE TRAVAIL
                              ========================================= -->
                         <div class="workbench">
 
+
                             <div class="workbench-header">
 
+
                                 <div>
+
                                     <strong>
                                         SCHÉMA ÉLECTRIQUE
                                     </strong>
@@ -524,27 +984,35 @@
                                     <span id="toolModeLabel">
                                         Outil : Select
                                     </span>
+
                                 </div>
 
+
                                 <div class="workbench-actions">
+
 
                                     <button
                                         type="button"
                                         id="zoomOutBtn"
+                                        aria-label="Réduire le zoom"
                                     >
                                         −
                                     </button>
+
 
                                     <span id="zoomValue">
                                         100%
                                     </span>
 
+
                                     <button
                                         type="button"
                                         id="zoomInBtn"
+                                        aria-label="Augmenter le zoom"
                                     >
                                         +
                                     </button>
+
 
                                     <button
                                         type="button"
@@ -558,34 +1026,65 @@
                             </div>
 
 
+                            <!-- =====================================
+                                 CANVAS TOPOLOGIQUE
+                                 ===================================== -->
                             <div
                                 class="circuit-canvas-wrapper"
                                 id="circuitCanvasWrapper"
                             >
 
+
                                 <svg
                                     id="circuitCanvas"
                                     class="circuit-canvas"
-                                    viewBox="0 0 1200 700"
+                                    viewBox="0 0 1400 800"
                                     preserveAspectRatio="xMidYMid meet"
+                                    role="application"
+                                    aria-label="Plan de câblage électrique virtuel"
                                 >
+
 
                                     <defs>
 
+
+                                        <!-- GRILLE -->
                                         <pattern
                                             id="gridPattern"
                                             width="25"
                                             height="25"
                                             patternUnits="userSpaceOnUse"
                                         >
+
                                             <path
                                                 d="M 25 0 L 0 0 0 25"
                                                 fill="none"
                                                 stroke="rgba(255,255,255,.055)"
                                                 stroke-width="1"
-                                            />
+                                            ></path>
+
                                         </pattern>
 
+
+                                        <!-- GRILLE PRINCIPALE -->
+                                        <pattern
+                                            id="majorGridPattern"
+                                            width="100"
+                                            height="100"
+                                            patternUnits="userSpaceOnUse"
+                                        >
+
+                                            <path
+                                                d="M 100 0 L 0 0 0 100"
+                                                fill="none"
+                                                stroke="rgba(255,255,255,.08)"
+                                                stroke-width="1"
+                                            ></path>
+
+                                        </pattern>
+
+
+                                        <!-- OMBRE DES COMPOSANTS -->
                                         <filter
                                             id="componentGlow"
                                             x="-50%"
@@ -593,59 +1092,156 @@
                                             width="200%"
                                             height="200%"
                                         >
+
                                             <feGaussianBlur
                                                 stdDeviation="5"
                                                 result="blur"
-                                            />
+                                            ></feGaussianBlur>
 
                                             <feMerge>
+
                                                 <feMergeNode
                                                     in="blur"
-                                                />
+                                                ></feMergeNode>
 
                                                 <feMergeNode
                                                     in="SourceGraphic"
-                                                />
+                                                ></feMergeNode>
+
                                             </feMerge>
+
                                         </filter>
 
+
+                                        <!-- MARQUEUR PHASE -->
+                                        <marker
+                                            id="arrowPhase"
+                                            markerWidth="8"
+                                            markerHeight="8"
+                                            refX="7"
+                                            refY="4"
+                                            orient="auto"
+                                        >
+
+                                            <path
+                                                d="M0,0 L8,4 L0,8 Z"
+                                                fill="#ff4d5a"
+                                            ></path>
+
+                                        </marker>
+
+
+                                        <!-- MARQUEUR NEUTRE -->
+                                        <marker
+                                            id="arrowNeutral"
+                                            markerWidth="8"
+                                            markerHeight="8"
+                                            refX="7"
+                                            refY="4"
+                                            orient="auto"
+                                        >
+
+                                            <path
+                                                d="M0,0 L8,4 L0,8 Z"
+                                                fill="#4ea7ff"
+                                            ></path>
+
+                                        </marker>
+
+
+                                        <!-- MARQUEUR TERRE -->
+                                        <marker
+                                            id="arrowEarth"
+                                            markerWidth="8"
+                                            markerHeight="8"
+                                            refX="7"
+                                            refY="4"
+                                            orient="auto"
+                                        >
+
+                                            <path
+                                                d="M0,0 L8,4 L0,8 Z"
+                                                fill="#e6c84a"
+                                            ></path>
+
+                                        </marker>
+
                                     </defs>
+
+
+                                    <!-- FOND -->
+                                    <rect
+                                        x="0"
+                                        y="0"
+                                        width="1400"
+                                        height="800"
+                                        fill="url(#gridPattern)"
+                                    ></rect>
 
 
                                     <rect
                                         x="0"
                                         y="0"
-                                        width="1200"
-                                        height="700"
-                                        fill="url(#gridPattern)"
+                                        width="1400"
+                                        height="800"
+                                        fill="url(#majorGridPattern)"
                                     ></rect>
 
 
+                                    <!-- ZONE DES CONDUCTEURS -->
                                     <g
                                         id="wiresLayer"
                                         class="wires-layer"
                                     ></g>
 
 
+                                    <!-- ZONE DES COMPOSANTS -->
                                     <g
                                         id="componentsLayer"
                                         class="components-layer"
                                     ></g>
 
 
+                                    <!-- ZONE DES BORNES -->
+                                    <g
+                                        id="terminalsLayer"
+                                        class="terminals-layer"
+                                    ></g>
+
+
+                                    <!-- CONDUCTEUR TEMPORAIRE -->
                                     <g
                                         id="temporaryWireLayer"
                                         class="temporary-wire-layer"
                                     ></g>
 
+
+                                    <!-- INDICATIONS DE MESURE -->
+                                    <g
+                                        id="measurementOverlayLayer"
+                                        class="measurement-overlay-layer"
+                                    ></g>
+
+
+                                    <!-- CURSEUR / AIDE -->
+                                    <g
+                                        id="interactionOverlayLayer"
+                                        class="interaction-overlay-layer"
+                                    ></g>
+
                                 </svg>
 
 
+                                <!-- MESSAGE CANVAS VIDE -->
                                 <div
                                     class="canvas-empty-message"
                                     id="canvasEmptyMessage"
                                 >
-                                    <div class="empty-icon">
+
+                                    <div
+                                        class="empty-icon"
+                                        aria-hidden="true"
+                                    >
                                         ⚡
                                     </div>
 
@@ -654,17 +1250,48 @@
                                     </h2>
 
                                     <p>
-                                        Ajoutez des composants
-                                        pour commencer votre circuit.
+                                        Ajoutez une source, des protections
+                                        et des récepteurs pour commencer
+                                        votre installation.
                                     </p>
+
+                                    <small>
+                                        Utilisez ensuite <strong>Wire</strong>
+                                        pour connecter les bornes L, N et PE.
+                                    </small>
+
+                                </div>
+
+
+                                <!-- AIDE WIRE -->
+                                <div
+                                    class="canvas-wire-help hidden"
+                                    id="canvasWireHelp"
+                                >
+
+                                    <strong>
+                                        Mode Wire
+                                    </strong>
+
+                                    <span>
+                                        Cliquez sur une borne puis sur
+                                        une seconde borne pour créer
+                                        le conducteur.
+                                    </span>
+
                                 </div>
 
                             </div>
 
 
+                            <!-- =====================================
+                                 FOOTER DU WORKBENCH
+                                 ===================================== -->
                             <div class="workbench-footer">
 
+
                                 <div>
+
                                     <span class="footer-label">
                                         Mode :
                                     </span>
@@ -672,9 +1299,12 @@
                                     <strong id="footerMode">
                                         Sélection
                                     </strong>
+
                                 </div>
 
+
                                 <div>
+
                                     <span class="footer-label">
                                         Alimentation :
                                     </span>
@@ -682,9 +1312,12 @@
                                     <strong id="footerVoltage">
                                         230 V AC
                                     </strong>
+
                                 </div>
 
+
                                 <div>
+
                                     <span class="footer-label">
                                         Sécurité :
                                     </span>
@@ -692,6 +1325,20 @@
                                     <strong class="safe-text">
                                         Virtuelle
                                     </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="footer-label">
+                                        Topologie :
+                                    </span>
+
+                                    <strong id="footerTopologyState">
+                                        En attente
+                                    </strong>
+
                                 </div>
 
                             </div>
@@ -700,52 +1347,68 @@
 
 
                         <!-- =========================================
-                             INSPECTOR
+                             INSPECTEUR
                              ========================================= -->
                         <aside class="inspector-panel">
+
 
                             <div class="panel-title">
                                 INSPECTEUR
                             </div>
 
+
+                            <!-- ÉTAT VIDE -->
                             <div
                                 id="inspectorEmpty"
                                 class="inspector-empty"
                             >
-                                <div class="inspector-empty-icon">
+
+                                <div
+                                    class="inspector-empty-icon"
+                                    aria-hidden="true"
+                                >
                                     ◈
                                 </div>
 
                                 <p>
-                                    Sélectionnez un composant
-                                    pour afficher ses propriétés.
+                                    Sélectionnez un composant ou un
+                                    conducteur pour afficher ses
+                                    propriétés.
                                 </p>
+
                             </div>
 
 
+                            <!-- CONTENU COMPOSANT -->
                             <div
                                 id="inspectorContent"
                                 class="inspector-content hidden"
                             >
 
+
                                 <div class="selected-component-icon">
+
                                     <span id="inspectorIcon">
-                                        💡
+                                        ⚡
                                     </span>
+
                                 </div>
+
 
                                 <h3 id="inspectorTitle">
                                     Composant
                                 </h3>
+
 
                                 <p id="inspectorDescription">
                                     —
                                 </p>
 
 
+                                <!-- IDENTIFIANT -->
                                 <div class="property-group">
 
-                                    <label>
+                                    <label for="inspectorId">
                                         Identifiant
                                     </label>
 
@@ -758,32 +1421,82 @@
                                 </div>
 
 
+                                <!-- TYPE -->
+                                <div class="property-group">
+
+                                    <label for="inspectorType">
+                                        Type
+                                    </label>
+
+                                    <input
+                                        id="inspectorType"
+                                        type="text"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <!-- POSITION X -->
+                                <div class="property-group">
+
+                                    <label for="inspectorX">
+                                        Position X
+                                    </label>
+
+                                    <input
+                                        id="inspectorX"
+                                        type="number"
+                                        step="1"
+                                    >
+
+                                </div>
+
+
+                                <!-- POSITION Y -->
+                                <div class="property-group">
+
+                                    <label for="inspectorY">
+                                        Position Y
+                                    </label>
+
+                                    <input
+                                        id="inspectorY"
+                                        type="number"
+                                        step="1"
+                                    >
+
+                                </div>
+
+
+                                <!-- RÉSISTANCE -->
                                 <div
                                     class="property-group"
                                     id="resistanceProperty"
                                 >
 
-                                    <label>
+                                    <label for="inspectorResistance">
                                         Résistance (Ω)
                                     </label>
 
                                     <input
                                         id="inspectorResistance"
                                         type="number"
-                                        min="0.1"
-                                        step="0.1"
+                                        min="0.01"
+                                        step="0.01"
                                         value="100"
                                     >
 
                                 </div>
 
 
+                                <!-- PUISSANCE -->
                                 <div
                                     class="property-group"
                                     id="powerProperty"
                                 >
 
-                                    <label>
+                                    <label for="inspectorPower">
                                         Puissance nominale (W)
                                     </label>
 
@@ -798,16 +1511,111 @@
                                 </div>
 
 
+                                <!-- CALIBRE DISJONCTEUR -->
+                                <div
+                                    class="property-group"
+                                    id="breakerRatingProperty"
+                                >
+
+                                    <label for="inspectorBreakerRating">
+                                        Calibre disjoncteur (A)
+                                    </label>
+
+                                    <select
+                                        id="inspectorBreakerRating"
+                                    >
+
+                                        <option value="2">
+                                            2 A
+                                        </option>
+
+                                        <option value="6">
+                                            6 A
+                                        </option>
+
+                                        <option value="10">
+                                            10 A
+                                        </option>
+
+                                        <option
+                                            value="16"
+                                            selected
+                                        >
+                                            16 A
+                                        </option>
+
+                                        <option value="20">
+                                            20 A
+                                        </option>
+
+                                        <option value="25">
+                                            25 A
+                                        </option>
+
+                                        <option value="32">
+                                            32 A
+                                        </option>
+
+                                        <option value="40">
+                                            40 A
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- DDR -->
+                                <div
+                                    class="property-group"
+                                    id="rcdRatingProperty"
+                                >
+
+                                    <label for="inspectorRcdRating">
+                                        Sensibilité différentielle
+                                    </label>
+
+                                    <select
+                                        id="inspectorRcdRating"
+                                    >
+
+                                        <option value="0.01">
+                                            10 mA
+                                        </option>
+
+                                        <option
+                                            value="0.03"
+                                            selected
+                                        >
+                                            30 mA
+                                        </option>
+
+                                        <option value="0.1">
+                                            100 mA
+                                        </option>
+
+                                        <option value="0.3">
+                                            300 mA
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- ÉTAT INTERRUPTEUR -->
                                 <div
                                     class="property-group"
                                     id="switchProperty"
                                 >
 
-                                    <label>
+                                    <label for="inspectorSwitchState">
                                         État
                                     </label>
 
-                                    <select id="inspectorSwitchState">
+                                    <select
+                                        id="inspectorSwitchState"
+                                    >
 
                                         <option value="off">
                                             OFF
@@ -822,6 +1630,51 @@
                                 </div>
 
 
+                                <!-- ÉTAT DISJONCTEUR -->
+                                <div
+                                    class="property-group"
+                                    id="breakerStateProperty"
+                                >
+
+                                    <label for="inspectorBreakerState">
+                                        État de protection
+                                    </label>
+
+                                    <select
+                                        id="inspectorBreakerState"
+                                    >
+
+                                        <option value="on">
+                                            ON
+                                        </option>
+
+                                        <option value="off">
+                                            OFF
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- DESCRIPTION TOPOLOGIQUE -->
+                                <div class="inspector-topology-box">
+
+                                    <div class="inspector-topology-title">
+                                        TOPOLOGIE
+                                    </div>
+
+                                    <div
+                                        id="inspectorTerminals"
+                                        class="inspector-terminals"
+                                    >
+                                        —
+                                    </div>
+
+                                </div>
+
+
+                                <!-- SUPPRESSION -->
                                 <button
                                     type="button"
                                     class="inspector-delete"
@@ -832,7 +1685,202 @@
 
                             </div>
 
+
+                            <!-- =====================================
+                                 INSPECTEUR CONDUCTEUR
+                                 ===================================== -->
+                            <div
+                                id="wireInspectorContent"
+                                class="wire-inspector-content hidden"
+                            >
+
+                                <div class="selected-component-icon">
+
+                                    <span>
+                                        ╱
+                                    </span>
+
+                                </div>
+
+
+                                <h3>
+                                    Conducteur
+                                </h3>
+
+
+                                <p>
+                                    Connexion électrique entre deux
+                                    bornes topologiques.
+                                </p>
+
+
+                                <div class="property-group">
+
+                                    <label>
+                                        Identifiant
+                                    </label>
+
+                                    <input
+                                        id="inspectorWireId"
+                                        type="text"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <div class="property-group">
+
+                                    <label>
+                                        Borne A
+                                    </label>
+
+                                    <input
+                                        id="inspectorWireFrom"
+                                        type="text"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <div class="property-group">
+
+                                    <label>
+                                        Borne B
+                                    </label>
+
+                                    <input
+                                        id="inspectorWireTo"
+                                        type="text"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <div class="property-group">
+
+                                    <label for="inspectorWireGauge">
+                                        Section conducteur
+                                    </label>
+
+                                    <select id="inspectorWireGauge">
+
+                                        <option value="1.5">
+                                            1,5 mm²
+                                        </option>
+
+                                        <option
+                                            value="2.5"
+                                            selected
+                                        >
+                                            2,5 mm²
+                                        </option>
+
+                                        <option value="4">
+                                            4 mm²
+                                        </option>
+
+                                        <option value="6">
+                                            6 mm²
+                                        </option>
+
+                                        <option value="10">
+                                            10 mm²
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <div class="property-group">
+
+                                    <label>
+                                        Continuité
+                                    </label>
+
+                                    <input
+                                        id="inspectorWireContinuity"
+                                        type="text"
+                                        readonly
+                                    >
+
+                                </div>
+
+
+                                <button
+                                    type="button"
+                                    class="inspector-delete"
+                                    id="deleteSelectedWireBtn"
+                                >
+                                    Delete wire
+                                </button>
+
+                            </div>
+
                         </aside>
+
+                    </div>
+
+
+                    <!-- =============================================
+                         CONSOLE DE TOPOLOGIE
+                         ============================================= -->
+                    <div class="laboratory-console">
+
+
+                        <div class="console-header">
+
+                            <div>
+
+                                <strong>
+                                    CONSOLE TOPOLOGIQUE
+                                </strong>
+
+                                <span>
+                                    Analyse en temps réel du réseau
+                                    virtuel.
+                                </span>
+
+                            </div>
+
+
+                            <div class="console-status">
+
+                                <span>
+                                    L
+                                </span>
+
+                                <span>
+                                    N
+                                </span>
+
+                                <span>
+                                    PE
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="topologyConsole"
+                            class="console-body"
+                        >
+
+                            <div>
+                                [SYSTÈME] Moteur topologique prêt.
+                            </div>
+
+                            <div>
+                                [SYSTÈME] En attente de composants et
+                                de connexions.
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -840,7 +1888,7 @@
 
 
                 <!-- =================================================
-                     COMPONENTS VIEW
+                     VUE COMPOSANTS
                      ================================================= -->
                 <section
                     class="app-view"
@@ -848,7 +1896,9 @@
                 >
 
                     <div class="view-header">
+
                         <div>
+
                             <div class="view-kicker">
                                 BIBLIOTHÈQUE
                             </div>
@@ -858,11 +1908,14 @@
                             </h1>
 
                             <p>
-                                Sélectionnez un élément pour
+                                Sélectionnez un composant pour
                                 l'intégrer au laboratoire.
                             </p>
+
                         </div>
+
                     </div>
+
 
                     <div
                         class="large-component-grid"
@@ -873,7 +1926,7 @@
 
 
                 <!-- =================================================
-                     TOOLS VIEW
+                     VUE OUTILS
                      ================================================= -->
                 <section
                     class="app-view"
@@ -883,6 +1936,7 @@
                     <div class="view-header">
 
                         <div>
+
                             <div class="view-kicker">
                                 OUTILS
                             </div>
@@ -892,9 +1946,10 @@
                             </h1>
 
                             <p>
-                                Outils virtuels disponibles pour
-                                l'analyse et la construction.
+                                Construisez et analysez
+                                l'installation électrique virtuelle.
                             </p>
+
                         </div>
 
                     </div>
@@ -902,16 +1957,26 @@
 
                     <div class="tools-grid">
 
+
                         <button
                             type="button"
                             class="tool-large-card"
                             data-tool-select="select"
                         >
-                            <span>↖</span>
-                            <strong>Select</strong>
+
+                            <span>
+                                ↖
+                            </span>
+
+                            <strong>
+                                Select
+                            </strong>
+
                             <small>
-                                Sélectionner un élément
+                                Sélectionner un composant,
+                                une borne ou un conducteur.
                             </small>
+
                         </button>
 
 
@@ -920,11 +1985,20 @@
                             class="tool-large-card"
                             data-tool-select="wire"
                         >
-                            <span>╱</span>
-                            <strong>Wire</strong>
+
+                            <span>
+                                ╱
+                            </span>
+
+                            <strong>
+                                Wire
+                            </strong>
+
                             <small>
-                                Créer une connexion
+                                Créer une connexion entre
+                                deux bornes électriques.
                             </small>
+
                         </button>
 
 
@@ -933,11 +2007,20 @@
                             class="tool-large-card"
                             data-tool-select="delete"
                         >
-                            <span>⌫</span>
-                            <strong>Delete</strong>
+
+                            <span>
+                                ⌫
+                            </span>
+
+                            <strong>
+                                Delete
+                            </strong>
+
                             <small>
-                                Supprimer un élément
+                                Supprimer un composant ou
+                                un conducteur.
                             </small>
+
                         </button>
 
 
@@ -946,12 +2029,234 @@
                             class="tool-large-card"
                             id="measureToolCard"
                         >
-                            <span>⌁</span>
-                            <strong>Multimeter</strong>
+
+                            <span>
+                                ⌁
+                            </span>
+
+                            <strong>
+                                Multimeter
+                            </strong>
+
                             <small>
-                                Mesurer les valeurs du circuit
+                                Mesurer tension, courant,
+                                résistance et continuité.
                             </small>
+
                         </button>
+
+
+                        <button
+                            type="button"
+                            class="tool-large-card"
+                            data-tool-select="voltmeter"
+                        >
+
+                            <span>
+                                V
+                            </span>
+
+                            <strong>
+                                Voltmeter
+                            </strong>
+
+                            <small>
+                                Mesurer la différence de
+                                potentiel entre deux bornes.
+                            </small>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="tool-large-card"
+                            data-tool-select="ammeter"
+                        >
+
+                            <span>
+                                A
+                            </span>
+
+                            <strong>
+                                Ammeter
+                            </strong>
+
+                            <small>
+                                Observer le courant simulé
+                                d'une branche.
+                            </small>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="tool-large-card"
+                            data-tool-select="ohmmeter"
+                        >
+
+                            <span>
+                                Ω
+                            </span>
+
+                            <strong>
+                                Ohmmeter
+                            </strong>
+
+                            <small>
+                                Mesurer une résistance hors
+                                alimentation.
+                            </small>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="tool-large-card"
+                            data-tool-select="continuity"
+                        >
+
+                            <span>
+                                ∿
+                            </span>
+
+                            <strong>
+                                Continuity
+                            </strong>
+
+                            <small>
+                                Vérifier la continuité
+                                d'une connexion.
+                            </small>
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- =============================================
+                         PANNEAU MULTIMÈTRE
+                         ============================================= -->
+                    <div class="multimeter-workspace">
+
+
+                        <div class="multimeter-device">
+
+
+                            <div class="multimeter-top">
+
+                                <div class="multimeter-brand">
+                                    FOBAS
+                                </div>
+
+                                <div class="multimeter-model">
+                                    DIGITAL MULTIMETER
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="multimeterDisplay"
+                                class="multimeter-display"
+                            >
+
+                                <span
+                                    id="multimeterMode"
+                                >
+                                    READY
+                                </span>
+
+                                <strong
+                                    id="multimeterValue"
+                                >
+                                    —
+                                </strong>
+
+                                <small
+                                    id="multimeterUnit"
+                                >
+                                    —
+                                </small>
+
+                            </div>
+
+
+                            <div class="multimeter-controls">
+
+
+                                <button
+                                    type="button"
+                                    class="meter-mode-button active"
+                                    data-meter-mode="voltage"
+                                >
+                                    V
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="meter-mode-button"
+                                    data-meter-mode="current"
+                                >
+                                    A
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="meter-mode-button"
+                                    data-meter-mode="resistance"
+                                >
+                                    Ω
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="meter-mode-button"
+                                    data-meter-mode="continuity"
+                                >
+                                    🔔
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="multimeter-instructions">
+
+                            <div class="panel-title">
+                                PROCÉDURE DE MESURE
+                            </div>
+
+                            <ol>
+
+                                <li>
+                                    Choisissez le mode de mesure.
+                                </li>
+
+                                <li>
+                                    Sélectionnez les bornes ou la
+                                    branche à analyser.
+                                </li>
+
+                                <li>
+                                    Consultez la valeur calculée
+                                    par le moteur topologique.
+                                </li>
+
+                                <li>
+                                    Respectez les conditions de mesure
+                                    indiquées par le simulateur.
+                                </li>
+
+                            </ol>
+
+                        </div>
 
                     </div>
 
@@ -959,7 +2264,7 @@
 
 
                 <!-- =================================================
-                     TABLEAU VIEW
+                     VUE TABLEAU ÉLECTRIQUE
                      ================================================= -->
                 <section
                     class="app-view"
@@ -969,6 +2274,7 @@
                     <div class="view-header">
 
                         <div>
+
                             <div class="view-kicker">
                                 DISTRIBUTION
                             </div>
@@ -978,9 +2284,11 @@
                             </h1>
 
                             <p>
-                                Visualisez les protections et
-                                l'alimentation du circuit.
+                                Visualisez l'alimentation,
+                                les protections, les bus L/N/PE
+                                et l'état des départs.
                             </p>
+
                         </div>
 
                     </div>
@@ -988,11 +2296,17 @@
 
                     <div class="electrical-panel">
 
+
+                        <!-- =========================================
+                             ALIMENTATION
+                             ========================================= -->
                         <div class="panel-main-breaker">
 
+
                             <div class="breaker-head">
+
                                 <span>
-                                    DISJONCTEUR PRINCIPAL
+                                    PROTECTION GÉNÉRALE
                                 </span>
 
                                 <span
@@ -1001,51 +2315,348 @@
                                 >
                                     OFF
                                 </span>
+
                             </div>
+
 
                             <button
                                 type="button"
                                 id="mainBreakerToggle"
                                 class="breaker-switch"
+                                aria-label="Commuter le disjoncteur principal"
                             >
-                                <span class="breaker-lever"></span>
+
+                                <span
+                                    class="breaker-lever"
+                                ></span>
+
                             </button>
 
+
                             <div class="breaker-rating">
-                                30 mA — Protection générale
+
+                                <span>
+                                    Disjoncteur principal
+                                </span>
+
+                                <strong id="mainBreakerRating">
+                                    32 A
+                                </strong>
+
                             </div>
 
                         </div>
 
 
+                        <!-- =========================================
+                             DDR
+                             ========================================= -->
+                        <div class="panel-protection-card">
+
+
+                            <div class="breaker-head">
+
+                                <span>
+                                    DISPOSITIF DIFFÉRENTIEL
+                                </span>
+
+                                <span
+                                    id="rcdStatus"
+                                    class="status-pill off"
+                                >
+                                    OFF
+                                </span>
+
+                            </div>
+
+
+                            <div class="protection-visual">
+
+                                <div class="protection-symbol">
+                                    ◉
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        DDR
+                                    </strong>
+
+                                    <span id="rcdSensitivity">
+                                        IΔn = 30 mA
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="rcdFaultIndicator"
+                                class="protection-indicator"
+                            >
+                                Surveillance différentielle active
+                            </div>
+
+                        </div>
+
+
+                        <!-- =========================================
+                             BUS
+                             ========================================= -->
+                        <div class="bus-grid">
+
+
+                            <div class="bus-card phase-bus">
+
+                                <div class="bus-label">
+                                    PHASE
+                                </div>
+
+                                <strong>
+                                    L
+                                </strong>
+
+                                <span id="phaseBusState">
+                                    Disponible
+                                </span>
+
+                            </div>
+
+
+                            <div class="bus-card neutral-bus">
+
+                                <div class="bus-label">
+                                    NEUTRE
+                                </div>
+
+                                <strong>
+                                    N
+                                </strong>
+
+                                <span id="neutralBusState">
+                                    Disponible
+                                </span>
+
+                            </div>
+
+
+                            <div class="bus-card earth-bus">
+
+                                <div class="bus-label">
+                                    TERRE
+                                </div>
+
+                                <strong>
+                                    PE
+                                </strong>
+
+                                <span id="earthBusState">
+                                    Disponible
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =========================================
+                             DISJONCTEURS DE DÉPART
+                             ========================================= -->
                         <div class="breaker-grid">
 
-                            <div class="mini-breaker">
-                                <strong>Q1</strong>
-                                <span>Éclairage</span>
-                                <b>10 A</b>
-                                <i class="breaker-indicator off"></i>
+
+                            <div
+                                class="mini-breaker"
+                                data-panel-breaker="lighting"
+                            >
+
+                                <strong>
+                                    Q1
+                                </strong>
+
+                                <span>
+                                    Éclairage
+                                </span>
+
+                                <b>
+                                    10 A
+                                </b>
+
+                                <i
+                                    id="lightingBreakerIndicator"
+                                    class="breaker-indicator off"
+                                ></i>
+
+                                <small
+                                    id="lightingBreakerState"
+                                >
+                                    OFF
+                                </small>
+
                             </div>
 
-                            <div class="mini-breaker">
-                                <strong>Q2</strong>
-                                <span>Prises</span>
-                                <b>16 A</b>
-                                <i class="breaker-indicator off"></i>
+
+                            <div
+                                class="mini-breaker"
+                                data-panel-breaker="outlet"
+                            >
+
+                                <strong>
+                                    Q2
+                                </strong>
+
+                                <span>
+                                    Prises
+                                </span>
+
+                                <b>
+                                    16 A
+                                </b>
+
+                                <i
+                                    id="outletBreakerIndicator"
+                                    class="breaker-indicator off"
+                                ></i>
+
+                                <small
+                                    id="outletBreakerState"
+                                >
+                                    OFF
+                                </small>
+
                             </div>
 
-                            <div class="mini-breaker">
-                                <strong>Q3</strong>
-                                <span>Chauffe-eau</span>
-                                <b>20 A</b>
-                                <i class="breaker-indicator off"></i>
+
+                            <div
+                                class="mini-breaker"
+                                data-panel-breaker="heating"
+                            >
+
+                                <strong>
+                                    Q3
+                                </strong>
+
+                                <span>
+                                    Charge
+                                </span>
+
+                                <b>
+                                    20 A
+                                </b>
+
+                                <i
+                                    id="heatingBreakerIndicator"
+                                    class="breaker-indicator off"
+                                ></i>
+
+                                <small
+                                    id="heatingBreakerState"
+                                >
+                                    OFF
+                                </small>
+
                             </div>
 
-                            <div class="mini-breaker">
-                                <strong>Q4</strong>
-                                <span>Moteur</span>
-                                <b>16 A</b>
-                                <i class="breaker-indicator off"></i>
+
+                            <div
+                                class="mini-breaker"
+                                data-panel-breaker="motor"
+                            >
+
+                                <strong>
+                                    Q4
+                                </strong>
+
+                                <span>
+                                    Moteur
+                                </span>
+
+                                <b>
+                                    16 A
+                                </b>
+
+                                <i
+                                    id="motorBreakerIndicator"
+                                    class="breaker-indicator off"
+                                ></i>
+
+                                <small
+                                    id="motorBreakerState"
+                                >
+                                    OFF
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =========================================
+                             MONITEUR DU TABLEAU
+                             ========================================= -->
+                        <div class="panel-monitor">
+
+
+                            <div class="panel-title">
+                                MONITEUR DU TABLEAU
+                            </div>
+
+
+                            <div class="panel-monitor-grid">
+
+
+                                <div>
+
+                                    <span>
+                                        Tension
+                                    </span>
+
+                                    <strong id="panelVoltage">
+                                        230 V
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Courant total
+                                    </span>
+
+                                    <strong id="panelCurrent">
+                                        0.00 A
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        Puissance
+                                    </span>
+
+                                    <strong id="panelPower">
+                                        0 W
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>
+                                        État protection
+                                    </span>
+
+                                    <strong id="panelProtectionState">
+                                        Prête
+                                    </strong>
+
+                                </div>
+
                             </div>
 
                         </div>
@@ -1056,7 +2667,7 @@
 
 
                 <!-- =================================================
-                     MEASURES VIEW
+                     VUE MESURES
                      ================================================= -->
                 <section
                     class="app-view"
@@ -1066,6 +2677,7 @@
                     <div class="view-header">
 
                         <div>
+
                             <div class="view-kicker">
                                 INSTRUMENTATION
                             </div>
@@ -1075,9 +2687,10 @@
                             </h1>
 
                             <p>
-                                Consultez les valeurs calculées
-                                par le moteur de simulation.
+                                Consultez les grandeurs électriques
+                                calculées par le moteur de simulation.
                             </p>
+
                         </div>
 
                     </div>
@@ -1085,73 +2698,173 @@
 
                     <div class="measurement-grid">
 
+
                         <div class="measurement-card">
-                            <span>TENSION</span>
+
+                            <span>
+                                TENSION
+                            </span>
+
                             <strong id="measureVoltage">
                                 230
                             </strong>
-                            <small>V</small>
+
+                            <small>
+                                V
+                            </small>
+
                         </div>
 
+
                         <div class="measurement-card">
-                            <span>COURANT</span>
+
+                            <span>
+                                COURANT
+                            </span>
+
                             <strong id="measureCurrent">
                                 0.00
                             </strong>
-                            <small>A</small>
+
+                            <small>
+                                A
+                            </small>
+
                         </div>
 
+
                         <div class="measurement-card">
-                            <span>RÉSISTANCE</span>
+
+                            <span>
+                                RÉSISTANCE
+                            </span>
+
                             <strong id="measureResistance">
                                 ∞
                             </strong>
-                            <small>Ω</small>
+
+                            <small>
+                                Ω
+                            </small>
+
                         </div>
 
+
                         <div class="measurement-card">
-                            <span>PUISSANCE</span>
+
+                            <span>
+                                PUISSANCE
+                            </span>
+
                             <strong id="measurePower">
                                 0.00
                             </strong>
-                            <small>W</small>
+
+                            <small>
+                                W
+                            </small>
+
                         </div>
 
+
                         <div class="measurement-card">
-                            <span>FRÉQUENCE</span>
+
+                            <span>
+                                FRÉQUENCE
+                            </span>
+
                             <strong>
                                 50
                             </strong>
-                            <small>Hz</small>
+
+                            <small>
+                                Hz
+                            </small>
+
                         </div>
 
+
                         <div class="measurement-card">
-                            <span>ÉTAT DU CIRCUIT</span>
+
+                            <span>
+                                ÉTAT DU CIRCUIT
+                            </span>
+
                             <strong
                                 id="measureCircuitState"
                                 class="measurement-state"
                             >
                                 OUVERT
                             </strong>
-                            <small></small>
+
+                            <small>
+                                —
+                            </small>
+
+                        </div>
+
+
+                        <div class="measurement-card">
+
+                            <span>
+                                CONTINUITÉ
+                            </span>
+
+                            <strong id="measureContinuity">
+                                —
+                            </strong>
+
+                            <small>
+                                État
+                            </small>
+
+                        </div>
+
+
+                        <div class="measurement-card">
+
+                            <span>
+                                DÉFAUT DIFFÉRENTIEL
+                            </span>
+
+                            <strong id="measureLeakage">
+                                0.00
+                            </strong>
+
+                            <small>
+                                mA
+                            </small>
+
                         </div>
 
                     </div>
 
 
+                    <!-- =============================================
+                         JOURNAL DE MESURE
+                         ============================================= -->
                     <div class="measurement-console">
+
 
                         <div class="console-title">
                             JOURNAL DE MESURE
                         </div>
 
+
                         <div
                             id="measurementLog"
                             class="console-body"
                         >
+
                             <div>
                                 [SYSTÈME] Instrumentation prête.
                             </div>
+
+                            <div>
+                                [MULTIMÈTRE] Sélectionnez un mode et
+                                deux bornes pour effectuer une mesure.
+                            </div>
+
                         </div>
 
                     </div>
@@ -1160,7 +2873,7 @@
 
 
                 <!-- =================================================
-                     DIAGNOSTIC VIEW
+                     VUE DIAGNOSTIC
                      ================================================= -->
                 <section
                     class="app-view"
@@ -1169,7 +2882,9 @@
 
                     <div class="view-header">
 
+
                         <div>
+
                             <div class="view-kicker">
                                 ANALYSE
                             </div>
@@ -1179,10 +2894,13 @@
                             </h1>
 
                             <p>
-                                Analysez automatiquement la
-                                configuration virtuelle.
+                                Analysez la topologie, les protections,
+                                la continuité, les défauts et les
+                                conditions d'alimentation.
                             </p>
+
                         </div>
+
 
                         <button
                             type="button"
@@ -1195,39 +2913,156 @@
                     </div>
 
 
+                    <!-- =============================================
+                         RESULTAT PRINCIPAL
+                         ============================================= -->
                     <div
                         id="diagnosticResult"
                         class="diagnostic-result"
                     >
 
-                        <div class="diagnostic-icon">
+                        <div
+                            class="diagnostic-icon"
+                            id="diagnosticIcon"
+                        >
                             ✓
                         </div>
 
+
                         <div>
-                            <h2>
+
+                            <h2 id="diagnosticTitle">
                                 Diagnostic en attente
                             </h2>
 
-                            <p>
+                            <p id="diagnosticSummary">
                                 Lancez une analyse pour vérifier
                                 la configuration actuelle.
                             </p>
+
                         </div>
 
                     </div>
 
 
+                    <!-- =============================================
+                         DETAILS DIAGNOSTIC
+                         ============================================= -->
                     <div
                         id="diagnosticDetails"
                         class="diagnostic-details"
                     ></div>
 
+
+                    <!-- =============================================
+                         PROCÉDURE GUIDÉE
+                         ============================================= -->
+                    <div class="guided-diagnostic">
+
+
+                        <div class="panel-title">
+                            PROCÉDURE GUIDÉE
+                        </div>
+
+
+                        <div
+                            id="diagnosticProcedure"
+                            class="diagnostic-procedure"
+                        >
+
+                            <div class="procedure-step">
+
+                                <span>
+                                    1
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Vérifier l'alimentation
+                                    </strong>
+
+                                    <small>
+                                        Contrôler la source, L, N et PE.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="procedure-step">
+
+                                <span>
+                                    2
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Vérifier les protections
+                                    </strong>
+
+                                    <small>
+                                        Examiner le disjoncteur et le DDR.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="procedure-step">
+
+                                <span>
+                                    3
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Vérifier la continuité
+                                    </strong>
+
+                                    <small>
+                                        Contrôler les conducteurs et
+                                        les connexions.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="procedure-step">
+
+                                <span>
+                                    4
+                                </span>
+
+                                <div>
+
+                                    <strong>
+                                        Vérifier les récepteurs
+                                    </strong>
+
+                                    <small>
+                                        Contrôler les chemins L/N/PE.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </section>
 
 
                 <!-- =================================================
-                     MISSIONS VIEW
+                     VUE MISSIONS
                      ================================================= -->
                 <section
                     class="app-view"
@@ -1236,7 +3071,9 @@
 
                     <div class="view-header">
 
+
                         <div>
+
                             <div class="view-kicker">
                                 PRATIQUE
                             </div>
@@ -1246,29 +3083,105 @@
                             </h1>
 
                             <p>
-                                Mettez vos compétences en pratique
-                                dans des situations électriques
-                                simulées.
+                                Construisez et diagnostiquez des
+                                installations électriques virtuelles
+                                à travers des missions progressives.
                             </p>
+
+                        </div>
+
+
+                        <div class="mission-progress-summary">
+
+                            <span>
+                                Progression
+                            </span>
+
+                            <strong id="missionProgressValue">
+                                0 %
+                            </strong>
+
                         </div>
 
                     </div>
 
 
+                    <!-- =============================================
+                         FILTRES DE NIVEAU
+                         ============================================= -->
+                    <div class="mission-level-filter">
+
+
+                        <button
+                            type="button"
+                            class="mission-filter active"
+                            data-mission-level="all"
+                        >
+                            Toutes
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="mission-filter"
+                            data-mission-level="beginner"
+                        >
+                            Débutant
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="mission-filter"
+                            data-mission-level="intermediate"
+                        >
+                            Intermédiaire
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="mission-filter"
+                            data-mission-level="advanced"
+                        >
+                            Avancé
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="mission-filter"
+                            data-mission-level="expert"
+                        >
+                            Expert
+                        </button>
+
+                    </div>
+
+
+                    <!-- =============================================
+                         LISTE DES MISSIONS
+                         ============================================= -->
                     <div
                         class="mission-grid"
                         id="missionGrid"
                     ></div>
 
 
+                    <!-- =============================================
+                         ESPACE MISSION ACTIVE
+                         ============================================= -->
                     <div
                         class="mission-workspace hidden"
                         id="missionWorkspace"
                     >
 
+
                         <div class="mission-workspace-header">
 
+
                             <div>
+
                                 <span class="mission-label">
                                     MISSION ACTIVE
                                 </span>
@@ -1280,7 +3193,9 @@
                                 <p id="activeMissionDescription">
                                     —
                                 </p>
+
                             </div>
+
 
                             <button
                                 type="button"
@@ -1293,6 +3208,9 @@
                         </div>
 
 
+                        <!-- =========================================
+                             OBJECTIF
+                             ========================================= -->
                         <div class="mission-objective">
 
                             <strong>
@@ -1306,19 +3224,105 @@
                         </div>
 
 
+                        <!-- =========================================
+                             CONDITIONS
+                             ========================================= -->
+                        <div class="mission-conditions">
+
+
+                            <div>
+
+                                <span>
+                                    Niveau
+                                </span>
+
+                                <strong id="activeMissionLevel">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Étapes
+                                </span>
+
+                                <strong id="activeMissionStepCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Score
+                                </span>
+
+                                <strong id="activeMissionScore">
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    État
+                                </span>
+
+                                <strong id="activeMissionState">
+                                    En cours
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =========================================
+                             ÉTAPES
+                             ========================================= -->
+                        <div
+                            class="mission-steps"
+                            id="missionSteps"
+                        ></div>
+
+
+                        <!-- =========================================
+                             FEEDBACK
+                             ========================================= -->
                         <div
                             id="missionFeedback"
                             class="mission-feedback"
                         ></div>
 
 
-                        <button
-                            type="button"
-                            class="tool-button primary"
-                            id="validateMissionBtn"
-                        >
-                            Validate Mission
-                        </button>
+                        <div class="mission-actions">
+
+
+                            <button
+                                type="button"
+                                class="tool-button primary"
+                                id="validateMissionBtn"
+                            >
+                                Validate Mission
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="tool-button"
+                                id="missionResetCircuitBtn"
+                            >
+                                Reset Circuit
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -1332,39 +3336,52 @@
 
 
     <!-- =========================================================
-         NOTIFICATION
+         PANNEAU DE NOTIFICATIONS
          ========================================================= -->
     <div
         id="toastContainer"
         class="toast-container"
         aria-live="polite"
+        aria-atomic="true"
     ></div>
 
 
     <!-- =========================================================
-         MODAL CONFIRMATION
+         MODAL DE CONFIRMATION RESET
          ========================================================= -->
     <div
         id="confirmationModal"
         class="modal-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="resetModalTitle"
     >
 
         <div class="modal-card">
 
-            <div class="modal-icon">
+
+            <div
+                class="modal-icon"
+                aria-hidden="true"
+            >
                 ⚠
             </div>
 
-            <h2>
+
+            <h2 id="resetModalTitle">
                 Réinitialiser la simulation ?
             </h2>
 
+
             <p>
-                Tous les composants et connexions virtuels
-                actuels seront supprimés.
+                Tous les composants, conducteurs, mesures,
+                défauts et états virtuels actuels seront
+                réinitialisés.
             </p>
 
+
             <div class="modal-actions">
+
 
                 <button
                     type="button"
@@ -1373,6 +3390,7 @@
                 >
                     Cancel
                 </button>
+
 
                 <button
                     type="button"
@@ -1389,15 +3407,86 @@
     </div>
 
 
+    <!-- =========================================================
+         MODAL D'INFORMATION COMPOSANT
+         ========================================================= -->
+    <div
+        id="componentInfoModal"
+        class="modal-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="componentInfoTitle"
+    >
+
+        <div class="modal-card component-info-modal">
+
+
+            <div
+                class="modal-icon"
+                id="componentInfoIcon"
+            >
+                ⚡
+            </div>
+
+
+            <h2 id="componentInfoTitle">
+                Composant
+            </h2>
+
+
+            <p id="componentInfoDescription">
+                —
+            </p>
+
+
+            <div
+                id="componentInfoTerminals"
+                class="modal-terminal-list"
+            ></div>
+
+
+            <div class="modal-actions">
+
+
+                <button
+                    type="button"
+                    class="tool-button"
+                    id="closeComponentInfoBtn"
+                >
+                    Close
+                </button>
+
+
+                <button
+                    type="button"
+                    class="tool-button primary"
+                    id="addComponentFromInfoBtn"
+                >
+                    Add Component
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
     <footer class="app-footer">
+
 
         <span>
             SIMULATION ÉLECTRICITÉ FOBAS
         </span>
 
+
         <span>
-            Laboratoire virtuel • Version 1.0
+            Laboratoire virtuel • Moteur topologique
         </span>
+
 
         <span>
             ⚠ Environnement de simulation uniquement
@@ -1408,6 +3497,9 @@
 </div>
 
 
+<!-- =============================================================
+     JAVASCRIPT PRINCIPAL
+     ============================================================= -->
 <script
     src="simulationelectricitefobas.js"
     defer
