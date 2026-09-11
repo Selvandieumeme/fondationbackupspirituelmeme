@@ -505,8 +505,17 @@
         },
 
 
+
+
+
+
+
         /* ========================================================
            SOLIDES
+           --------------------------------------------------------
+           Matériaux solides disponibles dans le laboratoire.
+           Les matériaux existants sont conservés.
+           Aucun ID existant n'est dupliqué.
         ======================================================== */
 
         {
@@ -585,7 +594,222 @@
             }
         },
 
+        {
+            id: "sodium",
+            name: "Sodium",
+            category: "solid",
+            type: "solid",
+            icon: "🔘",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 0.968,
+            temperature: 25,
+            ph: null,
+            color: "Argenté",
+            formula: "Na",
+            molarMass: 22.98976928,
+            defaultMolarity: null,
+            description:
+                "Échantillon de sodium métallique.",
+            thermal: {
+                meltingPoint: 97.79,
+                boilingPoint: 883,
+                heatCapacity: 1.228
+            }
+        },
 
+        {
+            id: "sulfur",
+            name: "Soufre",
+            category: "solid",
+            type: "solid",
+            icon: "🟡",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.07,
+            temperature: 25,
+            ph: null,
+            color: "Jaune",
+            formula: "S",
+            molarMass: 32.06,
+            defaultMolarity: null,
+            description:
+                "Échantillon de soufre élémentaire.",
+            thermal: {
+                meltingPoint: 115.21,
+                boilingPoint: 444.72,
+                heatCapacity: 0.71
+            }
+        },
+
+        {
+            id: "carbon",
+            name: "Carbone",
+            category: "solid",
+            type: "solid",
+            icon: "⚫",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.26,
+            temperature: 25,
+            ph: null,
+            color: "Noir",
+            formula: "C",
+            molarMass: 12.011,
+            defaultMolarity: null,
+            description:
+                "Échantillon de carbone sous forme de graphite.",
+            thermal: {
+                meltingPoint: 3550,
+                boilingPoint: 4027,
+                heatCapacity: 0.709
+            }
+        },
+
+        {
+            id: "aluminum",
+            name: "Aluminium",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.70,
+            temperature: 25,
+            ph: null,
+            color: "Argenté",
+            formula: "Al",
+            molarMass: 26.9815385,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique d'aluminium.",
+            thermal: {
+                meltingPoint: 660.32,
+                boilingPoint: 2519,
+                heatCapacity: 0.897
+            }
+        },
+
+        {
+            id: "zinc",
+            name: "Zinc",
+            category: "solid",
+            type: "solid",
+            icon: "⚙️",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 7.14,
+            temperature: 25,
+            ph: null,
+            color: "Gris argenté",
+            formula: "Zn",
+            molarMass: 65.38,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique de zinc.",
+            thermal: {
+                meltingPoint: 419.53,
+                boilingPoint: 907,
+                heatCapacity: 0.388
+            }
+        },
+
+        {
+            id: "magnesium",
+            name: "Magnésium",
+            category: "solid",
+            type: "solid",
+            icon: "🔘",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 1.738,
+            temperature: 25,
+            ph: null,
+            color: "Argenté",
+            formula: "Mg",
+            molarMass: 24.305,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique de magnésium.",
+            thermal: {
+                meltingPoint: 650,
+                boilingPoint: 1091,
+                heatCapacity: 1.023
+            }
+        },
+
+        {
+            id: "calcium-carbonate",
+            name: "Carbonate de calcium",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.71,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "CaCO₃",
+            molarMass: 100.0869,
+            defaultMolarity: null,
+            description:
+                "Carbonate de calcium solide utilisé notamment dans les réactions avec les acides.",
+            thermal: {
+                meltingPoint: 825,
+                boilingPoint: 1339,
+                heatCapacity: 0.82
+            }
+        },
+
+        {
+            id: "sucrose",
+            name: "Sucre",
+            category: "solid",
+            type: "solid",
+            icon: "🍚",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 1.587,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "C₁₂H₂₂O₁₁",
+            molarMass: 342.2965,
+            defaultMolarity: null,
+            description:
+                "Saccharose solide utilisé pour les expériences de dissolution et de préparation de solutions.",
+            thermal: {
+                meltingPoint: 186,
+                boilingPoint: null,
+                heatCapacity: 1.24
+            }
+        },
+
+
+
+
+
+
+
+
+      
         /* ========================================================
            INSTRUMENTS
         ======================================================== */
