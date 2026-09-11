@@ -1,91 +1,99 @@
-/* ============================================================
+/* ================================================================
    FOBAS — LABORATOIRE CHIMIQUE
-   simulationchimicfobas.css
-   Version finale — Interface laboratoire dynamique
-   Compatible avec simulationchimicfobas.html
-   ============================================================ */
+   ---------------------------------------------------------------
+   FEUILLE DE STYLE PRINCIPALE — VERSION NOUVELLE
+   Architecture compatible avec simulationchimicfobas.html
+
+   Palette :
+   Bleu profond  → structure / technologie
+   Bleu clair    → interface / profondeur
+   Jaune         → accent scientifique / énergie
+   Blanc         → lisibilité / contraste
+
+   IMPORTANT :
+   - Aucun JavaScript requis pour le style.
+   - Tous les sélecteurs correspondent à l'HTML actuel.
+   - Responsive Desktop / Tablette / Mobile.
+   - Bibliothèque mobile sous forme de drawer.
+================================================================ */
 
 
-/* ============================================================
-   01. ROOT / VARIABLES
-   ============================================================ */
+/* ================================================================
+   01 — VARIABLES
+================================================================ */
 
 :root {
+    --fobas-blue-950: #04131d;
+    --fobas-blue-900: #061d2b;
+    --fobas-blue-850: #08283a;
+    --fobas-blue-800: #0a3349;
+    --fobas-blue-700: #0b4765;
+    --fobas-blue-600: #0877a8;
+    --fobas-blue-500: #0aa0dc;
+    --fobas-blue-400: #39c5f2;
+    --fobas-blue-300: #82ddf8;
 
-    --bg-main: #061014;
-    --bg-deep: #040b0e;
+    --fobas-yellow-600: #c98d00;
+    --fobas-yellow-500: #f0b90b;
+    --fobas-yellow-400: #ffd43b;
+    --fobas-yellow-300: #ffe477;
+    --fobas-yellow-100: #fff8d9;
 
-    --panel: #0b171c;
-    --panel-2: #0e1d23;
-    --panel-3: #12252c;
+    --fobas-white: #ffffff;
+    --fobas-white-soft: #f5f9fc;
+    --fobas-text: #eaf5fa;
+    --fobas-text-soft: #a9c3cf;
+    --fobas-text-dark: #17303d;
 
-    --surface: #10232a;
-    --surface-hover: #173139;
-    --surface-active: #193a43;
+    --fobas-border: rgba(124, 205, 235, 0.18);
+    --fobas-border-strong: rgba(124, 205, 235, 0.32);
 
-    --line: rgba(154, 205, 214, 0.12);
-    --line-strong: rgba(154, 205, 214, 0.22);
+    --fobas-panel: rgba(5, 27, 40, 0.96);
+    --fobas-panel-2: rgba(7, 35, 51, 0.98);
 
-    --text: #edf8fa;
-    --text-soft: #b7cbd0;
-    --text-muted: #71888e;
+    --fobas-success: #32d583;
+    --fobas-danger: #ff5964;
+    --fobas-warning: #ffc928;
 
-    --accent: #21d4c3;
-    --accent-soft: rgba(33, 212, 195, 0.13);
-    --accent-strong: #39f1dd;
+    --header-height: 76px;
+    --left-width: 310px;
+    --right-width: 350px;
 
-    --blue: #48a9ff;
-    --blue-soft: rgba(72, 169, 255, 0.13);
+    --toolbar-height: 74px;
+    --status-height: 46px;
 
-    --green: #49df91;
-    --green-soft: rgba(73, 223, 145, 0.13);
+    --radius-xs: 6px;
+    --radius-sm: 9px;
+    --radius-md: 13px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
 
-    --yellow: #eacb62;
-    --yellow-soft: rgba(234, 203, 98, 0.13);
+    --shadow-panel:
+        0 18px 50px rgba(0, 0, 0, 0.28);
 
-    --orange: #ff9d57;
-    --orange-soft: rgba(255, 157, 87, 0.13);
+    --shadow-card:
+        0 10px 28px rgba(0, 0, 0, 0.20);
 
-    --red: #ff6875;
-    --red-soft: rgba(255, 104, 117, 0.13);
-
-    --purple: #ad8cff;
-    --purple-soft: rgba(173, 140, 255, 0.13);
-
-    --shadow-small:
-        0 4px 16px rgba(0, 0, 0, 0.18);
-
-    --shadow-medium:
-        0 12px 35px rgba(0, 0, 0, 0.28);
-
-    --shadow-large:
-        0 24px 70px rgba(0, 0, 0, 0.45);
-
-    --radius-xs: 5px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 22px;
-
-    --header-height: 70px;
-
-    --left-width: 285px;
-    --right-width: 335px;
+    --shadow-yellow:
+        0 0 24px rgba(240, 185, 11, 0.16);
 
     --transition-fast:
-        120ms ease;
+        140ms ease;
 
     --transition:
-        180ms ease;
+        220ms cubic-bezier(.2,.75,.25,1);
 
     --transition-slow:
-        300ms ease;
+        360ms cubic-bezier(.2,.75,.25,1);
+
+    --font:
+        Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 
-/* ============================================================
-   02. GLOBAL RESET
-   ============================================================ */
+/* ================================================================
+   02 — RESET
+================================================================ */
 
 *,
 *::before,
@@ -93,49 +101,41 @@
     box-sizing: border-box;
 }
 
-
-html {
+html,
+body {
     width: 100%;
     height: 100%;
-    background: var(--bg-deep);
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    background: var(--fobas-blue-950);
     color-scheme: dark;
 }
 
-
 body {
-    width: 100%;
     min-width: 320px;
-    height: 100%;
-    margin: 0;
-
+    overflow: hidden;
     background:
         radial-gradient(
-            circle at 50% -20%,
-            rgba(33, 212, 195, 0.06),
-            transparent 42%
+            circle at 15% 10%,
+            rgba(10, 160, 220, 0.10),
+            transparent 30%
         ),
-        var(--bg-main);
-
-    color: var(--text);
-
-    font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
+        radial-gradient(
+            circle at 85% 90%,
+            rgba(240, 185, 11, 0.06),
+            transparent 28%
+        ),
+        var(--fobas-blue-950);
+    color: var(--fobas-text);
+    font-family: var(--font);
     font-size: 14px;
-    line-height: 1.4;
-
-    overflow: hidden;
-
+    line-height: 1.45;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
-
 
 button,
 input,
@@ -144,385 +144,321 @@ textarea {
     font: inherit;
 }
 
-
 button {
     border: 0;
-    outline: none;
 }
-
 
 button,
-select {
-    cursor: pointer;
+select,
+input[type="range"] {
+    -webkit-tap-highlight-color: transparent;
 }
 
-
-input {
-    outline: none;
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--fobas-yellow-400);
+    outline-offset: 2px;
 }
-
-
-svg,
-img {
-    max-width: 100%;
-}
-
 
 .hidden {
     display: none !important;
 }
 
 
-.sr-only {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
-    overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-}
-
-
-/* ============================================================
-   03. APPLICATION SHELL
-   ============================================================ */
+/* ================================================================
+   03 — APPLICATION ROOT
+================================================================ */
 
 .chem-app {
+    position: relative;
     width: 100%;
     height: 100dvh;
-    min-height: 100%;
-
+    min-height: 520px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 
     background:
         linear-gradient(
             180deg,
-            rgba(255,255,255,0.015),
-            transparent 120px
-        ),
-        var(--bg-main);
-
-    overflow: hidden;
+            rgba(5, 30, 44, 0.98),
+            rgba(3, 17, 27, 1)
+        );
 }
 
 
-/* ============================================================
-   04. HEADER
-   ============================================================ */
+/* ================================================================
+   04 — HEADER
+================================================================ */
 
 .chem-header {
-    height: var(--header-height);
-    min-height: var(--header-height);
+    position: relative;
+    z-index: 100;
+    flex: 0 0 var(--header-height);
 
-    display: flex;
+    display: grid;
+    grid-template-columns:
+        auto
+        minmax(150px, 1fr)
+        minmax(190px, 300px)
+        auto;
+
     align-items: center;
-
-    gap: 20px;
+    gap: 18px;
 
     padding:
         0 18px;
 
     background:
         linear-gradient(
-            180deg,
-            #0b191e,
-            #09161a
+            135deg,
+            rgba(7, 40, 58, 0.99),
+            rgba(4, 23, 35, 0.99)
         );
 
     border-bottom:
-        1px solid var(--line);
+        1px solid var(--fobas-border-strong);
 
     box-shadow:
-        0 3px 18px rgba(0,0,0,0.18);
-
-    position: relative;
-    z-index: 50;
+        0 10px 30px rgba(0, 0, 0, 0.24);
 }
 
 
-/* BRAND */
+/* ================================================================
+   BRAND
+================================================================ */
 
 .brand-area {
-    min-width: 245px;
-
     display: flex;
     align-items: center;
-
     gap: 11px;
+    min-width: 0;
 }
 
-
 .brand-mark {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
 
     display: grid;
     place-items: center;
 
     border-radius: 11px;
 
-    color: #031011;
+    color: var(--fobas-blue-950);
 
-    font-size: 20px;
+    font-size: 23px;
     font-weight: 900;
 
     background:
         linear-gradient(
             135deg,
-            var(--accent-strong),
-            var(--accent)
+            var(--fobas-yellow-300),
+            var(--fobas-yellow-500)
         );
 
     box-shadow:
-        0 0 22px rgba(33, 212, 195, 0.22);
-
-    flex: 0 0 auto;
+        0 0 0 1px rgba(255, 228, 119, 0.35),
+        0 8px 22px rgba(240, 185, 11, 0.18);
 }
-
 
 .brand-text {
+    min-width: 0;
     display: flex;
     flex-direction: column;
-
-    line-height: 1.05;
+    line-height: 1.1;
 }
-
 
 .brand-text strong {
-    font-size: 15px;
-    font-weight: 850;
-    letter-spacing: 0.08em;
-}
-
-
-.brand-text span {
-    margin-top: 5px;
-
-    color: var(--text-muted);
-
-    font-size: 9px;
-    font-weight: 750;
+    color: var(--fobas-white);
+    font-size: 17px;
     letter-spacing: 0.16em;
 }
 
-
-/* LAB STATE */
-
-.laboratory-state {
-    height: 36px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 0 11px;
-
-    color: var(--text-soft);
-
-    background:
-        rgba(255,255,255,0.025);
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 9px;
-
+.brand-text span {
+    margin-top: 4px;
+    color: var(--fobas-blue-300);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
     white-space: nowrap;
 }
 
 
+/* ================================================================
+   LABORATORY STATE
+================================================================ */
+
+.laboratory-state {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+
+    color: var(--fobas-text-soft);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 .state-dot {
     width: 8px;
     height: 8px;
+    flex: 0 0 8px;
 
     border-radius: 50%;
-
-    background: var(--text-muted);
-}
-
-
-.state-dot.online {
-    background: var(--green);
+    background: var(--fobas-success);
 
     box-shadow:
-        0 0 0 4px rgba(73, 223, 145, 0.08),
-        0 0 12px rgba(73, 223, 145, 0.55);
+        0 0 0 4px rgba(50, 213, 131, 0.10),
+        0 0 16px rgba(50, 213, 131, 0.65);
 }
 
-
-.state-dot.warning {
-    background: var(--yellow);
-
+.state-dot:not(.online) {
+    background: var(--fobas-danger);
     box-shadow:
-        0 0 0 4px rgba(234, 203, 98, 0.08);
+        0 0 0 4px rgba(255, 89, 100, 0.10),
+        0 0 16px rgba(255, 89, 100, 0.50);
 }
 
 
-.state-dot.offline {
-    background: var(--red);
-}
-
-
-/* SESSION */
+/* ================================================================
+   SESSION
+================================================================ */
 
 .session-area {
-    margin-left: auto;
-
     display: flex;
     align-items: center;
-
     gap: 9px;
+    min-width: 0;
 }
-
 
 .session-area label {
-    color: var(--text-muted);
-
-    font-size: 10px;
-    font-weight: 800;
-
+    color: var(--fobas-text-soft);
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
 }
 
+#sessionName {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
 
-.session-area input {
-    width: 185px;
-    height: 36px;
+    padding: 0 12px;
 
-    padding: 0 11px;
+    border: 1px solid var(--fobas-border);
+    border-radius: 9px;
 
-    color: var(--text);
-
-    background: #071217;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--fobas-white);
 
     transition:
         border-color var(--transition),
+        background var(--transition),
         box-shadow var(--transition);
 }
 
-
-.session-area input:hover {
-    border-color: var(--line-strong);
+#sessionName:hover {
+    border-color: var(--fobas-border-strong);
 }
 
-
-.session-area input:focus {
-    border-color: rgba(33, 212, 195, 0.55);
-
+#sessionName:focus {
+    border-color: var(--fobas-blue-400);
+    background: rgba(0, 0, 0, 0.25);
     box-shadow:
-        0 0 0 3px rgba(33, 212, 195, 0.08);
+        0 0 0 3px rgba(57, 197, 242, 0.09);
 }
 
 
-/* HEADER ACTIONS */
+/* ================================================================
+   HEADER ACTIONS
+================================================================ */
 
 .header-actions {
     display: flex;
     align-items: center;
-
+    justify-content: flex-end;
     gap: 7px;
 }
 
-
 .header-button {
-    height: 36px;
-
-    padding:
-        0 12px;
-
-    color: var(--text-soft);
-
-    background:
-        rgba(255,255,255,0.035);
+    min-height: 38px;
+    padding: 0 12px;
 
     border:
-        1px solid var(--line);
+        1px solid var(--fobas-border);
 
-    border-radius: 8px;
+    border-radius: 9px;
 
-    font-size: 12px;
-    font-weight: 700;
+    background:
+        rgba(255, 255, 255, 0.045);
+
+    color: var(--fobas-text);
+
+    cursor: pointer;
+
+    font-size: 11px;
+    font-weight: 800;
 
     transition:
         transform var(--transition-fast),
         background var(--transition),
         border-color var(--transition),
-        color var(--transition);
+        color var(--transition),
+        box-shadow var(--transition);
 }
-
 
 .header-button:hover {
-    color: var(--text);
-
-    background:
-        rgba(255,255,255,0.065);
-
-    border-color: var(--line-strong);
+    transform: translateY(-1px);
+    border-color: var(--fobas-blue-400);
+    background: rgba(10, 160, 220, 0.13);
 }
-
 
 .header-button:active {
-    transform: scale(0.97);
+    transform: translateY(0);
 }
 
-
 .header-button.primary {
-    color: #031312;
-
+    border-color: rgba(240, 185, 11, 0.50);
     background:
         linear-gradient(
             135deg,
-            var(--accent-strong),
-            var(--accent)
+            var(--fobas-yellow-400),
+            var(--fobas-yellow-500)
         );
-
-    border-color: transparent;
-
+    color: #162000;
     box-shadow:
-        0 4px 18px rgba(33, 212, 195, 0.15);
+        0 7px 20px rgba(240, 185, 11, 0.14);
 }
-
 
 .header-button.primary:hover {
-    color: #02100f;
-
+    border-color: var(--fobas-yellow-300);
     box-shadow:
-        0 5px 24px rgba(33, 212, 195, 0.25);
+        0 9px 25px rgba(240, 185, 11, 0.22);
 }
-
 
 .header-button.danger {
-    color: #ff9ca4;
+    color: #ffb8bc;
 }
-
 
 .header-button.danger:hover {
-    color: #ffd3d6;
+    border-color: rgba(255, 89, 100, 0.45);
+    background: rgba(255, 89, 100, 0.10);
+}
 
-    background:
-        var(--red-soft);
-
-    border-color:
-        rgba(255,104,117,0.28);
+.library-toggle {
+    display: none;
 }
 
 
-/* ============================================================
-   05. MAIN 3-COLUMN LAYOUT
-   ============================================================ */
+/* ================================================================
+   05 — MAIN GRID
+================================================================ */
 
 .laboratory-layout {
+    position: relative;
     min-height: 0;
     flex: 1;
 
@@ -534,576 +470,675 @@ img {
         var(--right-width);
 
     overflow: hidden;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(8, 42, 59, 0.42),
+            rgba(2, 18, 27, 0.22),
+            rgba(8, 42, 59, 0.42)
+        );
 }
 
 
-/* ============================================================
-   06. COMMON PANEL
-   ============================================================ */
+/* ================================================================
+   06 — COMMON PANELS
+================================================================ */
 
 .materials-panel,
 .inspector-panel {
-    min-width: 0;
     min-height: 0;
-
     display: flex;
     flex-direction: column;
 
     background:
         linear-gradient(
             180deg,
-            rgba(255,255,255,0.015),
-            transparent
+            rgba(7, 36, 52, 0.98),
+            rgba(4, 24, 36, 0.98)
         );
-}
 
+    box-shadow: var(--shadow-panel);
+}
 
 .materials-panel {
-    border-right:
-        1px solid var(--line);
+    position: relative;
+    z-index: 30;
+    border-right: 1px solid var(--fobas-border);
 }
-
 
 .inspector-panel {
-    border-left:
-        1px solid var(--line);
+    position: relative;
+    z-index: 20;
+    border-left: 1px solid var(--fobas-border);
 }
 
-
 .panel-heading {
-    min-height: 67px;
+    flex: 0 0 auto;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
 
-    padding:
-        12px 15px;
+    padding: 17px 16px 14px;
 
-    border-bottom:
-        1px solid var(--line);
-
-    background:
-        rgba(255,255,255,0.012);
+    border-bottom: 1px solid rgba(124, 205, 235, 0.10);
 }
-
 
 .panel-heading small {
     display: block;
-
     margin-bottom: 4px;
 
-    color: var(--text-muted);
+    color: var(--fobas-blue-300);
 
-    font-size: 8px;
-    font-weight: 850;
-
-    letter-spacing: 0.17em;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.16em;
 }
-
 
 .panel-heading h2 {
     margin: 0;
 
-    font-size: 16px;
-    font-weight: 800;
+    color: var(--fobas-white);
 
+    font-size: 19px;
+    font-weight: 800;
     letter-spacing: -0.02em;
 }
 
-
-.panel-heading > span {
-    min-width: 28px;
-    height: 25px;
-
+.panel-heading > span,
+.object-type {
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    padding: 0 7px;
+    min-width: 30px;
+    height: 28px;
 
-    color: var(--accent);
+    padding: 0 9px;
 
-    background:
-        var(--accent-soft);
+    border-radius: 8px;
 
-    border:
-        1px solid rgba(33,212,195,0.15);
+    background: rgba(10, 160, 220, 0.11);
+    border: 1px solid rgba(57, 197, 242, 0.18);
 
-    border-radius: 7px;
+    color: var(--fobas-blue-300);
 
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 800;
 }
 
 
-.object-type {
-    color: var(--blue) !important;
+/* ================================================================
+   MOBILE LIBRARY HEADER
+================================================================ */
 
-    background:
-        var(--blue-soft) !important;
-
-    border-color:
-        rgba(72,169,255,0.16) !important;
+.mobile-library-header {
+    display: none;
 }
 
+.library-close-button {
+    width: 36px;
+    height: 36px;
 
-/* ============================================================
-   07. MATERIAL SEARCH
-   ============================================================ */
-
-.material-search {
-    padding: 12px 12px 8px;
-}
-
-
-.material-search input {
-    width: 100%;
-    height: 38px;
-
-    padding:
-        0 12px;
-
-    color: var(--text);
-
-    background:
-        #071217;
-
-    border:
-        1px solid var(--line);
-
+    border: 1px solid var(--fobas-border);
     border-radius: 9px;
 
-    font-size: 12px;
+    background: rgba(255,255,255,0.05);
+    color: var(--fobas-white);
+
+    cursor: pointer;
+
+    font-size: 24px;
+    line-height: 1;
 
     transition:
+        background var(--transition),
         border-color var(--transition),
-        box-shadow var(--transition);
+        transform var(--transition-fast);
 }
 
-
-.material-search input::placeholder {
-    color: #52686e;
+.library-close-button:hover {
+    border-color: rgba(255, 89, 100, 0.45);
+    background: rgba(255, 89, 100, 0.12);
 }
 
-
-.material-search input:focus {
-    border-color:
-        rgba(33,212,195,0.5);
-
-    box-shadow:
-        0 0 0 3px rgba(33,212,195,0.07);
+.library-close-button:active {
+    transform: scale(.95);
 }
 
-
-/* ============================================================
-   08. CATEGORIES
-   ============================================================ */
-
-.material-categories {
-    display: flex;
-
-    gap: 5px;
-
-    padding:
-        5px 12px 10px;
-
-    overflow-x: auto;
-
-    scrollbar-width: none;
-}
-
-
-.material-categories::-webkit-scrollbar {
+.materials-backdrop {
     display: none;
 }
 
 
-.category-button {
+/* ================================================================
+   07 — SEARCH
+================================================================ */
+
+.material-search {
     flex: 0 0 auto;
-
-    height: 29px;
-
-    padding:
-        0 9px;
-
-    color: var(--text-muted);
-
-    background:
-        rgba(255,255,255,0.025);
-
-    border:
-        1px solid transparent;
-
-    border-radius: 7px;
-
-    font-size: 10px;
-    font-weight: 750;
-
-    white-space: nowrap;
-
-    transition:
-        color var(--transition),
-        background var(--transition),
-        border-color var(--transition);
+    padding: 12px 12px 9px;
 }
 
+.material-search::before {
+    content: "⌕";
+    position: absolute;
+    margin: 10px 0 0 11px;
 
-.category-button:hover {
-    color: var(--text-soft);
+    color: var(--fobas-blue-300);
+    font-size: 17px;
 
-    background:
-        rgba(255,255,255,0.05);
+    pointer-events: none;
 }
 
-
-.category-button.active {
-    color: var(--accent);
-
-    background:
-        var(--accent-soft);
-
-    border-color:
-        rgba(33,212,195,0.18);
-}
-
-
-/* ============================================================
-   09. MATERIAL LIBRARY
-   ============================================================ */
-
-.materials-library {
-    min-height: 0;
-
-    flex: 1;
-
-    overflow-y: auto;
-
-    padding:
-        4px 10px 12px;
-
-    scrollbar-width: thin;
-
-    scrollbar-color:
-        rgba(255,255,255,0.12)
-        transparent;
-}
-
-
-.materials-library::-webkit-scrollbar,
-.inventory-list::-webkit-scrollbar,
-.inspector-panel::-webkit-scrollbar,
-.observation-log::-webkit-scrollbar,
-.composition-list::-webkit-scrollbar {
-    width: 5px;
-}
-
-
-.materials-library::-webkit-scrollbar-track,
-.inventory-list::-webkit-scrollbar-track,
-.inspector-panel::-webkit-scrollbar-track,
-.observation-log::-webkit-scrollbar-track,
-.composition-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-
-.materials-library::-webkit-scrollbar-thumb,
-.inventory-list::-webkit-scrollbar-thumb,
-.inspector-panel::-webkit-scrollbar-thumb,
-.observation-log::-webkit-scrollbar-thumb,
-.composition-list::-webkit-scrollbar-thumb {
-    background:
-        rgba(255,255,255,0.12);
-
-    border-radius: 99px;
-}
-
-
-/* JS generated material cards */
-
-.material-card,
-.library-item,
-.material-item {
+#materialSearch {
     width: 100%;
+    height: 40px;
 
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 9px;
-
-    margin-bottom: 6px;
-
-    color: var(--text-soft);
-
-    background:
-        rgba(255,255,255,0.022);
+    padding:
+        0 12px 0 34px;
 
     border:
-        1px solid transparent;
+        1px solid var(--fobas-border);
 
     border-radius: 10px;
 
-    text-align: left;
+    background:
+        rgba(0, 0, 0, 0.18);
 
-    cursor: pointer;
+    color: var(--fobas-white);
 
     transition:
-        transform var(--transition-fast),
-        background var(--transition),
-        border-color var(--transition);
+        border-color var(--transition),
+        box-shadow var(--transition),
+        background var(--transition);
+}
+
+#materialSearch::placeholder {
+    color: rgba(169, 195, 207, 0.60);
+}
+
+#materialSearch:hover {
+    border-color: var(--fobas-border-strong);
+}
+
+#materialSearch:focus {
+    border-color: var(--fobas-blue-400);
+    background: rgba(0, 0, 0, 0.25);
+    box-shadow:
+        0 0 0 3px rgba(57, 197, 242, 0.08);
 }
 
 
-.material-card:hover,
-.library-item:hover,
-.material-item:hover {
-    color: var(--text);
+/* ================================================================
+   08 — CATEGORIES
+================================================================ */
 
-    background:
-        rgba(255,255,255,0.055);
-
-    border-color:
-        var(--line);
-
-    transform:
-        translateX(2px);
-}
-
-
-.material-card:active,
-.library-item:active,
-.material-item:active {
-    transform:
-        scale(0.985);
-}
-
-
-.material-icon {
-    width: 38px;
-    height: 38px;
-
+.material-categories {
     flex: 0 0 auto;
 
-    display: grid;
-    place-items: center;
-
-    color: var(--accent);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(33,212,195,0.12),
-            rgba(33,212,195,0.035)
-        );
-
-    border:
-        1px solid rgba(33,212,195,0.12);
-
-    border-radius: 9px;
-
-    font-size: 18px;
-}
-
-
-.material-info {
-    min-width: 0;
-
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 6px;
 
-    gap: 3px;
+    padding:
+        2px 12px 11px;
 }
 
+.category-button {
+    min-height: 30px;
 
-.material-info strong {
-    color: var(--text);
+    padding: 0 9px;
 
-    font-size: 11px;
-    font-weight: 750;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-
-.material-info small {
-    color: var(--text-muted);
-
-    font-size: 9px;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-
-.material-state {
-    margin-left: auto;
-
-    padding: 3px 6px;
-
-    color: var(--text-muted);
+    border: 1px solid var(--fobas-border);
+    border-radius: 7px;
 
     background:
         rgba(255,255,255,0.035);
 
-    border-radius: 5px;
+    color: var(--fobas-text-soft);
 
-    font-size: 8px;
-    font-weight: 750;
+    cursor: pointer;
 
-    white-space: nowrap;
+    font-size: 10px;
+    font-weight: 800;
+
+    transition:
+        color var(--transition-fast),
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition-fast);
+}
+
+.category-button:hover {
+    color: var(--fobas-white);
+    border-color: rgba(57, 197, 242, 0.35);
+    background: rgba(10, 160, 220, 0.10);
+}
+
+.category-button:active {
+    transform: scale(.97);
+}
+
+.category-button.active {
+    border-color: rgba(240, 185, 11, 0.52);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 212, 59, 0.18),
+            rgba(240, 185, 11, 0.08)
+        );
+    color: var(--fobas-yellow-300);
+    box-shadow:
+        0 0 18px rgba(240, 185, 11, 0.06);
 }
 
 
-/* MATERIAL COLOR INDICATORS */
+/* ================================================================
+   09 — MATERIAL LIBRARY
+================================================================ */
 
-.material-color,
-.color-dot {
-    width: 9px;
-    height: 9px;
+.materials-library {
+    min-height: 0;
+    flex: 1;
 
-    flex: 0 0 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 
-    border-radius: 50%;
+    padding:
+        5px 10px 14px;
+
+    scrollbar-width: thin;
+    scrollbar-color:
+        rgba(57,197,242,0.30)
+        transparent;
+}
+
+.materials-library::-webkit-scrollbar,
+.inventory-list::-webkit-scrollbar,
+.observation-log::-webkit-scrollbar,
+.help-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.materials-library::-webkit-scrollbar-track,
+.inventory-list::-webkit-scrollbar-track,
+.observation-log::-webkit-scrollbar-track,
+.help-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.materials-library::-webkit-scrollbar-thumb,
+.inventory-list::-webkit-scrollbar-thumb,
+.observation-log::-webkit-scrollbar-thumb,
+.help-content::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background: rgba(57,197,242,0.24);
+}
+
+
+/* ================================================================
+   MATERIAL CARDS — CLASSES GENERATED BY JS
+================================================================ */
+
+.chem-material-card {
+    position: relative;
+
+    width: 100%;
+    min-height: 70px;
+
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 28px;
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 7px;
+    padding: 8px 9px;
+
+    border:
+        1px solid rgba(124,205,235,0.13);
+
+    border-radius: 12px;
 
     background:
-        #d8f2f5;
+        linear-gradient(
+            135deg,
+            rgba(12, 56, 77, 0.76),
+            rgba(5, 29, 42, 0.92)
+        );
+
+    color: var(--fobas-text);
+
+    text-align: left;
+    cursor: pointer;
 
     box-shadow:
-        0 0 8px rgba(255,255,255,0.15);
+        0 6px 16px rgba(0,0,0,0.12);
+
+    transition:
+        transform var(--transition-fast),
+        border-color var(--transition),
+        background var(--transition),
+        box-shadow var(--transition);
 }
 
+.chem-material-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
 
-.material-color.blue,
-.color-dot.blue {
-    background: #36a8ff;
-}
-
-
-.material-color.green,
-.color-dot.green {
-    background: #44d98c;
-}
-
-
-.material-color.red,
-.color-dot.red {
-    background: #ff646d;
-}
-
-
-.material-color.yellow,
-.color-dot.yellow {
-    background: #e6c956;
-}
-
-
-.material-color.purple,
-.color-dot.purple {
-    background: #a98cff;
-}
-
-
-.material-color.orange,
-.color-dot.orange {
-    background: #ff9b52;
-}
-
-
-/* ============================================================
-   10. INVENTORY
-   ============================================================ */
-
-.inventory-section {
-    flex: 0 0 auto;
-
-    border-top:
-        1px solid var(--line);
+    border-radius: inherit;
 
     background:
-        rgba(0,0,0,0.08);
+        linear-gradient(
+            90deg,
+            rgba(57,197,242,0.06),
+            transparent 55%
+        );
+
+    opacity: 0;
+    transition: opacity var(--transition);
+    pointer-events: none;
+}
+
+.chem-material-card:hover {
+    transform: translateY(-2px);
+
+    border-color:
+        rgba(57,197,242,0.42);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(10,71,101,0.88),
+            rgba(5,31,45,0.96)
+        );
+
+    box-shadow:
+        0 11px 25px rgba(0,0,0,0.24),
+        0 0 18px rgba(57,197,242,0.06);
+}
+
+.chem-material-card:hover::before {
+    opacity: 1;
+}
+
+.chem-material-card:active {
+    transform: translateY(0) scale(.985);
+}
+
+.chem-material-icon {
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            rgba(255,255,255,0.18),
+            rgba(10,160,220,0.09) 55%,
+            rgba(0,0,0,0.12)
+        );
+
+    border:
+        1px solid rgba(57,197,242,0.18);
+
+    font-size: 23px;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.chem-material-info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.chem-material-info strong {
+    overflow: hidden;
+
+    color: var(--fobas-white);
+
+    font-size: 12px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.chem-material-info small {
+    overflow: hidden;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 9px;
+    font-weight: 600;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.chem-material-add {
+    width: 25px;
+    height: 25px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 7px;
+
+    background:
+        rgba(240,185,11,0.12);
+
+    border:
+        1px solid rgba(240,185,11,0.25);
+
+    color: var(--fobas-yellow-300);
+
+    font-size: 17px;
+    font-weight: 900;
+
+    transition:
+        background var(--transition),
+        color var(--transition),
+        transform var(--transition-fast);
+}
+
+.chem-material-card:hover .chem-material-add {
+    background:
+        var(--fobas-yellow-500);
+
+    color:
+        var(--fobas-blue-950);
+
+    transform: scale(1.05);
 }
 
 
+/* ================================================================
+   EMPTY STATES
+================================================================ */
+
+.chem-empty-library,
+.chem-empty-inventory {
+    margin: 14px 4px;
+    padding: 22px 14px;
+
+    border:
+        1px dashed rgba(124,205,235,0.18);
+
+    border-radius: 12px;
+
+    color: var(--fobas-text-soft);
+
+    background:
+        rgba(255,255,255,0.018);
+
+    text-align: center;
+
+    font-size: 11px;
+}
+
+
+/* ================================================================
+   10 — INVENTORY
+================================================================ */
+
+.inventory-section {
+    flex: 0 0 180px;
+
+    min-height: 130px;
+
+    display: flex;
+    flex-direction: column;
+
+    border-top:
+        1px solid var(--fobas-border);
+
+    background:
+        rgba(0, 0, 0, 0.10);
+}
+
 .inventory-heading {
-    height: 37px;
+    flex: 0 0 auto;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    padding:
-        0 12px;
+    padding: 11px 13px 8px;
 
-    color: var(--text-muted);
+    color: var(--fobas-text-soft);
 
     font-size: 9px;
-    font-weight: 850;
-
-    letter-spacing: 0.12em;
+    font-weight: 900;
+    letter-spacing: 0.14em;
 }
-
 
 .inventory-heading strong {
-    color: var(--accent);
+    min-width: 24px;
+    height: 22px;
+
+    display: inline-grid;
+    place-items: center;
+
+    border-radius: 6px;
+
+    background:
+        rgba(57,197,242,0.10);
+
+    color: var(--fobas-blue-300);
 
     font-size: 10px;
+    letter-spacing: normal;
 }
-
 
 .inventory-list {
-    max-height: 150px;
+    min-height: 0;
+    flex: 1;
 
     overflow-y: auto;
-
-    padding:
-        0 10px 8px;
+    padding: 2px 10px 10px;
 }
 
+.chem-inventory-item {
+    width: 100%;
 
-.inventory-item {
-    display: flex;
+    display: grid;
+    grid-template-columns: 30px minmax(0,1fr) auto;
     align-items: center;
 
     gap: 8px;
 
-    padding: 7px 8px;
+    padding: 7px;
 
-    margin-bottom: 4px;
+    margin-bottom: 5px;
+
+    border:
+        1px solid rgba(124,205,235,0.10);
+
+    border-radius: 8px;
 
     background:
-        rgba(255,255,255,0.02);
+        rgba(255,255,255,0.025);
 
-    border-radius: 7px;
+    color: var(--fobas-text);
+
+    cursor: pointer;
+
+    text-align: left;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition);
 }
 
+.chem-inventory-item:hover {
+    border-color: rgba(57,197,242,0.28);
+    background: rgba(10,160,220,0.08);
+}
 
-.inventory-item strong {
-    flex: 1;
+.chem-inventory-icon {
+    width: 30px;
+    height: 30px;
 
-    color: var(--text-soft);
+    display: grid;
+    place-items: center;
 
+    border-radius: 7px;
+
+    background: rgba(10,160,220,0.08);
+
+    font-size: 15px;
+}
+
+.chem-inventory-info {
+    min-width: 0;
+}
+
+.chem-inventory-info strong,
+.chem-inventory-info small {
+    display: block;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.chem-inventory-info strong {
+    color: var(--fobas-white);
     font-size: 10px;
 }
 
+.chem-inventory-info small {
+    margin-top: 2px;
+    color: var(--fobas-text-soft);
+    font-size: 8px;
+}
 
-.inventory-item span {
-    color: var(--text-muted);
-
+.chem-inventory-value {
+    color: var(--fobas-yellow-300);
     font-size: 9px;
+    font-weight: 800;
 }
 
 
-/* ============================================================
-   11. CENTRAL WORKSPACE
-   ============================================================ */
+/* ================================================================
+   11 — CENTRAL WORKSPACE
+================================================================ */
 
 .laboratory-workspace {
+    position: relative;
     min-width: 0;
     min-height: 0;
 
@@ -1111,470 +1146,322 @@ img {
     flex-direction: column;
 
     background:
-        #081317;
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(10,160,220,0.045),
+            transparent 50%
+        ),
+        #061923;
 }
 
 
-/* ============================================================
-   12. TOOLBAR
-   ============================================================ */
+/* ================================================================
+   TOOLBAR
+================================================================ */
 
 .workspace-toolbar {
-    min-height: 62px;
+    position: relative;
+    z-index: 10;
+
+    flex: 0 0 var(--toolbar-height);
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    gap: 10px;
+    gap: 12px;
 
     padding:
-        8px 12px;
-
-    background:
-        #0b191e;
+        9px 12px;
 
     border-bottom:
-        1px solid var(--line);
+        1px solid var(--fobas-border);
 
-    overflow-x: auto;
+    background:
+        rgba(5, 28, 41, 0.97);
 
-    scrollbar-width: none;
+    box-shadow:
+        0 7px 20px rgba(0,0,0,0.12);
 }
-
-
-.workspace-toolbar::-webkit-scrollbar {
-    display: none;
-}
-
 
 .toolbar-group {
     display: flex;
     align-items: center;
-
-    gap: 5px;
-
-    flex: 0 0 auto;
+    gap: 6px;
 }
-
 
 .toolbar-divider {
     width: 1px;
-    height: 32px;
-
-    margin:
-        0 4px;
+    height: 34px;
 
     background:
-        var(--line);
+        var(--fobas-border);
 }
 
 
+/* ================================================================
+   TOOL BUTTONS
+================================================================ */
+
 .tool-button {
-    min-width: 60px;
-    height: 46px;
+    min-width: 62px;
+    height: 54px;
 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 
-    gap: 2px;
+    gap: 3px;
 
-    padding: 4px 7px;
-
-    color: var(--text-muted);
-
-    background:
-        transparent;
+    padding: 5px 7px;
 
     border:
         1px solid transparent;
 
-    border-radius: 8px;
+    border-radius: 9px;
+
+    background:
+        transparent;
+
+    color: var(--fobas-text-soft);
+
+    cursor: pointer;
 
     transition:
-        color var(--transition),
         background var(--transition),
-        border-color var(--transition);
+        border-color var(--transition),
+        color var(--transition),
+        transform var(--transition-fast);
 }
-
 
 .tool-button span {
-    height: 19px;
-
-    font-size: 17px;
-    line-height: 19px;
+    font-size: 19px;
+    line-height: 1;
 }
-
 
 .tool-button small {
     font-size: 8px;
-    font-weight: 750;
+    font-weight: 800;
 }
-
 
 .tool-button:hover {
-    color: var(--text);
-
-    background:
-        rgba(255,255,255,0.045);
+    border-color: var(--fobas-border);
+    background: rgba(10,160,220,0.08);
+    color: var(--fobas-white);
 }
 
+.tool-button:active {
+    transform: scale(.96);
+}
 
 .tool-button.active {
-    color: var(--accent);
+    border-color:
+        rgba(240,185,11,0.35);
 
     background:
-        var(--accent-soft);
+        linear-gradient(
+            180deg,
+            rgba(240,185,11,0.15),
+            rgba(240,185,11,0.055)
+        );
 
-    border-color:
-        rgba(33,212,195,0.16);
+    color:
+        var(--fobas-yellow-300);
+
+    box-shadow:
+        inset 0 0 0 1px rgba(240,185,11,0.04),
+        0 0 18px rgba(240,185,11,0.05);
 }
 
-
 .tool-icon {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
 
     display: grid;
     place-items: center;
 
-    color: var(--text-soft);
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius: 8px;
 
     background:
-        rgba(255,255,255,0.03);
+        rgba(255,255,255,0.035);
 
-    border:
-        1px solid var(--line);
+    color: var(--fobas-text);
 
-    border-radius: 7px;
+    cursor: pointer;
 
-    font-size: 16px;
+    font-size: 18px;
 
     transition:
         background var(--transition),
+        border-color var(--transition),
         color var(--transition),
-        border-color var(--transition);
+        transform var(--transition-fast);
 }
-
 
 .tool-icon:hover {
-    color: var(--text);
-
-    background:
-        rgba(255,255,255,0.07);
-
-    border-color:
-        var(--line-strong);
+    border-color: rgba(57,197,242,0.35);
+    background: rgba(10,160,220,0.10);
+    color: var(--fobas-white);
 }
 
+.tool-icon:active {
+    transform: scale(.94);
+}
 
 .tool-icon.danger:hover {
-    color: var(--red);
-
-    background:
-        var(--red-soft);
-
-    border-color:
-        rgba(255,104,117,0.2);
+    border-color: rgba(255,89,100,0.40);
+    color: #ff9da3;
+    background: rgba(255,89,100,0.08);
 }
 
-
 .zoom-value {
-    min-width: 42px;
+    min-width: 50px;
 
-    color: var(--text-muted);
+    color: var(--fobas-blue-300);
 
     text-align: center;
 
     font-size: 10px;
-    font-weight: 750;
+    font-weight: 800;
 }
 
 
-/* ============================================================
-   13. WORKSPACE VIEWPORT
-   ============================================================ */
+/* ================================================================
+   12 — WORKSPACE VIEWPORT
+================================================================ */
 
 .workspace-viewport {
     position: relative;
-
-    min-width: 0;
     min-height: 0;
-
     flex: 1;
 
     overflow: hidden;
 
     background:
-        #071115;
+        #04141d;
 }
-
 
 .horizontal-ruler {
     position: absolute;
+    z-index: 7;
 
     top: 0;
-    left: 27px;
+    left: 32px;
     right: 0;
 
     height: 25px;
 
     display: flex;
-    align-items: flex-end;
-
-    padding-bottom: 4px;
-
-    z-index: 15;
-
-    color: #536a70;
-
-    background:
-        #09181d;
+    justify-content: space-around;
+    align-items: center;
 
     border-bottom:
-        1px solid var(--line);
-
-    overflow: hidden;
-}
-
-
-.horizontal-ruler::before {
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    height: 8px;
+        1px solid rgba(124,205,235,0.14);
 
     background:
-        repeating-linear-gradient(
-            90deg,
-            transparent 0,
-            transparent 9px,
-            rgba(170,210,216,0.18) 9px,
-            rgba(170,210,216,0.18) 10px
-        );
+        rgba(4,20,29,0.94);
+
+    color:
+        rgba(169,195,207,0.55);
+
+    font-size: 8px;
+    pointer-events: none;
 }
-
-
-.horizontal-ruler span {
-    position: relative;
-
-    width: 50px;
-
-    flex: 0 0 50px;
-
-    font-size: 7px;
-
-    text-align: center;
-}
-
 
 .vertical-ruler {
     position: absolute;
+    z-index: 7;
 
     top: 25px;
     left: 0;
     bottom: 0;
 
-    width: 27px;
+    width: 32px;
 
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-
-    padding-top: 4px;
-
-    z-index: 15;
-
-    color: #536a70;
-
-    background:
-        #09181d;
+    justify-content: space-around;
+    align-items: center;
 
     border-right:
-        1px solid var(--line);
-
-    overflow: hidden;
-}
-
-
-.vertical-ruler::before {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-    right: 0;
-    bottom: 0;
-
-    width: 8px;
+        1px solid rgba(124,205,235,0.14);
 
     background:
-        repeating-linear-gradient(
-            0deg,
-            transparent 0,
-            transparent 9px,
-            rgba(170,210,216,0.18) 9px,
-            rgba(170,210,216,0.18) 10px
-        );
+        rgba(4,20,29,0.94);
+
+    color:
+        rgba(169,195,207,0.55);
+
+    font-size: 8px;
+    pointer-events: none;
 }
 
 
-.vertical-ruler span {
-    position: relative;
-
-    width: 100%;
-    height: 50px;
-
-    flex: 0 0 50px;
-
-    padding-right: 11px;
-
-    font-size: 7px;
-
-    text-align: right;
-}
-
-
-/* ============================================================
-   14. CHEMISTRY CANVAS
-   ============================================================ */
+/* ================================================================
+   CHEMISTRY CANVAS
+================================================================ */
 
 .chemistry-canvas {
     position: absolute;
 
     top: 25px;
-    left: 27px;
+    left: 32px;
     right: 0;
     bottom: 0;
 
-    overflow: auto;
+    overflow: hidden;
 
     background:
-        #071115;
+        radial-gradient(
+            circle at center,
+            rgba(10,160,220,0.035),
+            transparent 58%
+        ),
+        #071a25;
 
-    isolation: isolate;
-
-    cursor: default;
-
-    scrollbar-width: thin;
-
-    scrollbar-color:
-        rgba(255,255,255,0.15)
-        transparent;
-}
-
-
-.chemistry-canvas::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-
-.chemistry-canvas::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.08);
-}
-
-
-.chemistry-canvas::-webkit-scrollbar-thumb {
-    background:
-        rgba(255,255,255,0.13);
-
-    border-radius: 99px;
-}
-
-
-.chemistry-canvas:focus {
     outline: none;
 }
 
-
-.chemistry-canvas.tool-move {
-    cursor: grab;
-}
-
-
-.chemistry-canvas.tool-move:active {
-    cursor: grabbing;
-}
-
-
-.chemistry-canvas.tool-transfer {
-    cursor: crosshair;
-}
-
-
-.chemistry-canvas.tool-mix {
-    cursor: pointer;
-}
-
-
-/* GRID */
-
 .workspace-grid {
     position: absolute;
-
     inset: 0;
 
-    min-width: 900px;
-    min-height: 650px;
-
-    background-color:
-        #071115;
+    opacity: 0.58;
 
     background-image:
         linear-gradient(
-            rgba(110, 171, 180, 0.055) 1px,
+            rgba(57,197,242,0.055) 1px,
             transparent 1px
         ),
         linear-gradient(
             90deg,
-            rgba(110, 171, 180, 0.055) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            rgba(110, 171, 180, 0.025) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(110, 171, 180, 0.025) 1px,
+            rgba(57,197,242,0.055) 1px,
             transparent 1px
         );
 
     background-size:
-        50px 50px,
-        50px 50px,
-        10px 10px,
-        10px 10px;
+        25px 25px;
 
     pointer-events: none;
-
-    z-index: 0;
 }
 
-
-/* OBJECT CONTAINER */
-
 .workspace-objects {
-    position: relative;
+    position: absolute;
+    inset: 0;
 
-    min-width: 900px;
-    min-height: 650px;
+    transform-origin: 0 0;
 
     z-index: 5;
 }
 
 
-/* ============================================================
-   15. DROP ZONE
-   ============================================================ */
+/* ================================================================
+   DROP ZONE
+================================================================ */
 
 .workspace-drop-zone {
     position: absolute;
@@ -1582,93 +1469,88 @@ img {
     left: 50%;
     top: 50%;
 
-    transform:
-        translate(-50%, -50%);
+    width: min(390px, 80%);
 
-    width: min(420px, 70%);
+    transform: translate(-50%, -50%);
 
     display: flex;
     flex-direction: column;
     align-items: center;
 
-    gap: 7px;
-
     padding: 30px 25px;
 
-    color: var(--text-muted);
+    border:
+        1px dashed rgba(57,197,242,0.20);
+
+    border-radius: 20px;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(10,160,220,0.06),
+            rgba(255,255,255,0.01)
+        );
+
+    color: var(--fobas-text-soft);
 
     text-align: center;
 
-    border:
-        1px dashed rgba(154,205,214,0.17);
-
-    border-radius: 18px;
-
-    background:
-        rgba(255,255,255,0.012);
-
     pointer-events: none;
-
-    z-index: 2;
 
     transition:
         opacity var(--transition),
         transform var(--transition);
 }
 
-
-.workspace-drop-zone.hidden,
-.workspace-drop-zone.is-hidden {
-    opacity: 0;
-    visibility: hidden;
-}
-
-
 .drop-icon {
-    width: 54px;
-    height: 54px;
+    width: 62px;
+    height: 62px;
 
     display: grid;
     place-items: center;
 
-    margin-bottom: 4px;
+    margin-bottom: 13px;
 
-    color: var(--accent);
-
-    background:
-        var(--accent-soft);
+    border-radius: 18px;
 
     border:
-        1px solid rgba(33,212,195,0.13);
+        1px solid rgba(57,197,242,0.22);
 
-    border-radius: 15px;
+    background:
+        rgba(10,160,220,0.08);
 
-    font-size: 26px;
+    color: var(--fobas-blue-300);
+
+    font-size: 32px;
+
+    box-shadow:
+        0 0 28px rgba(10,160,220,0.07);
 }
-
 
 .workspace-drop-zone strong {
-    color: var(--text-soft);
+    color: var(--fobas-white);
 
-    font-size: 13px;
-    font-weight: 750;
+    font-size: 15px;
+    font-weight: 800;
 }
 
-
-.workspace-drop-zone span {
+.workspace-drop-zone > span {
     max-width: 310px;
 
-    font-size: 10px;
+    margin-top: 7px;
 
+    color: var(--fobas-text-soft);
+
+    font-size: 10px;
     line-height: 1.55;
 }
 
 
-/* ============================================================
-   16. DYNAMIC LAB OBJECTS
-   ============================================================ */
+/* ================================================================
+   GENERATED OBJECTS
+================================================================ */
 
-.lab-object {
+.chem-object {
     position: absolute;
 
     user-select: none;
@@ -1677,1418 +1559,552 @@ img {
     cursor: pointer;
 
     transition:
-        filter var(--transition),
-        transform var(--transition);
+        box-shadow var(--transition-fast),
+        filter var(--transition-fast);
 }
 
-
-.lab-object:hover {
-    filter:
-        brightness(1.08);
+.chem-object:hover {
+    filter: brightness(1.08);
 }
 
-
-.lab-object.selected {
-    z-index: 30;
-
-    filter:
-        brightness(1.1)
-        drop-shadow(
-            0 0 10px rgba(33,212,195,0.5)
-        );
-}
-
-
-.lab-object.dragging {
-    z-index: 100;
-
-    transition: none;
-
-    cursor: grabbing;
-}
-
-
-/* GENERIC OBJECT CARD */
-
-.object-card {
-    min-width: 92px;
-
-    padding: 8px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(19,42,49,0.96),
-            rgba(7,19,23,0.96)
-        );
-
-    border:
-        1px solid rgba(154,205,214,0.18);
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 8px 22px rgba(0,0,0,0.28);
-
-    backdrop-filter:
-        blur(8px);
-
-    -webkit-backdrop-filter:
-        blur(8px);
-}
-
-
-.lab-object.selected .object-card {
-    border-color:
-        rgba(33,212,195,0.65);
-
-    box-shadow:
-        0 0 0 2px rgba(33,212,195,0.12),
-        0 10px 30px rgba(0,0,0,0.32);
-}
-
-
-/* OBJECT NAME */
-
-.object-name {
-    max-width: 140px;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    color: var(--text);
-
-    font-size: 10px;
-    font-weight: 800;
-}
-
-
-.object-subtitle {
-    margin-top: 2px;
-
-    color: var(--text-muted);
-
-    font-size: 8px;
-}
-
-
-/* ============================================================
-   17. GLASSWARE VISUALS
-   ============================================================ */
-
-.glassware-object {
-    position: relative;
+.chem-object.selected {
+    z-index: 20;
 
     filter:
         drop-shadow(
-            0 10px 14px rgba(0,0,0,0.25)
+            0 0 12px
+            rgba(240,185,11,0.36)
         );
 }
 
-
-.glassware-body {
-    position: relative;
-
-    width: 92px;
-    height: 122px;
-
-    border:
-        2px solid rgba(184,232,239,0.48);
-
-    border-top:
-        3px solid rgba(207,241,245,0.68);
-
-    border-radius:
-        4px 4px 13px 13px;
-
-    background:
-        linear-gradient(
-            90deg,
-            rgba(255,255,255,0.07),
-            rgba(255,255,255,0.015) 45%,
-            rgba(255,255,255,0.07)
-        );
-
-    overflow: hidden;
-
-    box-shadow:
-        inset 7px 0 14px rgba(255,255,255,0.035),
-        inset -7px 0 14px rgba(0,0,0,0.12);
-}
-
-
-.glassware-rim {
-    position: absolute;
-
-    left: -4px;
-    top: -7px;
-
-    width: calc(100% + 8px);
-    height: 13px;
-
-    border:
-        2px solid rgba(207,241,245,0.55);
-
-    border-radius: 50%;
-
-    background:
-        rgba(220,248,250,0.035);
-}
-
-
-.glassware-liquid {
-    position: absolute;
-
-    left: 4px;
-    right: 4px;
-    bottom: 4px;
-
-    height: 25%;
-
-    border-radius:
-        2px 2px 9px 9px;
-
-    background:
-        rgba(50,170,220,0.36);
-
-    box-shadow:
-        inset 0 7px 12px rgba(255,255,255,0.07);
-
-    transition:
-        height 350ms ease,
-        background 350ms ease;
-}
-
-
-.glassware-liquid::before {
+.chem-object.selected::after {
     content: "";
 
     position: absolute;
-
-    left: 0;
-    right: 0;
-    top: -3px;
-
-    height: 6px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(180,240,247,0.23);
-}
-
-
-.glassware-graduation {
-    position: absolute;
-
-    top: 24px;
-    right: 8px;
-    bottom: 10px;
-
-    width: 18px;
-
-    opacity: 0.6;
-
-    background:
-        repeating-linear-gradient(
-            to bottom,
-            transparent 0,
-            transparent 9px,
-            rgba(218,241,244,0.55) 9px,
-            rgba(218,241,244,0.55) 10px
-        );
-}
-
-
-/* ERLENMEYER */
-
-.erlenmeyer-body {
-    position: relative;
-
-    width: 105px;
-    height: 125px;
-}
-
-
-.erlenmeyer-neck {
-    position: absolute;
-
-    left: 37px;
-    top: 0;
-
-    width: 31px;
-    height: 47px;
+    inset: -5px;
 
     border:
-        2px solid rgba(184,232,239,0.5);
+        1px solid rgba(240,185,11,0.65);
 
-    border-bottom: 0;
+    border-radius: 12px;
 
-    background:
-        rgba(255,255,255,0.025);
+    pointer-events: none;
 }
 
 
-.erlenmeyer-flask {
-    position: absolute;
-
-    left: 7px;
-    right: 7px;
-    bottom: 0;
-
-    height: 88px;
-
-    clip-path:
-        polygon(
-            35% 0,
-            65% 0,
-            65% 22%,
-            100% 100%,
-            0 100%,
-            35% 22%
-        );
-
-    border:
-        2px solid rgba(184,232,239,0.45);
-
-    background:
-        rgba(200,240,244,0.025);
-}
-
-
-/* TEST TUBE */
-
-.test-tube-body {
-    width: 40px;
-    height: 125px;
-
-    position: relative;
-
-    border:
-        2px solid rgba(184,232,239,0.5);
-
-    border-top:
-        3px solid rgba(210,243,246,0.65);
-
-    border-radius:
-        7px 7px 20px 20px;
-
-    background:
-        rgba(255,255,255,0.025);
-
-    overflow: hidden;
-}
-
-
-.test-tube-liquid {
-    position: absolute;
-
-    left: 4px;
-    right: 4px;
-    bottom: 4px;
-
-    height: 28%;
-
-    border-radius:
-        2px 2px 15px 15px;
-
-    background:
-        rgba(70,160,220,0.35);
-}
-
-
-/* CYLINDER */
-
-.cylinder-body {
-    position: relative;
-
-    width: 65px;
-    height: 140px;
-
-    border:
-        2px solid rgba(184,232,239,0.48);
-
-    border-radius:
-        5px 5px 10px 10px;
-
-    background:
-        rgba(255,255,255,0.025);
-
-    overflow: hidden;
-}
-
-
-.cylinder-rim {
-    position: absolute;
-
-    left: -3px;
-    right: -3px;
-    top: -5px;
-
-    height: 11px;
-
-    border:
-        2px solid rgba(210,243,246,0.55);
-
-    border-radius: 50%;
-}
-
-
-.cylinder-liquid {
-    position: absolute;
-
-    left: 4px;
-    right: 4px;
-    bottom: 4px;
-
-    height: 30%;
-
-    background:
-        rgba(70,160,220,0.35);
-
-    border-radius:
-        2px 2px 7px 7px;
-}
-
-
-/* ============================================================
-   18. SOLID MATERIAL VISUALS
-   ============================================================ */
-
-.solid-material {
-    position: relative;
-
-    min-width: 70px;
-    min-height: 54px;
-
-    padding: 10px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background:
-        linear-gradient(
-            145deg,
-            #233238,
-            #101b1f
-        );
-
-    border:
-        1px solid rgba(190,220,225,0.22);
-
-    border-radius: 9px;
-
-    box-shadow:
-        0 9px 20px rgba(0,0,0,0.3);
-}
-
-
-.solid-material .solid-particles {
-    position: absolute;
-
-    inset: 7px;
-
-    background:
-        radial-gradient(
-            circle at 20% 30%,
-            rgba(255,255,255,0.45) 0 2px,
-            transparent 3px
-        ),
-        radial-gradient(
-            circle at 65% 25%,
-            rgba(255,255,255,0.32) 0 2px,
-            transparent 3px
-        ),
-        radial-gradient(
-            circle at 42% 70%,
-            rgba(255,255,255,0.28) 0 2px,
-            transparent 3px
-        ),
-        radial-gradient(
-            circle at 78% 72%,
-            rgba(255,255,255,0.25) 0 2px,
-            transparent 3px
-        );
-
-    opacity: 0.7;
-}
-
-
-.solid-material.zinc {
-    background:
-        linear-gradient(
-            145deg,
-            #6e7b80,
-            #293438
-        );
-}
-
-
-.solid-material.copper {
-    background:
-        linear-gradient(
-            145deg,
-            #b96e43,
-            #563322
-        );
-}
-
-
-.solid-material.white {
-    background:
-        linear-gradient(
-            145deg,
-            #eef4f3,
-            #9aa9aa
-        );
-
-    color: #162023;
-}
-
-
-/* ============================================================
-   19. LIQUID COLOR SYSTEM
-   ============================================================ */
-
-.liquid-clear {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(235,250,255,0.18),
-            rgba(175,225,240,0.09)
-        );
-}
-
-
-.liquid-blue {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(45,164,255,0.65),
-            rgba(27,98,183,0.55)
-        );
-}
-
-
-.liquid-light-blue {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(75,190,255,0.45),
-            rgba(54,135,207,0.32)
-        );
-}
-
-
-.liquid-green {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(50,210,128,0.58),
-            rgba(25,125,80,0.46)
-        );
-}
-
-
-.liquid-yellow {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(235,208,71,0.62),
-            rgba(175,141,25,0.5)
-        );
-}
-
-
-.liquid-orange {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,147,65,0.68),
-            rgba(187,73,30,0.52)
-        );
-}
-
-
-.liquid-red {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,73,84,0.64),
-            rgba(172,36,46,0.52)
-        );
-}
-
-
-.liquid-purple {
-    background:
-        linear-gradient(
-            180deg,
-            rgba(171,115,255,0.65),
-            rgba(91,54,170,0.52)
-        );
-}
-
-
-/* ============================================================
-   20. INSTRUMENTS
-   ============================================================ */
-
-.instrument-object {
-    min-width: 95px;
-
-    padding: 10px;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-
-    gap: 6px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #15282e,
-            #091519
-        );
-
-    border:
-        1px solid rgba(154,205,214,0.18);
-
-    border-radius: 10px;
-
-    box-shadow:
-        0 9px 22px rgba(0,0,0,0.28);
-}
-
-
-.instrument-icon {
-    width: 42px;
-    height: 42px;
-
-    display: grid;
-    place-items: center;
-
-    color: var(--blue);
-
-    background:
-        var(--blue-soft);
-
-    border:
-        1px solid rgba(72,169,255,0.16);
-
-    border-radius: 10px;
-
-    font-size: 20px;
-}
-
-
-.instrument-name {
-    color: var(--text);
-
-    font-size: 9px;
-    font-weight: 800;
-
-    text-align: center;
-}
-
-
-/* DIGITAL SCREEN */
-
-.instrument-display {
-    min-width: 68px;
-
-    padding: 5px 7px;
-
-    color: #72f7b0;
-
-    background:
-        #03100b;
-
-    border:
-        1px solid rgba(73,223,145,0.18);
-
-    border-radius: 5px;
-
-    font-family:
-        "SFMono-Regular",
-        Consolas,
-        monospace;
-
-    font-size: 11px;
-
-    text-align: center;
-
-    box-shadow:
-        inset 0 0 12px rgba(0,0,0,0.45);
-}
-
-
-/* ============================================================
-   21. WORKSPACE OVERLAYS
-   ============================================================ */
+/* ================================================================
+   TEMPERATURE / REACTION OVERLAYS
+================================================================ */
 
 .temperature-overlay,
 .reaction-overlay {
     position: absolute;
-
     inset: 0;
 
     pointer-events: none;
 
-    opacity: 0;
-
     z-index: 40;
-
-    transition:
-        opacity 350ms ease;
 }
 
-
-.temperature-overlay.active {
-    opacity: 1;
-
+.temperature-overlay {
     background:
         radial-gradient(
             circle at center,
-            rgba(255,117,54,0.13),
-            transparent 55%
-        );
-}
-
-
-.reaction-overlay.active {
-    opacity: 1;
-
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(33,212,195,0.08),
-            transparent 55%
-        );
-}
-
-
-.reaction-overlay.gas {
-    background:
-        radial-gradient(
-            circle at 50% 55%,
-            rgba(255,255,255,0.08),
+            rgba(255,130,40,0.08),
             transparent 42%
         );
+
+    opacity: 0;
+    transition: opacity 500ms ease;
 }
 
-
-/* BUBBLES */
-
-.reaction-bubble {
-    position: absolute;
-
-    width: 7px;
-    height: 7px;
-
-    border:
-        1px solid rgba(220,250,255,0.55);
-
-    border-radius: 50%;
-
+.reaction-overlay {
     background:
-        rgba(255,255,255,0.08);
+        radial-gradient(
+            circle at center,
+            rgba(255,255,255,0.08),
+            transparent 35%
+        );
 
-    animation:
-        bubbleRise 1.8s ease-out infinite;
+    opacity: 0;
+    transition: opacity 300ms ease;
 }
 
 
-@keyframes bubbleRise {
-
-    0% {
-        transform:
-            translateY(0)
-            scale(0.6);
-
-        opacity: 0;
-    }
-
-    15% {
-        opacity: 0.8;
-    }
-
-    100% {
-        transform:
-            translateY(-80px)
-            scale(1.15);
-
-        opacity: 0;
-    }
-}
-
-
-/* ============================================================
-   22. WORKSPACE STATUSBAR
-   ============================================================ */
+/* ================================================================
+   13 — WORKSPACE STATUS BAR
+================================================================ */
 
 .workspace-statusbar {
-    min-height: 38px;
+    position: relative;
+    z-index: 10;
+
+    flex: 0 0 var(--status-height);
 
     display: flex;
     align-items: center;
 
-    gap: 0;
+    gap: 18px;
 
     padding:
-        0 10px;
-
-    background:
-        #09171c;
+        0 13px;
 
     border-top:
-        1px solid var(--line);
+        1px solid var(--fobas-border);
+
+    background:
+        rgba(4,22,33,0.98);
 
     overflow-x: auto;
-
-    scrollbar-width: none;
+    overflow-y: hidden;
 }
-
-
-.workspace-statusbar::-webkit-scrollbar {
-    display: none;
-}
-
 
 .status-item {
-    min-width: 85px;
-
     display: flex;
     align-items: center;
-
-    gap: 6px;
-
-    padding:
-        0 11px;
-
-    border-right:
-        1px solid var(--line);
+    gap: 7px;
 
     white-space: nowrap;
 }
 
-
 .status-item span {
-    color: var(--text-muted);
-
-    font-size: 8px;
+    color: var(--fobas-text-soft);
+    font-size: 9px;
     font-weight: 700;
 }
 
-
 .status-item strong {
-    color: var(--text-soft);
-
-    font-size: 9px;
-    font-weight: 800;
+    color: var(--fobas-white);
+    font-size: 10px;
 }
-
 
 .engine-status {
     margin-left: auto;
 
     display: flex;
     align-items: center;
-
-    gap: 6px;
-
-    padding-left: 12px;
+    gap: 7px;
 
     white-space: nowrap;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 9px;
+    font-weight: 700;
 }
-
-
-.engine-status > span:not(.engine-dot) {
-    color: var(--text-muted);
-
-    font-size: 8px;
-}
-
 
 .engine-status strong {
-    color: var(--green);
-
+    color: var(--fobas-success);
     font-size: 8px;
     letter-spacing: 0.08em;
 }
 
-
 .engine-dot {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
 
     border-radius: 50%;
 
-    background:
-        var(--green);
+    background: var(--fobas-success);
 
     box-shadow:
-        0 0 8px rgba(73,223,145,0.65);
+        0 0 0 4px rgba(50,213,131,0.08),
+        0 0 12px rgba(50,213,131,0.55);
 }
 
 
-/* ============================================================
-   23. INSPECTOR
-   ============================================================ */
-
-.inspector-panel {
-    overflow-y: auto;
-
-    scrollbar-width: thin;
-
-    scrollbar-color:
-        rgba(255,255,255,0.12)
-        transparent;
-}
-
+/* ================================================================
+   14 — INSPECTOR
+================================================================ */
 
 .inspector-section {
+    flex: 0 0 auto;
+
     padding:
-        13px;
+        12px;
 
     border-bottom:
-        1px solid var(--line);
+        1px solid rgba(124,205,235,0.08);
 }
 
-
 .empty-inspector {
-    min-height: 155px;
+    min-height: 150px;
 
     display: flex;
     flex-direction: column;
-
     align-items: center;
     justify-content: center;
 
-    gap: 8px;
+    padding: 18px;
 
-    color: var(--text-muted);
+    border:
+        1px dashed rgba(124,205,235,0.16);
+
+    border-radius: 13px;
+
+    background:
+        rgba(255,255,255,0.018);
 
     text-align: center;
 }
 
-
 .empty-inspector-icon {
-    width: 45px;
-    height: 45px;
+    width: 48px;
+    height: 48px;
 
     display: grid;
     place-items: center;
 
-    margin-bottom: 4px;
+    margin-bottom: 10px;
 
-    color: var(--accent);
+    border-radius: 13px;
 
     background:
-        var(--accent-soft);
+        rgba(10,160,220,0.08);
 
     border:
-        1px solid rgba(33,212,195,0.12);
+        1px solid rgba(57,197,242,0.16);
 
-    border-radius: 12px;
+    color:
+        var(--fobas-blue-300);
 
-    font-size: 22px;
+    font-size: 24px;
 }
-
 
 .empty-inspector strong {
-    color: var(--text-soft);
-
-    font-size: 11px;
+    color: var(--fobas-white);
+    font-size: 12px;
 }
 
-
 .empty-inspector span {
-    max-width: 235px;
+    max-width: 240px;
+
+    margin-top: 6px;
+
+    color: var(--fobas-text-soft);
 
     font-size: 9px;
-
     line-height: 1.55;
 }
 
 
-/* ============================================================
-   24. SECTION TITLES
-   ============================================================ */
+/* ================================================================
+   SECTION TITLES
+================================================================ */
 
 .section-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    margin-bottom: 10px;
+    margin-bottom: 9px;
 
-    color: var(--text-muted);
-
-    font-size: 8px;
-    font-weight: 850;
-
-    letter-spacing: 0.14em;
-}
-
-
-.section-value {
-    color: var(--accent);
+    color: var(--fobas-blue-300);
 
     font-size: 9px;
-    letter-spacing: 0;
+    font-weight: 900;
+
+    letter-spacing: 0.13em;
+}
+
+.section-value {
+    color: var(--fobas-yellow-300);
 }
 
 
-/* ============================================================
-   25. PROPERTY GRID
-   ============================================================ */
+/* ================================================================
+   PROPERTY GRID
+================================================================ */
 
 .property-grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
+    grid-template-columns: repeat(2, minmax(0,1fr));
     gap: 6px;
 }
-
 
 .property-card {
     min-width: 0;
 
     padding: 8px;
 
+    border:
+        1px solid rgba(124,205,235,0.10);
+
+    border-radius: 8px;
+
     background:
         rgba(255,255,255,0.025);
-
-    border:
-        1px solid rgba(154,205,214,0.08);
-
-    border-radius: 7px;
 }
-
 
 .property-card small {
     display: block;
 
-    margin-bottom: 3px;
-
-    color: var(--text-muted);
+    color: var(--fobas-text-soft);
 
     font-size: 8px;
+    font-weight: 700;
 }
-
 
 .property-card strong {
     display: block;
 
+    margin-top: 3px;
+
     overflow: hidden;
 
-    color: var(--text-soft);
+    color: var(--fobas-white);
 
     font-size: 10px;
-    font-weight: 750;
 
-    text-overflow: ellipsis;
     white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 
-/* ============================================================
-   26. COMPOSITION
-   ============================================================ */
+/* ================================================================
+   COMPOSITION
+================================================================ */
 
 .composition-list {
-    max-height: 170px;
-
     display: flex;
     flex-direction: column;
-
     gap: 5px;
-
-    overflow-y: auto;
 }
 
+.composition-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
 
-.composition-row {
-    display: grid;
-
-    grid-template-columns:
-        9px minmax(0,1fr) auto;
-
-    align-items: center;
-
-    gap: 7px;
-
-    padding: 7px;
-
-    background:
-        rgba(255,255,255,0.022);
+    padding: 7px 8px;
 
     border-radius: 7px;
-}
-
-
-.composition-row strong {
-    min-width: 0;
-
-    overflow: hidden;
-
-    color: var(--text-soft);
-
-    font-size: 9px;
-
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-
-.composition-row span {
-    color: var(--text-muted);
-
-    font-size: 8px;
-
-    white-space: nowrap;
-}
-
-
-.composition-percentage {
-    height: 3px;
-
-    margin-top: 4px;
-
-    background:
-        rgba(255,255,255,0.06);
-
-    border-radius: 99px;
-
-    overflow: hidden;
-}
-
-
-.composition-percentage span {
-    display: block;
-
-    height: 100%;
-
-    width: var(--percentage, 50%);
-
-    background:
-        linear-gradient(
-            90deg,
-            var(--accent),
-            var(--blue)
-        );
-
-    border-radius: inherit;
-}
-
-
-/* ============================================================
-   27. MEASUREMENT DISPLAY
-   ============================================================ */
-
-.measurement-display {
-    display: grid;
-
-    grid-template-columns:
-        minmax(0, 1fr)
-        auto;
-
-    gap: 8px;
-}
-
-
-.measurement-main {
-    min-height: 72px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    padding:
-        10px 12px;
-
-    background:
-        #04100d;
-
-    border:
-        1px solid rgba(73,223,145,0.16);
-
-    border-radius: 9px;
-
-    box-shadow:
-        inset 0 0 20px rgba(0,0,0,0.32);
-}
-
-
-.measurement-main span {
-    color: var(--text-muted);
-
-    font-size: 8px;
-    font-weight: 700;
-
-    text-transform: uppercase;
-}
-
-
-.measurement-main strong {
-    margin-top: 2px;
-
-    color: #6df3a8;
-
-    font-family:
-        "SFMono-Regular",
-        Consolas,
-        monospace;
-
-    font-size: 19px;
-
-    letter-spacing: 0.02em;
-}
-
-
-.measurement-details {
-    min-width: 66px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    padding: 8px;
 
     background:
         rgba(255,255,255,0.025);
 
-    border:
-        1px solid var(--line);
-
-    border-radius: 8px;
-}
-
-
-.measurement-details span {
-    color: var(--text-muted);
-
-    font-size: 7px;
-}
-
-
-.measurement-details strong {
-    margin-top: 3px;
-
-    color: var(--text-soft);
-
     font-size: 9px;
 }
 
+.composition-item strong {
+    color: var(--fobas-white);
+}
 
-/* ============================================================
-   28. REACTION STATE
-   ============================================================ */
+.composition-item span {
+    color: var(--fobas-yellow-300);
+}
+
+
+/* ================================================================
+   MEASUREMENT DISPLAY
+================================================================ */
+
+.measurement-display {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+.measurement-main,
+.measurement-details {
+    padding: 10px;
+
+    border-radius: 9px;
+
+    border:
+        1px solid rgba(124,205,235,0.11);
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+.measurement-main span,
+.measurement-details span {
+    display: block;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 8px;
+}
+
+.measurement-main strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--fobas-yellow-300);
+
+    font-size: 18px;
+}
+
+.measurement-details strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--fobas-white);
+
+    font-size: 10px;
+}
+
+
+/* ================================================================
+   REACTION STATE
+================================================================ */
 
 .reaction-state {
     display: flex;
     flex-direction: column;
-
-    gap: 4px;
+    gap: 5px;
 }
 
-
 .reaction-state-row {
-    min-height: 29px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
 
     gap: 10px;
 
-    padding:
-        0 8px;
+    padding: 7px 8px;
+
+    border-radius: 7px;
 
     background:
-        rgba(255,255,255,0.022);
-
-    border-radius: 6px;
+        rgba(255,255,255,0.025);
 }
-
 
 .reaction-state-row span {
-    color: var(--text-muted);
-
-    font-size: 8px;
+    color: var(--fobas-text-soft);
+    font-size: 9px;
 }
-
 
 .reaction-state-row strong {
-    max-width: 58%;
-
-    overflow: hidden;
-
-    color: var(--text-soft);
-
-    font-size: 8px;
-
+    color: var(--fobas-white);
+    font-size: 9px;
     text-align: right;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 
-.reaction-state-row:first-child strong {
-    color: var(--accent);
-}
-
-
-/* ============================================================
-   29. INSPECTOR ACTIONS
-   ============================================================ */
+/* ================================================================
+   INSPECTOR ACTIONS
+================================================================ */
 
 .inspector-actions {
     display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
+    grid-template-columns: repeat(2, minmax(0,1fr));
     gap: 6px;
 }
-
 
 .inspector-action {
     min-height: 34px;
 
-    padding: 7px;
+    border:
+        1px solid var(--fobas-border);
 
-    color: var(--text-soft);
+    border-radius: 8px;
 
     background:
         rgba(255,255,255,0.035);
 
-    border:
-        1px solid var(--line);
+    color: var(--fobas-text);
 
-    border-radius: 7px;
+    cursor: pointer;
 
     font-size: 9px;
-    font-weight: 750;
+    font-weight: 800;
 
     transition:
-        color var(--transition),
         background var(--transition),
-        border-color var(--transition);
+        border-color var(--transition),
+        color var(--transition),
+        transform var(--transition-fast);
 }
-
 
 .inspector-action:hover {
-    color: var(--accent);
-
-    background:
-        var(--accent-soft);
-
-    border-color:
-        rgba(33,212,195,0.18);
+    border-color: rgba(57,197,242,0.35);
+    background: rgba(10,160,220,0.09);
+    color: var(--fobas-white);
 }
 
-
-.inspector-action.danger {
-    color: #ff9ca4;
+.inspector-action:active {
+    transform: scale(.97);
 }
-
 
 .inspector-action.danger:hover {
-    color: #ffd4d8;
-
-    background:
-        var(--red-soft);
-
-    border-color:
-        rgba(255,104,117,0.2);
+    border-color: rgba(255,89,100,0.40);
+    background: rgba(255,89,100,0.08);
+    color: #ffb8bc;
 }
 
 
-/* ============================================================
-   30. LIVE OBSERVATION
-   ============================================================ */
+/* ================================================================
+   15 — LIVE OBSERVATION
+================================================================ */
 
 .observation-section {
-    margin-top: auto;
+    min-height: 0;
 
-    min-height: 190px;
+    flex: 1;
 
     display: flex;
     flex-direction: column;
 
-    background:
-        rgba(0,0,0,0.09);
+    border-bottom: 0;
 }
 
-
 .observation-heading {
-    min-height: 51px;
+    flex: 0 0 auto;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    padding:
-        9px 12px;
+    padding-bottom: 9px;
 
     border-bottom:
-        1px solid var(--line);
+        1px solid rgba(124,205,235,0.08);
 }
-
 
 .observation-heading small {
     display: block;
 
-    margin-bottom: 2px;
+    color: var(--fobas-blue-300);
 
-    color: var(--text-muted);
-
-    font-size: 7px;
-    font-weight: 850;
-
-    letter-spacing: 0.13em;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
 }
 
-
 .observation-heading strong {
-    color: var(--text-soft);
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--fobas-white);
 
     font-size: 10px;
 }
 
-
 .observation-pulse {
-    width: 7px;
-    height: 7px;
+    width: 9px;
+    height: 9px;
 
     border-radius: 50%;
 
-    background:
-        var(--accent);
+    background: var(--fobas-success);
 
     box-shadow:
-        0 0 0 4px rgba(33,212,195,0.07),
-        0 0 10px rgba(33,212,195,0.5);
+        0 0 0 4px rgba(50,213,131,0.08),
+        0 0 14px rgba(50,213,131,0.45);
 
     animation:
-        observationPulse 2s ease-in-out infinite;
+        observationPulse 1.8s ease-in-out infinite;
 }
 
-
 @keyframes observationPulse {
-
-    0%,
-    100% {
-        opacity: 0.5;
-        transform: scale(0.9);
+    0%, 100% {
+        opacity: .65;
+        transform: scale(.90);
     }
 
     50% {
@@ -3097,107 +2113,50 @@ img {
     }
 }
 
-
 .observation-log {
     min-height: 0;
-
     flex: 1;
 
     overflow-y: auto;
 
-    padding:
-        8px 10px;
+    margin-top: 8px;
+
+    padding-right: 3px;
 }
 
-
 .observation-entry {
-    position: relative;
-
-    padding:
-        7px 8px 7px 13px;
+    padding: 7px 8px;
 
     margin-bottom: 5px;
+
+    border-left:
+        2px solid rgba(57,197,242,0.40);
+
+    border-radius: 0 7px 7px 0;
 
     background:
         rgba(255,255,255,0.022);
 
-    border-radius: 7px;
-}
-
-
-.observation-entry::before {
-    content: "";
-
-    position: absolute;
-
-    left: 5px;
-    top: 10px;
-
-    width: 3px;
-    height: 3px;
-
-    border-radius: 50%;
-
-    background:
-        var(--accent);
-}
-
-
-.observation-entry time {
-    display: block;
-
-    margin-bottom: 2px;
-
-    color: #4d666d;
-
-    font-family:
-        "SFMono-Regular",
-        Consolas,
-        monospace;
-
-    font-size: 7px;
-}
-
-
-.observation-entry p {
-    margin: 0;
-
-    color: var(--text-muted);
+    color: var(--fobas-text-soft);
 
     font-size: 8px;
+    line-height: 1.45;
+}
 
-    line-height: 1.5;
+.observation-entry strong {
+    color: var(--fobas-blue-300);
 }
 
 
-.observation-entry.reaction::before {
-    background: var(--orange);
-}
-
-
-.observation-entry.measurement::before {
-    background: var(--blue);
-}
-
-
-.observation-entry.warning::before {
-    background: var(--yellow);
-}
-
-
-.observation-entry.important::before {
-    background: var(--red);
-}
-
-
-/* ============================================================
-   31. MODALS
-   ============================================================ */
+/* ================================================================
+   16 — MODAL SYSTEM
+================================================================ */
 
 .chem-modal {
     position: fixed;
-
     inset: 0;
+
+    z-index: 500;
 
     display: flex;
     align-items: center;
@@ -3205,10 +2164,8 @@ img {
 
     padding: 20px;
 
-    z-index: 500;
-
-    opacity: 0;
     visibility: hidden;
+    opacity: 0;
 
     pointer-events: none;
 
@@ -3217,343 +2174,364 @@ img {
         visibility var(--transition);
 }
 
-
-.chem-modal.open,
-.chem-modal.active {
-    opacity: 1;
+.chem-modal[aria-hidden="false"] {
     visibility: visible;
-
+    opacity: 1;
     pointer-events: auto;
 }
 
-
 .modal-backdrop {
     position: absolute;
-
     inset: 0;
 
     background:
-        rgba(1,7,9,0.76);
+        rgba(1, 9, 14, 0.78);
 
     backdrop-filter:
         blur(7px);
-
-    -webkit-backdrop-filter:
-        blur(7px);
 }
-
 
 .modal-window {
     position: relative;
+    z-index: 2;
 
-    width: min(600px, 100%);
-
-    max-height:
-        min(88vh, 760px);
+    width: min(680px, 100%);
+    max-height: min(820px, calc(100dvh - 40px));
 
     display: flex;
     flex-direction: column;
 
-    background:
-        linear-gradient(
-            160deg,
-            #11252b,
-            #09161a
-        );
+    overflow: hidden;
 
     border:
-        1px solid rgba(154,205,214,0.18);
+        1px solid rgba(57,197,242,0.24);
 
-    border-radius: 16px;
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 42, 59, 0.99),
+            rgba(4, 23, 35, 0.99)
+        );
 
     box-shadow:
-        var(--shadow-large);
-
-    overflow: hidden;
+        0 30px 90px rgba(0,0,0,0.55),
+        0 0 50px rgba(10,160,220,0.08);
 
     transform:
         translateY(12px)
-        scale(0.985);
+        scale(.985);
 
     transition:
-        transform 220ms ease;
+        transform var(--transition);
 }
 
-
-.chem-modal.open .modal-window,
-.chem-modal.active .modal-window {
+.chem-modal[aria-hidden="false"] .modal-window {
     transform:
         translateY(0)
         scale(1);
 }
 
 
+/* ================================================================
+   MODAL HEADER
+================================================================ */
+
 .modal-header {
-    min-height: 70px;
+    flex: 0 0 auto;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    gap: 15px;
+    gap: 20px;
 
     padding:
-        13px 16px;
+        17px 18px;
 
     border-bottom:
-        1px solid var(--line);
+        1px solid var(--fobas-border);
 }
-
 
 .modal-header small {
     display: block;
 
-    margin-bottom: 4px;
-
-    color: var(--text-muted);
+    color: var(--fobas-blue-300);
 
     font-size: 8px;
-    font-weight: 850;
+    font-weight: 900;
 
     letter-spacing: 0.15em;
 }
 
-
 .modal-header h2 {
-    margin: 0;
+    margin: 4px 0 0;
 
-    color: var(--text);
+    color: var(--fobas-white);
 
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 18px;
 }
 
-
 .modal-close {
-    width: 32px;
-    height: 32px;
+    width: 35px;
+    height: 35px;
+    flex: 0 0 35px;
 
     display: grid;
     place-items: center;
 
-    flex: 0 0 auto;
+    border:
+        1px solid var(--fobas-border);
 
-    color: var(--text-muted);
+    border-radius: 8px;
 
     background:
-        rgba(255,255,255,0.035);
+        rgba(255,255,255,0.04);
 
-    border:
-        1px solid var(--line);
+    color: var(--fobas-text);
 
-    border-radius: 7px;
+    cursor: pointer;
 
-    font-size: 20px;
+    font-size: 23px;
     line-height: 1;
 
     transition:
-        color var(--transition),
-        background var(--transition);
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition-fast);
 }
-
 
 .modal-close:hover {
-    color: var(--red);
+    border-color: rgba(255,89,100,0.40);
+    background: rgba(255,89,100,0.10);
+    color: #ffb8bc;
+}
 
-    background:
-        var(--red-soft);
+.modal-close:active {
+    transform: scale(.94);
 }
 
 
-/* ============================================================
-   32. TRANSFER MODAL
-   ============================================================ */
+/* ================================================================
+   MODAL FOOTER
+================================================================ */
+
+.modal-footer {
+    flex: 0 0 auto;
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    padding:
+        13px 18px;
+
+    border-top:
+        1px solid var(--fobas-border);
+
+    background:
+        rgba(0,0,0,0.10);
+}
+
+.modal-button {
+    min-height: 38px;
+
+    padding: 0 15px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        transform var(--transition-fast);
+}
+
+.modal-button.secondary {
+    background: rgba(255,255,255,0.035);
+    color: var(--fobas-text);
+}
+
+.modal-button.primary {
+    border-color: rgba(240,185,11,0.45);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--fobas-yellow-400),
+            var(--fobas-yellow-500)
+        );
+
+    color: #172000;
+}
+
+.modal-button:hover {
+    transform: translateY(-1px);
+}
+
+.modal-button.secondary:hover {
+    border-color: rgba(57,197,242,0.35);
+    background: rgba(10,160,220,0.08);
+}
+
+.modal-button.primary:hover {
+    box-shadow:
+        0 7px 20px rgba(240,185,11,0.16);
+}
+
+
+/* ================================================================
+   TRANSFER MODAL
+================================================================ */
 
 .transfer-body {
+    padding: 20px;
+
     display: grid;
 
     grid-template-columns:
         minmax(0,1fr)
-        35px
+        auto
         minmax(0,1fr);
 
     align-items: center;
 
-    gap: 10px;
+    gap: 16px;
 
-    padding: 20px;
+    overflow-y: auto;
 }
-
 
 .transfer-source,
 .transfer-target {
-    min-height: 95px;
+    padding: 15px;
 
-    display: flex;
-    flex-direction: column;
+    border:
+        1px solid rgba(124,205,235,0.12);
 
-    justify-content: center;
-
-    padding: 13px;
+    border-radius: 11px;
 
     background:
         rgba(255,255,255,0.025);
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 10px;
 }
-
 
 .transfer-source span,
-.transfer-target label {
-    margin-bottom: 5px;
+.transfer-target label,
+.transfer-quantity label {
+    display: block;
 
-    color: var(--text-muted);
-
-    font-size: 8px;
-    font-weight: 800;
-
-    text-transform: uppercase;
-}
-
-
-.transfer-source strong {
-    color: var(--text);
-
-    font-size: 12px;
-}
-
-
-.transfer-source small {
-    margin-top: 3px;
-
-    color: var(--accent);
+    color: var(--fobas-text-soft);
 
     font-size: 9px;
+    font-weight: 700;
 }
 
+.transfer-source strong {
+    display: block;
+
+    margin-top: 6px;
+
+    color: var(--fobas-white);
+
+    font-size: 14px;
+}
+
+.transfer-source small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--fobas-yellow-300);
+
+    font-size: 10px;
+}
+
+.transfer-arrow {
+    color: var(--fobas-yellow-400);
+    font-size: 24px;
+}
 
 .transfer-target select {
     width: 100%;
-    height: 36px;
+    height: 38px;
 
-    padding:
-        0 9px;
+    margin-top: 7px;
 
-    color: var(--text);
-
-    background:
-        #071217;
+    padding: 0 10px;
 
     border:
-        1px solid var(--line);
+        1px solid var(--fobas-border);
 
-    border-radius: 7px;
+    border-radius: 8px;
+
+    background:
+        var(--fobas-blue-900);
+
+    color:
+        var(--fobas-white);
 }
-
-
-.transfer-target select:focus {
-    border-color:
-        rgba(33,212,195,0.5);
-}
-
-
-.transfer-arrow {
-    display: grid;
-    place-items: center;
-
-    color: var(--accent);
-
-    font-size: 23px;
-}
-
 
 .transfer-quantity {
     grid-column: 1 / -1;
 
-    margin-top: 4px;
-
-    padding-top: 15px;
-
-    border-top:
-        1px solid var(--line);
+    padding-top: 5px;
 }
-
-
-.transfer-quantity > label {
-    display: block;
-
-    margin-bottom: 7px;
-
-    color: var(--text-muted);
-
-    font-size: 9px;
-    font-weight: 750;
-}
-
 
 .quantity-input {
     display: flex;
+    align-items: center;
 
-    height: 40px;
+    margin-top: 7px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius: 8px;
 
     overflow: hidden;
 
     background:
-        #071217;
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 8px;
+        rgba(0,0,0,0.16);
 }
 
-
-.quantity-input input {
+#transferAmount {
     width: 100%;
+    height: 38px;
 
-    padding:
-        0 10px;
-
-    color: var(--text);
-
-    background:
-        transparent;
+    padding: 0 10px;
 
     border: 0;
+    outline: 0;
 
-    font-size: 12px;
+    background: transparent;
+
+    color: var(--fobas-white);
 }
 
+.quantity-input > span {
+    padding: 0 11px;
 
-.quantity-input span {
-    display: flex;
-    align-items: center;
-
-    padding:
-        0 11px;
-
-    color: var(--text-muted);
-
-    border-left:
-        1px solid var(--line);
+    color: var(--fobas-yellow-300);
 
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
-
-.transfer-quantity input[type="range"] {
+#transferRange {
     width: 100%;
 
-    margin-top: 14px;
+    margin-top: 12px;
 
     accent-color:
-        var(--accent);
+        var(--fobas-yellow-500);
 }
-
 
 .range-labels {
     display: flex;
@@ -3561,161 +2539,153 @@ img {
 
     margin-top: 3px;
 
-    color: var(--text-muted);
+    color: var(--fobas-text-soft);
 
     font-size: 8px;
 }
 
 
-/* ============================================================
-   33. MEASUREMENT MODAL
-   ============================================================ */
+/* ================================================================
+   MEASUREMENT MODAL
+================================================================ */
 
 .measurement-modal-body {
-    padding: 20px;
-}
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 
+    gap: 18px;
+
+    padding: 20px;
+
+    overflow-y: auto;
+}
 
 .instrument-visual {
-    display: flex;
-    justify-content: center;
+    min-height: 190px;
 
-    margin-bottom: 18px;
-}
-
-
-.instrument-screen {
-    width: min(330px, 100%);
-
-    min-height: 125px;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 15px;
-
-    background:
-        #03100b;
+    display: grid;
+    place-items: center;
 
     border:
-        1px solid rgba(73,223,145,0.22);
+        1px solid rgba(57,197,242,0.14);
 
     border-radius: 14px;
 
-    box-shadow:
-        inset 0 0 35px rgba(0,0,0,0.5),
-        0 8px 30px rgba(0,0,0,0.2);
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(10,160,220,0.09),
+            rgba(0,0,0,0.08)
+        );
 }
 
+.instrument-screen {
+    width: 75%;
+    min-height: 110px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid rgba(240,185,11,0.30);
+
+    border-radius: 12px;
+
+    background:
+        #07140f;
+
+    box-shadow:
+        inset 0 0 25px rgba(240,185,11,0.035),
+        0 0 25px rgba(0,0,0,0.30);
+}
 
 .instrument-screen span {
-    color: #507a65;
-
+    color: #93a69b;
     font-size: 8px;
-    font-weight: 800;
-
-    letter-spacing: 0.15em;
+    letter-spacing: 0.16em;
 }
 
-
 .instrument-screen strong {
-    margin-top: 4px;
+    margin-top: 5px;
 
-    color: #6df3a8;
+    color: var(--fobas-yellow-400);
 
     font-family:
         "SFMono-Regular",
         Consolas,
         monospace;
 
-    font-size: 34px;
-    line-height: 1.1;
+    font-size: 28px;
 }
-
 
 .instrument-screen small {
-    margin-top: 4px;
-
-    color: #4b9a70;
-
-    font-size: 10px;
+    color: #93a69b;
+    font-size: 9px;
 }
-
 
 .measurement-options {
-    display: grid;
-
-    grid-template-columns:
-        repeat(5, minmax(0,1fr));
-
-    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
 }
-
 
 .measurement-option {
     min-height: 38px;
 
-    padding:
-        5px 6px;
+    border:
+        1px solid var(--fobas-border);
 
-    color: var(--text-muted);
+    border-radius: 8px;
 
     background:
         rgba(255,255,255,0.03);
 
-    border:
-        1px solid var(--line);
+    color: var(--fobas-text-soft);
 
-    border-radius: 7px;
+    cursor: pointer;
 
-    font-size: 9px;
-    font-weight: 750;
+    text-align: left;
+
+    padding: 0 12px;
+
+    font-size: 10px;
+    font-weight: 800;
 
     transition:
-        color var(--transition),
         background var(--transition),
-        border-color var(--transition);
+        border-color var(--transition),
+        color var(--transition);
 }
-
 
 .measurement-option:hover {
-    color: var(--text-soft);
-
-    background:
-        rgba(255,255,255,0.055);
+    border-color: rgba(57,197,242,0.30);
+    background: rgba(10,160,220,0.08);
+    color: var(--fobas-white);
 }
-
 
 .measurement-option.active {
-    color: var(--accent);
-
-    background:
-        var(--accent-soft);
-
-    border-color:
-        rgba(33,212,195,0.2);
+    border-color: rgba(240,185,11,0.42);
+    background: rgba(240,185,11,0.10);
+    color: var(--fobas-yellow-300);
 }
 
 
-/* ============================================================
-   34. HELP MODAL
-   ============================================================ */
+/* ================================================================
+   HELP MODAL
+================================================================ */
 
 .help-window {
-    width: min(650px, 100%);
+    width: min(760px, 100%);
 }
-
 
 .help-content {
     min-height: 0;
 
     display: grid;
-
-    grid-template-columns:
-        repeat(2, minmax(0,1fr));
+    grid-template-columns: repeat(2, minmax(0,1fr));
 
     gap: 8px;
 
@@ -3724,25 +2694,22 @@ img {
     overflow-y: auto;
 }
 
-
 .help-card {
     display: grid;
-
-    grid-template-columns: 30px minmax(0,1fr);
+    grid-template-columns: 32px minmax(0,1fr);
 
     gap: 9px;
 
     padding: 11px;
 
+    border:
+        1px solid rgba(124,205,235,0.11);
+
+    border-radius: 10px;
+
     background:
         rgba(255,255,255,0.025);
-
-    border:
-        1px solid var(--line);
-
-    border-radius: 9px;
 }
-
 
 .help-card > span {
     width: 28px;
@@ -3751,1101 +2718,781 @@ img {
     display: grid;
     place-items: center;
 
-    color: var(--accent);
-
-    background:
-        var(--accent-soft);
-
     border-radius: 7px;
 
-    font-family:
-        "SFMono-Regular",
-        Consolas,
-        monospace;
+    background:
+        rgba(240,185,11,0.11);
+
+    color:
+        var(--fobas-yellow-300);
 
     font-size: 8px;
-    font-weight: 800;
+    font-weight: 900;
 }
 
-
 .help-card strong {
-    color: var(--text-soft);
-
+    color: var(--fobas-white);
     font-size: 10px;
 }
 
-
 .help-card p {
-    margin:
-        4px 0 0;
+    margin: 4px 0 0;
 
-    color: var(--text-muted);
+    color: var(--fobas-text-soft);
 
-    font-size: 8px;
-
+    font-size: 9px;
     line-height: 1.5;
 }
 
 
-/* ============================================================
-   35. MODAL FOOTER
-   ============================================================ */
-
-.modal-footer {
-    min-height: 62px;
-
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-
-    gap: 7px;
-
-    padding:
-        11px 16px;
-
-    border-top:
-        1px solid var(--line);
-}
-
-
-.modal-button {
-    min-height: 36px;
-
-    padding:
-        0 13px;
-
-    border-radius: 8px;
-
-    font-size: 10px;
-    font-weight: 800;
-
-    transition:
-        transform var(--transition-fast),
-        background var(--transition),
-        border-color var(--transition);
-}
-
-
-.modal-button:active {
-    transform: scale(0.97);
-}
-
-
-.modal-button.secondary {
-    color: var(--text-soft);
-
-    background:
-        rgba(255,255,255,0.04);
-
-    border:
-        1px solid var(--line);
-}
-
-
-.modal-button.secondary:hover {
-    background:
-        rgba(255,255,255,0.07);
-}
-
-
-.modal-button.primary {
-    color: #031312;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--accent-strong),
-            var(--accent)
-        );
-
-    border:
-        1px solid transparent;
-}
-
-
-/* ============================================================
-   36. TOASTS
-   ============================================================ */
+/* ================================================================
+   17 — TOAST SYSTEM
+================================================================ */
 
 .toast-stack {
     position: fixed;
+    z-index: 800;
 
-    right: 17px;
-    bottom: 17px;
+    right: 18px;
+    bottom: 18px;
 
-    width: min(340px, calc(100vw - 34px));
+    width: min(360px, calc(100vw - 36px));
 
     display: flex;
     flex-direction: column;
-
+    align-items: stretch;
     gap: 7px;
-
-    z-index: 1000;
 
     pointer-events: none;
 }
 
-
 .chem-toast {
     display: grid;
-
-    grid-template-columns:
-        30px minmax(0,1fr);
-
-    align-items: center;
+    grid-template-columns: 6px minmax(0,1fr);
 
     gap: 9px;
 
-    padding: 10px;
-
-    background:
-        rgba(13,31,37,0.97);
+    padding: 11px 12px;
 
     border:
-        1px solid rgba(154,205,214,0.16);
+        1px solid rgba(124,205,235,0.16);
 
     border-radius: 10px;
 
-    box-shadow:
-        var(--shadow-medium);
-
-    backdrop-filter:
-        blur(10px);
-
-    -webkit-backdrop-filter:
-        blur(10px);
-
-    animation:
-        toastIn 220ms ease forwards;
-}
-
-
-.chem-toast.removing {
-    animation:
-        toastOut 180ms ease forwards;
-}
-
-
-.toast-icon {
-    width: 30px;
-    height: 30px;
-
-    display: grid;
-    place-items: center;
-
-    color: var(--accent);
-
     background:
-        var(--accent-soft);
+        rgba(5,28,41,0.97);
 
-    border-radius: 8px;
-
-    font-size: 13px;
-}
-
-
-.toast-content strong {
-    display: block;
-
-    color: var(--text-soft);
-
-    font-size: 9px;
-}
-
-
-.toast-content span {
-    display: block;
-
-    margin-top: 2px;
-
-    color: var(--text-muted);
-
-    font-size: 8px;
-
-    line-height: 1.4;
-}
-
-
-.chem-toast.success .toast-icon {
-    color: var(--green);
-    background: var(--green-soft);
-}
-
-
-.chem-toast.warning .toast-icon {
-    color: var(--yellow);
-    background: var(--yellow-soft);
-}
-
-
-.chem-toast.error .toast-icon {
-    color: var(--red);
-    background: var(--red-soft);
-}
-
-
-@keyframes toastIn {
-
-    from {
-        opacity: 0;
-        transform:
-            translateY(10px)
-            scale(0.97);
-    }
-
-    to {
-        opacity: 1;
-        transform:
-            translateY(0)
-            scale(1);
-    }
-}
-
-
-@keyframes toastOut {
-
-    from {
-        opacity: 1;
-        transform:
-            translateY(0)
-            scale(1);
-    }
-
-    to {
-        opacity: 0;
-        transform:
-            translateY(8px)
-            scale(0.97);
-    }
-}
-
-
-/* ============================================================
-   37. SELECTION STATES
-   ============================================================ */
-
-.is-selected {
-    outline:
-        2px solid rgba(33,212,195,0.7);
-
-    outline-offset: 4px;
+    color: var(--fobas-text);
 
     box-shadow:
-        0 0 0 5px rgba(33,212,195,0.08);
-}
+        0 15px 35px rgba(0,0,0,0.28);
 
+    pointer-events: auto;
 
-.is-reacting {
     animation:
-        reactionGlow 1.2s ease-in-out infinite alternate;
+        toastIn 240ms ease both;
 }
 
+.chem-toast::before {
+    content: "";
 
-@keyframes reactionGlow {
+    width: 4px;
 
-    from {
-        filter:
-            brightness(1)
-            drop-shadow(
-                0 0 0 rgba(33,212,195,0)
-            );
-    }
-
-    to {
-        filter:
-            brightness(1.1)
-            drop-shadow(
-                0 0 13px rgba(33,212,195,0.35)
-            );
-    }
-}
-
-
-.is-heating {
-    animation:
-        heatingPulse 800ms ease-in-out infinite alternate;
-}
-
-
-@keyframes heatingPulse {
-
-    from {
-        filter:
-            brightness(1);
-    }
-
-    to {
-        filter:
-            brightness(1.12)
-            drop-shadow(
-                0 0 12px rgba(255,120,50,0.38)
-            );
-    }
-}
-
-
-/* ============================================================
-   38. PH COLOR INDICATORS
-   ============================================================ */
-
-.ph-acid-strong {
-    color: #ff5967 !important;
-}
-
-
-.ph-acid {
-    color: #ff8a62 !important;
-}
-
-
-.ph-neutral {
-    color: #72e4b0 !important;
-}
-
-
-.ph-basic {
-    color: #64b7ff !important;
-}
-
-
-.ph-base-strong {
-    color: #a889ff !important;
-}
-
-
-/* ============================================================
-   39. MATERIAL STATE BADGES
-   ============================================================ */
-
-.state-liquid {
-    color: #61c7ff !important;
+    border-radius: 4px;
 
     background:
-        rgba(72,169,255,0.11) !important;
+        var(--fobas-blue-400);
 }
 
-
-.state-solid {
-    color: #d6c4a0 !important;
-
-    background:
-        rgba(214,196,160,0.08) !important;
+.chem-toast.success::before {
+    background: var(--fobas-success);
 }
 
-
-.state-gas {
-    color: #d8f3f5 !important;
-
-    background:
-        rgba(216,243,245,0.08) !important;
+.chem-toast.warning::before {
+    background: var(--fobas-warning);
 }
 
-
-.state-mixture {
-    color: var(--accent) !important;
-
-    background:
-        var(--accent-soft) !important;
+.chem-toast.error::before {
+    background: var(--fobas-danger);
 }
 
-
-/* ============================================================
-   40. NO RESULTS
-   ============================================================ */
-
-.no-results {
-    min-height: 130px;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    gap: 7px;
-
-    padding: 20px;
-
-    color: var(--text-muted);
-
-    text-align: center;
-}
-
-
-.no-results-icon {
-    font-size: 22px;
-
-    opacity: 0.5;
-}
-
-
-.no-results strong {
-    color: var(--text-soft);
-
+.chem-toast strong {
+    display: block;
+    color: var(--fobas-white);
     font-size: 10px;
 }
 
+.chem-toast span {
+    display: block;
+    margin-top: 2px;
+    color: var(--fobas-text-soft);
+    font-size: 9px;
+}
 
-.no-results span {
-    font-size: 8px;
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 
-/* ============================================================
-   41. ACCESSIBILITY / FOCUS
-   ============================================================ */
+/* ================================================================
+   18 — ACCESSIBILITY
+================================================================ */
 
-button:focus-visible,
-input:focus-visible,
-select:focus-visible {
-    outline:
-        2px solid rgba(33,212,195,0.55);
+.sr-only {
+    position: absolute !important;
 
-    outline-offset: 2px;
+    width: 1px !important;
+    height: 1px !important;
+
+    padding: 0 !important;
+    margin: -1px !important;
+
+    overflow: hidden !important;
+
+    clip: rect(0, 0, 0, 0) !important;
+
+    white-space: nowrap !important;
+
+    border: 0 !important;
 }
 
+
+/* ================================================================
+   19 — TABLET
+================================================================ */
+
+@media (max-width: 1180px) {
+
+    :root {
+        --left-width: 280px;
+        --right-width: 300px;
+    }
+
+    .chem-header {
+        grid-template-columns:
+            auto
+            minmax(110px,1fr)
+            minmax(150px,220px)
+            auto;
+
+        gap: 10px;
+        padding: 0 12px;
+    }
+
+    .brand-text span {
+        display: none;
+    }
+
+    .header-button {
+        padding: 0 9px;
+    }
+
+    .tool-button {
+        min-width: 54px;
+    }
+
+    .workspace-statusbar {
+        gap: 11px;
+    }
+}
+
+
+/* ================================================================
+   20 — MOBILE / DRAWER
+================================================================ */
+
+@media (max-width: 800px) {
+
+    :root {
+        --header-height: 62px;
+    }
+
+    body {
+        overflow: hidden;
+    }
+
+    .chem-header {
+        grid-template-columns:
+            auto
+            minmax(0,1fr)
+            auto;
+
+        gap: 8px;
+
+        padding: 0 9px;
+    }
+
+    .brand-mark {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+
+        font-size: 20px;
+    }
+
+    .brand-text strong {
+        font-size: 13px;
+    }
+
+    .laboratory-state {
+        display: none;
+    }
+
+    .session-area {
+        display: none;
+    }
+
+    .header-actions {
+        gap: 5px;
+    }
+
+    .header-button {
+        min-height: 36px;
+        padding: 0 9px;
+        font-size: 9px;
+    }
+
+    .library-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        border-color:
+            rgba(240,185,11,0.38);
+
+        background:
+            rgba(240,185,11,0.08);
+
+        color:
+            var(--fobas-yellow-300);
+    }
+
+    .library-toggle:hover {
+        background:
+            rgba(240,185,11,0.15);
+    }
+
+    .chem-header #chemHelpBtn {
+        display: none;
+    }
+
+    .chem-header #chemResetBtn {
+        display: none;
+    }
+
+    .chem-header #chemSaveBtn {
+        min-width: 36px;
+
+        width: 36px;
+        padding: 0;
+
+        font-size: 0;
+    }
+
+    .chem-header #chemSaveBtn::before {
+        content: "✓";
+        font-size: 15px;
+    }
+
+
+    /* ------------------------------------------------------------
+       MOBILE MAIN
+    ------------------------------------------------------------ */
+
+    .laboratory-layout {
+        grid-template-columns:
+            minmax(0,1fr);
+    }
+
+
+    /* ------------------------------------------------------------
+       LIBRARY DRAWER
+    ------------------------------------------------------------ */
+
+    .materials-panel {
+        position: fixed;
+
+        z-index: 700;
+
+        top: var(--header-height);
+        left: 0;
+        bottom: 0;
+
+        width:
+            min(390px, 92vw);
+
+        max-width: 100%;
+
+        display: flex;
+
+        border-right:
+            1px solid rgba(57,197,242,0.30);
+
+        border-top:
+            1px solid rgba(57,197,242,0.15);
+
+        box-shadow:
+            20px 0 60px rgba(0,0,0,0.42);
+
+        transform:
+            translateX(-105%);
+
+        visibility: hidden;
+
+        transition:
+            transform var(--transition-slow),
+            visibility var(--transition-slow);
+    }
+
+    .materials-panel.mobile-library-open {
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .mobile-library-header {
+        flex: 0 0 auto;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 11px 13px;
+
+        border-bottom:
+            1px solid var(--fobas-border);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(10,71,101,0.70),
+                rgba(5,29,42,0.96)
+            );
+    }
+
+    .mobile-library-header small {
+        display: block;
+
+        color: var(--fobas-blue-300);
+
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 0.13em;
+    }
+
+    .mobile-library-header strong {
+        display: block;
+
+        margin-top: 2px;
+
+        color: var(--fobas-white);
+
+        font-size: 14px;
+    }
+
+    .materials-panel > .panel-heading {
+        display: none;
+    }
+
+    .materials-backdrop {
+        position: fixed;
+
+        z-index: 650;
+
+        inset: 0;
+
+        display: block;
+
+        background:
+            rgba(0,0,0,0.56);
+
+        backdrop-filter:
+            blur(3px);
+
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+
+        transition:
+            opacity var(--transition),
+            visibility var(--transition);
+    }
+
+    .materials-backdrop.mobile-library-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+
+    /* ------------------------------------------------------------
+       WORKSPACE
+    ------------------------------------------------------------ */
+
+    .inspector-panel {
+        display: none;
+    }
+
+    .workspace-toolbar {
+        flex: 0 0 65px;
+
+        padding:
+            6px 8px;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        justify-content: flex-start;
+    }
+
+    .workspace-toolbar::-webkit-scrollbar {
+        height: 3px;
+    }
+
+    .workspace-toolbar::-webkit-scrollbar-thumb {
+        background: rgba(57,197,242,0.20);
+    }
+
+    .toolbar-group {
+        flex: 0 0 auto;
+    }
+
+    .toolbar-divider {
+        flex: 0 0 1px;
+    }
+
+    .tool-button {
+        min-width: 52px;
+        height: 49px;
+    }
+
+    .tool-button span {
+        font-size: 17px;
+    }
+
+    .tool-button small {
+        font-size: 7px;
+    }
+
+    .workspace-statusbar {
+        flex: 0 0 42px;
+
+        gap: 13px;
+
+        padding: 0 9px;
+    }
+
+    .status-item span {
+        font-size: 8px;
+    }
+
+    .status-item strong {
+        font-size: 9px;
+    }
+
+    .engine-status {
+        margin-left: 0;
+    }
+
+    .horizontal-ruler {
+        left: 27px;
+        height: 22px;
+    }
+
+    .vertical-ruler {
+        top: 22px;
+        width: 27px;
+    }
+
+    .chemistry-canvas {
+        top: 22px;
+        left: 27px;
+    }
+
+    .workspace-drop-zone {
+        width: min(330px, 82%);
+        padding: 23px 18px;
+    }
+}
+
+
+/* ================================================================
+   21 — SMALL MOBILE
+================================================================ */
+
+@media (max-width: 600px) {
+
+    .chem-header {
+        padding: 0 7px;
+    }
+
+    .brand-area {
+        gap: 7px;
+    }
+
+    .brand-mark {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+
+        border-radius: 9px;
+    }
+
+    .brand-text strong {
+        font-size: 12px;
+        letter-spacing: 0.12em;
+    }
+
+    .header-actions {
+        gap: 4px;
+    }
+
+    .library-toggle {
+        width: 39px;
+        padding: 0 !important;
+        font-size: 0;
+    }
+
+    .library-toggle::before {
+        content: "☰";
+        font-size: 18px;
+    }
+
+    .chem-header #chemSaveBtn {
+        width: 35px;
+        min-width: 35px;
+    }
+
+    .workspace-toolbar {
+        gap: 5px;
+    }
+
+    .tool-button {
+        min-width: 47px;
+    }
+
+    .tool-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .zoom-value {
+        min-width: 43px;
+    }
+
+    .workspace-statusbar {
+        gap: 10px;
+    }
+
+    .engine-status span:not(.engine-dot) {
+        display: none;
+    }
+
+    .engine-status strong {
+        font-size: 7px;
+    }
+
+    .toast-stack {
+        right: 9px;
+        bottom: 9px;
+
+        width:
+            calc(100vw - 18px);
+    }
+
+    .chem-modal {
+        padding: 9px;
+    }
+
+    .modal-window {
+        max-height:
+            calc(100dvh - 18px);
+
+        border-radius: 14px;
+    }
+
+    .modal-header {
+        padding: 13px;
+    }
+
+    .modal-header h2 {
+        font-size: 15px;
+    }
+
+    .modal-footer {
+        padding: 10px 13px;
+    }
+
+    .transfer-body {
+        grid-template-columns: 1fr;
+        gap: 9px;
+
+        padding: 13px;
+    }
+
+    .transfer-arrow {
+        display: none;
+    }
+
+    .transfer-quantity {
+        grid-column: auto;
+    }
+
+    .measurement-modal-body {
+        grid-template-columns: 1fr;
+        padding: 13px;
+    }
+
+    .instrument-visual {
+        min-height: 150px;
+    }
+
+    .help-content {
+        grid-template-columns: 1fr;
+        padding: 11px;
+    }
+}
+
+
+/* ================================================================
+   22 — VERY SMALL DEVICES
+================================================================ */
+
+@media (max-width: 380px) {
+
+    .brand-text strong {
+        font-size: 11px;
+    }
+
+    .workspace-toolbar {
+        flex: 0 0 60px;
+    }
+
+    .tool-button {
+        min-width: 43px;
+        height: 46px;
+    }
+
+    .tool-button span {
+        font-size: 15px;
+    }
+
+    .tool-button small {
+        font-size: 6px;
+    }
+
+    .workspace-statusbar {
+        gap: 8px;
+    }
+
+    .status-item:nth-child(4),
+    .status-item:nth-child(5) {
+        display: none;
+    }
+}
+
+
+/* ================================================================
+   23 — TOUCH DEVICES
+================================================================ */
+
+@media (hover: none) and (pointer: coarse) {
+
+    .chem-material-card {
+        min-height: 76px;
+    }
+
+    .category-button {
+        min-height: 34px;
+    }
+
+    .tool-button {
+        min-height: 48px;
+    }
+
+    .header-button,
+    .tool-icon,
+    .inspector-action,
+    .modal-button {
+        min-height: 38px;
+    }
+
+    .chem-material-card:hover {
+        transform: none;
+    }
+
+    .chem-material-card:active {
+        transform: scale(.975);
+    }
+
+    .chem-material-add {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+
+/* ================================================================
+   24 — REDUCED MOTION
+================================================================ */
 
 @media (prefers-reduced-motion: reduce) {
 
     *,
     *::before,
     *::after {
+        scroll-behavior: auto !important;
         animation-duration: 0.001ms !important;
         animation-iteration-count: 1 !important;
-
-        scroll-behavior: auto !important;
-
         transition-duration: 0.001ms !important;
     }
 }
 
 
-/* ============================================================
-   42. LARGE TABLETS / SMALL DESKTOP
-   ============================================================ */
-
-@media (max-width: 1180px) {
-
-    :root {
-        --left-width: 245px;
-        --right-width: 300px;
-    }
-
-
-    .brand-area {
-        min-width: 205px;
-    }
-
-
-    .laboratory-state {
-        display: none;
-    }
-
-
-    .session-area input {
-        width: 145px;
-    }
-
-
-    .tool-button {
-        min-width: 55px;
-    }
-}
-
-
-/* ============================================================
-   43. TABLET
-   ============================================================ */
-
-@media (max-width: 950px) {
-
-    :root {
-        --left-width: 220px;
-        --right-width: 280px;
-    }
-
-
-    .chem-header {
-        gap: 10px;
-
-        padding:
-            0 11px;
-    }
-
-
-    .brand-area {
-        min-width: auto;
-    }
-
-
-    .brand-text span {
-        display: none;
-    }
-
-
-    .session-area {
-        margin-left: auto;
-    }
-
-
-    .session-area label {
-        display: none;
-    }
-
-
-    .session-area input {
-        width: 135px;
-    }
-
-
-    .header-button {
-        padding:
-            0 9px;
-    }
-
-
-    .property-grid {
-        grid-template-columns:
-            1fr;
-    }
-
-
-    .measurement-options {
-        grid-template-columns:
-            repeat(3, 1fr);
-    }
-}
-
-
-/* ============================================================
-   44. TABLET PORTRAIT
-   ============================================================ */
-
-@media (max-width: 800px) {
-
-    body {
-        overflow: hidden;
-    }
-
-
-    :root {
-        --header-height: 62px;
-    }
-
-
-    .chem-header {
-        min-height: 62px;
-        height: 62px;
-    }
-
-
-    .brand-mark {
-        width: 35px;
-        height: 35px;
-
-        border-radius: 9px;
-
-        font-size: 17px;
-    }
-
-
-    .brand-text strong {
-        font-size: 13px;
-    }
-
-
-    .header-actions .header-button:not(.primary) {
-        display: none;
-    }
-
-
-    .session-area input {
-        width: 130px;
-        height: 34px;
-    }
-
-
-    .laboratory-layout {
-        grid-template-columns:
-            minmax(0, 1fr);
-    }
-
-
-    .materials-panel,
-    .inspector-panel {
-        display: none;
-    }
-
-
-    .laboratory-workspace {
-        width: 100%;
-    }
-
-
-    .workspace-toolbar {
-        min-height: 58px;
-    }
-
-
-    .workspace-statusbar {
-        min-height: 36px;
-    }
-
-
-    .status-item {
-        min-width: 76px;
-
-        padding:
-            0 8px;
-    }
-}
-
-
-/* ============================================================
-   45. MOBILE
-   ============================================================ */
-
-@media (max-width: 600px) {
-
-    :root {
-        --header-height: 57px;
-    }
-
-
-    .chem-header {
-        height: 57px;
-        min-height: 57px;
-
-        gap: 7px;
-
-        padding:
-            0 8px;
-    }
-
-
-    .brand-mark {
-        width: 32px;
-        height: 32px;
-
-        font-size: 15px;
-    }
-
-
-    .brand-text strong {
-        font-size: 12px;
-    }
-
-
-    .session-area {
-        min-width: 0;
-    }
-
-
-    .session-area input {
-        width: 110px;
-        height: 32px;
-
-        font-size: 10px;
-    }
-
-
-    .header-button {
-        height: 32px;
-
-        padding:
-            0 8px;
-
-        font-size: 10px;
-    }
-
-
-    .header-button.primary {
-        font-size: 9px;
-    }
-
-
-    .workspace-toolbar {
-        min-height: 56px;
-
-        padding:
-            6px 7px;
-    }
-
-
-    .toolbar-group {
-        gap: 2px;
-    }
-
-
-    .tool-button {
-        min-width: 48px;
-        height: 44px;
-
-        padding:
-            3px 5px;
-    }
-
-
-    .tool-button span {
-        font-size: 15px;
-    }
-
-
-    .tool-button small {
-        font-size: 7px;
-    }
-
-
-    .toolbar-divider {
-        height: 27px;
-
-        margin:
-            0 2px;
-    }
-
-
-    .tool-icon {
-        width: 29px;
-        height: 29px;
-    }
-
-
-    .zoom-value {
-        min-width: 36px;
-
-        font-size: 9px;
-    }
-
-
-    .workspace-drop-zone {
-        width: 78%;
-
-        padding:
-            23px 17px;
-    }
-
-
-    .drop-icon {
-        width: 46px;
-        height: 46px;
-
-        font-size: 22px;
-    }
-
-
-    .workspace-drop-zone strong {
-        font-size: 11px;
-    }
-
-
-    .workspace-drop-zone span {
-        font-size: 8px;
-    }
-
-
-    .workspace-statusbar {
-        min-height: 34px;
-
-        padding:
-            0 5px;
-    }
-
-
-    .status-item {
-        min-width: auto;
-
-        padding:
-            0 7px;
-    }
-
-
-    .status-item span {
-        display: none;
-    }
-
-
-    .status-item strong {
-        font-size: 8px;
-    }
-
-
-    .engine-status {
-        padding-left: 7px;
-    }
-
-
-    .engine-status > span:not(.engine-dot) {
-        display: none;
-    }
-
-
-    .chem-modal {
-        padding: 10px;
-    }
-
-
-    .modal-window {
-        max-height: 92vh;
-
-        border-radius: 13px;
-    }
-
-
-    .modal-header {
-        min-height: 62px;
-
-        padding:
-            10px 12px;
-    }
-
-
-    .modal-header h2 {
-        font-size: 13px;
-    }
-
-
-    .transfer-body {
-        grid-template-columns:
-            1fr;
-
-        gap: 8px;
-
-        padding: 13px;
-    }
-
-
-    .transfer-source,
-    .transfer-target {
-        min-height: 72px;
-    }
-
-
-    .transfer-arrow {
-        transform:
-            rotate(90deg);
-    }
-
-
-    .transfer-quantity {
-        grid-column: auto;
-    }
-
-
-    .help-content {
-        grid-template-columns:
-            1fr;
-
-        padding: 11px;
-    }
-
-
-    .measurement-modal-body {
-        padding: 13px;
-    }
-
-
-    .measurement-options {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-
-    .measurement-screen strong {
-        font-size: 27px;
-    }
-
-
-    .modal-footer {
-        min-height: 57px;
-
-        padding:
-            9px 12px;
-    }
-
-
-    .toast-stack {
-        right: 10px;
-        bottom: 10px;
-
-        width:
-            calc(100vw - 20px);
-    }
-}
-
-
-/* ============================================================
-   46. VERY SMALL PHONES
-   ============================================================ */
-
-@media (max-width: 380px) {
-
-    .brand-text {
-        display: none;
-    }
-
-
-    .session-area input {
-        width: 105px;
-    }
-
-
-    .tool-button {
-        min-width: 45px;
-    }
-
-
-    .tool-button small {
-        font-size: 6px;
-    }
-
-
-    .engine-status {
-        display: none;
-    }
-}
-
-
-/* ============================================================
-   47. LANDSCAPE MOBILE
-   ============================================================ */
-
-@media
-    (max-height: 520px)
-    and (orientation: landscape) {
-
-    :root {
-        --header-height: 50px;
-    }
-
-
-    .chem-header {
-        height: 50px;
-        min-height: 50px;
-    }
-
-
-    .brand-mark {
-        width: 29px;
-        height: 29px;
-    }
-
-
-    .workspace-toolbar {
-        min-height: 50px;
-    }
-
-
-    .tool-button {
-        height: 40px;
-    }
-
-
-    .workspace-statusbar {
-        min-height: 30px;
-    }
-
-
-    .observation-section {
-        min-height: 150px;
-    }
-
-
-    .modal-window {
-        max-height: 96vh;
-    }
-}
-
-
-/* ============================================================
-   48. TOUCH DEVICES
-   ============================================================ */
-
-@media (hover: none) and (pointer: coarse) {
-
-    button,
-    .material-card,
-    .library-item,
-    .material-item,
-    .lab-object {
-        -webkit-tap-highlight-color:
-            transparent;
-    }
-
-
-    .material-card:hover,
-    .library-item:hover,
-    .material-item:hover {
-        transform: none;
-    }
-
-
-    .tool-button,
-    .tool-icon,
-    .header-button,
-    .category-button {
-        min-height: 38px;
-    }
-
-
-    .lab-object {
-        touch-action: none;
-    }
-
-
-    .chemistry-canvas {
-        -webkit-overflow-scrolling:
-            touch;
-    }
-}
-
-
-/* ============================================================
-   49. PRINT SAFETY
-   ============================================================ */
+/* ================================================================
+   25 — PRINT
+================================================================ */
 
 @media print {
 
     body {
         overflow: visible;
-        background: #fff;
-        color: #000;
+        background: white;
+        color: black;
     }
-
-
-    .chem-app {
-        height: auto;
-        overflow: visible;
-    }
-
 
     .chem-header,
     .materials-panel,
-    .workspace-toolbar,
     .inspector-panel,
+    .workspace-toolbar,
     .workspace-statusbar,
     .chem-modal,
-    .toast-stack {
+    .toast-stack,
+    .materials-backdrop {
         display: none !important;
     }
 
-
-    .laboratory-layout {
-        display: block;
-    }
-
-
-    .laboratory-workspace {
-        display: block;
-    }
-
-
-    .workspace-viewport {
+    .laboratory-layout,
+    .laboratory-workspace,
+    .workspace-viewport,
+    .chemistry-canvas {
+        position: static;
+        width: 100%;
         height: auto;
         overflow: visible;
     }
 }
 
 
-/* ============================================================
-   50. END
-   ============================================================ */
+/* ================================================================
+   FIN
+   FOBAS — LABORATOIRE CHIMIQUE
+================================================================ */
+
