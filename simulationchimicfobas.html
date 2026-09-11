@@ -79,6 +79,26 @@
 
         <div class="header-actions">
 
+            <!-- =================================================
+                 NOUVEAU : BOUTON BIBLIOTHÈQUE
+                 -------------------------------------------------
+                 Ce bouton ne remplace aucun ID existant.
+                 Il permet au nouveau JS d'ouvrir la bibliothèque
+                 dynamiquement sur mobile/tablette.
+            ================================================== -->
+
+            <button
+                id="openMaterialsBtn"
+                class="header-button library-toggle"
+                type="button"
+                aria-controls="materialsPanel"
+                aria-expanded="false"
+                title="Ouvrir la bibliothèque"
+            >
+                ☰ Bibliothèque
+            </button>
+
+
             <button
                 id="chemHelpBtn"
                 class="header-button"
@@ -134,6 +154,33 @@
                 <span id="materialCount">
                     0
                 </span>
+
+            </div>
+
+
+            <!-- =================================================
+                 MOBILE LIBRARY HEADER
+            ================================================== -->
+
+            <div class="mobile-library-header">
+
+                <div>
+                    <small>BIBLIOTHÈQUE FOBAS</small>
+
+                    <strong>
+                        Matériaux
+                    </strong>
+                </div>
+
+                <button
+                    id="closeMaterialsBtn"
+                    type="button"
+                    class="library-close-button"
+                    aria-label="Fermer la bibliothèque"
+                    title="Fermer"
+                >
+                    ×
+                </button>
 
             </div>
 
@@ -234,6 +281,20 @@
             </div>
 
         </aside>
+
+
+        <!-- =====================================================
+             MOBILE LIBRARY BACKDROP
+             -----------------------------------------------------
+             Nouvel élément visuel uniquement.
+             Aucun ID existant n'est modifié.
+        ====================================================== -->
+
+        <div
+            id="materialsBackdrop"
+            class="materials-backdrop"
+            aria-hidden="true"
+        ></div>
 
 
 
