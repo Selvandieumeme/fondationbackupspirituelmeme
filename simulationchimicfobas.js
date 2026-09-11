@@ -1,1478 +1,3460 @@
+/* ================================================================
+   FOBAS — LABORATOIRE CHIMIQUE
+   ================================================================
+   MOTEUR JAVASCRIPT PRINCIPAL — VERSION CHIMIQUE AVANCÉE
+   Compatible avec :
+   simulationchimicfobas.html
+
+   VERSION
+   ---------------------------------------------------------------
+   FOBAS Chemistry Engine — Advanced Scientific Simulation Core
+
+   OBJECTIF
+   ---------------------------------------------------------------
+   Transformer l'interface FOBAS en véritable moteur de simulation
+   chimique pédagogique et expérimental :
+
+   • Sélection réelle
+   • Déplacement réel
+   • Transfert réel de matière
+   • Conservation de la composition
+   • Masse / volume / densité
+   • Moles / masse molaire
+   • Concentration molaire
+   • Mélange réel
+   • Réactions chimiques
+   • Équations équilibrées
+   • Stœchiométrie
+   • Réactif limitant
+   • Précipitation
+   • Gaz
+   • Couleur
+   • Chaleur de réaction
+   • pH dynamique pour les systèmes pris en charge
+   • Chauffage
+   • Changements de phase
+   • Mesures instrumentales
+   • Sauvegarde / restauration
+   • Drag souris / tactile / stylet
+   • Outils Select / Move / Transfer / Mix / Measure / Heat
+   • API publique
+
+   NIVEAUX
+   ---------------------------------------------------------------
+   Débutant
+   • manipulation
+   • observation
+   • volume
+   • masse
+   • température
+   • mélange simple
+
+   Intermédiaire
+   • concentration
+   • moles
+   • densité
+   • pH
+   • transfert quantitatif
+   • réactions classiques
+
+   Avancé
+   • stœchiométrie
+   • réactif limitant
+   • précipitation
+   • gaz
+   • changements de phase
+   • bilan de matière
+
+   Expert
+   • composition multi-espèces
+   • équations équilibrées
+   • calculs molaires
+   • conservation de matière
+   • diagnostics du moteur
+   • interactions chimiques structurées
+
+   IMPORTANT
+   ---------------------------------------------------------------
+   Ce moteur reste une simulation numérique scientifique.
+   Les modèles thermiques, pH, solubilité et cinétique sont des
+   modèles pédagogiques paramétrés et non un remplacement d'un
+   laboratoire physique réel.
+
+   ARCHITECTURE
+   ---------------------------------------------------------------
+   01. Configuration
+   02. Base scientifique des matériaux
+   03. Base des réactions
+   04. État de simulation
+   05. Références DOM
+   06. Utilitaires
+   07. Normalisation scientifique
+   08. Bibliothèque
+   09. Création des objets
+   10. Rendu workspace
+   11. Sélection
+   12. Drag / Move
+   13. Outils
+   14. Inspecteur
+   15. Transfert
+   16. Mélange
+   17. Moteur de réaction
+   18. Stœchiométrie
+   19. pH
+   20. Chauffage
+   21. Changements de phase
+   22. Instruments
+   23. Zoom
+   24. Bibliothèque mobile
+   25. Sauvegarde
+   26. Observations
+   27. Modales
+   28. Inventaire
+   29. Clavier
+   30. Diagnostics
+   31. Initialisation
+   32. API publique
+================================================================ */
+
 (() => {
+
     "use strict";
 
-    /*
-     * ================================================================
-     * FOBAS — SIMULATION CHIMIQUE
-     * simulationchimicfobas.js
-     * ================================================================
-     *
-     * Moteur autonome:
-     * - Catalogue de matériaux
-     * - Verrerie
-     * - Réactifs
-     * - Solides
-     * - Instruments
-     * - Équipements
-     * - Transfert
-     * - Mélange
-     * - Réactions
-     * - pH
-     * - Température
-     * - Masse / volume / densité
-     * - Gaz / précipité / changement de couleur
-     * - Chauffage
-     * - Mesures
-     * - Sauvegarde locale
-     * - Interface tactile
-     *
-     * Compatible avec:
-     * simulationchimicfobas.html
-     * ================================================================
-     */
 
-    const APP = {};
+    /* ============================================================
+       01 — CONFIGURATION
+    ============================================================ */
 
-    const $ = (selector) => document.querySelector(selector);
-    const $$ = (selector) => [...document.querySelectorAll(selector)];
+    const CHEM_CONFIG = {
 
-    const STORAGE_KEY = "FOBAS_CHEM_LAB_SESSION_V4";
-    const SESSION_KEY = "FOBAS_CHEM_LAB_NAME_V4";
+        storageKey:
+            "FOBAS_CHEMISTRY_LAB_STATE",
 
-    const DEFAULT_TEMPERATURE = 25;
-    const MIN_TEMPERATURE = 5;
-    const MAX_SIMULATION_TEMPERATURE = 150;
+        engineVersion:
+            "3.0.0-advanced",
 
-    const state = {
-        objects: [],
-        selectedId: null,
-        nextId: 1,
+        defaultSessionName:
+            "Expérience chimique",
 
-        tool: "select",
-        category: "all",
-        search: "",
+        workspaceWidth:
+            1100,
 
-        zoom: 1,
-        measurementType: "volume",
+        workspaceHeight:
+            760,
 
-        transferSourceId: null,
+        minZoom:
+            0.65,
 
-        sessionName: "Laboratoire chimique FOBAS",
+        maxZoom:
+            1.60,
 
-        logs: [],
+        zoomStep:
+            0.10,
 
-        running: false,
-        initialized: false,
+        defaultTemperature:
+            25,
 
-        lastTick: Date.now()
+        minTemperature:
+            -273.15,
+
+        maxTemperature:
+            3000,
+
+        dragPadding:
+            12,
+
+        precision:
+            6,
+
+        maxObservations:
+            50,
+
+        reactionTolerance:
+            1e-9,
+
+        standardPressure:
+            1,
+
+        /*
+         * R = 0.082057 L·atm·mol⁻¹·K⁻¹
+         */
+        gasConstant:
+            0.082057,
+
+        /*
+         * Modèle pédagogique de chauffage.
+         * Chaque pression sur Heat représente une étape
+         * d'apport d'énergie.
+         */
+        heatingStepC:
+            25,
+
+        /*
+         * Fraction approximative évaporée lorsqu'un liquide
+         * dépasse son point d'ébullition.
+         */
+        evaporationFraction:
+            0.05
+
     };
 
-    /* ================================================================
-       UTILITAIRES
-       ================================================================ */
 
-    function uid(prefix = "obj") {
-        return `${prefix}_${state.nextId++}_${Date.now().toString(36)}`;
-    }
+    /* ============================================================
+       02 — BASE SCIENTIFIQUE DES MATÉRIAUX
+    ============================================================ */
 
-    function clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
-    function round(value, decimals = 2) {
-        const p = Math.pow(10, decimals);
-        return Math.round((Number(value) || 0) * p) / p;
-    }
-
-    function nowTime() {
-        return new Date().toLocaleTimeString("fr-FR", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-        });
-    }
-
-    function escapeHTML(value) {
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    function hexToRgba(hex, alpha = 1) {
-        if (!hex) return `rgba(180,200,220,${alpha})`;
-
-        let h = hex.replace("#", "");
-
-        if (h.length === 3) {
-            h = h.split("").map(c => c + c).join("");
-        }
-
-        const n = parseInt(h, 16);
-
-        if (Number.isNaN(n)) {
-            return `rgba(180,200,220,${alpha})`;
-        }
-
-        return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
-    }
-
-    function getObject(id) {
-        return state.objects.find(o => o.id === id) || null;
-    }
-
-    function getSelected() {
-        return getObject(state.selectedId);
-    }
-
-    function isLiquidObject(obj) {
-        if (!obj) return false;
-
-        if (obj.phase === "liquid") return true;
-
-        return Number(obj.volumeMl || 0) > 0 &&
-            (
-                obj.category === "reagent" ||
-                obj.kind === "container"
-            );
-    }
-
-    function isContainer(obj) {
-        return obj && obj.kind === "container";
-    }
-
-    function isInstrument(obj) {
-        return obj && obj.category === "instrument";
-    }
-
-    function totalComponentMoles(obj) {
-        if (!obj || !Array.isArray(obj.components)) return 0;
-
-        return obj.components.reduce(
-            (sum, c) => sum + Number(c.moles || 0),
-            0
-        );
-    }
-
-    function totalComponentMass(obj) {
-        if (!obj || !Array.isArray(obj.components)) return 0;
-
-        return obj.components.reduce(
-            (sum, c) => sum + Number(c.massG || 0),
-            0
-        );
-    }
-
-    function calculateTotalMass(obj) {
-        if (!obj) return 0;
-
-        if (obj.kind === "container") {
-            return Number(obj.emptyMassG || 0) +
-                totalComponentMass(obj);
-        }
-
-        if (obj.massG != null) {
-            return Number(obj.massG || 0);
-        }
-
-        return totalComponentMass(obj);
-    }
-
-    function calculateDensity(obj) {
-        if (!obj) return 0;
-
-        const volume = Number(obj.volumeMl || 0);
-
-        if (volume <= 0) {
-            return Number(obj.density || 0);
-        }
-
-        const liquidMass = totalComponentMass(obj);
-
-        if (liquidMass <= 0) {
-            return Number(obj.density || 1);
-        }
-
-        return liquidMass / volume;
-    }
-
-    function totalVolume(obj) {
-        if (!obj) return 0;
-
-        if (obj.kind === "container") {
-            return Number(obj.volumeMl || 0);
-        }
-
-        return Number(obj.volumeMl || 0);
-    }
-
-    /* ================================================================
-       CATALOGUE DES MATÉRIAUX
-       ================================================================ */
+    /*
+     * IMPORTANT :
+     * Les valeurs de concentration des solutions sont des valeurs
+     * de simulation utilisées pour permettre des expériences
+     * quantitatives cohérentes.
+     */
 
     const MATERIALS = [
 
-        /* ------------------------------------------------------------
+        /* ========================================================
            VERRERIE
-           ------------------------------------------------------------ */
+        ======================================================== */
 
         {
-            id: "beaker50",
-            name: "Bécher 50 mL",
-            shortName: "Bécher 50",
-            category: "glassware",
-            kind: "container",
-            icon: "🧪",
-            formula: "",
-            state: "vide",
-            capacityMl: 50,
-            emptyMassG: 45,
-            width: 92,
-            height: 118,
-            color: "#d9edf7"
-        },
-
-        {
-            id: "beaker100",
+            id: "beaker-100",
             name: "Bécher 100 mL",
-            shortName: "Bécher 100",
             category: "glassware",
-            kind: "container",
+            type: "container",
             icon: "🧪",
-            formula: "",
-            state: "vide",
-            capacityMl: 100,
-            emptyMassG: 65,
-            width: 100,
-            height: 128,
-            color: "#d9edf7"
+            state: "Vide",
+            volume: 0,
+            capacity: 100,
+            mass: 0,
+            density: 1,
+            temperature: 25,
+            ph: null,
+            color: "Transparent",
+            formula: "SiO₂ / verre",
+            molarMass: null,
+            description:
+                "Petit bécher de laboratoire de 100 mL.",
+            thermal: {
+                meltingPoint: 1400,
+                boilingPoint: 2200,
+                heatCapacity: 0.84
+            }
         },
 
         {
-            id: "beaker250",
+            id: "beaker-250",
             name: "Bécher 250 mL",
-            shortName: "Bécher 250",
             category: "glassware",
-            kind: "container",
+            type: "container",
             icon: "🧪",
-            formula: "",
-            state: "vide",
-            capacityMl: 250,
-            emptyMassG: 105,
-            width: 116,
-            height: 145,
-            color: "#d9edf7"
+            state: "Vide",
+            volume: 0,
+            capacity: 250,
+            mass: 0,
+            density: 1,
+            temperature: 25,
+            ph: null,
+            color: "Transparent",
+            formula: "SiO₂ / verre",
+            molarMass: null,
+            description:
+                "Bécher standard de laboratoire de 250 mL.",
+            thermal: {
+                meltingPoint: 1400,
+                boilingPoint: 2200,
+                heatCapacity: 0.84
+            }
         },
 
         {
-            id: "beaker500",
+            id: "beaker-500",
             name: "Bécher 500 mL",
-            shortName: "Bécher 500",
             category: "glassware",
-            kind: "container",
+            type: "container",
             icon: "🧪",
-            formula: "",
-            state: "vide",
-            capacityMl: 500,
-            emptyMassG: 165,
-            width: 130,
-            height: 160,
-            color: "#d9edf7"
+            state: "Vide",
+            volume: 0,
+            capacity: 500,
+            mass: 0,
+            density: 1,
+            temperature: 25,
+            ph: null,
+            color: "Transparent",
+            formula: "SiO₂ / verre",
+            molarMass: null,
+            description:
+                "Grand bécher de laboratoire de 500 mL.",
+            thermal: {
+                meltingPoint: 1400,
+                boilingPoint: 2200,
+                heatCapacity: 0.84
+            }
         },
 
         {
-            id: "erlenmeyer100",
-            name: "Erlenmeyer 100 mL",
-            shortName: "Erlenmeyer 100",
-            category: "glassware",
-            kind: "container",
-            icon: "⚗️",
-            formula: "",
-            state: "vide",
-            capacityMl: 100,
-            emptyMassG: 85,
-            width: 108,
-            height: 138,
-            color: "#d9edf7"
-        },
-
-        {
-            id: "erlenmeyer250",
+            id: "erlenmeyer-250",
             name: "Erlenmeyer 250 mL",
-            shortName: "Erlenmeyer 250",
             category: "glassware",
-            kind: "container",
+            type: "container",
             icon: "⚗️",
-            formula: "",
-            state: "vide",
-            capacityMl: 250,
-            emptyMassG: 125,
-            width: 122,
-            height: 155,
-            color: "#d9edf7"
+            state: "Vide",
+            volume: 0,
+            capacity: 250,
+            mass: 0,
+            density: 1,
+            temperature: 25,
+            ph: null,
+            color: "Transparent",
+            formula: "SiO₂ / verre",
+            molarMass: null,
+            description:
+                "Fiole Erlenmeyer de 250 mL.",
+            thermal: {
+                meltingPoint: 1400,
+                boilingPoint: 2200,
+                heatCapacity: 0.84
+            }
         },
 
         {
-            id: "testTube",
+            id: "test-tube",
             name: "Tube à essai",
-            shortName: "Tube",
             category: "glassware",
-            kind: "container",
+            type: "container",
             icon: "🧫",
-            formula: "",
-            state: "vide",
-            capacityMl: 20,
-            emptyMassG: 18,
-            width: 55,
-            height: 150,
-            color: "#d9edf7"
+            state: "Vide",
+            volume: 0,
+            capacity: 25,
+            mass: 0,
+            density: 1,
+            temperature: 25,
+            ph: null,
+            color: "Transparent",
+            formula: "SiO₂ / verre",
+            molarMass: null,
+            description:
+                "Tube à essai pour petites quantités.",
+            thermal: {
+                meltingPoint: 1400,
+                boilingPoint: 2200,
+                heatCapacity: 0.84
+            }
         },
 
         {
-            id: "graduated10",
-            name: "Éprouvette graduée 10 mL",
-            shortName: "Éprouvette 10",
+            id: "flask-100",
+            name: "Fiole 100 mL",
             category: "glassware",
-            kind: "container",
-            icon: "🥃",
-            formula: "",
-            state: "vide",
-            capacityMl: 10,
-            emptyMassG: 25,
-            width: 60,
-            height: 170,
-            color: "#d9edf7",
-            precisionVolume: 0.1
-        },
-
-        {
-            id: "graduated100",
-            name: "Éprouvette graduée 100 mL",
-            shortName: "Éprouvette 100",
-            category: "glassware",
-            kind: "container",
-            icon: "🥃",
-            formula: "",
-            state: "vide",
-            capacityMl: 100,
-            emptyMassG: 70,
-            width: 70,
-            height: 190,
-            color: "#d9edf7",
-            precisionVolume: 0.5
-        },
-
-        {
-            id: "volumetricFlask",
-            name: "Fiole jaugée 100 mL",
-            shortName: "Fiole jaugée",
-            category: "glassware",
-            kind: "container",
+            type: "container",
             icon: "⚗️",
-            formula: "",
-            state: "vide",
-            capacityMl: 100,
-            emptyMassG: 80,
-            width: 110,
-            height: 170,
-            color: "#d9edf7",
-            precisionVolume: 0.1
+            state: "Vide",
+            volume: 0,
+            capacity: 100,
+            mass: 0,
+            density: 1,
+            temperature: 25,
+            ph: null,
+            color: "Transparent",
+            formula: "SiO₂ / verre",
+            molarMass: null,
+            description:
+                "Fiole de laboratoire de 100 mL.",
+            thermal: {
+                meltingPoint: 1400,
+                boilingPoint: 2200,
+                heatCapacity: 0.84
+            }
         },
 
-        {
-            id: "funnel",
-            name: "Entonnoir",
-            shortName: "Entonnoir",
-            category: "glassware",
-            kind: "equipment",
-            icon: "🔻",
-            formula: "",
-            state: "vide",
-            width: 90,
-            height: 95,
-            color: "#d9edf7"
-        },
 
-        /* ------------------------------------------------------------
-           RÉACTIFS
-           ------------------------------------------------------------ */
+        /* ========================================================
+           RÉACTIFS LIQUIDES
+        ======================================================== */
 
         {
             id: "water",
             name: "Eau distillée",
-            shortName: "Eau",
             category: "reagent",
-            kind: "reagent",
+            type: "liquid",
             icon: "💧",
+            state: "Liquide",
+            volume: 100,
+            capacity: 100,
+            mass: 100,
+            density: 1.000,
+            temperature: 25,
+            ph: 7,
+            color: "Incolore",
             formula: "H₂O",
-            phase: "liquid",
-            state: "liquide",
-            defaultVolumeMl: 250,
-            maxVolumeMl: 1000,
-            density: 1.0,
-            pH: 7.0,
-            temperatureC: 25,
-            color: "#bde9ff",
-            molarity: 55.5,
-            role: "solvent"
+            molarMass: 18.01528,
+            defaultMolarity: 0,
+            description:
+                "Eau distillée de laboratoire.",
+            thermal: {
+                meltingPoint: 0,
+                boilingPoint: 100,
+                heatCapacity: 4.18
+            }
         },
 
         {
-            id: "hydrochloricAcid",
+            id: "hydrochloric-acid",
             name: "Acide chlorhydrique",
-            shortName: "HCl",
             category: "reagent",
-            kind: "reagent",
-            icon: "⚗️",
+            type: "liquid",
+            icon: "🧴",
+            state: "Liquide",
+            volume: 100,
+            capacity: 100,
+            mass: 119,
+            density: 1.19,
+            temperature: 25,
+            ph: 1,
+            color: "Incolore",
             formula: "HCl",
-            phase: "liquid",
-            state: "liquide",
-            defaultVolumeMl: 100,
-            maxVolumeMl: 500,
-            density: 1.0,
-            pH: 1.0,
-            temperatureC: 25,
-            color: "#f3f5ff",
-            molarity: 0.10,
-            strongAcid: true,
-            acidEquivalent: 1
+            molarMass: 36.46094,
+            defaultMolarity: 1.0,
+            acidStrength: "strong",
+            acidKa: Infinity,
+            description:
+                "Solution aqueuse d'acide chlorhydrique à 1,00 mol/L pour la simulation.",
+            thermal: {
+                meltingPoint: -27,
+                boilingPoint: 108,
+                heatCapacity: 3.5
+            }
         },
 
         {
-            id: "sodiumHydroxide",
+            id: "sodium-hydroxide",
             name: "Hydroxyde de sodium",
-            shortName: "NaOH",
             category: "reagent",
-            kind: "reagent",
-            icon: "⚗️",
+            type: "liquid",
+            icon: "🧴",
+            state: "Liquide",
+            volume: 100,
+            capacity: 100,
+            mass: 105,
+            density: 1.05,
+            temperature: 25,
+            ph: 13,
+            color: "Incolore",
             formula: "NaOH",
-            phase: "liquid",
-            state: "solution",
-            defaultVolumeMl: 100,
-            maxVolumeMl: 500,
-            density: 1.0,
-            pH: 13.0,
-            temperatureC: 25,
-            color: "#fff5d7",
-            molarity: 0.10,
-            strongBase: true,
-            baseEquivalent: 1
+            molarMass: 39.997,
+            defaultMolarity: 1.0,
+            baseStrength: "strong",
+            description:
+                "Solution aqueuse de NaOH à 1,00 mol/L pour la simulation.",
+            thermal: {
+                meltingPoint: 318,
+                boilingPoint: 1388,
+                heatCapacity: 3.7
+            }
         },
 
         {
-            id: "copperSulfate",
-            name: "Sulfate de cuivre(II)",
-            shortName: "CuSO₄",
+            id: "ethanol",
+            name: "Éthanol",
             category: "reagent",
-            kind: "reagent",
+            type: "liquid",
+            icon: "🧴",
+            state: "Liquide",
+            volume: 100,
+            capacity: 100,
+            mass: 78.9,
+            density: 0.789,
+            temperature: 25,
+            ph: 7,
+            color: "Incolore",
+            formula: "C₂H₅OH",
+            molarMass: 46.06844,
+            defaultMolarity: 17.12,
+            description:
+                "Éthanol de laboratoire.",
+            thermal: {
+                meltingPoint: -114.1,
+                boilingPoint: 78.37,
+                heatCapacity: 2.44
+            }
+        },
+
+        {
+            id: "copper-sulfate",
+            name: "Sulfate de cuivre",
+            category: "reagent",
+            type: "solution",
             icon: "🔵",
+            state: "Solution",
+            volume: 100,
+            capacity: 100,
+            mass: 115,
+            density: 1.15,
+            temperature: 25,
+            ph: 4,
+            color: "Bleu",
             formula: "CuSO₄",
-            phase: "liquid",
-            state: "solution",
-            defaultVolumeMl: 100,
-            maxVolumeMl: 500,
-            density: 1.02,
-            pH: 5.0,
-            temperatureC: 25,
-            color: "#2196f3",
-            molarity: 0.10,
-            aqueousSalt: true
+            molarMass: 159.609,
+            defaultMolarity: 0.5,
+            description:
+                "Solution aqueuse de CuSO₄ à 0,50 mol/L.",
+            thermal: {
+                meltingPoint: 110,
+                boilingPoint: 100,
+                heatCapacity: 3.8
+            }
         },
 
+
+        /* ========================================================
+           SOLIDES
+        ======================================================== */
+
         {
-            id: "sodiumChloride",
+            id: "sodium-chloride",
             name: "Chlorure de sodium",
-            shortName: "NaCl",
-            category: "reagent",
-            kind: "reagent",
-            icon: "🧂",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 50,
+            density: 2.16,
+            temperature: 25,
+            ph: 7,
+            color: "Blanc",
             formula: "NaCl",
-            phase: "liquid",
-            state: "solution",
-            defaultVolumeMl: 100,
-            maxVolumeMl: 500,
-            density: 1.0,
-            pH: 7.0,
-            temperatureC: 25,
-            color: "#eef7ff",
-            molarity: 0.10,
-            aqueousSalt: true
-        },
-
-        {
-            id: "sodiumBicarbonate",
-            name: "Bicarbonate de sodium",
-            shortName: "NaHCO₃",
-            category: "reagent",
-            kind: "reagent",
-            icon: "⚪",
-            formula: "NaHCO₃",
-            phase: "solid",
-            state: "solide",
-            defaultMassG: 25,
-            density: 2.2,
-            pH: 8.3,
-            color: "#f2f2f2",
-            molarMass: 84.0066,
-            solid: true
-        },
-
-        {
-            id: "calciumCarbonate",
-            name: "Carbonate de calcium",
-            shortName: "CaCO₃",
-            category: "solid",
-            kind: "reagent",
-            icon: "⚪",
-            formula: "CaCO₃",
-            phase: "solid",
-            state: "solide",
-            defaultMassG: 25,
-            density: 2.71,
-            pH: 8.0,
-            color: "#eeeeee",
-            molarMass: 100.0869,
-            solid: true
-        },
-
-        {
-            id: "universalIndicator",
-            name: "Indicateur universel",
-            shortName: "Indicateur",
-            category: "reagent",
-            kind: "reagent",
-            icon: "🟣",
-            formula: "Ind.",
-            phase: "liquid",
-            state: "solution",
-            defaultVolumeMl: 25,
-            maxVolumeMl: 100,
-            density: 1.0,
-            pH: 7,
-            temperatureC: 25,
-            color: "#38bdf8",
-            indicator: true
-        },
-
-        {
-            id: "phenolphthalein",
-            name: "Phénolphtaléine",
-            shortName: "Phénolphtaléine",
-            category: "reagent",
-            kind: "reagent",
-            icon: "🩷",
-            formula: "Ind.",
-            phase: "liquid",
-            state: "solution",
-            defaultVolumeMl: 25,
-            maxVolumeMl: 100,
-            density: 1.0,
-            pH: 7,
-            temperatureC: 25,
-            color: "#f5f5f5",
-            indicator: true,
-            phenolphthalein: true
-        },
-
-        /* ------------------------------------------------------------
-           SOLIDES / MÉTAUX
-           ------------------------------------------------------------ */
-
-        {
-            id: "zinc",
-            name: "Zinc",
-            shortName: "Zn",
-            category: "solid",
-            kind: "solid",
-            icon: "⚙️",
-            formula: "Zn",
-            phase: "solid",
-            state: "solide",
-            defaultMassG: 5,
-            density: 7.14,
-            molarMass: 65.38,
-            color: "#9ca3af",
-            metal: true
+            molarMass: 58.4428,
+            defaultMolarity: null,
+            description:
+                "Sel de laboratoire.",
+            thermal: {
+                meltingPoint: 801,
+                boilingPoint: 1413,
+                heatCapacity: 0.864
+            }
         },
 
         {
             id: "copper",
             name: "Cuivre",
-            shortName: "Cu",
             category: "solid",
-            kind: "solid",
-            icon: "🟤",
-            formula: "Cu",
-            phase: "solid",
-            state: "solide",
-            defaultMassG: 5,
+            type: "solid",
+            icon: "🟠",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
             density: 8.96,
+            temperature: 25,
+            ph: null,
+            color: "Cuivre",
+            formula: "Cu",
             molarMass: 63.546,
-            color: "#b87333",
-            metal: true
+            description:
+                "Échantillon métallique de cuivre.",
+            thermal: {
+                meltingPoint: 1084.62,
+                boilingPoint: 2562,
+                heatCapacity: 0.385
+            }
         },
 
         {
             id: "iron",
             name: "Fer",
-            shortName: "Fe",
             category: "solid",
-            kind: "solid",
+            type: "solid",
             icon: "⚙️",
-            formula: "Fe",
-            phase: "solid",
-            state: "solide",
-            defaultMassG: 5,
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
             density: 7.87,
+            temperature: 25,
+            ph: null,
+            color: "Gris métallique",
+            formula: "Fe",
             molarMass: 55.845,
-            color: "#525252",
-            metal: true
+            description:
+                "Échantillon de fer.",
+            thermal: {
+                meltingPoint: 1538,
+                boilingPoint: 2862,
+                heatCapacity: 0.449
+            }
         },
 
-        {
-            id: "aluminium",
-            name: "Aluminium",
-            shortName: "Al",
-            category: "solid",
-            kind: "solid",
-            icon: "⬜",
-            formula: "Al",
-            phase: "solid",
-            state: "solide",
-            defaultMassG: 5,
-            density: 2.70,
-            molarMass: 26.9815,
-            color: "#cbd5e1",
-            metal: true
-        },
 
-        {
-            id: "saltSolid",
-            name: "Chlorure de sodium solide",
-            shortName: "NaCl solide",
-            category: "solid",
-            kind: "solid",
-            icon: "🧂",
-            formula: "NaCl",
-            phase: "solid",
-            state: "solide",
-            defaultMassG: 10,
-            density: 2.165,
-            molarMass: 58.44,
-            color: "#ffffff",
-            solid: true
-        },
-
-        /* ------------------------------------------------------------
+        /* ========================================================
            INSTRUMENTS
-           ------------------------------------------------------------ */
-
-        {
-            id: "balance",
-            name: "Balance électronique",
-            shortName: "Balance",
-            category: "instrument",
-            kind: "instrument",
-            icon: "⚖️",
-            state: "prête",
-            width: 150,
-            height: 90,
-            measurementType: "mass",
-            precisionMass: 0.01
-        },
+        ======================================================== */
 
         {
             id: "thermometer",
             name: "Thermomètre",
-            shortName: "Thermomètre",
             category: "instrument",
-            kind: "instrument",
+            type: "instrument",
             icon: "🌡️",
-            state: "prêt",
-            width: 65,
-            height: 170,
-            measurementType: "temperature",
-            precisionTemperature: 0.1
+            state: "Instrument",
+            volume: 0,
+            capacity: 0,
+            mass: 0,
+            density: null,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: null,
+            molarMass: null,
+            description:
+                "Instrument de mesure de température.",
+            measurementType: "temperature"
         },
 
         {
-            id: "phMeter",
+            id: "ph-meter",
             name: "pH-mètre",
-            shortName: "pH-mètre",
             category: "instrument",
-            kind: "instrument",
+            type: "instrument",
             icon: "📟",
-            state: "prêt",
-            width: 130,
-            height: 95,
-            measurementType: "ph",
-            precisionPH: 0.01
+            state: "Instrument",
+            volume: 0,
+            capacity: 0,
+            mass: 0,
+            density: null,
+            temperature: 25,
+            ph: 7,
+            color: "Noir",
+            formula: null,
+            molarMass: null,
+            description:
+                "Instrument de mesure du pH.",
+            measurementType: "ph"
         },
 
         {
-            id: "magneticStirrer",
-            name: "Agitateur magnétique",
-            shortName: "Agitateur",
+            id: "balance",
+            name: "Balance électronique",
             category: "instrument",
-            kind: "instrument",
-            icon: "🔄",
-            state: "arrêté",
-            width: 150,
-            height: 80,
-            measurementType: null
+            type: "instrument",
+            icon: "⚖️",
+            state: "Instrument",
+            volume: 0,
+            capacity: 0,
+            mass: 0,
+            density: null,
+            temperature: 25,
+            ph: null,
+            color: "Noir",
+            formula: null,
+            molarMass: null,
+            description:
+                "Balance électronique de précision.",
+            measurementType: "mass"
         },
 
         {
-            id: "pipette",
-            name: "Pipette graduée",
-            shortName: "Pipette",
+            id: "graduated-cylinder",
+            name: "Éprouvette graduée",
             category: "instrument",
-            kind: "instrument",
-            icon: "💉",
-            state: "prête",
-            width: 55,
-            height: 180,
-            measurementType: "volume",
-            precisionVolume: 0.1
+            type: "container",
+            icon: "🥛",
+            state: "Vide",
+            volume: 0,
+            capacity: 100,
+            mass: 0,
+            density: 1,
+            temperature: 25,
+            ph: null,
+            color: "Transparent",
+            formula: "SiO₂ / verre",
+            molarMass: null,
+            description:
+                "Éprouvette graduée de 100 mL.",
+            thermal: {
+                meltingPoint: 1400,
+                boilingPoint: 2200,
+                heatCapacity: 0.84
+            }
         },
 
-        /* ------------------------------------------------------------
+
+        /* ========================================================
            ÉQUIPEMENTS
-           ------------------------------------------------------------ */
+        ======================================================== */
 
         {
-            id: "hotPlate",
-            name: "Plaque chauffante",
-            shortName: "Chauffe",
+            id: "bunsen",
+            name: "Bec Bunsen",
             category: "equipment",
-            kind: "equipment",
+            type: "heater",
             icon: "🔥",
-            state: "arrêtée",
-            width: 155,
-            height: 80,
-            heater: true
+            state: "Éteint",
+            volume: 0,
+            capacity: 0,
+            mass: 0,
+            density: null,
+            temperature: 25,
+            ph: null,
+            color: "Métallique",
+            formula: null,
+            molarMass: null,
+            description:
+                "Source de chaleur de laboratoire.",
+            heatPower: 1
         },
 
         {
-            id: "support",
-            name: "Support universel",
-            shortName: "Support",
+            id: "hot-plate",
+            name: "Plaque chauffante",
             category: "equipment",
-            kind: "equipment",
-            icon: "🔩",
-            state: "stable",
-            width: 90,
-            height: 190
+            type: "heater",
+            icon: "♨️",
+            state: "Éteinte",
+            volume: 0,
+            capacity: 0,
+            mass: 0,
+            density: null,
+            temperature: 25,
+            ph: null,
+            color: "Noir",
+            formula: null,
+            molarMass: null,
+            description:
+                "Plaque chauffante de laboratoire.",
+            heatPower: 0.8
         },
 
         {
-            id: "clamp",
-            name: "Pince de laboratoire",
-            shortName: "Pince",
+            id: "stirrer",
+            name: "Agitateur magnétique",
             category: "equipment",
-            kind: "equipment",
-            icon: "🗜️",
-            state: "prête",
-            width: 100,
-            height: 75
-        },
-
-        {
-            id: "spatula",
-            name: "Spatule",
-            shortName: "Spatule",
-            category: "equipment",
-            kind: "equipment",
-            icon: "🥄",
-            state: "propre",
-            width: 115,
-            height: 45
+            type: "mixer",
+            icon: "🔄",
+            state: "Arrêté",
+            volume: 0,
+            capacity: 0,
+            mass: 0,
+            density: null,
+            temperature: 25,
+            ph: null,
+            color: "Noir",
+            formula: null,
+            molarMass: null,
+            description:
+                "Agitateur magnétique."
         }
+
     ];
 
-    /* ================================================================
-       INDEX RAPIDE
-       ================================================================ */
 
-    const MATERIAL_MAP = new Map(
-        MATERIALS.map(material => [material.id, material])
-    );
+    /* ============================================================
+       03 — BASE DES RÉACTIONS
+    ============================================================ */
 
-    /* ================================================================
-       POSITIONNEMENT
-       ================================================================ */
+    /*
+     * Une réaction n'est plus identifiée uniquement par deux IDs.
+     * Elle possède :
+     *
+     * reactants:
+     * [
+     *   { materialId, coefficient }
+     * ]
+     *
+     * products:
+     * [
+     *   { materialId, coefficient }
+     * ]
+     *
+     * Le moteur calcule ensuite :
+     * • moles disponibles
+     * • ratio stœchiométrique
+     * • réactif limitant
+     * • avancement
+     * • produits
+     */
 
-    function workspaceElement() {
-        return $("#workspaceObjects") ||
-            $("#chemistryCanvas") ||
-            $("#workspaceDropZone");
-    }
+    const REACTIONS = [
 
-    function getWorkspaceSize() {
-        const el = workspaceElement();
+        {
+            id: "neutralization-hcl-naoh",
 
-        return {
-            width: el?.clientWidth || 1000,
-            height: el?.clientHeight || 650
-        };
-    }
+            name:
+                "Neutralisation acide-base",
 
-    function nextPosition() {
-        const size = getWorkspaceSize();
+            equation:
+                "HCl + NaOH → NaCl + H₂O",
 
-        const index = state.objects.length;
+            reactants: [
+                {
+                    materialId: "hydrochloric-acid",
+                    coefficient: 1
+                },
+                {
+                    materialId: "sodium-hydroxide",
+                    coefficient: 1
+                }
+            ],
 
-        const column = index % 5;
-        const row = Math.floor(index / 5);
+            products: [
+                {
+                    materialId: "sodium-chloride",
+                    coefficient: 1
+                },
+                {
+                    materialId: "water",
+                    coefficient: 1
+                }
+            ],
 
-        return {
-            x: clamp(
-                60 + column * 165,
-                10,
-                Math.max(10, size.width - 150)
-            ),
-            y: clamp(
-                50 + row * 150,
-                10,
-                Math.max(10, size.height - 190)
-            )
-        };
-    }
+            type:
+                "neutralisation",
 
-    /* ================================================================
-       CRÉATION D'OBJETS
-       ================================================================ */
+            enthalpyKJPerMol:
+                -57.3,
 
-    function createComponentsFromMaterial(material) {
+            gas:
+                null,
 
-        const components = [];
-
-        if (material.kind === "reagent" &&
-            material.phase === "liquid") {
-
-            components.push({
-                id: material.id,
-                name: material.name,
-                formula: material.formula,
-                moles: 0,
-                massG: 0,
-                volumeMl: 0,
-                concentrationM: Number(material.molarity || 0),
-                density: Number(material.density || 1),
-                pH: Number(material.pH ?? 7),
-                phase: "liquid",
-                color: material.color,
-                role: material.role || "solute",
-                strongAcid: !!material.strongAcid,
-                strongBase: !!material.strongBase,
-                acidEquivalent: Number(material.acidEquivalent || 0),
-                baseEquivalent: Number(material.baseEquivalent || 0),
-                indicator: !!material.indicator,
-                phenolphthalein: !!material.phenolphthalein
-            });
-
-        }
-
-        if (material.kind === "solid" ||
-            (material.kind === "reagent" && material.phase === "solid")) {
-
-            const mass = Number(material.defaultMassG || 0);
-            const molarMass = Number(material.molarMass || 1);
-
-            components.push({
-                id: material.id,
-                name: material.name,
-                formula: material.formula,
-                moles: mass / molarMass,
-                massG: mass,
-                volumeMl: 0,
-                concentrationM: 0,
-                density: Number(material.density || 1),
-                pH: Number(material.pH ?? 7),
-                phase: "solid",
-                color: material.color,
-                role: "solid",
-                metal: !!material.metal
-            });
-        }
-
-        return components;
-    }
-
-    function createObject(materialId, position = null) {
-
-        const material = MATERIAL_MAP.get(materialId);
-
-        if (!material) return null;
-
-        const pos = position || nextPosition();
-
-        const isContainerMaterial =
-            material.kind === "container";
-
-        const initialVolume =
-            isContainerMaterial
-                ? 0
-                : Number(material.defaultVolumeMl || 0);
-
-        const initialMass =
-            isContainerMaterial
-                ? Number(material.emptyMassG || 0)
-                : Number(material.defaultMassG || 0);
-
-        const object = {
-            id: uid(material.id),
-
-            materialId: material.id,
-
-            name: material.name,
-            shortName: material.shortName || material.name,
-            formula: material.formula || "",
-
-            kind: material.kind,
-            category: material.category,
-
-            icon: material.icon || "🧪",
-
-            x: pos.x,
-            y: pos.y,
-
-            width: material.width || 105,
-            height: material.height || 135,
-
-            capacityMl: Number(material.capacityMl || 0),
-
-            volumeMl: initialVolume,
-            massG: initialMass,
-
-            emptyMassG: Number(material.emptyMassG || 0),
-
-            density: Number(material.density || 0),
-
-            temperatureC:
-                Number(material.temperatureC ?? DEFAULT_TEMPERATURE),
-
-            pH:
-                Number(material.pH ?? 7),
+            precipitate:
+                null,
 
             color:
-                material.color || "#dbeafe",
+                "Incolore",
+
+            priority:
+                10
+        },
+
+
+        {
+            id: "precipitation-cuso4-naoh",
+
+            name:
+                "Précipitation de l'hydroxyde de cuivre(II)",
+
+            equation:
+                "CuSO₄ + 2 NaOH → Cu(OH)₂↓ + Na₂SO₄",
+
+            reactants: [
+                {
+                    materialId: "copper-sulfate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "sodium-hydroxide",
+                    coefficient: 2
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "copper-hydroxide",
+                    coefficient: 1
+                },
+                {
+                    materialId: "sodium-sulfate",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "precipitation",
+
+            enthalpyKJPerMol:
+                -20,
+
+            gas:
+                null,
+
+            precipitate:
+                "Cu(OH)₂",
+
+            color:
+                "Bleu",
+
+            priority:
+                20
+        },
+
+
+        {
+            id: "displacement-fe-cuso4",
+
+            name:
+                "Déplacement du cuivre par le fer",
+
+            equation:
+                "Fe + CuSO₄ → FeSO₄ + Cu",
+
+            reactants: [
+                {
+                    materialId: "iron",
+                    coefficient: 1
+                },
+                {
+                    materialId: "copper-sulfate",
+                    coefficient: 1
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "iron-sulfate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "copper",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "redox",
+
+            enthalpyKJPerMol:
+                -20,
+
+            gas:
+                null,
+
+            precipitate:
+                "Cu",
+
+            color:
+                "Vert pâle / cuivre métallique",
+
+            priority:
+                15
+        }
+
+    ];
+
+
+    /*
+     * Produits supplémentaires nécessaires aux réactions.
+     * Ils ne sont pas forcément affichés comme cartes de bibliothèque.
+     */
+
+    const GENERATED_SUBSTANCES = {
+
+        "copper-hydroxide": {
+            id: "copper-hydroxide",
+            name: "Hydroxyde de cuivre(II)",
+            category: "product",
+            type: "solid",
+            icon: "🔷",
+            state: "Précipité",
+            density: 3.37,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: null,
+            color: "Bleu",
+            formula: "Cu(OH)₂",
+            molarMass: 97.561,
+            description:
+                "Précipité bleu formé lors de la réaction CuSO₄/NaOH."
+        },
+
+        "sodium-sulfate": {
+            id: "sodium-sulfate",
+            name: "Sulfate de sodium",
+            category: "product",
+            type: "solution",
+            icon: "🧂",
+            state: "Dissous",
+            density: 1,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: 7,
+            color: "Incolore",
+            formula: "Na₂SO₄",
+            molarMass: 142.042,
+            description:
+                "Produit dissous de la réaction de précipitation."
+        },
+
+        "iron-sulfate": {
+            id: "iron-sulfate",
+            name: "Sulfate de fer(II)",
+            category: "product",
+            type: "solution",
+            icon: "🟢",
+            state: "Dissous",
+            density: 1,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: 4,
+            color: "Vert pâle",
+            formula: "FeSO₄",
+            molarMass: 151.908,
+            description:
+                "Solution de sulfate de fer(II)."
+        }
+
+    };
+
+
+    /* ============================================================
+       04 — ÉTAT DE LA SIMULATION
+    ============================================================ */
+
+    const state = {
+
+        engineVersion:
+            CHEM_CONFIG.engineVersion,
+
+        sessionName:
+            CHEM_CONFIG.defaultSessionName,
+
+        selectedMaterialId:
+            null,
+
+        activeTool:
+            "select",
+
+        activeCategory:
+            "all",
+
+        search:
+            "",
+
+        zoom:
+            1,
+
+        nextObjectNumber:
+            1,
+
+        objects:
+            [],
+
+        observations:
+            [],
+
+        temperature:
+            CHEM_CONFIG.defaultTemperature,
+
+        totalEnergy:
+            0,
+
+        reaction: {
+
+            active:
+                false,
+
+            status:
+                "Aucune",
 
             phase:
-                material.phase ||
-                (isContainerMaterial ? "empty" : "liquid"),
+                "Stable",
 
-            state:
-                material.state || "stable",
+            gas:
+                "Aucun",
 
-            molarity:
-                Number(material.molarity || 0),
+            precipitate:
+                "Aucun",
 
-            components:
-                createComponentsFromMaterial(material),
+            color:
+                "Inchangée",
 
-            reactionState: {
-                active: false,
-                gas: false,
-                precipitate: false,
-                bubbling: false,
-                phase: "stable",
-                color: material.color || "#dbeafe",
-                description: ""
-            },
+            equation:
+                "",
 
-            properties: {
-                strongAcid: !!material.strongAcid,
-                strongBase: !!material.strongBase,
-                metal: !!material.metal,
-                indicator: !!material.indicator,
-                phenolphthalein: !!material.phenolphthalein,
-                aqueousSalt: !!material.aqueousSalt,
-                solvent: material.role === "solvent"
-            },
+            limitingReagent:
+                null,
 
-            precisionVolume:
-                Number(material.precisionVolume || 0.5),
+            extentMol:
+                0
+        },
 
-            precisionMass:
-                Number(material.precisionMass || 0.01),
+        drag: {
 
-            precisionTemperature:
-                Number(material.precisionTemperature || 0.1),
+            active:
+                false,
 
-            precisionPH:
-                Number(material.precisionPH || 0.01),
+            objectId:
+                null,
 
-            heater:
-                !!material.heater,
+            pointerId:
+                null,
 
-            measurementType:
-                material.measurementType || null,
+            offsetX:
+                0,
 
-            createdAt: Date.now()
-        };
+            offsetY:
+                0,
 
-        if (object.kind === "container") {
-            object.volumeMl = 0;
-            object.massG = object.emptyMassG;
-            object.phase = "empty";
-            object.components = [];
+            originalX:
+                0,
+
+            originalY:
+                0
         }
 
-        return object;
+    };
+
+
+    /* ============================================================
+       05 — RÉFÉRENCES DOM
+    ============================================================ */
+
+    const $ = (id) =>
+        document.getElementById(id);
+
+    const app =
+        $("chemApp");
+
+    const materialsPanel =
+        $("materialsPanel");
+
+    const materialsLibrary =
+        $("materialsLibrary");
+
+    const materialSearch =
+        $("materialSearch");
+
+    const materialCategories =
+        $("materialCategories");
+
+    const inventoryList =
+        $("inventoryList");
+
+    const chemistryCanvas =
+        $("chemistryCanvas");
+
+    const workspaceObjects =
+        $("workspaceObjects");
+
+    const workspaceDropZone =
+        $("workspaceDropZone");
+
+    const sessionName =
+        $("sessionName");
+
+    const selectedObjectType =
+        $("selectedObjectType");
+
+    const objectInspector =
+        $("objectInspector");
+
+    const materialProperties =
+        $("materialProperties");
+
+    const compositionSection =
+        $("compositionSection");
+
+    const measurementSection =
+        $("measurementSection");
+
+    const reactionSection =
+        $("reactionSection");
+
+    const objectActions =
+        $("objectActions");
+
+    const observationLog =
+        $("observationLog");
+
+
+    /* ============================================================
+       06 — UTILITAIRES
+    ============================================================ */
+
+    function clamp(
+        value,
+        min,
+        max
+    ) {
+
+        return Math.min(
+            Math.max(
+                value,
+                min
+            ),
+            max
+        );
+
     }
 
-    /* ================================================================
-       AJOUT AU LABORATOIRE
-       ================================================================ */
 
-    function addMaterial(materialId, position = null) {
+    function round(
+        value,
+        decimals = CHEM_CONFIG.precision
+    ) {
 
-        const object = createObject(materialId, position);
+        const factor =
+            Math.pow(
+                10,
+                decimals
+            );
 
-        if (!object) {
-            toast("Matériau introuvable.", "error");
+        return Math.round(
+            Number(value) * factor
+        ) / factor;
+
+    }
+
+
+    function escapeHTML(value) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    function formatNumber(
+        value,
+        decimals = 1
+    ) {
+
+        if (
+            !Number.isFinite(
+                Number(value)
+            )
+        ) {
+
+            return "—";
+
+        }
+
+
+        return Number(value)
+            .toFixed(
+                decimals
+            );
+
+    }
+
+
+    function formatScientific(
+        value
+    ) {
+
+        if (
+            !Number.isFinite(
+                Number(value)
+            )
+        ) {
+
+            return "—";
+
+        }
+
+
+        return Number(value)
+            .toExponential(3);
+
+    }
+
+
+    function getMaterial(
+        materialId
+    ) {
+
+        return MATERIALS.find(
+            material =>
+                material.id ===
+                materialId
+        ) ||
+        GENERATED_SUBSTANCES[
+            materialId
+        ] ||
+        null;
+
+    }
+
+
+    function getObject(
+        objectId
+    ) {
+
+        return state.objects.find(
+            object =>
+                object.id ===
+                objectId
+        ) || null;
+
+    }
+
+
+    function getSelectedObject() {
+
+        if (
+            !state.selectedMaterialId
+        ) {
+
             return null;
+
         }
 
-        state.objects.push(object);
 
-        selectObject(object.id);
-
-        logObservation(
-            `${object.name} a été ajouté au laboratoire.`
+        return getObject(
+            state.selectedMaterialId
         );
 
-        renderAll();
-
-        toast(
-            `${object.name} ajouté au laboratoire.`,
-            "success"
-        );
-
-        return object;
     }
 
-    /* ================================================================
-       BIBLIOTHÈQUE
-       ================================================================ */
 
-    function filteredMaterials() {
+    function isContainer(
+        object
+    ) {
 
-        const query =
-            String(state.search || "")
+        return !!object &&
+            (
+                object.type ===
+                    "container" ||
+                object.category ===
+                    "glassware" ||
+                object.materialId ===
+                    "graduated-cylinder"
+            );
+
+    }
+
+
+    function isLiquidObject(
+        object
+    ) {
+
+        return !!object &&
+            (
+                object.type ===
+                    "liquid" ||
+                object.type ===
+                    "solution"
+            );
+
+    }
+
+
+    function isSolidObject(
+        object
+    ) {
+
+        return !!object &&
+            object.type ===
+                "solid";
+
+    }
+
+
+    function isInstrument(
+        object
+    ) {
+
+        return !!object &&
+            object.type ===
+                "instrument";
+
+    }
+
+
+    function announce(
+        message
+    ) {
+
+        const region =
+            $("chemLiveRegion");
+
+
+        if (region) {
+
+            region.textContent =
+                message;
+
+        }
+
+    }
+
+
+    function getCanvasScale() {
+
+        return Number(
+            state.zoom
+        ) || 1;
+
+    }
+
+
+    /* ============================================================
+       07 — NORMALISATION SCIENTIFIQUE
+    ============================================================ */
+
+    function getMaterialThermalData(
+        materialId
+    ) {
+
+        const material =
+            getMaterial(
+                materialId
+            );
+
+
+        return material?.thermal ||
+            {
+                meltingPoint: null,
+                boilingPoint: null,
+                heatCapacity: 4.18
+            };
+
+    }
+
+
+    function calculateMolesFromMass(
+        massG,
+        molarMass
+    ) {
+
+        if (
+            !Number.isFinite(
+                Number(massG)
+            ) ||
+            !Number.isFinite(
+                Number(molarMass)
+            ) ||
+            Number(molarMass) <= 0
+        ) {
+
+            return 0;
+
+        }
+
+
+        return Math.max(
+            0,
+            Number(massG) /
+                Number(molarMass)
+        );
+
+    }
+
+
+    function calculateMassFromMoles(
+        moles,
+        molarMass
+    ) {
+
+        if (
+            !Number.isFinite(
+                Number(moles)
+            ) ||
+            !Number.isFinite(
+                Number(molarMass)
+            )
+        ) {
+
+            return 0;
+
+        }
+
+
+        return Math.max(
+            0,
+            Number(moles) *
+                Number(molarMass)
+        );
+
+    }
+
+
+    function calculateMolarity(
+        moles,
+        volumeMl
+    ) {
+
+        const volumeL =
+            Number(volumeMl) /
+            1000;
+
+
+        if (
+            volumeL <= 0
+        ) {
+
+            return 0;
+
+        }
+
+
+        return Math.max(
+            0,
+            Number(moles) /
+                volumeL
+        );
+
+    }
+
+
+    function getComponentById(
+        object,
+        materialId
+    ) {
+
+        if (
+            !object ||
+            !Array.isArray(
+                object.composition
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        return object.composition.find(
+            component =>
+                component.materialId ===
+                materialId
+        ) || null;
+
+    }
+
+
+    function ensureComposition(
+        object
+    ) {
+
+        if (
+            !Array.isArray(
+                object.composition
+            )
+        ) {
+
+            object.composition = [];
+
+        }
+
+
+        return object.composition;
+
+    }
+
+
+    function getCompositionMoles(
+        component
+    ) {
+
+        if (
+            Number.isFinite(
+                Number(component.moles)
+            )
+        ) {
+
+            return Math.max(
+                0,
+                Number(component.moles)
+            );
+
+        }
+
+
+        const material =
+            getMaterial(
+                component.materialId
+            );
+
+
+        if (
+            !material
+        ) {
+
+            return 0;
+
+        }
+
+
+        return calculateMolesFromMass(
+            component.mass,
+            material.molarMass
+        );
+
+    }
+
+
+    function getObjectTotalCompositionMass(
+        object
+    ) {
+
+        return ensureComposition(
+            object
+        ).reduce(
+            (
+                total,
+                component
+            ) =>
+                total +
+                (
+                    Number(
+                        component.mass
+                    ) || 0
+                ),
+            0
+        );
+
+    }
+
+
+    function calculateObjectMass(
+        object
+    ) {
+
+        if (
+            isContainer(
+                object
+            )
+        ) {
+
+            return getObjectTotalCompositionMass(
+                object
+            );
+
+        }
+
+
+        if (
+            Number.isFinite(
+                Number(object.mass)
+            )
+        ) {
+
+            return Math.max(
+                0,
+                Number(object.mass)
+            );
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    function calculateObjectVolume(
+        object
+    ) {
+
+        if (
+            isContainer(
+                object
+            )
+        ) {
+
+            /*
+             * Approximation additive des volumes liquides.
+             */
+            return ensureComposition(
+                object
+            ).reduce(
+                (
+                    total,
+                    component
+                ) =>
+                    total +
+                    (
+                        Number(
+                            component.volumeMl
+                        ) || 0
+                    ),
+                0
+            );
+
+        }
+
+
+        return Math.max(
+            0,
+            Number(object.volume) || 0
+        );
+
+    }
+
+
+    function calculateEffectiveDensity(
+        object
+    ) {
+
+        const volume =
+            calculateObjectVolume(
+                object
+            );
+
+        const mass =
+            calculateObjectMass(
+                object
+            );
+
+
+        if (
+            volume <= 0
+        ) {
+
+            return Number.isFinite(
+                Number(object.density)
+            )
+                ? Number(object.density)
+                : null;
+
+        }
+
+
+        return mass /
+            volume;
+
+    }
+
+
+    function recalculateContainer(
+        object
+    ) {
+
+        if (
+            !object ||
+            !isContainer(
+                object
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        ensureComposition(
+            object
+        );
+
+
+        object.volume =
+            calculateObjectVolume(
+                object
+            );
+
+
+        object.mass =
+            calculateObjectMass(
+                object
+            );
+
+
+        object.density =
+            calculateEffectiveDensity(
+                object
+            );
+
+
+        /*
+         * Température pondérée approximative
+         * par masse.
+         */
+        const totalMass =
+            object.mass;
+
+
+        if (
+            totalMass > 0
+        ) {
+
+            let weighted =
+                0;
+
+
+            object.composition
+                .forEach(
+                    component => {
+
+                        const componentMass =
+                            Number(
+                                component.mass
+                            ) || 0;
+
+                        const componentTemp =
+                            Number(
+                                component.temperature
+                            );
+
+                        if (
+                            Number.isFinite(
+                                componentTemp
+                            )
+                        ) {
+
+                            weighted +=
+                                componentMass *
+                                componentTemp;
+
+                        }
+
+                    }
+                );
+
+
+            if (
+                weighted > 0
+            ) {
+
+                object.temperature =
+                    weighted /
+                    totalMass;
+
+            }
+
+        }
+
+
+        /*
+         * Couleur dominante.
+         */
+        updateObjectAppearance(
+            object
+        );
+
+
+        /*
+         * pH dynamique.
+         */
+        object.ph =
+            calculateObjectPH(
+                object
+            );
+
+
+        /*
+         * Etat.
+         */
+        if (
+            object.volume <=
+            CHEM_CONFIG.reactionTolerance
+        ) {
+
+            object.state =
+                "Vide";
+
+        } else {
+
+            object.state =
+                object.composition.length >
+                    1
+                    ? "Solution / mélange"
+                    : "Liquide";
+
+        }
+
+    }
+
+
+    function updateObjectAppearance(
+        object
+    ) {
+
+        if (
+            !object ||
+            !object.composition ||
+            !object.composition.length
+        ) {
+
+            return;
+
+        }
+
+
+        const colors =
+            object.composition
+                .map(
+                    component => {
+
+                        const material =
+                            getMaterial(
+                                component.materialId
+                            );
+
+                        return material?.color;
+
+                    }
+                )
+                .filter(Boolean);
+
+
+        if (
+            colors.length === 1
+        ) {
+
+            object.color =
+                colors[0];
+
+        } else if (
+            colors.length > 1
+        ) {
+
+            const unique =
+                [...new Set(colors)];
+
+            object.color =
+                unique.join(" / ");
+
+        }
+
+
+        /*
+         * Les réactions peuvent imposer une couleur
+         * particulière.
+         */
+        if (
+            object.reaction?.color &&
+            object.reaction.color !==
+                "Inchangée"
+        ) {
+
+            object.color =
+                object.reaction.color;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       08 — BIBLIOTHÈQUE
+    ============================================================ */
+
+    function renderMaterialsLibrary() {
+
+        if (
+            !materialsLibrary
+        ) {
+
+            return;
+
+        }
+
+
+        const search =
+            state.search
                 .trim()
                 .toLowerCase();
 
-        return MATERIALS.filter(material => {
 
-            const categoryOK =
-                state.category === "all" ||
-                material.category === state.category;
+        const filtered =
+            MATERIALS.filter(
+                material => {
 
-            if (!categoryOK) return false;
+                    const categoryMatch =
+                        state.activeCategory ===
+                            "all" ||
+                        material.category ===
+                            state.activeCategory;
 
-            if (!query) return true;
 
-            return [
-                material.name,
-                material.shortName,
-                material.formula,
-                material.category
-            ]
-                .join(" ")
-                .toLowerCase()
-                .includes(query);
-        });
-    }
+                    const searchMatch =
+                        !search ||
+                        material.name
+                            .toLowerCase()
+                            .includes(
+                                search
+                            ) ||
+                        material.description
+                            .toLowerCase()
+                            .includes(
+                                search
+                            ) ||
+                        (
+                            material.formula ||
+                            ""
+                        )
+                            .toLowerCase()
+                            .includes(
+                                search
+                            );
 
-    function renderLibrary() {
 
-        const library = $("#materialsLibrary");
+                    return (
+                        categoryMatch &&
+                        searchMatch
+                    );
 
-        if (!library) return;
+                }
+            );
 
-        const list = filteredMaterials();
 
-        const count = $("#materialCount");
+        if (
+            $("materialCount")
+        ) {
 
-        if (count) {
-            count.textContent = String(list.length);
+            $("materialCount")
+                .textContent =
+                filtered.length;
+
         }
 
-        if (!list.length) {
-            library.innerHTML = `
+
+        if (
+            !filtered.length
+        ) {
+
+            materialsLibrary.innerHTML = `
                 <div class="chem-empty-library">
-                    Aucun élément trouvé.
-                </div>
-            `;
-            return;
-        }
-
-        library.innerHTML = list.map(material => {
-
-            const description =
-                material.formula
-                    ? `${material.formula} · ${material.state || ""}`
-                    : material.state || "";
-
-            return `
-                <button
-                    type="button"
-                    class="chem-material-card"
-                    data-material-id="${escapeHTML(material.id)}"
-                    title="Ajouter ${escapeHTML(material.name)}"
-                >
-                    <span class="chem-material-icon">
-                        ${escapeHTML(material.icon || "🧪")}
-                    </span>
-
-                    <span class="chem-material-info">
-                        <strong>
-                            ${escapeHTML(material.name)}
-                        </strong>
-
-                        <small>
-                            ${escapeHTML(description)}
-                        </small>
-                    </span>
-
-                    <span class="chem-material-add">
-                        +
-                    </span>
-                </button>
-            `;
-        }).join("");
-    }
-
-    /* ================================================================
-       INVENTAIRE
-       ================================================================ */
-
-    function renderInventory() {
-
-        const list = $("#inventoryList");
-
-        if (!list) return;
-
-        const count = $("#inventoryCount");
-
-        if (count) {
-            count.textContent = String(state.objects.length);
-        }
-
-        if (!state.objects.length) {
-
-            list.innerHTML = `
-                <div class="chem-empty-inventory">
-                    Aucun objet dans le laboratoire.
+                    <div>⚗</div>
+                    <strong>Aucun matériau trouvé</strong>
+                    <span>Modifiez la recherche ou la catégorie.</span>
                 </div>
             `;
 
             return;
+
         }
 
-        list.innerHTML = state.objects.map(object => {
 
-            const selected =
-                object.id === state.selectedId
-                    ? " selected"
-                    : "";
+        materialsLibrary.innerHTML =
+            filtered.map(
+                material => `
 
-            return `
+            <article
+                class="chem-material-card"
+                data-material-id="${escapeHTML(material.id)}"
+                tabindex="0"
+                role="button"
+                aria-label="Ajouter ${escapeHTML(material.name)}"
+            >
+
+                <div class="chem-material-icon">
+                    ${material.icon}
+                </div>
+
+                <div class="chem-material-info">
+
+                    <strong>
+                        ${escapeHTML(material.name)}
+                    </strong>
+
+                    <span>
+                        ${escapeHTML(material.description)}
+                    </span>
+
+                    ${
+                        material.formula
+                            ? `
+                                <small>
+                                    ${escapeHTML(material.formula)}
+                                    ${
+                                        Number.isFinite(
+                                            material.molarMass
+                                        )
+                                            ? ` · M = ${formatNumber(material.molarMass, 3)} g/mol`
+                                            : ""
+                                    }
+                                </small>
+                              `
+                            : ""
+                    }
+
+                </div>
+
                 <button
                     type="button"
-                    class="chem-inventory-item${selected}"
-                    data-object-id="${escapeHTML(object.id)}"
+                    class="chem-material-add"
+                    data-add-material="${escapeHTML(material.id)}"
+                    title="Ajouter"
+                    aria-label="Ajouter ${escapeHTML(material.name)}"
                 >
-                    <span>
-                        ${escapeHTML(object.icon || "🧪")}
-                    </span>
-
-                    <span>
-                        <strong>
-                            ${escapeHTML(object.name)}
-                        </strong>
-
-                        <small>
-                            ${escapeHTML(
-                                object.formula ||
-                                object.state ||
-                                object.category
-                            )}
-                        </small>
-                    </span>
+                    +
                 </button>
-            `;
-        }).join("");
+
+            </article>
+
+        `
+            ).join("");
+
     }
 
-    /* ================================================================
-       RENDU DU LABORATOIRE
-       ================================================================ */
+
+    function renderCategories() {
+
+        if (
+            !materialCategories
+        ) {
+
+            return;
+
+        }
+
+
+        materialCategories
+            .querySelectorAll(
+                ".category-button"
+            )
+            .forEach(
+                button => {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.category ===
+                            state.activeCategory
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ============================================================
+       09 — COMPOSITION DES OBJETS
+    ============================================================ */
+
+    function createPureComposition(
+        material,
+        volumeOverride = null,
+        massOverride = null
+    ) {
+
+        const volume =
+            Number.isFinite(
+                Number(volumeOverride)
+            )
+                ? Number(volumeOverride)
+                : Number(
+                    material.volume
+                ) || 0;
+
+
+        let mass =
+            Number.isFinite(
+                Number(massOverride)
+            )
+                ? Number(massOverride)
+                : Number(
+                    material.mass
+                ) || 0;
+
+
+        if (
+            mass <= 0 &&
+            volume > 0 &&
+            Number.isFinite(
+                Number(material.density)
+            )
+        ) {
+
+            mass =
+                volume *
+                Number(
+                    material.density
+                );
+
+        }
+
+
+        let moles =
+            calculateMolesFromMass(
+                mass,
+                material.molarMass
+            );
+
+
+        if (
+            Number.isFinite(
+                Number(material.defaultMolarity)
+            ) &&
+            volume > 0
+        ) {
+
+            moles =
+                Number(
+                    material.defaultMolarity
+                ) *
+                (
+                    volume / 1000
+                );
+
+        }
+
+
+        return {
+
+            materialId:
+                material.id,
+
+            name:
+                material.name,
+
+            formula:
+                material.formula ||
+                "",
+
+            amount:
+                volume,
+
+            volumeMl:
+                volume,
+
+            mass:
+                mass,
+
+            moles:
+                moles,
+
+            molarity:
+                volume > 0
+                    ? calculateMolarity(
+                        moles,
+                        volume
+                    )
+                    : null,
+
+            temperature:
+                Number(
+                    material.temperature
+                ) || 25,
+
+            phase:
+                material.type ===
+                    "solid"
+                    ? "solid"
+                    : "liquid"
+
+        };
+
+    }
+
+
+    /* ============================================================
+       10 — CRÉATION DES OBJETS
+    ============================================================ */
+
+    function createLabObject(
+        materialId,
+        x = null,
+        y = null
+    ) {
+
+        const material =
+            getMaterial(
+                materialId
+            );
+
+
+        if (
+            !material
+        ) {
+
+            return null;
+
+        }
+
+
+        const number =
+            state.nextObjectNumber++;
+
+
+        const isContainerMaterial =
+            material.type ===
+                "container";
+
+
+        const isLiquid =
+            material.type ===
+                "liquid" ||
+            material.type ===
+                "solution";
+
+
+        const isSolid =
+            material.type ===
+                "solid";
+
+
+        const object = {
+
+            id:
+                `chem-object-${Date.now()}-${number}`,
+
+            materialId:
+                material.id,
+
+            name:
+                material.name,
+
+            category:
+                material.category,
+
+            type:
+                material.type,
+
+            icon:
+                material.icon,
+
+            state:
+                material.state,
+
+            volume:
+                isContainerMaterial
+                    ? 0
+                    : (
+                        Number(
+                            material.volume
+                        ) || 0
+                    ),
+
+            capacity:
+                Number(
+                    material.capacity
+                ) || 0,
+
+            mass:
+                isContainerMaterial
+                    ? 0
+                    : (
+                        Number(
+                            material.mass
+                        ) || 0
+                    ),
+
+            density:
+                material.density,
+
+            temperature:
+                Number(
+                    material.temperature
+                ) || 25,
+
+            ph:
+                material.ph,
+
+            color:
+                material.color,
+
+            description:
+                material.description,
+
+            formula:
+                material.formula ||
+                null,
+
+            molarMass:
+                material.molarMass ||
+                null,
+
+            mixed:
+                false,
+
+            heated:
+                false,
+
+            selected:
+                false,
+
+            interactionLocked:
+                false,
+
+            reaction: {
+
+                active:
+                    false,
+
+                status:
+                    "Aucune",
+
+                phase:
+                    "Stable",
+
+                gas:
+                    "Aucun",
+
+                precipitate:
+                    "Aucun",
+
+                color:
+                    "Inchangée",
+
+                equation:
+                    "",
+
+                limitingReagent:
+                    null,
+
+                extentMol:
+                    0
+            },
+
+            composition:
+                [],
+
+            products:
+                [],
+
+            x:
+                Number.isFinite(x)
+                    ? x
+                    : 120 +
+                        (
+                            number *
+                            43
+                        ) %
+                        600,
+
+            y:
+                Number.isFinite(y)
+                    ? y
+                    : 100 +
+                        (
+                            number *
+                            31
+                        ) %
+                        400,
+
+            width:
+                material.type ===
+                    "instrument"
+                    ? 130
+                    : 110,
+
+            height:
+                material.type ===
+                    "instrument"
+                    ? 82
+                    : 115
+
+        };
+
+
+        if (
+            isLiquid ||
+            isSolid
+        ) {
+
+            object.composition =
+                [
+                    createPureComposition(
+                        material
+                    )
+                ];
+
+        }
+
+
+        if (
+            isContainerMaterial
+        ) {
+
+            object.composition =
+                [];
+
+        }
+
+
+        state.objects.push(
+            object
+        );
+
+
+        selectObject(
+            object.id
+        );
+
+
+        renderWorkspace();
+
+        updateAllUI();
+
+
+        addObservation(
+            `${material.name} ajouté au laboratoire.`
+        );
+
+
+        announce(
+            `${material.name} ajouté au laboratoire.`
+        );
+
+
+        saveState(false);
+
+
+        return object;
+
+    }
+
+
+    /* ============================================================
+       11 — RENDU DU WORKSPACE
+    ============================================================ */
 
     function renderWorkspace() {
 
-        const workspace =
-            $("#workspaceObjects") ||
-            $("#chemistryCanvas");
+        if (
+            !workspaceObjects
+        ) {
 
-        if (!workspace) return;
+            return;
 
-        workspace.innerHTML = state.objects.map(renderObjectHTML).join("");
+        }
 
-        bindWorkspaceObjects();
 
-        updateWorkspaceVisuals();
-    }
+        workspaceObjects.innerHTML =
+            "";
 
-    function renderObjectHTML(object) {
 
-        const selected =
-            object.id === state.selectedId
-                ? " selected"
-                : "";
+        state.objects.forEach(
+            object => {
 
-        const hasLiquid =
-            Number(object.volumeMl || 0) > 0;
+                const element =
+                    document.createElement(
+                        "div"
+                    );
 
-        const fill =
-            object.kind === "container"
-                ? liquidFillPercentage(object)
-                : 0;
 
-        const color =
-            object.color || "#dbeafe";
+                element.className =
+                    "chem-object";
 
-        const reaction =
-            object.reactionState || {};
 
-        const classes = [
-            "chem-object",
-            `chem-kind-${object.kind}`,
-            `chem-category-${object.category}`,
-            selected,
+                element.dataset.objectId =
+                    object.id;
 
-            hasLiquid ? "has-liquid" : "",
-            reaction.active ? "reaction-active" : "",
-            reaction.gas ? "is-bubbling" : "",
-            reaction.precipitate ? "has-precipitate" : "",
-            object.heating ? "is-heating" : ""
-        ]
-            .filter(Boolean)
-            .join(" ");
 
-        const liquidHTML =
-            hasLiquid
-                ? `
-                    <div
-                        class="object-liquid"
-                        style="
-                            height:${fill}%;
-                            background:
-                                linear-gradient(
-                                    to top,
-                                    ${hexToRgba(color, 0.82)},
-                                    ${hexToRgba(color, 0.48)}
-                                );
-                        "
-                    ></div>
-                `
-                : "";
+                element.dataset.materialId =
+                    object.materialId;
 
-        const precipitateHTML =
-            reaction.precipitate
-                ? `
-                    <div class="object-precipitate"></div>
-                `
-                : "";
 
-        const gasHTML =
-            reaction.gas
-                ? `
-                    <div class="object-bubbles">
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                    </div>
-                `
-                : "";
+                element.tabIndex =
+                    0;
 
-        const label =
-            object.formula
-                ? `${object.shortName} (${object.formula})`
-                : object.shortName;
 
-        return `
-            <div
-                class="${classes}"
-                data-object-id="${escapeHTML(object.id)}"
-                style="
-                    left:${round(object.x, 1)}px;
-                    top:${round(object.y, 1)}px;
-                    width:${round(object.width, 1)}px;
-                    height:${round(object.height, 1)}px;
-                "
-                tabindex="0"
-                role="button"
-                aria-label="${escapeHTML(object.name)}"
-            >
+                if (
+                    object.selected
+                ) {
 
-                <div class="object-shadow"></div>
+                    element.classList.add(
+                        "selected"
+                    );
 
-                <div class="object-body">
-
-                    <div class="object-liquid-wrap">
-                        ${liquidHTML}
-                        ${precipitateHTML}
-                        ${gasHTML}
-                    </div>
-
-                    <div class="object-symbol">
-                        ${escapeHTML(object.icon || "🧪")}
-                    </div>
-
-                    <div class="object-label">
-                        ${escapeHTML(label)}
-                    </div>
-
-                    <div class="object-volume">
-                        ${
-                            hasLiquid
-                                ? `${round(object.volumeMl, 1)} mL`
-                                : ""
-                        }
-                    </div>
-
-                    <div class="object-state">
-                        ${escapeHTML(object.state || "")}
-                    </div>
-
-                </div>
-
-                ${
-                    object.heating
-                        ? `<div class="object-heat-wave"></div>`
-                        : ""
                 }
 
-            </div>
-        `;
-    }
 
-    function liquidFillPercentage(object) {
+                if (
+                    object.heated
+                ) {
 
-        if (!object.capacityMl) {
+                    element.classList.add(
+                        "heated"
+                    );
 
-            if (object.volumeMl <= 0) {
-                return 0;
+                }
+
+
+                if (
+                    object.mixed
+                ) {
+
+                    element.classList.add(
+                        "mixed"
+                    );
+
+                }
+
+
+                if (
+                    object.reaction?.active
+                ) {
+
+                    element.classList.add(
+                        "reacting"
+                    );
+
+                }
+
+
+                element.style.left =
+                    `${object.x}px`;
+
+
+                element.style.top =
+                    `${object.y}px`;
+
+
+                element.style.width =
+                    `${object.width}px`;
+
+
+                element.style.minHeight =
+                    `${object.height}px`;
+
+
+                const quantity =
+                    calculateObjectVolume(
+                        object
+                    );
+
+
+                const mass =
+                    calculateObjectMass(
+                        object
+                    );
+
+
+                element.innerHTML = `
+
+                    <div class="chem-object-glow"></div>
+
+                    <div class="chem-object-icon">
+                        ${object.icon}
+                    </div>
+
+                    <div class="chem-object-name">
+                        ${escapeHTML(object.name)}
+                    </div>
+
+                    <div class="chem-object-state">
+                        ${escapeHTML(object.state)}
+                    </div>
+
+                    ${
+                        quantity > 0
+                            ? `
+                                <div class="chem-object-quantity">
+                                    ${formatNumber(quantity)} mL
+                                </div>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        mass > 0 &&
+                        isSolidObject(object)
+                            ? `
+                                <div class="chem-object-quantity">
+                                    ${formatNumber(mass)} g
+                                </div>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        object.reaction?.active
+                            ? `
+                                <div class="chem-object-heat">
+                                    ⚗
+                                </div>
+                              `
+                            : ""
+                    }
+
+                    ${
+                        object.heated
+                            ? `
+                                <div class="chem-object-heat">
+                                    ♨
+                                </div>
+                              `
+                            : ""
+                    }
+
+                    <div class="chem-object-drag-handle">
+                        ⠿
+                    </div>
+
+                `;
+
+
+                workspaceObjects.appendChild(
+                    element
+                );
+
             }
-
-            return 50;
-        }
-
-        return clamp(
-            (object.volumeMl / object.capacityMl) * 100,
-            3,
-            94
         );
+
+
+        updateDropZone();
+
     }
 
-    function updateWorkspaceVisuals() {
 
-        const temperatureOverlay =
-            $("#temperatureOverlay");
+    function updateDropZone() {
 
-        const reactionOverlay =
-            $("#reactionOverlay");
+        if (
+            !workspaceDropZone
+        ) {
 
-        const averageTemp =
-            averageWorkspaceTemperature();
-
-        if (temperatureOverlay) {
-
-            const intensity =
-                clamp(
-                    (averageTemp - 25) / 80,
-                    0,
-                    1
-                );
-
-            temperatureOverlay.style.opacity =
-                String(round(intensity * 0.45, 2));
-        }
-
-        if (reactionOverlay) {
-
-            const active =
-                state.objects.some(
-                    object =>
-                        object.reactionState?.active
-                );
-
-            reactionOverlay.classList.toggle(
-                "active",
-                active
-            );
-        }
-    }
-
-    function averageWorkspaceTemperature() {
-
-        if (!state.objects.length) {
-            return 25;
-        }
-
-        const relevant =
-            state.objects.filter(
-                object =>
-                    Number.isFinite(object.temperatureC)
-            );
-
-        if (!relevant.length) return 25;
-
-        return relevant.reduce(
-            (sum, object) =>
-                sum + object.temperatureC,
-            0
-        ) / relevant.length;
-    }
-
-    /* ================================================================
-       SÉLECTION
-       ================================================================ */
-
-    function selectObject(id) {
-
-        const object = getObject(id);
-
-        if (!object) {
-            state.selectedId = null;
-            renderInspector();
             return;
+
         }
 
-        state.selectedId = id;
+
+        workspaceDropZone.classList.toggle(
+            "has-objects",
+            state.objects.length >
+                0
+        );
+
+    }
+
+
+    /* ============================================================
+       12 — SÉLECTION
+    ============================================================ */
+
+    function selectObject(
+        objectId
+    ) {
+
+        const object =
+            getObject(
+                objectId
+            );
+
+
+        if (
+            !object
+        ) {
+
+            return;
+
+        }
+
+
+        state.objects.forEach(
+            item => {
+
+                item.selected =
+                    item.id ===
+                    objectId;
+
+            }
+        );
+
+
+        state.selectedMaterialId =
+            objectId;
+
 
         renderWorkspace();
-        renderInventory();
-        renderInspector();
+
+        updateInspector();
+
 
         announce(
             `${object.name} sélectionné.`
         );
+
     }
 
-    /* ================================================================
-       OUTILS
-       ================================================================ */
 
-    function setTool(tool) {
+    function clearSelection() {
 
-        const validTools = [
+        state.objects.forEach(
+            object =>
+                object.selected =
+                    false
+        );
+
+
+        state.selectedMaterialId =
+            null;
+
+
+        updateInspector();
+
+        renderWorkspace();
+
+    }
+
+
+    /* ============================================================
+       13 — DRAG / MOVE
+    ============================================================ */
+
+    function setupObjectDragging() {
+
+        if (
+            !workspaceObjects
+        ) {
+
+            return;
+
+        }
+
+
+        workspaceObjects.addEventListener(
+            "pointerdown",
+            handleObjectPointerDown
+        );
+
+
+        document.addEventListener(
+            "pointermove",
+            handleObjectPointerMove
+        );
+
+
+        document.addEventListener(
+            "pointerup",
+            handleObjectPointerUp
+        );
+
+
+        document.addEventListener(
+            "pointercancel",
+            handleObjectPointerUp
+        );
+
+    }
+
+
+    function handleObjectPointerDown(
+        event
+    ) {
+
+        const objectElement =
+            event.target.closest(
+                ".chem-object"
+            );
+
+
+        if (
+            !objectElement
+        ) {
+
+            return;
+
+        }
+
+
+        const objectId =
+            objectElement.dataset.objectId;
+
+
+        const object =
+            getObject(
+                objectId
+            );
+
+
+        if (
+            !object
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            event.target.closest(
+                "button"
+            ) ||
+            event.target.closest(
+                "input"
+            ) ||
+            event.target.closest(
+                "select"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        selectObject(
+            objectId
+        );
+
+
+        /*
+         * Les outils chimiques déclenchent leur action
+         * directement sur l'objet touché.
+         */
+        if (
+            state.activeTool !==
+                "select" &&
+            state.activeTool !==
+                "move"
+        ) {
+
+            executeToolOnObject(
+                state.activeTool,
+                object
+            );
+
+
+            return;
+
+        }
+
+
+        const canvasRect =
+            chemistryCanvas.getBoundingClientRect();
+
+
+        const scale =
+            getCanvasScale();
+
+
+        const pointerX =
+            (
+                event.clientX -
+                canvasRect.left
+            ) /
+            scale;
+
+
+        const pointerY =
+            (
+                event.clientY -
+                canvasRect.top
+            ) /
+            scale;
+
+
+        /*
+         * Select = sélection simple.
+         * Move = déplacement.
+         *
+         * Pour conserver la possibilité historique de déplacer
+         * directement un objet, Select permet également le drag
+         * si le mouvement démarre réellement.
+         */
+        state.drag.active =
+            true;
+
+        state.drag.objectId =
+            objectId;
+
+        state.drag.pointerId =
+            event.pointerId;
+
+        state.drag.offsetX =
+            pointerX -
+            object.x;
+
+        state.drag.offsetY =
+            pointerY -
+            object.y;
+
+        state.drag.originalX =
+            object.x;
+
+        state.drag.originalY =
+            object.y;
+
+
+        objectElement.classList.add(
+            "dragging"
+        );
+
+
+        objectElement.style.zIndex =
+            "9999";
+
+
+        try {
+
+            objectElement.setPointerCapture(
+                event.pointerId
+            );
+
+        } catch (
+            error
+        ) {}
+
+
+        chemistryCanvas.classList.add(
+            "is-dragging"
+        );
+
+
+        announce(
+            `Déplacement de ${object.name}.`
+        );
+
+    }
+
+
+    function handleObjectPointerMove(
+        event
+    ) {
+
+        if (
+            !state.drag.active
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            state.drag.pointerId !==
+                null &&
+            event.pointerId !==
+                state.drag.pointerId
+        ) {
+
+            return;
+
+        }
+
+
+        const object =
+            getObject(
+                state.drag.objectId
+            );
+
+
+        if (
+            !object
+        ) {
+
+            return;
+
+        }
+
+
+        const element =
+            workspaceObjects.querySelector(
+                `[data-object-id="${CSS.escape(object.id)}"]`
+            );
+
+
+        if (
+            !element
+        ) {
+
+            return;
+
+        }
+
+
+        event.preventDefault();
+
+
+        const canvasRect =
+            chemistryCanvas.getBoundingClientRect();
+
+
+        const scale =
+            getCanvasScale();
+
+
+        let x =
+            (
+                event.clientX -
+                canvasRect.left
+            ) /
+                scale -
+            state.drag.offsetX;
+
+
+        let y =
+            (
+                event.clientY -
+                canvasRect.top
+            ) /
+                scale -
+            state.drag.offsetY;
+
+
+        const canvasWidth =
+            chemistryCanvas.clientWidth /
+            scale;
+
+
+        const canvasHeight =
+            chemistryCanvas.clientHeight /
+            scale;
+
+
+        const maxX =
+            Math.max(
+                CHEM_CONFIG.dragPadding,
+                canvasWidth -
+                    object.width -
+                    CHEM_CONFIG.dragPadding
+            );
+
+
+        const maxY =
+            Math.max(
+                CHEM_CONFIG.dragPadding,
+                canvasHeight -
+                    object.height -
+                    CHEM_CONFIG.dragPadding
+            );
+
+
+        x =
+            clamp(
+                x,
+                CHEM_CONFIG.dragPadding,
+                maxX
+            );
+
+
+        y =
+            clamp(
+                y,
+                CHEM_CONFIG.dragPadding,
+                maxY
+            );
+
+
+        object.x =
+            x;
+
+        object.y =
+            y;
+
+
+        element.style.left =
+            `${x}px`;
+
+        element.style.top =
+            `${y}px`;
+
+    }
+
+
+    function handleObjectPointerUp(
+        event
+    ) {
+
+        if (
+            !state.drag.active
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            state.drag.pointerId !==
+                null &&
+            event.pointerId !==
+                state.drag.pointerId
+        ) {
+
+            return;
+
+        }
+
+
+        const object =
+            getObject(
+                state.drag.objectId
+            );
+
+
+        const element =
+            object
+                ? workspaceObjects.querySelector(
+                    `[data-object-id="${CSS.escape(object.id)}"]`
+                  )
+                : null;
+
+
+        if (
+            element
+        ) {
+
+            element.classList.remove(
+                "dragging"
+            );
+
+            element.style.zIndex =
+                "";
+
+
+            try {
+
+                element.releasePointerCapture(
+                    event.pointerId
+                );
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+
+        const moved =
+            object &&
+            (
+                Math.abs(
+                    object.x -
+                    state.drag.originalX
+                ) > 2 ||
+                Math.abs(
+                    object.y -
+                    state.drag.originalY
+                ) > 2
+            );
+
+
+        state.drag.active =
+            false;
+
+        state.drag.objectId =
+            null;
+
+        state.drag.pointerId =
+            null;
+
+        state.drag.offsetX =
+            0;
+
+        state.drag.offsetY =
+            0;
+
+
+        chemistryCanvas?.classList.remove(
+            "is-dragging"
+        );
+
+
+        /*
+         * Une fois le déplacement terminé, on vérifie
+         * si l'objet est posé sur un récipient.
+         */
+        if (
+            moved &&
+            object
+        ) {
+
+            attemptObjectDropInteraction(
+                object
+            );
+
+
+            addObservation(
+                `${object.name} déplacé dans le laboratoire.`
+            );
+
+
+            announce(
+                `${object.name} positionné dans le laboratoire.`
+            );
+
+        }
+
+
+        saveState(false);
+
+    }
+
+
+    function attemptObjectDropInteraction(
+        source
+    ) {
+
+        if (
+            !source
+        ) {
+
+            return;
+
+        }
+
+
+        const target =
+            findOverlappingContainer(
+                source
+            );
+
+
+        if (
+            !target
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Un récipient sur un autre récipient n'est pas
+         * automatiquement transféré.
+         */
+        if (
+            isContainer(source)
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Un liquide peut être déposé dans un récipient.
+         */
+        if (
+            isLiquidObject(source)
+        ) {
+
+            const available =
+                source.volume;
+
+
+            if (
+                available > 0
+            ) {
+
+                transferAllLiquid(
+                    source,
+                    target,
+                    available
+                );
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+         * Un solide est introduit dans le récipient.
+         */
+        if (
+            isSolidObject(source)
+        ) {
+
+            transferSolidIntoContainer(
+                source,
+                target
+            );
+
+        }
+
+    }
+
+
+    function findOverlappingContainer(
+        source
+    ) {
+
+        const centerX =
+            source.x +
+            source.width /
+                2;
+
+        const centerY =
+            source.y +
+            source.height /
+                2;
+
+
+        return state.objects.find(
+            candidate => {
+
+                if (
+                    candidate.id ===
+                    source.id
+                ) {
+
+                    return false;
+
+                }
+
+
+                if (
+                    !isContainer(
+                        candidate
+                    )
+                ) {
+
+                    return false;
+
+                }
+
+
+                return (
+                    centerX >=
+                        candidate.x &&
+                    centerX <=
+                        candidate.x +
+                        candidate.width &&
+                    centerY >=
+                        candidate.y &&
+                    centerY <=
+                        candidate.y +
+                        candidate.height
+                );
+
+            }
+        ) || null;
+
+    }
+
+
+    /* ============================================================
+       14 — OUTILS
+    ============================================================ */
+
+    function setupTools() {
+
+        document
+            .querySelectorAll(
+                ".tool-button[data-tool]"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            setActiveTool(
+                                button.dataset.tool
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    function setActiveTool(
+        tool
+    ) {
+
+        const allowed = [
             "select",
             "move",
             "transfer",
@@ -1481,3934 +3463,6167 @@
             "heat"
         ];
 
-        if (!validTools.includes(tool)) {
-            tool = "select";
-        }
-
-        state.tool = tool;
-
-        $$(".tool-button").forEach(button => {
-            button.classList.toggle(
-                "active",
-                button.dataset.tool === tool
-            );
-        });
-
-        announce(`Outil ${tool}.`);
-
-        if (tool === "measure") {
-
-            const selected = getSelected();
-
-            if (selected) {
-                openMeasurementModal(selected);
-            } else {
-                toast(
-                    "Sélectionnez d'abord un objet à mesurer.",
-                    "warning"
-                );
-            }
-        }
-
-        if (tool === "transfer") {
-
-            const selected = getSelected();
-
-            if (selected) {
-                openTransferModal(selected);
-            } else {
-                toast(
-                    "Sélectionnez d'abord une source.",
-                    "warning"
-                );
-            }
-        }
-
-        if (tool === "mix") {
-
-            const selected = getSelected();
-
-            if (selected) {
-                mixObject(selected);
-            } else {
-                toast(
-                    "Sélectionnez un récipient.",
-                    "warning"
-                );
-            }
-        }
-
-        if (tool === "heat") {
-
-            const selected = getSelected();
-
-            if (selected) {
-                toggleHeating(selected);
-            } else {
-                toast(
-                    "Sélectionnez un récipient à chauffer.",
-                    "warning"
-                );
-            }
-        }
-    }
-
-    /* ================================================================
-       DÉPLACEMENT — POINTER EVENTS
-       ================================================================ */
-
-    let dragData = null;
-
-    function bindWorkspaceObjects() {
-
-        $$(".chem-object").forEach(element => {
-
-            element.addEventListener(
-                "pointerdown",
-                onObjectPointerDown
-            );
-
-            element.addEventListener(
-                "dblclick",
-                onObjectDoubleClick
-            );
-        });
-    }
-
-    function onObjectPointerDown(event) {
 
         if (
-            event.target.closest("button") ||
-            event.target.closest("input") ||
-            event.target.closest("select")
-        ) {
-            return;
-        }
-
-        const element =
-            event.currentTarget;
-
-        const id =
-            element.dataset.objectId;
-
-        const object =
-            getObject(id);
-
-        if (!object) return;
-
-        selectObject(id);
-
-        if (
-            state.tool !== "move" &&
-            state.tool !== "select"
-        ) {
-            return;
-        }
-
-        dragData = {
-            id,
-            startX: event.clientX,
-            startY: event.clientY,
-            originalX: object.x,
-            originalY: object.y
-        };
-
-        try {
-            element.setPointerCapture(
-                event.pointerId
-            );
-        } catch (_) {}
-
-        element.addEventListener(
-            "pointermove",
-            onObjectPointerMove
-        );
-
-        element.addEventListener(
-            "pointerup",
-            onObjectPointerUp,
-            { once: true }
-        );
-
-        element.addEventListener(
-            "pointercancel",
-            onObjectPointerUp,
-            { once: true }
-        );
-    }
-
-    function onObjectPointerMove(event) {
-
-        if (!dragData) return;
-
-        const object =
-            getObject(dragData.id);
-
-        if (!object) return;
-
-        const dx =
-            (event.clientX - dragData.startX) /
-            state.zoom;
-
-        const dy =
-            (event.clientY - dragData.startY) /
-            state.zoom;
-
-        const size =
-            getWorkspaceSize();
-
-        object.x =
-            clamp(
-                dragData.originalX + dx,
-                5,
-                Math.max(
-                    5,
-                    size.width - object.width - 5
-                )
-            );
-
-        object.y =
-            clamp(
-                dragData.originalY + dy,
-                5,
-                Math.max(
-                    5,
-                    size.height - object.height - 5
-                )
-            );
-
-        const element =
-            document.querySelector(
-                `[data-object-id="${CSS.escape(object.id)}"]`
-            );
-
-        if (element) {
-
-            element.style.left =
-                `${object.x}px`;
-
-            element.style.top =
-                `${object.y}px`;
-        }
-    }
-
-    function onObjectPointerUp(event) {
-
-        const element =
-            event.currentTarget;
-
-        element.removeEventListener(
-            "pointermove",
-            onObjectPointerMove
-        );
-
-        dragData = null;
-
-        renderInventory();
-        renderInspector();
-    }
-
-    function onObjectDoubleClick(event) {
-
-        const id =
-            event.currentTarget.dataset.objectId;
-
-        const object =
-            getObject(id);
-
-        if (!object) return;
-
-        selectObject(id);
-
-        if (object.kind === "container") {
-            openTransferModal(object);
-        }
-    }
-
-    /* ================================================================
-       TRANSFERT
-       ================================================================ */
-
-    function getTransferTargets(source) {
-
-        return state.objects.filter(
-            object =>
-                object.id !== source.id &&
-                object.kind === "container" &&
-                Number(object.capacityMl || 0) >
-                    Number(object.volumeMl || 0)
-        );
-    }
-
-    function openTransferModal(source) {
-
-        if (!source) return;
-
-        if (
-            source.kind === "solid" ||
-            (
-                source.kind === "reagent" &&
-                source.phase === "solid"
+            !allowed.includes(
+                tool
             )
         ) {
 
-            toast(
-                "Ce matériau est solide. Le transfert liquide n'est pas disponible.",
-                "warning"
-            );
+            tool =
+                "select";
 
-            return;
         }
 
-        if (
-            source.volumeMl <= 0 &&
-            source.kind !== "reagent"
+
+        state.activeTool =
+            tool;
+
+
+        document
+            .querySelectorAll(
+                ".tool-button[data-tool]"
+            )
+            .forEach(
+                button => {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.tool ===
+                            tool
+                    );
+
+                }
+            );
+
+
+        const labels = {
+
+            select:
+                "Sélection",
+
+            move:
+                "Déplacement",
+
+            transfer:
+                "Transfert",
+
+            mix:
+                "Mélange",
+
+            measure:
+                "Mesure",
+
+            heat:
+                "Chauffage"
+
+        };
+
+
+        announce(
+            `Outil actif : ${
+                labels[tool] ||
+                tool
+            }.`
+        );
+
+    }
+
+
+    function executeToolOnObject(
+        tool,
+        object
+    ) {
+
+        switch (
+            tool
         ) {
 
-            toast(
-                "La source ne contient aucun liquide.",
-                "warning"
+            case "select":
+                selectObject(
+                    object.id
+                );
+                break;
+
+
+            case "move":
+                /*
+                 * Le déplacement commence par pointerdown.
+                 */
+                break;
+
+
+            case "transfer":
+                openTransferModal();
+                break;
+
+
+            case "mix":
+                mixSelectedObject();
+                break;
+
+
+            case "measure":
+                openMeasurementModal();
+                break;
+
+
+            case "heat":
+                heatSelectedObject();
+                break;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       15 — INSPECTEUR
+    ============================================================ */
+
+    function updateInspector() {
+
+        const object =
+            getSelectedObject();
+
+
+        if (
+            !object
+        ) {
+
+            if (
+                selectedObjectType
+            ) {
+
+                selectedObjectType
+                    .textContent =
+                    "Aucun";
+
+            }
+
+
+            objectInspector?.classList.remove(
+                "hidden"
+            );
+
+            materialProperties?.classList.add(
+                "hidden"
+            );
+
+            compositionSection?.classList.add(
+                "hidden"
+            );
+
+            measurementSection?.classList.add(
+                "hidden"
+            );
+
+            reactionSection?.classList.add(
+                "hidden"
+            );
+
+            objectActions?.classList.add(
+                "hidden"
             );
 
             return;
+
         }
 
-        state.transferSourceId =
-            source.id;
 
-        const modal =
-            $("#transferModal");
+        selectedObjectType.textContent =
+            object.name;
 
-        if (!modal) return;
 
-        const sourceName =
-            $("#transferSourceName");
+        objectInspector.classList.add(
+            "hidden"
+        );
 
-        const sourceAmount =
-            $("#transferSourceAmount");
+        materialProperties.classList.remove(
+            "hidden"
+        );
 
-        const target =
-            $("#transferTarget");
+        objectActions.classList.remove(
+            "hidden"
+        );
 
-        const amount =
-            $("#transferAmount");
 
-        const range =
-            $("#transferRange");
+        recalculateObjectScientificState(
+            object
+        );
 
-        const maxLabel =
-            $("#transferMaxLabel");
 
-        if (sourceName) {
-            sourceName.textContent =
-                source.name;
+        $("propName").textContent =
+            object.name;
+
+
+        $("propState").textContent =
+            object.state;
+
+
+        $("propTemperature").textContent =
+            `${formatNumber(object.temperature)} °C`;
+
+
+        $("propMass").textContent =
+            `${formatNumber(object.mass)} g`;
+
+
+        $("propVolume").textContent =
+            object.volume > 0
+                ? `${formatNumber(object.volume)} mL`
+                : "—";
+
+
+        $("propDensity").textContent =
+            Number.isFinite(
+                object.density
+            )
+                ? `${formatNumber(object.density, 3)} g/mL`
+                : "—";
+
+
+        $("propPH").textContent =
+            Number.isFinite(
+                object.ph
+            )
+                ? formatNumber(
+                    object.ph,
+                    2
+                )
+                : "—";
+
+
+        $("propColor").textContent =
+            object.color ||
+            "—";
+
+
+        renderCompositionInspector(
+            object
+        );
+
+
+        renderReactionInspector(
+            object
+        );
+
+    }
+
+
+    function recalculateObjectScientificState(
+        object
+    ) {
+
+        if (
+            isContainer(
+                object
+            )
+        ) {
+
+            recalculateContainer(
+                object
+            );
+
         }
 
-        const maxTransfer =
-            getMaximumTransfer(source);
 
-        if (sourceAmount) {
+        if (
+            isLiquidObject(
+                object
+            ) ||
+            isSolidObject(
+                object
+            )
+        ) {
 
-            sourceAmount.textContent =
-                `${round(source.volumeMl, 1)} mL`;
-        }
+            const material =
+                getMaterial(
+                    object.materialId
+                );
 
-        if (amount) {
 
-            amount.value =
-                String(
-                    Math.min(
-                        10,
-                        Math.max(
-                            0.1,
-                            maxTransfer
+            if (
+                material
+            ) {
+
+                object.volume =
+                    Number(
+                        object.volume
+                    ) || 0;
+
+                object.mass =
+                    Number(
+                        object.mass
+                    ) || 0;
+
+                object.density =
+                    Number.isFinite(
+                        Number(
+                            material.density
                         )
                     )
-                );
+                        ? Number(
+                            material.density
+                        )
+                        : object.density;
+
+            }
+
         }
 
-        if (range) {
-
-            range.min = "0.1";
-            range.max = String(
-                Math.max(
-                    0.1,
-                    maxTransfer
-                )
-            );
-
-            range.step = "0.1";
-
-            range.value = String(
-                Math.min(
-                    10,
-                    Math.max(
-                        0.1,
-                        maxTransfer
-                    )
-                )
-            );
-        }
-
-        if (maxLabel) {
-
-            maxLabel.textContent =
-                `Maximum : ${round(maxTransfer, 1)} mL`;
-        }
-
-        if (target) {
-
-            const targets =
-                getTransferTargets(source);
-
-            target.innerHTML =
-                `<option value="">Choisir un récipient...</option>` +
-                targets.map(
-                    item =>
-                        `<option value="${escapeHTML(item.id)}">
-                            ${escapeHTML(item.name)}
-                            — ${round(item.volumeMl, 1)}/${round(item.capacityMl, 1)} mL
-                        </option>`
-                ).join("");
-        }
-
-        modal.classList.add("open");
-        modal.setAttribute("aria-hidden", "false");
     }
 
-    function closeTransferModal() {
 
-        const modal =
-            $("#transferModal");
+    function renderCompositionInspector(
+        object
+    ) {
 
-        if (!modal) return;
+        if (
+            !compositionSection
+        ) {
 
-        modal.classList.remove("open");
-        modal.setAttribute("aria-hidden", "true");
+            return;
 
-        state.transferSourceId = null;
-    }
-
-    function getMaximumTransfer(source) {
-
-        if (!source) return 0;
-
-        if (source.kind === "reagent") {
-
-            return Number(
-                source.volumeMl || 0
-            );
         }
 
-        return Number(
-            source.volumeMl || 0
+
+        if (
+            !object.composition ||
+            !object.composition.length
+        ) {
+
+            compositionSection.classList.add(
+                "hidden"
+            );
+
+            return;
+
+        }
+
+
+        compositionSection.classList.remove(
+            "hidden"
         );
+
+
+        /*
+         * Ancien HTML utilise compositionTotal comme nombre
+         * de composants. On le conserve pour compatibilité.
+         */
+        $("compositionTotal").textContent =
+            object.composition.length;
+
+
+        $("compositionList").innerHTML =
+            object.composition.map(
+                component => {
+
+                    const material =
+                        getMaterial(
+                            component.materialId
+                        );
+
+
+                    const moles =
+                        getComponentById(
+                            object,
+                            component.materialId
+                        )?.moles ||
+                        getCompositionMoles(
+                            component
+                        );
+
+
+                    const molarity =
+                        Number.isFinite(
+                            Number(
+                                component.molarity
+                            )
+                        )
+                            ? component.molarity
+                            : calculateMolarity(
+                                moles,
+                                object.volume
+                            );
+
+
+                    return `
+
+                        <div class="composition-item">
+
+                            <span>
+                                ${escapeHTML(
+                                    component.name
+                                )}
+
+                                ${
+                                    material?.formula
+                                        ? `
+                                            <small>
+                                                ${escapeHTML(
+                                                    material.formula
+                                                )}
+                                            </small>
+                                          `
+                                        : ""
+                                }
+                            </span>
+
+                            <strong>
+                                ${
+                                    Number(
+                                        component.volumeMl
+                                    ) > 0
+                                        ? `${formatNumber(
+                                            component.volumeMl
+                                        )} mL`
+                                        : `${formatNumber(
+                                            component.mass
+                                        )} g`
+                                }
+
+                                ${
+                                    Number.isFinite(
+                                        Number(
+                                            moles
+                                        )
+                                    )
+                                        ? `
+                                            <small>
+                                                n = ${formatScientific(
+                                                    moles
+                                                )} mol
+                                            </small>
+                                          `
+                                        : ""
+                                }
+
+                                ${
+                                    object.volume > 0 &&
+                                    Number.isFinite(
+                                        Number(
+                                            molarity
+                                        )
+                                    )
+                                        ? `
+                                            <small>
+                                                C = ${formatNumber(
+                                                    molarity,
+                                                    3
+                                                )} mol/L
+                                            </small>
+                                          `
+                                        : ""
+                                }
+
+                            </strong>
+
+                        </div>
+
+                    `;
+
+                }
+            ).join("");
+
     }
 
-    function executeTransfer() {
+
+    function renderReactionInspector(
+        object
+    ) {
+
+        const reaction =
+            object.reaction;
+
+
+        if (
+            !reaction ||
+            (
+                !reaction.active &&
+                reaction.status ===
+                    "Aucune"
+            )
+        ) {
+
+            reactionSection?.classList.add(
+                "hidden"
+            );
+
+            return;
+
+        }
+
+
+        reactionSection.classList.remove(
+            "hidden"
+        );
+
+
+        $("reactionStatus").textContent =
+            reaction.status ||
+            "Aucune";
+
+
+        $("reactionPhase").textContent =
+            reaction.phase ||
+            "Stable";
+
+
+        $("reactionGas").textContent =
+            reaction.gas ||
+            "Aucun";
+
+
+        $("reactionPrecipitate").textContent =
+            reaction.precipitate ||
+            "Aucun";
+
+
+        $("reactionColor").textContent =
+            reaction.color ||
+            "Inchangée";
+
+
+        /*
+         * On peut réutiliser reactionStatus pour
+         * communiquer le réactif limitant si disponible.
+         */
+        if (
+            reaction.limitingReagent
+        ) {
+
+            $("reactionStatus").textContent =
+                `${
+                    reaction.status
+                } — limitant : ${
+                    reaction.limitingReagent
+                }`;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       16 — TRANSFERT
+    ============================================================ */
+
+    function openTransferModal() {
 
         const source =
-            getObject(state.transferSourceId);
+            getSelectedObject();
 
-        if (!source) {
-            closeTransferModal();
-            return;
-        }
 
-        const targetId =
-            $("#transferTarget")?.value;
+        if (
+            !source
+        ) {
 
-        const target =
-            getObject(targetId);
-
-        if (!target || target.kind !== "container") {
-
-            toast(
-                "Choisissez un récipient cible.",
+            showToast(
+                "Sélectionnez d'abord un matériau.",
                 "warning"
             );
 
             return;
+
         }
 
-        const requested =
-            Number(
-                $("#transferAmount")?.value || 0
+
+        if (
+            !isLiquidObject(source) &&
+            !isContainer(source)
+        ) {
+
+            showToast(
+                "Le transfert volumétrique nécessite une matière liquide.",
+                "warning"
             );
 
-        const maxSource =
-            Number(source.volumeMl || 0);
+            return;
 
-        const freeCapacity =
+        }
+
+
+        if (
+            source.volume <= 0
+        ) {
+
+            showToast(
+                "Aucune matière liquide disponible.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+
+        const modal =
+            $("transferModal");
+
+
+        const targetSelect =
+            $("transferTarget");
+
+
+        targetSelect.innerHTML =
+            "";
+
+
+        state.objects
+            .filter(
+                object =>
+                    object.id !==
+                        source.id &&
+                    isContainer(
+                        object
+                    )
+            )
+            .forEach(
+                object => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    option.value =
+                        object.id;
+
+
+                    option.textContent =
+                        `${object.name}${
+                            object.volume > 0
+                                ? ` — ${formatNumber(object.volume)} mL`
+                                : ""
+                        }`;
+
+
+                    targetSelect.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+
+        if (
+            !targetSelect.options.length
+        ) {
+
+            showToast(
+                "Ajoutez d'abord un récipient destination.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+
+        $("transferSourceName").textContent =
+            source.name;
+
+
+        $("transferSourceAmount").textContent =
+            `${formatNumber(source.volume)} mL disponible`;
+
+
+        const max =
             Math.max(
                 0,
-                Number(target.capacityMl || 0) -
-                Number(target.volumeMl || 0)
+                source.volume
             );
 
-        const amount =
+
+        $("transferAmount").max =
+            max;
+
+        $("transferRange").max =
+            max;
+
+
+        const initial =
             Math.min(
-                requested,
-                maxSource,
-                freeCapacity
+                10,
+                max
             );
 
-        if (amount <= 0) {
 
-            toast(
-                "Quantité de transfert invalide.",
+        $("transferAmount").value =
+            initial;
+
+        $("transferRange").value =
+            initial;
+
+
+        $("transferMaxLabel").textContent =
+            `${formatNumber(max)} mL`;
+
+
+        openModal(
+            modal
+        );
+
+    }
+
+
+    function performTransfer() {
+
+        const source =
+            getSelectedObject();
+
+
+        if (
+            !source
+        ) {
+
+            return;
+
+        }
+
+
+        const target =
+            getObject(
+                $("transferTarget").value
+            );
+
+
+        if (
+            !target
+        ) {
+
+            showToast(
+                "Destination invalide.",
                 "error"
             );
 
             return;
+
         }
 
-        transferLiquid(
-            source,
-            target,
-            amount
-        );
 
-        closeTransferModal();
-
-        renderAll();
-
-        toast(
-            `${round(amount, 1)} mL transférés.`,
-            "success"
-        );
-    }
-
-    function transferLiquid(source, target, amountMl) {
-
-        if (!source || !target) return;
-
-        const sourceVolume =
-            Number(source.volumeMl || 0);
-
-        if (sourceVolume <= 0) return;
-
-        const ratio =
-            clamp(
-                amountMl / sourceVolume,
-                0,
-                1
+        let amount =
+            Number(
+                $("transferAmount").value
             );
 
+
         if (
-            source.components &&
-            source.components.length
+            !Number.isFinite(
+                amount
+            ) ||
+            amount <= 0
         ) {
 
-            source.components.forEach(sourceComponent => {
+            showToast(
+                "Quantité invalide.",
+                "warning"
+            );
 
-                const movedMoles =
-                    Number(sourceComponent.moles || 0) *
+            return;
+
+        }
+
+
+        amount =
+            Math.min(
+                amount,
+                source.volume
+            );
+
+
+        if (
+            amount <=
+                CHEM_CONFIG.reactionTolerance
+        ) {
+
+            showToast(
+                "Aucune matière liquide disponible.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+
+        const availableCapacity =
+            target.capacity > 0
+                ? target.capacity -
+                    target.volume
+                : Infinity;
+
+
+        if (
+            amount >
+            availableCapacity
+        ) {
+
+            showToast(
+                `Capacité insuffisante : seulement ${
+                    formatNumber(
+                        Math.max(
+                            0,
+                            availableCapacity
+                        )
+                    )
+                } mL disponibles.`,
+                "warning"
+            );
+
+            return;
+
+        }
+
+
+        const transferred =
+            transferLiquid(
+                source,
+                target,
+                amount
+            );
+
+
+        if (
+            transferred <= 0
+        ) {
+
+            showToast(
+                "Le transfert n'a pas pu être effectué.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        closeModal(
+            $("transferModal")
+        );
+
+
+        renderWorkspace();
+
+        updateAllUI();
+
+
+        addObservation(
+            `Transfert réel de ${
+                formatNumber(
+                    transferred
+                )
+            } mL de ${
+                source.name
+            } vers ${
+                target.name
+            }.`
+        );
+
+
+        showToast(
+            "Transfert effectué.",
+            "success"
+        );
+
+
+        saveState(false);
+
+    }
+
+
+    function transferLiquid(
+        source,
+        target,
+        amountMl
+    ) {
+
+        if (
+            !source ||
+            !target ||
+            amountMl <= 0
+        ) {
+
+            return 0;
+
+        }
+
+
+        if (
+            !isContainer(target)
+        ) {
+
+            return 0;
+
+        }
+
+
+        const amount =
+            Math.min(
+                Number(
+                    amountMl
+                ),
+                Number(
+                    source.volume
+                ) || 0
+            );
+
+
+        if (
+            amount <= 0
+        ) {
+
+            return 0;
+
+        }
+
+
+        const sourceInitialVolume =
+            Number(
+                source.volume
+            ) || 0;
+
+
+        /*
+         * Pour chaque composant, on transfère exactement
+         * la fraction :
+         *
+         * quantité transférée / quantité source avant transfert
+         */
+        const ratio =
+            sourceInitialVolume >
+                0
+                ? amount /
+                    sourceInitialVolume
+                : 0;
+
+
+        ensureComposition(
+            source
+        );
+
+        ensureComposition(
+            target
+        );
+
+
+        const transferredComponents =
+            [];
+
+
+        source.composition.forEach(
+            component => {
+
+                const transferredVolume =
+                    (
+                        Number(
+                            component.volumeMl
+                        ) || 0
+                    ) *
                     ratio;
 
-                const movedMass =
-                    Number(sourceComponent.massG || 0) *
+
+                const transferredMass =
+                    (
+                        Number(
+                            component.mass
+                        ) || 0
+                    ) *
                     ratio;
 
-                const movedVolume =
-                    Number(sourceComponent.volumeMl || 0) *
+
+                const transferredMoles =
+                    (
+                        Number(
+                            component.moles
+                        ) || 0
+                    ) *
                     ratio;
 
-                const existing =
-                    target.components.find(
-                        component =>
-                            component.id ===
-                            sourceComponent.id
-                    );
 
-                if (existing) {
+                if (
+                    transferredVolume <= 0 &&
+                    transferredMass <= 0 &&
+                    transferredMoles <= 0
+                ) {
 
-                    existing.moles +=
-                        movedMoles;
+                    return;
 
-                    existing.massG +=
-                        movedMass;
-
-                    existing.volumeMl +=
-                        movedVolume;
-
-                } else {
-
-                    target.components.push({
-                        ...sourceComponent,
-                        moles: movedMoles,
-                        massG: movedMass,
-                        volumeMl: movedVolume
-                    });
                 }
-            });
+
+
+                transferredComponents.push(
+                    {
+                        ...component,
+                        volumeMl:
+                            transferredVolume,
+                        amount:
+                            transferredVolume,
+                        mass:
+                            transferredMass,
+                        moles:
+                            transferredMoles
+                    }
+                );
+
+            }
+        );
+
+
+        transferredComponents.forEach(
+            component => {
+
+                mergeComponentIntoContainer(
+                    target,
+                    component
+                );
+
+            }
+        );
+
+
+        /*
+         * Retirer la même fraction de la source.
+         */
+        source.composition =
+            source.composition
+                .map(
+                    component => {
+
+                        const newComponent = {
+                            ...component
+                        };
+
+
+                        newComponent.volumeMl =
+                            Math.max(
+                                0,
+                                (
+                                    Number(
+                                        component.volumeMl
+                                    ) || 0
+                                ) *
+                                (
+                                    1 -
+                                    ratio
+                                )
+                            );
+
+
+                        newComponent.amount =
+                            newComponent.volumeMl;
+
+
+                        newComponent.mass =
+                            Math.max(
+                                0,
+                                (
+                                    Number(
+                                        component.mass
+                                    ) || 0
+                                ) *
+                                (
+                                    1 -
+                                    ratio
+                                )
+                            );
+
+
+                        newComponent.moles =
+                            Math.max(
+                                0,
+                                (
+                                    Number(
+                                        component.moles
+                                    ) || 0
+                                ) *
+                                (
+                                    1 -
+                                    ratio
+                                )
+                            );
+
+
+                        return newComponent;
+
+                    }
+                )
+                .filter(
+                    component =>
+                        component.volumeMl >
+                            CHEM_CONFIG.reactionTolerance ||
+                        component.mass >
+                            CHEM_CONFIG.reactionTolerance
+                );
+
+
+        source.volume =
+            Math.max(
+                0,
+                sourceInitialVolume -
+                    amount
+            );
+
+
+        recalculateLiquidObject(
+            source
+        );
+
+
+        recalculateContainer(
+            target
+        );
+
+
+        evaluateCompositionReaction(
+            target
+        );
+
+
+        /*
+         * Le récipient source vide redevient cohérent.
+         */
+        if (
+            source.volume <=
+                CHEM_CONFIG.reactionTolerance
+        ) {
+
+            source.volume =
+                0;
+
+            source.mass =
+                0;
+
+            source.composition =
+                [];
+
+            source.ph =
+                null;
+
+            source.state =
+                "Vide";
+
+        }
+
+
+        return amount;
+
+    }
+
+
+    function transferAllLiquid(
+        source,
+        target,
+        amount
+    ) {
+
+        if (
+            !target ||
+            !isContainer(
+                target
+            )
+        ) {
+
+            return 0;
+
+        }
+
+
+        const capacity =
+            target.capacity > 0
+                ? target.capacity -
+                    target.volume
+                : Infinity;
+
+
+        const actual =
+            Math.min(
+                amount,
+                capacity
+            );
+
+
+        if (
+            actual <= 0
+        ) {
+
+            showToast(
+                "Le récipient destination est plein.",
+                "warning"
+            );
+
+            return 0;
+
+        }
+
+
+        const transferred =
+            transferLiquid(
+                source,
+                target,
+                actual
+            );
+
+
+        if (
+            transferred > 0
+        ) {
+
+            addObservation(
+                `Dépôt automatique : ${
+                    formatNumber(
+                        transferred
+                    )
+                } mL transférés vers ${
+                    target.name
+                }.`
+            );
+
+
+            renderWorkspace();
+
+            updateAllUI();
+
+            saveState(false);
+
+        }
+
+
+        return transferred;
+
+    }
+
+
+    function mergeComponentIntoContainer(
+        target,
+        incoming
+    ) {
+
+        const existing =
+            target.composition.find(
+                component =>
+                    component.materialId ===
+                    incoming.materialId
+            );
+
+
+        if (
+            existing
+        ) {
+
+            existing.volumeMl +=
+                Number(
+                    incoming.volumeMl
+                ) || 0;
+
+
+            existing.amount =
+                existing.volumeMl;
+
+
+            existing.mass +=
+                Number(
+                    incoming.mass
+                ) || 0;
+
+
+            existing.moles +=
+                Number(
+                    incoming.moles
+                ) || 0;
+
+
+            existing.molarity =
+                calculateMolarity(
+                    existing.moles,
+                    target.volume +
+                        (
+                            Number(
+                                incoming.volumeMl
+                            ) || 0
+                        )
+                );
 
         } else {
 
-            const material =
-                MATERIAL_MAP.get(
-                    source.materialId
-                );
-
-            if (material) {
-
-                const moles =
-                    material.molarity
-                        ? amountMl / 1000 *
-                          material.molarity
-                        : 0;
-
-                target.components.push({
-                    id: material.id,
-                    name: material.name,
-                    formula: material.formula,
-                    moles,
-                    massG:
-                        amountMl *
-                        Number(material.density || 1),
-                    volumeMl: amountMl,
-                    concentrationM:
-                        Number(material.molarity || 0),
-                    density:
-                        Number(material.density || 1),
-                    pH:
-                        Number(material.pH ?? 7),
-                    phase: "liquid",
-                    color: material.color,
-                    strongAcid:
-                        !!material.strongAcid,
-                    strongBase:
-                        !!material.strongBase,
-                    acidEquivalent:
-                        Number(material.acidEquivalent || 0),
-                    baseEquivalent:
-                        Number(material.baseEquivalent || 0),
-                    indicator:
-                        !!material.indicator,
-                    phenolphthalein:
-                        !!material.phenolphthalein
-                });
-            }
-        }
-
-        source.volumeMl =
-            Math.max(
-                0,
-                source.volumeMl - amountMl
+            target.composition.push(
+                {
+                    ...incoming,
+                    amount:
+                        Number(
+                            incoming.volumeMl
+                        ) || 0
+                }
             );
 
-        if (source.components) {
-
-            source.components.forEach(component => {
-
-                component.moles *= (1 - ratio);
-                component.massG *= (1 - ratio);
-                component.volumeMl *= (1 - ratio);
-            });
-
-            source.components =
-                source.components.filter(
-                    component =>
-                        component.moles > 1e-12 ||
-                        component.massG > 1e-9
-                );
         }
 
-        target.volumeMl += amountMl;
-
-        recalculateContainer(target);
-        recalculateStandaloneLiquid(source);
-
-        logObservation(
-            `${round(amountMl, 1)} mL de ${source.name} transférés vers ${target.name}.`
-        );
-
-        detectAndApplyReactions(target);
     }
 
-    function recalculateStandaloneLiquid(object) {
 
-        if (!object) return;
+    function recalculateLiquidObject(
+        object
+    ) {
 
-        if (object.components?.length) {
-
-            const mass =
-                totalComponentMass(object);
-
-            if (mass > 0) {
-                object.massG = mass;
-            }
-        }
-
-        if (object.volumeMl <= 0) {
-
-            object.volumeMl = 0;
-            object.state = "vide";
-        }
-    }
-
-    /* ================================================================
-       MÉLANGE / CHIMIE
-       ================================================================ */
-
-    function mixObject(object) {
-
-        if (!object) return;
-
-        if (!isContainer(object)) {
-
-            toast(
-                "Le mélange nécessite un récipient.",
-                "warning"
+        const material =
+            getMaterial(
+                object.materialId
             );
 
-            return;
-        }
 
         if (
-            !object.components?.length ||
-            object.volumeMl <= 0
+            !material
         ) {
 
-            toast(
-                "Le récipient ne contient pas encore de mélange.",
+            return;
+
+        }
+
+
+        object.mass =
+            Math.max(
+                0,
+                object.volume *
+                    (
+                        Number(
+                            material.density
+                        ) || 1
+                    )
+            );
+
+
+        object.density =
+            material.density;
+
+
+        object.ph =
+            calculateObjectPH(
+                object
+            );
+
+
+        object.state =
+            object.volume > 0
+                ? "Liquide"
+                : "Vide";
+
+    }
+
+
+    /* ============================================================
+       17 — TRANSFERT DES SOLIDES
+    ============================================================ */
+
+    function transferSolidIntoContainer(
+        source,
+        target
+    ) {
+
+        if (
+            !source ||
+            !target ||
+            !isSolidObject(
+                source
+            ) ||
+            !isContainer(
+                target
+            )
+        ) {
+
+            return false;
+
+        }
+
+
+        ensureComposition(
+            source
+        );
+
+        ensureComposition(
+            target
+        );
+
+
+        const material =
+            getMaterial(
+                source.materialId
+            );
+
+
+        if (
+            !material
+        ) {
+
+            return false;
+
+        }
+
+
+        const solidMass =
+            Number(
+                source.mass
+            ) || 0;
+
+
+        const solidMoles =
+            calculateMolesFromMass(
+                solidMass,
+                material.molarMass
+            );
+
+
+        const existing =
+            getComponentById(
+                target,
+                source.materialId
+            );
+
+
+        if (
+            existing
+        ) {
+
+            existing.mass +=
+                solidMass;
+
+            existing.moles +=
+                solidMoles;
+
+        } else {
+
+            target.composition.push(
+                {
+                    materialId:
+                        material.id,
+
+                    name:
+                        material.name,
+
+                    formula:
+                        material.formula,
+
+                    amount:
+                        0,
+
+                    volumeMl:
+                        0,
+
+                    mass:
+                        solidMass,
+
+                    moles:
+                        solidMoles,
+
+                    molarity:
+                        null,
+
+                    temperature:
+                        source.temperature,
+
+                    phase:
+                        "solid"
+                }
+            );
+
+        }
+
+
+        /*
+         * Le solide est consommé dans la manipulation.
+         */
+        state.objects =
+            state.objects.filter(
+                object =>
+                    object.id !==
+                    source.id
+            );
+
+
+        state.selectedMaterialId =
+            target.id;
+
+
+        recalculateContainer(
+            target
+        );
+
+
+        evaluateCompositionReaction(
+            target
+        );
+
+
+        addObservation(
+            `${
+                source.name
+            } introduit dans ${
+                target.name
+            } : ${
+                formatNumber(
+                    solidMass
+                )
+            } g.`
+        );
+
+
+        showToast(
+            `${
+                source.name
+            } ajouté à ${
+                target.name
+            }.`,
+            "success"
+        );
+
+
+        renderWorkspace();
+
+        updateAllUI();
+
+        saveState(false);
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       18 — MÉLANGE
+    ============================================================ */
+
+    function mixSelectedObject() {
+
+        const object =
+            getSelectedObject();
+
+
+        if (
+            !object
+        ) {
+
+            showToast(
+                "Sélectionnez un récipient.",
                 "warning"
             );
 
             return;
+
         }
 
-        object.mixing = true;
 
-        setTimeout(() => {
+        if (
+            !isContainer(
+                object
+            )
+        ) {
 
-            object.mixing = false;
+            showToast(
+                "Le mélange s'effectue dans un récipient.",
+                "warning"
+            );
 
-            detectAndApplyReactions(object);
+            return;
 
-            recalculateContainer(object);
+        }
 
-            renderAll();
 
-        }, 350);
+        if (
+            !object.composition ||
+            !object.composition.length
+        ) {
 
-        logObservation(
-            `${object.name} est agité/mélangé.`
+            showToast(
+                "Le récipient est vide.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+
+        object.mixed =
+            true;
+
+
+        /*
+         * Mélange thermique simple :
+         * température moyenne pondérée.
+         */
+        recalculateContainer(
+            object
         );
 
-        toast(
-            `${object.name} mélangé.`,
+
+        /*
+         * Une agitation accélère l'évaluation de réaction.
+         */
+        evaluateCompositionReaction(
+            object,
+            true
+        );
+
+
+        addObservation(
+            `${
+                object.name
+            } mélangé : ${
+                object.composition.length
+            } composant(s).`
+        );
+
+
+        renderWorkspace();
+
+        updateAllUI();
+
+        saveState(false);
+
+
+        showToast(
+            "Mélange effectué.",
             "success"
         );
+
     }
 
-    /* ================================================================
-       MOTEUR CHIMIQUE
-       ================================================================ */
 
-    function detectAndApplyReactions(container) {
+    /* ============================================================
+       19 — MOTEUR DE RÉACTION
+    ============================================================ */
 
-        if (!container ||
-            container.kind !== "container") {
-            return;
+    function evaluateCompositionReaction(
+        object,
+        forcedMix = false
+    ) {
+
+        if (
+            !object ||
+            !isContainer(
+                object
+            )
+        ) {
+
+            return null;
+
         }
 
-        if (!container.components?.length) {
-            return;
+
+        ensureComposition(
+            object
+        );
+
+
+        /*
+         * On recherche toutes les réactions dont les réactifs
+         * existent réellement dans la composition.
+         */
+        const possible =
+            REACTIONS.filter(
+                reaction =>
+                    reaction.reactants.every(
+                        reactant =>
+                            getComponentById(
+                                object,
+                                reactant.materialId
+                            )
+                    )
+            );
+
+
+        if (
+            !possible.length
+        ) {
+
+            return null;
+
         }
 
-        normalizeComponentAmounts(container);
 
-        reactionNeutralization(container);
+        /*
+         * Priorité : réaction la plus spécifique.
+         */
+        possible.sort(
+            (
+                a,
+                b
+            ) =>
+                (
+                    b.priority || 0
+                ) -
+                (
+                    a.priority || 0
+                )
+        );
 
-        reactionCopperZinc(container);
 
-        reactionAcidBicarbonate(container);
+        let reactionExecuted =
+            false;
 
-        reactionAcidCarbonate(container);
 
-        reactionCalciumCarbonatePrecipitation(container);
+        for (
+            const reaction of possible
+        ) {
 
-        updateSolutionPH(container);
-
-        updateIndicatorColor(container);
-
-        updateReactionVisuals(container);
-
-        recalculateContainer(container);
-    }
-
-    function normalizeComponentAmounts(container) {
-
-        container.components.forEach(component => {
-
-            component.moles =
-                Math.max(
-                    0,
-                    Number(component.moles || 0)
+            const result =
+                runReaction(
+                    object,
+                    reaction,
+                    forcedMix
                 );
 
-            component.massG =
-                Math.max(
-                    0,
-                    Number(component.massG || 0)
-                );
 
-            component.volumeMl =
-                Math.max(
-                    0,
-                    Number(component.volumeMl || 0)
-                );
-        });
-    }
+            if (
+                result?.executed
+            ) {
 
-    /* ------------------------------------------------------------
-       HCl + NaOH
-       ------------------------------------------------------------ */
+                reactionExecuted =
+                    true;
 
-    function reactionNeutralization(container) {
+                break;
 
-        const acid =
-            findComponent(
-                container,
-                ["hydrochloricAcid", "HCl"]
+            }
+
+        }
+
+
+        if (
+            reactionExecuted
+        ) {
+
+            recalculateContainer(
+                object
             );
 
-        const base =
-            findComponent(
-                container,
-                ["sodiumHydroxide", "NaOH"]
+
+            renderWorkspace();
+
+            updateInspector();
+
+            saveState(false);
+
+        }
+
+
+        return reactionExecuted;
+
+    }
+
+
+    function runReaction(
+        object,
+        reaction,
+        forcedMix = false
+    ) {
+
+        /*
+         * Certaines réactions sont volontairement activées
+         * dès le contact, les autres après mélange.
+         */
+        if (
+            !forcedMix &&
+            reaction.type ===
+                "neutralisation"
+        ) {
+
+            /*
+             * Neutralisation : contact liquide-liquide
+             * suffit dans cette simulation.
+             */
+
+        }
+
+
+        const availableMoles =
+            {};
+
+
+        reaction.reactants.forEach(
+            reactant => {
+
+                const component =
+                    getComponentById(
+                        object,
+                        reactant.materialId
+                    );
+
+
+                availableMoles[
+                    reactant.materialId
+                ] =
+                    component
+                        ? getCompositionMoles(
+                            component
+                          )
+                        : 0;
+
+            }
+        );
+
+
+        let extent =
+            Infinity;
+
+        let limiting =
+            null;
+
+
+        reaction.reactants.forEach(
+            reactant => {
+
+                const n =
+                    Number(
+                        availableMoles[
+                            reactant.materialId
+                        ]
+                    ) || 0;
+
+
+                const possibleExtent =
+                    n /
+                    reactant.coefficient;
+
+
+                if (
+                    possibleExtent <
+                    extent
+                ) {
+
+                    extent =
+                        possibleExtent;
+
+                    limiting =
+                        reactant.materialId;
+
+                }
+
+            }
+        );
+
+
+        if (
+            !Number.isFinite(
+                extent
+            ) ||
+            extent <=
+                CHEM_CONFIG.reactionTolerance
+        ) {
+
+            return {
+
+                executed:
+                    false,
+
+                limiting:
+
+                    limiting
+
+            };
+
+        }
+
+
+        /*
+         * On n'exécute pas une réaction infinitésimale.
+         */
+        extent =
+            Math.max(
+                0,
+                extent
             );
 
-        if (!acid || !base) return;
 
-        const acidMoles =
-            Number(acid.moles || 0);
+        /*
+         * Consommation stœchiométrique.
+         */
+        reaction.reactants.forEach(
+            reactant => {
 
-        const baseMoles =
-            Number(base.moles || 0);
+                const component =
+                    getComponentById(
+                        object,
+                        reactant.materialId
+                    );
 
+
+                if (
+                    !component
+                ) {
+
+                    return;
+
+                }
+
+
+                const consumed =
+                    extent *
+                    reactant.coefficient;
+
+
+                component.moles =
+                    Math.max(
+                        0,
+                        (
+                            Number(
+                                component.moles
+                            ) || 0
+                        ) -
+                        consumed
+                    );
+
+
+                const material =
+                    getMaterial(
+                        reactant.materialId
+                    );
+
+
+                if (
+                    material?.molarMass
+                ) {
+
+                    component.mass =
+                        calculateMassFromMoles(
+                            component.moles,
+                            material.molarMass
+                        );
+
+                }
+
+
+                if (
+                    Number(
+                        component.volumeMl
+                    ) > 0 &&
+                    Number(
+                        component.moles
+                    ) >= 0
+                ) {
+
+                    /*
+                     * Pour les solutions, on garde le volume
+                     * de solution approximativement constant.
+                     */
+
+                    component.molarity =
+                        calculateMolarity(
+                            component.moles,
+                            object.volume
+                        );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Ajouter les produits.
+         */
+        reaction.products.forEach(
+            product => {
+
+                const producedMoles =
+                    extent *
+                    product.coefficient;
+
+
+                const material =
+                    getMaterial(
+                        product.materialId
+                    );
+
+
+                if (
+                    !material
+                ) {
+
+                    return;
+
+                }
+
+
+                const producedMass =
+                    calculateMassFromMoles(
+                        producedMoles,
+                        material.molarMass
+                    );
+
+
+                const isSolid =
+                    material.type ===
+                        "solid";
+
+
+                const existing =
+                    getComponentById(
+                        object,
+                        product.materialId
+                    );
+
+
+                if (
+                    existing
+                ) {
+
+                    existing.moles +=
+                        producedMoles;
+
+                    existing.mass +=
+                        producedMass;
+
+                    existing.amount =
+                        existing.volumeMl;
+
+                } else {
+
+                    object.composition.push(
+                        {
+                            materialId:
+                                product.materialId,
+
+                            name:
+                                material.name,
+
+                            formula:
+                                material.formula,
+
+                            amount:
+                                0,
+
+                            volumeMl:
+                                isSolid
+                                    ? 0
+                                    : object.volume,
+
+                            mass:
+                                producedMass,
+
+                            moles:
+                                producedMoles,
+
+                            molarity:
+                                isSolid
+                                    ? null
+                                    : calculateMolarity(
+                                        producedMoles,
+                                        object.volume
+                                    ),
+
+                            temperature:
+                                object.temperature,
+
+                            phase:
+                                isSolid
+                                    ? "solid"
+                                    : "aqueous"
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Supprimer les espèces épuisées.
+         */
+        object.composition =
+            object.composition.filter(
+                component =>
+                    (
+                        Number(
+                            component.moles
+                        ) || 0
+                    ) >
+                        CHEM_CONFIG.reactionTolerance ||
+                    (
+                        Number(
+                            component.mass
+                        ) || 0
+                    ) >
+                        CHEM_CONFIG.reactionTolerance &&
+                    component.phase ===
+                        "solid"
+            );
+
+
+        /*
+         * Etat de réaction.
+         */
+        const precipitate =
+            reaction.precipitate ||
+            "Aucun";
+
+
+        let gas =
+            reaction.gas ||
+            "Aucun";
+
+
+        /*
+         * Exemple d'utilisation future :
+         * si une réaction possède un gaz et que le produit
+         * existe avec une phase gazeuse, on pourrait calculer
+         * son volume par PV=nRT.
+         */
+        let gasVolume =
+            null;
+
+
+        if (
+            gas !==
+                "Aucun"
+        ) {
+
+            const gasProduct =
+                reaction.products.find(
+                    product => {
+
+                        const material =
+                            getMaterial(
+                                product.materialId
+                            );
+
+                        return (
+                            material &&
+                            material.gas
+                        );
+
+                    }
+                );
+
+
+            if (
+                gasProduct
+            ) {
+
+                const gasMoles =
+                    extent *
+                    gasProduct.coefficient;
+
+
+                const temperatureK =
+                    object.temperature +
+                    273.15;
+
+
+                gasVolume =
+                    (
+                        gasMoles *
+                        CHEM_CONFIG.gasConstant *
+                        temperatureK
+                    ) /
+                    CHEM_CONFIG.standardPressure;
+
+            }
+
+        }
+
+
+        /*
+         * Energie de réaction.
+         */
+        if (
+            Number.isFinite(
+                reaction.enthalpyKJPerMol
+            )
+        ) {
+
+            const deltaEnergy =
+                reaction.enthalpyKJPerMol *
+                extent;
+
+
+            state.totalEnergy +=
+                deltaEnergy;
+
+
+            /*
+             * Modèle thermique simplifié.
+             * Une réaction exothermique augmente la température.
+             */
+            const massKg =
+                Math.max(
+                    0.001,
+                    (
+                        object.mass ||
+                        1
+                    ) /
+                    1000
+                );
+
+
+            const heatCapacity =
+                4.18;
+
+
+            const deltaT =
+                -(
+                    deltaEnergy *
+                    1000
+                ) /
+                (
+                    massKg *
+                    1000 *
+                    heatCapacity
+                );
+
+
+            if (
+                Number.isFinite(
+                    deltaT
+                )
+            ) {
+
+                object.temperature =
+                    clamp(
+                        object.temperature +
+                            deltaT,
+                        CHEM_CONFIG.minTemperature,
+                        CHEM_CONFIG.maxTemperature
+                    );
+
+            }
+
+        }
+
+
+        object.reaction = {
+
+            active:
+                true,
+
+            status:
+                reaction.name,
+
+            phase:
+                "Réaction effectuée",
+
+            gas:
+                gasVolume !== null
+                    ? `${gas} — ${formatNumber(gasVolume, 2)} L`
+                    : gas,
+
+            precipitate:
+                precipitate,
+
+            color:
+                reaction.color,
+
+            equation:
+                reaction.equation,
+
+            limitingReagent:
+                getMaterial(
+                    limiting
+                )?.name ||
+                limiting,
+
+            extentMol:
+                extent
+
+        };
+
+
+        state.reaction = {
+            ...object.reaction
+        };
+
+
+        addObservation(
+            `Réaction : ${
+                reaction.equation
+            }. Réactif limitant : ${
+                getMaterial(
+                    limiting
+                )?.name ||
+                limiting
+            }. Avancement : ${
+                formatScientific(
+                    extent
+                )
+            } mol.`
+        );
+
+
+        if (
+            precipitate &&
+            precipitate !==
+                "Aucun"
+        ) {
+
+            addObservation(
+                `Précipité observé : ${
+                    precipitate
+                }.`
+            );
+
+        }
+
+
+        if (
+            gas &&
+            gas !==
+                "Aucun"
+        ) {
+
+            addObservation(
+                `Gaz produit : ${
+                    gas
+                }.`
+            );
+
+        }
+
+
+        showToast(
+            `Réaction : ${
+                reaction.name
+            }`,
+            "success"
+        );
+
+
+        return {
+
+            executed:
+                true,
+
+            reaction:
+                reaction,
+
+            extentMol:
+                extent,
+
+            limitingReagent:
+                limiting,
+
+            gasVolume:
+
+                gasVolume,
+
+            precipitate:
+                precipitate
+
+        };
+
+    }
+
+
+    /* ============================================================
+       20 — PH
+    ============================================================ */
+
+    function calculateObjectPH(
+        object
+    ) {
+
+        if (
+            !object
+        ) {
+
+            return null;
+
+        }
+
+
+        /*
+         * Pour un liquide pur, utiliser la valeur connue.
+         */
+        if (
+            !isContainer(
+                object
+            )
+        ) {
+
+            const material =
+                getMaterial(
+                    object.materialId
+                );
+
+
+            if (
+                Number.isFinite(
+                    material?.ph
+                )
+            ) {
+
+                return material.ph;
+
+            }
+
+
+            return null;
+
+        }
+
+
+        const volumeL =
+            (
+                Number(
+                    object.volume
+                ) || 0
+            ) /
+            1000;
+
+
+        if (
+            volumeL <= 0
+        ) {
+
+            return null;
+
+        }
+
+
+        let acidMoles =
+            0;
+
+        let baseMoles =
+            0;
+
+
+        const hcl =
+            getComponentById(
+                object,
+                "hydrochloric-acid"
+            );
+
+
+        const naoh =
+            getComponentById(
+                object,
+                "sodium-hydroxide"
+            );
+
+
+        if (
+            hcl
+        ) {
+
+            acidMoles +=
+                Number(
+                    hcl.moles
+                ) || 0;
+
+        }
+
+
+        if (
+            naoh
+        ) {
+
+            baseMoles +=
+                Number(
+                    naoh.moles
+                ) || 0;
+
+        }
+
+
+        /*
+         * Neutralisation forte :
+         * H+ + OH- → H2O
+         */
         const neutralized =
             Math.min(
                 acidMoles,
                 baseMoles
             );
 
-        if (neutralized <= 0) return;
 
-        acid.moles -= neutralized;
-        base.moles -= neutralized;
+        acidMoles -=
+            neutralized;
 
-        const water =
-            findComponent(
-                container,
-                ["generatedWater", "H2O"]
-            );
 
-        if (water) {
+        baseMoles -=
+            neutralized;
 
-            water.moles += neutralized;
-            water.massG += neutralized * 18.015;
-            water.volumeMl += neutralized * 18.015;
-
-        } else {
-
-            container.components.push({
-
-                id: "generatedWater",
-
-                name: "Eau formée",
-                formula: "H₂O",
-
-                moles: neutralized,
-
-                massG:
-                    neutralized * 18.015,
-
-                volumeMl:
-                    neutralized * 18.015,
-
-                concentrationM: 0,
-
-                density: 1,
-
-                pH: 7,
-
-                phase: "liquid",
-
-                color: "#bde9ff",
-
-                role: "product"
-            });
-        }
-
-        const salt =
-            findComponent(
-                container,
-                ["generatedNaCl", "NaCl"]
-            );
-
-        if (salt) {
-
-            salt.moles += neutralized;
-
-            salt.massG +=
-                neutralized * 58.44;
-
-        } else {
-
-            container.components.push({
-
-                id: "generatedNaCl",
-
-                name: "Chlorure de sodium formé",
-
-                formula: "NaCl",
-
-                moles: neutralized,
-
-                massG:
-                    neutralized * 58.44,
-
-                volumeMl: 0,
-
-                concentrationM: 0,
-
-                density: 2.165,
-
-                pH: 7,
-
-                phase: "dissolved",
-
-                color: "#ffffff",
-
-                role: "product"
-            });
-        }
-
-        container.reactionState.active = true;
-        container.reactionState.phase = "neutralisation";
 
         /*
-         * Le changement thermique reste volontairement modéré
-         * dans le modèle de simulation.
+         * Si acide fort restant.
          */
-        const thermalRise =
-            clamp(
-                neutralized * 20,
-                0,
-                8
-            );
-
-        container.temperatureC +=
-            thermalRise;
-
-        logObservation(
-            `${container.name} : neutralisation HCl + NaOH détectée.`
-        );
-    }
-
-    /* ------------------------------------------------------------
-       CuSO4 + Zn
-       ------------------------------------------------------------ */
-
-    function reactionCopperZinc(container) {
-
-        const copperSulfate =
-            findComponent(
-                container,
-                ["copperSulfate", "CuSO4"]
-            );
-
-        const zinc =
-            findComponent(
-                container,
-                ["zinc", "Zn"]
-            );
-
-        if (!copperSulfate || !zinc) return;
-
         if (
-            copperSulfate.moles <= 0 ||
-            zinc.moles <= 0
+            acidMoles >
+                CHEM_CONFIG.reactionTolerance
         ) {
-            return;
+
+            const concentration =
+                acidMoles /
+                volumeL;
+
+
+            return clamp(
+                -Math.log10(
+                    concentration
+                ),
+                0,
+                14
+            );
+
         }
 
-        const reacted =
-            Math.min(
-                copperSulfate.moles,
-                zinc.moles
-            );
-
-        if (reacted <= 0) return;
-
-        copperSulfate.moles -= reacted;
-        zinc.moles -= reacted;
-
-        copperSulfate.massG =
-            Math.max(
-                0,
-                copperSulfate.moles *
-                159.609
-            );
-
-        zinc.massG =
-            Math.max(
-                0,
-                zinc.moles *
-                65.38
-            );
-
-        let copper =
-            findComponent(
-                container,
-                ["generatedCopper", "Cu"]
-            );
-
-        if (!copper) {
-
-            copper = {
-
-                id: "generatedCopper",
-
-                name: "Cuivre formé",
-
-                formula: "Cu",
-
-                moles: 0,
-
-                massG: 0,
-
-                volumeMl: 0,
-
-                concentrationM: 0,
-
-                density: 8.96,
-
-                pH: 7,
-
-                phase: "solid",
-
-                color: "#b87333",
-
-                role: "precipitate",
-
-                metal: true
-            };
-
-            container.components.push(copper);
-        }
-
-        copper.moles += reacted;
-
-        copper.massG +=
-            reacted * 63.546;
-
-        container.reactionState.active = true;
-        container.reactionState.precipitate = true;
-        container.reactionState.phase = "redox";
 
         /*
-         * La couleur bleue du CuSO4 diminue
-         * avec sa consommation.
+         * Si base forte restante.
          */
         if (
-            copperSulfate.moles <
-            0.05
+            baseMoles >
+                CHEM_CONFIG.reactionTolerance
         ) {
-            copperSulfate.color = "#b8d9ff";
-        }
 
-        container.temperatureC +=
-            clamp(
-                reacted * 8,
-                0,
-                5
-            );
+            const concentration =
+                baseMoles /
+                volumeL;
 
-        logObservation(
-            `${container.name} : réaction redox CuSO₄ + Zn → Cu + ZnSO₄ simulée.`
-        );
-    }
-
-    /* ------------------------------------------------------------
-       ACIDE + BICARBONATE
-       ------------------------------------------------------------ */
-
-    function reactionAcidBicarbonate(container) {
-
-        const acid =
-            findComponent(
-                container,
-                ["hydrochloricAcid", "HCl"]
-            );
-
-        const bicarbonate =
-            findComponent(
-                container,
-                ["sodiumBicarbonate", "NaHCO3"]
-            );
-
-        if (!acid || !bicarbonate) return;
-
-        if (
-            acid.moles <= 0 ||
-            bicarbonate.moles <= 0
-        ) {
-            return;
-        }
-
-        const reacted =
-            Math.min(
-                acid.moles,
-                bicarbonate.moles
-            );
-
-        if (reacted <= 0) return;
-
-        acid.moles -= reacted;
-        bicarbonate.moles -= reacted;
-
-        const co2 =
-            findComponent(
-                container,
-                ["generatedCO2", "CO2"]
-            );
-
-        if (co2) {
-
-            co2.moles += reacted;
-
-        } else {
-
-            container.components.push({
-
-                id: "generatedCO2",
-
-                name: "Dioxyde de carbone",
-
-                formula: "CO₂",
-
-                moles: reacted,
-
-                massG:
-                    reacted * 44.01,
-
-                volumeMl: 0,
-
-                concentrationM: 0,
-
-                density: 0.00198,
-
-                pH: 7,
-
-                phase: "gas",
-
-                color: "#ffffff",
-
-                role: "gas"
-            });
-        }
-
-        container.reactionState.active = true;
-        container.reactionState.gas = true;
-        container.reactionState.bubbling = true;
-        container.reactionState.phase = "gas-evolution";
-
-        container.temperatureC =
-            Math.max(
-                MIN_TEMPERATURE,
-                container.temperatureC - 0.5
-            );
-
-        logObservation(
-            `${container.name} : dégagement de CO₂ détecté.`
-        );
-    }
-
-    /* ------------------------------------------------------------
-       ACIDE + CARBONATE DE CALCIUM
-       ------------------------------------------------------------ */
-
-    function reactionAcidCarbonate(container) {
-
-        const acid =
-            findComponent(
-                container,
-                ["hydrochloricAcid", "HCl"]
-            );
-
-        const carbonate =
-            findComponent(
-                container,
-                ["calciumCarbonate", "CaCO3"]
-            );
-
-        if (!acid || !carbonate) return;
-
-        if (
-            acid.moles <= 0 ||
-            carbonate.moles <= 0
-        ) {
-            return;
-        }
-
-        /*
-         * Modèle stœchiométrique simplifié:
-         * CaCO3 + 2HCl → CaCl2 + CO2 + H2O
-         */
-
-        const reacted =
-            Math.min(
-                carbonate.moles,
-                acid.moles / 2
-            );
-
-        if (reacted <= 0) return;
-
-        carbonate.moles -= reacted;
-
-        acid.moles -=
-            reacted * 2;
-
-        carbonate.massG =
-            carbonate.moles *
-            100.0869;
-
-        const co2 =
-            findComponent(
-                container,
-                ["generatedCO2", "CO2"]
-            );
-
-        if (co2) {
-
-            co2.moles += reacted;
-            co2.massG += reacted * 44.01;
-
-        } else {
-
-            container.components.push({
-
-                id: "generatedCO2",
-
-                name: "Dioxyde de carbone",
-
-                formula: "CO₂",
-
-                moles: reacted,
-
-                massG: reacted * 44.01,
-
-                volumeMl: 0,
-
-                concentrationM: 0,
-
-                density: 0.00198,
-
-                pH: 7,
-
-                phase: "gas",
-
-                color: "#ffffff",
-
-                role: "gas"
-            });
-        }
-
-        const calciumChloride =
-            findComponent(
-                container,
-                ["generatedCaCl2", "CaCl2"]
-            );
-
-        if (calciumChloride) {
-
-            calciumChloride.moles += reacted;
-
-        } else {
-
-            container.components.push({
-
-                id: "generatedCaCl2",
-
-                name: "Chlorure de calcium formé",
-
-                formula: "CaCl₂",
-
-                moles: reacted,
-
-                massG:
-                    reacted * 110.98,
-
-                volumeMl: 0,
-
-                concentrationM: 0,
-
-                density: 2.15,
-
-                pH: 7,
-
-                phase: "dissolved",
-
-                color: "#ffffff",
-
-                role: "product"
-            });
-        }
-
-        container.reactionState.active = true;
-        container.reactionState.gas = true;
-        container.reactionState.bubbling = true;
-        container.reactionState.phase = "carbonate-acid";
-
-        logObservation(
-            `${container.name} : carbonate + acide → dégagement de CO₂.`
-        );
-    }
-
-    /* ------------------------------------------------------------
-       PRÉCIPITATION CaCO3
-       ------------------------------------------------------------ */
-
-    function reactionCalciumCarbonatePrecipitation(container) {
-
-        const calcium =
-            findComponent(
-                container,
-                ["calciumIon", "CaCl2"]
-            );
-
-        const carbonate =
-            findComponent(
-                container,
-                ["carbonateIon", "Na2CO3"]
-            );
-
-        /*
-         * Cette règle permet aussi au moteur de gérer
-         * des produits générés ou des solutions abstraites
-         * contenant Ca²⁺ / CO₃²⁻.
-         */
-
-        if (!calcium || !carbonate) return;
-
-        if (
-            calcium.moles <= 0 ||
-            carbonate.moles <= 0
-        ) {
-            return;
-        }
-
-        const precipitated =
-            Math.min(
-                calcium.moles,
-                carbonate.moles
-            );
-
-        calcium.moles -= precipitated;
-        carbonate.moles -= precipitated;
-
-        let precipitate =
-            findComponent(
-                container,
-                ["generatedCaCO3", "CaCO3"]
-            );
-
-        if (!precipitate) {
-
-            precipitate = {
-
-                id: "generatedCaCO3",
-
-                name: "Carbonate de calcium précipité",
-
-                formula: "CaCO₃",
-
-                moles: 0,
-
-                massG: 0,
-
-                volumeMl: 0,
-
-                concentrationM: 0,
-
-                density: 2.71,
-
-                pH: 8,
-
-                phase: "solid",
-
-                color: "#f4f4f4",
-
-                role: "precipitate"
-            };
-
-            container.components.push(
-                precipitate
-            );
-        }
-
-        precipitate.moles +=
-            precipitated;
-
-        precipitate.massG +=
-            precipitated *
-            100.0869;
-
-        container.reactionState.active = true;
-        container.reactionState.precipitate = true;
-        container.reactionState.phase = "precipitation";
-
-        logObservation(
-            `${container.name} : formation d'un précipité de CaCO₃.`
-        );
-    }
-
-    function findComponent(container, ids) {
-
-        if (!container?.components) {
-            return null;
-        }
-
-        return container.components.find(
-            component =>
-                ids.includes(component.id) ||
-                ids.includes(component.formula)
-        ) || null;
-    }
-
-    /* ================================================================
-       pH
-       ================================================================ */
-
-    function calculateSolutionPH(container) {
-
-        if (!container ||
-            container.volumeMl <= 0) {
-            return 7;
-        }
-
-        let strongAcidMoles = 0;
-        let strongBaseMoles = 0;
-
-        let hasAcid = false;
-        let hasBase = false;
-
-        let fallbackWeighted = 0;
-        let fallbackVolume = 0;
-
-        container.components.forEach(component => {
-
-            const moles =
-                Number(component.moles || 0);
-
-            const volume =
-                Number(component.volumeMl || 0);
-
-            if (
-                component.strongAcid ||
-                component.formula === "HCl"
-            ) {
-
-                strongAcidMoles +=
-                    moles *
-                    Number(
-                        component.acidEquivalent || 1
-                    );
-
-                hasAcid = true;
-            }
-
-            if (
-                component.strongBase ||
-                component.formula === "NaOH"
-            ) {
-
-                strongBaseMoles +=
-                    moles *
-                    Number(
-                        component.baseEquivalent || 1
-                    );
-
-                hasBase = true;
-            }
-
-            if (
-                !component.strongAcid &&
-                !component.strongBase &&
-                component.phase !== "solid" &&
-                component.phase !== "gas"
-            ) {
-
-                const ph =
-                    Number(component.pH);
-
-                if (
-                    Number.isFinite(ph) &&
-                    volume > 0
-                ) {
-
-                    fallbackWeighted +=
-                        ph * volume;
-
-                    fallbackVolume +=
-                        volume;
-                }
-            }
-        });
-
-        const totalVolumeL =
-            Math.max(
-                container.volumeMl / 1000,
-                1e-9
-            );
-
-        const netAcid =
-            strongAcidMoles -
-            strongBaseMoles;
-
-        if (hasAcid || hasBase) {
-
-            if (Math.abs(netAcid) < 1e-12) {
-                return 7;
-            }
-
-            if (netAcid > 0) {
-
-                const H =
-                    netAcid /
-                    totalVolumeL;
-
-                return clamp(
-                    -Math.log10(
-                        Math.max(H, 1e-14)
-                    ),
-                    0,
-                    14
-                );
-            }
-
-            const OH =
-                (-netAcid) /
-                totalVolumeL;
 
             const pOH =
                 -Math.log10(
-                    Math.max(OH, 1e-14)
+                    concentration
                 );
 
+
             return clamp(
-                14 - pOH,
+                14 -
+                    pOH,
                 0,
                 14
             );
+
         }
 
-        if (fallbackVolume > 0) {
-
-            return clamp(
-                fallbackWeighted /
-                fallbackVolume,
-                0,
-                14
-            );
-        }
-
-        return 7;
-    }
-
-    function updateSolutionPH(container) {
-
-        container.pH =
-            round(
-                calculateSolutionPH(container),
-                3
-            );
-    }
-
-    /* ================================================================
-       INDICATEURS
-       ================================================================ */
-
-    function updateIndicatorColor(container) {
-
-        const indicator =
-            container.components.find(
-                component =>
-                    component.indicator ||
-                    component.phenolphthalein
-            );
-
-        if (!indicator) return;
-
-        const pH =
-            Number(container.pH || 7);
-
-        if (indicator.phenolphthalein) {
-
-            if (pH >= 8.2) {
-
-                indicator.color = "#f472b6";
-
-            } else {
-
-                indicator.color = "#f8fafc";
-            }
-
-            container.color =
-                indicator.color;
-
-            return;
-        }
 
         /*
-         * Indicateur universel — modèle de couleur
-         * visuelle simplifié.
+         * Si sulfate de cuivre en solution :
+         * approximation pédagogique faiblement acide.
          */
-
-        if (pH < 3) {
-
-            container.color = "#ef4444";
-
-        } else if (pH < 5) {
-
-            container.color = "#f97316";
-
-        } else if (pH < 6.5) {
-
-            container.color = "#facc15";
-
-        } else if (pH < 7.5) {
-
-            container.color = "#22c55e";
-
-        } else if (pH < 9) {
-
-            container.color = "#38bdf8";
-
-        } else if (pH < 11) {
-
-            container.color = "#6366f1";
-
-        } else {
-
-            container.color = "#8b5cf6";
-        }
-    }
-
-    /* ================================================================
-       VISUELS DE RÉACTION
-       ================================================================ */
-
-    function updateReactionVisuals(container) {
-
-        const reaction =
-            container.reactionState;
-
-        if (!reaction) return;
-
-        const hasGas =
-            container.components.some(
-                component =>
-                    component.phase === "gas" &&
-                    Number(component.moles || 0) > 0
+        const cuso4 =
+            getComponentById(
+                object,
+                "copper-sulfate"
             );
 
-        const hasSolid =
-            container.components.some(
-                component =>
-                    component.phase === "solid" &&
-                    component.role === "precipitate" &&
-                    Number(component.massG || 0) > 0
-            );
-
-        reaction.gas =
-            reaction.gas || hasGas;
-
-        reaction.precipitate =
-            reaction.precipitate || hasSolid;
-
-        reaction.color =
-            container.color;
-    }
-
-    /* ================================================================
-       RECALCUL CONTENEUR
-       ================================================================ */
-
-    function recalculateContainer(container) {
-
-        if (!container ||
-            container.kind !== "container") {
-            return;
-        }
-
-        container.volumeMl =
-            Math.max(
-                0,
-                Number(container.volumeMl || 0)
-            );
-
-        container.massG =
-            container.emptyMassG +
-            totalComponentMass(container);
-
-        container.density =
-            container.volumeMl > 0
-                ? totalComponentMass(container) /
-                  container.volumeMl
-                : 0;
-
-        if (container.volumeMl <= 0) {
-
-            container.phase = "empty";
-            container.state = "vide";
-            container.pH = 7;
-
-        } else {
-
-            const hasGas =
-                container.components.some(
-                    c => c.phase === "gas" &&
-                        c.moles > 0
-                );
-
-            const hasSolid =
-                container.components.some(
-                    c => c.phase === "solid" &&
-                        c.moles > 0
-                );
-
-            if (hasGas && hasSolid) {
-
-                container.state =
-                    "réaction en cours";
-
-            } else if (hasGas) {
-
-                container.state =
-                    "dégagement gazeux";
-
-            } else if (hasSolid) {
-
-                container.state =
-                    "suspension / précipité";
-
-            } else {
-
-                container.state =
-                    "solution";
-            }
-
-            updateSolutionPH(container);
-        }
-    }
-
-    /* ================================================================
-       CHAUFFAGE
-       ================================================================ */
-
-    function toggleHeating(object) {
-
-        if (!object) return;
 
         if (
-            object.kind !== "container" &&
-            !object.heater
+            cuso4 &&
+            Number(cuso4.moles) >
+                0
         ) {
 
-            toast(
-                "Cet objet ne peut pas être chauffé directement.",
+            return 4.0;
+
+        }
+
+
+        /*
+         * Eau / sel neutre.
+         */
+        return 7;
+
+    }
+
+
+    /* ============================================================
+       21 — CHAUFFAGE
+    ============================================================ */
+
+    function heatSelectedObject() {
+
+        const object =
+            getSelectedObject();
+
+
+        if (
+            !object
+        ) {
+
+            showToast(
+                "Sélectionnez un objet à chauffer.",
                 "warning"
             );
 
             return;
+
         }
 
-        object.heating =
-            !object.heating;
 
-        if (object.heating) {
+        /*
+         * Si on sélectionne un appareil chauffant,
+         * il passe simplement à l'état actif.
+         */
+        if (
+            object.type ===
+                "heater"
+        ) {
+
+            object.heated =
+                !object.heated;
+
 
             object.state =
-                "chauffage";
+                object.heated
+                    ? "Allumé"
+                    : "Éteint";
 
-            logObservation(
-                `${object.name} commence à être chauffé.`
+
+            addObservation(
+                `${
+                    object.name
+                } ${
+                    object.heated
+                        ? "activé"
+                        : "désactivé"
+                }.`
             );
 
-            toast(
-                `${object.name} en chauffage.`,
+
+            renderWorkspace();
+
+            updateAllUI();
+
+            saveState(false);
+
+
+            showToast(
+                object.heated
+                    ? "Chauffage activé."
+                    : "Chauffage désactivé.",
                 "success"
             );
 
-        } else {
 
-            object.state =
-                object.volumeMl > 0
-                    ? "solution"
-                    : "vide";
+            return;
 
-            toast(
-                "Chauffage arrêté.",
-                "success"
-            );
         }
 
-        renderAll();
-    }
 
-    function chemistryTick() {
+        /*
+         * Un récipient vide peut quand même être chauffé.
+         */
+        const previousTemperature =
+            Number(
+                object.temperature
+            ) || 25;
 
-        const now =
-            Date.now();
 
-        const elapsed =
-            Math.min(
-                5,
-                Math.max(
-                    0,
-                    (now - state.lastTick) / 1000
+        const material =
+            getMaterial(
+                object.materialId
+            );
+
+
+        const thermal =
+            material?.thermal ||
+            {
+                meltingPoint: null,
+                boilingPoint: null,
+                heatCapacity: 4.18
+            };
+
+
+        let step =
+            CHEM_CONFIG.heatingStepC;
+
+
+        /*
+         * Les mélanges peuvent avoir une capacité thermique
+         * différente ; on reste dans un modèle pédagogique.
+         */
+        if (
+            isContainer(
+                object
+            )
+        ) {
+
+            step =
+                20;
+
+        }
+
+
+        object.temperature =
+            clamp(
+                previousTemperature +
+                    step,
+                CHEM_CONFIG.minTemperature,
+                CHEM_CONFIG.maxTemperature
+            );
+
+
+        object.heated =
+            true;
+
+
+        state.temperature =
+            object.temperature;
+
+
+        state.totalEnergy +=
+            step;
+
+
+        /*
+         * Vérification des phases et évaporation.
+         */
+        processThermalPhaseChanges(
+            object
+        );
+
+
+        /*
+         * Une réaction dépendant de la température
+         * peut être réévaluée.
+         */
+        if (
+            isContainer(
+                object
+            )
+        ) {
+
+            evaluateCompositionReaction(
+                object
+            );
+
+        }
+
+
+        addObservation(
+            `${
+                object.name
+            } chauffé de ${
+                formatNumber(
+                    previousTemperature
                 )
-            );
+            } °C à ${
+                formatNumber(
+                    object.temperature
+                )
+            } °C.`
+        );
 
-        state.lastTick = now;
 
-        if (!elapsed) return;
+        renderWorkspace();
 
-        state.objects.forEach(object => {
+        updateAllUI();
 
-            if (object.heating) {
+        saveState(false);
 
-                const target =
-                    object.phase === "liquid"
-                        ? 95
-                        : 80;
 
-                const rate =
-                    object.volumeMl > 0
-                        ? 4.5
-                        : 2.5;
+        showToast(
+            `${
+                object.name
+            } : ${
+                formatNumber(
+                    object.temperature
+                )
+            } °C`,
+            "success"
+        );
 
-                object.temperatureC +=
-                    (target -
-                        object.temperatureC) *
-                    Math.min(
-                        1,
-                        rate *
-                        elapsed /
-                        60
-                    );
-
-                object.temperatureC =
-                    clamp(
-                        object.temperatureC,
-                        MIN_TEMPERATURE,
-                        MAX_SIMULATION_TEMPERATURE
-                    );
-
-                /*
-                 * Modèle de changement d'état visuel
-                 * pour une solution aqueuse chauffée.
-                 */
-
-                if (
-                    object.volumeMl > 0 &&
-                    object.temperatureC >= 100
-                ) {
-
-                    const evaporation =
-                        Math.min(
-                            object.volumeMl,
-                            object.volumeMl *
-                            0.003 *
-                            elapsed
-                        );
-
-                    if (evaporation > 0) {
-
-                        object.volumeMl -=
-                            evaporation;
-
-                        object.components.forEach(
-                            component => {
-
-                                if (
-                                    component.phase ===
-                                    "liquid"
-                                ) {
-
-                                    const ratio =
-                                        clamp(
-                                            evaporation /
-                                            Math.max(
-                                                object.volumeMl +
-                                                evaporation,
-                                                0.001
-                                            ),
-                                            0,
-                                            1
-                                        );
-
-                                    component.volumeMl *=
-                                        (1 - ratio);
-
-                                    component.massG *=
-                                        (1 - ratio);
-                                }
-                            }
-                        );
-
-                        object.reactionState.gas =
-                            true;
-                    }
-
-                    object.state =
-                        "ébullition simulée";
-                }
-            } else {
-
-                /*
-                 * Retour progressif vers la température ambiante.
-                 */
-
-                if (
-                    Math.abs(
-                        object.temperatureC -
-                        DEFAULT_TEMPERATURE
-                    ) > 0.05
-                ) {
-
-                    object.temperatureC +=
-                        (
-                            DEFAULT_TEMPERATURE -
-                            object.temperatureC
-                        ) *
-                        Math.min(
-                            1,
-                            elapsed * 0.02
-                        );
-                }
-            }
-
-            if (object.kind === "container") {
-
-                recalculateContainer(object);
-
-                if (
-                    object.reactionState?.gas &&
-                    object.temperatureC <
-                    40
-                ) {
-
-                    /*
-                     * Le dégagement gazeux visuel
-                     * diminue progressivement.
-                     */
-
-                    object.reactionState.gas =
-                        object.components.some(
-                            c =>
-                                c.phase === "gas" &&
-                                c.moles > 0
-                        );
-                }
-            }
-        });
-
-        updateStatus();
-
-        updateWorkspaceVisuals();
-
-        updateInspectorLive();
     }
 
-    /* ================================================================
-       MESURES
-       ================================================================ */
 
-    function openMeasurementModal(object) {
-
-        if (!object) return;
-
-        const modal =
-            $("#measurementModal");
-
-        if (!modal) return;
-
-        const type =
-            state.measurementType ||
-            "volume";
-
-        $$(".measurement-option").forEach(
-            option => {
-
-                option.classList.toggle(
-                    "active",
-                    option.dataset.measurement ===
-                    type
-                );
-            }
-        );
-
-        updateMeasurementDisplay(
-            object,
-            type
-        );
-
-        modal.classList.add("open");
-        modal.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-    }
-
-    function closeMeasurementModal() {
-
-        const modal =
-            $("#measurementModal");
-
-        if (!modal) return;
-
-        modal.classList.remove("open");
-
-        modal.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-    }
-
-    function updateMeasurementDisplay(
-        object,
-        measurement
+    function processThermalPhaseChanges(
+        object
     ) {
 
-        if (!object) return;
+        if (
+            !object
+        ) {
 
-        state.measurementType =
-            measurement;
+            return;
 
-        let value = 0;
-        let unit = "";
-        let label = "";
-        let precision = "";
+        }
 
-        switch (measurement) {
+
+        if (
+            !object.composition ||
+            !object.composition.length
+        ) {
+
+            return;
+
+        }
+
+
+        const temperature =
+            Number(
+                object.temperature
+            ) || 25;
+
+
+        object.composition.forEach(
+            component => {
+
+                const material =
+                    getMaterial(
+                        component.materialId
+                    );
+
+
+                if (
+                    !material
+                ) {
+
+                    return;
+
+                }
+
+
+                const thermal =
+                    material.thermal;
+
+
+                if (
+                    !thermal
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                 * Eau / éthanol / liquide :
+                 * évaporation progressive au-dessus du point
+                 * d'ébullition.
+                 */
+                if (
+                    Number.isFinite(
+                        thermal.boilingPoint
+                    ) &&
+                    temperature >=
+                        thermal.boilingPoint &&
+                    Number(
+                        component.volumeMl
+                    ) > 0
+                ) {
+
+                    const evaporatedVolume =
+                        component.volumeMl *
+                        CHEM_CONFIG.evaporationFraction;
+
+
+                    const evaporationRatio =
+                        evaporatedVolume /
+                        component.volumeMl;
+
+
+                    component.volumeMl =
+                        Math.max(
+                            0,
+                            component.volumeMl -
+                                evaporatedVolume
+                        );
+
+
+                    component.amount =
+                        component.volumeMl;
+
+
+                    component.mass =
+                        Math.max(
+                            0,
+                            component.mass *
+                                (
+                                    1 -
+                                    evaporationRatio
+                                )
+                        );
+
+
+                    component.moles =
+                        Math.max(
+                            0,
+                            component.moles *
+                                (
+                                    1 -
+                                    evaporationRatio
+                                )
+                        );
+
+
+                    component.phase =
+                        "vapeur partielle";
+
+
+                    addObservation(
+                        `${
+                            material.name
+                        } : évaporation partielle à ${
+                            formatNumber(
+                                temperature
+                            )
+                        } °C.`
+                    );
+
+                }
+
+
+                /*
+                 * Fusion simplifiée.
+                 */
+                if (
+                    Number.isFinite(
+                        thermal.meltingPoint
+                    ) &&
+                    temperature >=
+                        thermal.meltingPoint &&
+                    component.phase ===
+                        "solid"
+                ) {
+
+                    component.phase =
+                        "liquide";
+
+
+                    addObservation(
+                        `${
+                            material.name
+                        } : changement de phase solide → liquide.`
+                    );
+
+                }
+
+            }
+        );
+
+
+        recalculateContainer(
+            object
+        );
+
+    }
+
+
+    /* ============================================================
+       22 — MESURES
+    ============================================================ */
+
+    function openMeasurementModal() {
+
+        const object =
+            getSelectedObject();
+
+
+        if (
+            !object
+        ) {
+
+            showToast(
+                "Sélectionnez un objet à mesurer.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+
+        updateMeasurement(
+            "volume"
+        );
+
+
+        openModal(
+            $("measurementModal")
+        );
+
+    }
+
+
+    function getMeasurementValue(
+        object,
+        type
+    ) {
+
+        switch (
+            type
+        ) {
 
             case "volume":
 
-                value =
-                    totalVolume(object);
+                return {
+                    label:
+                        "VOLUME",
 
-                unit = "mL";
-                label = "Volume";
+                    value:
+                        formatNumber(
+                            calculateObjectVolume(
+                                object
+                            )
+                        ),
 
-                precision =
-                    `± ${object.precisionVolume || 0.5} mL`;
+                    unit:
+                        "mL",
 
-                break;
+                    precision:
+                        "± 0.1 mL"
+                };
+
 
             case "temperature":
 
-                value =
-                    Number(
-                        object.temperatureC ??
-                        DEFAULT_TEMPERATURE
-                    );
+                return {
+                    label:
+                        "TEMPÉRATURE",
 
-                unit = "°C";
-                label = "Température";
+                    value:
+                        formatNumber(
+                            object.temperature
+                        ),
 
-                precision =
-                    `± ${object.precisionTemperature || 0.1} °C`;
+                    unit:
+                        "°C",
 
-                break;
+                    precision:
+                        "± 0.1 °C"
+                };
+
 
             case "ph":
 
-                value =
-                    object.kind === "container"
-                        ? calculateSolutionPH(object)
-                        : Number(object.pH ?? 7);
+                return {
+                    label:
+                        "pH",
 
-                unit = "pH";
-                label = "Acidité";
+                    value:
+                        Number.isFinite(
+                            object.ph
+                        )
+                            ? formatNumber(
+                                object.ph,
+                                2
+                            )
+                            : "—",
 
-                precision =
-                    `± ${object.precisionPH || 0.01}`;
+                    unit:
+                        "pH",
 
-                break;
+                    precision:
+                        "± 0.01"
+                };
+
 
             case "mass":
 
-                value =
-                    calculateTotalMass(object);
+                return {
+                    label:
+                        "MASSE",
 
-                unit = "g";
-                label = "Masse";
+                    value:
+                        formatNumber(
+                            calculateObjectMass(
+                                object
+                            )
+                        ),
 
-                precision =
-                    `± ${object.precisionMass || 0.01} g`;
+                    unit:
+                        "g",
 
-                break;
+                    precision:
+                        "± 0.01 g"
+                };
+
 
             case "density":
 
-                value =
-                    calculateDensity(object);
+                return {
+                    label:
+                        "DENSITÉ",
 
-                unit = "g/mL";
-                label = "Densité";
+                    value:
+                        Number.isFinite(
+                            calculateEffectiveDensity(
+                                object
+                            )
+                        )
+                            ? formatNumber(
+                                calculateEffectiveDensity(
+                                    object
+                                ),
+                                3
+                            )
+                            : "—",
 
-                precision =
-                    "± 0.001 g/mL";
+                    unit:
+                        "g/mL",
 
-                break;
+                    precision:
+                        "± 0.001 g/mL"
+                };
+
 
             default:
 
-                value = 0;
-                unit = "";
-                label = "Mesure";
-                precision = "";
+                return {
+                    label:
+                        "MESURE",
+
+                    value:
+                        "—",
+
+                    unit:
+                        "",
+
+                    precision:
+                        "—"
+                };
+
         }
 
-        const screenLabel =
-            $("#instrumentScreenLabel");
-
-        const screenValue =
-            $("#instrumentScreenValue");
-
-        const screenUnit =
-            $("#instrumentScreenUnit");
-
-        const measurementLabel =
-            $("#measurementLabel");
-
-        const measurementValue =
-            $("#measurementValue");
-
-        const measurementPrecision =
-            $("#measurementPrecision");
-
-        if (screenLabel) {
-            screenLabel.textContent = label;
-        }
-
-        if (screenValue) {
-            screenValue.textContent =
-                formatMeasurementValue(
-                    value,
-                    measurement
-                );
-        }
-
-        if (screenUnit) {
-            screenUnit.textContent = unit;
-        }
-
-        if (measurementLabel) {
-            measurementLabel.textContent =
-                label;
-        }
-
-        if (measurementValue) {
-            measurementValue.textContent =
-                `${formatMeasurementValue(
-                    value,
-                    measurement
-                )} ${unit}`;
-        }
-
-        if (measurementPrecision) {
-            measurementPrecision.textContent =
-                precision;
-        }
     }
 
-    function formatMeasurementValue(
-        value,
-        measurement
+
+    function updateMeasurement(
+        type
     ) {
 
-        if (!Number.isFinite(value)) {
-            return "—";
-        }
-
-        if (measurement === "ph") {
-            return round(value, 2).toFixed(2);
-        }
-
-        if (measurement === "temperature") {
-            return round(value, 1).toFixed(1);
-        }
-
-        if (measurement === "density") {
-            return round(value, 3).toFixed(3);
-        }
-
-        if (measurement === "mass") {
-            return round(value, 2).toFixed(2);
-        }
-
-        return round(value, 1).toFixed(1);
-    }
-
-    /* ================================================================
-       INSPECTEUR
-       ================================================================ */
-
-    function renderInspector() {
-
         const object =
-            getSelected();
+            getSelectedObject();
 
-        const type =
-            $("#selectedObjectType");
-
-        const inspector =
-            $("#objectInspector");
-
-        const materialProperties =
-            $("#materialProperties");
-
-        const compositionSection =
-            $("#compositionSection");
-
-        const measurementSection =
-            $("#measurementSection");
-
-        const reactionSection =
-            $("#reactionSection");
-
-        const objectActions =
-            $("#objectActions");
-
-        if (!object) {
-
-            if (type) {
-                type.textContent =
-                    "Aucun objet sélectionné";
-            }
-
-            if (inspector) {
-                inspector.innerHTML =
-                    `
-                    <div class="chem-inspector-empty">
-                        Sélectionnez un élément du laboratoire.
-                    </div>
-                    `;
-            }
-
-            if (materialProperties) {
-                materialProperties.hidden = true;
-            }
-
-            if (compositionSection) {
-                compositionSection.hidden = true;
-            }
-
-            if (measurementSection) {
-                measurementSection.hidden = true;
-            }
-
-            if (reactionSection) {
-                reactionSection.hidden = true;
-            }
-
-            if (objectActions) {
-                objectActions.hidden = true;
-            }
-
-            return;
-        }
-
-        if (type) {
-            type.textContent =
-                `${object.icon || "🧪"} ${object.name}`;
-        }
-
-        if (inspector) {
-
-            inspector.innerHTML = `
-                <div class="chem-inspector-title">
-                    ${escapeHTML(object.name)}
-                </div>
-
-                <div class="chem-inspector-subtitle">
-                    ${
-                        escapeHTML(
-                            object.formula ||
-                            object.category
-                        )
-                    }
-                </div>
-            `;
-        }
-
-        if (materialProperties) {
-            materialProperties.hidden = false;
-        }
-
-        setText(
-            "#propName",
-            object.name
-        );
-
-        setText(
-            "#propState",
-            object.state || object.phase || "—"
-        );
-
-        setText(
-            "#propTemperature",
-            `${round(object.temperatureC, 1)} °C`
-        );
-
-        setText(
-            "#propMass",
-            `${round(calculateTotalMass(object), 2)} g`
-        );
-
-        setText(
-            "#propVolume",
-            `${round(object.volumeMl || 0, 1)} mL`
-        );
-
-        setText(
-            "#propDensity",
-            object.volumeMl > 0
-                ? `${round(calculateDensity(object), 3)} g/mL`
-                : "—"
-        );
-
-        setText(
-            "#propPH",
-            object.kind === "container"
-                ? round(calculateSolutionPH(object), 2)
-                : round(object.pH ?? 7, 2)
-        );
-
-        setText(
-            "#propColor",
-            colorName(object.color)
-        );
-
-        if (compositionSection) {
-
-            compositionSection.hidden =
-                object.kind !== "container";
-
-            if (object.kind === "container") {
-                renderComposition(object);
-            }
-        }
-
-        if (measurementSection) {
-            measurementSection.hidden = false;
-        }
-
-        if (reactionSection) {
-
-            const hasReaction =
-                object.reactionState?.active ||
-                object.kind === "container";
-
-            reactionSection.hidden =
-                !hasReaction;
-
-            if (hasReaction) {
-                renderReactionInfo(object);
-            }
-        }
-
-        if (objectActions) {
-            objectActions.hidden = false;
-        }
-    }
-
-    function updateInspectorLive() {
-
-        if (!state.selectedId) return;
-
-        const object =
-            getSelected();
-
-        if (!object) return;
-
-        setText(
-            "#propTemperature",
-            `${round(object.temperatureC, 1)} °C`
-        );
-
-        setText(
-            "#propMass",
-            `${round(calculateTotalMass(object), 2)} g`
-        );
-
-        setText(
-            "#propVolume",
-            `${round(object.volumeMl || 0, 1)} mL`
-        );
-
-        setText(
-            "#propDensity",
-            object.volumeMl > 0
-                ? `${round(calculateDensity(object), 3)} g/mL`
-                : "—"
-        );
-
-        setText(
-            "#propPH",
-            object.kind === "container"
-                ? round(calculateSolutionPH(object), 2)
-                : round(object.pH ?? 7, 2)
-        );
-
-        if (object.kind === "container") {
-            renderComposition(object);
-            renderReactionInfo(object);
-        }
-    }
-
-    function setText(selector, value) {
-
-        const element = $(selector);
-
-        if (element) {
-            element.textContent =
-                String(value ?? "—");
-        }
-    }
-
-    function renderComposition(object) {
-
-        const list =
-            $("#compositionList");
-
-        const total =
-            $("#compositionTotal");
-
-        if (!list) return;
 
         if (
-            !object.components ||
-            !object.components.length
+            !object
         ) {
 
-            list.innerHTML =
-                `<div class="chem-empty-composition">
-                    Aucun composant.
-                </div>`;
-
-            if (total) {
-                total.textContent =
-                    "0";
-            }
-
             return;
+
         }
 
-        const entries =
-            object.components.filter(
-                component =>
-                    Number(component.moles || 0) > 0 ||
-                    Number(component.massG || 0) > 0
+
+        recalculateObjectScientificState(
+            object
+        );
+
+
+        const measurement =
+            getMeasurementValue(
+                object,
+                type
             );
 
-        const totalMass =
-            totalComponentMass(object);
 
-        if (total) {
-            total.textContent =
-                `${round(totalMass, 3)} g`;
+        $("instrumentScreenLabel")
+            .textContent =
+            measurement.label;
+
+
+        $("instrumentScreenValue")
+            .textContent =
+            measurement.value;
+
+
+        $("instrumentScreenUnit")
+            .textContent =
+            measurement.unit;
+
+
+        $("measurementLabel")
+            .textContent =
+            measurement.label;
+
+
+        $("measurementValue")
+            .textContent =
+            measurement.value;
+
+
+        $("measurementPrecision")
+            .textContent =
+            measurement.precision;
+
+
+        measurementSection?.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    /* ============================================================
+       23 — ZOOM
+    ============================================================ */
+
+    function applyZoom() {
+
+        const value =
+            `${Math.round(
+                state.zoom *
+                    100
+            )}%`;
+
+
+        if (
+            $("zoomValue")
+        ) {
+
+            $("zoomValue")
+                .textContent =
+                value;
+
         }
 
-        list.innerHTML =
-            entries.map(component => `
-                <div class="chem-composition-item">
 
-                    <div>
-                        <strong>
-                            ${escapeHTML(
-                                component.name ||
-                                component.formula ||
-                                component.id
-                            )}
-                        </strong>
-
-                        <small>
-                            ${escapeHTML(
-                                component.formula || ""
-                            )}
-                        </small>
-                    </div>
-
-                    <div>
-                        ${
-                            component.moles
-                                ? `${round(component.moles, 5)} mol`
-                                : `${round(component.massG || 0, 3)} g`
-                        }
-                    </div>
-
-                </div>
-            `).join("");
-    }
-
-    function renderReactionInfo(object) {
-
-        const reaction =
-            object.reactionState || {};
-
-        setText(
-            "#reactionStatus",
-            reaction.active
-                ? "Réaction détectée"
-                : "Aucune réaction active"
+        chemistryCanvas?.style.setProperty(
+            "--chem-zoom",
+            state.zoom
         );
 
-        setText(
-            "#reactionPhase",
-            reaction.phase || "stable"
-        );
 
-        const gas =
-            object.components?.some(
-                component =>
-                    component.phase === "gas" &&
-                    component.moles > 0
-            );
+        if (
+            workspaceObjects
+        ) {
 
-        const precipitate =
-            object.components?.some(
-                component =>
-                    component.phase === "solid" &&
-                    component.role === "precipitate" &&
-                    component.massG > 0
-            );
+            workspaceObjects.style.transform =
+                `scale(${state.zoom})`;
 
-        setText(
-            "#reactionGas",
-            gas ? "Oui — gaz détecté" : "Non"
-        );
+            workspaceObjects.style.transformOrigin =
+                "top left";
 
-        setText(
-            "#reactionPrecipitate",
-            precipitate
-                ? "Oui — solide détecté"
-                : "Non"
-        );
-
-        setText(
-            "#reactionColor",
-            colorName(object.color)
-        );
-    }
-
-    function colorName(hex) {
-
-        const names = {
-            "#bde9ff": "Bleu très clair",
-            "#2196f3": "Bleu",
-            "#ef4444": "Rouge",
-            "#f97316": "Orange",
-            "#facc15": "Jaune",
-            "#22c55e": "Vert",
-            "#38bdf8": "Bleu cyan",
-            "#6366f1": "Indigo",
-            "#8b5cf6": "Violet",
-            "#f472b6": "Rose",
-            "#ffffff": "Blanc",
-            "#f8fafc": "Incolore / clair",
-            "#b87333": "Cuivre"
-        };
-
-        return names[hex] ||
-            hex ||
-            "Non défini";
-    }
-
-    /* ================================================================
-       SUPPRESSION
-       ================================================================ */
-
-    function removeSelected() {
-
-        const object =
-            getSelected();
-
-        if (!object) {
-
-            toast(
-                "Aucun objet sélectionné.",
-                "warning"
-            );
-
-            return;
         }
 
-        state.objects =
-            state.objects.filter(
-                item =>
-                    item.id !== object.id
-            );
 
-        state.selectedId = null;
+        if (
+            $("workspaceGrid")
+        ) {
 
-        logObservation(
-            `${object.name} a été retiré du laboratoire.`
-        );
+            $("workspaceGrid").style.transform =
+                `scale(${state.zoom})`;
 
-        renderAll();
+            $("workspaceGrid").style.transformOrigin =
+                "top left";
 
-        toast(
-            `${object.name} retiré.`,
-            "success"
-        );
-    }
-
-    /* ================================================================
-       STATUT DU LABORATOIRE
-       ================================================================ */
-
-    function updateStatus() {
-
-        setText(
-            "#statusObjects",
-            String(state.objects.length)
-        );
-
-        const totalVolume =
-            state.objects.reduce(
-                (sum, object) =>
-                    sum +
-                    Number(
-                        object.volumeMl || 0
-                    ),
-                0
-            );
-
-        setText(
-            "#statusVolume",
-            `${round(totalVolume, 1)} mL`
-        );
-
-        const avgTemp =
-            averageWorkspaceTemperature();
-
-        setText(
-            "#statusTemperature",
-            `${round(avgTemp, 1)} °C`
-        );
-
-        const selected =
-            getSelected();
-
-        const ph =
-            selected?.kind === "container"
-                ? calculateSolutionPH(selected)
-                : selected
-                    ? Number(selected.pH ?? 7)
-                    : 7;
-
-        setText(
-            "#statusPH",
-            round(ph, 2)
-        );
-
-        const totalMass =
-            state.objects.reduce(
-                (sum, object) =>
-                    sum +
-                    calculateTotalMass(object),
-                0
-            );
-
-        setText(
-            "#statusMass",
-            `${round(totalMass, 2)} g`
-        );
-    }
-
-    /* ================================================================
-       OBSERVATION / LOG
-       ================================================================ */
-
-    function logObservation(message) {
-
-        const entry = {
-            id: uid("log"),
-            time: nowTime(),
-            message: String(message)
-        };
-
-        state.logs.unshift(entry);
-
-        if (state.logs.length > 100) {
-            state.logs.length = 100;
         }
 
-        renderObservationLog();
-
-        pulseObservation();
     }
 
-    function renderObservationLog() {
 
-        const log =
-            $("#observationLog");
-
-        if (!log) return;
-
-        if (!state.logs.length) {
-
-            log.innerHTML =
-                `<div class="chem-log-empty">
-                    Aucune observation.
-                </div>`;
-
-            return;
-        }
-
-        log.innerHTML =
-            state.logs.map(
-                entry => `
-                    <div class="chem-log-entry">
-                        <time>
-                            ${escapeHTML(entry.time)}
-                        </time>
-
-                        <span>
-                            ${escapeHTML(entry.message)}
-                        </span>
-                    </div>
-                `
-            ).join("");
-    }
-
-    function pulseObservation() {
-
-        const pulse =
-            $("#observationPulse");
-
-        if (!pulse) return;
-
-        pulse.classList.remove("active");
-
-        void pulse.offsetWidth;
-
-        pulse.classList.add("active");
-    }
-
-    function announce(message) {
-
-        const live =
-            $("#chemLiveRegion");
-
-        if (live) {
-            live.textContent =
-                String(message);
-        }
-    }
-
-    /* ================================================================
-       TOAST
-       ================================================================ */
-
-    function toast(
-        message,
-        type = "info"
+    function changeZoom(
+        delta
     ) {
-
-        const stack =
-            $("#chemToastStack");
-
-        if (!stack) return;
-
-        const item =
-            document.createElement("div");
-
-        item.className =
-            `chem-toast chem-toast-${type}`;
-
-        item.innerHTML = `
-            <span>
-                ${escapeHTML(message)}
-            </span>
-        `;
-
-        stack.appendChild(item);
-
-        requestAnimationFrame(() => {
-            item.classList.add("show");
-        });
-
-        setTimeout(() => {
-
-            item.classList.remove("show");
-
-            setTimeout(
-                () => item.remove(),
-                300
-            );
-
-        }, 3200);
-    }
-
-    /* ================================================================
-       ZOOM
-       ================================================================ */
-
-    function setZoom(value) {
 
         state.zoom =
             clamp(
-                Number(value) || 1,
-                0.5,
-                2
+                state.zoom +
+                    delta,
+                CHEM_CONFIG.minZoom,
+                CHEM_CONFIG.maxZoom
             );
 
-        const workspace =
-            $("#workspaceObjects") ||
-            $("#chemistryCanvas");
 
-        if (workspace) {
+        applyZoom();
 
-            workspace.style.transform =
-                `scale(${state.zoom})`;
+        saveState(false);
 
-            workspace.style.transformOrigin =
-                "top left";
-        }
-
-        setText(
-            "#zoomValue",
-            `${Math.round(state.zoom * 100)}%`
-        );
     }
 
-    function zoomIn() {
-
-        setZoom(
-            state.zoom + 0.1
-        );
-    }
-
-    function zoomOut() {
-
-        setZoom(
-            state.zoom - 0.1
-        );
-    }
 
     function fitWorkspace() {
 
-        setZoom(1);
-
         const viewport =
-            $("#workspaceViewport");
+            $("workspaceViewport");
 
-        const workspace =
-            $("#workspaceObjects") ||
-            $("#chemistryCanvas");
-
-        if (!viewport || !workspace) return;
-
-        const viewportWidth =
-            viewport.clientWidth;
-
-        const estimatedWidth =
-            Math.max(
-                workspace.scrollWidth,
-                900
-            );
 
         if (
-            estimatedWidth >
-            viewportWidth
+            !viewport
         ) {
 
-            setZoom(
-                clamp(
-                    viewportWidth /
-                    estimatedWidth,
-                    0.5,
-                    1
-                )
-            );
-        }
-    }
-
-    /* ================================================================
-       EFFACER LABORATOIRE
-       ================================================================ */
-
-    function clearWorkspace() {
-
-        if (!state.objects.length) {
-            toast(
-                "Le laboratoire est déjà vide.",
-                "info"
-            );
             return;
+
         }
 
-        const confirmed =
-            window.confirm(
-                "Voulez-vous retirer tous les objets du laboratoire ?"
+
+        const availableWidth =
+            viewport.clientWidth -
+            80;
+
+
+        const availableHeight =
+            viewport.clientHeight -
+            80;
+
+
+        const scaleX =
+            availableWidth /
+            CHEM_CONFIG.workspaceWidth;
+
+
+        const scaleY =
+            availableHeight /
+            CHEM_CONFIG.workspaceHeight;
+
+
+        state.zoom =
+            clamp(
+                Math.min(
+                    scaleX,
+                    scaleY
+                ),
+                CHEM_CONFIG.minZoom,
+                1
             );
 
-        if (!confirmed) return;
 
-        state.objects = [];
-        state.selectedId = null;
+        applyZoom();
 
-        logObservation(
-            "Le laboratoire a été vidé."
-        );
+        saveState(false);
 
-        renderAll();
-
-        toast(
-            "Laboratoire vidé.",
-            "success"
-        );
     }
 
-    /* ================================================================
-       RESET
-       ================================================================ */
 
-    function resetLab() {
+    /* ============================================================
+       24 — BIBLIOTHÈQUE MOBILE
+    ============================================================ */
 
-        const confirmed =
-            window.confirm(
-                "Réinitialiser complètement la simulation ?"
-            );
-
-        if (!confirmed) return;
-
-        state.objects = [];
-        state.selectedId = null;
-        state.nextId = 1;
-        state.logs = [];
-        state.tool = "select";
-        state.category = "all";
-        state.search = "";
-        state.zoom = 1;
-
-        try {
-            localStorage.removeItem(
-                STORAGE_KEY
-            );
-
-            localStorage.removeItem(
-                SESSION_KEY
-            );
-        } catch (_) {}
-
-        renderAll();
-
-        toast(
-            "Simulation réinitialisée.",
-            "success"
-        );
-
-        logObservation(
-            "Nouvelle session de laboratoire."
-        );
-    }
-
-    /* ================================================================
-       SAUVEGARDE
-       ================================================================ */
-
-    function saveSession() {
-
-        const name =
-            $("#sessionName")?.value ||
-            $("#sessionName")?.textContent ||
-            state.sessionName;
-
-        state.sessionName =
-            String(name || state.sessionName)
-                .trim() ||
-            "Laboratoire chimique FOBAS";
-
-        const payload = {
-            version: 4,
-            savedAt: new Date().toISOString(),
-            sessionName: state.sessionName,
-            zoom: state.zoom,
-            objects: state.objects,
-            logs: state.logs,
-            nextId: state.nextId
-        };
-
-        try {
-
-            localStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(payload)
-            );
-
-            localStorage.setItem(
-                SESSION_KEY,
-                state.sessionName
-            );
-
-        } catch (error) {
-
-            console.error(
-                "FOBAS Chemistry save error:",
-                error
-            );
-
-            toast(
-                "Impossible d'enregistrer la session.",
-                "error"
-            );
-
-            return;
-        }
-
-        downloadJSON(
-            payload,
-            "simulation-chimique-fobas-session.json"
-        );
-
-        logObservation(
-            "Session enregistrée."
-        );
-
-        toast(
-            "Session enregistrée avec succès.",
-            "success"
-        );
-    }
-
-    function downloadJSON(data, filename) {
-
-        try {
-
-            const blob =
-                new Blob(
-                    [
-                        JSON.stringify(
-                            data,
-                            null,
-                            2
-                        )
-                    ],
-                    {
-                        type:
-                            "application/json"
-                    }
-                );
-
-            const url =
-                URL.createObjectURL(blob);
-
-            const anchor =
-                document.createElement("a");
-
-            anchor.href = url;
-            anchor.download = filename;
-
-            document.body.appendChild(anchor);
-
-            anchor.click();
-
-            anchor.remove();
-
-            setTimeout(
-                () =>
-                    URL.revokeObjectURL(url),
-                1000
-            );
-
-        } catch (_) {
-            /*
-             * Le localStorage reste la sauvegarde principale.
-             */
-        }
-    }
-
-    /* ================================================================
-       CHARGEMENT
-       ================================================================ */
-
-    function loadSession() {
-
-        try {
-
-            const raw =
-                localStorage.getItem(
-                    STORAGE_KEY
-                );
-
-            if (!raw) return false;
-
-            const payload =
-                JSON.parse(raw);
-
-            if (
-                !payload ||
-                !Array.isArray(payload.objects)
-            ) {
-                return false;
-            }
-
-            state.objects =
-                payload.objects;
-
-            state.logs =
-                Array.isArray(payload.logs)
-                    ? payload.logs
-                    : [];
-
-            state.nextId =
-                Number(payload.nextId || 1);
-
-            state.zoom =
-                Number(payload.zoom || 1);
-
-            state.sessionName =
-                payload.sessionName ||
-                "Laboratoire chimique FOBAS";
-
-            state.objects.forEach(
-                normalizeLoadedObject
-            );
-
-            return true;
-
-        } catch (error) {
-
-            console.warn(
-                "FOBAS Chemistry load error:",
-                error
-            );
-
-            return false;
-        }
-    }
-
-    function normalizeLoadedObject(object) {
-
-        object.components =
-            Array.isArray(object.components)
-                ? object.components
-                : [];
-
-        object.reactionState =
-            object.reactionState ||
-            {
-                active: false,
-                gas: false,
-                precipitate: false,
-                bubbling: false,
-                phase: "stable",
-                color: object.color || "#dbeafe",
-                description: ""
-            };
-
-        object.properties =
-            object.properties || {};
-
-        object.temperatureC =
-            Number(
-                object.temperatureC ??
-                DEFAULT_TEMPERATURE
-            );
-
-        object.volumeMl =
-            Number(object.volumeMl || 0);
-
-        object.massG =
-            Number(object.massG || 0);
-
-        object.x =
-            Number(object.x || 20);
-
-        object.y =
-            Number(object.y || 20);
-
-        object.width =
-            Number(object.width || 105);
-
-        object.height =
-            Number(object.height || 135);
+    function openMaterials() {
 
         if (
-            object.kind === "container"
+            !materialsPanel
+        ) {
+
+            return;
+
+        }
+
+
+        materialsPanel.classList.add(
+            "mobile-library-open"
+        );
+
+
+        materialsPanel.classList.add(
+            "is-open"
+        );
+
+
+        $("materialsBackdrop")?.classList.add(
+            "is-visible"
+        );
+
+
+        $("openMaterialsBtn")?.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+
+        document.body.classList.add(
+            "materials-open"
+        );
+
+    }
+
+
+    function closeMaterials() {
+
+        if (
+            !materialsPanel
+        ) {
+
+            return;
+
+        }
+
+
+        materialsPanel.classList.remove(
+            "mobile-library-open"
+        );
+
+
+        materialsPanel.classList.remove(
+            "is-open"
+        );
+
+
+        $("materialsBackdrop")?.classList.remove(
+            "is-visible"
+        );
+
+
+        $("openMaterialsBtn")?.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+
+        document.body.classList.remove(
+            "materials-open"
+        );
+
+    }
+
+
+    function setupMobileLibrary() {
+
+        $("openMaterialsBtn")?.addEventListener(
+            "click",
+            openMaterials
+        );
+
+
+        $("closeMaterialsBtn")?.addEventListener(
+            "click",
+            closeMaterials
+        );
+
+
+        $("materialsBackdrop")?.addEventListener(
+            "click",
+            closeMaterials
+        );
+
+    }
+
+
+    /* ============================================================
+       25 — SAUVEGARDE
+    ============================================================ */
+
+    function serializeState() {
+
+        return {
+
+            engineVersion:
+                CHEM_CONFIG.engineVersion,
+
+            sessionName:
+                sessionName?.value ||
+                state.sessionName ||
+                CHEM_CONFIG.defaultSessionName,
+
+            activeTool:
+                state.activeTool,
+
+            activeCategory:
+                state.activeCategory,
+
+            zoom:
+                state.zoom,
+
+            nextObjectNumber:
+                state.nextObjectNumber,
+
+            objects:
+                state.objects,
+
+            observations:
+                state.observations,
+
+            temperature:
+                state.temperature,
+
+            totalEnergy:
+                state.totalEnergy,
+
+            reaction:
+                state.reaction
+
+        };
+
+    }
+
+
+    function saveState(
+        showMessage = true
+    ) {
+
+        try {
+
+            localStorage.setItem(
+                CHEM_CONFIG.storageKey,
+                JSON.stringify(
+                    serializeState()
+                )
+            );
+
+
+            if (
+                showMessage
+            ) {
+
+                showToast(
+                    "Session enregistrée.",
+                    "success"
+                );
+
+            }
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                "FOBAS Chemistry Save Error:",
+                error
+            );
+
+
+            if (
+                showMessage
+            ) {
+
+                showToast(
+                    "Impossible d'enregistrer la session.",
+                    "error"
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* ============================================================
+       26 — RESTAURATION / MIGRATION
+    ============================================================ */
+
+    function normalizeLoadedObject(
+        raw
+    ) {
+
+        if (
+            !raw ||
+            !raw.id
+        ) {
+
+            return null;
+
+        }
+
+
+        const material =
+            getMaterial(
+                raw.materialId
+            );
+
+
+        if (
+            !material
+        ) {
+
+            return null;
+
+        }
+
+
+        const object = {
+
+            ...raw,
+
+            materialId:
+                material.id,
+
+            name:
+                raw.name ||
+                material.name,
+
+            category:
+                raw.category ||
+                material.category,
+
+            type:
+                raw.type ||
+                material.type,
+
+            icon:
+                raw.icon ||
+                material.icon,
+
+            state:
+                raw.state ||
+                material.state,
+
+            volume:
+                Number(
+                    raw.volume
+                ) || 0,
+
+            capacity:
+                Number(
+                    raw.capacity
+                ) ||
+                Number(
+                    material.capacity
+                ) ||
+                0,
+
+            mass:
+                Number(
+                    raw.mass
+                ) || 0,
+
+            density:
+                Number.isFinite(
+                    Number(
+                        raw.density
+                    )
+                )
+                    ? Number(
+                        raw.density
+                    )
+                    : material.density,
+
+            temperature:
+                Number.isFinite(
+                    Number(
+                        raw.temperature
+                    )
+                )
+                    ? Number(
+                        raw.temperature
+                    )
+                    : 25,
+
+            ph:
+                Number.isFinite(
+                    Number(
+                        raw.ph
+                    )
+                )
+                    ? Number(
+                        raw.ph
+                    )
+                    : material.ph,
+
+            color:
+                raw.color ||
+                material.color,
+
+            description:
+                raw.description ||
+                material.description,
+
+            formula:
+                raw.formula ||
+                material.formula ||
+                null,
+
+            molarMass:
+                raw.molarMass ||
+                material.molarMass ||
+                null,
+
+            selected:
+                !!raw.selected,
+
+            mixed:
+                !!raw.mixed,
+
+            heated:
+                !!raw.heated,
+
+            composition:
+                Array.isArray(
+                    raw.composition
+                )
+                    ? raw.composition
+                    : [],
+
+            reaction:
+                raw.reaction ||
+                {
+                    active:
+                        false,
+
+                    status:
+                        "Aucune",
+
+                    phase:
+                        "Stable",
+
+                    gas:
+                        "Aucun",
+
+                    precipitate:
+                        "Aucun",
+
+                    color:
+                        "Inchangée",
+
+                    equation:
+                        "",
+
+                    limitingReagent:
+                        null,
+
+                    extentMol:
+                        0
+                },
+
+            products:
+                Array.isArray(
+                    raw.products
+                )
+                    ? raw.products
+                    : [],
+
+            x:
+                Number.isFinite(
+                    Number(raw.x)
+                )
+                    ? Number(raw.x)
+                    : 100,
+
+            y:
+                Number.isFinite(
+                    Number(raw.y)
+                )
+                    ? Number(raw.y)
+                    : 100,
+
+            width:
+                Number(raw.width) ||
+                (
+                    material.type ===
+                        "instrument"
+                        ? 130
+                        : 110
+                ),
+
+            height:
+                Number(raw.height) ||
+                (
+                    material.type ===
+                        "instrument"
+                        ? 82
+                        : 115
+                )
+
+        };
+
+
+        /*
+         * Migration des anciennes compositions.
+         *
+         * Ancien système :
+         * amount = volume
+         *
+         * Nouveau système :
+         * volumeMl / mass / moles.
+         */
+        object.composition =
+            object.composition
+                .map(
+                    component => {
+
+                        const componentMaterial =
+                            getMaterial(
+                                component.materialId
+                            );
+
+
+                        if (
+                            !componentMaterial
+                        ) {
+
+                            return null;
+
+                        }
+
+
+                        const volumeMl =
+                            Number.isFinite(
+                                Number(
+                                    component.volumeMl
+                                )
+                            )
+                                ? Number(
+                                    component.volumeMl
+                                )
+                                : Number(
+                                    component.amount
+                                ) || 0;
+
+
+                        let mass =
+                            Number(
+                                component.mass
+                            ) || 0;
+
+
+                        if (
+                            mass <= 0 &&
+                            volumeMl > 0 &&
+                            Number.isFinite(
+                                Number(
+                                    componentMaterial.density
+                                )
+                            )
+                        ) {
+
+                            mass =
+                                volumeMl *
+                                componentMaterial.density;
+
+                        }
+
+
+                        let moles =
+                            Number(
+                                component.moles
+                            );
+
+
+                        if (
+                            !Number.isFinite(
+                                moles
+                            )
+                        ) {
+
+                            moles =
+                                calculateMolesFromMass(
+                                    mass,
+                                    componentMaterial.molarMass
+                                );
+
+                        }
+
+
+                        if (
+                            Number.isFinite(
+                                Number(
+                                    componentMaterial.defaultMolarity
+                                )
+                            ) &&
+                            volumeMl > 0 &&
+                            (
+                                !Number.isFinite(
+                                    Number(
+                                        component.moles
+                                    )
+                                )
+                            )
+                        ) {
+
+                            moles =
+                                componentMaterial.defaultMolarity *
+                                (
+                                    volumeMl /
+                                    1000
+                                );
+
+                        }
+
+
+                        return {
+
+                            ...component,
+
+                            name:
+                                component.name ||
+                                componentMaterial.name,
+
+                            formula:
+                                component.formula ||
+                                componentMaterial.formula,
+
+                            volumeMl:
+                                volumeMl,
+
+                            amount:
+                                volumeMl,
+
+                            mass:
+                                mass,
+
+                            moles:
+                                Math.max(
+                                    0,
+                                    moles
+                                ),
+
+                            molarity:
+                                volumeMl > 0
+                                    ? calculateMolarity(
+                                        moles,
+                                        volumeMl
+                                    )
+                                    : null,
+
+                            temperature:
+                                Number(
+                                    component.temperature
+                                ) ||
+                                object.temperature ||
+                                25,
+
+                            phase:
+                                component.phase ||
+                                (
+                                    componentMaterial.type ===
+                                        "solid"
+                                        ? "solid"
+                                        : "liquid"
+                                )
+
+                        };
+
+                    }
+                )
+                .filter(Boolean);
+
+
+        /*
+         * Les anciens objets liquides avaient parfois composition
+         * correcte mais masse calculée incorrectement.
+         */
+        if (
+            isLiquidObject(
+                object
+            ) &&
+            !isContainer(
+                object
+            ) &&
+            !object.composition.length
+        ) {
+
+            object.composition =
+                [
+                    createPureComposition(
+                        material,
+                        object.volume,
+                        object.mass
+                    )
+                ];
+
+        }
+
+
+        if (
+            isContainer(
+                object
+            )
         ) {
 
             recalculateContainer(
                 object
             );
+
         }
+
+
+        return object;
+
     }
 
-    /* ================================================================
-       AIDE
-       ================================================================ */
 
-    function openHelp() {
+    function loadState() {
 
-        const modal =
-            $("#helpModal");
+        try {
 
-        if (!modal) return;
+            const raw =
+                localStorage.getItem(
+                    CHEM_CONFIG.storageKey
+                );
 
-        modal.classList.add("open");
+
+            if (
+                !raw
+            ) {
+
+                return false;
+
+            }
+
+
+            const saved =
+                JSON.parse(
+                    raw
+                );
+
+
+            if (
+                !saved
+            ) {
+
+                return false;
+
+            }
+
+
+            state.activeTool =
+                saved.activeTool ||
+                "select";
+
+
+            state.activeCategory =
+                saved.activeCategory ||
+                "all";
+
+
+            state.zoom =
+                clamp(
+                    Number(
+                        saved.zoom
+                    ) || 1,
+                    CHEM_CONFIG.minZoom,
+                    CHEM_CONFIG.maxZoom
+                );
+
+
+            state.nextObjectNumber =
+                Number(
+                    saved.nextObjectNumber
+                ) || 1;
+
+
+            state.objects =
+                Array.isArray(
+                    saved.objects
+                )
+                    ? saved.objects
+                        .map(
+                            normalizeLoadedObject
+                        )
+                        .filter(Boolean)
+                    : [];
+
+
+            state.observations =
+                Array.isArray(
+                    saved.observations
+                )
+                    ? saved.observations
+                    : [];
+
+
+            state.temperature =
+                Number.isFinite(
+                    Number(
+                        saved.temperature
+                    )
+                )
+                    ? Number(
+                        saved.temperature
+                    )
+                    : 25;
+
+
+            state.totalEnergy =
+                Number(
+                    saved.totalEnergy
+                ) || 0;
+
+
+            state.reaction =
+                saved.reaction ||
+                state.reaction;
+
+
+            state.selectedMaterialId =
+                null;
+
+
+            if (
+                sessionName
+            ) {
+
+                sessionName.value =
+                    saved.sessionName ||
+                    CHEM_CONFIG.defaultSessionName;
+
+            }
+
+
+            state.sessionName =
+                sessionName?.value ||
+                CHEM_CONFIG.defaultSessionName;
+
+
+            renderMaterialsLibrary();
+
+            renderCategories();
+
+            renderWorkspace();
+
+            applyZoom();
+
+            renderObservationLog();
+
+            updateAllUI();
+
+
+            addObservation(
+                "Session chimique restaurée."
+            );
+
+
+            return true;
+
+        } catch (
+            error
+        ) {
+
+            console.warn(
+                "FOBAS Chemistry Load Error:",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       27 — RESET
+    ============================================================ */
+
+    function resetLaboratory() {
+
+        const confirmed =
+            window.confirm(
+                "Voulez-vous réellement réinitialiser le laboratoire ? Tous les objets de la session actuelle seront supprimés."
+            );
+
+
+        if (
+            !confirmed
+        ) {
+
+            return;
+
+        }
+
+
+        state.objects =
+            [];
+
+        state.selectedMaterialId =
+            null;
+
+        state.nextObjectNumber =
+            1;
+
+        state.observations =
+            [];
+
+        state.temperature =
+            25;
+
+        state.totalEnergy =
+            0;
+
+        state.reaction = {
+
+            active:
+                false,
+
+            status:
+                "Aucune",
+
+            phase:
+                "Stable",
+
+            gas:
+                "Aucun",
+
+            precipitate:
+                "Aucun",
+
+            color:
+                "Inchangée",
+
+            equation:
+                "",
+
+            limitingReagent:
+                null,
+
+            extentMol:
+                0
+
+        };
+
+
+        state.zoom =
+            1;
+
+
+        localStorage.removeItem(
+            CHEM_CONFIG.storageKey
+        );
+
+
+        renderWorkspace();
+
+        updateAllUI();
+
+        renderObservationLog();
+
+        applyZoom();
+
+
+        addObservation(
+            "Laboratoire réinitialisé."
+        );
+
+
+        showToast(
+            "Laboratoire réinitialisé.",
+            "success"
+        );
+
+
+        saveState(false);
+
+    }
+
+
+    function clearWorkspace() {
+
+        if (
+            !state.objects.length
+        ) {
+
+            return;
+
+        }
+
+
+        const confirmed =
+            window.confirm(
+                "Voulez-vous vider l'espace de manipulation ?"
+            );
+
+
+        if (
+            !confirmed
+        ) {
+
+            return;
+
+        }
+
+
+        state.objects =
+            [];
+
+        state.selectedMaterialId =
+            null;
+
+
+        renderWorkspace();
+
+        updateAllUI();
+
+
+        addObservation(
+            "Espace de manipulation vidé."
+        );
+
+
+        saveState(false);
+
+    }
+
+
+    /* ============================================================
+       28 — OBSERVATION
+    ============================================================ */
+
+    function addObservation(
+        message
+    ) {
+
+        const entry = {
+
+            time:
+                new Date()
+                    .toLocaleTimeString(
+                        "fr-FR",
+                        {
+                            hour:
+                                "2-digit",
+
+                            minute:
+                                "2-digit",
+
+                            second:
+                                "2-digit"
+                        }
+                    ),
+
+            message:
+                String(
+                    message
+                )
+
+        };
+
+
+        state.observations.unshift(
+            entry
+        );
+
+
+        state.observations =
+            state.observations.slice(
+                0,
+                CHEM_CONFIG.maxObservations
+            );
+
+
+        renderObservationLog();
+
+    }
+
+
+    function renderObservationLog() {
+
+        if (
+            !observationLog
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !state.observations.length
+        ) {
+
+            observationLog.innerHTML = `
+                <div class="chem-observation-empty">
+                    Aucune observation.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        observationLog.innerHTML =
+            state.observations
+                .map(
+                    entry => `
+
+                <div class="chem-observation-entry">
+
+                    <time>
+                        ${escapeHTML(
+                            entry.time
+                        )}
+                    </time>
+
+                    <span>
+                        ${escapeHTML(
+                            entry.message
+                        )}
+                    </span>
+
+                </div>
+
+            `
+                )
+                .join("");
+
+    }
+
+
+    /* ============================================================
+       29 — TOAST
+    ============================================================ */
+
+    function showToast(
+        message,
+        type = "info"
+    ) {
+
+        const stack =
+            $("chemToastStack");
+
+
+        if (
+            !stack
+        ) {
+
+            return;
+
+        }
+
+
+        const toast =
+            document.createElement(
+                "div"
+            );
+
+
+        toast.className =
+            `chem-toast ${type}`;
+
+
+        toast.innerHTML = `
+
+            <span class="chem-toast-indicator"></span>
+
+            <span class="chem-toast-message">
+                ${escapeHTML(
+                    message
+                )}
+            </span>
+
+        `;
+
+
+        stack.appendChild(
+            toast
+        );
+
+
+        requestAnimationFrame(
+            () => {
+
+                toast.classList.add(
+                    "visible"
+                );
+
+            }
+        );
+
+
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    "visible"
+                );
+
+
+                setTimeout(
+                    () => {
+
+                        toast.remove();
+
+                    },
+                    250
+                );
+
+            },
+            3000
+        );
+
+    }
+
+
+    /* ============================================================
+       30 — MODALES
+    ============================================================ */
+
+    function openModal(
+        modal
+    ) {
+
+        if (
+            !modal
+        ) {
+
+            return;
+
+        }
+
+
+        modal.classList.add(
+            "open"
+        );
+
 
         modal.setAttribute(
             "aria-hidden",
             "false"
         );
+
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
     }
 
-    function closeHelp() {
 
-        const modal =
-            $("#helpModal");
+    function closeModal(
+        modal
+    ) {
 
-        if (!modal) return;
+        if (
+            !modal
+        ) {
 
-        modal.classList.remove("open");
+            return;
+
+        }
+
+
+        modal.classList.remove(
+            "open"
+        );
+
 
         modal.setAttribute(
             "aria-hidden",
             "true"
         );
-    }
 
-    /* ================================================================
-       ACTIONS INSPECTEUR
-       ================================================================ */
 
-    function actionTransfer() {
-
-        const selected =
-            getSelected();
-
-        if (selected) {
-            openTransferModal(selected);
-        }
-    }
-
-    function actionMix() {
-
-        const selected =
-            getSelected();
-
-        if (selected) {
-            mixObject(selected);
-        }
-    }
-
-    function actionMeasure() {
-
-        const selected =
-            getSelected();
-
-        if (selected) {
-            openMeasurementModal(selected);
-        }
-    }
-
-    function actionHeat() {
-
-        const selected =
-            getSelected();
-
-        if (selected) {
-            toggleHeating(selected);
-        }
-    }
-
-    /* ================================================================
-       BOUTONS / ÉVÉNEMENTS
-       ================================================================ */
-
-    function bindEvents() {
-
-        /* ------------------------------------------------------------
-           BIBLIOTHÈQUE
-           ------------------------------------------------------------ */
-
-        const library =
-            $("#materialsLibrary");
-
-        if (library) {
-
-            library.addEventListener(
-                "click",
-                event => {
-
-                    const button =
-                        event.target.closest(
-                            "[data-material-id]"
-                        );
-
-                    if (!button) return;
-
-                    const materialId =
-                        button.dataset.materialId;
-
-                    addMaterial(
-                        materialId
-                    );
-                }
+        const openModals =
+            document.querySelectorAll(
+                ".chem-modal.open"
             );
-        }
 
-        /* ------------------------------------------------------------
-           INVENTAIRE
-           ------------------------------------------------------------ */
 
-        const inventory =
-            $("#inventoryList");
+        if (
+            !openModals.length
+        ) {
 
-        if (inventory) {
-
-            inventory.addEventListener(
-                "click",
-                event => {
-
-                    const button =
-                        event.target.closest(
-                            "[data-object-id]"
-                        );
-
-                    if (!button) return;
-
-                    selectObject(
-                        button.dataset.objectId
-                    );
-                }
+            document.body.classList.remove(
+                "modal-open"
             );
+
         }
 
-        /* ------------------------------------------------------------
-           RECHERCHE
-           ------------------------------------------------------------ */
+    }
 
-        const search =
-            $("#materialSearch");
 
-        if (search) {
+    function setupModals() {
 
-            search.addEventListener(
-                "input",
-                event => {
+        $("chemHelpBtn")?.addEventListener(
+            "click",
+            () =>
+                openModal(
+                    $("helpModal")
+                )
+        );
 
-                    state.search =
-                        event.target.value || "";
 
-                    renderLibrary();
-                }
-            );
-        }
+        $("closeHelpModal")?.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    $("helpModal")
+                )
+        );
 
-        /* ------------------------------------------------------------
-           CATÉGORIES
-           ------------------------------------------------------------ */
 
-        $$(".category-button").forEach(
-            button => {
+        $("closeHelpBtn")?.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    $("helpModal")
+                )
+        );
 
-                button.addEventListener(
-                    "click",
-                    () => {
 
-                        state.category =
-                            button.dataset.category ||
-                            "all";
+        $("closeTransferModal")?.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    $("transferModal")
+                )
+        );
 
-                        $$(".category-button")
-                            .forEach(
-                                item =>
-                                    item.classList.toggle(
-                                        "active",
-                                        item === button
-                                    )
+
+        $("cancelTransferBtn")?.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    $("transferModal")
+                )
+        );
+
+
+        $("confirmTransferBtn")?.addEventListener(
+            "click",
+            performTransfer
+        );
+
+
+        $("closeMeasurementModal")?.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    $("measurementModal")
+                )
+        );
+
+
+        $("closeMeasurementBtn")?.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    $("measurementModal")
+                )
+        );
+
+
+        document
+            .querySelectorAll(
+                ".chem-modal .modal-backdrop"
+            )
+            .forEach(
+                backdrop => {
+
+                    backdrop.addEventListener(
+                        "click",
+                        () => {
+
+                            const modal =
+                                backdrop.closest(
+                                    ".chem-modal"
+                                );
+
+
+                            closeModal(
+                                modal
                             );
 
-                        renderLibrary();
-                    }
-                );
-            }
-        );
-
-        /* ------------------------------------------------------------
-           OUTILS
-           ------------------------------------------------------------ */
-
-        $$(".tool-button").forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () =>
-                        setTool(
-                            button.dataset.tool
-                        )
-                );
-            }
-        );
-
-        /* ------------------------------------------------------------
-           ZOOM
-           ------------------------------------------------------------ */
-
-        $("#zoomInBtn")?.addEventListener(
-            "click",
-            zoomIn
-        );
-
-        $("#zoomOutBtn")?.addEventListener(
-            "click",
-            zoomOut
-        );
-
-        $("#fitWorkspaceBtn")?.addEventListener(
-            "click",
-            fitWorkspace
-        );
-
-        /* ------------------------------------------------------------
-           WORKSPACE
-           ------------------------------------------------------------ */
-
-        const viewport =
-            $("#workspaceViewport");
-
-        if (viewport) {
-
-            viewport.addEventListener(
-                "dblclick",
-                event => {
-
-                    if (
-                        event.target.closest(
-                            ".chem-object"
-                        )
-                    ) {
-                        return;
-                    }
-
-                    const rect =
-                        viewport.getBoundingClientRect();
-
-                    const x =
-                        (
-                            event.clientX -
-                            rect.left +
-                            viewport.scrollLeft
-                        ) / state.zoom;
-
-                    const y =
-                        (
-                            event.clientY -
-                            rect.top +
-                            viewport.scrollTop
-                        ) / state.zoom;
-
-                    addMaterial(
-                        "beaker250",
-                        {
-                            x: Math.max(10, x - 55),
-                            y: Math.max(10, y - 70)
                         }
                     );
-                }
-            );
-        }
 
-        /* ------------------------------------------------------------
-           TRANSFERT
-           ------------------------------------------------------------ */
-
-        $("#closeTransferModal")
-            ?.addEventListener(
-                "click",
-                closeTransferModal
-            );
-
-        $("#cancelTransferBtn")
-            ?.addEventListener(
-                "click",
-                closeTransferModal
-            );
-
-        $("#confirmTransferBtn")
-            ?.addEventListener(
-                "click",
-                executeTransfer
-            );
-
-        $("#transferRange")
-            ?.addEventListener(
-                "input",
-                event => {
-
-                    const amount =
-                        $("#transferAmount");
-
-                    if (amount) {
-                        amount.value =
-                            event.target.value;
-                    }
                 }
             );
 
-        $("#transferAmount")
-            ?.addEventListener(
-                "input",
-                event => {
-
-                    const range =
-                        $("#transferRange");
-
-                    if (range) {
-                        range.value =
-                            event.target.value;
-                    }
-                }
-            );
-
-        /* ------------------------------------------------------------
-           MESURE
-           ------------------------------------------------------------ */
-
-        $$(".measurement-option")
-            .forEach(option => {
-
-                option.addEventListener(
-                    "click",
-                    () => {
-
-                        state.measurementType =
-                            option.dataset.measurement ||
-                            "volume";
-
-                        const selected =
-                            getSelected();
-
-                        if (selected) {
-
-                            updateMeasurementDisplay(
-                                selected,
-                                state.measurementType
-                            );
-                        }
-
-                        $$(".measurement-option")
-                            .forEach(
-                                item =>
-                                    item.classList.toggle(
-                                        "active",
-                                        item === option
-                                    )
-                            );
-                    }
-                );
-            });
-
-        $("#closeMeasurementModal")
-            ?.addEventListener(
-                "click",
-                closeMeasurementModal
-            );
-
-        $("#closeMeasurementBtn")
-            ?.addEventListener(
-                "click",
-                closeMeasurementModal
-            );
-
-        /* ------------------------------------------------------------
-           AIDE
-           ------------------------------------------------------------ */
-
-        $("#chemHelpBtn")
-            ?.addEventListener(
-                "click",
-                openHelp
-            );
-
-        $("#closeHelpModal")
-            ?.addEventListener(
-                "click",
-                closeHelp
-            );
-
-        $("#closeHelpBtn")
-            ?.addEventListener(
-                "click",
-                closeHelp
-            );
-
-        /* ------------------------------------------------------------
-           RESET / SAVE / CLEAR
-           ------------------------------------------------------------ */
-
-        $("#chemResetBtn")
-            ?.addEventListener(
-                "click",
-                resetLab
-            );
-
-        $("#chemSaveBtn")
-            ?.addEventListener(
-                "click",
-                saveSession
-            );
-
-        $("#clearWorkspaceBtn")
-            ?.addEventListener(
-                "click",
-                clearWorkspace
-            );
-
-        /* ------------------------------------------------------------
-           INSPECTEUR
-           ------------------------------------------------------------ */
-
-        $("#actionTransferBtn")
-            ?.addEventListener(
-                "click",
-                actionTransfer
-            );
-
-        $("#actionMixBtn")
-            ?.addEventListener(
-                "click",
-                actionMix
-            );
-
-        $("#actionMeasureBtn")
-            ?.addEventListener(
-                "click",
-                actionMeasure
-            );
-
-        $("#actionHeatBtn")
-            ?.addEventListener(
-                "click",
-                actionHeat
-            );
-
-        $("#actionRemoveBtn")
-            ?.addEventListener(
-                "click",
-                removeSelected
-            );
-
-        /* ------------------------------------------------------------
-           FERMETURE DES MODALES EN CLIQUANT À L'EXTÉRIEUR
-           ------------------------------------------------------------ */
-
-        $$(".chem-modal, .modal")
-            .forEach(modal => {
-
-                modal.addEventListener(
-                    "click",
-                    event => {
-
-                        if (
-                            event.target !== modal
-                        ) {
-                            return;
-                        }
-
-                        modal.classList.remove(
-                            "open"
-                        );
-
-                        modal.setAttribute(
-                            "aria-hidden",
-                            "true"
-                        );
-                    }
-                );
-            });
-
-        /* ------------------------------------------------------------
-           CLAVIER
-           ------------------------------------------------------------ */
 
         document.addEventListener(
             "keydown",
             event => {
 
                 if (
-                    event.key === "Delete" ||
-                    event.key === "Backspace"
+                    event.key !==
+                    "Escape"
                 ) {
 
-                    const active =
-                        document.activeElement;
+                    return;
 
-                    const editing =
-                        active &&
-                        (
-                            active.tagName === "INPUT" ||
-                            active.tagName === "TEXTAREA" ||
-                            active.tagName === "SELECT"
-                        );
-
-                    if (!editing) {
-                        removeSelected();
-                    }
                 }
 
-                if (event.key === "Escape") {
 
-                    closeTransferModal();
-                    closeMeasurementModal();
-                    closeHelp();
-                }
+                document
+                    .querySelectorAll(
+                        ".chem-modal.open"
+                    )
+                    .forEach(
+                        closeModal
+                    );
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       31 — ACTIONS INSPECTEUR
+    ============================================================ */
+
+    function setupInspectorActions() {
+
+        $("actionTransferBtn")?.addEventListener(
+            "click",
+            openTransferModal
+        );
+
+
+        $("actionMixBtn")?.addEventListener(
+            "click",
+            mixSelectedObject
+        );
+
+
+        $("actionMeasureBtn")?.addEventListener(
+            "click",
+            openMeasurementModal
+        );
+
+
+        $("actionHeatBtn")?.addEventListener(
+            "click",
+            heatSelectedObject
+        );
+
+
+        $("actionRemoveBtn")?.addEventListener(
+            "click",
+            removeSelectedObject
+        );
+
+    }
+
+
+    function removeSelectedObject() {
+
+        const object =
+            getSelectedObject();
+
+
+        if (
+            !object
+        ) {
+
+            return;
+
+        }
+
+
+        state.objects =
+            state.objects.filter(
+                item =>
+                    item.id !==
+                    object.id
+            );
+
+
+        state.selectedMaterialId =
+            null;
+
+
+        renderWorkspace();
+
+        updateAllUI();
+
+
+        addObservation(
+            `${object.name} retiré du laboratoire.`
+        );
+
+
+        showToast(
+            `${object.name} retiré.`,
+            "success"
+        );
+
+
+        saveState(false);
+
+    }
+
+
+    /* ============================================================
+       32 — RECHERCHE / CATÉGORIES
+    ============================================================ */
+
+    function setupLibraryFilters() {
+
+        materialSearch?.addEventListener(
+            "input",
+            event => {
+
+                state.search =
+                    event.target.value ||
+                    "";
+
+
+                renderMaterialsLibrary();
+
+            }
+        );
+
+
+        materialCategories?.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        ".category-button"
+                    );
+
 
                 if (
-                    (event.ctrlKey || event.metaKey) &&
-                    event.key.toLowerCase() === "s"
+                    !button
+                ) {
+
+                    return;
+
+                }
+
+
+                state.activeCategory =
+                    button.dataset.category ||
+                    "all";
+
+
+                renderCategories();
+
+                renderMaterialsLibrary();
+
+            }
+        );
+
+
+        materialsLibrary?.addEventListener(
+            "click",
+            event => {
+
+                const addButton =
+                    event.target.closest(
+                        "[data-add-material]"
+                    );
+
+
+                if (
+                    addButton
+                ) {
+
+                    event.stopPropagation();
+
+
+                    createLabObject(
+                        addButton.dataset
+                            .addMaterial
+                    );
+
+
+                    return;
+
+                }
+
+
+                const card =
+                    event.target.closest(
+                        ".chem-material-card"
+                    );
+
+
+                if (
+                    !card
+                ) {
+
+                    return;
+
+                }
+
+
+                createLabObject(
+                    card.dataset.materialId
+                );
+
+            }
+        );
+
+
+        materialsLibrary?.addEventListener(
+            "keydown",
+            event => {
+
+                const card =
+                    event.target.closest(
+                        ".chem-material-card"
+                    );
+
+
+                if (
+                    !card ||
+                    (
+                        event.key !==
+                            "Enter" &&
+                        event.key !==
+                            " "
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                createLabObject(
+                    card.dataset.materialId
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       33 — CANVAS
+    ============================================================ */
+
+    function setupCanvasSelection() {
+
+        chemistryCanvas?.addEventListener(
+            "pointerdown",
+            event => {
+
+                if (
+                    event.target ===
+                        chemistryCanvas ||
+                    event.target ===
+                        workspaceObjects
+                ) {
+
+                    clearSelection();
+
+                }
+
+            }
+        );
+
+
+        workspaceObjects?.addEventListener(
+            "click",
+            event => {
+
+                const element =
+                    event.target.closest(
+                        ".chem-object"
+                    );
+
+
+                if (
+                    !element
+                ) {
+
+                    return;
+
+                }
+
+
+                selectObject(
+                    element.dataset.objectId
+                );
+
+            }
+        );
+
+
+        workspaceObjects?.addEventListener(
+            "keydown",
+            event => {
+
+                const element =
+                    event.target.closest(
+                        ".chem-object"
+                    );
+
+
+                if (
+                    !element ||
+                    event.key !==
+                        "Enter"
+                ) {
+
+                    return;
+
+                }
+
+
+                selectObject(
+                    element.dataset.objectId
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       34 — TRANSFERT CONTROLS
+    ============================================================ */
+
+    function setupTransferControls() {
+
+        const amount =
+            $("transferAmount");
+
+
+        const range =
+            $("transferRange");
+
+
+        range?.addEventListener(
+            "input",
+            () => {
+
+                amount.value =
+                    range.value;
+
+            }
+        );
+
+
+        amount?.addEventListener(
+            "input",
+            () => {
+
+                const max =
+                    Number(
+                        amount.max
+                    ) || 0;
+
+
+                let value =
+                    Number(
+                        amount.value
+                    );
+
+
+                if (
+                    !Number.isFinite(
+                        value
+                    )
+                ) {
+
+                    value = 0;
+
+                }
+
+
+                value =
+                    clamp(
+                        value,
+                        0,
+                        max
+                    );
+
+
+                amount.value =
+                    value;
+
+                range.value =
+                    value;
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       35 — MESURES
+    ============================================================ */
+
+    function setupMeasurementControls() {
+
+        document
+            .querySelectorAll(
+                ".measurement-option"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            document
+                                .querySelectorAll(
+                                    ".measurement-option"
+                                )
+                                .forEach(
+                                    item => {
+
+                                        item.classList.toggle(
+                                            "active",
+                                            item ===
+                                                button
+                                        );
+
+                                    }
+                                );
+
+
+                            updateMeasurement(
+                                button.dataset
+                                    .measurement
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ============================================================
+       36 — CONTRÔLES GLOBAUX
+    ============================================================ */
+
+    function setupGlobalControls() {
+
+        $("zoomOutBtn")?.addEventListener(
+            "click",
+            () =>
+                changeZoom(
+                    -CHEM_CONFIG.zoomStep
+                )
+        );
+
+
+        $("zoomInBtn")?.addEventListener(
+            "click",
+            () =>
+                changeZoom(
+                    CHEM_CONFIG.zoomStep
+                )
+        );
+
+
+        $("fitWorkspaceBtn")?.addEventListener(
+            "click",
+            fitWorkspace
+        );
+
+
+        $("clearWorkspaceBtn")?.addEventListener(
+            "click",
+            clearWorkspace
+        );
+
+
+        $("chemSaveBtn")?.addEventListener(
+            "click",
+            () =>
+                saveState(true)
+        );
+
+
+        $("chemResetBtn")?.addEventListener(
+            "click",
+            resetLaboratory
+        );
+
+
+        sessionName?.addEventListener(
+            "input",
+            () => {
+
+                state.sessionName =
+                    sessionName.value;
+
+                saveState(false);
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       37 — UI GLOBALE
+    ============================================================ */
+
+    function updateAllUI() {
+
+        if (
+            $("inventoryCount")
+        ) {
+
+            $("inventoryCount")
+                .textContent =
+                state.objects.length;
+
+        }
+
+
+        if (
+            $("statusObjects")
+        ) {
+
+            $("statusObjects")
+                .textContent =
+                state.objects.length;
+
+        }
+
+
+        const totalVolume =
+            state.objects.reduce(
+                (
+                    sum,
+                    object
+                ) =>
+                    sum +
+                    (
+                        Number(
+                            object.volume
+                        ) || 0
+                    ),
+                0
+            );
+
+
+        const totalMass =
+            state.objects.reduce(
+                (
+                    sum,
+                    object
+                ) =>
+                    sum +
+                    (
+                        Number(
+                            object.mass
+                        ) || 0
+                    ),
+                0
+            );
+
+
+        if (
+            $("statusVolume")
+        ) {
+
+            $("statusVolume")
+                .textContent =
+                `${formatNumber(
+                    totalVolume
+                )} mL`;
+
+        }
+
+
+        if (
+            $("statusMass")
+        ) {
+
+            $("statusMass")
+                .textContent =
+                `${formatNumber(
+                    totalMass
+                )} g`;
+
+        }
+
+
+        if (
+            $("statusTemperature")
+        ) {
+
+            $("statusTemperature")
+                .textContent =
+                `${formatNumber(
+                    state.temperature
+                )} °C`;
+
+        }
+
+
+        const selected =
+            getSelectedObject();
+
+
+        if (
+            $("statusPH")
+        ) {
+
+            $("statusPH")
+                .textContent =
+                selected &&
+                Number.isFinite(
+                    selected.ph
+                )
+                    ? formatNumber(
+                        selected.ph,
+                        2
+                    )
+                    : "—";
+
+        }
+
+
+        renderInventory();
+
+        updateInspector();
+
+    }
+
+
+    /* ============================================================
+       38 — INVENTAIRE
+    ============================================================ */
+
+    function renderInventory() {
+
+        if (
+            !inventoryList
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !state.objects.length
+        ) {
+
+            inventoryList.innerHTML = `
+                <div class="chem-empty-inventory">
+                    Aucun objet dans le laboratoire.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        inventoryList.innerHTML =
+            state.objects.map(
+                object => `
+
+                <button
+                    type="button"
+                    class="chem-inventory-item ${
+                        object.selected
+                            ? "selected"
+                            : ""
+                    }"
+                    data-inventory-id="${escapeHTML(
+                        object.id
+                    )}"
+                >
+
+                    <span class="chem-inventory-icon">
+                        ${object.icon}
+                    </span>
+
+                    <span class="chem-inventory-info">
+
+                        <strong>
+                            ${escapeHTML(
+                                object.name
+                            )}
+                        </strong>
+
+                        <small>
+                            ${escapeHTML(
+                                object.state
+                            )}
+                        </small>
+
+                    </span>
+
+                    <span class="chem-inventory-position">
+                        ${Math.round(
+                            object.x
+                        )},
+                        ${Math.round(
+                            object.y
+                        )}
+                    </span>
+
+                </button>
+
+            `
+            ).join("");
+
+    }
+
+
+    function setupInventory() {
+
+        inventoryList?.addEventListener(
+            "click",
+            event => {
+
+                const item =
+                    event.target.closest(
+                        ".chem-inventory-item"
+                    );
+
+
+                if (
+                    !item
+                ) {
+
+                    return;
+
+                }
+
+
+                selectObject(
+                    item.dataset.inventoryId
+                );
+
+
+                const object =
+                    getObject(
+                        item.dataset
+                            .inventoryId
+                    );
+
+
+                if (
+                    object
+                ) {
+
+                    chemistryCanvas.scrollTo(
+                        {
+                            left:
+                                Math.max(
+                                    0,
+                                    object.x -
+                                        150
+                                ),
+
+                            top:
+                                Math.max(
+                                    0,
+                                    object.y -
+                                        120
+                                ),
+
+                            behavior:
+                                "smooth"
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       39 — RACCOURCIS CLAVIER
+    ============================================================ */
+
+    function setupKeyboardShortcuts() {
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                const tag =
+                    event.target?.tagName;
+
+
+                if (
+                    tag ===
+                        "INPUT" ||
+                    tag ===
+                        "TEXTAREA" ||
+                    tag ===
+                        "SELECT"
+                ) {
+
+                    return;
+
+                }
+
+
+                const selected =
+                    getSelectedObject();
+
+
+                if (
+                    (
+                        event.key ===
+                            "Delete" ||
+                        event.key ===
+                            "Backspace"
+                    ) &&
+                    selected
                 ) {
 
                     event.preventDefault();
 
-                    saveSession();
+
+                    removeSelectedObject();
+
                 }
+
+
+                if (
+                    event.key ===
+                        "Escape" &&
+                    state.drag.active
+                ) {
+
+                    cancelDrag();
+
+                }
+
+
+                /*
+                 * Raccourcis pratiques.
+                 */
+                const shortcuts = {
+
+                    "1":
+                        "select",
+
+                    "2":
+                        "move",
+
+                    "3":
+                        "transfer",
+
+                    "4":
+                        "mix",
+
+                    "5":
+                        "measure",
+
+                    "6":
+                        "heat"
+
+                };
+
+
+                if (
+                    shortcuts[event.key]
+                ) {
+
+                    setActiveTool(
+                        shortcuts[
+                            event.key
+                        ]
+                    );
+
+                }
+
             }
         );
+
     }
 
-    /* ================================================================
-       RENDU GLOBAL
-       ================================================================ */
 
-    function renderAll() {
+    function cancelDrag() {
 
-        renderLibrary();
+        const object =
+            getObject(
+                state.drag.objectId
+            );
 
-        renderInventory();
+
+        if (
+            object
+        ) {
+
+            object.x =
+                state.drag.originalX;
+
+            object.y =
+                state.drag.originalY;
+
+        }
+
+
+        state.drag.active =
+            false;
+
+        state.drag.objectId =
+            null;
+
+        state.drag.pointerId =
+            null;
+
+        state.drag.offsetX =
+            0;
+
+        state.drag.offsetY =
+            0;
+
+
+        chemistryCanvas?.classList.remove(
+            "is-dragging"
+        );
+
+
+        workspaceObjects
+            ?.querySelectorAll(
+                ".chem-object.dragging"
+            )
+            .forEach(
+                element => {
+
+                    element.classList.remove(
+                        "dragging"
+                    );
+
+                    element.style.zIndex =
+                        "";
+
+                }
+            );
+
 
         renderWorkspace();
 
-        renderInspector();
-
-        renderObservationLog();
-
-        updateStatus();
-
-        setZoom(state.zoom);
     }
 
-    /* ================================================================
-       SESSION
-       ================================================================ */
 
-    function initializeSessionName() {
+    /* ============================================================
+       40 — RESIZE
+    ============================================================ */
 
-        const element =
-            $("#sessionName");
+    function setupResize() {
 
-        if (!element) return;
+        let resizeTimer =
+            null;
 
-        try {
 
-            const saved =
-                localStorage.getItem(
-                    SESSION_KEY
+        window.addEventListener(
+            "resize",
+            () => {
+
+                clearTimeout(
+                    resizeTimer
                 );
 
-            if (saved) {
-                state.sessionName = saved;
+
+                resizeTimer =
+                    setTimeout(
+                        () => {
+
+                            applyZoom();
+
+                        },
+                        120
+                    );
+
             }
+        );
 
-        } catch (_) {}
-
-        if (
-            element.tagName === "INPUT" ||
-            element.tagName === "TEXTAREA"
-        ) {
-
-            element.value =
-                state.sessionName;
-
-        } else {
-
-            element.textContent =
-                state.sessionName;
-        }
     }
 
-    /* ================================================================
-       ÉTAT DU SYSTÈME
-       ================================================================ */
 
-    function setLaboratoryOnline() {
+    /* ============================================================
+       41 — ÉTAT DU LABORATOIRE
+    ============================================================ */
+
+    function setLaboratoryState(
+        active = true
+    ) {
 
         const dot =
-            $("#laboratoryStateDot");
+            $("laboratoryStateDot");
+
 
         const text =
-            $("#laboratoryStateText");
+            $("laboratoryStateText");
 
-        if (dot) {
 
-            dot.classList.add(
-                "online"
+        if (
+            dot
+        ) {
+
+            dot.classList.toggle(
+                "online",
+                active
             );
 
-            dot.classList.remove(
-                "offline"
+
+            dot.classList.toggle(
+                "offline",
+                !active
             );
+
         }
 
-        if (text) {
+
+        if (
+            text
+        ) {
+
             text.textContent =
-                "Laboratoire prêt";
+                active
+                    ? "Laboratoire actif"
+                    : "Laboratoire en pause";
+
         }
+
     }
 
-    /* ================================================================
-       INITIALISATION
-       ================================================================ */
 
-    function init() {
+    /* ============================================================
+       42 — DIAGNOSTICS SCIENTIFIQUES
+    ============================================================ */
 
-        if (state.initialized) {
-            return;
-        }
+    function runScientificDiagnostics() {
 
-        state.initialized = true;
-        state.running = true;
+        const diagnostics = {
 
-        bindEvents();
+            engine:
+                CHEM_CONFIG.engineVersion,
 
-        initializeSessionName();
+            materialCount:
+                MATERIALS.length,
 
-        const loaded =
-            loadSession();
+            reactionCount:
+                REACTIONS.length,
 
-        setLaboratoryOnline();
+            objectCount:
+                state.objects.length,
 
-        renderAll();
+            selected:
+                getSelectedObject()?.name ||
+                null,
 
-        if (!loaded) {
+            conservationWarnings:
+                [],
 
-            logObservation(
-                "Laboratoire chimique FOBAS prêt."
-            );
+            valid:
+                true
 
-            logObservation(
-                "Sélectionnez un matériau dans la bibliothèque pour commencer."
-            );
-        } else {
+        };
 
-            logObservation(
-                "Session précédente restaurée."
-            );
-        }
 
-        state.lastTick =
-            Date.now();
+        state.objects.forEach(
+            object => {
 
-        setInterval(
-            chemistryTick,
-            1000
+                if (
+                    isContainer(
+                        object
+                    )
+                ) {
+
+                    const compositionMass =
+                        getObjectTotalCompositionMass(
+                            object
+                        );
+
+
+                    if (
+                        Math.abs(
+                            compositionMass -
+                            object.mass
+                        ) >
+                        0.05
+                    ) {
+
+                        diagnostics
+                            .conservationWarnings
+                            .push(
+                                `${
+                                    object.name
+                                } : masse de composition ${
+                                    formatNumber(
+                                        compositionMass,
+                                        3
+                                    )
+                                } g ≠ masse objet ${
+                                    formatNumber(
+                                        object.mass,
+                                        3
+                                    )
+                                } g`
+                            );
+
+                    }
+
+                }
+
+            }
         );
+
+
+        diagnostics.valid =
+            diagnostics
+                .conservationWarnings
+                .length ===
+                0;
+
+
+        return diagnostics;
+
     }
 
-    /* ================================================================
-       API PUBLIQUE
-       ================================================================ */
 
-    APP.version = "4.0.0";
+    /* ============================================================
+       43 — INITIALISATION
+    ============================================================ */
 
-    APP.state = state;
+    function initializeChemistryLaboratory() {
 
-    APP.materials = MATERIALS;
+        if (
+            !app
+        ) {
 
-    APP.addMaterial =
-        addMaterial;
+            console.error(
+                "FOBAS Chemistry Engine : #chemApp introuvable."
+            );
 
-    APP.select =
-        selectObject;
 
-    APP.setTool =
-        setTool;
+            return;
 
-    APP.transfer =
-        executeTransfer;
+        }
 
-    APP.mix =
-        mixObject;
 
-    APP.measure =
-        openMeasurementModal;
+        /*
+         * IMPORTANT :
+         * Aucun système externe n'est appelé ici.
+         * Le laboratoire reste totalement autonome.
+         */
 
-    APP.heat =
-        toggleHeating;
+        setupTools();
 
-    APP.save =
-        saveSession;
+        setupObjectDragging();
 
-    APP.reset =
-        resetLab;
+        setupCanvasSelection();
 
-    APP.clear =
-        clearWorkspace;
+        setupLibraryFilters();
 
-    APP.render =
-        renderAll;
+        setupInventory();
 
-    APP.getSelected =
-        getSelected;
+        setupInspectorActions();
 
-    APP.getObject =
-        getObject;
+        setupTransferControls();
 
-    APP.calculatePH =
-        calculateSolutionPH;
+        setupMeasurementControls();
 
-    APP.detectReactions =
-        detectAndApplyReactions;
+        setupGlobalControls();
 
-    APP.openTransfer =
-        openTransferModal;
+        setupMobileLibrary();
 
-    APP.openMeasurement =
-        openMeasurementModal;
+        setupModals();
 
-    window.FOBASChemistry =
-        APP;
+        setupKeyboardShortcuts();
 
-    /* ================================================================
-       DÉMARRAGE
-       ================================================================ */
+        setupResize();
+
+
+        const restored =
+            loadState();
+
+
+        if (
+            !restored
+        ) {
+
+            renderMaterialsLibrary();
+
+            renderCategories();
+
+            renderWorkspace();
+
+            updateAllUI();
+
+            addObservation(
+                "Laboratoire chimique FOBAS initialisé."
+            );
+
+        }
+
+
+        setLaboratoryState(
+            true
+        );
+
+
+        applyZoom();
+
+
+        if (
+            workspaceObjects
+        ) {
+
+            workspaceObjects.style.touchAction =
+                "none";
+
+        }
+
+
+        /*
+         * Outil par défaut.
+         */
+        setActiveTool(
+            state.activeTool ||
+                "select"
+        );
+
+
+        console.log(
+            "FOBAS — Laboratoire Chimique : moteur avancé actif."
+        );
+
+
+        console.log(
+            "FOBAS — Drag / Move : actif."
+        );
+
+
+        console.log(
+            "FOBAS — Chemistry Reaction Engine : actif."
+        );
+
+
+        console.log(
+            "FOBAS — Scientific diagnostics :",
+            runScientificDiagnostics()
+        );
+
+    }
+
+
+    /* ============================================================
+       44 — DÉMARRAGE
+    ============================================================ */
 
     if (
         document.readyState ===
-        "loading"
+            "loading"
     ) {
 
         document.addEventListener(
             "DOMContentLoaded",
-            init,
-            { once: true }
+            initializeChemistryLaboratory,
+            {
+                once:
+                    true
+            }
         );
 
     } else {
 
-        init();
+        initializeChemistryLaboratory();
+
     }
 
+
+    /* ============================================================
+       45 — API PUBLIQUE
+    ============================================================ */
+
+    window.FOBASChemistryEngine = {
+
+        /*
+         * Ajouter un matériau.
+         */
+        addMaterial(
+            materialId,
+            x,
+            y
+        ) {
+
+            return createLabObject(
+                materialId,
+                x,
+                y
+            );
+
+        },
+
+
+        /*
+         * Sélectionner un objet.
+         */
+        selectObject(
+            objectId
+        ) {
+
+            selectObject(
+                objectId
+            );
+
+        },
+
+
+        /*
+         * Retirer l'objet sélectionné.
+         */
+        removeSelected() {
+
+            removeSelectedObject();
+
+        },
+
+
+        /*
+         * Sauvegarder.
+         */
+        save() {
+
+            saveState(
+                true
+            );
+
+        },
+
+
+        /*
+         * Réinitialiser.
+         */
+        reset() {
+
+            resetLaboratory();
+
+        },
+
+
+        /*
+         * Activer un outil.
+         */
+        setTool(
+            tool
+        ) {
+
+            setActiveTool(
+                tool
+            );
+
+        },
+
+
+        /*
+         * Mélanger.
+         */
+        mix() {
+
+            mixSelectedObject();
+
+        },
+
+
+        /*
+         * Chauffer.
+         */
+        heat() {
+
+            heatSelectedObject();
+
+        },
+
+
+        /*
+         * Mesurer.
+         */
+        measure(
+            type = "volume"
+        ) {
+
+            updateMeasurement(
+                type
+            );
+
+
+            const object =
+                getSelectedObject();
+
+
+            return object
+                ? getMeasurementValue(
+                    object,
+                    type
+                )
+                : null;
+
+        },
+
+
+        /*
+         * Evaluer une réaction.
+         */
+        evaluateReaction() {
+
+            const object =
+                getSelectedObject();
+
+
+            return object
+                ? evaluateCompositionReaction(
+                    object,
+                    true
+                  )
+                : null;
+
+        },
+
+
+        /*
+         * Obtenir les diagnostics.
+         */
+        diagnostics() {
+
+            return runScientificDiagnostics();
+
+        },
+
+
+        /*
+         * Obtenir l'état complet.
+         */
+        getState() {
+
+            return serializeState();
+
+        },
+
+
+        /*
+         * Obtenir les matériaux publics.
+         */
+        getMaterials() {
+
+            return MATERIALS.map(
+                material => ({
+                    id:
+                        material.id,
+
+                    name:
+                        material.name,
+
+                    formula:
+                        material.formula,
+
+                    category:
+                        material.category,
+
+                    type:
+                        material.type,
+
+                    molarMass:
+                        material.molarMass,
+
+                    density:
+                        material.density
+                })
+            );
+
+        },
+
+
+        /*
+         * Obtenir les réactions disponibles.
+         */
+        getReactions() {
+
+            return REACTIONS.map(
+                reaction => ({
+                    id:
+                        reaction.id,
+
+                    name:
+                        reaction.name,
+
+                    equation:
+                        reaction.equation,
+
+                    type:
+                        reaction.type
+                })
+            );
+
+        },
+
+        version:
+            CHEM_CONFIG.engineVersion
+
+    };
+
 })();
+
 
