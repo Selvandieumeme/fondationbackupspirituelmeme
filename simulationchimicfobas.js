@@ -510,782 +510,530 @@
    SOLIDES — RÉACTIFS SOLIDES
    ================================================================ */
 
-const SOLIDES = [
 
-    {
-        id: "sodium-chloride",
-        name: "Chlorure de sodium",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 2.16,
-        temperature: 25,
-        ph: 7,
-        color: "Blanc",
-        formula: "NaCl",
-        molarMass: 58.4428,
-        defaultMolarity: null,
-        description: "Sel de laboratoire.",
-        thermal: {
-            meltingPoint: 801,
-            boilingPoint: 1413,
-            heatCapacity: 0.864
-        }
-    },
+        {
+            id: "potassium-chloride",
+            name: "Chlorure de potassium",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 1.984,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "KCl",
+            molarMass: 74.5513,
+            defaultMolarity: null,
+            description:
+                "Sel solide utilisé pour les expériences de dissolution et de préparation de solutions.",
+            thermal: {
+                meltingPoint: 770,
+                boilingPoint: 1420,
+                heatCapacity: 0.707
+            }
+        },
 
-    {
-        id: "copper",
-        name: "Cuivre",
-        category: "solid",
-        type: "solid",
-        icon: "🟠",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 8.96,
-        temperature: 25,
-        ph: null,
-        color: "Cuivre",
-        formula: "Cu",
-        molarMass: 63.546,
-        defaultMolarity: null,
-        description: "Échantillon métallique de cuivre.",
-        thermal: {
-            meltingPoint: 1084.62,
-            boilingPoint: 2562,
-            heatCapacity: 0.385
-        }
-    },
+        {
+            id: "sodium-carbonate",
+            name: "Carbonate de sodium",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.54,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "Na₂CO₃",
+            molarMass: 105.9888,
+            defaultMolarity: null,
+            description:
+                "Sel alcalin solide utilisé dans les expériences acido-basiques.",
+            thermal: {
+                meltingPoint: 851,
+                boilingPoint: 1600,
+                heatCapacity: 1.13
+            }
+        },
 
-    {
-        id: "iron",
-        name: "Fer",
-        category: "solid",
-        type: "solid",
-        icon: "⚙️",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 7.87,
-        temperature: 25,
-        ph: null,
-        color: "Gris métallique",
-        formula: "Fe",
-        molarMass: 55.845,
-        defaultMolarity: null,
-        description: "Échantillon de fer.",
-        thermal: {
-            meltingPoint: 1538,
-            boilingPoint: 2862,
-            heatCapacity: 0.449
-        }
-    },
+        {
+            id: "sodium-bicarbonate",
+            name: "Bicarbonate de sodium",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.20,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "NaHCO₃",
+            molarMass: 84.0066,
+            defaultMolarity: null,
+            description:
+                "Solide alcalin utilisé dans les réactions avec les acides.",
+            thermal: {
+                meltingPoint: 270,
+                boilingPoint: null,
+                heatCapacity: 1.05
+            }
+        },
 
-    {
-        id: "sodium",
-        name: "Sodium",
-        category: "solid",
-        type: "solid",
-        icon: "🟡",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 20,
-        density: 0.968,
-        temperature: 25,
-        ph: null,
-        color: "Argenté",
-        formula: "Na",
-        molarMass: 22.98976928,
-        defaultMolarity: null,
-        description: "Métal alcalin réactif.",
-        thermal: {
-            meltingPoint: 97.79,
-            boilingPoint: 883,
-            heatCapacity: 1.228
-        }
-    },
+        {
+            id: "silver-nitrate",
+            name: "Nitrate d'argent",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 4.35,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "AgNO₃",
+            molarMass: 169.8731,
+            defaultMolarity: null,
+            description:
+                "Sel d'argent utilisé comme réactif dans les expériences de chimie analytique.",
+            thermal: {
+                meltingPoint: 212,
+                boilingPoint: 444,
+                heatCapacity: 0.43
+            }
+        },
 
-    {
-        id: "sulfur",
-        name: "Soufre",
-        category: "solid",
-        type: "solid",
-        icon: "🟨",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 2.07,
-        temperature: 25,
-        ph: null,
-        color: "Jaune",
-        formula: "S",
-        molarMass: 32.06,
-        defaultMolarity: null,
-        description: "Soufre élémentaire.",
-        thermal: {
-            meltingPoint: 115.21,
-            boilingPoint: 444.72,
-            heatCapacity: 0.71
-        }
-    },
+        {
+            id: "zinc-sulfate",
+            name: "Sulfate de zinc",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 3.54,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "ZnSO₄",
+            molarMass: 161.44,
+            defaultMolarity: null,
+            description:
+                "Sel métallique solide utilisé dans les expériences de chimie.",
+            thermal: {
+                meltingPoint: 680,
+                boilingPoint: null,
+                heatCapacity: 0.74
+            }
+        },
 
-    {
-        id: "carbon",
-        name: "Carbone",
-        category: "solid",
-        type: "solid",
-        icon: "⬛",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 20,
-        density: 2.26,
-        temperature: 25,
-        ph: null,
-        color: "Noir",
-        formula: "C",
-        molarMass: 12.011,
-        defaultMolarity: null,
-        description: "Carbone sous forme graphite.",
-        thermal: {
-            meltingPoint: 3550,
-            boilingPoint: 4027,
-            heatCapacity: 0.709
-        }
-    },
+        {
+            id: "silver",
+            name: "Argent",
+            category: "solid",
+            type: "solid",
+            icon: "⚪",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 10.49,
+            temperature: 25,
+            ph: null,
+            color: "Argenté",
+            formula: "Ag",
+            molarMass: 107.8682,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique d'argent.",
+            thermal: {
+                meltingPoint: 961.78,
+                boilingPoint: 2162,
+                heatCapacity: 0.235
+            }
+        },
 
-    {
-        id: "aluminum",
-        name: "Aluminium",
-        category: "solid",
-        type: "solid",
-        icon: "🔘",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 2.70,
-        temperature: 25,
-        ph: null,
-        color: "Argenté",
-        formula: "Al",
-        molarMass: 26.9815385,
-        defaultMolarity: null,
-        description: "Échantillon métallique d'aluminium.",
-        thermal: {
-            meltingPoint: 660.32,
-            boilingPoint: 2519,
-            heatCapacity: 0.897
-        }
-    },
+        {
+            id: "gold",
+            name: "Or",
+            category: "solid",
+            type: "solid",
+            icon: "🟨",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 19.32,
+            temperature: 25,
+            ph: null,
+            color: "Doré",
+            formula: "Au",
+            molarMass: 196.96657,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique d'or.",
+            thermal: {
+                meltingPoint: 1064.18,
+                boilingPoint: 2856,
+                heatCapacity: 0.129
+            }
+        },
 
-    {
-        id: "zinc",
-        name: "Zinc",
-        category: "solid",
-        type: "solid",
-        icon: "⚪",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 7.14,
-        temperature: 25,
-        ph: null,
-        color: "Gris argenté",
-        formula: "Zn",
-        molarMass: 65.38,
-        defaultMolarity: null,
-        description: "Échantillon métallique de zinc.",
-        thermal: {
-            meltingPoint: 419.53,
-            boilingPoint: 907,
-            heatCapacity: 0.388
-        }
-    },
+        {
+            id: "lead",
+            name: "Plomb",
+            category: "solid",
+            type: "solid",
+            icon: "⚙️",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 11.34,
+            temperature: 25,
+            ph: null,
+            color: "Gris foncé",
+            formula: "Pb",
+            molarMass: 207.2,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique de plomb.",
+            thermal: {
+                meltingPoint: 327.46,
+                boilingPoint: 1749,
+                heatCapacity: 0.129
+            }
+        },
 
-    {
-        id: "magnesium",
-        name: "Magnésium",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 20,
-        density: 1.738,
-        temperature: 25,
-        ph: null,
-        color: "Argenté",
-        formula: "Mg",
-        molarMass: 24.305,
-        defaultMolarity: null,
-        description: "Échantillon métallique de magnésium.",
-        thermal: {
-            meltingPoint: 650,
-            boilingPoint: 1091,
-            heatCapacity: 1.023
-        }
-    },
+        {
+            id: "tin",
+            name: "Étain",
+            category: "solid",
+            type: "solid",
+            icon: "⚪",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 7.31,
+            temperature: 25,
+            ph: null,
+            color: "Argenté",
+            formula: "Sn",
+            molarMass: 118.710,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique d'étain.",
+            thermal: {
+                meltingPoint: 231.93,
+                boilingPoint: 2602,
+                heatCapacity: 0.228
+            }
+        },
 
-    {
-        id: "calcium-carbonate",
-        name: "Carbonate de calcium",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 2.71,
-        temperature: 25,
-        ph: null,
-        color: "Blanc",
-        formula: "CaCO₃",
-        molarMass: 100.0869,
-        defaultMolarity: null,
-        description: "Carbonate de calcium, composé minéral courant.",
-        thermal: {
-            meltingPoint: 825,
-            boilingPoint: 1339,
-            heatCapacity: 0.82
-        }
-    },
+        {
+            id: "nickel",
+            name: "Nickel",
+            category: "solid",
+            type: "solid",
+            icon: "⚙️",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 8.908,
+            temperature: 25,
+            ph: null,
+            color: "Gris argenté",
+            formula: "Ni",
+            molarMass: 58.6934,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique de nickel.",
+            thermal: {
+                meltingPoint: 1455,
+                boilingPoint: 2913,
+                heatCapacity: 0.444
+            }
+        },
 
-    {
-        id: "sucrose",
-        name: "Saccharose",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 1.587,
-        temperature: 25,
-        ph: null,
-        color: "Blanc",
-        formula: "C₁₂H₂₂O₁₁",
-        molarMass: 342.2965,
-        defaultMolarity: null,
-        description: "Sucre cristallin.",
-        thermal: {
-            meltingPoint: 186,
-            boilingPoint: null,
-            heatCapacity: 1.24
-        }
-    },
+        {
+            id: "chromium",
+            name: "Chrome",
+            category: "solid",
+            type: "solid",
+            icon: "⚙️",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 7.19,
+            temperature: 25,
+            ph: null,
+            color: "Gris métallique",
+            formula: "Cr",
+            molarMass: 51.9961,
+            defaultMolarity: null,
+            description:
+                "Échantillon métallique de chrome.",
+            thermal: {
+                meltingPoint: 1907,
+                boilingPoint: 2671,
+                heatCapacity: 0.449
+            }
+        },
 
-    {
-        id: "potassium-chloride",
-        name: "Chlorure de potassium",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 1.984,
-        temperature: 25,
-        ph: 7,
-        color: "Blanc",
-        formula: "KCl",
-        molarMass: 74.5513,
-        defaultMolarity: null,
-        description: "Sel ionique de potassium.",
-        thermal: {
-            meltingPoint: 770,
-            boilingPoint: 1420,
-            heatCapacity: 0.69
-        }
-    },
+        {
+            id: "copper-oxide",
+            name: "Oxyde de cuivre",
+            category: "solid",
+            type: "solid",
+            icon: "⚫",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 6.31,
+            temperature: 25,
+            ph: null,
+            color: "Noir",
+            formula: "CuO",
+            molarMass: 79.545,
+            defaultMolarity: null,
+            description:
+                "Oxyde métallique solide utilisé dans les expériences chimiques.",
+            thermal: {
+                meltingPoint: 1326,
+                boilingPoint: null,
+                heatCapacity: 0.54
+            }
+        },
 
-    {
-        id: "sodium-carbonate",
-        name: "Carbonate de sodium",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 2.54,
-        temperature: 25,
-        ph: 11.6,
-        color: "Blanc",
-        formula: "Na₂CO₃",
-        molarMass: 105.9888,
-        defaultMolarity: null,
-        description: "Carbonate de sodium.",
-        thermal: {
-            meltingPoint: 851,
-            boilingPoint: 1600,
-            heatCapacity: 1.09
-        }
-    },
+        {
+            id: "iron-oxide",
+            name: "Oxyde de fer",
+            category: "solid",
+            type: "solid",
+            icon: "🟤",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 5.24,
+            temperature: 25,
+            ph: null,
+            color: "Rouge brun",
+            formula: "Fe₂O₃",
+            molarMass: 159.688,
+            defaultMolarity: null,
+            description:
+                "Oxyde de fer solide utilisé pour les expériences sur les composés minéraux.",
+            thermal: {
+                meltingPoint: 1565,
+                boilingPoint: null,
+                heatCapacity: 0.65
+            }
+        },
 
-    {
-        id: "sodium-bicarbonate",
-        name: "Bicarbonate de sodium",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 2.20,
-        temperature: 25,
-        ph: 8.3,
-        color: "Blanc",
-        formula: "NaHCO₃",
-        molarMass: 84.0066,
-        defaultMolarity: null,
-        description: "Bicarbonate de sodium.",
-        thermal: {
-            meltingPoint: 50,
-            boilingPoint: null,
-            heatCapacity: 1.05
-        }
-    },
+        {
+            id: "silicon-dioxide",
+            name: "Dioxyde de silicium",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.65,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "SiO₂",
+            molarMass: 60.0843,
+            defaultMolarity: null,
+            description:
+                "Composé minéral solide utilisé comme matériau de référence.",
+            thermal: {
+                meltingPoint: 1710,
+                boilingPoint: 2230,
+                heatCapacity: 0.703
+            }
+        },
 
-    {
-        id: "silver-nitrate",
-        name: "Nitrate d'argent",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 4.35,
-        temperature: 25,
-        ph: null,
-        color: "Blanc",
-        formula: "AgNO₃",
-        molarMass: 169.8731,
-        defaultMolarity: null,
-        description: "Sel d'argent utilisé comme réactif analytique.",
-        thermal: {
-            meltingPoint: 212,
-            boilingPoint: 444,
-            heatCapacity: 0.435
-        }
-    },
+        {
+            id: "potassium-permanganate",
+            name: "Permanganate de potassium",
+            category: "solid",
+            type: "solid",
+            icon: "🟣",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 2.70,
+            temperature: 25,
+            ph: null,
+            color: "Violet foncé",
+            formula: "KMnO₄",
+            molarMass: 158.034,
+            defaultMolarity: null,
+            description:
+                "Réactif solide oxydant utilisé dans les expériences de laboratoire.",
+            thermal: {
+                meltingPoint: 240,
+                boilingPoint: null,
+                heatCapacity: 0.75
+            }
+        },
 
-    {
-        id: "zinc-sulfate",
-        name: "Sulfate de zinc",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 3.54,
-        temperature: 25,
-        ph: null,
-        color: "Blanc",
-        formula: "ZnSO₄",
-        molarMass: 161.44,
-        defaultMolarity: null,
-        description: "Sulfate de zinc.",
-        thermal: {
-            meltingPoint: 680,
-            boilingPoint: 740,
-            heatCapacity: 0.74
-        }
-    },
+        {
+            id: "iodine",
+            name: "Iode",
+            category: "solid",
+            type: "solid",
+            icon: "🟣",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 4.93,
+            temperature: 25,
+            ph: null,
+            color: "Violet foncé",
+            formula: "I₂",
+            molarMass: 253.80894,
+            defaultMolarity: null,
+            description:
+                "Échantillon d'iode solide utilisé comme réactif chimique.",
+            thermal: {
+                meltingPoint: 113.7,
+                boilingPoint: 184.3,
+                heatCapacity: 0.427
+            }
+        },
 
-    {
-        id: "silver",
-        name: "Argent",
-        category: "solid",
-        type: "solid",
-        icon: "⚪",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 20,
-        density: 10.49,
-        temperature: 25,
-        ph: null,
-        color: "Argent",
-        formula: "Ag",
-        molarMass: 107.8682,
-        defaultMolarity: null,
-        description: "Échantillon métallique d'argent.",
-        thermal: {
-            meltingPoint: 961.78,
-            boilingPoint: 2162,
-            heatCapacity: 0.235
-        }
-    },
+        {
+            id: "glucose",
+            name: "Glucose",
+            category: "solid",
+            type: "solid",
+            icon: "🍚",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 1.54,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "C₆H₁₂O₆",
+            molarMass: 180.156,
+            defaultMolarity: null,
+            description:
+                "Glucide solide utilisé dans les expériences de dissolution.",
+            thermal: {
+                meltingPoint: 146,
+                boilingPoint: null,
+                heatCapacity: 1.25
+            }
+        },
 
-    {
-        id: "gold",
-        name: "Or",
-        category: "solid",
-        type: "solid",
-        icon: "🟨",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 20,
-        density: 19.32,
-        temperature: 25,
-        ph: null,
-        color: "Doré",
-        formula: "Au",
-        molarMass: 196.96657,
-        defaultMolarity: null,
-        description: "Échantillon métallique d'or.",
-        thermal: {
-            meltingPoint: 1064.18,
-            boilingPoint: 2856,
-            heatCapacity: 0.129
-        }
-    },
+        {
+            id: "urea",
+            name: "Urée",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 1.32,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "CH₄N₂O",
+            molarMass: 60.056,
+            defaultMolarity: null,
+            description:
+                "Composé azoté organique solide utilisé dans les expériences chimiques.",
+            thermal: {
+                meltingPoint: 133,
+                boilingPoint: null,
+                heatCapacity: 1.42
+            }
+        },
 
-    {
-        id: "lead",
-        name: "Plomb",
-        category: "solid",
-        type: "solid",
-        icon: "⬛",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 11.34,
-        temperature: 25,
-        ph: null,
-        color: "Gris",
-        formula: "Pb",
-        molarMass: 207.2,
-        defaultMolarity: null,
-        description: "Échantillon métallique de plomb.",
-        thermal: {
-            meltingPoint: 327.46,
-            boilingPoint: 1749,
-            heatCapacity: 0.128
-        }
-    },
+        {
+            id: "citric-acid",
+            name: "Acide citrique",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 1.665,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "C₆H₈O₇",
+            molarMass: 192.123,
+            defaultMolarity: null,
+            description:
+                "Acide organique solide utilisé dans les expériences acido-basiques.",
+            thermal: {
+                meltingPoint: 153,
+                boilingPoint: null,
+                heatCapacity: 1.35
+            }
+        },
 
-    {
-        id: "tin",
-        name: "Étain",
-        category: "solid",
-        type: "solid",
-        icon: "⚪",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 7.31,
-        temperature: 25,
-        ph: null,
-        color: "Argenté",
-        formula: "Sn",
-        molarMass: 118.71,
-        defaultMolarity: null,
-        description: "Échantillon métallique d'étain.",
-        thermal: {
-            meltingPoint: 231.93,
-            boilingPoint: 2602,
-            heatCapacity: 0.228
-        }
-    },
+        {
+            id: "benzoic-acid",
+            name: "Acide benzoïque",
+            category: "solid",
+            type: "solid",
+            icon: "⬜",
+            state: "Solide",
+            volume: 0,
+            capacity: 0,
+            mass: 25,
+            density: 1.266,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "C₇H₆O₂",
+            molarMass: 122.123,
+            defaultMolarity: null,
+            description:
+                "Acide organique aromatique solide utilisé comme composé expérimental.",
+            thermal: {
+                meltingPoint: 122.4,
+                boilingPoint: 249.2,
+                heatCapacity: 1.26
+            }
+        },
 
-    {
-        id: "nickel",
-        name: "Nickel",
-        category: "solid",
-        type: "solid",
-        icon: "⚙️",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 8.908,
-        temperature: 25,
-        ph: null,
-        color: "Argenté",
-        formula: "Ni",
-        molarMass: 58.6934,
-        defaultMolarity: null,
-        description: "Échantillon métallique de nickel.",
-        thermal: {
-            meltingPoint: 1455,
-            boilingPoint: 2913,
-            heatCapacity: 0.444
-        }
-    },
 
-    {
-        id: "chromium",
-        name: "Chrome",
-        category: "solid",
-        type: "solid",
-        icon: "⚙️",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 7.19,
-        temperature: 25,
-        ph: null,
-        color: "Argenté",
-        formula: "Cr",
-        molarMass: 51.9961,
-        defaultMolarity: null,
-        description: "Échantillon métallique de chrome.",
-        thermal: {
-            meltingPoint: 1907,
-            boilingPoint: 2671,
-            heatCapacity: 0.449
-        }
-    },
 
-    {
-        id: "copper-oxide",
-        name: "Oxyde de cuivre(II)",
-        category: "solid",
-        type: "solid",
-        icon: "⬛",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 6.31,
-        temperature: 25,
-        ph: null,
-        color: "Noir",
-        formula: "CuO",
-        molarMass: 79.545,
-        defaultMolarity: null,
-        description: "Oxyde de cuivre(II).",
-        thermal: {
-            meltingPoint: 1326,
-            boilingPoint: 2000,
-            heatCapacity: 0.535
-        }
-    },
 
-    {
-        id: "iron-oxide",
-        name: "Oxyde de fer(III)",
-        category: "solid",
-        type: "solid",
-        icon: "🟤",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 5.24,
-        temperature: 25,
-        ph: null,
-        color: "Rouge-brun",
-        formula: "Fe₂O₃",
-        molarMass: 159.688,
-        defaultMolarity: null,
-        description: "Oxyde de fer(III).",
-        thermal: {
-            meltingPoint: 1565,
-            boilingPoint: 1987,
-            heatCapacity: 0.65
-        }
-    },
-
-    {
-        id: "silicon-dioxide",
-        name: "Dioxyde de silicium",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 2.65,
-        temperature: 25,
-        ph: null,
-        color: "Blanc",
-        formula: "SiO₂",
-        molarMass: 60.0843,
-        defaultMolarity: null,
-        description: "Dioxyde de silicium.",
-        thermal: {
-            meltingPoint: 1713,
-            boilingPoint: 2950,
-            heatCapacity: 0.703
-        }
-    },
-
-    {
-        id: "potassium-permanganate",
-        name: "Permanganate de potassium",
-        category: "solid",
-        type: "solid",
-        icon: "🟣",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 25,
-        density: 2.70,
-        temperature: 25,
-        ph: null,
-        color: "Violet foncé",
-        formula: "KMnO₄",
-        molarMass: 158.034,
-        defaultMolarity: null,
-        description: "Oxydant solide de laboratoire.",
-        thermal: {
-            meltingPoint: 240,
-            boilingPoint: null,
-            heatCapacity: 0.75
-        }
-    },
-
-    {
-        id: "iodine",
-        name: "Iode",
-        category: "solid",
-        type: "solid",
-        icon: "🟣",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 15,
-        density: 4.93,
-        temperature: 25,
-        ph: null,
-        color: "Violet-noir",
-        formula: "I₂",
-        molarMass: 253.80894,
-        defaultMolarity: null,
-        description: "Iode élémentaire.",
-        thermal: {
-            meltingPoint: 113.7,
-            boilingPoint: 184.3,
-            heatCapacity: 0.54
-        }
-    },
-
-    {
-        id: "glucose",
-        name: "Glucose",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 1.54,
-        temperature: 25,
-        ph: null,
-        color: "Blanc",
-        formula: "C₆H₁₂O₆",
-        molarMass: 180.156,
-        defaultMolarity: null,
-        description: "Glucose cristallin.",
-        thermal: {
-            meltingPoint: 146,
-            boilingPoint: null,
-            heatCapacity: 1.25
-        }
-    },
-
-    {
-        id: "urea",
-        name: "Urée",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 1.32,
-        temperature: 25,
-        ph: null,
-        color: "Blanc",
-        formula: "CH₄N₂O",
-        molarMass: 60.056,
-        defaultMolarity: null,
-        description: "Composé organique azoté.",
-        thermal: {
-            meltingPoint: 133,
-            boilingPoint: null,
-            heatCapacity: 1.33
-        }
-    },
-
-    {
-        id: "citric-acid",
-        name: "Acide citrique",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 1.665,
-        temperature: 25,
-        ph: 2.2,
-        color: "Blanc",
-        formula: "C₆H₈O₇",
-        molarMass: 192.123,
-        defaultMolarity: null,
-        description: "Acide organique solide.",
-        thermal: {
-            meltingPoint: 153,
-            boilingPoint: null,
-            heatCapacity: 1.25
-        }
-    },
-
-    {
-        id: "benzoic-acid",
-        name: "Acide benzoïque",
-        category: "solid",
-        type: "solid",
-        icon: "⬜",
-        state: "Solide",
-        volume: 0,
-        capacity: 0,
-        mass: 50,
-        density: 1.27,
-        temperature: 25,
-        ph: 2.8,
-        color: "Blanc",
-        formula: "C₇H₆O₂",
-        molarMass: 122.123,
-        defaultMolarity: null,
-        description: "Acide carboxylique aromatique.",
-        thermal: {
-            meltingPoint: 122.4,
-            boilingPoint: 249.2,
-            heatCapacity: 1.15
-        }
-    },
 
 
 
