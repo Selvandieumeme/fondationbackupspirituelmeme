@@ -520,162 +520,8 @@
         ======================================================== */
 
         {
-            id: "sodium-chloride",
-            name: "Chlorure de sodium",
-            category: "solid",
-            type: "solid",
-            icon: "⬜",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 50,
-            density: 2.16,
-            temperature: 25,
-            ph: 7,
-            color: "Blanc",
-            formula: "NaCl",
-            molarMass: 58.4428,
-            defaultMolarity: null,
-            description:
-                "Sel de laboratoire.",
-            thermal: {
-                meltingPoint: 801,
-                boilingPoint: 1413,
-                heatCapacity: 0.864
-            }
-        },
-
-        {
-            id: "copper",
-            name: "Cuivre",
-            category: "solid",
-            type: "solid",
-            icon: "🟠",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 8.96,
-            temperature: 25,
-            ph: null,
-            color: "Cuivre",
-            formula: "Cu",
-            molarMass: 63.546,
-            description:
-                "Échantillon métallique de cuivre.",
-            thermal: {
-                meltingPoint: 1084.62,
-                boilingPoint: 2562,
-                heatCapacity: 0.385
-            }
-        },
-
-        {
-            id: "iron",
-            name: "Fer",
-            category: "solid",
-            type: "solid",
-            icon: "⚙️",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 7.87,
-            temperature: 25,
-            ph: null,
-            color: "Gris métallique",
-            formula: "Fe",
-            molarMass: 55.845,
-            description:
-                "Échantillon de fer.",
-            thermal: {
-                meltingPoint: 1538,
-                boilingPoint: 2862,
-                heatCapacity: 0.449
-            }
-        },
-
-        {
-            id: "sodium",
-            name: "Sodium",
-            category: "solid",
-            type: "solid",
-            icon: "🔘",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 0.968,
-            temperature: 25,
-            ph: null,
-            color: "Argenté",
-            formula: "Na",
-            molarMass: 22.98976928,
-            defaultMolarity: null,
-            description:
-                "Échantillon de sodium métallique.",
-            thermal: {
-                meltingPoint: 97.79,
-                boilingPoint: 883,
-                heatCapacity: 1.228
-            }
-        },
-
-        {
-            id: "sulfur",
-            name: "Soufre",
-            category: "solid",
-            type: "solid",
-            icon: "🟡",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 2.07,
-            temperature: 25,
-            ph: null,
-            color: "Jaune",
-            formula: "S",
-            molarMass: 32.06,
-            defaultMolarity: null,
-            description:
-                "Échantillon de soufre élémentaire.",
-            thermal: {
-                meltingPoint: 115.21,
-                boilingPoint: 444.72,
-                heatCapacity: 0.71
-            }
-        },
-
-        {
-            id: "carbon",
-            name: "Carbone",
-            category: "solid",
-            type: "solid",
-            icon: "⚫",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 2.26,
-            temperature: 25,
-            ph: null,
-            color: "Noir",
-            formula: "C",
-            molarMass: 12.011,
-            defaultMolarity: null,
-            description:
-                "Échantillon de carbone sous forme de graphite.",
-            thermal: {
-                meltingPoint: 3550,
-                boilingPoint: 4027,
-                heatCapacity: 0.709
-            }
-        },
-
-        {
-            id: "aluminum",
-            name: "Aluminium",
+            id: "potassium-chloride",
+            name: "Chlorure de potassium",
             category: "solid",
             type: "solid",
             icon: "⬜",
@@ -683,77 +529,25 @@
             volume: 0,
             capacity: 0,
             mass: 25,
-            density: 2.70,
+            density: 1.984,
             temperature: 25,
             ph: null,
-            color: "Argenté",
-            formula: "Al",
-            molarMass: 26.9815385,
+            color: "Blanc",
+            formula: "KCl",
+            molarMass: 74.5513,
             defaultMolarity: null,
             description:
-                "Échantillon métallique d'aluminium.",
+                "Sel solide utilisé pour les expériences de dissolution et de préparation de solutions.",
             thermal: {
-                meltingPoint: 660.32,
-                boilingPoint: 2519,
-                heatCapacity: 0.897
+                meltingPoint: 770,
+                boilingPoint: 1420,
+                heatCapacity: 0.707
             }
         },
 
         {
-            id: "zinc",
-            name: "Zinc",
-            category: "solid",
-            type: "solid",
-            icon: "⚙️",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 7.14,
-            temperature: 25,
-            ph: null,
-            color: "Gris argenté",
-            formula: "Zn",
-            molarMass: 65.38,
-            defaultMolarity: null,
-            description:
-                "Échantillon métallique de zinc.",
-            thermal: {
-                meltingPoint: 419.53,
-                boilingPoint: 907,
-                heatCapacity: 0.388
-            }
-        },
-
-        {
-            id: "magnesium",
-            name: "Magnésium",
-            category: "solid",
-            type: "solid",
-            icon: "🔘",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 1.738,
-            temperature: 25,
-            ph: null,
-            color: "Argenté",
-            formula: "Mg",
-            molarMass: 24.305,
-            defaultMolarity: null,
-            description:
-                "Échantillon métallique de magnésium.",
-            thermal: {
-                meltingPoint: 650,
-                boilingPoint: 1091,
-                heatCapacity: 1.023
-            }
-        },
-
-        {
-            id: "calcium-carbonate",
-            name: "Carbonate de calcium",
+            id: "sodium-carbonate",
+            name: "Carbonate de sodium",
             category: "solid",
             type: "solid",
             icon: "⬜",
@@ -761,158 +555,51 @@
             volume: 0,
             capacity: 0,
             mass: 25,
-            density: 2.71,
+            density: 2.54,
             temperature: 25,
             ph: null,
             color: "Blanc",
-            formula: "CaCO₃",
-            molarMass: 100.0869,
+            formula: "Na₂CO₃",
+            molarMass: 105.9888,
             defaultMolarity: null,
             description:
-                "Carbonate de calcium solide utilisé notamment dans les réactions avec les acides.",
+                "Sel alcalin solide utilisé dans les expériences acido-basiques.",
             thermal: {
-                meltingPoint: 825,
-                boilingPoint: 1339,
-                heatCapacity: 0.82
+                meltingPoint: 851,
+                boilingPoint: 1600,
+                heatCapacity: 1.13
             }
         },
 
         {
-            id: "sucrose",
-            name: "Sucre",
+            id: "sodium-bicarbonate",
+            name: "Bicarbonate de sodium",
             category: "solid",
             type: "solid",
-            icon: "🍚",
+            icon: "⬜",
             state: "Solide",
             volume: 0,
             capacity: 0,
             mass: 25,
-            density: 1.587,
+            density: 2.20,
             temperature: 25,
             ph: null,
             color: "Blanc",
-            formula: "C₁₂H₂₂O₁₁",
-            molarMass: 342.2965,
+            formula: "NaHCO₃",
+            molarMass: 84.0066,
             defaultMolarity: null,
             description:
-                "Saccharose solide utilisé pour les expériences de dissolution et de préparation de solutions.",
+                "Solide alcalin utilisé dans les réactions avec les acides.",
             thermal: {
-                meltingPoint: 186,
+                meltingPoint: 270,
                 boilingPoint: null,
-                heatCapacity: 1.24
-            }
-        },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /* ========================================================
-           MÉTAUX
-        ======================================================== */
-
-        {
-            id: "copper",
-            name: "Cuivre",
-            category: "solid",
-            type: "solid",
-            icon: "🟠",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 8.96,
-            temperature: 25,
-            ph: null,
-            color: "Cuivre",
-            formula: "Cu",
-            molarMass: 63.546,
-            defaultMolarity: null,
-            description:
-                "Échantillon métallique de cuivre.",
-            thermal: {
-                meltingPoint: 1084.62,
-                boilingPoint: 2562,
-                heatCapacity: 0.385
+                heatCapacity: 1.05
             }
         },
 
         {
-            id: "iron",
-            name: "Fer",
-            category: "solid",
-            type: "solid",
-            icon: "⚙️",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 7.87,
-            temperature: 25,
-            ph: null,
-            color: "Gris métallique",
-            formula: "Fe",
-            molarMass: 55.845,
-            defaultMolarity: null,
-            description:
-                "Échantillon de fer.",
-            thermal: {
-                meltingPoint: 1538,
-                boilingPoint: 2862,
-                heatCapacity: 0.449
-            }
-        },
-
-        {
-            id: "sodium",
-            name: "Sodium",
-            category: "solid",
-            type: "solid",
-            icon: "🔘",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 0.968,
-            temperature: 25,
-            ph: null,
-            color: "Argenté",
-            formula: "Na",
-            molarMass: 22.98976928,
-            defaultMolarity: null,
-            description:
-                "Échantillon de sodium métallique.",
-            thermal: {
-                meltingPoint: 97.79,
-                boilingPoint: 883,
-                heatCapacity: 1.228
-            }
-        },
-
-        {
-            id: "aluminum",
-            name: "Aluminium",
+            id: "silver-nitrate",
+            name: "Nitrate d'argent",
             category: "solid",
             type: "solid",
             icon: "⬜",
@@ -920,71 +607,45 @@
             volume: 0,
             capacity: 0,
             mass: 25,
-            density: 2.70,
+            density: 4.35,
             temperature: 25,
             ph: null,
-            color: "Argenté",
-            formula: "Al",
-            molarMass: 26.9815385,
+            color: "Blanc",
+            formula: "AgNO₃",
+            molarMass: 169.8731,
             defaultMolarity: null,
             description:
-                "Échantillon métallique d'aluminium.",
+                "Sel d'argent utilisé comme réactif dans les expériences de chimie analytique.",
             thermal: {
-                meltingPoint: 660.32,
-                boilingPoint: 2519,
-                heatCapacity: 0.897
+                meltingPoint: 212,
+                boilingPoint: 444,
+                heatCapacity: 0.43
             }
         },
 
         {
-            id: "zinc",
-            name: "Zinc",
+            id: "zinc-sulfate",
+            name: "Sulfate de zinc",
             category: "solid",
             type: "solid",
-            icon: "⚙️",
+            icon: "⬜",
             state: "Solide",
             volume: 0,
             capacity: 0,
             mass: 25,
-            density: 7.14,
+            density: 3.54,
             temperature: 25,
             ph: null,
-            color: "Gris argenté",
-            formula: "Zn",
-            molarMass: 65.38,
+            color: "Blanc",
+            formula: "ZnSO₄",
+            molarMass: 161.44,
             defaultMolarity: null,
             description:
-                "Échantillon métallique de zinc.",
+                "Sel métallique solide utilisé dans les expériences de chimie.",
             thermal: {
-                meltingPoint: 419.53,
-                boilingPoint: 907,
-                heatCapacity: 0.388
-            }
-        },
-
-        {
-            id: "magnesium",
-            name: "Magnésium",
-            category: "solid",
-            type: "solid",
-            icon: "🔘",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 1.738,
-            temperature: 25,
-            ph: null,
-            color: "Argenté",
-            formula: "Mg",
-            molarMass: 24.305,
-            defaultMolarity: null,
-            description:
-                "Échantillon métallique de magnésium.",
-            thermal: {
-                meltingPoint: 650,
-                boilingPoint: 1091,
-                heatCapacity: 1.023
+                meltingPoint: 680,
+                boilingPoint: null,
+                heatCapacity: 0.74
             }
         },
 
@@ -1019,7 +680,7 @@
             name: "Or",
             category: "solid",
             type: "solid",
-            icon: "🟡",
+            icon: "🟨",
             state: "Solide",
             volume: 0,
             capacity: 0,
@@ -1053,7 +714,7 @@
             density: 11.34,
             temperature: 25,
             ph: null,
-            color: "Gris bleuté",
+            color: "Gris foncé",
             formula: "Pb",
             molarMass: 207.2,
             defaultMolarity: null,
@@ -1062,7 +723,7 @@
             thermal: {
                 meltingPoint: 327.46,
                 boilingPoint: 1749,
-                heatCapacity: 0.128
+                heatCapacity: 0.129
             }
         },
 
@@ -1081,7 +742,7 @@
             ph: null,
             color: "Argenté",
             formula: "Sn",
-            molarMass: 118.71,
+            molarMass: 118.710,
             defaultMolarity: null,
             description:
                 "Échantillon métallique d'étain.",
@@ -1105,7 +766,7 @@
             density: 8.908,
             temperature: 25,
             ph: null,
-            color: "Argenté",
+            color: "Gris argenté",
             formula: "Ni",
             molarMass: 58.6934,
             defaultMolarity: null,
@@ -1144,68 +805,6 @@
             }
         },
 
-
-        /* ========================================================
-           SOUFRE ET CARBONE
-        ======================================================== */
-
-        {
-            id: "sulfur",
-            name: "Soufre",
-            category: "solid",
-            type: "solid",
-            icon: "🟡",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 2.07,
-            temperature: 25,
-            ph: null,
-            color: "Jaune",
-            formula: "S",
-            molarMass: 32.06,
-            defaultMolarity: null,
-            description:
-                "Échantillon de soufre élémentaire.",
-            thermal: {
-                meltingPoint: 115.21,
-                boilingPoint: 444.72,
-                heatCapacity: 0.71
-            }
-        },
-
-        {
-            id: "carbon",
-            name: "Carbone",
-            category: "solid",
-            type: "solid",
-            icon: "⚫",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 2.26,
-            temperature: 25,
-            ph: null,
-            color: "Noir",
-            formula: "C",
-            molarMass: 12.011,
-            defaultMolarity: null,
-            description:
-                "Échantillon de carbone sous forme de graphite.",
-            thermal: {
-                meltingPoint: 3550,
-                boilingPoint: 4027,
-                heatCapacity: 0.709
-            }
-        },
-
-
-        /* ========================================================
-           OXYDES ET COMPOSÉS MINÉRAUX
-        ======================================================== */
-
         {
             id: "copper-oxide",
             name: "Oxyde de cuivre",
@@ -1224,17 +823,17 @@
             molarMass: 79.545,
             defaultMolarity: null,
             description:
-                "Oxyde de cuivre(II), solide noir utilisé dans les réactions chimiques.",
+                "Oxyde métallique solide utilisé dans les expériences chimiques.",
             thermal: {
                 meltingPoint: 1326,
-                boilingPoint: 2000,
-                heatCapacity: 0.535
+                boilingPoint: null,
+                heatCapacity: 0.54
             }
         },
 
         {
             id: "iron-oxide",
-            name: "Oxyde de fer(III)",
+            name: "Oxyde de fer",
             category: "solid",
             type: "solid",
             icon: "🟤",
@@ -1250,10 +849,10 @@
             molarMass: 159.688,
             defaultMolarity: null,
             description:
-                "Oxyde de fer(III) solide.",
+                "Oxyde de fer solide utilisé pour les expériences sur les composés minéraux.",
             thermal: {
                 meltingPoint: 1565,
-                boilingPoint: 1987,
+                boilingPoint: null,
                 heatCapacity: 0.65
             }
         },
@@ -1276,18 +875,13 @@
             molarMass: 60.0843,
             defaultMolarity: null,
             description:
-                "Dioxyde de silicium solide, principal constituant du quartz.",
+                "Composé minéral solide utilisé comme matériau de référence.",
             thermal: {
-                meltingPoint: 1713,
-                boilingPoint: 2950,
+                meltingPoint: 1710,
+                boilingPoint: 2230,
                 heatCapacity: 0.703
             }
         },
-
-
-        /* ========================================================
-           RÉACTIFS SOLIDES DE LABORATOIRE
-        ======================================================== */
 
         {
             id: "potassium-permanganate",
@@ -1307,7 +901,7 @@
             molarMass: 158.034,
             defaultMolarity: null,
             description:
-                "Oxydant solide utilisé dans les expériences d'oxydoréduction.",
+                "Réactif solide oxydant utilisé dans les expériences de laboratoire.",
             thermal: {
                 meltingPoint: 240,
                 boilingPoint: null,
@@ -1328,47 +922,16 @@
             density: 4.93,
             temperature: 25,
             ph: null,
-            color: "Noir violet",
+            color: "Violet foncé",
             formula: "I₂",
             molarMass: 253.80894,
             defaultMolarity: null,
             description:
-                "Iode moléculaire solide utilisé dans les expériences de chimie analytique.",
+                "Échantillon d'iode solide utilisé comme réactif chimique.",
             thermal: {
                 meltingPoint: 113.7,
                 boilingPoint: 184.3,
-                heatCapacity: 0.54
-            }
-        },
-
-
-        /* ========================================================
-           COMPOSÉS ORGANIQUES SOLIDES
-        ======================================================== */
-
-        {
-            id: "sucrose",
-            name: "Sucre",
-            category: "solid",
-            type: "solid",
-            icon: "🍚",
-            state: "Solide",
-            volume: 0,
-            capacity: 0,
-            mass: 25,
-            density: 1.587,
-            temperature: 25,
-            ph: null,
-            color: "Blanc",
-            formula: "C₁₂H₂₂O₁₁",
-            molarMass: 342.2965,
-            defaultMolarity: null,
-            description:
-                "Saccharose solide utilisé pour les expériences de dissolution et de préparation de solutions.",
-            thermal: {
-                meltingPoint: 186,
-                boilingPoint: null,
-                heatCapacity: 1.24
+                heatCapacity: 0.427
             }
         },
 
@@ -1377,7 +940,7 @@
             name: "Glucose",
             category: "solid",
             type: "solid",
-            icon: "⬜",
+            icon: "🍚",
             state: "Solide",
             volume: 0,
             capacity: 0,
@@ -1390,7 +953,7 @@
             molarMass: 180.156,
             defaultMolarity: null,
             description:
-                "Glucose solide utilisé pour les expériences de dissolution et de biochimie.",
+                "Glucide solide utilisé dans les expériences de dissolution.",
             thermal: {
                 meltingPoint: 146,
                 boilingPoint: null,
@@ -1416,11 +979,11 @@
             molarMass: 60.056,
             defaultMolarity: null,
             description:
-                "Urée solide utilisée dans les expériences de chimie et de biochimie.",
+                "Composé azoté organique solide utilisé dans les expériences chimiques.",
             thermal: {
                 meltingPoint: 133,
                 boilingPoint: null,
-                heatCapacity: 1.33
+                heatCapacity: 1.42
             }
         },
 
@@ -1436,17 +999,17 @@
             mass: 25,
             density: 1.665,
             temperature: 25,
-            ph: 2.2,
+            ph: null,
             color: "Blanc",
             formula: "C₆H₈O₇",
             molarMass: 192.123,
             defaultMolarity: null,
             description:
-                "Acide organique solide utilisé pour les expériences acide-base.",
+                "Acide organique solide utilisé dans les expériences acido-basiques.",
             thermal: {
                 meltingPoint: 153,
                 boilingPoint: null,
-                heatCapacity: 1.25
+                heatCapacity: 1.35
             }
         },
 
@@ -1460,21 +1023,21 @@
             volume: 0,
             capacity: 0,
             mass: 25,
-            density: 1.27,
+            density: 1.266,
             temperature: 25,
-            ph: 2.8,
+            ph: null,
             color: "Blanc",
             formula: "C₇H₆O₂",
             molarMass: 122.123,
             defaultMolarity: null,
             description:
-                "Acide organique aromatique solide utilisé dans les expériences de chimie.",
+                "Acide organique aromatique solide utilisé comme composé expérimental.",
             thermal: {
                 meltingPoint: 122.4,
                 boilingPoint: 249.2,
-                heatCapacity: 1.15
+                heatCapacity: 1.26
             }
-        }
+        },
 
 
 
