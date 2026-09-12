@@ -7255,6 +7255,16 @@ function mixSelectedObject() {
 
 
 
+
+
+
+
+
+
+
+
+
+
 /* ============================================================
    19 — MOTEUR DE RÉACTION
    ------------------------------------------------------------
@@ -7267,10 +7277,26 @@ function mixSelectedObject() {
    - Le bouton "Réagir" est responsable du déclenchement.
    ============================================================ */
 
+
+/* ============================================================
+   19.1 — ÉVALUATION DES RÉACTIONS
+   ------------------------------------------------------------
+   CORRECTION ISOLÉE :
+   - Vérifie que les réactifs existent.
+   - Vérifie qu'ils possèdent réellement des moles disponibles.
+   - Vérifie les coefficients stœchiométriques.
+   - Ne modifie PAS runReaction().
+   - Ne modifie PAS la base REACTIONS.
+   ============================================================ */
+
 function evaluateCompositionReaction(
     object,
     forcedMix = false
 ) {
+
+    /* --------------------------------------------------------
+       01 — Validation du récipient
+       -------------------------------------------------------- */
 
     if (
         !object ||
@@ -7284,27 +7310,156 @@ function evaluateCompositionReaction(
     }
 
 
+    /* --------------------------------------------------------
+       02 — Garantir l'existence de la composition
+       -------------------------------------------------------- */
+
     ensureComposition(
         object
     );
 
 
-    /*
-     * On recherche toutes les réactions dont les réactifs
-     * existent réellement dans la composition du même récipient.
-     */
+    if (
+        !Array.isArray(
+            object.composition
+        ) ||
+        object.composition.length === 0
+    ) {
+
+        return null;
+
+    }
+
+
+    /* --------------------------------------------------------
+       03 — Recherche des réactions réellement possibles
+       --------------------------------------------------------
+       Une réaction est compatible seulement si TOUS ses
+       réactifs :
+
+       1. existent dans le même récipient ;
+       2. possèdent une quantité de matière valide ;
+       3. possèdent une quantité supérieure au seuil minimal ;
+       4. possèdent un coefficient stœchiométrique valide.
+       -------------------------------------------------------- */
+
     const possible =
         REACTIONS.filter(
-            reaction =>
-                reaction.reactants.every(
-                    reactant =>
-                        getComponentById(
-                            object,
-                            reactant.materialId
-                        )
-                )
+            reaction => {
+
+                if (
+                    !reaction ||
+                    !Array.isArray(
+                        reaction.reactants
+                    ) ||
+                    reaction.reactants.length === 0
+                ) {
+
+                    return false;
+
+                }
+
+
+                return reaction.reactants.every(
+                    reactant => {
+
+                        if (
+                            !reactant ||
+                            !reactant.materialId
+                        ) {
+
+                            return false;
+
+                        }
+
+
+                        /*
+                         * Recherche du composant par son
+                         * materialId officiel.
+                         */
+                        const component =
+                            getComponentById(
+                                object,
+                                reactant.materialId
+                            );
+
+
+                        /*
+                         * Le réactif doit réellement
+                         * exister dans le récipient.
+                         */
+                        if (
+                            !component
+                        ) {
+
+                            return false;
+
+                        }
+
+
+                        /*
+                         * Quantité de matière disponible.
+                         */
+                        const moles =
+                            Number(
+                                getCompositionMoles(
+                                    component
+                                )
+                            );
+
+
+                        /*
+                         * Un composant sans quantité de
+                         * matière utilisable ne peut pas
+                         * déclencher une réaction.
+                         */
+                        if (
+                            !Number.isFinite(
+                                moles
+                            ) ||
+                            moles <=
+                                CHEM_CONFIG.reactionTolerance
+                        ) {
+
+                            return false;
+
+                        }
+
+
+                        /*
+                         * Vérification du coefficient
+                         * stœchiométrique.
+                         */
+                        const coefficient =
+                            Number(
+                                reactant.coefficient
+                            );
+
+
+                        if (
+                            !Number.isFinite(
+                                coefficient
+                            ) ||
+                            coefficient <= 0
+                        ) {
+
+                            return false;
+
+                        }
+
+
+                        return true;
+
+                    }
+                );
+
+            }
         );
 
+
+    /* --------------------------------------------------------
+       04 — Aucune réaction compatible
+       -------------------------------------------------------- */
 
     if (
         !possible.length
@@ -7315,22 +7470,34 @@ function evaluateCompositionReaction(
     }
 
 
-    /*
-     * Priorité : réaction la plus spécifique.
-     */
+    /* --------------------------------------------------------
+       05 — Priorité des réactions
+       --------------------------------------------------------
+       La réaction possédant la priorité la plus élevée
+       est essayée en premier.
+       -------------------------------------------------------- */
+
     possible.sort(
         (
             a,
             b
         ) =>
             (
-                b.priority || 0
+                Number(
+                    b.priority
+                ) || 0
             ) -
             (
-                a.priority || 0
+                Number(
+                    a.priority
+                ) || 0
             )
     );
 
+
+    /* --------------------------------------------------------
+       06 — Exécution de la première réaction réalisable
+       -------------------------------------------------------- */
 
     let reactionExecuted =
         false;
@@ -7349,7 +7516,8 @@ function evaluateCompositionReaction(
 
 
         if (
-            result?.executed
+            result &&
+            result.executed === true
         ) {
 
             reactionExecuted =
@@ -7362,6 +7530,10 @@ function evaluateCompositionReaction(
     }
 
 
+    /* --------------------------------------------------------
+       07 — Recalcul scientifique après réaction
+       -------------------------------------------------------- */
+
     if (
         reactionExecuted
     ) {
@@ -7373,17 +7545,30 @@ function evaluateCompositionReaction(
 
         renderWorkspace();
 
+
         updateInspector();
+
 
         saveState(false);
 
     }
 
 
+    /* --------------------------------------------------------
+       08 — Retour du moteur
+       -------------------------------------------------------- */
+
     return reactionExecuted;
 
 }
 
+
+/* ============================================================
+   19.2 — EXÉCUTION STOCHIOMÉTRIQUE DE LA RÉACTION
+   ------------------------------------------------------------
+   IMPORTANT :
+   Cette fonction est conservée sans modification fonctionnelle.
+   ============================================================ */
 
 function runReaction(
     object,
@@ -7996,6 +8181,8 @@ function runReaction(
     };
 
 }
+
+
 
 
 /* ============================================================
