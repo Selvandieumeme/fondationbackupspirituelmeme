@@ -4526,6 +4526,16 @@ function executeToolOnObject(
             break;
 
 
+
+
+case "react":
+
+            reactSelectedObject();
+
+            break;
+
+
+
         case "measure":
 
             openMeasurementModal();
