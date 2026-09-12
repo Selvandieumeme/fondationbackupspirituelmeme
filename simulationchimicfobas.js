@@ -2570,26 +2570,120 @@
             );
 
 
+
+
+
+
+
+
         /*
          * Etat.
+         *
+         * IMPORTANT :
+         * Un récipient peut contenir uniquement un solide.
+         * Dans ce cas, son volume liquide reste naturellement à 0 mL,
+         * mais le récipient n'est PAS vide.
+         *
+         * On distingue donc :
+         * - aucun composant       → Vide
+         * - solide(s) uniquement  → Solide / solide(s)
+         * - liquide(s) uniquement → Liquide ou Solution / mélange
+         * - plusieurs phases      → Solution / mélange
          */
+
+        const composition =
+            ensureComposition(
+                object
+            );
+
+        const hasComponents =
+            composition.length > 0;
+
+        const hasSolid =
+            composition.some(
+                component =>
+                    component.phase ===
+                        "solid" &&
+                    (
+                        (
+                            Number(
+                                component.mass
+                            ) || 0
+                        ) >
+                            CHEM_CONFIG.reactionTolerance ||
+                        (
+                            Number(
+                                component.moles
+                            ) || 0
+                        ) >
+                            CHEM_CONFIG.reactionTolerance
+                    )
+            );
+
+        const hasLiquid =
+            composition.some(
+                component =>
+                    (
+                        component.phase ===
+                            "liquid" ||
+                        component.phase ===
+                            "solution"
+                    ) &&
+                    (
+                        (
+                            Number(
+                                component.volumeMl
+                            ) || 0
+                        ) >
+                            CHEM_CONFIG.reactionTolerance
+                    )
+            );
+
+
         if (
-            object.volume <=
-            CHEM_CONFIG.reactionTolerance
+            !hasComponents
         ) {
 
             object.state =
                 "Vide";
 
-        } else {
+        } else if (
+            hasSolid &&
+            !hasLiquid
+        ) {
 
             object.state =
-                object.composition.length >
-                    1
+                composition.length === 1
+                    ? "Solide"
+                    : "Mélange solide";
+
+        } else if (
+            hasLiquid &&
+            hasSolid
+        ) {
+
+            object.state =
+                "Solution / mélange";
+
+        } else if (
+            object.volume >
+                CHEM_CONFIG.reactionTolerance
+        ) {
+
+            object.state =
+                composition.length > 1
                     ? "Solution / mélange"
                     : "Liquide";
 
+        } else {
+
+            object.state =
+                "Matière présente";
+
         }
+
+
+
 
     }
 
