@@ -4258,32 +4258,17 @@
 
 
 
-
-
-
-
-
-
-
-
-
 /* ============================================================
    14 — OUTILS
    ------------------------------------------------------------
    Connexion des outils de la barre principale.
 
-   IMPORTANT :
-   - Réagir travaille sur UN SEUL récipient sélectionné.
-   - Le récipient peut contenir plusieurs composants mélangés.
-   - Le moteur de réaction existant du Bloc 19 analyse
-     object.composition et applique la stœchiométrie réelle.
-   - Ne modifie PAS :
-     • mixSelectedObject()
-     • transfert
-     • mesure
-     • chauffage
-     • déplacement
-     • sélection normale
+   ARCHITECTURE :
+   - Mélanger = mélange uniquement.
+   - Réagir = réaction chimique réelle.
+   - Une seule récipient sélectionné.
+   - Le récipient peut contenir plusieurs substances.
+   - Bloc 19 reste le moteur chimique.
 ============================================================ */
 
 
@@ -4310,15 +4295,20 @@ function setupTools() {
 
                         /*
                          * MÉLANGER
+                         * ----------------------------------------
+                         * Une seule action :
+                         * mélanger le contenu du récipient.
                          *
-                         * Le comportement existant est conservé :
-                         * si un récipient est déjà sélectionné,
-                         * le mélange est exécuté immédiatement.
+                         * Aucune réaction chimique.
                          */
                         if (
-                            tool ===
-                            "mix"
+                            tool === "mix"
                         ) {
+
+                            setActiveTool(
+                                "mix"
+                            );
+
 
                             const selected =
                                 getSelectedObject();
@@ -4328,22 +4318,9 @@ function setupTools() {
                                 selected
                             ) {
 
-                                setActiveTool(
-                                    "mix"
-                                );
-
-
                                 mixSelectedObject();
 
-
-                                return;
-
                             }
-
-
-                            setActiveTool(
-                                "mix"
-                            );
 
 
                             return;
@@ -4353,15 +4330,17 @@ function setupTools() {
 
                         /*
                          * RÉAGIR
+                         * ----------------------------------------
+                         * Travaille sur UN SEUL récipient.
                          *
-                         * Même principe que Mélanger :
-                         * un seul récipient sélectionné,
-                         * mais son contenu peut comporter plusieurs
-                         * composants.
+                         * Le récipient peut contenir plusieurs
+                         * substances mélangées.
+                         *
+                         * Ici seulement la réaction chimique
+                         * est lancée.
                          */
                         if (
-                            tool ===
-                            "react"
+                            tool === "react"
                         ) {
 
                             setActiveTool(
@@ -4399,6 +4378,10 @@ function setupTools() {
 
 }
 
+
+/* ============================================================
+   ACTIVATION DE L'OUTIL
+============================================================ */
 
 function setActiveTool(
     tool
@@ -4485,11 +4468,11 @@ function setActiveTool(
 
 
 /* ============================================================
-   RÉACTION D'UN SEUL RÉCIPIENT
+   RÉAGIR — UN SEUL RÉCIPIENT
    ------------------------------------------------------------
-   Le récipient peut contenir plusieurs substances.
-   La réaction est évaluée directement à partir de
-   object.composition.
+   Le récipient peut contenir plusieurs composants.
+   Le Bloc 19 analyse object.composition et exécute
+   la réaction chimique correspondante.
 ============================================================ */
 
 function reactSelectedObject() {
@@ -4498,9 +4481,7 @@ function reactSelectedObject() {
         getSelectedObject();
 
 
-    if (
-        !object
-    ) {
+    if (!object) {
 
         showToast(
             "Sélectionnez un récipient.",
@@ -4513,9 +4494,7 @@ function reactSelectedObject() {
 
 
     if (
-        !isContainer(
-            object
-        )
+        !isContainer(object)
     ) {
 
         showToast(
@@ -4534,8 +4513,7 @@ function reactSelectedObject() {
 
 
     if (
-        object.composition.length ===
-        0
+        object.composition.length === 0
     ) {
 
         showToast(
@@ -4549,9 +4527,13 @@ function reactSelectedObject() {
 
 
     /*
-     * Le moteur Bloc 19 analyse maintenant
-     * tous les composants présents dans
-     * CE MÊME récipient.
+     * IMPORTANT :
+     *
+     * Le moteur existant du Bloc 19 reçoit
+     * UN SEUL récipient.
+     *
+     * Toutes les substances présentes dans
+     * object.composition sont analysées.
      */
     const result =
         evaluateCompositionReaction(
@@ -4564,21 +4546,11 @@ function reactSelectedObject() {
         result
     ) {
 
-        renderWorkspace();
-
-        updateAllUI();
-
-        saveState(false);
-
         return true;
 
     }
 
 
-    /*
-     * Aucun couple de réactifs compatible
-     * n'a été trouvé dans ce récipient.
-     */
     showToast(
         "Aucune réaction compatible détectée dans ce récipient.",
         "warning"
@@ -4594,6 +4566,10 @@ function reactSelectedObject() {
 
 }
 
+
+/* ============================================================
+   EXÉCUTION D'UN OUTIL SUR UN OBJET
+============================================================ */
 
 function executeToolOnObject(
     tool,
@@ -4655,6 +4631,8 @@ function executeToolOnObject(
     }
 
 }
+
+
 
 
 
