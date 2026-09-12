@@ -7260,11 +7260,6 @@ function mixSelectedObject() {
 
 
 
-
-
-
-
-
 /* ============================================================
    19 — MOTEUR DE RÉACTION
    ------------------------------------------------------------
@@ -7272,6 +7267,7 @@ function mixSelectedObject() {
    - Le moteur travaille sur UN SEUL récipient.
    - Le récipient peut contenir plusieurs composants.
    - Tous les réactifs sont recherchés dans object.composition.
+   - La recherche se fait directement par materialId.
    - Ce bloc ne crée PAS plusieurs récipients.
    - Ce bloc ne sélectionne PAS plusieurs objets.
    - Le bouton "Réagir" est responsable du déclenchement.
@@ -7279,13 +7275,47 @@ function mixSelectedObject() {
 
 
 /* ============================================================
+   19.0 — RECHERCHE DIRECTE D'UN COMPOSANT
+   ------------------------------------------------------------
+   IMPORTANT :
+   Les composants de composition utilisent :
+       component.materialId
+
+   On ne dépend donc plus de getComponentById()
+   pour identifier un réactif ou un produit.
+   ============================================================ */
+
+function findReactionComponent(
+    object,
+    materialId
+) {
+
+    if (
+        !object ||
+        !Array.isArray(object.composition) ||
+        !materialId
+    ) {
+        return null;
+    }
+
+    return (
+        object.composition.find(
+            component =>
+                component &&
+                String(component.materialId) ===
+                String(materialId)
+        ) || null
+    );
+}
+
+
+/* ============================================================
    19.1 — ÉVALUATION DES RÉACTIONS
    ------------------------------------------------------------
-   CORRECTION ISOLÉE :
    - Vérifie que les réactifs existent.
-   - Vérifie qu'ils possèdent réellement des moles disponibles.
+   - Vérifie les moles disponibles.
    - Vérifie les coefficients stœchiométriques.
-   - Ne modifie PAS runReaction().
+   - Utilise directement materialId.
    - Ne modifie PAS la base REACTIONS.
    ============================================================ */
 
@@ -7300,47 +7330,29 @@ function evaluateCompositionReaction(
 
     if (
         !object ||
-        !isContainer(
-            object
-        )
+        !isContainer(object)
     ) {
-
         return null;
-
     }
 
 
     /* --------------------------------------------------------
-       02 — Garantir l'existence de la composition
+       02 — Initialisation de la composition
        -------------------------------------------------------- */
 
-    ensureComposition(
-        object
-    );
+    ensureComposition(object);
 
 
     if (
-        !Array.isArray(
-            object.composition
-        ) ||
+        !Array.isArray(object.composition) ||
         object.composition.length === 0
     ) {
-
         return null;
-
     }
 
 
     /* --------------------------------------------------------
-       03 — Recherche des réactions réellement possibles
-       --------------------------------------------------------
-       Une réaction est compatible seulement si TOUS ses
-       réactifs :
-
-       1. existent dans le même récipient ;
-       2. possèdent une quantité de matière valide ;
-       3. possèdent une quantité supérieure au seuil minimal ;
-       4. possèdent un coefficient stœchiométrique valide.
+       03 — Recherche des réactions compatibles
        -------------------------------------------------------- */
 
     const possible =
@@ -7354,11 +7366,13 @@ function evaluateCompositionReaction(
                     ) ||
                     reaction.reactants.length === 0
                 ) {
-
                     return false;
-
                 }
 
+
+                /* --------------------------------------------
+                   Chaque réactif doit être présent
+                   -------------------------------------------- */
 
                 return reaction.reactants.every(
                     reactant => {
@@ -7367,69 +7381,14 @@ function evaluateCompositionReaction(
                             !reactant ||
                             !reactant.materialId
                         ) {
-
                             return false;
-
                         }
 
 
-                        /*
-                         * Recherche du composant par son
-                         * materialId officiel.
-                         */
-                        const component =
-                            getComponentById(
-                                object,
-                                reactant.materialId
-                            );
+                        /* ------------------------------------
+                           Coefficient valide
+                           ------------------------------------ */
 
-
-                        /*
-                         * Le réactif doit réellement
-                         * exister dans le récipient.
-                         */
-                        if (
-                            !component
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        /*
-                         * Quantité de matière disponible.
-                         */
-                        const moles =
-                            Number(
-                                getCompositionMoles(
-                                    component
-                                )
-                            );
-
-
-                        /*
-                         * Un composant sans quantité de
-                         * matière utilisable ne peut pas
-                         * déclencher une réaction.
-                         */
-                        if (
-                            !Number.isFinite(
-                                moles
-                            ) ||
-                            moles <=
-                                CHEM_CONFIG.reactionTolerance
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        /*
-                         * Vérification du coefficient
-                         * stœchiométrique.
-                         */
                         const coefficient =
                             Number(
                                 reactant.coefficient
@@ -7442,17 +7401,50 @@ function evaluateCompositionReaction(
                             ) ||
                             coefficient <= 0
                         ) {
-
                             return false;
+                        }
 
+
+                        /* ------------------------------------
+                           Recherche DIRECTE par materialId
+                           ------------------------------------ */
+
+                        const component =
+                            findReactionComponent(
+                                object,
+                                reactant.materialId
+                            );
+
+
+                        if (!component) {
+                            return false;
+                        }
+
+
+                        /* ------------------------------------
+                           Moles disponibles
+                           ------------------------------------ */
+
+                        const moles =
+                            Number(
+                                getCompositionMoles(
+                                    component
+                                )
+                            );
+
+
+                        if (
+                            !Number.isFinite(moles) ||
+                            moles <=
+                                CHEM_CONFIG.reactionTolerance
+                        ) {
+                            return false;
                         }
 
 
                         return true;
-
                     }
                 );
-
             }
         );
 
@@ -7462,49 +7454,38 @@ function evaluateCompositionReaction(
        -------------------------------------------------------- */
 
     if (
-        !possible.length
+        !Array.isArray(possible) ||
+        possible.length === 0
     ) {
-
         return null;
-
     }
 
 
     /* --------------------------------------------------------
        05 — Priorité des réactions
-       --------------------------------------------------------
-       La réaction possédant la priorité la plus élevée
-       est essayée en premier.
        -------------------------------------------------------- */
 
     possible.sort(
-        (
-            a,
-            b
-        ) =>
+        (a, b) =>
             (
-                Number(
-                    b.priority
-                ) || 0
+                Number(b.priority) || 0
             ) -
             (
-                Number(
-                    a.priority
-                ) || 0
+                Number(a.priority) || 0
             )
     );
 
 
     /* --------------------------------------------------------
-       06 — Exécution de la première réaction réalisable
+       06 — Tentative d'exécution
        -------------------------------------------------------- */
 
-    let reactionExecuted =
-        false;
+    let reactionExecuted = false;
 
 
     for (
-        const reaction of possible
+        const reaction
+        of possible
     ) {
 
         const result =
@@ -7520,55 +7501,36 @@ function evaluateCompositionReaction(
             result.executed === true
         ) {
 
-            reactionExecuted =
-                true;
+            reactionExecuted = true;
 
             break;
-
         }
-
     }
 
 
     /* --------------------------------------------------------
-       07 — Recalcul scientifique après réaction
+       07 — Mise à jour après réaction
        -------------------------------------------------------- */
 
-    if (
-        reactionExecuted
-    ) {
+    if (reactionExecuted) {
 
-        recalculateContainer(
-            object
-        );
-
+        recalculateContainer(object);
 
         renderWorkspace();
 
-
         updateInspector();
 
-
         saveState(false);
-
     }
 
 
-    /* --------------------------------------------------------
-       08 — Retour du moteur
-       -------------------------------------------------------- */
-
     return reactionExecuted;
-
 }
 
 
 /* ============================================================
    19.2 — EXÉCUTION STOCHIOMÉTRIQUE DE LA RÉACTION
-   ------------------------------------------------------------
-   IMPORTANT :
-   Cette fonction est conservée sans modification fonctionnelle.
-   ============================================================ */
+   ------------------------------------------------------------ */
 
 function runReaction(
     object,
@@ -7576,118 +7538,165 @@ function runReaction(
     forcedMix = false
 ) {
 
-    /*
-     * Certaines réactions peuvent être évaluées selon
-     * le mode de déclenchement.
-     *
-     * Le paramètre forcedMix est conservé pour préserver
-     * la compatibilité avec le moteur existant.
-     */
+    /* --------------------------------------------------------
+       01 — Validation
+       -------------------------------------------------------- */
+
     if (
-        !forcedMix &&
-        reaction.type ===
-            "neutralisation"
+        !object ||
+        !isContainer(object) ||
+        !reaction ||
+        !Array.isArray(
+            reaction.reactants
+        ) ||
+        !Array.isArray(
+            reaction.products
+        )
     ) {
-
-        /*
-         * Neutralisation : contact liquide-liquide
-         * suffit dans cette simulation.
-         */
-
+        return {
+            executed: false
+        };
     }
 
 
-    const availableMoles =
-        {};
-
-
-    reaction.reactants.forEach(
-        reactant => {
-
-            const component =
-                getComponentById(
-                    object,
-                    reactant.materialId
-                );
-
-
-            availableMoles[
-                reactant.materialId
-            ] =
-                component
-                    ? getCompositionMoles(
-                        component
-                      )
-                    : 0;
-
-        }
-    );
-
-
-    let extent =
-        Infinity;
-
-    let limiting =
-        null;
-
-
-    reaction.reactants.forEach(
-        reactant => {
-
-            const n =
-                Number(
-                    availableMoles[
-                        reactant.materialId
-                    ]
-                ) || 0;
-
-
-            const possibleExtent =
-                n /
-                reactant.coefficient;
-
-
-            if (
-                possibleExtent <
-                extent
-            ) {
-
-                extent =
-                    possibleExtent;
-
-                limiting =
-                    reactant.materialId;
-
-            }
-
-        }
-    );
-
+    /* --------------------------------------------------------
+       02 — Gestion du mode forcé
+       --------------------------------------------------------
+       Conservé pour compatibilité avec le système actuel.
+       -------------------------------------------------------- */
 
     if (
-        !Number.isFinite(
-            extent
-        ) ||
+        !forcedMix &&
+        reaction.type === "neutralisation"
+    ) {
+        /* neutralisation contact liquid-liquid */
+    }
+
+
+    /* --------------------------------------------------------
+       03 — Calcul des moles disponibles
+       -------------------------------------------------------- */
+
+    const availableMoles = {};
+
+
+    for (
+        const reactant
+        of reaction.reactants
+    ) {
+
+        if (
+            !reactant ||
+            !reactant.materialId
+        ) {
+            return {
+                executed: false
+            };
+        }
+
+
+        const component =
+            findReactionComponent(
+                object,
+                reactant.materialId
+            );
+
+
+        const moles =
+            component
+                ? Number(
+                    getCompositionMoles(
+                        component
+                    )
+                )
+                : 0;
+
+
+        availableMoles[
+            reactant.materialId
+        ] =
+            Number.isFinite(moles)
+                ? Math.max(0, moles)
+                : 0;
+    }
+
+
+    /* --------------------------------------------------------
+       04 — Détermination du réactif limitant
+       -------------------------------------------------------- */
+
+    let extent = Infinity;
+
+    let limiting = null;
+
+
+    for (
+        const reactant
+        of reaction.reactants
+    ) {
+
+        const coefficient =
+            Number(
+                reactant.coefficient
+            );
+
+
+        if (
+            !Number.isFinite(
+                coefficient
+            ) ||
+            coefficient <= 0
+        ) {
+            return {
+                executed: false
+            };
+        }
+
+
+        const n =
+            Number(
+                availableMoles[
+                    reactant.materialId
+                ]
+            ) || 0;
+
+
+        const possibleExtent =
+            n / coefficient;
+
+
+        if (
+            possibleExtent < extent
+        ) {
+
+            extent =
+                possibleExtent;
+
+            limiting =
+                reactant.materialId;
+        }
+    }
+
+
+    /* --------------------------------------------------------
+       05 — Vérification de l'avancement
+       -------------------------------------------------------- */
+
+    if (
+        !Number.isFinite(extent) ||
         extent <=
             CHEM_CONFIG.reactionTolerance
     ) {
 
         return {
-
-            executed:
-                false,
+            executed: false,
 
             limiting:
                 limiting
-
         };
-
     }
 
 
-    /*
-     * On n'exécute pas une réaction infinitésimale.
-     */
     extent =
         Math.max(
             0,
@@ -7695,307 +7704,500 @@ function runReaction(
         );
 
 
-    /*
-     * Consommation stœchiométrique.
-     */
-    reaction.reactants.forEach(
-        reactant => {
+    /* ========================================================
+       06 — CONSOMMATION DES RÉACTIFS
+       ======================================================== */
 
-            const component =
-                getComponentById(
-                    object,
-                    reactant.materialId
-                );
+    for (
+        const reactant
+        of reaction.reactants
+    ) {
 
-
-            if (
-                !component
-            ) {
-
-                return;
-
-            }
+        const component =
+            findReactionComponent(
+                object,
+                reactant.materialId
+            );
 
 
-            const consumed =
-                extent *
-                reactant.coefficient;
-
-
-            component.moles =
-                Math.max(
-                    0,
-                    (
-                        Number(
-                            component.moles
-                        ) || 0
-                    ) -
-                    consumed
-                );
-
-
-            const material =
-                getMaterial(
-                    reactant.materialId
-                );
-
-
-            if (
-                material?.molarMass
-            ) {
-
-                component.mass =
-                    calculateMassFromMoles(
-                        component.moles,
-                        material.molarMass
-                    );
-
-            }
-
-
-            if (
-                Number(
-                    component.volumeMl
-                ) > 0 &&
-                Number(
-                    component.moles
-                ) >= 0
-            ) {
-
-                /*
-                 * Pour les solutions, on garde le volume
-                 * de solution approximativement constant.
-                 */
-
-                component.molarity =
-                    calculateMolarity(
-                        component.moles,
-                        object.volume
-                    );
-
-            }
-
+        if (!component) {
+            return {
+                executed: false
+            };
         }
-    );
 
 
-    /*
-     * Ajouter les produits.
-     */
-    reaction.products.forEach(
-        product => {
-
-            const producedMoles =
-                extent *
-                product.coefficient;
+        const consumed =
+            extent *
+            Number(
+                reactant.coefficient
+            );
 
 
-            const material =
-                getMaterial(
-                    product.materialId
-                );
-
-
-            if (
-                !material
-            ) {
-
-                return;
-
-            }
-
-
-            const producedMass =
-                calculateMassFromMoles(
-                    producedMoles,
-                    material.molarMass
-                );
-
-
-            const isSolid =
-                material.type ===
-                    "solid";
-
-
-            const existing =
-                getComponentById(
-                    object,
-                    product.materialId
-                );
-
-
-            if (
-                existing
-            ) {
-
-                existing.moles +=
-                    producedMoles;
-
-                existing.mass +=
-                    producedMass;
-
-                existing.amount =
-                    existing.volumeMl;
-
-            } else {
-
-                object.composition.push(
-                    {
-                        materialId:
-                            product.materialId,
-
-                        name:
-                            material.name,
-
-                        formula:
-                            material.formula,
-
-                        amount:
-                            0,
-
-                        volumeMl:
-                            isSolid
-                                ? 0
-                                : object.volume,
-
-                        mass:
-                            producedMass,
-
-                        moles:
-                            producedMoles,
-
-                        molarity:
-                            isSolid
-                                ? null
-                                : calculateMolarity(
-                                    producedMoles,
-                                    object.volume
-                                ),
-
-                        temperature:
-                            object.temperature,
-
-                        phase:
-                            isSolid
-                                ? "solid"
-                                : "aqueous"
-
-                    }
-                );
-
-            }
-
-        }
-    );
-
-
-    /*
-     * Supprimer les espèces épuisées.
-     */
-    object.composition =
-        object.composition.filter(
-            component =>
+        component.moles =
+            Math.max(
+                0,
                 (
                     Number(
                         component.moles
                     ) || 0
-                ) >
-                    CHEM_CONFIG.reactionTolerance ||
+                ) -
+                consumed
+            );
+
+
+        /* --------------------------------------------
+           Recalcul de la masse
+           -------------------------------------------- */
+
+        const material =
+            getMaterial(
+                reactant.materialId
+            );
+
+
+        if (
+            material &&
+            Number.isFinite(
+                Number(
+                    material.molarMass
+                )
+            )
+        ) {
+
+            component.mass =
+                calculateMassFromMoles(
+                    component.moles,
+                    material.molarMass
+                );
+        }
+
+
+        /* --------------------------------------------
+           Recalcul de la molarité
+           -------------------------------------------- */
+
+        if (
+            Number(
+                object.volume
+            ) > 0
+        ) {
+
+            component.molarity =
+                calculateMolarity(
+                    component.moles,
+                    object.volume
+                );
+        }
+    }
+
+
+    /* ========================================================
+       07 — CRÉATION DES PRODUITS
+       ======================================================== */
+
+    for (
+        const product
+        of reaction.products
+    ) {
+
+        if (
+            !product ||
+            !product.materialId
+        ) {
+            continue;
+        }
+
+
+        const coefficient =
+            Number(
+                product.coefficient
+            );
+
+
+        if (
+            !Number.isFinite(
+                coefficient
+            ) ||
+            coefficient <= 0
+        ) {
+            continue;
+        }
+
+
+        const producedMoles =
+            extent *
+            coefficient;
+
+
+        if (
+            producedMoles <=
+                CHEM_CONFIG.reactionTolerance
+        ) {
+            continue;
+        }
+
+
+        const material =
+            getMaterial(
+                product.materialId
+            );
+
+
+        if (!material) {
+            continue;
+        }
+
+
+        const molarMass =
+            Number(
+                material.molarMass
+            ) || 0;
+
+
+        const producedMass =
+            calculateMassFromMoles(
+                producedMoles,
+                molarMass
+            );
+
+
+        /* ----------------------------------------------------
+           Détermination correcte de la phase
+           ---------------------------------------------------- */
+
+        let productPhase =
+            "aqueous";
+
+
+        if (
+            material.type === "solid"
+        ) {
+
+            productPhase =
+                "solid";
+
+        } else if (
+            material.type === "gas" ||
+            material.gas === true
+        ) {
+
+            productPhase =
+                "gas";
+
+        } else if (
+            material.type === "liquid"
+        ) {
+
+            productPhase =
+                "aqueous";
+        }
+
+
+        /* ----------------------------------------------------
+           Produit déjà présent
+           ---------------------------------------------------- */
+
+        const existing =
+            findReactionComponent(
+                object,
+                product.materialId
+            );
+
+
+        if (existing) {
+
+            existing.moles =
                 (
                     Number(
-                        component.mass
+                        existing.moles
                     ) || 0
-                ) >
-                    CHEM_CONFIG.reactionTolerance &&
-                component.phase ===
-                    "solid"
+                ) +
+                producedMoles;
+
+
+            existing.mass =
+                (
+                    Number(
+                        existing.mass
+                    ) || 0
+                ) +
+                producedMass;
+
+
+            existing.phase =
+                productPhase;
+
+
+            /* -----------------------------------------------
+               Les produits gazeux et solides ne prennent
+               pas le volume liquide du récipient.
+               ----------------------------------------------- */
+
+            if (
+                productPhase === "gas" ||
+                productPhase === "solid"
+            ) {
+
+                existing.volumeMl =
+                    0;
+
+                existing.molarity =
+                    null;
+
+            } else {
+
+                existing.volumeMl =
+                    Number(
+                        existing.volumeMl
+                    ) || 0;
+
+
+                existing.molarity =
+                    Number(
+                        object.volume
+                    ) > 0
+                        ? calculateMolarity(
+                            existing.moles,
+                            object.volume
+                        )
+                        : null;
+            }
+
+
+            existing.amount =
+                Number(
+                    existing.volumeMl
+                ) || 0;
+
+
+            continue;
+        }
+
+
+        /* ----------------------------------------------------
+           Nouveau produit
+           ---------------------------------------------------- */
+
+        object.composition.push(
+            {
+
+                materialId:
+                    product.materialId,
+
+
+                name:
+                    material.name,
+
+
+                formula:
+                    material.formula,
+
+
+                amount:
+                    0,
+
+
+                /* -------------------------------------------
+                   IMPORTANT :
+                   un produit de réaction dissous ne reçoit
+                   PAS automatiquement tout le volume du
+                   récipient.
+                   ------------------------------------------- */
+
+                volumeMl:
+                    (
+                        productPhase === "aqueous"
+                    )
+                        ? 0
+                        : 0,
+
+
+                mass:
+                    producedMass,
+
+
+                moles:
+                    producedMoles,
+
+
+                molarity:
+                    (
+                        productPhase === "aqueous" &&
+                        Number(
+                            object.volume
+                        ) > 0
+                    )
+                        ? calculateMolarity(
+                            producedMoles,
+                            object.volume
+                        )
+                        : null,
+
+
+                temperature:
+                    object.temperature,
+
+
+                phase:
+                    productPhase
+            }
+        );
+    }
+
+
+    /* ========================================================
+       08 — NETTOYAGE DES RÉACTIFS ÉPUISÉS
+       ======================================================== */
+
+    object.composition =
+        object.composition.filter(
+            component => {
+
+                const moles =
+                    Number(
+                        component.moles
+                    ) || 0;
+
+
+                const mass =
+                    Number(
+                        component.mass
+                    ) || 0;
+
+
+                if (
+                    moles >
+                    CHEM_CONFIG.reactionTolerance
+                ) {
+                    return true;
+                }
+
+
+                if (
+                    component.phase === "solid" &&
+                    mass >
+                    CHEM_CONFIG.reactionTolerance
+                ) {
+                    return true;
+                }
+
+
+                return false;
+            }
         );
 
 
-    /*
-     * État de réaction.
-     */
+    /* ========================================================
+       09 — GESTION DU PRÉCIPITÉ
+       ======================================================== */
+
     const precipitate =
         reaction.precipitate ||
         "Aucun";
 
 
-    let gas =
+    /* ========================================================
+       10 — GESTION DU GAZ
+       ======================================================== */
+
+    const gas =
         reaction.gas ||
         "Aucun";
 
 
-    /*
-     * Exemple d'utilisation future :
-     * si une réaction possède un gaz et que le produit
-     * existe avec une phase gazeuse, calcul du volume
-     * par PV=nRT.
-     */
-    let gasVolume =
-        null;
+    let gasVolume = null;
 
 
     if (
-        gas !==
-            "Aucun"
+        gas !== "Aucun"
     ) {
 
         const gasProduct =
             reaction.products.find(
                 product => {
 
+                    if (
+                        !product ||
+                        !product.materialId
+                    ) {
+                        return false;
+                    }
+
+
                     const material =
                         getMaterial(
                             product.materialId
                         );
 
+
                     return (
                         material &&
-                        material.gas
+                        (
+                            material.type === "gas" ||
+                            material.gas === true
+                        )
                     );
-
                 }
             );
 
 
-        if (
-            gasProduct
-        ) {
+        if (gasProduct) {
 
             const gasMoles =
                 extent *
-                gasProduct.coefficient;
+                Number(
+                    gasProduct.coefficient
+                );
 
 
             const temperatureK =
-                object.temperature +
+                (
+                    Number(
+                        object.temperature
+                    ) || 25
+                ) +
                 273.15;
 
 
-            gasVolume =
-                (
-                    gasMoles *
-                    CHEM_CONFIG.gasConstant *
+            if (
+                Number.isFinite(
+                    gasMoles
+                ) &&
+                gasMoles > 0 &&
+                Number.isFinite(
                     temperatureK
-                ) /
-                CHEM_CONFIG.standardPressure;
+                )
+            ) {
 
+                gasVolume =
+                    (
+                        gasMoles *
+                        CHEM_CONFIG.gasConstant *
+                        temperatureK
+                    ) /
+                    CHEM_CONFIG.standardPressure;
+            }
         }
-
     }
 
 
-    /*
-     * Énergie de réaction.
-     */
+    /* ========================================================
+       11 — GESTION DE L'ENTHALPIE
+       ======================================================== */
+
     if (
         Number.isFinite(
-            reaction.enthalpyKJPerMol
+            Number(
+                reaction.enthalpyKJPerMol
+            )
         )
     ) {
 
         const deltaEnergy =
-            reaction.enthalpyKJPerMol *
+            Number(
+                reaction.enthalpyKJPerMol
+            ) *
             extent;
 
 
@@ -8003,16 +8205,13 @@ function runReaction(
             deltaEnergy;
 
 
-        /*
-         * Modèle thermique simplifié.
-         * Une réaction exothermique augmente la température.
-         */
         const massKg =
             Math.max(
                 0.001,
                 (
-                    object.mass ||
-                    1
+                    Number(
+                        object.mass
+                    ) || 1
                 ) /
                 1000
             );
@@ -8042,44 +8241,56 @@ function runReaction(
 
             object.temperature =
                 clamp(
-                    object.temperature +
-                        deltaT,
+                    (
+                        Number(
+                            object.temperature
+                        ) || 25
+                    ) +
+                    deltaT,
+
                     CHEM_CONFIG.minTemperature,
+
                     CHEM_CONFIG.maxTemperature
                 );
-
         }
-
     }
 
 
-    /*
-     * État chimique du récipient.
-     */
+    /* ========================================================
+       12 — ÉTAT DE LA RÉACTION
+       ======================================================== */
+
     object.reaction = {
 
         active:
             true,
 
+
         status:
             reaction.name,
 
+
         phase:
             "Réaction effectuée",
+
 
         gas:
             gasVolume !== null
                 ? `${gas} — ${formatNumber(gasVolume, 2)} L`
                 : gas,
 
+
         precipitate:
             precipitate,
+
 
         color:
             reaction.color,
 
+
         equation:
             reaction.equation,
+
 
         limitingReagent:
             getMaterial(
@@ -8087,100 +8298,95 @@ function runReaction(
             )?.name ||
             limiting,
 
+
         extentMol:
             extent
-
     };
 
 
-    /*
-     * Synchronisation de l'état global.
-     */
     state.reaction = {
         ...object.reaction
     };
 
 
-    /*
-     * Journal scientifique.
-     */
+    /* ========================================================
+       13 — OBSERVATIONS
+       ======================================================== */
+
     addObservation(
-        `Réaction : ${
-            reaction.equation
-        }. Réactif limitant : ${
-            getMaterial(
-                limiting
-            )?.name ||
-            limiting
-        }. Avancement : ${
-            formatScientific(
-                extent
-            )
-        } mol.`
+        `Réaction : ${reaction.equation}. Réactif limitant : ${getMaterial(limiting)?.name || limiting}. Avancement : ${formatScientific(extent)} mol.`
     );
 
 
     if (
         precipitate &&
-        precipitate !==
-            "Aucun"
+        precipitate !== "Aucun"
     ) {
 
         addObservation(
-            `Précipité observé : ${
-                precipitate
-            }.`
+            `Précipité observé : ${precipitate}.`
         );
-
     }
 
 
     if (
         gas &&
-        gas !==
-            "Aucun"
+        gas !== "Aucun"
     ) {
 
         addObservation(
-            `Gaz produit : ${
-                gas
-            }.`
+            `Gaz produit : ${gas}.`
         );
-
     }
 
 
+    /* ========================================================
+       14 — NOTIFICATION
+       ======================================================== */
+
     showToast(
-        `Réaction : ${
-            reaction.name
-        }`,
+        `Réaction : ${reaction.name}`,
         "success"
     );
 
+
+    /* ========================================================
+       15 — RÉSULTAT
+       ======================================================== */
 
     return {
 
         executed:
             true,
 
+
         reaction:
             reaction,
+
 
         extentMol:
             extent,
 
+
         limitingReagent:
             limiting,
+
 
         gasVolume:
             gasVolume,
 
+
         precipitate:
             precipitate
-
     };
-
 }
+
+
+
+
+
+
+
 
 
 
