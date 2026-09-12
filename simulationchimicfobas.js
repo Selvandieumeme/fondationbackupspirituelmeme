@@ -2647,15 +2647,31 @@
             object.state =
                 "Vide";
 
+
+
+
+
+
+
+
+
+
+
+
+
         } else if (
             hasSolid &&
             !hasLiquid
         ) {
 
             object.state =
-                composition.length === 1
-                    ? "Solide"
-                    : "Mélange solide";
+                object.mixed
+                    ? "Mélange effectué"
+                    : (
+                        composition.length === 1
+                            ? "Solide"
+                            : "Mélange solide"
+                    );
 
         } else if (
             hasLiquid &&
@@ -2681,6 +2697,7 @@
                 "Matière présente";
 
         }
+
 
 
 
