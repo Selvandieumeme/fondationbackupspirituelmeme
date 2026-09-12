@@ -4438,27 +4438,34 @@ function setActiveTool(
         );
 
 
-    const labels = {
 
-        select:
-            "Sélection",
+const labels = {
 
-        move:
-            "Déplacement",
+    select:
+        "Sélection",
 
-        transfer:
-            "Transfert",
+    move:
+        "Déplacement",
 
-        mix:
-            "Mélange",
+    transfer:
+        "Transfert",
 
-        measure:
-            "Mesure",
+    mix:
+        "Mélange",
 
-        heat:
-            "Chauffage"
+    react:
+        "Réaction",
 
-    };
+    measure:
+        "Mesure",
+
+    heat:
+        "Chauffage"
+
+};
+
+
+
 
 
     announce(
