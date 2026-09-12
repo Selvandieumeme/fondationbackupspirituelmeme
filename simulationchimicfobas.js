@@ -4236,161 +4236,302 @@
     }
 
 
-    /* ============================================================
-       14 — OUTILS
-    ============================================================ */
 
-    function setupTools() {
 
-        document
-            .querySelectorAll(
-                ".tool-button[data-tool]"
-            )
-            .forEach(
-                button => {
 
-                    button.addEventListener(
-                        "click",
-                        () => {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   14 — OUTILS
+   ------------------------------------------------------------
+   Connexion des outils de la barre principale.
+   Le bouton Mélanger peut :
+   - activer l'outil Mélange ;
+   - exécuter immédiatement le mélange sur l'objet déjà sélectionné.
+   
+   Ne modifie PAS :
+   - mixSelectedObject()
+   - moteur de réaction
+   - transfert
+   - chauffage
+   - mesure
+   - système Drag / Move
+============================================================ */
+
+function setupTools() {
+
+    document
+        .querySelectorAll(
+            ".tool-button[data-tool]"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+
+                        const tool =
+                            button.dataset.tool;
+
+
+                        /*
+                         * ====================================================
+                         * MÉLANGE
+                         * ====================================================
+                         *
+                         * Si un objet est déjà sélectionné, le bouton
+                         * Mélanger exécute directement l'action.
+                         *
+                         * Sinon, il devient simplement l'outil actif,
+                         * afin que l'utilisateur puisse ensuite cliquer
+                         * sur un récipient.
+                         *
+                         * Aucun autre outil n'est modifié.
+                         * ====================================================
+                         */
+
+                        if (
+                            tool ===
+                            "mix"
+                        ) {
+
+                            const selected =
+                                getSelectedObject();
+
+
+                            /*
+                             * Un objet est déjà sélectionné :
+                             * exécution immédiate du mélange.
+                             */
+                            if (
+                                selected
+                            ) {
+
+                                setActiveTool(
+                                    "mix"
+                                );
+
+
+                                mixSelectedObject();
+
+
+                                return;
+
+                            }
+
+
+                            /*
+                             * Aucun objet sélectionné :
+                             * on active simplement l'outil.
+                             */
                             setActiveTool(
-                                button.dataset.tool
+                                "mix"
                             );
 
-                        }
-                    );
 
-                }
-            );
+                            return;
+
+                        }
+
+
+                        /*
+                         * ====================================================
+                         * AUTRES OUTILS
+                         * ====================================================
+                         *
+                         * Leur comportement existant reste inchangé.
+                         * ====================================================
+                         */
+
+                        setActiveTool(
+                            tool
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+function setActiveTool(
+    tool
+) {
+
+    const allowed = [
+        "select",
+        "move",
+        "transfer",
+        "mix",
+        "measure",
+        "heat"
+    ];
+
+
+    if (
+        !allowed.includes(
+            tool
+        )
+    ) {
+
+        tool =
+            "select";
 
     }
 
 
-    function setActiveTool(
+    state.activeTool =
+        tool;
+
+
+    document
+        .querySelectorAll(
+            ".tool-button[data-tool]"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.tool ===
+                        tool
+                );
+
+            }
+        );
+
+
+    const labels = {
+
+        select:
+            "Sélection",
+
+        move:
+            "Déplacement",
+
+        transfer:
+            "Transfert",
+
+        mix:
+            "Mélange",
+
+        measure:
+            "Mesure",
+
+        heat:
+            "Chauffage"
+
+    };
+
+
+    announce(
+        `Outil actif : ${
+            labels[tool] ||
+            tool
+        }.`
+    );
+
+}
+
+
+function executeToolOnObject(
+    tool,
+    object
+) {
+
+    switch (
         tool
     ) {
 
-        const allowed = [
-            "select",
-            "move",
-            "transfer",
-            "mix",
-            "measure",
-            "heat"
-        ];
+        case "select":
 
-
-        if (
-            !allowed.includes(
-                tool
-            )
-        ) {
-
-            tool =
-                "select";
-
-        }
-
-
-        state.activeTool =
-            tool;
-
-
-        document
-            .querySelectorAll(
-                ".tool-button[data-tool]"
-            )
-            .forEach(
-                button => {
-
-                    button.classList.toggle(
-                        "active",
-                        button.dataset.tool ===
-                            tool
-                    );
-
-                }
+            selectObject(
+                object.id
             );
 
-
-        const labels = {
-
-            select:
-                "Sélection",
-
-            move:
-                "Déplacement",
-
-            transfer:
-                "Transfert",
-
-            mix:
-                "Mélange",
-
-            measure:
-                "Mesure",
-
-            heat:
-                "Chauffage"
-
-        };
+            break;
 
 
-        announce(
-            `Outil actif : ${
-                labels[tool] ||
-                tool
-            }.`
-        );
+        case "move":
 
-    }
+            /*
+             * Le déplacement commence par pointerdown.
+             */
 
-
-    function executeToolOnObject(
-        tool,
-        object
-    ) {
-
-        switch (
-            tool
-        ) {
-
-            case "select":
-                selectObject(
-                    object.id
-                );
-                break;
+            break;
 
 
-            case "move":
-                /*
-                 * Le déplacement commence par pointerdown.
-                 */
-                break;
+        case "transfer":
+
+            openTransferModal();
+
+            break;
 
 
-            case "transfer":
-                openTransferModal();
-                break;
+        case "mix":
+
+            mixSelectedObject();
+
+            break;
 
 
-            case "mix":
-                mixSelectedObject();
-                break;
+        case "measure":
+
+            openMeasurementModal();
+
+            break;
 
 
-            case "measure":
-                openMeasurementModal();
-                break;
+        case "heat":
 
+            heatSelectedObject();
 
-            case "heat":
-                heatSelectedObject();
-                break;
-
-        }
+            break;
 
     }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /* ============================================================
