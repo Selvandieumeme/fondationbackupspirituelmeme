@@ -1470,6 +1470,35 @@
     ];
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* ============================================================
        03 — BASE DES RÉACTIONS
     ============================================================ */
@@ -1494,9 +1523,20 @@
      * • réactif limitant
      * • avancement
      * • produits
+     *
+     * IMPORTANT :
+     * ------------------------------------------------------------
+     * Les 3 réactions originales sont conservées.
+     * 8 nouvelles réactions sont ajoutées dans le même tableau.
+     * Aucun second const REACTIONS n'est créé.
+     * ============================================================
      */
 
     const REACTIONS = [
+
+        /* ========================================================
+           RÉACTION 01 — EXISTANTE
+        ======================================================== */
 
         {
             id: "neutralization-hcl-naoh",
@@ -1549,6 +1589,10 @@
         },
 
 
+        /* ========================================================
+           RÉACTION 02 — EXISTANTE
+        ======================================================== */
+
         {
             id: "precipitation-cuso4-naoh",
 
@@ -1600,6 +1644,10 @@
         },
 
 
+        /* ========================================================
+           RÉACTION 03 — EXISTANTE
+        ======================================================== */
+
         {
             id: "displacement-fe-cuso4",
 
@@ -1648,6 +1696,462 @@
 
             priority:
                 15
+        },
+
+
+        /* ========================================================
+           RÉACTION 04 — NOUVELLE
+           Zn + CuSO₄ → ZnSO₄ + Cu
+        ======================================================== */
+
+        {
+            id: "displacement-zn-cuso4",
+
+            name:
+                "Déplacement du cuivre par le zinc",
+
+            equation:
+                "Zn + CuSO₄ → ZnSO₄ + Cu",
+
+            reactants: [
+                {
+                    materialId: "zinc",
+                    coefficient: 1
+                },
+                {
+                    materialId: "copper-sulfate",
+                    coefficient: 1
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "zinc-sulfate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "copper",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "redox",
+
+            enthalpyKJPerMol:
+                -216,
+
+            gas:
+                null,
+
+            precipitate:
+                "Cu",
+
+            color:
+                "Bleu → incolore / cuivre métallique",
+
+            priority:
+                16
+        },
+
+
+        /* ========================================================
+           RÉACTION 05 — NOUVELLE
+           CaCO₃ + 2 HCl → CaCl₂ + H₂O + CO₂
+        ======================================================== */
+
+        {
+            id: "acid-carbonate-caco3-hcl",
+
+            name:
+                "Réaction du carbonate de calcium avec l'acide chlorhydrique",
+
+            equation:
+                "CaCO₃ + 2 HCl → CaCl₂ + H₂O + CO₂↑",
+
+            reactants: [
+                {
+                    materialId: "calcium-carbonate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "hydrochloric-acid",
+                    coefficient: 2
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "calcium-chloride",
+                    coefficient: 1
+                },
+                {
+                    materialId: "water",
+                    coefficient: 1
+                },
+                {
+                    materialId: "carbon-dioxide",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "acid-carbonate",
+
+            enthalpyKJPerMol:
+                -28,
+
+            gas:
+                "CO₂",
+
+            precipitate:
+                null,
+
+            color:
+                "Incolore avec effervescence",
+
+            priority:
+                30
+        },
+
+
+        /* ========================================================
+           RÉACTION 06 — NOUVELLE
+           NaHCO₃ + HCl → NaCl + H₂O + CO₂
+        ======================================================== */
+
+        {
+            id: "acid-bicarbonate-nahco3-hcl",
+
+            name:
+                "Réaction du bicarbonate de sodium avec l'acide chlorhydrique",
+
+            equation:
+                "NaHCO₃ + HCl → NaCl + H₂O + CO₂↑",
+
+            reactants: [
+                {
+                    materialId: "sodium-bicarbonate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "hydrochloric-acid",
+                    coefficient: 1
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "sodium-chloride",
+                    coefficient: 1
+                },
+                {
+                    materialId: "water",
+                    coefficient: 1
+                },
+                {
+                    materialId: "carbon-dioxide",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "acid-carbonate",
+
+            enthalpyKJPerMol:
+                -29,
+
+            gas:
+                "CO₂",
+
+            precipitate:
+                null,
+
+            color:
+                "Incolore avec effervescence",
+
+            priority:
+                29
+        },
+
+
+        /* ========================================================
+           RÉACTION 07 — NOUVELLE
+           C₆H₈O₇ + 3 NaOH → Na₃C₆H₅O₇ + 3 H₂O
+        ======================================================== */
+
+        {
+            id: "neutralization-citric-acid-naoh",
+
+            name:
+                "Neutralisation de l'acide citrique",
+
+            equation:
+                "C₆H₈O₇ + 3 NaOH → Na₃C₆H₅O₇ + 3 H₂O",
+
+            reactants: [
+                {
+                    materialId: "citric-acid",
+                    coefficient: 1
+                },
+                {
+                    materialId: "sodium-hydroxide",
+                    coefficient: 3
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "sodium-citrate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "water",
+                    coefficient: 3
+                }
+            ],
+
+            type:
+                "neutralisation",
+
+            enthalpyKJPerMol:
+                -171.9,
+
+            gas:
+                null,
+
+            precipitate:
+                null,
+
+            color:
+                "Incolore",
+
+            priority:
+                25
+        },
+
+
+        /* ========================================================
+           RÉACTION 08 — NOUVELLE
+           C₇H₆O₂ + NaOH → C₇H₅NaO₂ + H₂O
+        ======================================================== */
+
+        {
+            id: "neutralization-benzoic-acid-naoh",
+
+            name:
+                "Neutralisation de l'acide benzoïque",
+
+            equation:
+                "C₇H₆O₂ + NaOH → C₇H₅NaO₂ + H₂O",
+
+            reactants: [
+                {
+                    materialId: "benzoic-acid",
+                    coefficient: 1
+                },
+                {
+                    materialId: "sodium-hydroxide",
+                    coefficient: 1
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "sodium-benzoate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "water",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "neutralisation",
+
+            enthalpyKJPerMol:
+                -57.3,
+
+            gas:
+                null,
+
+            precipitate:
+                null,
+
+            color:
+                "Incolore",
+
+            priority:
+                24
+        },
+
+
+        /* ========================================================
+           RÉACTION 09 — NOUVELLE
+           AgNO₃ + NaCl → AgCl↓ + NaNO₃
+        ======================================================== */
+
+        {
+            id: "precipitation-agno3-nacl",
+
+            name:
+                "Précipitation du chlorure d'argent",
+
+            equation:
+                "AgNO₃ + NaCl → AgCl↓ + NaNO₃",
+
+            reactants: [
+                {
+                    materialId: "silver-nitrate",
+                    coefficient: 1
+                },
+                {
+                    materialId: "sodium-chloride",
+                    coefficient: 1
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "silver-chloride",
+                    coefficient: 1
+                },
+                {
+                    materialId: "sodium-nitrate",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "precipitation",
+
+            enthalpyKJPerMol:
+                -65,
+
+            gas:
+                null,
+
+            precipitate:
+                "AgCl",
+
+            color:
+                "Précipité blanc",
+
+            priority:
+                28
+        },
+
+
+        /* ========================================================
+           RÉACTION 10 — NOUVELLE
+           2 CuO + C → 2 Cu + CO₂
+        ======================================================== */
+
+        {
+            id: "redox-cu-cu2o",
+
+            name:
+                "Réduction de l'oxyde de cuivre(II) par le carbone",
+
+            equation:
+                "2 CuO + C → 2 Cu + CO₂↑",
+
+            reactants: [
+                {
+                    materialId: "copper-oxide",
+                    coefficient: 2
+                },
+                {
+                    materialId: "carbon",
+                    coefficient: 1
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "copper",
+                    coefficient: 2
+                },
+                {
+                    materialId: "carbon-dioxide",
+                    coefficient: 1
+                }
+            ],
+
+            type:
+                "redox",
+
+            enthalpyKJPerMol:
+                -168,
+
+            gas:
+                "CO₂",
+
+            precipitate:
+                null,
+
+            color:
+                "Noir → cuivre métallique",
+
+            priority:
+                22
+        },
+
+
+        /* ========================================================
+           RÉACTION 11 — NOUVELLE
+           2 Fe₂O₃ + 3 C → 4 Fe + 3 CO₂
+        ======================================================== */
+
+        {
+            id: "reduction-fe2o3-carbon",
+
+            name:
+                "Réduction de l'oxyde de fer(III) par le carbone",
+
+            equation:
+                "2 Fe₂O₃ + 3 C → 4 Fe + 3 CO₂↑",
+
+            reactants: [
+                {
+                    materialId: "iron-oxide",
+                    coefficient: 2
+                },
+                {
+                    materialId: "carbon",
+                    coefficient: 3
+                }
+            ],
+
+            products: [
+                {
+                    materialId: "iron",
+                    coefficient: 4
+                },
+                {
+                    materialId: "carbon-dioxide",
+                    coefficient: 3
+                }
+            ],
+
+            type:
+                "redox",
+
+            enthalpyKJPerMol:
+                -100,
+
+            gas:
+                "CO₂",
+
+            precipitate:
+                null,
+
+            color:
+                "Rouge-brun → gris métallique",
+
+            priority:
+                21
         }
 
     ];
@@ -1656,9 +2160,19 @@
     /*
      * Produits supplémentaires nécessaires aux réactions.
      * Ils ne sont pas forcément affichés comme cartes de bibliothèque.
+     *
+     * IMPORTANT :
+     * ------------------------------------------------------------
+     * Les substances originales sont conservées.
+     * Les nouvelles substances sont ajoutées dans CE MÊME objet.
+     * Aucun second const GENERATED_SUBSTANCES n'est créé.
      */
 
     const GENERATED_SUBSTANCES = {
+
+        /* ========================================================
+           PRODUIT EXISTANT — RÉACTION CuSO₄ + NaOH
+        ======================================================== */
 
         "copper-hydroxide": {
             id: "copper-hydroxide",
@@ -1680,6 +2194,11 @@
                 "Précipité bleu formé lors de la réaction CuSO₄/NaOH."
         },
 
+
+        /* ========================================================
+           PRODUIT EXISTANT — RÉACTION CuSO₄ + NaOH
+        ======================================================== */
+
         "sodium-sulfate": {
             id: "sodium-sulfate",
             name: "Sulfate de sodium",
@@ -1700,6 +2219,11 @@
                 "Produit dissous de la réaction de précipitation."
         },
 
+
+        /* ========================================================
+           PRODUIT EXISTANT — RÉACTION Fe + CuSO₄
+        ======================================================== */
+
         "iron-sulfate": {
             id: "iron-sulfate",
             name: "Sulfate de fer(II)",
@@ -1718,9 +2242,188 @@
             molarMass: 151.908,
             description:
                 "Solution de sulfate de fer(II)."
+        },
+
+
+        /* ========================================================
+           NOUVEAU PRODUIT — RÉACTION Zn + CuSO₄
+        ======================================================== */
+
+        "zinc-sulfate": {
+            id: "zinc-sulfate",
+            name: "Sulfate de zinc",
+            category: "product",
+            type: "solution",
+            icon: "🧪",
+            state: "Dissous",
+            density: 1,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: 5,
+            color: "Incolore",
+            formula: "ZnSO₄",
+            molarMass: 161.44,
+            description:
+                "Solution de sulfate de zinc formée lors du déplacement du cuivre par le zinc."
+        },
+
+
+        /* ========================================================
+           NOUVEAU PRODUIT — RÉACTION CaCO₃ + HCl
+        ======================================================== */
+
+        "calcium-chloride": {
+            id: "calcium-chloride",
+            name: "Chlorure de calcium",
+            category: "product",
+            type: "solution",
+            icon: "🧂",
+            state: "Dissous",
+            density: 1,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: 7,
+            color: "Incolore",
+            formula: "CaCl₂",
+            molarMass: 110.98,
+            description:
+                "Solution de chlorure de calcium formée par réaction du carbonate de calcium avec l'acide chlorhydrique."
+        },
+
+
+        /* ========================================================
+           NOUVEAU PRODUIT — CO₂
+        ======================================================== */
+
+        "carbon-dioxide": {
+            id: "carbon-dioxide",
+            name: "Dioxyde de carbone",
+            category: "product",
+            type: "gas",
+            icon: "💨",
+            state: "Gaz",
+            density: 0.001977,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: null,
+            color: "Incolore",
+            formula: "CO₂",
+            molarMass: 44.01,
+            description:
+                "Gaz carbonique produit lors de plusieurs réactions acide-carbonate et réactions de réduction."
+        },
+
+
+        /* ========================================================
+           NOUVEAU PRODUIT — CITRATE DE SODIUM
+        ======================================================== */
+
+        "sodium-citrate": {
+            id: "sodium-citrate",
+            name: "Citrate de sodium",
+            category: "product",
+            type: "solution",
+            icon: "🧪",
+            state: "Dissous",
+            density: 1,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: 7,
+            color: "Incolore",
+            formula: "Na₃C₆H₅O₇",
+            molarMass: 258.07,
+            description:
+                "Sel de sodium formé lors de la neutralisation de l'acide citrique."
+        },
+
+
+        /* ========================================================
+           NOUVEAU PRODUIT — BENZOATE DE SODIUM
+        ======================================================== */
+
+        "sodium-benzoate": {
+            id: "sodium-benzoate",
+            name: "Benzoate de sodium",
+            category: "product",
+            type: "solution",
+            icon: "🧪",
+            state: "Dissous",
+            density: 1,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: 7,
+            color: "Incolore",
+            formula: "C₇H₅NaO₂",
+            molarMass: 144.10,
+            description:
+                "Sel de sodium formé lors de la neutralisation de l'acide benzoïque."
+        },
+
+
+        /* ========================================================
+           NOUVEAU PRODUIT — CHLORURE D'ARGENT
+        ======================================================== */
+
+        "silver-chloride": {
+            id: "silver-chloride",
+            name: "Chlorure d'argent",
+            category: "product",
+            type: "solid",
+            icon: "⚪",
+            state: "Précipité",
+            density: 5.56,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: null,
+            color: "Blanc",
+            formula: "AgCl",
+            molarMass: 143.32,
+            description:
+                "Précipité blanc formé lors de la réaction entre le nitrate d'argent et le chlorure de sodium."
+        },
+
+
+        /* ========================================================
+           NOUVEAU PRODUIT — NITRATE DE SODIUM
+        ======================================================== */
+
+        "sodium-nitrate": {
+            id: "sodium-nitrate",
+            name: "Nitrate de sodium",
+            category: "product",
+            type: "solution",
+            icon: "🧪",
+            state: "Dissous",
+            density: 1,
+            mass: 0,
+            volume: 0,
+            capacity: 0,
+            temperature: 25,
+            ph: 7,
+            color: "Incolore",
+            formula: "NaNO₃",
+            molarMass: 84.994,
+            description:
+                "Produit dissous accompagnant la formation du précipité de chlorure d'argent."
         }
 
     };
+
+
+
+
 
 
     /* ============================================================
