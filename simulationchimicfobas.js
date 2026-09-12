@@ -7312,388 +7312,231 @@ function findReactionComponent(
 
 
 
-/* ================================================================
-   FOBAS — LABORATOIRE CHIMIQUE
-   REACTION COMPONENT RESOLVER
-   ---------------------------------------------------------------
-   OBJECTIF :
-   - Rekonèt yon reactant menm si component la gen yon variant ID.
-   - Konsève tout materialId orijinal yo.
-   - Pa modifye REACTIONS.
-   - Pa modifye MATERIALS.
-   - Pa kreye okenn duplicate component.
-   - Retounen vrè component ki egziste nan object.composition.
-   ================================================================ */
 
-function findReactionComponent(object, requestedMaterialId) {
+
+
+
+
+
+
+
+/* ============================================================
+   19.1 — ÉVALUATION DES RÉACTIONS
+   ------------------------------------------------------------
+   - Vérifie que les réactifs existent.
+   - Vérifie les moles disponibles.
+   - Vérifie les coefficients stœchiométriques.
+   - Utilise directement materialId.
+   - Ne modifie PAS la base REACTIONS.
+   ============================================================ */
+
+function evaluateCompositionReaction(
+    object,
+    forcedMix = false
+) {
+
+    /* --------------------------------------------------------
+       01 — Validation du récipient
+       -------------------------------------------------------- */
 
     if (
         !object ||
-        !Array.isArray(object.composition) ||
-        !requestedMaterialId
+        !isContainer(object)
     ) {
         return null;
     }
 
-    const requestedId =
-        String(requestedMaterialId)
-            .trim()
-            .toLowerCase();
 
-    if (!requestedId) {
+    /* --------------------------------------------------------
+       02 — Initialisation de la composition
+       -------------------------------------------------------- */
+
+    ensureComposition(object);
+
+
+    if (
+        !Array.isArray(object.composition) ||
+        object.composition.length === 0
+    ) {
         return null;
     }
 
 
-    /* ------------------------------------------------------------
-       01 — RECHERCHE DIRECTE PAR MATERIAL ID
-       ------------------------------------------------------------ */
+    /* --------------------------------------------------------
+       03 — Recherche des réactions compatibles
+       -------------------------------------------------------- */
 
-    const directComponent =
-        object.composition.find(
-            component => {
+    const possible =
+        REACTIONS.filter(
+            reaction => {
 
                 if (
-                    !component ||
-                    !component.materialId
+                    !reaction ||
+                    !Array.isArray(
+                        reaction.reactants
+                    ) ||
+                    reaction.reactants.length === 0
                 ) {
                     return false;
                 }
 
-                return (
-                    String(component.materialId)
-                        .trim()
-                        .toLowerCase() === requestedId
+
+                /* --------------------------------------------
+                   Chaque réactif doit être présent
+                   -------------------------------------------- */
+
+                return reaction.reactants.every(
+                    reactant => {
+
+                        if (
+                            !reactant ||
+                            !reactant.materialId
+                        ) {
+                            return false;
+                        }
+
+
+                        /* ------------------------------------
+                           Coefficient valide
+                           ------------------------------------ */
+
+                        const coefficient =
+                            Number(
+                                reactant.coefficient
+                            );
+
+
+                        if (
+                            !Number.isFinite(
+                                coefficient
+                            ) ||
+                            coefficient <= 0
+                        ) {
+                            return false;
+                        }
+
+
+                        /* ------------------------------------
+                           Recherche DIRECTE par materialId
+                           ------------------------------------ */
+
+                        const component =
+                            findReactionComponent(
+                                object,
+                                reactant.materialId
+                            );
+
+
+                        if (!component) {
+                            return false;
+                        }
+
+
+                        /* ------------------------------------
+                           Moles disponibles
+                           ------------------------------------ */
+
+                        const moles =
+                            Number(
+                                getCompositionMoles(
+                                    component
+                                )
+                            );
+
+
+                        if (
+                            !Number.isFinite(moles) ||
+                            moles <=
+                                CHEM_CONFIG.reactionTolerance
+                        ) {
+                            return false;
+                        }
+
+
+                        return true;
+                    }
                 );
             }
         );
 
-    if (directComponent) {
-        return directComponent;
-    }
 
+    /* --------------------------------------------------------
+       04 — Aucune réaction compatible
+       -------------------------------------------------------- */
 
-    /* ------------------------------------------------------------
-       02 — NORMALISATION DE L'IDENTITÉ CHIMIQUE
-       ------------------------------------------------------------ */
-
-    const normalizeChemicalIdentity =
-        material => {
-
-            if (!material) {
-                return "";
-            }
-
-            const materialId =
-                String(
-                    material.materialId ||
-                    material.id ||
-                    ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-            const formula =
-                String(
-                    material.formula ||
-                    material.chemicalFormula ||
-                    ""
-                )
-                    .trim()
-                    .toLowerCase()
-                    .replace(/\s+/g, "");
-
-            const name =
-                String(
-                    material.name ||
-                    material.label ||
-                    ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-            /*
-             * IMPORTANT :
-             * Nou itilize fòmil chimik la an premye paske
-             * li pi estab pase non ki ka chanje selon lang.
-             */
-
-            if (formula) {
-                return `formula:${formula}`;
-            }
-
-
-            /* ----------------------------------------------------
-               ALIAS CHIMIK STANDA
-               ---------------------------------------------------- */
-
-            const aliases = {
-
-                /*
-                 * Zinc
-                 */
-                "zinc": "zn",
-                "zn": "zn",
-                "zinc-metal": "zn",
-                "zinc-pur": "zn",
-                "zinc-powder": "zn",
-                "zinc-granules": "zn",
-
-                /*
-                 * Fer / Iron
-                 */
-                "iron": "fe",
-                "fer": "fe",
-                "fe": "fe",
-                "iron-metal": "fe",
-                "fer-metal": "fe",
-                "iron-pur": "fe",
-                "fer-pur": "fe",
-
-                /*
-                 * Copper
-                 */
-                "copper": "cu",
-                "cuivre": "cu",
-                "cu": "cu",
-                "copper-metal": "cu",
-
-                /*
-                 * Copper sulfate
-                 */
-                "copper-sulfate": "cuso4",
-                "cuivre-sulfate": "cuso4",
-                "copper-sulfate-solution": "cuso4",
-                "cuso4": "cuso4",
-
-                /*
-                 * Hydrochloric acid
-                 */
-                "hydrochloric-acid": "hcl",
-                "hydrochloricacid": "hcl",
-                "acide-chlorhydrique": "hcl",
-                "acide-chlorhydrique-solution": "hcl",
-                "hcl": "hcl",
-
-                /*
-                 * Sodium bicarbonate
-                 */
-                "sodium-bicarbonate": "nahco3",
-                "sodium-bicarbonate-solid": "nahco3",
-                "bicarbonate-de-sodium": "nahco3",
-                "bicarbonate": "nahco3",
-                "nahco3": "nahco3",
-
-                /*
-                 * Sodium hydroxide
-                 */
-                "sodium-hydroxide": "naoh",
-                "hydroxyde-de-sodium": "naoh",
-                "naoh": "naoh",
-
-                /*
-                 * Calcium carbonate
-                 */
-                "calcium-carbonate": "caco3",
-                "carbonate-de-calcium": "caco3",
-                "caco3": "caco3",
-
-                /*
-                 * Sodium chloride
-                 */
-                "sodium-chloride": "nacl",
-                "chlorure-de-sodium": "nacl",
-                "nacl": "nacl",
-
-                /*
-                 * Silver nitrate
-                 */
-                "silver-nitrate": "agno3",
-                "nitrate-dargent": "agno3",
-                "agno3": "agno3"
-            };
-
-
-            if (aliases[materialId]) {
-                return `element:${aliases[materialId]}`;
-            }
-
-            if (aliases[name]) {
-                return `element:${aliases[name]}`;
-            }
-
-
-            /*
-             * Si pa gen alias men gen materialId,
-             * nou konsève identity li pou lòt materyèl yo.
-             */
-
-            if (materialId) {
-                return `id:${materialId}`;
-            }
-
-            if (name) {
-                return `name:${name}`;
-            }
-
-            return "";
-        };
-
-
-    /* ------------------------------------------------------------
-       03 — CHERCHE LE MATERIAL DEMANDÉ
-       ------------------------------------------------------------ */
-
-    let requestedMaterial = null;
-
-    if (typeof getMaterial === "function") {
-        requestedMaterial =
-            getMaterial(requestedMaterialId);
-    }
-
-
-    /*
-     * Si getMaterial() pa jwenn li, nou kreye yon identity
-     * minimòm apati ID demand lan.
-     */
-
-    if (!requestedMaterial) {
-        requestedMaterial = {
-            materialId: requestedMaterialId,
-            id: requestedMaterialId,
-            name: requestedMaterialId
-        };
-    }
-
-
-    const requestedIdentity =
-        normalizeChemicalIdentity(
-            requestedMaterial
-        );
-
-
-    if (!requestedIdentity) {
+    if (
+        !Array.isArray(possible) ||
+        possible.length === 0
+    ) {
         return null;
     }
 
 
-    /* ------------------------------------------------------------
-       04 — RECHERCHE PAR IDENTITÉ CHIMIQUE
-       ------------------------------------------------------------ */
+    /* --------------------------------------------------------
+       05 — Priorité des réactions
+       -------------------------------------------------------- */
 
-    for (const component of object.composition) {
-
-        if (
-            !component ||
-            !component.materialId
-        ) {
-            continue;
-        }
-
-        let componentMaterial = null;
-
-        if (typeof getMaterial === "function") {
-            componentMaterial =
-                getMaterial(
-                    component.materialId
-                );
-        }
+    possible.sort(
+        (a, b) =>
+            (
+                Number(b.priority) || 0
+            ) -
+            (
+                Number(a.priority) || 0
+            )
+    );
 
 
-        /*
-         * Si material la pa disponib nan database,
-         * composition itself toujou ka bay kèk enfòmasyon.
-         */
+    /* --------------------------------------------------------
+       06 — Tentative d'exécution
+       -------------------------------------------------------- */
 
-        if (!componentMaterial) {
-
-            componentMaterial = {
-                materialId:
-                    component.materialId,
-
-                id:
-                    component.materialId,
-
-                name:
-                    component.name ||
-                    component.materialId,
-
-                formula:
-                    component.formula || ""
-            };
-        }
+    let reactionExecuted = false;
 
 
-        const componentIdentity =
-            normalizeChemicalIdentity(
-                componentMaterial
+    for (
+        const reaction
+        of possible
+    ) {
+
+        const result =
+            runReaction(
+                object,
+                reaction,
+                forcedMix
             );
 
 
         if (
-            componentIdentity &&
-            componentIdentity === requestedIdentity
+            result &&
+            result.executed === true
         ) {
-            return component;
+
+            reactionExecuted = true;
+
+            break;
         }
     }
 
 
-    /* ------------------------------------------------------------
-       05 — FALLBACK PAR FORMULE DIRECTE
-       ------------------------------------------------------------ */
+    /* --------------------------------------------------------
+       07 — Mise à jour après réaction
+       -------------------------------------------------------- */
 
-    const requestedFormula =
-        String(
-            requestedMaterial.formula ||
-            requestedMaterial.chemicalFormula ||
-            ""
-        )
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, "");
+    if (reactionExecuted) {
 
+        recalculateContainer(object);
 
-    if (requestedFormula) {
+        renderWorkspace();
 
-        const formulaComponent =
-            object.composition.find(
-                component => {
+        updateInspector();
 
-                    if (!component) {
-                        return false;
-                    }
-
-                    const componentFormula =
-                        String(
-                            component.formula ||
-                            ""
-                        )
-                            .trim()
-                            .toLowerCase()
-                            .replace(/\s+/g, "");
-
-                    return (
-                        componentFormula &&
-                        componentFormula ===
-                        requestedFormula
-                    );
-                }
-            );
-
-        if (formulaComponent) {
-            return formulaComponent;
-        }
+        saveState(false);
     }
 
 
-    /* ------------------------------------------------------------
-       06 — PA GEN CORRESPONDANCE
-       ------------------------------------------------------------ */
-
-    return null;
+    return reactionExecuted;
 }
-
 
 
 
@@ -7967,6 +7810,17 @@ function runReaction(
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
     /* ========================================================
        07 — CRÉATION DES PRODUITS
        ======================================================== */
@@ -8219,6 +8073,18 @@ function runReaction(
             }
         );
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /* ========================================================
