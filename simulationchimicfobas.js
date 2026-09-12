@@ -4395,14 +4395,21 @@ function setActiveTool(
     tool
 ) {
 
-    const allowed = [
-        "select",
-        "move",
-        "transfer",
-        "mix",
-        "measure",
-        "heat"
-    ];
+
+
+const allowed = [
+    "select",
+    "move",
+    "transfer",
+    "mix",
+    "react",
+    "measure",
+    "heat"
+];
+
+
+
+
 
 
     if (
