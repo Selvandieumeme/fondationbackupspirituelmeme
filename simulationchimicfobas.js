@@ -6416,15 +6416,22 @@ function openTransferModal() {
 
 
 
+
+
+
+
 /* ============================================================
-   MÉLANGER — MÉLANGE UNIQUEMENT
+   16 — MÉLANGE
    ------------------------------------------------------------
-   IMPORTANT :
-   - Travay sou UN SEUL récipient sélectionné.
-   - Ka gen plusieurs substances/components ladan.
-   - Mélanger pa lanse okenn réaction chimique.
-   - Bouton Réagir la se sèl aksyon ki lanse réaction.
-============================================================ */
+   Rôle :
+   - Mélanger uniquement les substances présentes dans
+     UN SEUL récipient.
+   - Le mélange ne déclenche AUCUNE réaction chimique.
+   - La réaction chimique est déclenchée uniquement par
+     l'outil "Réagir".
+   - Ne modifie PAS la composition scientifique.
+   - Ne modifie PAS recalculateContainer().
+   ============================================================ */
 
 function mixSelectedObject() {
 
@@ -6456,13 +6463,9 @@ function mixSelectedObject() {
     }
 
 
-    ensureComposition(
-        object
-    );
-
-
     if (
         !object.composition ||
+        !Array.isArray(object.composition) ||
         object.composition.length === 0
     ) {
 
@@ -6476,36 +6479,54 @@ function mixSelectedObject() {
     }
 
 
-    /*
-     * ACTION UNIQUE :
-     * le récipient est simplement marqué
-     * comme mélangé.
-     */
+    /* --------------------------------------------------------
+       1 — ÉTAT DE MÉLANGE
+       -------------------------------------------------------- */
+
     object.mixed = true;
 
 
-    /*
-     * Recalcule uniquement l'état physique
-     * et l'apparence du récipient.
-     *
-     * AUCUNE réaction chimique ici.
-     */
+    /* --------------------------------------------------------
+       2 — RECALCUL SCIENTIFIQUE
+       --------------------------------------------------------
+       IMPORTANT :
+       Aucun moteur de réaction n'est appelé ici.
+       Mélanger reste une opération physique.
+       -------------------------------------------------------- */
+
     recalculateContainer(
         object
     );
 
+
+    /* --------------------------------------------------------
+       3 — OBSERVATION
+       -------------------------------------------------------- */
 
     addObservation(
         `${object.name} mélangé : ${object.composition.length} composant(s).`
     );
 
 
+    /* --------------------------------------------------------
+       4 — RENDU
+       -------------------------------------------------------- */
+
     renderWorkspace();
 
     updateAllUI();
 
+
+    /* --------------------------------------------------------
+       5 — SAUVEGARDE
+       -------------------------------------------------------- */
+
     saveState(false);
 
+
+    /* --------------------------------------------------------
+       6 — CONFIRMATION
+       -------------------------------------------------------- */
 
     showToast(
         "Mélange effectué.",
@@ -6521,6 +6542,23 @@ function mixSelectedObject() {
     return true;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
