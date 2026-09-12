@@ -4267,26 +4267,25 @@
 
 
 
-
-
-
-
 /* ============================================================
    14 — OUTILS
    ------------------------------------------------------------
    Connexion des outils de la barre principale.
-   Le bouton Mélanger peut :
-   - activer l'outil Mélange ;
-   - exécuter immédiatement le mélange sur l'objet déjà sélectionné.
-   
-   Ne modifie PAS :
-   - mixSelectedObject()
-   - moteur de réaction
-   - transfert
-   - chauffage
-   - mesure
-   - système Drag / Move
+
+   IMPORTANT :
+   - Réagir travaille sur UN SEUL récipient sélectionné.
+   - Le récipient peut contenir plusieurs composants mélangés.
+   - Le moteur de réaction existant du Bloc 19 analyse
+     object.composition et applique la stœchiométrie réelle.
+   - Ne modifie PAS :
+     • mixSelectedObject()
+     • transfert
+     • mesure
+     • chauffage
+     • déplacement
+     • sélection normale
 ============================================================ */
+
 
 function setupTools() {
 
@@ -4310,21 +4309,12 @@ function setupTools() {
 
 
                         /*
-                         * ====================================================
-                         * MÉLANGE
-                         * ====================================================
+                         * MÉLANGER
                          *
-                         * Si un objet est déjà sélectionné, le bouton
-                         * Mélanger exécute directement l'action.
-                         *
-                         * Sinon, il devient simplement l'outil actif,
-                         * afin que l'utilisateur puisse ensuite cliquer
-                         * sur un récipient.
-                         *
-                         * Aucun autre outil n'est modifié.
-                         * ====================================================
+                         * Le comportement existant est conservé :
+                         * si un récipient est déjà sélectionné,
+                         * le mélange est exécuté immédiatement.
                          */
-
                         if (
                             tool ===
                             "mix"
@@ -4334,10 +4324,6 @@ function setupTools() {
                                 getSelectedObject();
 
 
-                            /*
-                             * Un objet est déjà sélectionné :
-                             * exécution immédiate du mélange.
-                             */
                             if (
                                 selected
                             ) {
@@ -4355,10 +4341,6 @@ function setupTools() {
                             }
 
 
-                            /*
-                             * Aucun objet sélectionné :
-                             * on active simplement l'outil.
-                             */
                             setActiveTool(
                                 "mix"
                             );
@@ -4370,13 +4352,40 @@ function setupTools() {
 
 
                         /*
-                         * ====================================================
-                         * AUTRES OUTILS
-                         * ====================================================
+                         * RÉAGIR
                          *
-                         * Leur comportement existant reste inchangé.
-                         * ====================================================
+                         * Même principe que Mélanger :
+                         * un seul récipient sélectionné,
+                         * mais son contenu peut comporter plusieurs
+                         * composants.
                          */
+                        if (
+                            tool ===
+                            "react"
+                        ) {
+
+                            setActiveTool(
+                                "react"
+                            );
+
+
+                            const selected =
+                                getSelectedObject();
+
+
+                            if (
+                                selected
+                            ) {
+
+                                reactSelectedObject();
+
+                            }
+
+
+                            return;
+
+                        }
+
 
                         setActiveTool(
                             tool
@@ -4395,21 +4404,15 @@ function setActiveTool(
     tool
 ) {
 
-
-
-const allowed = [
-    "select",
-    "move",
-    "transfer",
-    "mix",
-    "react",
-    "measure",
-    "heat"
-];
-
-
-
-
+    const allowed = [
+        "select",
+        "move",
+        "transfer",
+        "mix",
+        "react",
+        "measure",
+        "heat"
+    ];
 
 
     if (
@@ -4445,34 +4448,30 @@ const allowed = [
         );
 
 
+    const labels = {
 
-const labels = {
+        select:
+            "Sélection",
 
-    select:
-        "Sélection",
+        move:
+            "Déplacement",
 
-    move:
-        "Déplacement",
+        transfer:
+            "Transfert",
 
-    transfer:
-        "Transfert",
+        mix:
+            "Mélange",
 
-    mix:
-        "Mélange",
+        react:
+            "Réaction",
 
-    react:
-        "Réaction",
+        measure:
+            "Mesure",
 
-    measure:
-        "Mesure",
+        heat:
+            "Chauffage"
 
-    heat:
-        "Chauffage"
-
-};
-
-
-
+    };
 
 
     announce(
@@ -4481,6 +4480,117 @@ const labels = {
             tool
         }.`
     );
+
+}
+
+
+/* ============================================================
+   RÉACTION D'UN SEUL RÉCIPIENT
+   ------------------------------------------------------------
+   Le récipient peut contenir plusieurs substances.
+   La réaction est évaluée directement à partir de
+   object.composition.
+============================================================ */
+
+function reactSelectedObject() {
+
+    const object =
+        getSelectedObject();
+
+
+    if (
+        !object
+    ) {
+
+        showToast(
+            "Sélectionnez un récipient.",
+            "warning"
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        !isContainer(
+            object
+        )
+    ) {
+
+        showToast(
+            "La réaction s'effectue dans un récipient.",
+            "warning"
+        );
+
+        return false;
+
+    }
+
+
+    ensureComposition(
+        object
+    );
+
+
+    if (
+        object.composition.length ===
+        0
+    ) {
+
+        showToast(
+            "Le récipient est vide.",
+            "warning"
+        );
+
+        return false;
+
+    }
+
+
+    /*
+     * Le moteur Bloc 19 analyse maintenant
+     * tous les composants présents dans
+     * CE MÊME récipient.
+     */
+    const result =
+        evaluateCompositionReaction(
+            object,
+            true
+        );
+
+
+    if (
+        result
+    ) {
+
+        renderWorkspace();
+
+        updateAllUI();
+
+        saveState(false);
+
+        return true;
+
+    }
+
+
+    /*
+     * Aucun couple de réactifs compatible
+     * n'a été trouvé dans ce récipient.
+     */
+    showToast(
+        "Aucune réaction compatible détectée dans ce récipient.",
+        "warning"
+    );
+
+
+    announce(
+        "Aucune réaction compatible détectée dans le récipient."
+    );
+
+
+    return false;
 
 }
 
@@ -4505,10 +4615,6 @@ function executeToolOnObject(
 
         case "move":
 
-            /*
-             * Le déplacement commence par pointerdown.
-             */
-
             break;
 
 
@@ -4526,14 +4632,11 @@ function executeToolOnObject(
             break;
 
 
-
-
-case "react":
+        case "react":
 
             reactSelectedObject();
 
             break;
-
 
 
         case "measure":
@@ -4552,6 +4655,11 @@ case "react":
     }
 
 }
+
+
+
+
+
 
 
 
