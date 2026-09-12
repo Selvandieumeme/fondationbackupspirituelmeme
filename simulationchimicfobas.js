@@ -5360,436 +5360,229 @@ function executeToolOnObject(
 
 
 
+/* ============================================================
+   15 — ACTIONS DE L’INSPECTEUR
+   ------------------------------------------------------------
+   KOREKSYON 1 :
+   Connexion directe et protégée du bouton "Réagir"
+   au nouveau moteur evaluateCompositionReaction().
 
+   IMPORTANT :
+   - Ne modifie PAS le moteur REACTIONS.
+   - Ne modifie PAS Transfer.
+   - Ne modifie PAS Mix.
+   - Ne modifie PAS Measure.
+   - Ne modifie PAS Heat.
+   - Ne modifie PAS Remove.
+   ============================================================ */
 
+function setupInspectorActions() {
 
+    /* --------------------------------------------------------
+       TRANSFER
+       -------------------------------------------------------- */
+    const transferButton = $("actionTransferBtn");
 
-    /* ============================================================
-       15 — INSPECTEUR
-    ============================================================ */
-
-    function updateInspector() {
-
-        const object =
-            getSelectedObject();
-
-
-        if (
-            !object
-        ) {
-
-            if (
-                selectedObjectType
-            ) {
-
-                selectedObjectType
-                    .textContent =
-                    "Aucun";
-
-            }
-
-
-            objectInspector?.classList.remove(
-                "hidden"
-            );
-
-            materialProperties?.classList.add(
-                "hidden"
-            );
-
-            compositionSection?.classList.add(
-                "hidden"
-            );
-
-            measurementSection?.classList.add(
-                "hidden"
-            );
-
-            reactionSection?.classList.add(
-                "hidden"
-            );
-
-            objectActions?.classList.add(
-                "hidden"
-            );
-
-            return;
-
-        }
-
-
-        selectedObjectType.textContent =
-            object.name;
-
-
-        objectInspector.classList.add(
-            "hidden"
-        );
-
-        materialProperties.classList.remove(
-            "hidden"
-        );
-
-        objectActions.classList.remove(
-            "hidden"
-        );
-
-
-        recalculateObjectScientificState(
-            object
-        );
-
-
-        $("propName").textContent =
-            object.name;
-
-
-        $("propState").textContent =
-            object.state;
-
-
-        $("propTemperature").textContent =
-            `${formatNumber(object.temperature)} °C`;
-
-
-        $("propMass").textContent =
-            `${formatNumber(object.mass)} g`;
-
-
-        $("propVolume").textContent =
-            object.volume > 0
-                ? `${formatNumber(object.volume)} mL`
-                : "—";
-
-
-        $("propDensity").textContent =
-            Number.isFinite(
-                object.density
-            )
-                ? `${formatNumber(object.density, 3)} g/mL`
-                : "—";
-
-
-        $("propPH").textContent =
-            Number.isFinite(
-                object.ph
-            )
-                ? formatNumber(
-                    object.ph,
-                    2
-                )
-                : "—";
-
-
-        $("propColor").textContent =
-            object.color ||
-            "—";
-
-
-        renderCompositionInspector(
-            object
-        );
-
-
-        renderReactionInspector(
-            object
-        );
-
+    if (transferButton) {
+        transferButton.onclick = function () {
+            transferSelectedMaterial();
+        };
     }
 
 
-    function recalculateObjectScientificState(
-        object
-    ) {
+    /* --------------------------------------------------------
+       MIX
+       -------------------------------------------------------- */
+    const mixButton = $("actionMixBtn");
 
-        if (
-            isContainer(
-                object
-            )
-        ) {
+    if (mixButton) {
+        mixButton.onclick = function () {
+            mixSelectedObject();
+        };
+    }
 
-            recalculateContainer(
-                object
+
+    /* --------------------------------------------------------
+       MEASURE
+       -------------------------------------------------------- */
+    const measureButton = $("actionMeasureBtn");
+
+    if (measureButton) {
+        measureButton.onclick = function () {
+            measureSelectedObject("volume");
+        };
+    }
+
+
+    /* --------------------------------------------------------
+       HEAT
+       -------------------------------------------------------- */
+    const heatButton = $("actionHeatBtn");
+
+    if (heatButton) {
+        heatButton.onclick = function () {
+            heatSelectedObject();
+        };
+    }
+
+
+    /* --------------------------------------------------------
+       REMOVE
+       -------------------------------------------------------- */
+    const removeButton = $("actionRemoveBtn");
+
+    if (removeButton) {
+        removeButton.onclick = function () {
+            removeSelectedObject();
+        };
+    }
+
+
+    /* ========================================================
+       REAGIR — KOREKSYON 1
+       ======================================================== */
+
+    const reactButton =
+        $("actionReactBtn") ||
+        $("actionReactionBtn") ||
+        $("reactBtn");
+
+    if (reactButton) {
+
+        /*
+         * Si setupInspectorActions() ta rele plis pase yon fwa,
+         * retire bridge nou te ajoute deja.
+         */
+        if (reactButton._fobasReactionHandler) {
+            reactButton.removeEventListener(
+                "click",
+                reactButton._fobasReactionHandler,
+                true
             );
-
         }
 
+        const reactionHandler = function (event) {
 
-        if (
-            isLiquidObject(
-                object
-            ) ||
-            isSolidObject(
-                object
-            )
-        ) {
+            /*
+             * Nou pran kontwòl bouton an an capture phase
+             * pou yon ancien handler pa ranplase nouvo moteur la.
+             */
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (typeof event.stopImmediatePropagation === "function") {
+                    event.stopImmediatePropagation();
+                }
+            }
 
-            const material =
-                getMaterial(
-                    object.materialId
+            const object = getSelectedObject();
+
+            if (!object) {
+                showToast(
+                    "Sélectionnez un récipient.",
+                    "warning"
+                );
+                return;
+            }
+
+            if (!isContainer(object)) {
+                showToast(
+                    "La réaction doit être effectuée dans un récipient.",
+                    "warning"
+                );
+                return;
+            }
+
+            ensureComposition(object);
+
+            if (
+                !Array.isArray(object.composition) ||
+                object.composition.length === 0
+            ) {
+                showToast(
+                    "Le récipient est vide.",
+                    "warning"
+                );
+                return;
+            }
+
+            /*
+             * IMPORTANT :
+             * C'est le NOUVEAU moteur scientifique qui doit
+             * décider si une réaction existe.
+             *
+             * forcedMix = true :
+             * le bouton "Réagir" demande explicitement
+             * l'évaluation de la réaction.
+             */
+            const result = evaluateCompositionReaction(
+                object,
+                true
+            );
+
+            /*
+             * evaluateCompositionReaction() retourne :
+             *   true  = réaction exécutée
+             *   false = aucune réaction exécutée
+             *   null  = aucune réaction compatible
+             */
+            if (result === true) {
+
+                /*
+                 * Le moteur a déjà :
+                 * - consommé les réactifs
+                 * - créé les produits
+                 * - calculé le réactif limitant
+                 * - calculé gaz/précipité
+                 * - enregistré l'équation
+                 * - recalculé le récipient
+                 */
+                announce(
+                    object.name + " : réaction chimique effectuée."
                 );
 
-
-            if (
-                material
-            ) {
-
-                object.volume =
-                    Number(
-                        object.volume
-                    ) || 0;
-
-                object.mass =
-                    Number(
-                        object.mass
-                    ) || 0;
-
-                object.density =
-                    Number.isFinite(
-                        Number(
-                            material.density
-                        )
-                    )
-                        ? Number(
-                            material.density
-                        )
-                        : object.density;
-
+                return;
             }
 
-        }
-
-    }
-
-
-    function renderCompositionInspector(
-        object
-    ) {
-
-        if (
-            !compositionSection
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            !object.composition ||
-            !object.composition.length
-        ) {
-
-            compositionSection.classList.add(
-                "hidden"
+            /*
+             * Aucun moteur de réaction n'a pu exécuter
+             * une réaction avec la composition actuelle.
+             */
+            showToast(
+                "Aucune réaction compatible avec les substances présentes.",
+                "warning"
             );
 
-            return;
-
-        }
-
-
-        compositionSection.classList.remove(
-            "hidden"
-        );
-
-
-        /*
-         * Ancien HTML utilise compositionTotal comme nombre
-         * de composants. On le conserve pour compatibilité.
-         */
-        $("compositionTotal").textContent =
-            object.composition.length;
-
-
-        $("compositionList").innerHTML =
-            object.composition.map(
-                component => {
-
-                    const material =
-                        getMaterial(
-                            component.materialId
-                        );
-
-
-                    const moles =
-                        getComponentById(
-                            object,
-                            component.materialId
-                        )?.moles ||
-                        getCompositionMoles(
-                            component
-                        );
-
-
-                    const molarity =
-                        Number.isFinite(
-                            Number(
-                                component.molarity
-                            )
-                        )
-                            ? component.molarity
-                            : calculateMolarity(
-                                moles,
-                                object.volume
-                            );
-
-
-                    return `
-
-                        <div class="composition-item">
-
-                            <span>
-                                ${escapeHTML(
-                                    component.name
-                                )}
-
-                                ${
-                                    material?.formula
-                                        ? `
-                                            <small>
-                                                ${escapeHTML(
-                                                    material.formula
-                                                )}
-                                            </small>
-                                          `
-                                        : ""
-                                }
-                            </span>
-
-                            <strong>
-                                ${
-                                    Number(
-                                        component.volumeMl
-                                    ) > 0
-                                        ? `${formatNumber(
-                                            component.volumeMl
-                                        )} mL`
-                                        : `${formatNumber(
-                                            component.mass
-                                        )} g`
-                                }
-
-                                ${
-                                    Number.isFinite(
-                                        Number(
-                                            moles
-                                        )
-                                    )
-                                        ? `
-                                            <small>
-                                                n = ${formatScientific(
-                                                    moles
-                                                )} mol
-                                            </small>
-                                          `
-                                        : ""
-                                }
-
-                                ${
-                                    object.volume > 0 &&
-                                    Number.isFinite(
-                                        Number(
-                                            molarity
-                                        )
-                                    )
-                                        ? `
-                                            <small>
-                                                C = ${formatNumber(
-                                                    molarity,
-                                                    3
-                                                )} mol/L
-                                            </small>
-                                          `
-                                        : ""
-                                }
-
-                            </strong>
-
-                        </div>
-
-                    `;
-
-                }
-            ).join("");
-
-    }
-
-
-    function renderReactionInspector(
-        object
-    ) {
-
-        const reaction =
-            object.reaction;
-
-
-        if (
-            !reaction ||
-            (
-                !reaction.active &&
-                reaction.status ===
-                    "Aucune"
-            )
-        ) {
-
-            reactionSection?.classList.add(
-                "hidden"
+            announce(
+                object.name +
+                " : aucune réaction compatible détectée."
             );
+        };
 
-            return;
-
-        }
-
-
-        reactionSection.classList.remove(
-            "hidden"
-        );
-
-
-        $("reactionStatus").textContent =
-            reaction.status ||
-            "Aucune";
-
-
-        $("reactionPhase").textContent =
-            reaction.phase ||
-            "Stable";
-
-
-        $("reactionGas").textContent =
-            reaction.gas ||
-            "Aucun";
-
-
-        $("reactionPrecipitate").textContent =
-            reaction.precipitate ||
-            "Aucun";
-
-
-        $("reactionColor").textContent =
-            reaction.color ||
-            "Inchangée";
-
+        reactButton._fobasReactionHandler = reactionHandler;
 
         /*
-         * On peut réutiliser reactionStatus pour
-         * communiquer le réactif limitant si disponible.
+         * Capture = true :
+         * le nouveau moteur prend la main avant les anciens
+         * handlers éventuels attachés au bouton.
          */
-        if (
-            reaction.limitingReagent
-        ) {
-
-            $("reactionStatus").textContent =
-                `${
-                    reaction.status
-                } — limitant : ${
-                    reaction.limitingReagent
-                }`;
-
-        }
-
+        reactButton.addEventListener(
+            "click",
+            reactionHandler,
+            true
+        );
     }
+}
+
+
+
+
+
+
+
+
+
+
 
 
     /* ============================================================
