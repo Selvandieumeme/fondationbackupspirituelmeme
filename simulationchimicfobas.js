@@ -9301,90 +9301,174 @@ function mixSelectedObject() {
     }
 
 
-    /* ============================================================
-       31 — ACTIONS INSPECTEUR
-    ============================================================ */
-
-    function setupInspectorActions() {
-
-        $("actionTransferBtn")?.addEventListener(
-            "click",
-            openTransferModal
-        );
 
 
-        $("actionMixBtn")?.addEventListener(
-            "click",
-            mixSelectedObject
-        );
 
 
-        $("actionMeasureBtn")?.addEventListener(
-            "click",
-            openMeasurementModal
-        );
 
 
-        $("actionHeatBtn")?.addEventListener(
-            "click",
-            heatSelectedObject
-        );
 
 
-        $("actionRemoveBtn")?.addEventListener(
-            "click",
-            removeSelectedObject
-        );
+
+
+/* ============================================================
+   15 — ACTIONS DE L'INSPECTEUR
+   ------------------------------------------------------------
+   Connexion directe des boutons de l'inspecteur.
+   Ne modifie PAS :
+   - renderWorkspace()
+   - createLabObject()
+   - système Drag / Move
+   - composition
+   - moteur de réaction
+   ============================================================ */
+
+function setupInspectorActions() {
+
+    const transferButton =
+        $("actionTransferBtn");
+
+    const mixButton =
+        $("actionMixBtn");
+
+    const measureButton =
+        $("actionMeasureBtn");
+
+    const heatButton =
+        $("actionHeatBtn");
+
+    const removeButton =
+        $("actionRemoveBtn");
+
+
+    /* --------------------------------------------------------
+       TRANSFERT
+       -------------------------------------------------------- */
+
+    if (
+        transferButton
+    ) {
+
+        transferButton.onclick =
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                openTransferModal();
+
+            };
+
+    }
+
+
+    /* --------------------------------------------------------
+       MÉLANGE
+       --------------------------------------------------------
+       CONNEXION DIRECTE
+       -------------------------------------------------------- */
+
+    if (
+        mixButton
+    ) {
+
+        mixButton.onclick =
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                mixSelectedObject();
+
+            };
 
     }
 
 
-    function removeSelectedObject() {
+    /* --------------------------------------------------------
+       MESURE
+       -------------------------------------------------------- */
 
-        const object =
-            getSelectedObject();
+    if (
+        measureButton
+    ) {
 
+        measureButton.onclick =
+            function(event) {
 
-        if (
-            !object
-        ) {
+                event.preventDefault();
+                event.stopPropagation();
 
-            return;
+                openMeasurementModal();
 
-        }
-
-
-        state.objects =
-            state.objects.filter(
-                item =>
-                    item.id !==
-                    object.id
-            );
-
-
-        state.selectedMaterialId =
-            null;
-
-
-        renderWorkspace();
-
-        updateAllUI();
-
-
-        addObservation(
-            `${object.name} retiré du laboratoire.`
-        );
-
-
-        showToast(
-            `${object.name} retiré.`,
-            "success"
-        );
-
-
-        saveState(false);
+            };
 
     }
+
+
+    /* --------------------------------------------------------
+       CHAUFFAGE
+       -------------------------------------------------------- */
+
+    if (
+        heatButton
+    ) {
+
+        heatButton.onclick =
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                heatSelectedObject();
+
+            };
+
+    }
+
+
+    /* --------------------------------------------------------
+       SUPPRESSION
+       -------------------------------------------------------- */
+
+    if (
+        removeButton
+    ) {
+
+        removeButton.onclick =
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                removeSelectedObject();
+
+            };
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /* ============================================================
