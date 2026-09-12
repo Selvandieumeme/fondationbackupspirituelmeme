@@ -4731,7 +4731,8 @@
        16 — TRANSFERT
     ============================================================ */
 
-    function openTransferModal() {
+
+function openTransferModal() {
 
         const source =
             getSelectedObject();
@@ -4751,13 +4752,47 @@
         }
 
 
+        /*
+         * ============================================================
+         * DÉTERMINATION DU TYPE DE TRANSFERT
+         * ------------------------------------------------------------
+         * Liquide / récipient contenant un liquide :
+         * transfert volumétrique en mL.
+         *
+         * Solide :
+         * utilisation du moteur existant
+         * transferSolidIntoContainer().
+         *
+         * AUCUNE autre catégorie de matière n'est autorisée ici.
+         * ============================================================
+         */
+
+        const sourceIsSolid =
+            isSolidObject(
+                source
+            );
+
+
+        const sourceIsLiquid =
+            isLiquidObject(
+                source
+            );
+
+
+        const sourceIsContainer =
+            isContainer(
+                source
+            );
+
+
         if (
-            !isLiquidObject(source) &&
-            !isContainer(source)
+            !sourceIsSolid &&
+            !sourceIsLiquid &&
+            !sourceIsContainer
         ) {
 
             showToast(
-                "Le transfert volumétrique nécessite une matière liquide.",
+                "Le transfert nécessite une matière liquide ou solide.",
                 "warning"
             );
 
@@ -4766,16 +4801,53 @@
         }
 
 
+        /*
+         * ============================================================
+         * VALIDATION DE LA MATIÈRE DISPONIBLE
+         * ============================================================
+         */
+
         if (
-            source.volume <= 0
+            sourceIsSolid
         ) {
 
-            showToast(
-                "Aucune matière liquide disponible.",
-                "warning"
-            );
+            const solidMass =
+                Number(
+                    source.mass
+                ) || 0;
 
-            return;
+
+            if (
+                solidMass <= 0
+            ) {
+
+                showToast(
+                    "Aucune matière solide disponible.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+        } else {
+
+            if (
+                (
+                    Number(
+                        source.volume
+                    ) || 0
+                ) <= 0
+            ) {
+
+                showToast(
+                    "Aucune matière liquide disponible.",
+                    "warning"
+                );
+
+                return;
+
+            }
 
         }
 
@@ -4791,6 +4863,14 @@
         targetSelect.innerHTML =
             "";
 
+
+        /*
+         * ============================================================
+         * CONSTRUCTION DE LA LISTE DES DESTINATIONS
+         * ------------------------------------------------------------
+         * Seuls les récipients différents de la source sont proposés.
+         * ============================================================
+         */
 
         state.objects
             .filter(
@@ -4844,23 +4924,152 @@
         }
 
 
+        /*
+         * ============================================================
+         * INFORMATIONS DE LA SOURCE
+         * ============================================================
+         */
+
         $("transferSourceName").textContent =
             source.name;
 
 
+        /*
+         * ============================================================
+         * MODE SOLIDE
+         * ------------------------------------------------------------
+         * On réutilise le même modal existant.
+         *
+         * Le bloc quantité volumétrique est masqué car le moteur
+         * transferSolidIntoContainer() transfère actuellement
+         * l'objet solide complet.
+         * ============================================================
+         */
+
+        if (
+            sourceIsSolid
+        ) {
+
+            modal.dataset.transferMode =
+                "solid";
+
+
+            modal.dataset.transferSourceId =
+                source.id;
+
+
+            $("transferSourceAmount").textContent =
+                `${formatNumber(
+                    Number(
+                        source.mass
+                    ) || 0
+                )} g disponible`;
+
+
+            const quantityBlock =
+                modal.querySelector(
+                    ".transfer-quantity"
+                );
+
+
+            if (
+                quantityBlock
+            ) {
+
+                quantityBlock.style.display =
+                    "none";
+
+            }
+
+
+            const confirmButton =
+                $("confirmTransferBtn");
+
+
+            if (
+                confirmButton
+            ) {
+
+                confirmButton.textContent =
+                    "Transférer le solide";
+
+            }
+
+
+            openModal(
+                modal
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * ============================================================
+         * MODE LIQUIDE
+         * ------------------------------------------------------------
+         * On conserve ici le comportement volumétrique original.
+         * ============================================================
+         */
+
+        modal.dataset.transferMode =
+            "liquid";
+
+
+        modal.dataset.transferSourceId =
+            source.id;
+
+
+        const quantityBlock =
+            modal.querySelector(
+                ".transfer-quantity"
+            );
+
+
+        if (
+            quantityBlock
+        ) {
+
+            quantityBlock.style.display =
+                "";
+
+        }
+
+
+        const confirmButton =
+            $("confirmTransferBtn");
+
+
+        if (
+            confirmButton
+        ) {
+
+            confirmButton.textContent =
+                "Effectuer le transfert";
+
+        }
+
+
         $("transferSourceAmount").textContent =
-            `${formatNumber(source.volume)} mL disponible`;
+            `${formatNumber(
+                source.volume
+            )} mL disponible`;
 
 
         const max =
             Math.max(
                 0,
-                source.volume
+                Number(
+                    source.volume
+                ) || 0
             );
 
 
         $("transferAmount").max =
             max;
+
 
         $("transferRange").max =
             max;
@@ -4876,12 +5085,15 @@
         $("transferAmount").value =
             initial;
 
+
         $("transferRange").value =
             initial;
 
 
         $("transferMaxLabel").textContent =
-            `${formatNumber(max)} mL`;
+            `${formatNumber(
+                max
+            )} mL`;
 
 
         openModal(
@@ -4926,6 +5138,106 @@
         }
 
 
+        /*
+         * ============================================================
+         * TRANSFERT D'UN SOLIDE
+         * ------------------------------------------------------------
+         * IMPORTANT :
+         * On utilise le moteur solide déjà présent dans le système.
+         *
+         * transferSolidIntoContainer() est volontairement conservé
+         * sans aucune modification.
+         * ============================================================
+         */
+
+        if (
+            isSolidObject(
+                source
+            )
+        ) {
+
+            if (
+                !isContainer(
+                    target
+                )
+            ) {
+
+                showToast(
+                    "La destination doit être un récipient.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            const solidMass =
+                Number(
+                    source.mass
+                ) || 0;
+
+
+            if (
+                solidMass <= 0
+            ) {
+
+                showToast(
+                    "Aucune matière solide disponible.",
+                    "warning"
+                );
+
+                return;
+
+            }
+
+
+            const transferred =
+                transferSolidIntoContainer(
+                    source,
+                    target
+                );
+
+
+            if (
+                !transferred
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * Le moteur solide existant effectue déjà :
+             * - modification de la composition
+             * - recalcul du récipient
+             * - réaction éventuelle
+             * - rendu
+             * - mise à jour UI
+             * - sauvegarde
+             *
+             * On ferme donc simplement le modal ici.
+             */
+
+            closeModal(
+                $("transferModal")
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * ============================================================
+         * TRANSFERT LIQUIDE
+         * ------------------------------------------------------------
+         * Cette partie conserve le comportement original.
+         * ============================================================
+         */
+
         let amount =
             Number(
                 $("transferAmount").value
@@ -4952,7 +5264,9 @@
         amount =
             Math.min(
                 amount,
-                source.volume
+                Number(
+                    source.volume
+                ) || 0
             );
 
 
@@ -5028,6 +5342,7 @@
 
 
         renderWorkspace();
+
 
         updateAllUI();
 
@@ -5532,6 +5847,18 @@
                 : "Vide";
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /* ============================================================
