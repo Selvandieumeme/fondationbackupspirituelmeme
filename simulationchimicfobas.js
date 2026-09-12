@@ -9362,27 +9362,31 @@ function setupInspectorActions() {
     }
 
 
-    /* --------------------------------------------------------
-       MÉLANGE
-       --------------------------------------------------------
-       CONNEXION DIRECTE
-       -------------------------------------------------------- */
+/* --------------------------------------------------------
+   MÉLANGE
+   -------------------------------------------------------- */
 
-    if (
-        mixButton
-    ) {
+if (mixButton) {
 
-        mixButton.onclick =
-            function(event) {
+    mixButton.onclick = function(event) {
 
-                event.preventDefault();
-                event.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
 
-                mixSelectedObject();
+        console.log(
+            "FOBAS — Bouton Mélange cliqué"
+        );
 
-            };
+        mixSelectedObject();
 
-    }
+    };
+
+}
+
+
+
+
+
 
 
     /* --------------------------------------------------------
