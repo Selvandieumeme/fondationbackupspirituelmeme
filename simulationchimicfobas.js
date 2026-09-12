@@ -6133,105 +6133,140 @@ function openTransferModal() {
     }
 
 
-    /* ============================================================
-       18 — MÉLANGE
-    ============================================================ */
-
-    function mixSelectedObject() {
-
-        const object =
-            getSelectedObject();
 
 
-        if (
-            !object
-        ) {
-
-            showToast(
-                "Sélectionnez un récipient.",
-                "warning"
-            );
-
-            return;
-
-        }
 
 
-        if (
-            !isContainer(
-                object
-            )
-        ) {
-
-            showToast(
-                "Le mélange s'effectue dans un récipient.",
-                "warning"
-            );
-
-            return;
-
-        }
 
 
-        if (
-            !object.composition ||
-            !object.composition.length
-        ) {
-
-            showToast(
-                "Le récipient est vide.",
-                "warning"
-            );
-
-            return;
-
-        }
 
 
-        object.mixed =
-            true;
 
 
-        /*
-         * Mélange thermique simple :
-         * température moyenne pondérée.
-         */
-        recalculateContainer(
-            object
-        );
 
 
-        /*
-         * Une agitation accélère l'évaluation de réaction.
-         */
-        evaluateCompositionReaction(
-            object,
-            true
-        );
+/* ============================================================
+   16 — MÉLANGE
+   ------------------------------------------------------------
+   Correction :
+   - Le bouton Mélange doit toujours exécuter son action.
+   - Une erreur éventuelle du moteur de réaction ne doit plus
+     bloquer le rendu, la sauvegarde ou la confirmation.
+   - Ne modifie PAS la composition scientifique du récipient.
+   - Ne modifie PAS recalculateContainer().
+   ============================================================ */
 
+function mixSelectedObject() {
 
-        addObservation(
-            `${
-                object.name
-            } mélangé : ${
-                object.composition.length
-            } composant(s).`
-        );
+    const object = getSelectedObject();
 
-
-        renderWorkspace();
-
-        updateAllUI();
-
-        saveState(false);
-
-
+    if (!object) {
         showToast(
-            "Mélange effectué.",
-            "success"
+            "Sélectionnez un récipient.",
+            "warning"
+        );
+        return;
+    }
+
+    if (!isContainer(object)) {
+        showToast(
+            "Le mélange s'effectue dans un récipient.",
+            "warning"
+        );
+        return;
+    }
+
+    if (
+        !object.composition ||
+        !Array.isArray(object.composition) ||
+        object.composition.length === 0
+    ) {
+        showToast(
+            "Le récipient est vide.",
+            "warning"
+        );
+        return;
+    }
+
+    /* --------------------------------------------------------
+       1 — ÉTAT DE MÉLANGE
+       -------------------------------------------------------- */
+
+    object.mixed = true;
+
+    /* --------------------------------------------------------
+       2 — RECALCUL SCIENTIFIQUE
+       -------------------------------------------------------- */
+
+    recalculateContainer(object);
+
+    /* --------------------------------------------------------
+       3 — ÉVALUATION DE LA RÉACTION
+       --------------------------------------------------------
+       Une erreur éventuelle du moteur de réaction ne doit
+       absolument pas empêcher le bouton Mélange de terminer
+       son travail.
+       -------------------------------------------------------- */
+
+    try {
+
+        if (
+            typeof evaluateCompositionReaction === "function"
+        ) {
+            evaluateCompositionReaction(
+                object,
+                true
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "FOBAS — Erreur du moteur de réaction pendant le mélange :",
+            error
         );
 
+        /*
+         * Le mélange lui-même reste valide.
+         * On conserve donc object.mixed = true et les
+         * recalculs déjà effectués.
+         */
     }
+
+    /* --------------------------------------------------------
+       4 — OBSERVATION
+       -------------------------------------------------------- */
+
+    addObservation(
+        `${object.name} mélangé : ${object.composition.length} composant(s).`
+    );
+
+    /* --------------------------------------------------------
+       5 — RENDU
+       -------------------------------------------------------- */
+
+    renderWorkspace();
+
+    updateAllUI();
+
+    /* --------------------------------------------------------
+       6 — SAUVEGARDE
+       -------------------------------------------------------- */
+
+    saveState(false);
+
+    /* --------------------------------------------------------
+       7 — CONFIRMATION
+       -------------------------------------------------------- */
+
+    showToast(
+        "Mélange effectué.",
+        "success"
+    );
+}
+
+
+
 
 
     /* ============================================================
