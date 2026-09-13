@@ -1,504 +1,1172 @@
 /* ================================================================
-   FOBAS PIANO
+   FOBAS PIANO — SIMULATION MUSICALE PROFESSIONNELLE
    ================================================================
-   MOTEUR JAVASCRIPT PRINCIPAL
-   simulationpianofobas.js
+   Fichier : simulationpianofobas.js
 
-   VERSION
-   ---------------------------------------------------------------
-   FOBAS PIANO PRO — PROFESSIONAL MUSICAL SIMULATION ENGINE
+   Compatible avec :
+   simulationpianofobas.html
+
+   Fonctionnalités :
+   - 30 touches chromatiques
+   - 21 touches blanches
+   - 9 touches noires
+   - MIDI C2 → F4
+   - Web Audio API
+   - Polyphonie
+   - Sustain
+   - Métronome
+   - Volume
+   - BPM
+   - Plusieurs timbres
+   - Clavier ordinateur
+   - Touch / Pointer / Souris
+   - Affichage note / octave
+   - Marqueur de partition
    ================================================================ */
 
-
-/* ================================================================
-   01 — CONFIGURATION PRINCIPALE
-================================================================ */
-
-const FOBAS_PIANO_CONFIG = {
-
-    appName: "FOBAS PIANO",
-    version: "2.0.0 PRO",
-
-    /* Piano acoustique standard */
-    midiMin: 21,          // A0
-    midiMax: 108,         // C8
-
-    defaultVolume: 0.72,
-    defaultBpm: 100,
-    minBpm: 40,
-    maxBpm: 220,
-
-    maxPolyphony: 96,
-
-    masterFadeIn: 0.008,
-    masterFadeOut: 0.12,
-
-    sampleBasePath: "samples/fobas-piano/",
-    sampleEnabled: false,
-
-    sampleManifest: null,
-
-    defaultTimeSignatureNumerator: 4,
-    defaultTimeSignatureDenominator: 4,
-
-    defaultSubdivision: 1,
-
-    noteMarkerDuration: 650,
-
-    storagePrefix: "FOBAS_PIANO_PRO_",
-
-    midiVelocityDefault: 92,
-
-    keyboardOctaveOffset: 0,
-    keyboardOctaveMin: -3,
-    keyboardOctaveMax: 3,
-
-    computerKeyboardBaseMidi: 60,
-
-    metronomeLookAhead: 0.1,
-    metronomeScheduleInterval: 25,
-
-    recordingResolution: 1,
-
-    sustainCC: 64,
-    sostenutoCC: 66,
-    softCC: 67,
-
-    pitchBendCenter: 8192,
-    pitchBendRange: 2
-};
-
-
-/* ================================================================
-   02 — NOTE SYSTEM
-================================================================ */
-
-const NOTE_NAMES = [
-    "C",
-    "C#",
-    "D",
-    "D#",
-    "E",
-    "F",
-    "F#",
-    "G",
-    "G#",
-    "A",
-    "A#",
-    "B"
-];
-
-const NOTE_NAMES_FR = {
-    C: "Do",
-    "C#": "Do#",
-    D: "Ré",
-    "D#": "Ré#",
-    E: "Mi",
-    F: "Fa",
-    "F#": "Fa#",
-    G: "Sol",
-    "G#": "Sol#",
-    A: "La",
-    "A#": "La#",
-    B: "Si"
-};
-
-
-/* ================================================================
-   03 — COMPUTER KEYBOARD
-================================================================ */
-
-const COMPUTER_KEY_MAP = {
-
-    a: 48,
-    w: 49,
-    s: 50,
-    e: 51,
-    d: 52,
-    f: 53,
-    t: 54,
-    g: 55,
-    y: 56,
-    h: 57,
-    u: 58,
-    j: 59,
-    k: 60,
-
-    o: 61,
-    l: 62,
-    p: 63,
-    ";": 64,
-
-    z: 65,
-    x: 66,
-    c: 67,
-    v: 68,
-    b: 69,
-    n: 70,
-    m: 71,
-    ",": 72
-};
-
-
-/* ================================================================
-   04 — PIANO STATE
-================================================================ */
-
-const pianoState = {
-
-    audioContext: null,
-    masterGain: null,
-    compressor: null,
-
-    audioReady: false,
-    audioStarting: false,
-
-    volume: FOBAS_PIANO_CONFIG.defaultVolume,
-    bpm: FOBAS_PIANO_CONFIG.defaultBpm,
-
-    waveform: "piano",
-
-    keyboardOctaveOffset:
-        FOBAS_PIANO_CONFIG.keyboardOctaveOffset,
-
-    sustain: false,
-    sostenuto: false,
-    soft: false,
-
-    metronome: false,
-    metronomeTimer: null,
-    metronomeNextTime: 0,
-    metronomeBeat: 0,
-
-    timeSignatureNumerator:
-        FOBAS_PIANO_CONFIG.defaultTimeSignatureNumerator,
-
-    timeSignatureDenominator:
-        FOBAS_PIANO_CONFIG.defaultTimeSignatureDenominator,
-
-    subdivision:
-        FOBAS_PIANO_CONFIG.defaultSubdivision,
-
-    audioNodes: new Set(),
-
-    activeVoices: new Map(),
-
-    noteVoices: new Map(),
-
-    activePointerNotes: new Map(),
-
-    activeComputerNotes: new Map(),
-
-    activeMidiNotes: new Map(),
-
-    pressedComputerKeys: new Set(),
-
-    heldSostenutoNotes: new Set(),
-
-    pedalState: {
-        sustain: false,
-        sostenuto: false,
-        soft: false
-    },
-
-    generatedKeys: new Map(),
-
-    whiteKeys: [],
-    blackKeys: [],
-
-    midiToKey: new Map(),
-
-    lastNote: null,
-
-    noteSequence: [],
-
-    currentScore: [],
-
-    scoreCursor: 0,
-
-    currentExercise: null,
-
-    exerciseIndex: 0,
-
-    learningMode: false,
-
-    recording: false,
-
-    recordingStartedAt: 0,
-
-    recordingEvents: [],
-
-    recordings: [],
-
-    playback: false,
-
-    playbackTimers: [],
-
-    playbackStartedAt: 0,
-
-    currentSong: null,
-
-    practiceStats: {
-
-        correct: 0,
-        wrong: 0,
-        missed: 0,
-        total: 0,
-        timingErrors: [],
-        startTime: 0,
-        endTime: 0
-    },
-
-    midiAccess: null,
-    midiInputs: [],
-    midiOutputs: [],
-    selectedMidiInput: null,
-    selectedMidiOutput: null,
-
-    resizeTimer: null,
-
-    pointerVoices: new Map(),
-
-    initialized: false
-};
-
-
-/* ================================================================
-   05 — DOM CACHE
-================================================================ */
-
-const pianoDOM = {};
-
-function cacheDOM() {
-
-    pianoDOM.app =
-        document.getElementById("pianoApp");
-
-    pianoDOM.keyboard =
-        document.getElementById("pianoKeyboard");
-
-    pianoDOM.staff =
-        document.getElementById("staff");
-
-    pianoDOM.noteMarker =
-        document.getElementById("noteMarker");
-
-    pianoDOM.startAudioBtn =
-        document.getElementById("startAudioBtn");
-
-    pianoDOM.sustainBtn =
-        document.getElementById("sustainBtn");
-
-    pianoDOM.metronomeBtn =
-        document.getElementById("metronomeBtn");
-
-    pianoDOM.volume =
-        document.getElementById("volume");
-
-    pianoDOM.volumeValue =
-        document.getElementById("volumeValue");
-
-    pianoDOM.bpm =
-        document.getElementById("bpm");
-
-    pianoDOM.bpmOutput =
-        document.getElementById("bpmOutput");
-
-    pianoDOM.bpmValue =
-        document.getElementById("bpmValue");
-
-    pianoDOM.waveform =
-        document.getElementById("waveform");
-
-    pianoDOM.currentNote =
-        document.getElementById("currentNote");
-
-    pianoDOM.currentOctave =
-        document.getElementById("currentOctave");
-
-    pianoDOM.statusText =
-        document.getElementById("statusText");
-}
-
-
-/* ================================================================
-   06 — UTILITAIRES
-================================================================ */
-
-function clamp(value, min, max) {
-
-    return Math.max(
-        min,
-        Math.min(max, value)
-    );
-}
-
-
-function midiToNoteName(midi) {
-
-    const value = Number(midi);
-
-    if (!Number.isFinite(value)) {
-        return "—";
-    }
-
-    return NOTE_NAMES[
-        ((value % 12) + 12) % 12
+(() => {
+    "use strict";
+
+    /* ============================================================
+       CONFIGURATION PRINCIPALE
+    ============================================================ */
+
+    const CONFIG = {
+        totalKeys: 30,
+
+        firstMidi: 36, // C2
+        lastMidi: 65,  // F4
+
+        defaultVolume: 0.72,
+        defaultBpm: 100,
+
+        normalRelease: 0.18,
+        sustainRelease: 1.35,
+
+        maxPolyphony: 48,
+
+        keyboardMap: [
+            "a",
+            "w",
+            "s",
+            "e",
+            "d",
+            "f",
+            "t",
+            "g",
+            "y",
+            "h",
+            "u",
+            "j",
+            "k",
+            "o",
+            "l",
+            "p",
+            ";",
+            "z",
+            "x",
+            "c",
+            "v",
+            "b",
+            "n",
+            "m",
+            ",",
+            ".",
+            "/",
+            "'",
+            "[",
+            "]"
+        ]
+    };
+
+    /* ============================================================
+       NOTES
+    ============================================================ */
+
+    const NOTE_NAMES = [
+        "C",
+        "C♯",
+        "D",
+        "D♯",
+        "E",
+        "F",
+        "F♯",
+        "G",
+        "G♯",
+        "A",
+        "A♯",
+        "B"
     ];
-}
 
-
-function midiToOctave(midi) {
-
-    return Math.floor(
-        Number(midi) / 12
-    ) - 1;
-}
-
-
-function midiToLabel(midi) {
-
-    return (
-        midiToNoteName(midi) +
-        midiToOctave(midi)
-    );
-}
-
-
-function noteNameToMidi(note, octave) {
-
-    const index =
-        NOTE_NAMES.indexOf(note);
-
-    if (index < 0) {
-        return null;
-    }
-
-    return (
-        (Number(octave) + 1) * 12 +
-        index
-    );
-}
-
-
-function isBlackKey(midi) {
-
-    return [
+    const BLACK_PITCH_CLASSES = new Set([
         1,
         3,
         6,
         8,
         10
-    ].includes(
-        ((midi % 12) + 12) % 12
-    );
-}
+    ]);
 
+    /* ============================================================
+       TIMBRES
+    ============================================================ */
 
-function getVelocityFromPointer(event) {
+    const VOICES = {
+        piano: {
+            label: "Piano Grand",
+            oscillator1: "triangle",
+            oscillator2: "sine",
+            oscillator3: "triangle",
+            osc2Level: 0.25,
+            osc3Level: 0.08,
+            attack: 0.008,
+            decay: 1.25,
+            sustain: 0.28,
+            release: 1.35,
+            filter: 5200,
+            filterQ: 0.7,
+            detune2: 0,
+            detune3: 0
+        },
 
-    if (
-        event &&
-        Number.isFinite(event.pressure) &&
-        event.pressure > 0
-    ) {
+        warm: {
+            label: "Piano Warm",
+            oscillator1: "triangle",
+            oscillator2: "sine",
+            oscillator3: "sine",
+            osc2Level: 0.20,
+            osc3Level: 0.10,
+            attack: 0.015,
+            decay: 1.55,
+            sustain: 0.34,
+            release: 1.55,
+            filter: 3600,
+            filterQ: 0.65,
+            detune2: -2,
+            detune3: 2
+        },
 
-        return clamp(
-            event.pressure * 127,
-            1,
-            127
+        bright: {
+            label: "Piano Bright",
+            oscillator1: "triangle",
+            oscillator2: "sawtooth",
+            oscillator3: "sine",
+            osc2Level: 0.16,
+            osc3Level: 0.12,
+            attack: 0.004,
+            decay: 0.95,
+            sustain: 0.25,
+            release: 1.10,
+            filter: 7200,
+            filterQ: 0.8,
+            detune2: 1,
+            detune3: -1
+        },
+
+        grave: {
+            label: "Grave",
+            oscillator1: "sine",
+            oscillator2: "triangle",
+            oscillator3: "sine",
+            osc2Level: 0.34,
+            osc3Level: 0.12,
+            attack: 0.012,
+            decay: 1.75,
+            sustain: 0.42,
+            release: 1.80,
+            filter: 2800,
+            filterQ: 0.55,
+            detune2: -3,
+            detune3: 3
+        },
+
+        aigu: {
+            label: "Aigu",
+            oscillator1: "triangle",
+            oscillator2: "sawtooth",
+            oscillator3: "sine",
+            osc2Level: 0.19,
+            osc3Level: 0.10,
+            attack: 0.004,
+            decay: 0.80,
+            sustain: 0.22,
+            release: 0.90,
+            filter: 8200,
+            filterQ: 0.9,
+            detune2: 2,
+            detune3: -2
+        },
+
+        soprano: {
+            label: "Soprano",
+            oscillator1: "sine",
+            oscillator2: "triangle",
+            oscillator3: "sine",
+            osc2Level: 0.30,
+            osc3Level: 0.12,
+            attack: 0.018,
+            decay: 1.20,
+            sustain: 0.38,
+            release: 1.40,
+            filter: 9000,
+            filterQ: 0.7,
+            detune2: 3,
+            detune3: -3
+        },
+
+        alto: {
+            label: "Alto",
+            oscillator1: "triangle",
+            oscillator2: "sine",
+            oscillator3: "triangle",
+            osc2Level: 0.27,
+            osc3Level: 0.10,
+            attack: 0.012,
+            decay: 1.35,
+            sustain: 0.35,
+            release: 1.40,
+            filter: 6000,
+            filterQ: 0.65,
+            detune2: -1,
+            detune3: 1
+        },
+
+        tenor: {
+            label: "Ténor",
+            oscillator1: "triangle",
+            oscillator2: "sine",
+            oscillator3: "sine",
+            osc2Level: 0.32,
+            osc3Level: 0.08,
+            attack: 0.010,
+            decay: 1.50,
+            sustain: 0.40,
+            release: 1.60,
+            filter: 4700,
+            filterQ: 0.60,
+            detune2: -2,
+            detune3: 2
+        },
+
+        basse: {
+            label: "Basse",
+            oscillator1: "sine",
+            oscillator2: "triangle",
+            oscillator3: "sine",
+            osc2Level: 0.38,
+            osc3Level: 0.10,
+            attack: 0.014,
+            decay: 1.80,
+            sustain: 0.46,
+            release: 1.90,
+            filter: 2200,
+            filterQ: 0.50,
+            detune2: -4,
+            detune3: 4
+        }
+    };
+
+    /* ============================================================
+       ÉTAT GLOBAL
+    ============================================================ */
+
+    const state = {
+        audioContext: null,
+
+        masterGain: null,
+        compressor: null,
+
+        audioStarted: false,
+
+        volume: CONFIG.defaultVolume,
+        bpm: CONFIG.defaultBpm,
+
+        sustain: false,
+        metronome: false,
+
+        selectedVoice: "piano",
+
+        activeNotes: new Map(),
+
+        pressedComputerKeys: new Set(),
+
+        pointerNotes: new Map(),
+
+        metronomeTimer: null,
+
+        noteSequence: 0
+    };
+
+    /* ============================================================
+       DOM
+    ============================================================ */
+
+    const $ = id => document.getElementById(id);
+
+    const pianoKeyboard = $("pianoKeyboard");
+    const startAudioBtn = $("startAudioBtn");
+    const sustainBtn = $("sustainBtn");
+    const metronomeBtn = $("metronomeBtn");
+
+    const currentNote = $("currentNote");
+    const currentOctave = $("currentOctave");
+    const statusText = $("statusText");
+
+    const bpmValue = $("bpmValue");
+    const bpmOutput = $("bpmOutput");
+
+    const volume = $("volume");
+    const volumeValue = $("volumeValue");
+
+    const bpm = $("bpm");
+    const waveform = $("waveform");
+
+    const staff = $("staff");
+    const noteMarker = $("noteMarker");
+
+    /* ============================================================
+       UTILITAIRES
+    ============================================================ */
+
+    function midiToFrequency(midi) {
+        return 440 * Math.pow(
+            2,
+            (midi - 69) / 12
         );
     }
 
-    return 92;
-}
+    function midiToNoteName(midi) {
+        const pitchClass =
+            ((midi % 12) + 12) % 12;
 
-
-function getCurrentTime() {
-
-    if (
-        pianoState.audioContext
-    ) {
-
-        return pianoState.audioContext.currentTime;
+        return NOTE_NAMES[pitchClass];
     }
 
-    return 0;
-}
+    function midiToOctave(midi) {
+        return Math.floor(midi / 12) - 1;
+    }
 
+    function isBlackKey(midi) {
+        const pitchClass =
+            ((midi % 12) + 12) % 12;
 
-/* ================================================================
-   07 — PIANO KEYBOARD ENGINE
-================================================================ */
+        return BLACK_PITCH_CLASSES.has(
+            pitchClass
+        );
+    }
 
-const PianoKeyboardEngine = {
+    function getFullNoteName(midi) {
+        return `${midiToNoteName(midi)}${midiToOctave(midi)}`;
+    }
 
-    initialize() {
+    function clamp(value, min, max) {
+        return Math.min(
+            Math.max(value, min),
+            max
+        );
+    }
 
-        this.build88Keys();
-        this.bindPointerEvents();
-        this.bindKeyboardEvents();
-        this.positionBlackKeys();
+    /* ============================================================
+       AUDIO ENGINE
+    ============================================================ */
 
-        window.addEventListener(
-            "resize",
-            () => {
+    async function ensureAudio() {
 
-                clearTimeout(
-                    pianoState.resizeTimer
+        if (!state.audioContext) {
+
+            const AudioContextClass =
+                window.AudioContext ||
+                window.webkitAudioContext;
+
+            if (!AudioContextClass) {
+                throw new Error(
+                    "Web Audio API non disponible."
                 );
-
-                pianoState.resizeTimer =
-                    setTimeout(
-                        () => this.positionBlackKeys(),
-                        100
-                    );
             }
+
+            state.audioContext =
+                new AudioContextClass();
+
+            state.compressor =
+                state.audioContext.createDynamicsCompressor();
+
+            state.compressor.threshold.value = -18;
+            state.compressor.knee.value = 12;
+            state.compressor.ratio.value = 4;
+            state.compressor.attack.value = 0.003;
+            state.compressor.release.value = 0.25;
+
+            state.masterGain =
+                state.audioContext.createGain();
+
+            state.masterGain.gain.value =
+                state.volume;
+
+            state.compressor.connect(
+                state.masterGain
+            );
+
+            state.masterGain.connect(
+                state.audioContext.destination
+            );
+        }
+
+        if (
+            state.audioContext.state ===
+            "suspended"
+        ) {
+            await state.audioContext.resume();
+        }
+
+        state.audioStarted = true;
+
+        updateAudioButton();
+
+        setStatus(
+            "Piano actif — prêt à jouer."
         );
-    },
+    }
 
+    function updateAudioButton() {
 
-    build88Keys() {
-
-        if (!pianoDOM.keyboard) {
+        if (!startAudioBtn) {
             return;
         }
 
-        pianoDOM.keyboard.innerHTML = "";
+        if (state.audioStarted) {
 
-        pianoState.whiteKeys = [];
-        pianoState.blackKeys = [];
-        pianoState.midiToKey.clear();
+            startAudioBtn.textContent =
+                "Piano actif";
+
+            startAudioBtn.classList.add(
+                "active"
+            );
+
+        } else {
+
+            startAudioBtn.textContent =
+                "Activer le piano";
+
+            startAudioBtn.classList.remove(
+                "active"
+            );
+        }
+    }
+
+    /* ============================================================
+       VOLUME
+    ============================================================ */
+
+    function updateVolume() {
+
+        if (!volume) {
+            return;
+        }
+
+        const value =
+            clamp(
+                Number(volume.value),
+                0,
+                1
+            );
+
+        state.volume = value;
+
+        if (state.masterGain) {
+
+            state.masterGain.gain.setTargetAtTime(
+                value,
+                state.audioContext.currentTime,
+                0.015
+            );
+        }
+
+        if (volumeValue) {
+
+            volumeValue.textContent =
+                `${Math.round(value * 100)}%`;
+        }
+    }
+
+    /* ============================================================
+       CRÉATION D'UNE VOIX
+    ============================================================ */
+
+    function createVoice(
+        midi,
+        velocity = 1
+    ) {
+
+        if (!state.audioContext) {
+            return null;
+        }
+
+        const ctx =
+            state.audioContext;
+
+        const voice =
+            VOICES[state.selectedVoice] ||
+            VOICES.piano;
+
+        const frequency =
+            midiToFrequency(midi);
+
+        const now =
+            ctx.currentTime;
+
+        const output =
+            ctx.createGain();
+
+        const filter =
+            ctx.createBiquadFilter();
+
+        filter.type =
+            "lowpass";
+
+        const filterFrequency =
+            clamp(
+                voice.filter *
+                Math.pow(
+                    2,
+                    (midi - 60) / 36
+                ),
+                900,
+                12000
+            );
+
+        filter.frequency.setValueAtTime(
+            filterFrequency,
+            now
+        );
+
+        filter.Q.value =
+            voice.filterQ;
+
+        output.gain.setValueAtTime(
+            0.0001,
+            now
+        );
+
+        filter.connect(output);
+        output.connect(state.compressor);
+
+        const oscillators = [];
+
+        /* --------------------------------------------------------
+           OSCILLATEUR PRINCIPAL
+        -------------------------------------------------------- */
+
+        const osc1 =
+            ctx.createOscillator();
+
+        osc1.type =
+            voice.oscillator1;
+
+        osc1.frequency.setValueAtTime(
+            frequency,
+            now
+        );
+
+        const gain1 =
+            ctx.createGain();
+
+        gain1.gain.value =
+            1;
+
+        osc1.connect(gain1);
+        gain1.connect(filter);
+
+        oscillators.push(osc1);
+
+        /* --------------------------------------------------------
+           SECOND OSCILLATEUR
+        -------------------------------------------------------- */
+
+        const osc2 =
+            ctx.createOscillator();
+
+        osc2.type =
+            voice.oscillator2;
+
+        osc2.frequency.setValueAtTime(
+            frequency,
+            now
+        );
+
+        osc2.detune.value =
+            voice.detune2;
+
+        const gain2 =
+            ctx.createGain();
+
+        gain2.gain.value =
+            voice.osc2Level;
+
+        osc2.connect(gain2);
+        gain2.connect(filter);
+
+        oscillators.push(osc2);
+
+        /* --------------------------------------------------------
+           TROISIÈME OSCILLATEUR
+        -------------------------------------------------------- */
+
+        const osc3 =
+            ctx.createOscillator();
+
+        osc3.type =
+            voice.oscillator3;
+
+        osc3.frequency.setValueAtTime(
+            frequency * 2,
+            now
+        );
+
+        osc3.detune.value =
+            voice.detune3;
+
+        const gain3 =
+            ctx.createGain();
+
+        gain3.gain.value =
+            voice.osc3Level;
+
+        osc3.connect(gain3);
+        gain3.connect(filter);
+
+        oscillators.push(osc3);
+
+        /* --------------------------------------------------------
+           ENVELOPPE ADSR
+        -------------------------------------------------------- */
+
+        const velocityLevel =
+            clamp(
+                Number(velocity),
+                0.1,
+                1
+            );
+
+        const peak =
+            0.22 *
+            velocityLevel;
+
+        const attackEnd =
+            now + voice.attack;
+
+        const decayEnd =
+            attackEnd + voice.decay;
+
+        output.gain.cancelScheduledValues(
+            now
+        );
+
+        output.gain.setValueAtTime(
+            0.0001,
+            now
+        );
+
+        output.gain.exponentialRampToValueAtTime(
+            Math.max(0.0002, peak),
+            attackEnd
+        );
+
+        output.gain.exponentialRampToValueAtTime(
+            Math.max(
+                0.0001,
+                peak * voice.sustain
+            ),
+            decayEnd
+        );
+
+        /* --------------------------------------------------------
+           DÉMARRAGE
+        -------------------------------------------------------- */
+
+        oscillators.forEach(
+            oscillator => {
+                oscillator.start(now);
+            }
+        );
+
+        return {
+            midi,
+            frequency,
+
+            output,
+            filter,
+
+            oscillators,
+
+            startedAt: now,
+
+            released: false,
+            sustained: false,
+
+            voiceName:
+                state.selectedVoice,
+
+            id:
+                ++state.noteSequence
+        };
+    }
+
+    /* ============================================================
+       JOUER UNE NOTE
+    ============================================================ */
+
+    async function playNote(
+        midi,
+        velocity = 1
+    ) {
+
+        try {
+            await ensureAudio();
+        } catch (error) {
+            setStatus(
+                "Audio non disponible sur cet appareil."
+            );
+            return;
+        }
+
+        midi =
+            Number(midi);
+
+        if (
+            midi < CONFIG.firstMidi ||
+            midi > CONFIG.lastMidi
+        ) {
+            return;
+        }
+
+        /* Si la note existe déjà */
+        if (
+            state.activeNotes.has(midi)
+        ) {
+            releaseNote(
+                midi,
+                true
+            );
+        }
+
+        /* Limite de polyphonie */
+        if (
+            state.activeNotes.size >=
+            CONFIG.maxPolyphony
+        ) {
+
+            const firstNote =
+                state.activeNotes
+                    .values()
+                    .next()
+                    .value;
+
+            if (firstNote) {
+                forceStopNote(
+                    firstNote
+                );
+            }
+        }
+
+        const note =
+            createVoice(
+                midi,
+                velocity
+            );
+
+        if (!note) {
+            return;
+        }
+
+        state.activeNotes.set(
+            midi,
+            note
+        );
+
+        updateNoteDisplay(midi);
+        updateKeyVisual(midi, true);
+
+        setStatus(
+            `${getFullNoteName(midi)} — ${VOICES[state.selectedVoice].label}`
+        );
+    }
+
+    /* ============================================================
+       RELÂCHER UNE NOTE
+    ============================================================ */
+
+    function releaseNote(
+        midi,
+        immediate = false
+    ) {
+
+        const note =
+            state.activeNotes.get(midi);
+
+        if (!note) {
+            return;
+        }
+
+        if (note.released) {
+            return;
+        }
+
+        if (
+            state.sustain &&
+            !immediate
+        ) {
+
+            note.sustained = true;
+
+            updateKeyVisual(
+                midi,
+                false,
+                true
+            );
+
+            return;
+        }
+
+        note.released = true;
+
+        const ctx =
+            state.audioContext;
+
+        if (!ctx) {
+            return;
+        }
+
+        const now =
+            ctx.currentTime;
+
+        const releaseTime =
+            immediate
+                ? 0.025
+                : (
+                    state.sustain
+                        ? CONFIG.sustainRelease
+                        : CONFIG.normalRelease
+                );
+
+        const currentGain =
+            Math.max(
+                0.0001,
+                note.output.gain.value
+            );
+
+        note.output.gain.cancelScheduledValues(
+            now
+        );
+
+        note.output.gain.setValueAtTime(
+            currentGain,
+            now
+        );
+
+        note.output.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + releaseTime
+        );
+
+        note.oscillators.forEach(
+            oscillator => {
+
+                try {
+                    oscillator.stop(
+                        now + releaseTime + 0.03
+                    );
+                } catch (_) {}
+            }
+        );
+
+        setTimeout(
+            () => {
+
+                try {
+                    note.oscillators.forEach(
+                        oscillator => {
+                            oscillator.disconnect();
+                        }
+                    );
+
+                    note.filter.disconnect();
+                    note.output.disconnect();
+
+                } catch (_) {}
+
+                if (
+                    state.activeNotes.get(midi) ===
+                    note
+                ) {
+                    state.activeNotes.delete(
+                        midi
+                    );
+                }
+
+                updateKeyVisual(
+                    midi,
+                    false
+                );
+
+            },
+            Math.max(
+                80,
+                (releaseTime + 0.08) * 1000
+            )
+        );
+    }
+
+    /* ============================================================
+       ARRÊT FORCÉ
+    ============================================================ */
+
+    function forceStopNote(note) {
+
+        if (!note) {
+            return;
+        }
+
+        const midi =
+            note.midi;
+
+        try {
+
+            note.oscillators.forEach(
+                oscillator => {
+
+                    try {
+                        oscillator.stop();
+                    } catch (_) {}
+
+                    try {
+                        oscillator.disconnect();
+                    } catch (_) {}
+                }
+            );
+
+            note.filter.disconnect();
+            note.output.disconnect();
+
+        } catch (_) {}
+
+        state.activeNotes.delete(
+            midi
+        );
+
+        updateKeyVisual(
+            midi,
+            false
+        );
+    }
+
+    /* ============================================================
+       ARRÊT DE TOUTES LES NOTES
+    ============================================================ */
+
+    function stopAllNotes() {
+
+        const notes =
+            Array.from(
+                state.activeNotes.values()
+            );
+
+        notes.forEach(
+            note => {
+                forceStopNote(note);
+            }
+        );
+
+        state.pointerNotes.clear();
+        state.pressedComputerKeys.clear();
+    }
+
+    /* ============================================================
+       SUSTAIN
+    ============================================================ */
+
+    function setSustain(enabled) {
+
+        state.sustain =
+            Boolean(enabled);
+
+        if (sustainBtn) {
+
+            sustainBtn.setAttribute(
+                "aria-pressed",
+                String(state.sustain)
+            );
+
+            const span =
+                sustainBtn.querySelector("span");
+
+            if (span) {
+                span.textContent =
+                    state.sustain
+                        ? "ON"
+                        : "OFF";
+            }
+
+            sustainBtn.classList.toggle(
+                "active",
+                state.sustain
+            );
+        }
+
+        if (!state.sustain) {
+
+            const sustainedNotes =
+                Array.from(
+                    state.activeNotes.values()
+                ).filter(
+                    note => note.sustained
+                );
+
+            sustainedNotes.forEach(
+                note => {
+                    releaseNote(
+                        note.midi,
+                        false
+                    );
+                }
+            );
+        }
+
+        setStatus(
+            state.sustain
+                ? "Sustain activé."
+                : "Sustain désactivé."
+        );
+    }
+
+    /* ============================================================
+       CRÉATION DU CLAVIER — 30 TOUCHES
+    ============================================================ */
+
+    function buildKeyboard() {
+
+        if (!pianoKeyboard) {
+            return;
+        }
+
+        pianoKeyboard.innerHTML = "";
+
+        pianoKeyboard.setAttribute(
+            "data-key-count",
+            String(CONFIG.totalKeys)
+        );
+
+        pianoKeyboard.style.setProperty(
+            "--white-count",
+            String(
+                countWhiteKeys()
+            )
+        );
+
+        let whiteIndex = 0;
 
         for (
-            let midi = FOBAS_PIANO_CONFIG.midiMin;
-            midi <= FOBAS_PIANO_CONFIG.midiMax;
+            let midi = CONFIG.firstMidi;
+            midi <= CONFIG.lastMidi;
             midi++
         ) {
 
-            const key =
-                this.createKey(midi);
+            if (!isBlackKey(midi)) {
 
-            pianoDOM.keyboard.appendChild(key);
+                const key =
+                    createPianoKey(
+                        midi,
+                        false,
+                        whiteIndex
+                    );
 
-            pianoState.midiToKey.set(
-                midi,
-                key
-            );
+                pianoKeyboard.appendChild(
+                    key
+                );
 
-            if (isBlackKey(midi)) {
-                pianoState.blackKeys.push(key);
-            } else {
-                pianoState.whiteKeys.push(key);
+                whiteIndex++;
             }
         }
-    },
 
+        whiteIndex = 0;
 
-    createKey(midi) {
+        for (
+            let midi = CONFIG.firstMidi;
+            midi <= CONFIG.lastMidi;
+            midi++
+        ) {
 
-        const black =
-            isBlackKey(midi);
+            if (isBlackKey(midi)) {
+
+                const key =
+                    createPianoKey(
+                        midi,
+                        true,
+                        findPreviousWhiteIndex(
+                            midi
+                        )
+                    );
+
+                pianoKeyboard.appendChild(
+                    key
+                );
+            } else {
+                whiteIndex++;
+            }
+        }
+
+        updateKeyboardHelp();
+    }
+
+    function countWhiteKeys() {
+
+        let count = 0;
+
+        for (
+            let midi = CONFIG.firstMidi;
+            midi <= CONFIG.lastMidi;
+            midi++
+        ) {
+
+            if (!isBlackKey(midi)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    function findPreviousWhiteIndex(
+        midi
+    ) {
+
+        let index = 0;
+
+        for (
+            let current =
+                CONFIG.firstMidi;
+            current < midi;
+            current++
+        ) {
+
+            if (!isBlackKey(current)) {
+                index++;
+            }
+        }
+
+        return Math.max(
+            0,
+            index - 1
+        );
+    }
+
+    /* ============================================================
+       CRÉATION D'UNE TOUCHE
+    ============================================================ */
+
+    function createPianoKey(
+        midi,
+        black,
+        whiteIndex
+    ) {
 
         const key =
             document.createElement("button");
@@ -507,54 +1175,96 @@ const PianoKeyboardEngine = {
 
         key.className =
             black
-                ? "piano-black-key"
-                : "piano-white-key";
+                ? "piano-key black-key"
+                : "piano-key white-key";
 
-        key.dataset.midi = String(midi);
-        key.dataset.note = midiToLabel(midi);
-        key.dataset.noteName =
-            midiToNoteName(midi);
+        key.dataset.midi =
+            String(midi);
+
+        key.dataset.note =
+            getFullNoteName(midi);
+
+        key.dataset.keyIndex =
+            String(
+                midi -
+                CONFIG.firstMidi
+            );
+
+        key.dataset.whiteIndex =
+            String(whiteIndex);
+
+        const computerKey =
+            CONFIG.keyboardMap[
+                midi - CONFIG.firstMidi
+            ];
+
+        key.dataset.computerKey =
+            computerKey;
 
         key.setAttribute(
             "aria-label",
-            `${midiToLabel(midi)} — MIDI ${midi}`
+            `Note ${getFullNoteName(midi)}`
         );
 
-        key.tabIndex = -1;
+        key.title =
+            `${getFullNoteName(midi)} — touche ${computerKey.toUpperCase()}`;
 
-        const label =
+        key.style.setProperty(
+            "--white-index",
+            String(whiteIndex)
+        );
+
+        key.style.setProperty(
+            "--white-count",
+            String(countWhiteKeys())
+        );
+
+        const noteLabel =
             document.createElement("span");
 
-        label.className =
-            "fobas-piano-key-label";
+        noteLabel.className =
+            "key-note";
 
-        label.textContent =
-            midiToLabel(midi);
+        noteLabel.textContent =
+            getFullNoteName(midi);
 
-        key.appendChild(label);
+        key.appendChild(
+            noteLabel
+        );
+
+        const keyLabel =
+            document.createElement("span");
+
+        keyLabel.className =
+            "key-computer";
+
+        keyLabel.textContent =
+            computerKey.toUpperCase();
+
+        key.appendChild(
+            keyLabel
+        );
+
+        attachKeyEvents(
+            key,
+            midi
+        );
 
         return key;
-    },
+    }
 
+    /* ============================================================
+       ÉVÉNEMENTS DES TOUCHES
+    ============================================================ */
 
-    bindPointerEvents() {
+    function attachKeyEvents(
+        key,
+        midi
+    ) {
 
-        if (!pianoDOM.keyboard) {
-            return;
-        }
-
-        pianoDOM.keyboard.addEventListener(
+        key.addEventListener(
             "pointerdown",
             async event => {
-
-                const key =
-                    event.target.closest(
-                        "[data-midi]"
-                    );
-
-                if (!key) {
-                    return;
-                }
 
                 event.preventDefault();
 
@@ -564,316 +1274,116 @@ const PianoKeyboardEngine = {
                     );
                 } catch (_) {}
 
-                const midi =
-                    Number(key.dataset.midi);
-
                 const velocity =
-                    getVelocityFromPointer(event);
+                    event.pointerType === "touch"
+                        ? 0.95
+                        : 1;
 
-                pianoState.activePointerNotes.set(
+                state.pointerNotes.set(
                     event.pointerId,
                     midi
                 );
 
-                await NoteEngine.noteOn(
+                key.classList.add(
+                    "active"
+                );
+
+                await playNote(
                     midi,
-                    velocity,
-                    "pointer",
-                    event.pointerId
+                    velocity
                 );
             }
         );
 
-
-        const releasePointer =
+        key.addEventListener(
+            "pointerup",
             event => {
 
-                const midi =
-                    pianoState.activePointerNotes.get(
+                event.preventDefault();
+
+                const noteMidi =
+                    state.pointerNotes.get(
+                        event.pointerId
+                    );
+
+                state.pointerNotes.delete(
+                    event.pointerId
+                );
+
+                releaseNote(
+                    noteMidi ?? midi
+                );
+            }
+        );
+
+        key.addEventListener(
+            "pointercancel",
+            event => {
+
+                const noteMidi =
+                    state.pointerNotes.get(
+                        event.pointerId
+                    );
+
+                state.pointerNotes.delete(
+                    event.pointerId
+                );
+
+                releaseNote(
+                    noteMidi ?? midi
+                );
+            }
+        );
+
+        key.addEventListener(
+            "lostpointercapture",
+            event => {
+
+                const noteMidi =
+                    state.pointerNotes.get(
                         event.pointerId
                     );
 
                 if (
-                    midi === undefined
+                    noteMidi !== undefined
                 ) {
-                    return;
-                }
 
-                pianoState.activePointerNotes.delete(
-                    event.pointerId
-                );
-
-                NoteEngine.noteOff(
-                    midi,
-                    "pointer",
-                    event.pointerId
-                );
-            };
-
-
-        pianoDOM.keyboard.addEventListener(
-            "pointerup",
-            releasePointer
-        );
-
-        pianoDOM.keyboard.addEventListener(
-            "pointercancel",
-            releasePointer
-        );
-
-        pianoDOM.keyboard.addEventListener(
-            "lostpointercapture",
-            releasePointer
-        );
-    },
-
-
-    bindKeyboardEvents() {
-
-        document.addEventListener(
-            "keydown",
-            async event => {
-
-                const target =
-                    event.target;
-
-                if (
-                    target &&
-                    (
-                        target.tagName === "INPUT" ||
-                        target.tagName === "SELECT" ||
-                        target.tagName === "TEXTAREA"
-                    )
-                ) {
-                    return;
-                }
-
-                if (event.repeat) {
-                    return;
-                }
-
-                const key =
-                    event.key.toLowerCase();
-
-                if (key === " ") {
-
-                    event.preventDefault();
-
-                    PedalEngine.toggle(
-                        "sustain"
+                    state.pointerNotes.delete(
+                        event.pointerId
                     );
 
-                    return;
+                    releaseNote(
+                        noteMidi
+                    );
                 }
-
-                if (
-                    key === "arrowup"
-                ) {
-
-                    event.preventDefault();
-
-                    OctaveEngine.shift(1);
-
-                    return;
-                }
-
-                if (
-                    key === "arrowdown"
-                ) {
-
-                    event.preventDefault();
-
-                    OctaveEngine.shift(-1);
-
-                    return;
-                }
-
-                const baseMidi =
-                    COMPUTER_KEY_MAP[key];
-
-                if (
-                    baseMidi === undefined
-                ) {
-                    return;
-                }
-
-                event.preventDefault();
-
-                if (
-                    pianoState.pressedComputerKeys.has(
-                        key
-                    )
-                ) {
-                    return;
-                }
-
-                pianoState.pressedComputerKeys.add(
-                    key
-                );
-
-                const midi =
-                    baseMidi +
-                    pianoState.keyboardOctaveOffset * 12;
-
-                if (
-                    midi < FOBAS_PIANO_CONFIG.midiMin ||
-                    midi > FOBAS_PIANO_CONFIG.midiMax
-                ) {
-                    return;
-                }
-
-                pianoState.activeComputerNotes.set(
-                    key,
-                    midi
-                );
-
-                await NoteEngine.noteOn(
-                    midi,
-                    FOBAS_PIANO_CONFIG.midiVelocityDefault,
-                    "computer",
-                    key
-                );
             }
         );
 
-
-        document.addEventListener(
-            "keyup",
+        key.addEventListener(
+            "contextmenu",
             event => {
-
-                const key =
-                    event.key.toLowerCase();
-
-                if (
-                    !pianoState.pressedComputerKeys.has(
-                        key
-                    )
-                ) {
-                    return;
-                }
-
-                pianoState.pressedComputerKeys.delete(
-                    key
-                );
-
-                const midi =
-                    pianoState.activeComputerNotes.get(
-                        key
-                    );
-
-                pianoState.activeComputerNotes.delete(
-                    key
-                );
-
-                if (
-                    midi !== undefined
-                ) {
-
-                    NoteEngine.noteOff(
-                        midi,
-                        "computer",
-                        key
-                    );
-                }
+                event.preventDefault();
             }
         );
-    },
+    }
 
+    /* ============================================================
+       VISUEL DES TOUCHES
+    ============================================================ */
 
-    positionBlackKeys() {
+    function updateKeyVisual(
+        midi,
+        active,
+        sustained = false
+    ) {
 
-        if (
-            !pianoDOM.keyboard
-        ) {
+        if (!pianoKeyboard) {
             return;
         }
-
-        const whiteKeys =
-            pianoState.whiteKeys;
-
-        const keyboardRect =
-            pianoDOM.keyboard.getBoundingClientRect();
-
-        if (!keyboardRect.width) {
-            return;
-        }
-
-        const whiteWidth =
-            keyboardRect.width /
-            whiteKeys.length;
-
-        let whiteIndex = 0;
-
-        for (
-            let midi =
-                FOBAS_PIANO_CONFIG.midiMin;
-            midi <= FOBAS_PIANO_CONFIG.midiMax;
-            midi++
-        ) {
-
-            const key =
-                pianoState.midiToKey.get(
-                    midi
-                );
-
-            if (!key) {
-                continue;
-            }
-
-            if (isBlackKey(midi)) {
-
-                const previousWhite =
-                    midi - 1;
-
-                const previousWhiteIndex =
-                    this.countWhiteKeysBefore(
-                        previousWhite
-                    );
-
-                const left =
-                    (
-                        previousWhiteIndex +
-                        1
-                    ) *
-                    whiteWidth -
-                    whiteWidth * 0.32;
-
-                key.style.left =
-                    `${left}px`;
-
-            } else {
-
-                whiteIndex++;
-            }
-        }
-    },
-
-
-    countWhiteKeysBefore(midi) {
-
-        let count = 0;
-
-        for (
-            let i =
-                FOBAS_PIANO_CONFIG.midiMin;
-            i <= midi;
-            i++
-        ) {
-
-            if (!isBlackKey(i)) {
-                count++;
-            }
-        }
-
-        return count - 1;
-    },
-
-
-    setKeyVisual(midi, active) {
 
         const key =
-            pianoState.midiToKey.get(
-                midi
+            pianoKeyboard.querySelector(
+                `[data-midi="${midi}"]`
             );
 
         if (!key) {
@@ -885,5227 +1395,798 @@ const PianoKeyboardEngine = {
             Boolean(active)
         );
 
-        key.setAttribute(
-            "aria-pressed",
-            active ? "true" : "false"
+        key.classList.toggle(
+            "sustained",
+            Boolean(sustained)
         );
     }
-};
 
+    /* ============================================================
+       CLAVIER ORDINATEUR
+    ============================================================ */
 
-/* ================================================================
-   08 — AUDIO ENGINE
-================================================================ */
-
-const AcousticSampleEngine = {
-
-    buffers: new Map(),
-    loading: new Map(),
-    enabled: false,
-    manifest: null,
-
-
-    async initialize() {
-
-        this.enabled =
-            Boolean(
-                FOBAS_PIANO_CONFIG.sampleEnabled
-            );
-
-        this.manifest =
-            FOBAS_PIANO_CONFIG.sampleManifest;
-
-        if (
-            !this.enabled ||
-            !this.manifest
-        ) {
-            return;
-        }
-
-        await this.preloadManifest();
-    },
-
-
-    async preloadManifest() {
-
-        const entries =
-            this.getManifestEntries();
-
-        await Promise.all(
-            entries.map(
-                item =>
-                    this.loadSample(
-                        item.midi,
-                        item.velocityLayer,
-                        item.url
-                    )
-            )
-        );
-    },
-
-
-    getManifestEntries() {
-
-        const result = [];
-
-        if (!this.manifest) {
-            return result;
-        }
-
-        for (
-            const layer of Object.keys(
-                this.manifest
-            )
-        ) {
-
-            const notes =
-                this.manifest[layer];
-
-            if (!notes) {
-                continue;
-            }
-
-            for (
-                const midi of Object.keys(notes)
-            ) {
-
-                result.push({
-                    midi: Number(midi),
-                    velocityLayer: layer,
-                    url: notes[midi]
-                });
-            }
-        }
-
-        return result;
-    },
-
-
-    async loadSample(
-        midi,
-        velocityLayer,
-        url
+    function getMidiFromComputerKey(
+        key
     ) {
 
-        const key =
-            `${midi}:${velocityLayer}`;
-
-        if (
-            this.buffers.has(key)
-        ) {
-            return this.buffers.get(key);
-        }
-
-        if (
-            this.loading.has(key)
-        ) {
-            return this.loading.get(key);
-        }
-
-        const promise =
-            fetch(url)
-                .then(response => {
-
-                    if (!response.ok) {
-                        throw new Error(
-                            "Sample unavailable"
-                        );
-                    }
-
-                    return response.arrayBuffer();
-                })
-                .then(buffer =>
-                    pianoState.audioContext.decodeAudioData(
-                        buffer
-                    )
-                )
-                .then(decoded => {
-
-                    this.buffers.set(
-                        key,
-                        decoded
-                    );
-
-                    return decoded;
-                })
-                .catch(() => null);
-
-        this.loading.set(
-            key,
-            promise
-        );
-
-        return promise;
-    },
-
-
-    getLayer(velocity) {
-
-        if (velocity < 48) {
-            return "soft";
-        }
-
-        if (velocity < 96) {
-            return "medium";
-        }
-
-        return "hard";
-    },
-
-
-    async play(
-        midi,
-        velocity,
-        voice
-    ) {
-
-        if (
-            !this.enabled ||
-            !this.manifest ||
-            !pianoState.audioContext
-        ) {
-            return false;
-        }
-
-        const layer =
-            this.getLayer(velocity);
-
-        const exact =
-            this.manifest?.[layer]?.[midi];
-
-        if (!exact) {
-            return false;
-        }
-
-        const buffer =
-            await this.loadSample(
-                midi,
-                layer,
-                exact
-            );
-
-        if (!buffer) {
-            return false;
-        }
-
-        const source =
-            pianoState.audioContext.createBufferSource();
-
-        const gain =
-            pianoState.audioContext.createGain();
-
-        source.buffer = buffer;
-
-        gain.gain.setValueAtTime(
-            0.0001,
-            getCurrentTime()
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            getNoteAmplitude(velocity),
-            getCurrentTime() +
-            FOBAS_PIANO_CONFIG.masterFadeIn
-        );
-
-        source.connect(gain);
-        gain.connect(
-            pianoState.masterGain
-        );
-
-        source.start();
-
-        voice.sampleSource = source;
-        voice.sampleGain = gain;
-
-        pianoState.audioNodes.add(source);
-        pianoState.audioNodes.add(gain);
-
-        return true;
-    }
-};
-
-
-/* ================================================================
-   09 — VOICE ENGINE
-================================================================ */
-
-const VoiceEngine = {
-
-    create(
-        midi,
-        velocity
-    ) {
-
-        const now =
-            getCurrentTime();
-
-        const voice = {
-
-            id:
-                `${Date.now()}_${Math.random()
-                    .toString(36)
-                    .slice(2)}`,
-
-            midi,
-            velocity,
-
-            startedAt:
-                performance.now(),
-
-            audioStartedAt:
-                now,
-
-            released: false,
-            sustainHeld: false,
-            sostenutoHeld: false,
-
-            oscillators: [],
-            gains: [],
-
-            sampleSource: null,
-            sampleGain: null,
-
-            source: null
-        };
-
-        return voice;
-    },
-
-
-    startFallback(
-        voice
-    ) {
-
-        const ctx =
-            pianoState.audioContext;
-
-        if (!ctx) {
-            return;
-        }
-
-        const now =
-            ctx.currentTime;
-
-        const velocity =
-            voice.velocity / 127;
-
-        const amplitude =
-            getNoteAmplitude(
-                voice.velocity
-            );
-
-        const frequency =
-            440 *
-            Math.pow(
-                2,
-                (voice.midi - 69) / 12
-            );
-
-        const output =
-            ctx.createGain();
-
-        const filter =
-            ctx.createBiquadFilter();
-
-        filter.type =
-            "lowpass";
-
-        filter.frequency.setValueAtTime(
-            getFilterFrequency(
-                voice.velocity
-            ),
-            now
-        );
-
-        filter.Q.value = 0.65;
-
-        output.gain.setValueAtTime(
-            0.0001,
-            now
-        );
-
-        output.gain.exponentialRampToValueAtTime(
-            Math.max(
-                0.001,
-                amplitude
-            ),
-            now + 0.012
-        );
-
-        const oscillators = [];
-
-        const partials = [
-            {
-                multiplier: 1,
-                gain: 1,
-                type: "triangle"
-            },
-            {
-                multiplier: 2,
-                gain: 0.23,
-                type: "sine"
-            },
-            {
-                multiplier: 3,
-                gain: 0.08,
-                type: "sine"
-            },
-            {
-                multiplier: 4,
-                gain: 0.035,
-                type: "sine"
-            }
-        ];
-
-        partials.forEach(
-            partial => {
-
-                const osc =
-                    ctx.createOscillator();
-
-                const gain =
-                    ctx.createGain();
-
-                osc.type =
-                    partial.type;
-
-                osc.frequency.setValueAtTime(
-                    frequency *
-                    partial.multiplier,
-                    now
-                );
-
-                osc.detune.setValueAtTime(
-                    (
-                        partial.multiplier *
-                        0.3
-                    ),
-                    now
-                );
-
-                gain.gain.value =
-                    partial.gain *
-                    (
-                        0.85 +
-                        velocity * 0.15
-                    );
-
-                osc.connect(gain);
-                gain.connect(output);
-
-                osc.start(now);
-
-                oscillators.push(
-                    osc
-                );
-
-                pianoState.audioNodes.add(
-                    osc
-                );
-
-                pianoState.audioNodes.add(
-                    gain
-                );
-            }
-        );
-
-        output.connect(filter);
-
-        filter.connect(
-            pianoState.masterGain
-        );
-
-        voice.oscillators =
-            oscillators;
-
-        voice.output =
-            output;
-
-        voice.filter =
-            filter;
-
-        voice.gain =
-            output;
-
-        pianoState.audioNodes.add(
-            output
-        );
-
-        pianoState.audioNodes.add(
-            filter
-        );
-    },
-
-
-    release(
-        voice,
-        immediate = false
-    ) {
-
-        if (
-            !voice ||
-            voice.released
-        ) {
-            return;
-        }
-
-        voice.released = true;
-
-        const ctx =
-            pianoState.audioContext;
-
-        if (!ctx) {
-            return;
-        }
-
-        const now =
-            ctx.currentTime;
-
-        const release =
-            immediate
-                ? 0.025
-                : getReleaseTime(
-                    voice.velocity,
-                    pianoState.sustain,
-                    pianoState.soft
-                );
-
-        if (
-            voice.sampleGain
-        ) {
-
-            voice.sampleGain.gain.cancelScheduledValues(
-                now
-            );
-
-            voice.sampleGain.gain.setTargetAtTime(
-                0.0001,
-                now,
-                Math.max(
-                    0.01,
-                    release / 4
-                )
-            );
-
-            if (
-                voice.sampleSource
-            ) {
-
-                try {
-
-                    voice.sampleSource.stop(
-                        now +
-                        Math.max(
-                            0.05,
-                            release * 4
-                        )
-                    );
-
-                } catch (_) {}
-            }
-        }
-
-        if (voice.gain) {
-
-            voice.gain.gain.cancelScheduledValues(
-                now
-            );
-
-            voice.gain.gain.setTargetAtTime(
-                0.0001,
-                now,
-                Math.max(
-                    0.01,
-                    release / 4
-                )
-            );
-        }
-
-        voice.oscillators.forEach(
-            oscillator => {
-
-                try {
-
-                    oscillator.stop(
-                        now +
-                        Math.max(
-                            0.05,
-                            release * 4
-                        )
-                    );
-
-                } catch (_) {}
-            }
-        );
-
-        setTimeout(
-            () => {
-
-                pianoState.activeVoices.delete(
-                    voice.id
-                );
-
-                const voices =
-                    pianoState.noteVoices.get(
-                        voice.midi
-                    );
-
-                if (voices) {
-
-                    voices.delete(
-                        voice.id
-                    );
-
-                    if (!voices.size) {
-
-                        pianoState.noteVoices.delete(
-                            voice.midi
-                        );
-
-                        PianoKeyboardEngine.setKeyVisual(
-                            voice.midi,
-                            false
-                        );
-                    }
-                }
-
-            },
-            Math.max(
-                100,
-                release * 4000
-            )
-        );
-    }
-};
-
-
-/* ================================================================
-   10 — AUDIO INITIALIZATION
-================================================================ */
-
-async function initializeAudio() {
-
-    if (
-        pianoState.audioReady
-    ) {
-
-        if (
-            pianoState.audioContext.state ===
-            "suspended"
-        ) {
-
-            await pianoState.audioContext.resume();
-        }
-
-        return true;
-    }
-
-    if (
-        pianoState.audioStarting
-    ) {
-        return false;
-    }
-
-    pianoState.audioStarting = true;
-
-    try {
-
-        const AudioContextClass =
-            window.AudioContext ||
-            window.webkitAudioContext;
-
-        if (!AudioContextClass) {
-
-            pianoState.audioStarting =
-                false;
-
-            updateStatus(
-                "Audio Web non disponible sur cet appareil."
-            );
-
-            return false;
-        }
-
-        const ctx =
-            new AudioContextClass();
-
-        pianoState.audioContext =
-            ctx;
-
-        const compressor =
-            ctx.createDynamicsCompressor();
-
-        compressor.threshold.value = -18;
-        compressor.knee.value = 12;
-        compressor.ratio.value = 4;
-        compressor.attack.value = 0.003;
-        compressor.release.value = 0.18;
-
-        const master =
-            ctx.createGain();
-
-        master.gain.value =
-            pianoState.volume;
-
-        master.connect(
-            compressor
-        );
-
-        compressor.connect(
-            ctx.destination
-        );
-
-        pianoState.masterGain =
-            master;
-
-        pianoState.compressor =
-            compressor;
-
-        if (
-            ctx.state === "suspended"
-        ) {
-            await ctx.resume();
-        }
-
-        pianoState.audioReady = true;
-
-        pianoState.audioStarting =
-            false;
-
-        await AcousticSampleEngine.initialize();
-
-        updateAudioButton();
-
-        updateStatus(
-            "Piano prêt — vous pouvez commencer à jouer."
-        );
-
-        return true;
-
-    } catch (_) {
-
-        pianoState.audioStarting =
-            false;
-
-        pianoState.audioReady =
-            false;
-
-        updateStatus(
-            "Impossible d'activer le moteur audio."
-        );
-
-        return false;
-    }
-}
-
-
-async function ensureAudioReady() {
-
-    if (
-        !pianoState.audioReady
-    ) {
-        return initializeAudio();
-    }
-
-    if (
-        pianoState.audioContext &&
-        pianoState.audioContext.state ===
-        "suspended"
-    ) {
-
-        await pianoState.audioContext.resume();
-    }
-
-    return true;
-}
-
-
-/* ================================================================
-   11 — VOICE PARAMETERS
-================================================================ */
-
-function getNoteAmplitude(
-    velocity
-) {
-
-    const normalized =
-        clamp(
-            velocity / 127,
-            0,
-            1
-        );
-
-    const curve =
-        Math.pow(
-            normalized,
-            1.25
-        );
-
-    return (
-        0.045 +
-        curve * 0.22
-    );
-}
-
-
-function getFilterFrequency(
-    velocity
-) {
-
-    const normalized =
-        clamp(
-            velocity / 127,
-            0,
-            1
-        );
-
-    return (
-        1700 +
-        normalized * 6500
-    );
-}
-
-
-function getReleaseTime(
-    velocity,
-    sustain,
-    soft
-) {
-
-    let release =
-        0.45 +
-        (
-            velocity / 127
-        ) * 0.8;
-
-    if (sustain) {
-        release *= 1.8;
-    }
-
-    if (soft) {
-        release *= 1.12;
-    }
-
-    return clamp(
-        release,
-        0.2,
-        3.5
-    );
-}
-
-
-/* ================================================================
-   12 — NOTE ENGINE
-================================================================ */
-
-const NoteEngine = {
-
-    async noteOn(
-        midi,
-        velocity = 92,
-        source = "unknown",
-        sourceId = null
-    ) {
-
-        midi = Number(midi);
-
-        if (
-            midi <
-                FOBAS_PIANO_CONFIG.midiMin ||
-            midi >
-                FOBAS_PIANO_CONFIG.midiMax
-        ) {
-            return null;
-        }
-
-        const ready =
-            await ensureAudioReady();
-
-        if (!ready) {
-            return null;
-        }
-
-        this.stopDuplicateSource(
-            midi,
-            source,
-            sourceId
-        );
-
-        enforcePolyphonyLimit();
-
-        velocity =
-            clamp(
-                Number(velocity) || 92,
-                1,
-                127
-            );
-
-        const voice =
-            VoiceEngine.create(
-                midi,
-                velocity
-            );
-
-        voice.source =
-            source;
-
-        voice.sourceId =
-            sourceId;
-
-        pianoState.activeVoices.set(
-            voice.id,
-            voice
-        );
-
-        if (
-            !pianoState.noteVoices.has(
-                midi
-            )
-        ) {
-
-            pianoState.noteVoices.set(
-                midi,
-                new Set()
-            );
-        }
-
-        pianoState.noteVoices
-            .get(midi)
-            .add(voice.id);
-
-        PianoKeyboardEngine.setKeyVisual(
-            midi,
-            true
-        );
-
-        const playedSample =
-            await AcousticSampleEngine.play(
-                midi,
-                velocity,
-                voice
-            );
-
-        if (!playedSample) {
-
-            VoiceEngine.startFallback(
-                voice
-            );
-        }
-
-        updateMusicalDisplay(
-            midi,
-            velocity
-        );
-
-        RecordingEngine.captureNoteOn(
-            midi,
-            velocity,
-            source
-        );
-
-        PracticeScoringEngine.registerPlayedNote(
-            midi,
-            performance.now()
-        );
-
-        return voice;
-    },
-
-
-    noteOff(
-        midi,
-        source = "unknown",
-        sourceId = null
-    ) {
-
-        midi = Number(midi);
-
-        const voices =
-            pianoState.noteVoices.get(
-                midi
-            );
-
-        if (!voices) {
-            return;
-        }
-
-        voices.forEach(
-            voiceId => {
-
-                const voice =
-                    pianoState.activeVoices.get(
-                        voiceId
-                    );
-
-                if (!voice) {
-                    return;
-                }
-
-                if (
-                    voice.source !== source
-                ) {
-                    return;
-                }
-
-                if (
-                    sourceId !== null &&
-                    voice.sourceId !== sourceId
-                ) {
-                    return;
-                }
-
-                if (
-                    pianoState.sustain &&
-                    !voice.sostenutoHeld
-                ) {
-
-                    voice.sustainHeld =
-                        true;
-
-                    return;
-                }
-
-                if (
-                    pianoState.sostenuto &&
-                    pianoState.heldSostenutoNotes.has(
-                        midi
-                    )
-                ) {
-
-                    voice.sostenutoHeld =
-                        true;
-
-                    return;
-                }
-
-                VoiceEngine.release(
-                    voice
-                );
-
-                RecordingEngine.captureNoteOff(
-                    midi,
-                    source
-                );
-            }
-        );
-    },
-
-
-    stopDuplicateSource(
-        midi,
-        source,
-        sourceId
-    ) {
-
-        const voices =
-            pianoState.noteVoices.get(
-                midi
-            );
-
-        if (!voices) {
-            return;
-        }
-
-        voices.forEach(
-            voiceId => {
-
-                const voice =
-                    pianoState.activeVoices.get(
-                        voiceId
-                    );
-
-                if (
-                    voice &&
-                    voice.source === source &&
-                    voice.sourceId === sourceId
-                ) {
-
-                    VoiceEngine.release(
-                        voice,
-                        true
-                    );
-                }
-            }
-        );
-    }
-};
-
-
-/* ================================================================
-   13 — POLYPHONY ENGINE
-================================================================ */
-
-const PolyphonyEngine = {
-
-    enforce() {
-
-        const voices =
-            Array.from(
-                pianoState.activeVoices.values()
-            );
-
-        if (
-            voices.length <=
-            FOBAS_PIANO_CONFIG.maxPolyphony
-        ) {
-            return;
-        }
-
-        voices
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    a.startedAt -
-                    b.startedAt
-            )
-            .slice(
-                0,
-                voices.length -
-                FOBAS_PIANO_CONFIG.maxPolyphony
-            )
-            .forEach(
-                voice =>
-                    VoiceEngine.release(
-                        voice,
-                        true
-                    )
-            );
-    }
-};
-
-
-function enforcePolyphonyLimit() {
-
-    PolyphonyEngine.enforce();
-}
-
-
-/* ================================================================
-   14 — PEDAL ENGINE
-================================================================ */
-
-const PedalEngine = {
-
-    set(
-        pedal,
-        value
-    ) {
-
-        value =
-            Boolean(value);
-
-        if (
-            pedal === "sustain"
-        ) {
-
-            if (
-                pianoState.sustain === value
-            ) {
-                return;
-            }
-
-            pianoState.sustain =
-                value;
-
-            pianoState.pedalState.sustain =
-                value;
-
-            if (!value) {
-                this.releaseSustain();
-            }
-        }
-
-
-        if (
-            pedal === "sostenuto"
-        ) {
-
-            if (
-                pianoState.sostenuto === value
-            ) {
-                return;
-            }
-
-            pianoState.sostenuto =
-                value;
-
-            pianoState.pedalState.sostenuto =
-                value;
-
-            if (value) {
-
-                this.captureSostenuto();
-
-            } else {
-
-                this.releaseSostenuto();
-            }
-        }
-
-
-        if (
-            pedal === "soft"
-        ) {
-
-            pianoState.soft =
-                value;
-
-            pianoState.pedalState.soft =
-                value;
-        }
-
-        updatePedalUI();
-        updateStatus(
-            `${pedal} ${value ? "ON" : "OFF"}`
-        );
-
-        RecordingEngine.capturePedal(
-            pedal,
-            value
-        );
-    },
-
-
-    toggle(
-        pedal
-    ) {
-
-        const value =
-            !Boolean(
-                pianoState[pedal]
-            );
-
-        this.set(
-            pedal,
-            value
-        );
-    },
-
-
-    captureSostenuto() {
-
-        pianoState.heldSostenutoNotes.clear();
-
-        pianoState.noteVoices.forEach(
-            (
-                voiceIds,
-                midi
-            ) => {
-
-                voiceIds.forEach(
-                    voiceId => {
-
-                        const voice =
-                            pianoState.activeVoices.get(
-                                voiceId
-                            );
-
-                        if (
-                            voice &&
-                            !voice.released
-                        ) {
-
-                            voice.sostenutoHeld =
-                                true;
-
-                            pianoState
-                                .heldSostenutoNotes
-                                .add(midi);
-                        }
-                    }
-                );
-            }
-        );
-    },
-
-
-    releaseSustain() {
-
-        pianoState.activeVoices.forEach(
-            voice => {
-
-                if (
-                    voice.sustainHeld &&
-                    !voice.sostenutoHeld
-                ) {
-
-                    voice.sustainHeld =
-                        false;
-
-                    VoiceEngine.release(
-                        voice
-                    );
-                }
-            }
-        );
-    },
-
-
-    releaseSostenuto() {
-
-        pianoState.activeVoices.forEach(
-            voice => {
-
-                if (
-                    voice.sostenutoHeld
-                ) {
-
-                    voice.sostenutoHeld =
-                        false;
-
-                    if (
-                        !pianoState.sustain
-                    ) {
-
-                        VoiceEngine.release(
-                            voice
-                        );
-                    }
-                }
-            }
-        );
-
-        pianoState.heldSostenutoNotes.clear();
-    }
-};
-
-
-/* ================================================================
-   15 — OCTAVE ENGINE
-================================================================ */
-
-const OctaveEngine = {
-
-    shift(direction) {
-
-        pianoState.keyboardOctaveOffset =
-            clamp(
-                pianoState.keyboardOctaveOffset +
-                Number(direction),
-                FOBAS_PIANO_CONFIG.keyboardOctaveMin,
-                FOBAS_PIANO_CONFIG.keyboardOctaveMax
-            );
-
-        updateOctaveUI();
-
-        StorageEngine.saveSettings();
-    },
-
-
-    reset() {
-
-        pianoState.keyboardOctaveOffset =
-            0;
-
-        updateOctaveUI();
-    }
-};
-
-
-/* ================================================================
-   16 — MUSICAL DISPLAY
-================================================================ */
-
-function updateMusicalDisplay(
-    midi,
-    velocity
-) {
-
-    const note =
-        midiToNoteName(midi);
-
-    const octave =
-        midiToOctave(midi);
-
-    if (
-        pianoDOM.currentNote
-    ) {
-
-        pianoDOM.currentNote.textContent =
-            `${NOTE_NAMES_FR[note] || note}`;
-    }
-
-    if (
-        pianoDOM.currentOctave
-    ) {
-
-        pianoDOM.currentOctave.textContent =
-            String(octave);
-    }
-
-    pianoState.lastNote = {
-        midi,
-        note,
-        octave,
-        velocity,
-        time: performance.now()
-    };
-
-    NoteEngineDisplay.moveMarker(
-        midi
-    );
-}
-
-
-const NoteEngineDisplay = {
-
-    moveMarker(midi) {
-
-        if (
-            !pianoDOM.noteMarker
-        ) {
-            return;
-        }
-
-        pianoDOM.noteMarker.textContent =
-            "♪";
-
-        pianoDOM.noteMarker.classList.add(
-            "active"
-        );
-
-        pianoDOM.noteMarker.dataset.midi =
-            String(midi);
-
-        clearTimeout(
-            this.timer
-        );
-
-        this.timer =
-            setTimeout(
-                () => {
-
-                    pianoDOM.noteMarker.classList.remove(
-                        "active"
-                    );
-
-                },
-                FOBAS_PIANO_CONFIG.noteMarkerDuration
-            );
-    }
-};
-
-
-/* ================================================================
-   17 — SCORE / NOTATION ENGINE
-================================================================ */
-
-const MusicNotationEngine = {
-
-    svg: null,
-    cursor: null,
-    noteLayer: null,
-
-
-    initialize() {
-
-        if (!pianoDOM.staff) {
-            return;
-        }
-
-        this.render();
-    },
-
-
-    render() {
-
-        pianoDOM.staff
-            .querySelector(
-                ".fobas-score-svg"
-            )
-            ?.remove();
-
-        const svg =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "svg"
-            );
-
-        svg.classList.add(
-            "fobas-score-svg"
-        );
-
-        svg.setAttribute(
-            "viewBox",
-            "0 0 1200 300"
-        );
-
-        svg.setAttribute(
-            "preserveAspectRatio",
-            "none"
-        );
-
-        this.svg = svg;
-
-        this.drawStaff(
-            svg,
-            75
-        );
-
-        this.drawStaff(
-            svg,
-            195
-        );
-
-        this.drawClefs(
-            svg
-        );
-
-        this.cursor =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "line"
-            );
-
-        this.cursor.setAttribute(
-            "x1",
-            "110"
-        );
-
-        this.cursor.setAttribute(
-            "x2",
-            "110"
-        );
-
-        this.cursor.setAttribute(
-            "y1",
-            "38"
-        );
-
-        this.cursor.setAttribute(
-            "y2",
-            "235"
-        );
-
-        this.cursor.setAttribute(
-            "stroke",
-            "currentColor"
-        );
-
-        this.cursor.setAttribute(
-            "stroke-width",
-            "2"
-        );
-
-        this.cursor.setAttribute(
-            "opacity",
-            "0.8"
-        );
-
-        svg.appendChild(
-            this.cursor
-        );
-
-        this.noteLayer =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "g"
-            );
-
-        svg.appendChild(
-            this.noteLayer
-        );
-
-        pianoDOM.staff.appendChild(
-            svg
-        );
-    },
-
-
-    drawStaff(
-        svg,
-        centerY
-    ) {
-
-        for (
-            let i = -2;
-            i <= 2;
-            i++
-        ) {
-
-            const line =
-                document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "line"
-                );
-
-            const y =
-                centerY +
-                i * 12;
-
-            line.setAttribute(
-                "x1",
-                "80"
-            );
-
-            line.setAttribute(
-                "x2",
-                "1140"
-            );
-
-            line.setAttribute(
-                "y1",
-                String(y)
-            );
-
-            line.setAttribute(
-                "y2",
-                String(y)
-            );
-
-            line.setAttribute(
-                "stroke",
-                "currentColor"
-            );
-
-            line.setAttribute(
-                "opacity",
-                "0.55"
-            );
-
-            svg.appendChild(
-                line
-            );
-        }
-    },
-
-
-    drawClefs(svg) {
-
-        const treble =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "text"
-            );
-
-        treble.textContent =
-            "𝄞";
-
-        treble.setAttribute(
-            "x",
-            "45"
-        );
-
-        treble.setAttribute(
-            "y",
-            "105"
-        );
-
-        treble.setAttribute(
-            "font-size",
-            "72"
-        );
-
-        svg.appendChild(
-            treble
-        );
-
-
-        const bass =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "text"
-            );
-
-        bass.textContent =
-            "𝄢";
-
-        bass.setAttribute(
-            "x",
-            "45"
-        );
-
-        bass.setAttribute(
-            "y",
-            "225"
-        );
-
-        bass.setAttribute(
-            "font-size",
-            "62"
-        );
-
-        svg.appendChild(
-            bass
-        );
-    },
-
-
-    addPlayedNote(
-        midi
-    ) {
-
-        if (
-            !this.noteLayer
-        ) {
-            return;
-        }
+        const normalized =
+            String(key)
+                .toLowerCase();
 
         const index =
-            pianoState.currentScore.length;
-
-        const x =
-            130 +
-            (
-                index % 48
-            ) * 20;
-
-        const upper =
-            midi >= 60;
-
-        const centerY =
-            upper
-                ? 75
-                : 195;
-
-        const step =
-            upper
-                ? this.trebleStep(midi)
-                : this.bassStep(midi);
-
-        const y =
-            centerY -
-            step * 6;
-
-        const note =
-            document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "ellipse"
+            CONFIG.keyboardMap.indexOf(
+                normalized
             );
 
-        note.setAttribute(
-            "cx",
-            String(x)
-        );
-
-        note.setAttribute(
-            "cy",
-            String(y)
-        );
-
-        note.setAttribute(
-            "rx",
-            "7"
-        );
-
-        note.setAttribute(
-            "ry",
-            "5"
-        );
-
-        note.setAttribute(
-            "transform",
-            `rotate(-15 ${x} ${y})`
-        );
-
-        note.setAttribute(
-            "fill",
-            "currentColor"
-        );
-
-        this.noteLayer.appendChild(
-            note
-        );
-
-        if (
-            pianoState.currentScore.length >
-            48
-        ) {
-
-            const children =
-                this.noteLayer.children;
-
-            if (children.length > 48) {
-                this.noteLayer.removeChild(
-                    children[0]
-                );
-            }
-        }
-    },
-
-
-    trebleStep(midi) {
-
-        const map = {
-            60: -6,
-            62: -5,
-            64: -4,
-            65: -3,
-            67: -2,
-            69: -1,
-            71: 0,
-            72: 1,
-            74: 2,
-            76: 3,
-            77: 4,
-            79: 5,
-            81: 6
-        };
-
-        return map[midi] ??
-            Math.round(
-                (midi - 71) /
-                2
-            );
-    },
-
-
-    bassStep(midi) {
-
-        const map = {
-            36: 6,
-            38: 5,
-            40: 4,
-            41: 3,
-            43: 2,
-            45: 1,
-            47: 0,
-            48: -1,
-            50: -2,
-            52: -3,
-            53: -4,
-            55: -5,
-            57: -6
-        };
-
-        return map[midi] ??
-            Math.round(
-                (47 - midi) /
-                2
-            );
-    },
-
-
-    moveCursor(index) {
-
-        if (!this.cursor) {
-            return;
+        if (index === -1) {
+            return null;
         }
 
-        const x =
-            110 +
-            (
-                index % 50
-            ) * 20;
-
-        this.cursor.setAttribute(
-            "x1",
-            String(x)
-        );
-
-        this.cursor.setAttribute(
-            "x2",
-            String(x)
+        return (
+            CONFIG.firstMidi +
+            index
         );
     }
-};
 
-
-/* ================================================================
-   18 — SCORE SYNC ENGINE
-================================================================ */
-
-const ScoreSyncEngine = {
-
-    register(
-        midi,
-        duration = 1
+    async function handleComputerKeyDown(
+        event
     ) {
 
-        const event = {
+        if (
+            event.ctrlKey ||
+            event.metaKey ||
+            event.altKey
+        ) {
+            return;
+        }
 
-            midi,
-            duration,
-            time: performance.now()
-        };
+        const midi =
+            getMidiFromComputerKey(
+                event.key
+            );
 
-        pianoState.currentScore.push(
-            event
+        if (midi === null) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const normalized =
+            event.key.toLowerCase();
+
+        if (
+            state.pressedComputerKeys.has(
+                normalized
+            )
+        ) {
+            return;
+        }
+
+        state.pressedComputerKeys.add(
+            normalized
         );
 
-        MusicNotationEngine.addPlayedNote(
+        await playNote(
+            midi,
+            0.95
+        );
+    }
+
+    function handleComputerKeyUp(
+        event
+    ) {
+
+        const midi =
+            getMidiFromComputerKey(
+                event.key
+            );
+
+        if (midi === null) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const normalized =
+            event.key.toLowerCase();
+
+        state.pressedComputerKeys.delete(
+            normalized
+        );
+
+        releaseNote(
             midi
         );
+    }
 
-        MusicNotationEngine.moveCursor(
-            pianoState.currentScore.length
-        );
-    },
+    /* ============================================================
+       AFFICHAGE NOTE
+    ============================================================ */
 
+    function updateNoteDisplay(
+        midi
+    ) {
 
-    load(score) {
+        if (currentNote) {
 
-        pianoState.currentScore =
-            Array.isArray(score)
-                ? score.slice()
-                : [];
+            currentNote.textContent =
+                midiToNoteName(midi);
+        }
 
-        pianoState.scoreCursor = 0;
+        if (currentOctave) {
 
-        MusicNotationEngine.render();
+            currentOctave.textContent =
+                midiToOctave(midi);
+        }
 
-        pianoState.currentScore.forEach(
-            note =>
-                MusicNotationEngine.addPlayedNote(
-                    note.midi
-                )
+        updateStaffMarker(
+            midi
         );
     }
-};
 
+    /* ============================================================
+       PARTITION
+    ============================================================ */
 
-/* ================================================================
-   19 — TEMPO ENGINE
-================================================================ */
+    function updateStaffMarker(
+        midi
+    ) {
 
-const TempoEngine = {
+        if (!noteMarker) {
+            return;
+        }
 
-    setBPM(value) {
+        const minMidi =
+            CONFIG.firstMidi;
 
-        pianoState.bpm =
+        const maxMidi =
+            CONFIG.lastMidi;
+
+        const percentage =
+            (
+                (midi - minMidi) /
+                (maxMidi - minMidi)
+            ) * 100;
+
+        noteMarker.style.left =
+            `${clamp(
+                percentage,
+                2,
+                96
+            )}%`;
+
+        noteMarker.textContent =
+            isBlackKey(midi)
+                ? "◆"
+                : "●";
+
+        noteMarker.setAttribute(
+            "aria-label",
+            `Note ${getFullNoteName(midi)}`
+        );
+
+        if (staff) {
+
+            staff.classList.add(
+                "has-note"
+            );
+        }
+    }
+
+    /* ============================================================
+       STATUS
+    ============================================================ */
+
+    function setStatus(
+        text
+    ) {
+
+        if (statusText) {
+            statusText.textContent =
+                text;
+        }
+    }
+
+    /* ============================================================
+       TIMBRE
+    ============================================================ */
+
+    function populateVoices() {
+
+        if (!waveform) {
+            return;
+        }
+
+        waveform.innerHTML = "";
+
+        Object.entries(
+            VOICES
+        ).forEach(
+            ([value, voice]) => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    value;
+
+                option.textContent =
+                    voice.label;
+
+                if (
+                    value ===
+                    state.selectedVoice
+                ) {
+                    option.selected =
+                        true;
+                }
+
+                waveform.appendChild(
+                    option
+                );
+            }
+        );
+    }
+
+    function changeVoice(
+        voiceName
+    ) {
+
+        if (
+            !VOICES[voiceName]
+        ) {
+            return;
+        }
+
+        state.selectedVoice =
+            voiceName;
+
+        setStatus(
+            `Timbre sélectionné : ${VOICES[voiceName].label}`
+        );
+    }
+
+    /* ============================================================
+       BPM
+    ============================================================ */
+
+    function updateBpm() {
+
+        if (!bpm) {
+            return;
+        }
+
+        const value =
             clamp(
-                Number(value),
-                FOBAS_PIANO_CONFIG.minBpm,
-                FOBAS_PIANO_CONFIG.maxBpm
+                Number(bpm.value),
+                40,
+                220
             );
 
-        if (
-            pianoDOM.bpm
-        ) {
-            pianoDOM.bpm.value =
-                String(pianoState.bpm);
+        state.bpm =
+            value;
+
+        if (bpmValue) {
+            bpmValue.textContent =
+                String(value);
+        }
+
+        if (bpmOutput) {
+            bpmOutput.textContent =
+                String(value);
         }
 
         if (
-            pianoDOM.bpmOutput
+            state.metronome
         ) {
-            pianoDOM.bpmOutput.textContent =
-                String(pianoState.bpm);
+            restartMetronome();
         }
-
-        if (
-            pianoDOM.bpmValue
-        ) {
-            pianoDOM.bpmValue.textContent =
-                String(pianoState.bpm);
-        }
-
-        if (
-            pianoState.metronome
-        ) {
-            MetronomeEngine.restart();
-        }
-
-        StorageEngine.saveSettings();
     }
-};
 
+    /* ============================================================
+       MÉTRONOME
+    ============================================================ */
 
-/* ================================================================
-   20 — METRONOME ENGINE
-================================================================ */
-
-const MetronomeEngine = {
-
-    start() {
+    function playMetronomeClick() {
 
         if (
-            pianoState.metronome
+            !state.audioContext ||
+            !state.audioStarted
         ) {
             return;
         }
-
-        pianoState.metronome =
-            true;
-
-        pianoState.metronomeBeat =
-            0;
-
-        pianoState.metronomeNextTime =
-            getCurrentTime() + 0.05;
-
-        this.scheduler();
-
-        updateMetronomeUI();
-    },
-
-
-    stop() {
-
-        pianoState.metronome =
-            false;
-
-        if (
-            pianoState.metronomeTimer
-        ) {
-
-            clearInterval(
-                pianoState.metronomeTimer
-            );
-
-            pianoState.metronomeTimer =
-                null;
-        }
-
-        updateMetronomeUI();
-    },
-
-
-    toggle() {
-
-        if (
-            pianoState.metronome
-        ) {
-            this.stop();
-        } else {
-            this.start();
-        }
-    },
-
-
-    restart() {
-
-        if (
-            !pianoState.metronome
-        ) {
-            return;
-        }
-
-        this.stop();
-        this.start();
-    },
-
-
-    scheduler() {
-
-        if (
-            pianoState.metronomeTimer
-        ) {
-            return;
-        }
-
-        pianoState.metronomeTimer =
-            setInterval(
-                () => {
-
-                    if (
-                        !pianoState.metronome
-                    ) {
-                        return;
-                    }
-
-                    const interval =
-                        60 /
-                        pianoState.bpm;
-
-                    while (
-                        pianoState.metronomeNextTime <
-                        getCurrentTime() +
-                        FOBAS_PIANO_CONFIG.metronomeLookAhead
-                    ) {
-
-                        this.scheduleBeat(
-                            pianoState.metronomeNextTime
-                        );
-
-                        pianoState.metronomeNextTime +=
-                            interval /
-                            pianoState.subdivision;
-                    }
-
-                },
-                FOBAS_PIANO_CONFIG
-                    .metronomeScheduleInterval
-            );
-    },
-
-
-    scheduleBeat(time) {
 
         const ctx =
-            pianoState.audioContext;
+            state.audioContext;
 
-        if (!ctx) {
-            return;
-        }
+        const now =
+            ctx.currentTime;
 
-        const beat =
-            pianoState.metronomeBeat;
-
-        const accent =
-            beat === 0;
-
-        const osc =
+        const oscillator =
             ctx.createOscillator();
 
         const gain =
             ctx.createGain();
 
-        osc.frequency.value =
-            accent
-                ? 1250
-                : 850;
+        oscillator.type =
+            "sine";
+
+        oscillator.frequency.setValueAtTime(
+            1100,
+            now
+        );
 
         gain.gain.setValueAtTime(
-            accent ? 0.13 : 0.075,
-            time
+            0.0001,
+            now
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.12,
+            now + 0.004
         );
 
         gain.gain.exponentialRampToValueAtTime(
             0.0001,
-            time + 0.06
+            now + 0.065
         );
 
-        osc.connect(gain);
-        gain.connect(
-            pianoState.masterGain
+        oscillator.connect(gain);
+        gain.connect(state.masterGain);
+
+        oscillator.start(now);
+
+        oscillator.stop(
+            now + 0.08
         );
+    }
 
-        osc.start(time);
-        osc.stop(time + 0.07);
+    function startMetronome() {
 
-        pianoState.metronomeBeat =
-            (
-                beat + 1
-            ) %
-            pianoState.timeSignatureNumerator;
+        stopMetronome();
 
-        setTimeout(
-            () =>
-                this.flashBeat(
-                    beat
-                ),
-            Math.max(
-                0,
-                (
-                    time -
-                    getCurrentTime()
-                ) * 1000
-            )
-        );
-    },
+        const interval =
+            60000 /
+            state.bpm;
 
+        playMetronomeClick();
 
-    flashBeat(beat) {
+        state.metronomeTimer =
+            setInterval(
+                playMetronomeClick,
+                interval
+            );
+    }
 
-        const panel =
-            document.getElementById(
-                "fobasMetronomeBeat"
+    function stopMetronome() {
+
+        if (
+            state.metronomeTimer
+        ) {
+
+            clearInterval(
+                state.metronomeTimer
             );
 
-        if (!panel) {
-            return;
+            state.metronomeTimer =
+                null;
         }
-
-        panel.textContent =
-            String(beat + 1);
-
-        panel.classList.add(
-            "active"
-        );
-
-        setTimeout(
-            () =>
-                panel.classList.remove(
-                    "active"
-                ),
-            100
-        );
     }
-};
 
-
-/* ================================================================
-   21 — RECORDING ENGINE
-================================================================ */
-
-const RecordingEngine = {
-
-    start() {
+    function restartMetronome() {
 
         if (
-            pianoState.recording
+            !state.metronome
         ) {
             return;
         }
 
-        pianoState.recording =
-            true;
-
-        pianoState.recordingStartedAt =
-            performance.now();
-
-        pianoState.recordingEvents = [];
-
-        updateRecordingUI();
-
-        updateStatus(
-            "Enregistrement en cours..."
-        );
-    },
-
-
-    stop() {
-
-        if (
-            !pianoState.recording
-        ) {
-            return null;
-        }
-
-        pianoState.recording =
-            false;
-
-        const recording = {
-
-            id:
-                Date.now(),
-
-            createdAt:
-                new Date().toISOString(),
-
-            bpm:
-                pianoState.bpm,
-
-            timeSignature: [
-                pianoState.timeSignatureNumerator,
-                pianoState.timeSignatureDenominator
-            ],
-
-            events:
-                pianoState.recordingEvents.slice()
-        };
-
-        pianoState.recordings.push(
-            recording
-        );
-
-        StorageEngine.saveRecordings();
-
-        updateRecordingUI();
-
-        updateStatus(
-            "Enregistrement sauvegardé."
-        );
-
-        return recording;
-    },
-
-
-    captureNoteOn(
-        midi,
-        velocity,
-        source
-    ) {
-
-        if (
-            !pianoState.recording
-        ) {
-            return;
-        }
-
-        pianoState.recordingEvents.push({
-
-            type: "noteOn",
-
-            midi,
-
-            velocity,
-
-            source,
-
-            time:
-                performance.now() -
-                pianoState.recordingStartedAt
-        });
-    },
-
-
-    captureNoteOff(
-        midi,
-        source
-    ) {
-
-        if (
-            !pianoState.recording
-        ) {
-            return;
-        }
-
-        pianoState.recordingEvents.push({
-
-            type: "noteOff",
-
-            midi,
-
-            source,
-
-            time:
-                performance.now() -
-                pianoState.recordingStartedAt
-        });
-    },
-
-
-    capturePedal(
-        pedal,
-        value
-    ) {
-
-        if (
-            !pianoState.recording
-        ) {
-            return;
-        }
-
-        pianoState.recordingEvents.push({
-
-            type: "pedal",
-
-            pedal,
-
-            value,
-
-            time:
-                performance.now() -
-                pianoState.recordingStartedAt
-        });
+        startMetronome();
     }
-};
 
-
-/* ================================================================
-   22 — PLAYBACK ENGINE
-================================================================ */
-
-const PlaybackEngine = {
-
-    play(
-        recording
+    function setMetronome(
+        enabled
     ) {
 
-        if (
-            !recording ||
-            !Array.isArray(
-                recording.events
-            )
-        ) {
-            return;
-        }
+        state.metronome =
+            Boolean(enabled);
 
-        this.stop();
+        if (metronomeBtn) {
 
-        pianoState.playback =
-            true;
+            metronomeBtn.setAttribute(
+                "aria-pressed",
+                String(state.metronome)
+            );
 
-        pianoState.playbackStartedAt =
-            performance.now();
-
-        recording.events.forEach(
-            event => {
-
-                const timer =
-                    setTimeout(
-                        () => {
-
-                            if (
-                                event.type ===
-                                "noteOn"
-                            ) {
-
-                                NoteEngine.noteOn(
-                                    event.midi,
-                                    event.velocity,
-                                    "playback",
-                                    event.midi
-                                );
-                            }
-
-                            if (
-                                event.type ===
-                                "noteOff"
-                            ) {
-
-                                NoteEngine.noteOff(
-                                    event.midi,
-                                    "playback",
-                                    event.midi
-                                );
-                            }
-
-                            if (
-                                event.type ===
-                                "pedal"
-                            ) {
-
-                                PedalEngine.set(
-                                    event.pedal,
-                                    event.value
-                                );
-                            }
-
-                        },
-                        Math.max(
-                            0,
-                            Number(event.time) || 0
-                        )
-                    );
-
-                pianoState.playbackTimers.push(
-                    timer
+            const span =
+                metronomeBtn.querySelector(
+                    "span"
                 );
+
+            if (span) {
+
+                span.textContent =
+                    state.metronome
+                        ? "ON"
+                        : "OFF";
             }
-        );
 
-        const endTime =
-            recording.events.length
-                ? Math.max(
-                    ...recording.events.map(
-                        e =>
-                            Number(e.time) || 0
-                    )
-                )
-                : 0;
-
-        pianoState.playbackTimers.push(
-            setTimeout(
-                () => this.stop(),
-                endTime + 500
-            )
-        );
-
-        updatePlaybackUI();
-    },
-
-
-    stop() {
-
-        pianoState.playbackTimers.forEach(
-            timer =>
-                clearTimeout(timer)
-        );
-
-        pianoState.playbackTimers = [];
-
-        pianoState.playback =
-            false;
-
-        releaseAllNotes();
-
-        updatePlaybackUI();
-    }
-};
-
-
-/* ================================================================
-   23 — LEARNING ENGINE
-================================================================ */
-
-const LearningEngine = {
-
-    levels: [
-
-        {
-            id: "beginner",
-            name: "Initiation",
-            description:
-                "Découverte du clavier, notes et rythme."
-        },
-
-        {
-            id: "elementary",
-            name: "Débutant",
-            description:
-                "Gammes simples et coordination."
-        },
-
-        {
-            id: "intermediate",
-            name: "Intermédiaire",
-            description:
-                "Accords, arpèges et lecture."
-        },
-
-        {
-            id: "advanced",
-            name: "Avancé",
-            description:
-                "Indépendance et précision."
-        },
-
-        {
-            id: "expert",
-            name: "Expert",
-            description:
-                "Vitesse, précision et interprétation."
+            metronomeBtn.classList.toggle(
+                "active",
+                state.metronome
+            );
         }
-    ],
 
+        if (
+            state.metronome
+        ) {
 
-    enable() {
+            ensureAudio()
+                .then(() => {
+                    startMetronome();
+                });
 
-        pianoState.learningMode =
-            true;
-
-        updateLearningUI();
-
-        updateStatus(
-            "Mode apprentissage activé."
-        );
-    },
-
-
-    disable() {
-
-        pianoState.learningMode =
-            false;
-
-        updateLearningUI();
-    }
-};
-
-
-/* ================================================================
-   24 — EXERCISE ENGINE
-================================================================ */
-
-const ExerciseEngine = {
-
-    exercises: [
-
-        {
-            id: "scale-c-major",
-
-            name: "Gamme de Do majeur",
-
-            category: "Gammes",
-
-            bpm: 80,
-
-            notes: [
-                60,
-                62,
-                64,
-                65,
-                67,
-                69,
-                71,
-                72,
-                71,
-                69,
-                67,
-                65,
-                64,
-                62,
-                60
-            ]
-        },
-
-
-        {
-            id: "c-major-arpeggio",
-
-            name: "Arpège de Do majeur",
-
-            category: "Arpèges",
-
-            bpm: 70,
-
-            notes: [
-                60,
-                64,
-                67,
-                72,
-                67,
-                64,
-                60
-            ]
-        },
-
-
-        {
-            id: "chromatic",
-
-            name: "Exercice chromatique",
-
-            category: "Technique",
-
-            bpm: 90,
-
-            notes: [
-                60,
-                61,
-                62,
-                63,
-                64,
-                65,
-                66,
-                67,
-                68,
-                69,
-                70,
-                71,
-                72
-            ]
-        },
-
-
-        {
-            id: "fifths",
-
-            name: "Cycle de quintes — étude",
-
-            category: "Accords",
-
-            bpm: 65,
-
-            notes: [
-                60,
-                67,
-                62,
-                69,
-                64,
-                71,
-                66,
-                73
-            ]
-        },
-
-
-        {
-            id: "octave-control",
-
-            name: "Contrôle des octaves",
-
-            category: "Technique",
-
-            bpm: 70,
-
-            notes: [
-                60,
-                72,
-                60,
-                72,
-                62,
-                74,
-                62,
-                74,
-                64,
-                76,
-                64,
-                76
-            ]
-        }
-    ],
-
-
-    start(
-        exerciseId
-    ) {
-
-        const exercise =
-            this.exercises.find(
-                item =>
-                    item.id === exerciseId
+            setStatus(
+                `Métronome — ${state.bpm} BPM`
             );
 
-        if (!exercise) {
+        } else {
+
+            stopMetronome();
+
+            setStatus(
+                "Métronome désactivé."
+            );
+        }
+    }
+
+    /* ============================================================
+       AIDE CLAVIER
+    ============================================================ */
+
+    function updateKeyboardHelp() {
+
+        const helpCards =
+            document.querySelectorAll(
+                ".help-card"
+            );
+
+        if (!helpCards.length) {
             return;
         }
 
-        pianoState.currentExercise =
-            exercise;
+        const allKeys =
+            CONFIG.keyboardMap.map(
+                key =>
+                    key === " "
+                        ? "ESPACE"
+                        : key.toUpperCase()
+            );
 
-        pianoState.exerciseIndex =
-            0;
+        const firstCard =
+            helpCards[0];
 
-        pianoState.practiceStats = {
+        if (firstCard) {
 
-            correct: 0,
-            wrong: 0,
-            missed: 0,
-            total: exercise.notes.length,
-            timingErrors: [],
-            startTime: performance.now(),
-            endTime: 0
-        };
-
-        TempoEngine.setBPM(
-            exercise.bpm
-        );
-
-        updateExerciseUI();
-
-        updateStatus(
-            `Exercice : ${exercise.name}`
-        );
-    },
-
-
-    stop() {
-
-        pianoState.currentExercise =
-            null;
-
-        pianoState.exerciseIndex =
-            0;
-
-        updateExerciseUI();
-    },
-
-
-    expectedNote() {
-
-        const exercise =
-            pianoState.currentExercise;
-
-        if (!exercise) {
-            return null;
-        }
-
-        return exercise.notes[
-            pianoState.exerciseIndex
-        ];
-    },
-
-
-    registerNote(
-        midi
-    ) {
-
-        const expected =
-            this.expectedNote();
-
-        if (
-            expected === null ||
-            expected === undefined
-        ) {
-            return;
-        }
-
-        if (
-            Number(midi) ===
-            Number(expected)
-        ) {
-
-            pianoState.practiceStats.correct++;
-
-            pianoState.exerciseIndex++;
-
-            if (
-                pianoState.exerciseIndex >=
-                pianoState.currentExercise.notes.length
-            ) {
-
-                pianoState.practiceStats.endTime =
-                    performance.now();
-
-                updateStatus(
-                    "Exercice terminé — excellent travail."
+            const span =
+                firstCard.querySelector(
+                    "span"
                 );
 
-                PracticeScoringEngine.finishExercise();
+            if (span) {
+
+                span.textContent =
+                    allKeys.join(" ");
+            }
+        }
+
+        const whiteKeys = [];
+        const blackKeys = [];
+
+        for (
+            let midi = CONFIG.firstMidi;
+            midi <= CONFIG.lastMidi;
+            midi++
+        ) {
+
+            const index =
+                midi -
+                CONFIG.firstMidi;
+
+            const computerKey =
+                CONFIG.keyboardMap[index];
+
+            if (isBlackKey(midi)) {
+
+                blackKeys.push(
+                    computerKey.toUpperCase()
+                );
 
             } else {
 
-                updateExerciseUI();
-            }
-
-        } else {
-
-            pianoState.practiceStats.wrong++;
-
-            updateStatus(
-                `Note attendue : ${midiToLabel(expected)}`
-            );
-        }
-    }
-};
-
-
-/* ================================================================
-   25 — PRACTICE SCORING ENGINE
-================================================================ */
-
-const PracticeScoringEngine = {
-
-    registerPlayedNote(
-        midi,
-        time
-    ) {
-
-        if (
-            pianoState.currentExercise
-        ) {
-
-            ExerciseEngine.registerNote(
-                midi
-            );
-        }
-
-        ScoreSyncEngine.register(
-            midi
-        );
-    },
-
-
-    finishExercise() {
-
-        const stats =
-            pianoState.practiceStats;
-
-        const total =
-            stats.total || 1;
-
-        const accuracy =
-            (
-                stats.correct /
-                total
-            ) * 100;
-
-        updatePracticeScore(
-            accuracy
-        );
-
-        StorageEngine.saveProgress(
-            pianoState.currentExercise?.id,
-            {
-                accuracy,
-                correct: stats.correct,
-                wrong: stats.wrong,
-                date:
-                    new Date().toISOString()
-            }
-        );
-    }
-};
-
-
-/* ================================================================
-   26 — SONG LIBRARY ENGINE
-================================================================ */
-
-const SongLibraryEngine = {
-
-    songs: [
-
-        {
-            id: "fobas-scale",
-
-            title: "Étude FOBAS — Do majeur",
-
-            composer: "FOBAS Original Study",
-
-            type: "exercise",
-
-            bpm: 80,
-
-            notes: [
-                60,
-                62,
-                64,
-                65,
-                67,
-                69,
-                71,
-                72,
-                71,
-                69,
-                67,
-                65,
-                64,
-                62,
-                60
-            ]
-        },
-
-
-        {
-            id: "ode-to-joy-study",
-
-            title: "Thème classique — étude",
-
-            composer: "Domaine public",
-
-            type: "public-domain",
-
-            bpm: 90,
-
-            notes: [
-                64,
-                64,
-                65,
-                67,
-                67,
-                65,
-                64,
-                62,
-                60,
-                60,
-                62,
-                64,
-                64,
-                62,
-                62
-            ]
-        },
-
-
-        {
-            id: "fobas-chord-study",
-
-            title: "Étude d'accords FOBAS",
-
-            composer: "FOBAS Original Study",
-
-            type: "exercise",
-
-            bpm: 72,
-
-            notes: [
-                60,
-                64,
-                67,
-                60,
-                65,
-                69,
-                62,
-                67,
-                71,
-                64,
-                67,
-                72
-            ]
-        }
-    ],
-
-
-    getAll() {
-
-        return this.songs.slice();
-    },
-
-
-    get(
-        id
-    ) {
-
-        return this.songs.find(
-            song =>
-                song.id === id
-        );
-    },
-
-
-    load(
-        id
-    ) {
-
-        const song =
-            this.get(id);
-
-        if (!song) {
-            return;
-        }
-
-        pianoState.currentSong =
-            song;
-
-        ScoreSyncEngine.load(
-            song.notes.map(
-                midi => ({
-                    midi,
-                    duration: 1
-                })
-            )
-        );
-
-        TempoEngine.setBPM(
-            song.bpm
-        );
-
-        updateStatus(
-            `Morceau chargé : ${song.title}`
-        );
-
-        updateSongUI();
-    }
-};
-
-
-/* ================================================================
-   27 — MIDI ENGINE
-================================================================ */
-
-const MIDIEngine = {
-
-    async initialize() {
-
-        if (
-            !navigator.requestMIDIAccess
-        ) {
-
-            updateMIDIUI(
-                "MIDI non disponible"
-            );
-
-            return false;
-        }
-
-        try {
-
-            pianoState.midiAccess =
-                await navigator.requestMIDIAccess({
-                    sysex: false
-                });
-
-            this.refresh();
-
-            pianoState.midiAccess.onstatechange =
-                () => this.refresh();
-
-            updateMIDIUI(
-                "MIDI connecté"
-            );
-
-            return true;
-
-        } catch (_) {
-
-            updateMIDIUI(
-                "Accès MIDI refusé"
-            );
-
-            return false;
-        }
-    },
-
-
-    refresh() {
-
-        if (
-            !pianoState.midiAccess
-        ) {
-            return;
-        }
-
-        pianoState.midiInputs =
-            Array.from(
-                pianoState.midiAccess.inputs.values()
-            );
-
-        pianoState.midiOutputs =
-            Array.from(
-                pianoState.midiAccess.outputs.values()
-            );
-
-        pianoState.midiInputs.forEach(
-            input => {
-
-                input.onmidimessage =
-                    event =>
-                        this.handleMessage(
-                            event
-                        );
-            }
-        );
-
-        updateMIDISelects();
-    },
-
-
-    handleMessage(
-        event
-    ) {
-
-        const data =
-            event.data;
-
-        if (
-            !data ||
-            data.length < 2
-        ) {
-            return;
-        }
-
-        const status =
-            data[0];
-
-        const command =
-            status & 0xf0;
-
-        const channel =
-            status & 0x0f;
-
-        const data1 =
-            data[1];
-
-        const data2 =
-            data[2] || 0;
-
-        if (
-            command === 0x90 &&
-            data2 > 0
-        ) {
-
-            NoteEngine.noteOn(
-                data1,
-                data2,
-                "midi",
-                channel
-            );
-
-            pianoState.activeMidiNotes.set(
-                `${channel}:${data1}`,
-                data1
-            );
-
-            return;
-        }
-
-
-        if (
-            command === 0x80 ||
-            (
-                command === 0x90 &&
-                data2 === 0
-            )
-        ) {
-
-            NoteEngine.noteOff(
-                data1,
-                "midi",
-                channel
-            );
-
-            pianoState.activeMidiNotes.delete(
-                `${channel}:${data1}`
-            );
-
-            return;
-        }
-
-
-        if (
-            command === 0xb0
-        ) {
-
-            if (
-                data1 ===
-                FOBAS_PIANO_CONFIG.sustainCC
-            ) {
-
-                PedalEngine.set(
-                    "sustain",
-                    data2 >= 64
-                );
-            }
-
-            if (
-                data1 ===
-                FOBAS_PIANO_CONFIG.sostenutoCC
-            ) {
-
-                PedalEngine.set(
-                    "sostenuto",
-                    data2 >= 64
-                );
-            }
-
-            if (
-                data1 ===
-                FOBAS_PIANO_CONFIG.softCC
-            ) {
-
-                PedalEngine.set(
-                    "soft",
-                    data2 >= 64
+                whiteKeys.push(
+                    computerKey.toUpperCase()
                 );
             }
         }
 
+        const secondCard =
+            helpCards[1];
 
-        if (
-            command === 0xe0
-        ) {
+        if (secondCard) {
 
-            const bend =
-                data1 |
-                (
-                    data2 << 7
+            const span =
+                secondCard.querySelector(
+                    "span"
                 );
 
-            const normalized =
-                (
-                    bend -
-                    FOBAS_PIANO_CONFIG.pitchBendCenter
-                ) /
-                FOBAS_PIANO_CONFIG.pitchBendCenter;
+            if (span) {
 
-            pianoState.pitchBend =
-                clamp(
-                    normalized,
-                    -1,
-                    1
-                );
-        }
-    },
-
-
-    sendNoteOn(
-        midi,
-        velocity = 100
-    ) {
-
-        if (
-            !pianoState.selectedMidiOutput
-        ) {
-            return;
+                span.textContent =
+                    whiteKeys.join(" · ");
+            }
         }
 
-        pianoState.selectedMidiOutput.send([
-            0x90,
-            midi,
-            velocity
-        ]);
-    },
+        const thirdCard =
+            helpCards[2];
 
+        if (thirdCard) {
 
-    sendNoteOff(
-        midi
-    ) {
-
-        if (
-            !pianoState.selectedMidiOutput
-        ) {
-            return;
-        }
-
-        pianoState.selectedMidiOutput.send([
-            0x80,
-            midi,
-            0
-        ]);
-    },
-
-
-    sendPedal(
-        cc,
-        value
-    ) {
-
-        if (
-            !pianoState.selectedMidiOutput
-        ) {
-            return;
-        }
-
-        pianoState.selectedMidiOutput.send([
-            0xb0,
-            cc,
-            value ? 127 : 0
-        ]);
-    }
-};
-
-
-/* ================================================================
-   28 — STORAGE ENGINE
-================================================================ */
-
-const StorageEngine = {
-
-    settingsKey:
-        FOBAS_PIANO_CONFIG.storagePrefix +
-        "settings",
-
-
-    recordingsKey:
-        FOBAS_PIANO_CONFIG.storagePrefix +
-        "recordings",
-
-
-    progressKey:
-        FOBAS_PIANO_CONFIG.storagePrefix +
-        "progress",
-
-
-    saveSettings() {
-
-        const data = {
-
-            volume:
-                pianoState.volume,
-
-            bpm:
-                pianoState.bpm,
-
-            waveform:
-                pianoState.waveform,
-
-            octave:
-                pianoState.keyboardOctaveOffset,
-
-            timeSignatureNumerator:
-                pianoState.timeSignatureNumerator,
-
-            timeSignatureDenominator:
-                pianoState.timeSignatureDenominator,
-
-            subdivision:
-                pianoState.subdivision
-        };
-
-        this.safeSet(
-            this.settingsKey,
-            data
-        );
-    },
-
-
-    loadSettings() {
-
-        const data =
-            this.safeGet(
-                this.settingsKey
-            );
-
-        if (!data) {
-            return;
-        }
-
-        if (
-            Number.isFinite(
-                Number(data.volume)
-            )
-        ) {
-
-            pianoState.volume =
-                clamp(
-                    Number(data.volume),
-                    0,
-                    1
-                );
-        }
-
-        if (
-            Number.isFinite(
-                Number(data.bpm)
-            )
-        ) {
-
-            pianoState.bpm =
-                clamp(
-                    Number(data.bpm),
-                    FOBAS_PIANO_CONFIG.minBpm,
-                    FOBAS_PIANO_CONFIG.maxBpm
-                );
-        }
-
-        if (
-            Number.isFinite(
-                Number(data.octave)
-            )
-        ) {
-
-            pianoState.keyboardOctaveOffset =
-                clamp(
-                    Number(data.octave),
-                    FOBAS_PIANO_CONFIG.keyboardOctaveMin,
-                    FOBAS_PIANO_CONFIG.keyboardOctaveMax
-                );
-        }
-
-        if (data.waveform) {
-            pianoState.waveform =
-                data.waveform;
-        }
-
-        if (
-            Number.isFinite(
-                Number(data.timeSignatureNumerator)
-            )
-        ) {
-
-            pianoState.timeSignatureNumerator =
-                Number(
-                    data.timeSignatureNumerator
-                );
-        }
-
-        if (
-            Number.isFinite(
-                Number(data.timeSignatureDenominator)
-            )
-        ) {
-
-            pianoState.timeSignatureDenominator =
-                Number(
-                    data.timeSignatureDenominator
-                );
-        }
-
-        if (
-            Number.isFinite(
-                Number(data.subdivision)
-            )
-        ) {
-
-            pianoState.subdivision =
-                Number(
-                    data.subdivision
-                );
-        }
-    },
-
-
-    saveRecordings() {
-
-        this.safeSet(
-            this.recordingsKey,
-            pianoState.recordings
-        );
-    },
-
-
-    loadRecordings() {
-
-        const data =
-            this.safeGet(
-                this.recordingsKey
-            );
-
-        if (
-            Array.isArray(data)
-        ) {
-
-            pianoState.recordings =
-                data;
-        }
-    },
-
-
-    saveProgress(
-        exerciseId,
-        result
-    ) {
-
-        if (!exerciseId) {
-            return;
-        }
-
-        const progress =
-            this.safeGet(
-                this.progressKey
-            ) || {};
-
-        progress[exerciseId] =
-            result;
-
-        this.safeSet(
-            this.progressKey,
-            progress
-        );
-    },
-
-
-    safeSet(
-        key,
-        value
-    ) {
-
-        try {
-
-            localStorage.setItem(
-                key,
-                JSON.stringify(value)
-            );
-
-        } catch (_) {}
-    },
-
-
-    safeGet(
-        key
-    ) {
-
-        try {
-
-            const value =
-                localStorage.getItem(
-                    key
+            const span =
+                thirdCard.querySelector(
+                    "span"
                 );
 
-            return value
-                ? JSON.parse(value)
-                : null;
+            if (span) {
 
-        } catch (_) {
-
-            return null;
-        }
-    }
-};
-
-
-/* ================================================================
-   29 — RELEASE ALL NOTES
-================================================================ */
-
-function releaseAllNotes() {
-
-    pianoState.activeVoices.forEach(
-        voice =>
-            VoiceEngine.release(
-                voice,
-                true
-            )
-    );
-
-    pianoState.activePointerNotes.clear();
-    pianoState.activeComputerNotes.clear();
-    pianoState.activeMidiNotes.clear();
-    pianoState.pressedComputerKeys.clear();
-
-    pianoState.heldSostenutoNotes.clear();
-}
-
-
-/* ================================================================
-   30 — VOLUME
-================================================================ */
-
-function setVolume(
-    value
-) {
-
-    pianoState.volume =
-        clamp(
-            Number(value),
-            0,
-            1
-        );
-
-    if (
-        pianoState.masterGain
-    ) {
-
-        pianoState.masterGain.gain.setTargetAtTime(
-            pianoState.volume,
-            getCurrentTime(),
-            0.025
-        );
-    }
-
-    if (
-        pianoDOM.volume
-    ) {
-
-        pianoDOM.volume.value =
-            String(pianoState.volume);
-    }
-
-    if (
-        pianoDOM.volumeValue
-    ) {
-
-        pianoDOM.volumeValue.textContent =
-            `${Math.round(
-                pianoState.volume * 100
-            )}%`;
-    }
-
-    StorageEngine.saveSettings();
-}
-
-
-/* ================================================================
-   31 — UI ENGINE
-================================================================ */
-
-function updateAudioButton() {
-
-    if (
-        !pianoDOM.startAudioBtn
-    ) {
-        return;
-    }
-
-    if (
-        pianoState.audioReady
-    ) {
-
-        pianoDOM.startAudioBtn.textContent =
-            "Piano actif";
-
-        pianoDOM.startAudioBtn.classList.add(
-            "active"
-        );
-
-    } else {
-
-        pianoDOM.startAudioBtn.textContent =
-            "Activer le piano";
-
-        pianoDOM.startAudioBtn.classList.remove(
-            "active"
-        );
-    }
-}
-
-
-function updatePedalUI() {
-
-    const map = {
-
-        sustain:
-            "fobasPedalSustain",
-
-        sostenuto:
-            "fobasPedalSostenuto",
-
-        soft:
-            "fobasPedalSoft"
-    };
-
-    Object.keys(map).forEach(
-        pedal => {
-
-            const element =
-                document.getElementById(
-                    map[pedal]
-                );
-
-            if (!element) {
-                return;
+                span.textContent =
+                    blackKeys.join(" · ");
             }
+        }
 
-            const active =
-                pianoState[pedal];
-
-            element.classList.toggle(
-                "active",
-                active
+        const footerSpans =
+            document.querySelectorAll(
+                ".piano-footer span"
             );
-
-            element.setAttribute(
-                "aria-pressed",
-                active
-                    ? "true"
-                    : "false"
-            );
-        }
-    );
-
-
-    if (
-        pianoDOM.sustainBtn
-    ) {
-
-        const span =
-            pianoDOM.sustainBtn.querySelector(
-                "span"
-            );
-
-        if (span) {
-            span.textContent =
-                pianoState.sustain
-                    ? "ON"
-                    : "OFF";
-        }
-
-        pianoDOM.sustainBtn.setAttribute(
-            "aria-pressed",
-            pianoState.sustain
-                ? "true"
-                : "false"
-        );
-    }
-}
-
-
-function updateMetronomeUI() {
-
-    if (
-        pianoDOM.metronomeBtn
-    ) {
-
-        const span =
-            pianoDOM.metronomeBtn.querySelector(
-                "span"
-            );
-
-        if (span) {
-            span.textContent =
-                pianoState.metronome
-                    ? "ON"
-                    : "OFF";
-        }
-
-        pianoDOM.metronomeBtn.setAttribute(
-            "aria-pressed",
-            pianoState.metronome
-                ? "true"
-                : "false"
-        );
-    }
-}
-
-
-function updateOctaveUI() {
-
-    const element =
-        document.getElementById(
-            "fobasOctaveValue"
-        );
-
-    if (element) {
-
-        const value =
-            pianoState.keyboardOctaveOffset;
-
-        element.textContent =
-            value === 0
-                ? "0"
-                : value > 0
-                    ? `+${value}`
-                    : String(value);
-    }
-}
-
-
-function updateLearningUI() {
-
-    const element =
-        document.getElementById(
-            "fobasLearningStatus"
-        );
-
-    if (element) {
-
-        element.textContent =
-            pianoState.learningMode
-                ? "APPRENTISSAGE ACTIF"
-                : "MODE LIBRE";
-    }
-}
-
-
-function updateExerciseUI() {
-
-    const exercise =
-        pianoState.currentExercise;
-
-    const title =
-        document.getElementById(
-            "fobasExerciseTitle"
-        );
-
-    const progress =
-        document.getElementById(
-            "fobasExerciseProgress"
-        );
-
-    const next =
-        document.getElementById(
-            "fobasExerciseNext"
-        );
-
-    if (!exercise) {
-
-        if (title) {
-            title.textContent =
-                "Aucun exercice";
-        }
-
-        if (progress) {
-            progress.textContent =
-                "—";
-        }
-
-        if (next) {
-            next.textContent =
-                "—";
-        }
-
-        return;
-    }
-
-    if (title) {
-        title.textContent =
-            exercise.name;
-    }
-
-    if (progress) {
-
-        progress.textContent =
-            `${pianoState.exerciseIndex} / ${exercise.notes.length}`;
-    }
-
-    if (next) {
-
-        const expected =
-            ExerciseEngine.expectedNote();
-
-        next.textContent =
-            expected === null
-                ? "✓"
-                : midiToLabel(expected);
-    }
-}
-
-
-function updatePracticeScore(
-    accuracy
-) {
-
-    const element =
-        document.getElementById(
-            "fobasPracticeScore"
-        );
-
-    if (element) {
-
-        element.textContent =
-            `${Math.round(
-                accuracy
-            )}%`;
-    }
-}
-
-
-function updateRecordingUI() {
-
-    const button =
-        document.getElementById(
-            "fobasRecordBtn"
-        );
-
-    if (!button) {
-        return;
-    }
-
-    button.textContent =
-        pianoState.recording
-            ? "■ Arrêter"
-            : "● Enregistrer";
-
-    button.classList.toggle(
-        "active",
-        pianoState.recording
-    );
-}
-
-
-function updatePlaybackUI() {
-
-    const button =
-        document.getElementById(
-            "fobasPlaybackBtn"
-        );
-
-    if (!button) {
-        return;
-    }
-
-    button.textContent =
-        pianoState.playback
-            ? "■ Stop"
-            : "▶ Lecture";
-}
-
-
-function updateSongUI() {
-
-    const element =
-        document.getElementById(
-            "fobasCurrentSong"
-        );
-
-    if (element) {
-
-        element.textContent =
-            pianoState.currentSong
-                ? pianoState.currentSong.title
-                : "Aucun morceau";
-    }
-}
-
-
-function updateMIDIUI(
-    text
-) {
-
-    const element =
-        document.getElementById(
-            "fobasMidiStatus"
-        );
-
-    if (element) {
-        element.textContent =
-            text;
-    }
-}
-
-
-function updateStatus(
-    text
-) {
-
-    if (
-        pianoDOM.statusText
-    ) {
-
-        pianoDOM.statusText.textContent =
-            text;
-    }
-}
-
-
-/* ================================================================
-   32 — PROFESSIONAL CONTROL PANEL
-================================================================ */
-
-const PianoStudioController = {
-
-    initialize() {
-
-        this.injectAdvancedStyles();
-        this.createProfessionalControls();
-        this.bindControls();
-        this.populateLibraries();
-    },
-
-
-    injectAdvancedStyles() {
 
         if (
-            document.getElementById(
-                "fobasPianoProRuntimeStyles"
-            )
+            footerSpans.length > 1
         ) {
-            return;
-        }
 
-        const style =
-            document.createElement("style");
-
-        style.id =
-            "fobasPianoProRuntimeStyles";
-
-        style.textContent = `
-
-            .fobas-piano-pro-console {
-                display:grid;
-                grid-template-columns:
-                    repeat(auto-fit,minmax(220px,1fr));
-                gap:12px;
-                margin:14px 0;
-            }
-
-            .fobas-piano-pro-module {
-                padding:14px;
-                border:1px solid rgba(255,255,255,.10);
-                border-radius:14px;
-                background:rgba(255,255,255,.035);
-            }
-
-            .fobas-piano-pro-module h3 {
-                margin:0 0 10px;
-                font-size:12px;
-                letter-spacing:.08em;
-                text-transform:uppercase;
-            }
-
-            .fobas-piano-pro-row {
-                display:flex;
-                flex-wrap:wrap;
-                gap:7px;
-                align-items:center;
-            }
-
-            .fobas-piano-pro-row button,
-            .fobas-piano-pro-row select {
-                min-height:36px;
-                padding:7px 10px;
-                border-radius:9px;
-                border:1px solid rgba(255,255,255,.12);
-                background:rgba(0,0,0,.22);
-                color:inherit;
-            }
-
-            .fobas-piano-pro-row button.active {
-                outline:1px solid rgba(255,210,100,.75);
-                box-shadow:0 0 15px rgba(255,190,80,.15);
-            }
-
-            .fobas-piano-pedals {
-                display:grid;
-                grid-template-columns:
-                    repeat(3,1fr);
-                gap:8px;
-            }
-
-            .fobas-piano-pedal {
-                min-height:48px;
-                border-radius:12px;
-                border:1px solid rgba(255,255,255,.12);
-                background:rgba(255,255,255,.04);
-                color:inherit;
-            }
-
-            .fobas-piano-pedal.active {
-                transform:translateY(2px);
-                background:rgba(218,171,70,.20);
-            }
-
-            .fobas-piano-key-label {
-                pointer-events:none;
-                opacity:.45;
-                font-size:8px;
-            }
-
-            .piano-black-key .fobas-piano-key-label {
-                color:#fff;
-                opacity:.55;
-            }
-
-            #fobasMetronomeBeat {
-                display:inline-flex;
-                min-width:28px;
-                min-height:28px;
-                align-items:center;
-                justify-content:center;
-                border-radius:50%;
-                border:1px solid rgba(255,255,255,.12);
-            }
-
-            #fobasMetronomeBeat.active {
-                transform:scale(1.15);
-            }
-
-            @media(max-width:600px) {
-                .fobas-piano-pro-console {
-                    grid-template-columns:1fr;
-                }
-
-                .fobas-piano-pedals {
-                    grid-template-columns:1fr;
-                }
-            }
-        `;
-
-        document.head.appendChild(
-            style
-        );
-    },
-
-
-    createProfessionalControls() {
-
-        if (
-            document.getElementById(
-                "fobasPianoProConsole"
-            )
-        ) {
-            return;
-        }
-
-        const consolePanel =
-            document.createElement("section");
-
-        consolePanel.id =
-            "fobasPianoProConsole";
-
-        consolePanel.className =
-            "fobas-piano-pro-console";
-
-        consolePanel.setAttribute(
-            "aria-label",
-            "FOBAS Piano Professional Studio"
-        );
-
-
-        /* OCTAVE */
-
-        const octave =
-            this.module(
-                "Clavier",
-                `
-                    <div class="fobas-piano-pro-row">
-                        <button id="fobasOctaveDown" type="button">
-                            − Octave
-                        </button>
-
-                        <strong>
-                            OCTAVE
-                            <span id="fobasOctaveValue">0</span>
-                        </strong>
-
-                        <button id="fobasOctaveUp" type="button">
-                            + Octave
-                        </button>
-
-                        <button id="fobasOctaveReset" type="button">
-                            Reset
-                        </button>
-                    </div>
-                `
-            );
-
-
-        /* PEDALS */
-
-        const pedals =
-            this.module(
-                "Pedals",
-                `
-                    <div class="fobas-piano-pedals">
-
-                        <button
-                            id="fobasPedalSustain"
-                            class="fobas-piano-pedal"
-                            type="button"
-                            aria-pressed="false">
-                            Sustain
-                        </button>
-
-                        <button
-                            id="fobasPedalSostenuto"
-                            class="fobas-piano-pedal"
-                            type="button"
-                            aria-pressed="false">
-                            Sostenuto
-                        </button>
-
-                        <button
-                            id="fobasPedalSoft"
-                            class="fobas-piano-pedal"
-                            type="button"
-                            aria-pressed="false">
-                            Soft / Una Corda
-                        </button>
-
-                    </div>
-                `
-            );
-
-
-        /* METRONOME */
-
-        const metronome =
-            this.module(
-                "Métronome professionnel",
-                `
-                    <div class="fobas-piano-pro-row">
-
-                        <button
-                            id="fobasMetronomeStart"
-                            type="button">
-                            Métronome
-                        </button>
-
-                        <span>
-                            Beat
-                            <strong id="fobasMetronomeBeat">
-                                1
-                            </strong>
-                        </span>
-
-                        <select id="fobasTimeSignature">
-                            <option value="4/4">4/4</option>
-                            <option value="3/4">3/4</option>
-                            <option value="2/4">2/4</option>
-                            <option value="6/8">6/8</option>
-                            <option value="12/8">12/8</option>
-                        </select>
-
-                        <select id="fobasSubdivision">
-                            <option value="1">Noires</option>
-                            <option value="2">Croches</option>
-                            <option value="4">Double-croches</option>
-                        </select>
-
-                    </div>
-                `
-            );
-
-
-        /* LEARNING */
-
-        const learning =
-            this.module(
-                "Apprentissage",
-                `
-                    <div class="fobas-piano-pro-row">
-
-                        <button
-                            id="fobasLearningBtn"
-                            type="button">
-                            Mode apprentissage
-                        </button>
-
-                        <span id="fobasLearningStatus">
-                            MODE LIBRE
-                        </span>
-
-                        <select id="fobasLearningLevel">
-                            <option value="beginner">
-                                Initiation
-                            </option>
-                            <option value="elementary">
-                                Débutant
-                            </option>
-                            <option value="intermediate">
-                                Intermédiaire
-                            </option>
-                            <option value="advanced">
-                                Avancé
-                            </option>
-                            <option value="expert">
-                                Expert
-                            </option>
-                        </select>
-
-                    </div>
-                `
-            );
-
-
-        /* EXERCISES */
-
-        const exercise =
-            this.module(
-                "Exercices",
-                `
-                    <div class="fobas-piano-pro-row">
-
-                        <select id="fobasExerciseSelect"></select>
-
-                        <button
-                            id="fobasExerciseStart"
-                            type="button">
-                            Démarrer
-                        </button>
-
-                        <button
-                            id="fobasExerciseStop"
-                            type="button">
-                            Arrêter
-                        </button>
-
-                    </div>
-
-                    <div>
-                        <strong id="fobasExerciseTitle">
-                            Aucun exercice
-                        </strong>
-
-                        <span>
-                            <span id="fobasExerciseProgress">—</span>
-                        </span>
-
-                        <span>
-                            Prochaine :
-                            <strong id="fobasExerciseNext">
-                                —
-                            </strong>
-                        </span>
-
-                        <span>
-                            Score :
-                            <strong id="fobasPracticeScore">
-                                0%
-                            </strong>
-                        </span>
-                    </div>
-                `
-            );
-
-
-        /* RECORDING */
-
-        const recording =
-            this.module(
-                "Studio / Enregistrement",
-                `
-                    <div class="fobas-piano-pro-row">
-
-                        <button
-                            id="fobasRecordBtn"
-                            type="button">
-                            ● Enregistrer
-                        </button>
-
-                        <button
-                            id="fobasPlaybackBtn"
-                            type="button">
-                            ▶ Lecture
-                        </button>
-
-                    </div>
-                `
-            );
-
-
-        /* SONGS */
-
-        const songs =
-            this.module(
-                "Bibliothèque musicale",
-                `
-                    <div class="fobas-piano-pro-row">
-
-                        <select id="fobasSongSelect"></select>
-
-                        <button
-                            id="fobasSongLoad"
-                            type="button">
-                            Charger
-                        </button>
-
-                    </div>
-
-                    <div>
-                        <strong id="fobasCurrentSong">
-                            Aucun morceau
-                        </strong>
-                    </div>
-                `
-            );
-
-
-        /* MIDI */
-
-        const midi =
-            this.module(
-                "MIDI",
-                `
-                    <div class="fobas-piano-pro-row">
-
-                        <button
-                            id="fobasMidiConnect"
-                            type="button">
-                            Connecter MIDI
-                        </button>
-
-                        <select id="fobasMidiInput">
-                            <option value="">
-                                Entrée MIDI
-                            </option>
-                        </select>
-
-                        <select id="fobasMidiOutput">
-                            <option value="">
-                                Sortie MIDI
-                            </option>
-                        </select>
-
-                    </div>
-
-                    <div id="fobasMidiStatus">
-                        MIDI non initialisé
-                    </div>
-                `
-            );
-
-
-        consolePanel.append(
-            octave,
-            pedals,
-            metronome,
-            learning,
-            exercise,
-            recording,
-            songs,
-            midi
-        );
-
-
-        const target =
-            document.querySelector(
-                ".control-panel"
-            );
-
-        if (target) {
-
-            target.insertAdjacentElement(
-                "afterend",
-                consolePanel
-            );
-
-        } else {
-
-            pianoDOM.app.appendChild(
-                consolePanel
-            );
-        }
-    },
-
-
-    module(
-        title,
-        html
-    ) {
-
-        const section =
-            document.createElement("section");
-
-        section.className =
-            "fobas-piano-pro-module";
-
-        section.innerHTML =
-            `<h3>${title}</h3>${html}`;
-
-        return section;
-    },
-
-
-    bindControls() {
-
-        document
-            .getElementById(
-                "fobasOctaveDown"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    OctaveEngine.shift(-1)
-            );
-
-
-        document
-            .getElementById(
-                "fobasOctaveUp"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    OctaveEngine.shift(1)
-            );
-
-
-        document
-            .getElementById(
-                "fobasOctaveReset"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    OctaveEngine.reset()
-            );
-
-
-        document
-            .getElementById(
-                "fobasPedalSustain"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    PedalEngine.toggle(
-                        "sustain"
-                    )
-            );
-
-
-        document
-            .getElementById(
-                "fobasPedalSostenuto"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    PedalEngine.toggle(
-                        "sostenuto"
-                    )
-            );
-
-
-        document
-            .getElementById(
-                "fobasPedalSoft"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    PedalEngine.toggle(
-                        "soft"
-                    )
-            );
-
-
-        document
-            .getElementById(
-                "fobasMetronomeStart"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    MetronomeEngine.toggle()
-            );
-
-
-        document
-            .getElementById(
-                "fobasTimeSignature"
-            )
-            ?.addEventListener(
-                "change",
-                event => {
-
-                    const [
-                        numerator,
-                        denominator
-                    ] =
-                        event.target.value
-                            .split("/")
-                            .map(Number);
-
-                    pianoState.timeSignatureNumerator =
-                        numerator;
-
-                    pianoState.timeSignatureDenominator =
-                        denominator;
-
-                    pianoState.metronomeBeat =
-                        0;
-
-                    StorageEngine.saveSettings();
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasSubdivision"
-            )
-            ?.addEventListener(
-                "change",
-                event => {
-
-                    pianoState.subdivision =
-                        Number(
-                            event.target.value
-                        );
-
-                    StorageEngine.saveSettings();
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasLearningBtn"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    if (
-                        pianoState.learningMode
-                    ) {
-                        LearningEngine.disable();
-                    } else {
-                        LearningEngine.enable();
-                    }
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasExerciseStart"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    const id =
-                        document.getElementById(
-                            "fobasExerciseSelect"
-                        )?.value;
-
-                    ExerciseEngine.start(
-                        id
-                    );
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasExerciseStop"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    ExerciseEngine.stop()
-            );
-
-
-        document
-            .getElementById(
-                "fobasRecordBtn"
-            )
-            ?.addEventListener(
-                "click",
-                async () => {
-
-                    await ensureAudioReady();
-
-                    if (
-                        pianoState.recording
-                    ) {
-                        RecordingEngine.stop();
-                    } else {
-                        RecordingEngine.start();
-                    }
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasPlaybackBtn"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    if (
-                        pianoState.playback
-                    ) {
-
-                        PlaybackEngine.stop();
-
-                        return;
-                    }
-
-                    const recording =
-                        pianoState.recordings[
-                            pianoState.recordings.length - 1
-                        ];
-
-                    if (recording) {
-                        PlaybackEngine.play(
-                            recording
-                        );
-                    }
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasSongLoad"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    const id =
-                        document.getElementById(
-                            "fobasSongSelect"
-                        )?.value;
-
-                    SongLibraryEngine.load(
-                        id
-                    );
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasMidiConnect"
-            )
-            ?.addEventListener(
-                "click",
-                () =>
-                    MIDIEngine.initialize()
-            );
-
-
-        document
-            .getElementById(
-                "fobasMidiInput"
-            )
-            ?.addEventListener(
-                "change",
-                event => {
-
-                    const id =
-                        event.target.value;
-
-                    pianoState.selectedMidiInput =
-                        pianoState.midiInputs.find(
-                            input =>
-                                input.id === id
-                        ) || null;
-
-                    if (
-                        pianoState.selectedMidiInput
-                    ) {
-
-                        pianoState.selectedMidiInput.onmidimessage =
-                            event =>
-                                MIDIEngine.handleMessage(
-                                    event
-                                );
-                    }
-                }
-            );
-
-
-        document
-            .getElementById(
-                "fobasMidiOutput"
-            )
-            ?.addEventListener(
-                "change",
-                event => {
-
-                    pianoState.selectedMidiOutput =
-                        pianoState.midiOutputs.find(
-                            output =>
-                                output.id ===
-                                event.target.value
-                        ) || null;
-                }
-            );
-    },
-
-
-    populateLibraries() {
-
-        const exerciseSelect =
-            document.getElementById(
-                "fobasExerciseSelect"
-            );
-
-        if (exerciseSelect) {
-
-            exerciseSelect.innerHTML = "";
-
-            ExerciseEngine.exercises.forEach(
-                exercise => {
-
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-                    option.value =
-                        exercise.id;
-
-                    option.textContent =
-                        `${exercise.category} — ${exercise.name}`;
-
-                    exerciseSelect.appendChild(
-                        option
-                    );
-                }
-            );
-        }
-
-
-        const songSelect =
-            document.getElementById(
-                "fobasSongSelect"
-            );
-
-        if (songSelect) {
-
-            songSelect.innerHTML = "";
-
-            SongLibraryEngine.songs.forEach(
-                song => {
-
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-                    option.value =
-                        song.id;
-
-                    option.textContent =
-                        song.title;
-
-                    songSelect.appendChild(
-                        option
-                    );
-                }
-            );
+            footerSpans[1].textContent =
+                `Clavier ordinateur : ${allKeys.join(" ")}`;
         }
     }
-};
 
+    /* ============================================================
+       BOUTON AUDIO
+    ============================================================ */
 
-/* ================================================================
-   33 — MIDI SELECT UI
-================================================================ */
+    if (startAudioBtn) {
 
-function updateMIDISelects() {
-
-    const inputSelect =
-        document.getElementById(
-            "fobasMidiInput"
-        );
-
-    const outputSelect =
-        document.getElementById(
-            "fobasMidiOutput"
-        );
-
-    if (inputSelect) {
-
-        inputSelect.innerHTML =
-            `<option value="">
-                Entrée MIDI
-            </option>`;
-
-        pianoState.midiInputs.forEach(
-            input => {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    input.id;
-
-                option.textContent =
-                    input.name ||
-                    "MIDI Input";
-
-                inputSelect.appendChild(
-                    option
-                );
-            }
-        );
-    }
-
-
-    if (outputSelect) {
-
-        outputSelect.innerHTML =
-            `<option value="">
-                Sortie MIDI
-            </option>`;
-
-        pianoState.midiOutputs.forEach(
-            output => {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    output.id;
-
-                option.textContent =
-                    output.name ||
-                    "MIDI Output";
-
-                outputSelect.appendChild(
-                    option
-                );
-            }
-        );
-    }
-}
-
-
-/* ================================================================
-   34 — EXISTING HTML CONTROLS
-================================================================ */
-
-function bindExistingControls() {
-
-    pianoDOM.startAudioBtn
-        ?.addEventListener(
+        startAudioBtn.addEventListener(
             "click",
-            () =>
-                initializeAudio()
+            async () => {
+
+                try {
+
+                    await ensureAudio();
+
+                    setStatus(
+                        "Piano activé — vous pouvez jouer."
+                    );
+
+                } catch (_) {
+
+                    setStatus(
+                        "Impossible d'activer l'audio."
+                    );
+                }
+            }
         );
+    }
 
+    /* ============================================================
+       BOUTON SUSTAIN
+    ============================================================ */
 
-    pianoDOM.sustainBtn
-        ?.addEventListener(
+    if (sustainBtn) {
+
+        sustainBtn.addEventListener(
             "click",
-            () =>
-                PedalEngine.toggle(
-                    "sustain"
-                )
+            () => {
+
+                setSustain(
+                    !state.sustain
+                );
+            }
         );
+    }
 
+    /* ============================================================
+       BOUTON MÉTRONOME
+    ============================================================ */
 
-    pianoDOM.metronomeBtn
-        ?.addEventListener(
+    if (metronomeBtn) {
+
+        metronomeBtn.addEventListener(
             "click",
-            () =>
-                MetronomeEngine.toggle()
+            () => {
+
+                setMetronome(
+                    !state.metronome
+                );
+            }
         );
+    }
 
+    /* ============================================================
+       VOLUME
+    ============================================================ */
 
-    pianoDOM.volume
-        ?.addEventListener(
+    if (volume) {
+
+        volume.addEventListener(
             "input",
-            event =>
-                setVolume(
-                    event.target.value
-                )
+            updateVolume
         );
+    }
 
+    /* ============================================================
+       BPM
+    ============================================================ */
 
-    pianoDOM.bpm
-        ?.addEventListener(
+    if (bpm) {
+
+        bpm.addEventListener(
             "input",
-            event =>
-                TempoEngine.setBPM(
-                    event.target.value
-                )
+            updateBpm
         );
+    }
 
+    /* ============================================================
+       SÉLECTION DU SON
+    ============================================================ */
 
-    pianoDOM.waveform
-        ?.addEventListener(
+    if (waveform) {
+
+        waveform.addEventListener(
             "change",
             event => {
 
-                pianoState.waveform =
-                    event.target.value;
-
-                StorageEngine.saveSettings();
+                changeVoice(
+                    event.target.value
+                );
             }
         );
-}
+    }
 
+    /* ============================================================
+       CLAVIER PHYSIQUE
+    ============================================================ */
 
-/* ================================================================
-   35 — VISIBILITY / PAGE LIFECYCLE
-================================================================ */
-
-function bindLifecycle() {
-
-    document.addEventListener(
-        "visibilitychange",
-        async () => {
-
-            if (
-                document.hidden
-            ) {
-
-                pianoState.pressedComputerKeys.clear();
-
-                if (
-                    !pianoState.sustain &&
-                    !pianoState.sostenuto
-                ) {
-
-                    releaseAllNotes();
-                }
-
-            } else if (
-                pianoState.audioContext &&
-                pianoState.audioContext.state ===
-                "suspended"
-            ) {
-
-                try {
-                    await pianoState.audioContext.resume();
-                } catch (_) {}
-            }
-        }
+    window.addEventListener(
+        "keydown",
+        handleComputerKeyDown
     );
 
+    window.addEventListener(
+        "keyup",
+        handleComputerKeyUp
+    );
+
+    /* ============================================================
+       SÉCURITÉ — PERTE DE FOCUS
+    ============================================================ */
 
     window.addEventListener(
         "blur",
         () => {
 
-            pianoState.pressedComputerKeys.clear();
+            state.pressedComputerKeys.clear();
 
-            if (
-                !pianoState.sustain
-            ) {
-
-                releaseAllNotes();
+            if (!state.sustain) {
+                stopAllNotes();
             }
         }
     );
-}
-
-
-/* ================================================================
-   36 — INITIALIZATION
-================================================================ */
-
-function initializeFOBASPiano() {
-
-    if (
-        pianoState.initialized
-    ) {
-        return;
-    }
-
-    cacheDOM();
-
-    StorageEngine.loadSettings();
-    StorageEngine.loadRecordings();
-
-    PianoKeyboardEngine.initialize();
-
-    MusicNotationEngine.initialize();
-
-    PianoStudioController.initialize();
-
-    bindExistingControls();
-
-    bindLifecycle();
-
-    setVolume(
-        pianoState.volume
-    );
-
-    TempoEngine.setBPM(
-        pianoState.bpm
-    );
-
-    updateAudioButton();
-    updatePedalUI();
-    updateMetronomeUI();
-    updateOctaveUI();
-    updateLearningUI();
-    updateExerciseUI();
-    updateRecordingUI();
-    updatePlaybackUI();
-    updateSongUI();
-
-    pianoState.initialized =
-        true;
-
-    updateStatus(
-        "FOBAS Piano Pro prêt — activez le piano pour commencer."
-    );
-}
-
-
-/* ================================================================
-   37 — START
-================================================================ */
-
-if (
-    document.readyState ===
-    "loading"
-) {
 
     document.addEventListener(
-        "DOMContentLoaded",
-        initializeFOBASPiano,
-        {
-            once: true
+        "visibilitychange",
+        () => {
+
+            if (
+                document.hidden
+            ) {
+
+                state.pressedComputerKeys.clear();
+
+                if (!state.sustain) {
+                    stopAllNotes();
+                }
+            }
         }
     );
 
-} else {
+    /* ============================================================
+       EMPÊCHER LE MENU CONTEXTUEL SUR LE PIANO
+    ============================================================ */
 
-    initializeFOBASPiano();
-}
+    if (pianoKeyboard) {
 
-
-/* ================================================================
-   38 — API PUBLIQUE FOBAS
-================================================================ */
-
-window.FOBASPiano = {
-
-    version:
-        FOBAS_PIANO_CONFIG.version,
-
-    playNote(
-        midi,
-        velocity = 92
-    ) {
-
-        return NoteEngine.noteOn(
-            midi,
-            velocity,
-            "api",
-            midi
+        pianoKeyboard.addEventListener(
+            "contextmenu",
+            event => {
+                event.preventDefault();
+            }
         );
-    },
-
-    stopNote(
-        midi
-    ) {
-
-        NoteEngine.noteOff(
-            midi,
-            "api",
-            midi
-        );
-    },
-
-    sustain(
-        value
-    ) {
-
-        PedalEngine.set(
-            "sustain",
-            value
-        );
-    },
-
-    sostenuto(
-        value
-    ) {
-
-        PedalEngine.set(
-            "sostenuto",
-            value
-        );
-    },
-
-    soft(
-        value
-    ) {
-
-        PedalEngine.set(
-            "soft",
-            value
-        );
-    },
-
-    setBPM(
-        value
-    ) {
-
-        TempoEngine.setBPM(
-            value
-        );
-    },
-
-    setVolume(
-        value
-    ) {
-
-        setVolume(
-            value
-        );
-    },
-
-    octave(
-        direction
-    ) {
-
-        OctaveEngine.shift(
-            direction
-        );
-    },
-
-    startRecording() {
-
-        RecordingEngine.start();
-    },
-
-    stopRecording() {
-
-        return RecordingEngine.stop();
-    },
-
-    playRecording(
-        recording
-    ) {
-
-        PlaybackEngine.play(
-            recording
-        );
-    },
-
-    stopPlayback() {
-
-        PlaybackEngine.stop();
-    },
-
-    startExercise(
-        exerciseId
-    ) {
-
-        ExerciseEngine.start(
-            exerciseId
-        );
-    },
-
-    loadSong(
-        songId
-    ) {
-
-        SongLibraryEngine.load(
-            songId
-        );
-    },
-
-    connectMIDI() {
-
-        return MIDIEngine.initialize();
-    },
-
-    getState() {
-
-        return {
-            audioReady:
-                pianoState.audioReady,
-
-            volume:
-                pianoState.volume,
-
-            bpm:
-                pianoState.bpm,
-
-            octave:
-                pianoState.keyboardOctaveOffset,
-
-            sustain:
-                pianoState.sustain,
-
-            sostenuto:
-                pianoState.sostenuto,
-
-            soft:
-                pianoState.soft,
-
-            metronome:
-                pianoState.metronome,
-
-            recording:
-                pianoState.recording,
-
-            playback:
-                pianoState.playback,
-
-            activeVoices:
-                pianoState.activeVoices.size,
-
-            currentExercise:
-                pianoState.currentExercise,
-
-            currentSong:
-                pianoState.currentSong
-        };
     }
-};
 
+    /* ============================================================
+       INITIALISATION
+    ============================================================ */
 
-/* ================================================================
-   FIN — FOBAS PIANO PRO
-================================================================ */
+    function init() {
+
+        buildKeyboard();
+
+        populateVoices();
+
+        if (volume) {
+
+            volume.value =
+                String(
+                    CONFIG.defaultVolume
+                );
+        }
+
+        if (bpm) {
+
+            bpm.value =
+                String(
+                    CONFIG.defaultBpm
+                );
+        }
+
+        updateVolume();
+        updateBpm();
+
+        setSustain(false);
+
+        setMetronome(false);
+
+        updateAudioButton();
+
+        setStatus(
+            "Prêt — activez l'audio pour commencer."
+        );
+    }
+
+    /* ============================================================
+       LANCEMENT
+    ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            init,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        init();
+    }
+
+})();
 
 
 
