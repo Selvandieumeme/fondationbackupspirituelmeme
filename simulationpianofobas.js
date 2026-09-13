@@ -2201,6 +2201,1031 @@
 
 
 
+/* ================================================================
+   FOBAS PIANO PRO — VISUAL TOUCH KEYBOARD UPGRADE
+   ---------------------------------------------------------------
+   OBJECTIF
+   ---------------------------------------------------------------
+   - Rendre le piano visuellement professionnel
+   - 88 touches A0 → C8
+   - Design 3D réaliste
+   - Touch mobile / tablette
+   - 2 TOUCHES SIMULTANÉES ET PLUS
+   - Compatible avec le moteur audio existant
+   - Compatible avec le système MIDI existant
+   - Compatible avec Recording / Exercise / Practice
+   - NE MODIFIE PAS le moteur audio existant
+   - NE REMPLACE PAS PianoKeyboardEngine
+   ================================================================ */
 
+(function FOBAS_PIANO_VISUAL_TOUCH_UPGRADE() {
+
+    "use strict";
+
+
+    /* ============================================================
+       01 — PROTECTION
+    ============================================================ */
+
+    if (
+        document.getElementById(
+            "fobasPianoProfessionalTouchStyles"
+        )
+    ) {
+        return;
+    }
+
+
+    /* ============================================================
+       02 — STYLE PROFESSIONNEL
+    ============================================================ */
+
+    const style =
+        document.createElement("style");
+
+    style.id =
+        "fobasPianoProfessionalTouchStyles";
+
+    style.textContent = `
+
+        /* ========================================================
+           PIANO PRINCIPAL
+        ======================================================== */
+
+        #pianoKeyboard {
+
+            position: relative !important;
+
+            display: block !important;
+
+            width: 100% !important;
+
+            min-width: 1100px !important;
+
+            height: 310px !important;
+
+            margin: 0 !important;
+
+            padding: 0 !important;
+
+            overflow: visible !important;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #111827 0%,
+                    #020617 48%,
+                    #000000 100%
+                ) !important;
+
+            border-radius: 14px !important;
+
+            border:
+                2px solid
+                rgba(255,255,255,.10) !important;
+
+            box-shadow:
+
+                inset 0 2px 0
+                rgba(255,255,255,.08),
+
+                inset 0 -12px 20px
+                rgba(0,0,0,.75),
+
+                0 20px 40px
+                rgba(0,0,0,.45) !important;
+
+            user-select: none !important;
+
+            -webkit-user-select: none !important;
+
+            -webkit-touch-callout: none !important;
+
+            touch-action: none !important;
+
+            overscroll-behavior: contain !important;
+
+        }
+
+
+        /* ========================================================
+           BASE VISUELLE
+        ======================================================== */
+
+        #pianoKeyboard::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 8px;
+
+            right: 8px;
+
+            bottom: 5px;
+
+            height: 12px;
+
+            border-radius: 0 0 9px 9px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #374151,
+                    #030712
+                );
+
+            box-shadow:
+                inset 0 1px 0
+                rgba(255,255,255,.12),
+
+                0 5px 10px
+                rgba(0,0,0,.65);
+
+            pointer-events: none;
+
+            z-index: 0;
+
+        }
+
+
+        /* ========================================================
+           TOUCHES BLANCHES
+        ======================================================== */
+
+        #pianoKeyboard .piano-white-key {
+
+            position: absolute !important;
+
+            top: 0 !important;
+
+            bottom: 10px !important;
+
+            margin: 0 !important;
+
+            padding: 0 !important;
+
+            border-radius:
+                0 0 8px 8px !important;
+
+            border:
+
+                1px solid
+                rgba(100,116,139,.95) !important;
+
+            border-top: 0 !important;
+
+            background:
+
+                linear-gradient(
+                    180deg,
+                    #ffffff 0%,
+                    #f8fafc 34%,
+                    #e5e7eb 72%,
+                    #cbd5e1 100%
+                ) !important;
+
+            box-shadow:
+
+                inset 2px 0 2px
+                rgba(255,255,255,.90),
+
+                inset -2px 0 3px
+                rgba(0,0,0,.13),
+
+                inset 0 -18px 18px
+                rgba(0,0,0,.10),
+
+                0 5px 5px
+                rgba(0,0,0,.35) !important;
+
+            color: #111827 !important;
+
+            cursor: pointer !important;
+
+            z-index: 1 !important;
+
+            transition:
+                transform .045s ease,
+                background .045s ease,
+                box-shadow .045s ease !important;
+
+            -webkit-tap-highlight-color:
+                transparent !important;
+
+            touch-action: none !important;
+
+        }
+
+
+        /* --------------------------------------------------------
+           REFLET SUR TOUCHES BLANCHES
+        -------------------------------------------------------- */
+
+        #pianoKeyboard
+        .piano-white-key::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 8%;
+
+            right: 8%;
+
+            top: 4px;
+
+            height: 34%;
+
+            border-radius:
+                0 0 12px 12px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(255,255,255,.90),
+                    rgba(255,255,255,0)
+                );
+
+            pointer-events: none;
+
+        }
+
+
+        /* --------------------------------------------------------
+           BAS DE TOUCHE BLANCHE
+        -------------------------------------------------------- */
+
+        #pianoKeyboard
+        .piano-white-key::after {
+
+            content: "";
+
+            position: absolute;
+
+            left: 14%;
+
+            right: 14%;
+
+            bottom: 8px;
+
+            height: 3px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(15,23,42,.13);
+
+            pointer-events: none;
+
+        }
+
+
+        /* ========================================================
+           TOUCHES BLANCHES ACTIVES
+        ======================================================== */
+
+        #pianoKeyboard
+        .piano-white-key.active {
+
+            transform:
+                translateY(7px) !important;
+
+            background:
+
+                linear-gradient(
+                    180deg,
+                    #dbeafe 0%,
+                    #bfdbfe 35%,
+                    #93c5fd 72%,
+                    #60a5fa 100%
+                ) !important;
+
+            box-shadow:
+
+                inset 2px 0 3px
+                rgba(255,255,255,.70),
+
+                inset -2px 0 4px
+                rgba(30,64,175,.25),
+
+                inset 0 -20px 20px
+                rgba(37,99,235,.20),
+
+                0 2px 3px
+                rgba(0,0,0,.38),
+
+                0 0 16px
+                rgba(59,130,246,.35) !important;
+
+        }
+
+
+        /* ========================================================
+           TOUCHES NOIRES
+        ======================================================== */
+
+        #pianoKeyboard .piano-black-key {
+
+            position: absolute !important;
+
+            top: 0 !important;
+
+            height: 63% !important;
+
+            margin: 0 !important;
+
+            padding: 0 !important;
+
+            border-radius:
+                0 0 8px 8px !important;
+
+            border:
+
+                1px solid
+                #020617 !important;
+
+            background:
+
+                linear-gradient(
+                    105deg,
+                    #4b5563 0%,
+                    #1f2937 12%,
+                    #050505 34%,
+                    #000000 70%,
+                    #111827 88%,
+                    #374151 100%
+                ) !important;
+
+            box-shadow:
+
+                inset 2px 0 4px
+                rgba(255,255,255,.17),
+
+                inset -3px 0 6px
+                rgba(0,0,0,.95),
+
+                inset 0 -14px 12px
+                rgba(0,0,0,.60),
+
+                0 8px 9px
+                rgba(0,0,0,.65) !important;
+
+            color: #ffffff !important;
+
+            cursor: pointer !important;
+
+            z-index: 10 !important;
+
+            transform:
+                translateX(-50%) !important;
+
+            transition:
+                transform .045s ease,
+                background .045s ease,
+                box-shadow .045s ease !important;
+
+            -webkit-tap-highlight-color:
+                transparent !important;
+
+            touch-action: none !important;
+
+        }
+
+
+        /* --------------------------------------------------------
+           REFLET TOUCHES NOIRES
+        -------------------------------------------------------- */
+
+        #pianoKeyboard
+        .piano-black-key::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 4px;
+
+            top: 0;
+
+            width: 38%;
+
+            height: 72%;
+
+            border-radius:
+                0 0 5px 5px;
+
+            background:
+
+                linear-gradient(
+                    180deg,
+                    rgba(255,255,255,.23),
+                    rgba(255,255,255,0)
+                );
+
+            pointer-events: none;
+
+        }
+
+
+        /* ========================================================
+           TOUCHES NOIRES ACTIVES
+        ======================================================== */
+
+        #pianoKeyboard
+        .piano-black-key.active {
+
+            transform:
+                translateX(-50%)
+                translateY(7px) !important;
+
+            background:
+
+                linear-gradient(
+                    105deg,
+                    #bfdbfe 0%,
+                    #3b82f6 18%,
+                    #1e3a8a 52%,
+                    #020617 100%
+                ) !important;
+
+            box-shadow:
+
+                inset 2px 0 4px
+                rgba(255,255,255,.30),
+
+                inset -3px 0 7px
+                rgba(0,0,0,.95),
+
+                0 2px 3px
+                rgba(0,0,0,.60),
+
+                0 0 20px
+                rgba(59,130,246,.55) !important;
+
+        }
+
+
+        /* ========================================================
+           LABELS
+        ======================================================== */
+
+        #pianoKeyboard
+        .fobas-piano-key-label {
+
+            position: absolute !important;
+
+            left: 0 !important;
+
+            right: 0 !important;
+
+            bottom: 12px !important;
+
+            display: block !important;
+
+            text-align: center !important;
+
+            pointer-events: none !important;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif !important;
+
+            font-size: 7px !important;
+
+            line-height: 1 !important;
+
+            font-weight: 800 !important;
+
+            letter-spacing: .2px !important;
+
+            color: #475569 !important;
+
+            opacity: .70 !important;
+
+            white-space: nowrap !important;
+
+        }
+
+
+        /* --------------------------------------------------------
+           LABEL NOIRE
+        -------------------------------------------------------- */
+
+        #pianoKeyboard
+        .piano-black-key
+        .fobas-piano-key-label {
+
+            bottom: 7px !important;
+
+            color: #f8fafc !important;
+
+            opacity: .72 !important;
+
+            font-size: 6px !important;
+
+        }
+
+
+        /* ========================================================
+           TOUCH MULTIPLE
+        ======================================================== */
+
+        #pianoKeyboard
+        .piano-white-key,
+        #pianoKeyboard
+        .piano-black-key {
+
+            -webkit-user-select: none !important;
+
+            user-select: none !important;
+
+            -webkit-touch-callout: none !important;
+
+            touch-action: none !important;
+
+        }
+
+
+        /* ========================================================
+           MOBILE
+        ======================================================== */
+
+        @media (max-width: 900px) {
+
+            #pianoKeyboard {
+
+                min-width: 1000px !important;
+
+                height: 270px !important;
+
+            }
+
+            #pianoKeyboard
+            .fobas-piano-key-label {
+
+                font-size: 6px !important;
+
+            }
+
+            #pianoKeyboard
+            .piano-black-key
+            .fobas-piano-key-label {
+
+                font-size: 5px !important;
+
+            }
+
+        }
+
+
+        /* ========================================================
+           PETIT MOBILE
+        ======================================================== */
+
+        @media (max-width: 600px) {
+
+            #pianoKeyboard {
+
+                min-width: 900px !important;
+
+                height: 245px !important;
+
+                border-radius: 10px !important;
+
+            }
+
+            #pianoKeyboard
+            .fobas-piano-key-label {
+
+                bottom: 8px !important;
+
+                font-size: 5px !important;
+
+            }
+
+            #pianoKeyboard
+            .piano-black-key
+            .fobas-piano-key-label {
+
+                bottom: 5px !important;
+
+                font-size: 4px !important;
+
+            }
+
+        }
+
+
+        /* ========================================================
+           TRÈS PETIT ÉCRAN
+        ======================================================== */
+
+        @media (max-width: 420px) {
+
+            #pianoKeyboard {
+
+                min-width: 820px !important;
+
+                height: 225px !important;
+
+            }
+
+        }
+
+    `;
+
+    document.head.appendChild(style);
+
+
+    /* ============================================================
+       03 — SÉCURITÉ TOUCH
+       ------------------------------------------------------------
+       NE REMPLACE PAS LES ÉVÉNEMENTS DU MOTEUR.
+       On protège uniquement le comportement navigateur.
+    ============================================================ */
+
+    function installTouchProtection() {
+
+        const keyboard =
+            document.getElementById(
+                "pianoKeyboard"
+            );
+
+        if (!keyboard) {
+            return;
+        }
+
+
+        keyboard.addEventListener(
+            "contextmenu",
+            function (event) {
+
+                event.preventDefault();
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        keyboard.addEventListener(
+            "dragstart",
+            function (event) {
+
+                event.preventDefault();
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        keyboard.addEventListener(
+            "selectstart",
+            function (event) {
+
+                event.preventDefault();
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        /*
+         * IMPORTANT :
+         * chaque doigt possède son propre pointerId.
+         * Le moteur actuel peut donc gérer plusieurs touches
+         * simultanément sans fusionner les doigts.
+         */
+
+        keyboard.addEventListener(
+            "pointerdown",
+            function (event) {
+
+                if (
+                    event.pointerType === "touch"
+                ) {
+
+                    event.preventDefault();
+
+                }
+
+            },
+            {
+                passive: false,
+                capture: true
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       04 — RECALCUL DES TOUCHES NOIRES
+       ------------------------------------------------------------
+       Position exacte sur les jonctions des touches blanches.
+    ============================================================ */
+
+    function refreshBlackKeys() {
+
+        const keyboard =
+            document.getElementById(
+                "pianoKeyboard"
+            );
+
+        if (!keyboard) {
+            return;
+        }
+
+
+        const whiteKeys =
+            Array.from(
+                keyboard.querySelectorAll(
+                    ".piano-white-key"
+                )
+            );
+
+
+        const blackKeys =
+            Array.from(
+                keyboard.querySelectorAll(
+                    ".piano-black-key"
+                )
+            );
+
+
+        if (
+            whiteKeys.length === 0 ||
+            blackKeys.length === 0
+        ) {
+            return;
+        }
+
+
+        const keyboardWidth =
+            keyboard.clientWidth;
+
+
+        const whiteWidth =
+            keyboardWidth /
+            whiteKeys.length;
+
+
+        const whiteIndexByMidi =
+            new Map();
+
+
+        whiteKeys.forEach(
+            function (key, index) {
+
+                const midi =
+                    Number(
+                        key.dataset.midi
+                    );
+
+                whiteIndexByMidi.set(
+                    midi,
+                    index
+                );
+
+            }
+        );
+
+
+        blackKeys.forEach(
+            function (key) {
+
+                const midi =
+                    Number(
+                        key.dataset.midi
+                    );
+
+
+                const previousMidi =
+                    midi - 1;
+
+
+                const previousIndex =
+                    whiteIndexByMidi.get(
+                        previousMidi
+                    );
+
+
+                if (
+                    previousIndex === undefined
+                ) {
+                    return;
+                }
+
+
+                const center =
+                    (
+                        previousIndex + 1
+                    ) *
+                    whiteWidth;
+
+
+                key.style.left =
+                    center + "px";
+
+
+                /*
+                 * Largeur professionnelle de la touche noire.
+                 */
+
+                key.style.width =
+                    Math.max(
+                        20,
+                        Math.min(
+                            34,
+                            whiteWidth * 0.62
+                        )
+                    ) + "px";
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       05 — OBSERVATION DU PIANO
+       ------------------------------------------------------------
+       Si le moteur reconstruit les 88 touches, on recalcule
+       automatiquement le design sans toucher au moteur.
+    ============================================================ */
+
+    function observeKeyboard() {
+
+        const keyboard =
+            document.getElementById(
+                "pianoKeyboard"
+            );
+
+        if (!keyboard) {
+            return;
+        }
+
+
+        if (
+            keyboard.__fobasVisualObserver
+        ) {
+            return;
+        }
+
+
+        const observer =
+            new MutationObserver(
+                function () {
+
+                    requestAnimationFrame(
+                        refreshBlackKeys
+                    );
+
+                }
+            );
+
+
+        observer.observe(
+            keyboard,
+            {
+                childList: true
+            }
+        );
+
+
+        keyboard.__fobasVisualObserver =
+            observer;
+
+    }
+
+
+    /* ============================================================
+       06 — RESIZE
+    ============================================================ */
+
+    let resizeTimer = null;
+
+
+    window.addEventListener(
+        "resize",
+        function () {
+
+            clearTimeout(
+                resizeTimer
+            );
+
+
+            resizeTimer =
+                setTimeout(
+                    function () {
+
+                        refreshBlackKeys();
+
+                    },
+                    80
+                );
+
+        }
+    );
+
+
+    /* ============================================================
+       07 — ORIENTATION MOBILE
+    ============================================================ */
+
+    window.addEventListener(
+        "orientationchange",
+        function () {
+
+            setTimeout(
+                refreshBlackKeys,
+                150
+            );
+
+        }
+    );
+
+
+    /* ============================================================
+       08 — INITIALISATION
+    ============================================================ */
+
+    function initialize() {
+
+        installTouchProtection();
+
+        observeKeyboard();
+
+        refreshBlackKeys();
+
+
+        /*
+         * Le moteur principal peut construire le piano
+         * légèrement après l'initialisation de la page.
+         */
+
+        setTimeout(
+            refreshBlackKeys,
+            100
+        );
+
+
+        setTimeout(
+            refreshBlackKeys,
+            300
+        );
+
+
+        setTimeout(
+            refreshBlackKeys,
+            700
+        );
+
+
+        setTimeout(
+            refreshBlackKeys,
+            1200
+        );
+
+    }
+
+
+    /* ============================================================
+       09 — DÉMARRAGE
+    ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
+
+
+/* ================================================================
+   FIN — FOBAS PIANO PRO VISUAL TOUCH
+================================================================ */
 
 
