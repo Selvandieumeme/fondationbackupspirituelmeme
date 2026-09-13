@@ -6929,183 +6929,63 @@ function openTransferModal() {
 
 
     /* ============================================================
-       17 — TRANSFERT DES SOLIDES
+       17.1 — TRANSFERT CLASSIFICATION
     ============================================================ */
 
-    function transferSolidIntoContainer(
-        source,
-        target
-    ) {
 
-        if (
-            !source ||
-            !target ||
-            !isSolidObject(
-                source
-            ) ||
-            !isContainer(
-                target
-            )
-        ) {
+function getTransferMode(object) {
 
-            return false;
+    if (!object) {
+        return null;
+    }
 
-        }
-
-
-        ensureComposition(
-            source
-        );
-
-        ensureComposition(
-            target
-        );
-
-
-        const material =
-            getMaterial(
-                source.materialId
-            );
-
-
-        if (
-            !material
-        ) {
-
-            return false;
-
-        }
-
-
-        const solidMass =
-            Number(
-                source.mass
-            ) || 0;
-
-
-        const solidMoles =
-            calculateMolesFromMass(
-                solidMass,
-                material.molarMass
-            );
-
-
-        const existing =
-            getComponentById(
-                target,
-                source.materialId
-            );
-
-
-        if (
-            existing
-        ) {
-
-            existing.mass +=
-                solidMass;
-
-            existing.moles +=
-                solidMoles;
-
-        } else {
-
-            target.composition.push(
-                {
-                    materialId:
-                        material.id,
-
-                    name:
-                        material.name,
-
-                    formula:
-                        material.formula,
-
-                    amount:
-                        0,
-
-                    volumeMl:
-                        0,
-
-                    mass:
-                        solidMass,
-
-                    moles:
-                        solidMoles,
-
-                    molarity:
-                        null,
-
-                    temperature:
-                        source.temperature,
-
-                    phase:
-                        "solid"
-                }
-            );
-
-        }
-
-
-        /*
-         * Le solide est consommé dans la manipulation.
-         */
-        state.objects =
-            state.objects.filter(
-                object =>
-                    object.id !==
-                    source.id
-            );
-
-
-        state.selectedMaterialId =
-            target.id;
-
-
-        recalculateContainer(
-            target
-        );
-
-
-        evaluateCompositionReaction(
-            target
-        );
-
-
-        addObservation(
-            `${
-                source.name
-            } introduit dans ${
-                target.name
-            } : ${
-                formatNumber(
-                    solidMass
-                )
-            } g.`
-        );
-
-
-        showToast(
-            `${
-                source.name
-            } ajouté à ${
-                target.name
-            }.`,
-            "success"
-        );
-
-
-        renderWorkspace();
-
-        updateAllUI();
-
-        saveState(false);
-
-
-        return true;
-
+    /*
+     * SOLIDE
+     * ----------------------------------------
+     * Nou pa touche sistèm solid ki deja mache.
+     */
+    if (isSolidObject(object)) {
+        return "solid";
     }
 
 
+    /*
+     * LIQUIDE EXISTANT
+     * ----------------------------------------
+     * Nou konsève fonksyon ki deja egziste a.
+     */
+    if (isLiquidObject(object)) {
+        return "liquid";
+    }
+
+
+    /*
+     * MATIÈ MATÉRIELLE AVEC VOLUME
+     * ----------------------------------------
+     * Classification dynamique.
+     *
+     * Nou pa depann de non kategori a.
+     * Si objè a reprezante yon materyèl epi
+     * li gen yon kantite likid transfèrab,
+     * sistèm nan rekonèt li otomatikman.
+     */
+    const material =
+        getMaterial(object.materialId);
+
+    const volume =
+        Number(object.volume) || 0;
+
+
+    if (
+        material &&
+        volume > 0
+    ) {
+        return "liquid";
+    }
+
+
+    return null;
+}
 
 
 
@@ -7113,6 +6993,8 @@ function openTransferModal() {
 
 
 
+
+    
 
 
 
@@ -7126,7 +7008,7 @@ function openTransferModal() {
 
 
 /* ============================================================
-   16 — MÉLANGE
+   18 — MÉLANGE
    ------------------------------------------------------------
    Rôle :
    - Mélanger uniquement les substances présentes dans
