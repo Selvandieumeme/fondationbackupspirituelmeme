@@ -5,17 +5,24 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
     <meta
         name="description"
-        content="FOBAS Laboratoire Chimique — simulation dynamique réaliste des matériaux, équipements, solutions et phénomènes chimiques."
+        content="CHIMIQUE FOBAS — Laboratoire chimique virtuel interactif pour l'apprentissage et la simulation scientifique."
     >
 
-    <meta name="theme-color" content="#071216">
+    <meta
+        name="application-name"
+        content="CHIMIQUE FOBAS"
+    >
 
-    <title>FOBAS — Laboratoire Chimique</title>
+    <meta name="theme-color" content="#081522">
+
+    <title>
+        CHIMIQUE FOBAS — Virtual Chemical Laboratory
+    </title>
 
     <link
         rel="stylesheet"
@@ -25,102 +32,136 @@
 
 <body>
 
-<div id="chemApp" class="chem-app">
+<!-- =========================================================
+     CHIMIQUE FOBAS
+     VIRTUAL CHEMICAL LABORATORY
+     MAIN APPLICATION ROOT
+========================================================= -->
 
-    <!-- =========================================================
-         HEADER
-    ========================================================== -->
+<div
+    id="chimique-fobas"
+    class="chimique-app"
+    data-app="CHIMIQUE_FOBAS"
+    data-version="1.0.0"
+>
 
-    <header class="chem-header">
+    <!-- =====================================================
+         APPLICATION HEADER
+    ====================================================== -->
 
-        <div class="brand-area">
+    <header
+        id="app-header"
+        class="app-header"
+    >
 
-            <div class="brand-mark">
-                F
+        <div
+            id="brand"
+            class="brand"
+        >
+
+            <div
+                id="brand-logo"
+                class="brand-logo"
+                aria-label="CHIMIQUE FOBAS"
+            >
+                ⚗
             </div>
 
-            <div class="brand-text">
-                <strong>FOBAS</strong>
-                <span>LABORATOIRE CHIMIQUE</span>
+            <div class="brand-information">
+
+                <div class="brand-title">
+                    CHIMIQUE FOBAS
+                </div>
+
+                <div class="brand-subtitle">
+                    Virtual Chemical Laboratory
+                </div>
+
             </div>
 
         </div>
 
 
-        <div class="laboratory-state">
+        <!-- CURRENT EXPERIMENT -->
 
-            <span
-                id="laboratoryStateDot"
-                class="state-dot online"
-            ></span>
+        <div
+            id="experiment-header"
+            class="experiment-header"
+        >
 
-            <span id="laboratoryStateText">
-                Laboratoire actif
-            </span>
+            <div class="experiment-label">
+                EXPÉRIENCE
+            </div>
+
+            <div
+                id="current-experiment-name"
+                class="current-experiment-name"
+            >
+                Nouvelle expérience
+            </div>
+
+            <div
+                id="experiment-level"
+                class="experiment-level"
+            >
+                DÉBUTANT
+            </div>
 
         </div>
 
 
-        <div class="session-area">
+        <!-- HEADER ACTIONS -->
 
-            <label for="sessionName">
-                Session
-            </label>
-
-            <input
-                id="sessionName"
-                type="text"
-                value="Expérience chimique"
-                autocomplete="off"
-            >
-
-        </div>
-
-
-        <div class="header-actions">
-
-            <!-- =================================================
-                 NOUVEAU : BOUTON BIBLIOTHÈQUE
-                 -------------------------------------------------
-                 Ce bouton ne remplace aucun ID existant.
-                 Il permet au nouveau JS d'ouvrir la bibliothèque
-                 dynamiquement sur mobile/tablette.
-            ================================================== -->
+        <div
+            id="header-actions"
+            class="header-actions"
+        >
 
             <button
-                id="openMaterialsBtn"
-                class="header-button library-toggle"
-                type="button"
-                aria-controls="materialsPanel"
-                aria-expanded="false"
-                title="Ouvrir la bibliothèque"
-            >
-                ☰ Bibliothèque
-            </button>
-
-
-            <button
-                id="chemHelpBtn"
+                id="btn-new-experiment"
                 class="header-button"
                 type="button"
+                data-action="new-experiment"
+                title="Créer une nouvelle expérience"
             >
-                ?
+                <span>＋</span>
+                <span>Nouveau</span>
             </button>
 
-            <button
-                id="chemResetBtn"
-                class="header-button danger"
-                type="button"
-            >
-                Réinitialiser
-            </button>
 
             <button
-                id="chemSaveBtn"
-                class="header-button primary"
+                id="btn-save"
+                class="header-button"
                 type="button"
+                data-action="save"
+                title="Sauvegarder l'expérience"
             >
-                Enregistrer
+                <span>💾</span>
+                <span>Sauvegarder</span>
+            </button>
+
+
+            <button
+                id="btn-load"
+                class="header-button"
+                type="button"
+                data-action="load"
+                title="Charger une expérience"
+            >
+                <span>📂</span>
+                <span>Charger</span>
+            </button>
+
+
+            <button
+                id="btn-reset"
+                class="header-button danger-button"
+                type="button"
+                data-action="reset"
+                title="Réinitialiser le laboratoire"
+            >
+                <span>↻</span>
+                <span>Reset</span>
             </button>
 
         </div>
@@ -128,453 +169,786 @@
     </header>
 
 
-    <!-- =========================================================
-         MAIN LABORATORY
-    ========================================================== -->
+    <!-- =====================================================
+         MAIN APPLICATION
+    ====================================================== -->
 
-    <main class="laboratory-layout">
+    <main
+        id="main-workspace"
+        class="main-workspace"
+    >
 
 
-        <!-- =====================================================
-             LEFT LIBRARY
-        ====================================================== -->
+        <!-- =================================================
+             LEFT SIDEBAR
+        ================================================== -->
 
         <aside
-            id="materialsPanel"
-            class="materials-panel"
+            id="left-sidebar"
+            class="left-sidebar"
+            aria-label="Bibliothèque du laboratoire"
         >
 
-            <div class="panel-heading">
 
-                <div>
-                    <small>BIBLIOTHÈQUE</small>
-                    <h2>Matériaux</h2>
+            <!-- ==============================
+                 LIBRARY HEADER
+            =============================== -->
+
+            <section
+                id="library-section"
+                class="sidebar-section library-section"
+            >
+
+                <div class="section-title-row">
+
+                    <div class="section-title">
+                        <span class="section-icon">🧪</span>
+                        Bibliothèque
+                    </div>
+
+                    <span
+                        id="library-total"
+                        class="counter"
+                    >
+                        0
+                    </span>
+
                 </div>
 
-                <span id="materialCount">
-                    0
-                </span>
 
-            </div>
+                <!-- LIBRARY SEARCH -->
+
+                <div class="search-container">
+
+                    <span class="search-icon">
+                        🔎
+                    </span>
+
+                    <input
+                        id="library-search"
+                        class="library-search"
+                        type="search"
+                        autocomplete="off"
+                        placeholder="Rechercher..."
+                        aria-label="Rechercher dans la bibliothèque"
+                    >
+
+                    <button
+                        id="clear-library-search"
+                        class="clear-search"
+                        type="button"
+                        aria-label="Effacer la recherche"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <!-- LIBRARY CATEGORIES -->
+
+                <nav
+                    id="library-tabs"
+                    class="library-tabs"
+                    aria-label="Catégories de bibliothèque"
+                >
+
+                    <button
+                        class="library-tab active"
+                        type="button"
+                        data-library-category="substances"
+                    >
+                        <span>🧪</span>
+                        <span>Substances</span>
+                    </button>
+
+
+                    <button
+                        class="library-tab"
+                        type="button"
+                        data-library-category="glassware"
+                    >
+                        <span>⚗️</span>
+                        <span>Verrerie</span>
+                    </button>
+
+
+                    <button
+                        class="library-tab"
+                        type="button"
+                        data-library-category="equipment"
+                    >
+                        <span>🔬</span>
+                        <span>Équipements</span>
+                    </button>
+
+
+                    <button
+                        class="library-tab"
+                        type="button"
+                        data-library-category="tools"
+                    >
+                        <span>🛠️</span>
+                        <span>Outils</span>
+                    </button>
+
+                </nav>
+
+
+                <!-- SUBCATEGORY FILTER -->
+
+                <div
+                    id="library-filter-row"
+                    class="library-filter-row"
+                >
+
+                    <button
+                        type="button"
+                        class="filter-button active"
+                        data-filter="all"
+                    >
+                        Tous
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="acid"
+                    >
+                        Acides
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="base"
+                    >
+                        Bases
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="salt"
+                    >
+                        Sels
+                    </button>
+
+                    <button
+                        type="button"
+                        class="filter-button"
+                        data-filter="indicator"
+                    >
+                        Indicateurs
+                    </button>
+
+                </div>
+
+
+                <!-- ========================================
+                     LIBRARY ITEMS CONTAINER
+                ========================================= -->
+
+                <div
+                    id="library-items"
+                    class="library-items"
+                    role="list"
+                    aria-label="Éléments de la bibliothèque"
+                >
+                    <!--
+                        Les éléments sont générés dynamiquement
+                        par ChemicalLibraryEngine.
+                    -->
+                </div>
+
+
+                <!-- EMPTY LIBRARY STATE -->
+
+                <div
+                    id="library-empty"
+                    class="library-empty hidden"
+                >
+
+                    <div class="empty-icon">
+                        🔎
+                    </div>
+
+                    <div class="empty-title">
+                        Aucun élément trouvé
+                    </div>
+
+                    <div class="empty-description">
+                        Modifiez votre recherche ou choisissez
+                        une autre catégorie.
+                    </div>
+
+                </div>
+
+            </section>
 
 
             <!-- =================================================
-                 MOBILE LIBRARY HEADER
+                 REACTION DATABASE
             ================================================== -->
 
-            <div class="mobile-library-header">
+            <section
+                id="reaction-database-section"
+                class="sidebar-section reaction-database-section"
+            >
 
-                <div>
-                    <small>BIBLIOTHÈQUE FOBAS</small>
+                <div class="section-title-row">
 
-                    <strong>
-                        Matériaux
-                    </strong>
+                    <div class="section-title">
+                        <span class="section-icon">⚗️</span>
+                        Base de réactions
+                    </div>
+
+                    <span
+                        id="reaction-database-count"
+                        class="counter"
+                    >
+                        0
+                    </span>
+
                 </div>
 
-                <button
-                    id="closeMaterialsBtn"
-                    type="button"
-                    class="library-close-button"
-                    aria-label="Fermer la bibliothèque"
-                    title="Fermer"
+
+                <div class="search-container">
+
+                    <span class="search-icon">
+                        🔎
+                    </span>
+
+                    <input
+                        id="reaction-search"
+                        class="library-search"
+                        type="search"
+                        autocomplete="off"
+                        placeholder="Rechercher une réaction..."
+                        aria-label="Rechercher une réaction"
+                    >
+
+                </div>
+
+
+                <div
+                    id="reaction-items"
+                    class="reaction-items"
                 >
-                    ×
-                </button>
+                    <!--
+                        ReactionDatabaseEngine injecte
+                        les réactions supportées.
+                    -->
+                </div>
 
-            </div>
-
-
-            <div class="material-search">
-
-                <input
-                    id="materialSearch"
-                    type="search"
-                    placeholder="Rechercher un matériau..."
-                    autocomplete="off"
-                >
-
-            </div>
+            </section>
 
 
-            <div
-                id="materialCategories"
-                class="material-categories"
+            <!-- =================================================
+                 SAFETY QUICK ACCESS
+            ================================================== -->
+
+            <section
+                id="safety-section"
+                class="sidebar-section safety-section"
             >
 
                 <button
+                    id="btn-safety"
+                    class="safety-button"
                     type="button"
-                    class="category-button active"
-                    data-category="all"
+                    data-action="open-safety"
                 >
-                    Tout
+
+                    <span class="safety-icon">
+                        🛡️
+                    </span>
+
+                    <span class="safety-text">
+
+                        <strong>
+                            Sécurité laboratoire
+                        </strong>
+
+                        <small>
+                            Règles, risques et procédures
+                        </small>
+
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
                 </button>
 
-                <button
-                    type="button"
-                    class="category-button"
-                    data-category="glassware"
-                >
-                    Verrerie
-                </button>
+            </section>
 
-                <button
-                    type="button"
-                    class="category-button"
-                    data-category="reagent"
-                >
-                    Réactifs
-                </button>
+        </aside>
 
-                <button
-                    type="button"
-                    class="category-button"
-                    data-category="instrument"
-                >
-                    Instruments
-                </button>
 
-                <button
-                    type="button"
-                    class="category-button"
-                    data-category="solid"
-                >
-                    Solides
-                </button>
+        <!-- =================================================
+             CENTRAL LABORATORY
+        ================================================== -->
 
-                <button
-                    type="button"
-                    class="category-button"
-                    data-category="equipment"
+        <section
+            id="laboratory-area"
+            class="laboratory-area"
+            aria-label="Laboratoire virtuel"
+        >
+
+
+            <!-- =============================================
+                 LAB TOOLBAR
+            ============================================== -->
+
+            <div
+                id="lab-toolbar"
+                class="lab-toolbar"
+            >
+
+                <div
+                    id="primary-actions"
+                    class="toolbar-group primary-actions"
                 >
-                    Équipement
-                </button>
+
+                    <!-- SELECT -->
+
+                    <button
+                        id="tool-select"
+                        class="tool-button active"
+                        type="button"
+                        data-tool="select"
+                        title="Sélectionner un objet"
+                    >
+                        <span>↖</span>
+                        <span>Sélectionner</span>
+                    </button>
+
+
+                    <!-- ADD -->
+
+                    <button
+                        id="tool-add"
+                        class="tool-button important-action"
+                        type="button"
+                        data-tool="add"
+                        data-action="activate-add"
+                        title="Ajouter un élément au laboratoire"
+                    >
+                        <span>＋</span>
+                        <span>Ajouter</span>
+                    </button>
+
+
+                    <!-- MOVE -->
+
+                    <button
+                        id="tool-move"
+                        class="tool-button"
+                        type="button"
+                        data-tool="move"
+                        title="Déplacer un objet"
+                    >
+                        <span>✥</span>
+                        <span>Déplacer</span>
+                    </button>
+
+
+                    <!-- MEASURE -->
+
+                    <button
+                        id="tool-measure"
+                        class="tool-button"
+                        type="button"
+                        data-action="measure"
+                        title="Mesurer"
+                    >
+                        <span>⚖️</span>
+                        <span>Mesurer</span>
+                    </button>
+
+
+                    <!-- MIX -->
+
+                    <button
+                        id="tool-mix"
+                        class="tool-button"
+                        type="button"
+                        data-action="mix"
+                        title="Mélanger le contenu du récipient sélectionné"
+                    >
+                        <span>🌀</span>
+                        <span>Mélanger</span>
+                    </button>
+
+
+                    <!-- REACTION -->
+
+                    <button
+                        id="tool-reaction"
+                        class="tool-button reaction-button"
+                        type="button"
+                        data-action="reaction"
+                        title="Exécuter une réaction supportée par le moteur scientifique"
+                    >
+                        <span>⚗️</span>
+                        <span>Réaction</span>
+                    </button>
+
+
+                    <!-- ANALYZE -->
+
+                    <button
+                        id="tool-analyze"
+                        class="tool-button"
+                        type="button"
+                        data-action="analyze"
+                        title="Analyser le système sélectionné"
+                    >
+                        <span>🔬</span>
+                        <span>Analyser</span>
+                    </button>
+
+                </div>
+
+
+                <!-- =========================================
+                     SECONDARY ACTIONS
+                ========================================== -->
+
+                <div
+                    id="secondary-actions"
+                    class="toolbar-group secondary-actions"
+                >
+
+                    <button
+                        id="tool-temperature"
+                        class="mini-tool"
+                        type="button"
+                        data-action="temperature"
+                        title="Contrôler la température"
+                    >
+                        🌡️
+                    </button>
+
+
+                    <button
+                        id="tool-pipette"
+                        class="mini-tool"
+                        type="button"
+                        data-action="pipette"
+                        title="Utiliser une pipette"
+                    >
+                        💧
+                    </button>
+
+
+                    <button
+                        id="tool-clean"
+                        class="mini-tool"
+                        type="button"
+                        data-action="clean"
+                        title="Nettoyer"
+                    >
+                        🧹
+                    </button>
+
+
+                    <button
+                        id="tool-delete"
+                        class="mini-tool delete-tool"
+                        type="button"
+                        data-action="delete-selected"
+                        title="Supprimer l'objet sélectionné"
+                    >
+                        🗑️
+                    </button>
+
+                </div>
+
+
+                <!-- ENGINE STATUS -->
+
+                <div
+                    id="engine-status"
+                    class="engine-status ready"
+                    aria-live="polite"
+                >
+
+                    <span class="engine-indicator"></span>
+
+                    <span id="engine-status-text">
+                        ENGINE READY
+                    </span>
+
+                </div>
 
             </div>
 
 
+            <!-- =============================================
+                 3D / VIRTUAL LAB STAGE
+            ============================================== -->
+
             <div
-                id="materialsLibrary"
-                class="materials-library"
-            ></div>
+                id="laboratory-stage"
+                class="laboratory-stage"
+                tabindex="0"
+                aria-label="Espace de travail du laboratoire"
+                data-drop-zone="laboratory"
+            >
+
+                <!-- BACKGROUND -->
+
+                <div
+                    id="laboratory-background"
+                    class="laboratory-background"
+                >
+
+                    <div class="lab-light-effect"></div>
+
+                    <div class="lab-grid"></div>
+
+                    <div class="lab-floor"></div>
+
+                </div>
 
 
-            <div class="inventory-section">
+                <!-- TOP STAGE INFORMATION -->
 
-                <div class="inventory-heading">
+                <div
+                    id="stage-information"
+                    class="stage-information"
+                >
+
+                    <div class="stage-badge">
+                        VIRTUAL LAB
+                    </div>
+
+                    <div
+                        id="stage-mode"
+                        class="stage-mode"
+                    >
+                        MODE EXPÉRIENCE
+                    </div>
+
+                </div>
+
+
+                <!-- DROP ZONE -->
+
+                <div
+                    id="drop-zone-indicator"
+                    class="drop-zone-indicator hidden"
+                >
+
+                    <div class="drop-zone-icon">
+                        ＋
+                    </div>
+
+                    <strong>
+                        Déposer ici
+                    </strong>
 
                     <span>
-                        INVENTAIRE
+                        Ajoutez l'élément à l'espace laboratoire
                     </span>
 
-                    <strong id="inventoryCount">
+                </div>
+
+
+                <!-- DYNAMIC OBJECT LAYER -->
+
+                <div
+                    id="laboratory-objects"
+                    class="laboratory-objects"
+                    data-layer="objects"
+                >
+                    <!--
+                        Tous les objets du laboratoire sont
+                        créés dynamiquement ici.
+
+                        Exemple logique:
+                        substance
+                        bécher
+                        erlenmeyer
+                        tube
+                        balance
+                        thermomètre
+                        etc.
+                    -->
+                </div>
+
+
+                <!-- SELECTION OVERLAY -->
+
+                <div
+                    id="selection-overlay"
+                    class="selection-overlay hidden"
+                    aria-hidden="true"
+                ></div>
+
+
+                <!-- EMPTY LAB STATE -->
+
+                <div
+                    id="empty-laboratory"
+                    class="empty-laboratory"
+                >
+
+                    <div class="empty-laboratory-icon">
+                        ⚗️
+                    </div>
+
+                    <h2>
+                        Laboratoire prêt
+                    </h2>
+
+                    <p>
+                        Cliquez sur <strong>Ajouter</strong> ou
+                        glissez un élément depuis la bibliothèque.
+                    </p>
+
+                    <div class="empty-laboratory-actions">
+
+                        <button
+                            type="button"
+                            data-action="activate-add"
+                            class="empty-primary-button"
+                        >
+                            ＋ Ajouter un élément
+                        </button>
+
+                        <button
+                            type="button"
+                            data-action="open-reactions"
+                            class="empty-secondary-button"
+                        >
+                            ⚗️ Explorer les réactions
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CAMERA CONTROLS -->
+
+                <div
+                    id="stage-controls"
+                    class="stage-controls"
+                >
+
+                    <button
+                        type="button"
+                        data-stage-control="zoom-in"
+                        title="Zoom avant"
+                    >
+                        ＋
+                    </button>
+
+                    <button
+                        type="button"
+                        data-stage-control="zoom-out"
+                        title="Zoom arrière"
+                    >
+                        −
+                    </button>
+
+                    <button
+                        type="button"
+                        data-stage-control="center"
+                        title="Centrer le laboratoire"
+                    >
+                        ⌖
+                    </button>
+
+                    <button
+                        type="button"
+                        data-stage-control="reset-view"
+                        title="Réinitialiser la vue"
+                    >
+                        ⟳
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 LAB STATUS BAR
+            ============================================== -->
+
+            <div
+                id="laboratory-status-bar"
+                class="laboratory-status-bar"
+            >
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        Objets
+                    </span>
+
+                    <strong id="object-count">
                         0
                     </strong>
 
                 </div>
 
-                <div
-                    id="inventoryList"
-                    class="inventory-list"
-                ></div>
 
-            </div>
+                <div class="status-item">
 
-        </aside>
-
-
-        <!-- =====================================================
-             MOBILE LIBRARY BACKDROP
-             -----------------------------------------------------
-             Nouvel élément visuel uniquement.
-             Aucun ID existant n'est modifié.
-        ====================================================== -->
-
-        <div
-            id="materialsBackdrop"
-            class="materials-backdrop"
-            aria-hidden="true"
-        ></div>
-
-
-
-        <!-- =====================================================
-             CENTRAL LABORATORY WORKSPACE
-        ====================================================== -->
-
-        <section
-            id="laboratoryWorkspace"
-            class="laboratory-workspace"
-        >
-
-            <!-- TOOLBAR -->
-
-            <div class="workspace-toolbar">
-
-                <div class="toolbar-group">
-
-                    <button
-                        type="button"
-                        class="tool-button active"
-                        data-tool="select"
-                        title="Sélectionner"
-                    >
-                        <span>↖</span>
-                        <small>Sélection</small>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="tool-button"
-                        data-tool="move"
-                        title="Déplacer"
-                    >
-                        <span>✥</span>
-                        <small>Déplacer</small>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="tool-button"
-                        data-tool="transfer"
-                        title="Transférer"
-                    >
-                        <span>⇄</span>
-                        <small>Transférer</small>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="tool-button"
-                        data-tool="mix"
-                        title="Mélanger"
-                    >
-                        <span>↻</span>
-                        <small>Mélanger</small>
-                    </button>
-
-
-
-<button
-    type="button"
-    class="tool-button"
-    data-tool="react"
-    title="Réagir"
->
-    <span>⚗</span>
-    <small>Réagir</small>
-</button>
-
-
-
-
-                    <button
-                        type="button"
-                        class="tool-button"
-                        data-tool="measure"
-                        title="Mesurer"
-                    >
-                        <span>⌁</span>
-                        <small>Mesurer</small>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="tool-button"
-                        data-tool="heat"
-                        title="Chauffer"
-                    >
-                        <span>♨</span>
-                        <small>Chauffer</small>
-                    </button>
-
-                </div>
-
-
-                <div class="toolbar-divider"></div>
-
-
-                <div class="toolbar-group">
-
-                    <button
-                        id="zoomOutBtn"
-                        type="button"
-                        class="tool-icon"
-                        title="Réduire"
-                    >
-                        −
-                    </button>
-
-                    <span
-                        id="zoomValue"
-                        class="zoom-value"
-                    >
-                        100%
+                    <span class="status-label">
+                        Récipients
                     </span>
 
-                    <button
-                        id="zoomInBtn"
-                        type="button"
-                        class="tool-icon"
-                        title="Agrandir"
-                    >
-                        +
-                    </button>
-
-                    <button
-                        id="fitWorkspaceBtn"
-                        type="button"
-                        class="tool-icon"
-                        title="Ajuster"
-                    >
-                        □
-                    </button>
-
-                    <button
-                        id="clearWorkspaceBtn"
-                        type="button"
-                        class="tool-icon danger"
-                        title="Vider"
-                    >
-                        ⌫
-                    </button>
+                    <strong id="container-count">
+                        0
+                    </strong>
 
                 </div>
 
-            </div>
-
-
-            <!-- WORKSPACE -->
-
-            <div
-                id="workspaceViewport"
-                class="workspace-viewport"
-            >
-
-                <div class="horizontal-ruler">
-                    <span>0</span>
-                    <span>50</span>
-                    <span>100</span>
-                    <span>150</span>
-                    <span>200</span>
-                    <span>250</span>
-                    <span>300</span>
-                    <span>350</span>
-                    <span>400</span>
-                    <span>450</span>
-                    <span>500</span>
-                </div>
-
-
-                <div class="vertical-ruler">
-                    <span>0</span>
-                    <span>50</span>
-                    <span>100</span>
-                    <span>150</span>
-                    <span>200</span>
-                    <span>250</span>
-                    <span>300</span>
-                    <span>350</span>
-                    <span>400</span>
-                    <span>450</span>
-                    <span>500</span>
-                </div>
-
-
-                <div
-                    id="chemistryCanvas"
-                    class="chemistry-canvas"
-                    tabindex="0"
-                >
-
-                    <div
-                        id="workspaceGrid"
-                        class="workspace-grid"
-                    ></div>
-
-
-                    <div
-                        id="workspaceObjects"
-                        class="workspace-objects"
-                    ></div>
-
-
-                    <div
-                        id="workspaceDropZone"
-                        class="workspace-drop-zone"
-                    >
-
-                        <div class="drop-icon">
-                            ⚗
-                        </div>
-
-                        <strong>
-                            Espace de manipulation
-                        </strong>
-
-                        <span>
-                            Ajoutez une verrerie, un réactif
-                            ou un instrument depuis la bibliothèque.
-                        </span>
-
-                    </div>
-
-
-                    <div
-                        id="temperatureOverlay"
-                        class="temperature-overlay"
-                    ></div>
-
-
-                    <div
-                        id="reactionOverlay"
-                        class="reaction-overlay"
-                    ></div>
-
-                </div>
-
-            </div>
-
-
-            <!-- WORKSPACE STATUS -->
-
-            <div class="workspace-statusbar">
 
                 <div class="status-item">
-                    <span>Objets</span>
-                    <strong id="statusObjects">0</strong>
-                </div>
 
-                <div class="status-item">
-                    <span>Liquide</span>
-                    <strong id="statusVolume">0.0 mL</strong>
-                </div>
-
-                <div class="status-item">
-                    <span>Température</span>
-                    <strong id="statusTemperature">25.0 °C</strong>
-                </div>
-
-                <div class="status-item">
-                    <span>pH</span>
-                    <strong id="statusPH">—</strong>
-                </div>
-
-                <div class="status-item">
-                    <span>Masse</span>
-                    <strong id="statusMass">0.0 g</strong>
-                </div>
-
-                <div class="engine-status">
-
-                    <span class="engine-dot"></span>
-
-                    <span>
-                        Chemistry Engine
+                    <span class="status-label">
+                        Substances
                     </span>
 
-                    <strong>
-                        ACTIVE
+                    <strong id="substance-count">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        Actions
+                    </span>
+
+                    <strong id="action-count">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item status-item-wide">
+
+                    <span class="status-label">
+                        État laboratoire
+                    </span>
+
+                    <strong
+                        id="laboratory-global-status"
+                        class="global-status"
+                    >
+                        Prêt
                     </strong>
 
                 </div>
@@ -584,338 +958,679 @@
         </section>
 
 
-
-        <!-- =====================================================
-             RIGHT INSPECTOR
-        ====================================================== -->
+        <!-- =================================================
+             RIGHT SIDEBAR
+        ================================================== -->
 
         <aside
-            id="inspectorPanel"
-            class="inspector-panel"
+            id="right-sidebar"
+            class="right-sidebar"
+            aria-label="Inspecteur et résultats"
         >
 
-            <div class="panel-heading">
 
-                <div>
-                    <small>INSPECTEUR</small>
-                    <h2>Propriétés</h2>
-                </div>
-
-                <span
-                    id="selectedObjectType"
-                    class="object-type"
-                >
-                    Aucun
-                </span>
-
-            </div>
-
-
-            <!-- OBJECT INFO -->
+            <!-- =========================================
+                 INSPECTOR
+            ========================================== -->
 
             <section
-                id="objectInspector"
-                class="inspector-section"
+                id="inspector-section"
+                class="right-section inspector-section"
             >
 
-                <div class="empty-inspector">
+                <div class="section-title-row">
 
-                    <div class="empty-inspector-icon">
-                        ⚗
-                    </div>
-
-                    <strong>
-                        Aucun objet sélectionné
-                    </strong>
-
-                    <span>
-                        Sélectionnez un élément du laboratoire
-                        pour afficher son état physique et chimique.
-                    </span>
-
-                </div>
-
-            </section>
-
-
-            <!-- MATERIAL PROPERTIES -->
-
-            <section
-                id="materialProperties"
-                class="inspector-section hidden"
-            >
-
-                <div class="section-title">
-                    <span>ÉTAT MATÉRIEL</span>
-                </div>
-
-
-                <div class="property-grid">
-
-                    <div class="property-card">
-                        <small>Nom</small>
-                        <strong id="propName">—</strong>
-                    </div>
-
-                    <div class="property-card">
-                        <small>État</small>
-                        <strong id="propState">—</strong>
-                    </div>
-
-                    <div class="property-card">
-                        <small>Température</small>
-                        <strong id="propTemperature">—</strong>
-                    </div>
-
-                    <div class="property-card">
-                        <small>Masse</small>
-                        <strong id="propMass">—</strong>
-                    </div>
-
-                    <div class="property-card">
-                        <small>Volume</small>
-                        <strong id="propVolume">—</strong>
-                    </div>
-
-                    <div class="property-card">
-                        <small>Densité</small>
-                        <strong id="propDensity">—</strong>
-                    </div>
-
-                    <div class="property-card">
-                        <small>pH</small>
-                        <strong id="propPH">—</strong>
-                    </div>
-
-                    <div class="property-card">
-                        <small>Couleur</small>
-                        <strong id="propColor">—</strong>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- SOLUTION COMPOSITION -->
-
-            <section
-                id="compositionSection"
-                class="inspector-section hidden"
-            >
-
-                <div class="section-title">
-
-                    <span>
-                        COMPOSITION
-                    </span>
-
-                    <span
-                        id="compositionTotal"
-                        class="section-value"
-                    >
-                        0
-                    </span>
-
-                </div>
-
-
-                <div
-                    id="compositionList"
-                    class="composition-list"
-                ></div>
-
-            </section>
-
-
-            <!-- MEASUREMENTS -->
-
-            <section
-                id="measurementSection"
-                class="inspector-section hidden"
-            >
-
-                <div class="section-title">
-                    <span>MESURES</span>
-                </div>
-
-
-                <div class="measurement-display">
-
-                    <div class="measurement-main">
-
-                        <span id="measurementLabel">
-                            Mesure
+                    <div class="section-title">
+                        <span class="section-icon">
+                            🎛️
                         </span>
-
-                        <strong id="measurementValue">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="measurement-details">
-
-                        <span>
-                            Précision
-                        </span>
-
-                        <strong id="measurementPrecision">
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- REACTION STATE -->
-
-            <section
-                id="reactionSection"
-                class="inspector-section hidden"
-            >
-
-                <div class="section-title">
-                    <span>ÉTAT CHIMIQUE</span>
-                </div>
-
-
-                <div
-                    id="reactionState"
-                    class="reaction-state"
-                >
-
-                    <div class="reaction-state-row">
-                        <span>Réaction</span>
-                        <strong id="reactionStatus">
-                            Aucune
-                        </strong>
-                    </div>
-
-                    <div class="reaction-state-row">
-                        <span>Phase</span>
-                        <strong id="reactionPhase">
-                            Stable
-                        </strong>
-                    </div>
-
-                    <div class="reaction-state-row">
-                        <span>Gaz</span>
-                        <strong id="reactionGas">
-                            Aucun
-                        </strong>
-                    </div>
-
-                    <div class="reaction-state-row">
-                        <span>Précipité</span>
-                        <strong id="reactionPrecipitate">
-                            Aucun
-                        </strong>
-                    </div>
-
-                    <div class="reaction-state-row">
-                        <span>Couleur</span>
-                        <strong id="reactionColor">
-                            Inchangée
-                        </strong>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- OBJECT ACTIONS -->
-
-            <section
-                id="objectActions"
-                class="inspector-section hidden"
-            >
-
-                <div class="section-title">
-                    <span>ACTIONS</span>
-                </div>
-
-
-                <div class="inspector-actions">
-
-                    <button
-                        id="actionTransferBtn"
-                        type="button"
-                        class="inspector-action"
-                    >
-                        Transférer
-                    </button>
-
-                    <button
-                        id="actionMixBtn"
-                        type="button"
-                        class="inspector-action"
-                    >
-                        Mélanger
-                    </button>
-
-                    <button
-                        id="actionMeasureBtn"
-                        type="button"
-                        class="inspector-action"
-                    >
-                        Mesurer
-                    </button>
-
-                    <button
-                        id="actionHeatBtn"
-                        type="button"
-                        class="inspector-action"
-                    >
-                        Chauffer
-                    </button>
-
-                    <button
-                        id="actionRemoveBtn"
-                        type="button"
-                        class="inspector-action danger"
-                    >
-                        Retirer
-                    </button>
-
-                </div>
-
-            </section>
-
-
-            <!-- LIVE OBSERVATION -->
-
-            <section
-                id="observationSection"
-                class="observation-section"
-            >
-
-                <div class="observation-heading">
-
-                    <div>
-                        <small>OBSERVATION EN DIRECT</small>
-                        <strong>
-                            Chemistry Engine
-                        </strong>
+                        Inspecteur
                     </div>
 
                     <span
-                        id="observationPulse"
-                        class="observation-pulse"
-                    ></span>
+                        id="selected-object-type"
+                        class="object-type-badge"
+                    >
+                        —
+                    </span>
 
                 </div>
 
 
                 <div
-                    id="observationLog"
-                    class="observation-log"
-                ></div>
+                    id="inspector-empty"
+                    class="inspector-empty"
+                >
+
+                    <div class="inspector-empty-icon">
+                        ◇
+                    </div>
+
+                    <p>
+                        Sélectionnez un objet pour voir
+                        ses propriétés.
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="inspector-content"
+                    class="inspector-content hidden"
+                >
+
+                    <!-- OBJECT ID -->
+
+                    <div class="inspector-object-heading">
+
+                        <div
+                            id="inspector-object-icon"
+                            class="inspector-object-icon"
+                        >
+                            🧪
+                        </div>
+
+                        <div>
+
+                            <strong
+                                id="inspector-object-name"
+                            >
+                                Objet
+                            </strong>
+
+                            <small
+                                id="inspector-object-formula"
+                            >
+                                —
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- BASIC PROPERTIES -->
+
+                    <div
+                        id="basic-properties"
+                        class="property-group"
+                    >
+
+                        <div class="property-row">
+
+                            <span>
+                                ID
+                            </span>
+
+                            <strong
+                                id="property-id"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Catégorie
+                            </span>
+
+                            <strong
+                                id="property-category"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Position X
+                            </span>
+
+                            <strong
+                                id="property-x"
+                            >
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Position Y
+                            </span>
+
+                            <strong
+                                id="property-y"
+                            >
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Rotation
+                            </span>
+
+                            <strong
+                                id="property-rotation"
+                            >
+                                0°
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CONTAINER PROPERTIES -->
+
+                    <div
+                        id="container-properties"
+                        class="property-group hidden"
+                    >
+
+                        <div class="property-group-title">
+                            État du récipient
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Capacité
+                            </span>
+
+                            <strong
+                                id="property-capacity"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Volume
+                            </span>
+
+                            <strong
+                                id="property-volume"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Température
+                            </span>
+
+                            <strong
+                                id="property-temperature"
+                            >
+                                25 °C
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                pH
+                            </span>
+
+                            <strong
+                                id="property-ph"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Mélange
+                            </span>
+
+                            <strong
+                                id="property-mixture-state"
+                            >
+                                Vide
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Réaction
+                            </span>
+
+                            <strong
+                                id="property-reaction-state"
+                            >
+                                Aucune
+                            </strong>
+
+                        </div>
+
+
+                        <div class="property-row">
+
+                            <span>
+                                Statut
+                            </span>
+
+                            <strong
+                                id="property-container-status"
+                            >
+                                Prêt
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- CONTENTS -->
+
+                    <div
+                        id="contents-section"
+                        class="property-group hidden"
+                    >
+
+                        <div class="property-group-title">
+                            Contenu du récipient
+                        </div>
+
+                        <div
+                            id="container-contents"
+                            class="container-contents"
+                        >
+                            <!-- Contenu dynamique -->
+                        </div>
+
+                    </div>
+
+
+                    <!-- INSPECTOR ACTIONS -->
+
+                    <div
+                        id="inspector-actions"
+                        class="inspector-actions"
+                    >
+
+                        <button
+                            type="button"
+                            data-inspector-action="add"
+                            class="inspector-button"
+                        >
+                            ＋ Ajouter
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-inspector-action="remove"
+                            class="inspector-button"
+                        >
+                            − Retirer
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-inspector-action="move"
+                            class="inspector-button"
+                        >
+                            ✥ Déplacer
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-inspector-action="duplicate"
+                            class="inspector-button"
+                        >
+                            ⧉ Dupliquer
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-inspector-action="delete"
+                            class="inspector-button danger"
+                        >
+                            🗑 Supprimer
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================================
+                 CONTAINER STATUS
+            ========================================== -->
+
+            <section
+                id="container-status-section"
+                class="right-section container-status-section"
+            >
+
+                <div class="section-title-row">
+
+                    <div class="section-title">
+                        <span class="section-icon">
+                            🧫
+                        </span>
+                        Statut du récipient
+                    </div>
+
+                    <span
+                        id="container-state-badge"
+                        class="state-badge idle"
+                    >
+                        IDLE
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="container-status-card"
+                    class="container-status-card"
+                >
+
+                    <div class="status-main">
+
+                        <span
+                            id="status-container-icon"
+                            class="status-container-icon"
+                        >
+                            🧪
+                        </span>
+
+                        <div>
+
+                            <strong
+                                id="status-container-name"
+                            >
+                                Aucun récipient
+                            </strong>
+
+                            <small
+                                id="status-container-description"
+                            >
+                                Sélectionnez un récipient.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="container-live-properties"
+                        class="live-properties"
+                    >
+
+                        <div class="live-property">
+
+                            <span>
+                                Mélange
+                            </span>
+
+                            <strong
+                                id="live-mixture"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="live-property">
+
+                            <span>
+                                Réaction
+                            </span>
+
+                            <strong
+                                id="live-reaction"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="live-property">
+
+                            <span>
+                                Température
+                            </span>
+
+                            <strong
+                                id="live-temperature"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="live-property">
+
+                            <span>
+                                Volume
+                            </span>
+
+                            <strong
+                                id="live-volume"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================================
+                 REACTION RESULT
+            ========================================== -->
+
+            <section
+                id="reaction-result-section"
+                class="right-section reaction-result-section"
+            >
+
+                <div class="section-title-row">
+
+                    <div class="section-title">
+                        <span class="section-icon">
+                            ⚗️
+                        </span>
+                        Résultat réaction
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="reaction-result-empty"
+                    class="reaction-result-empty"
+                >
+
+                    <span>
+                        Les résultats apparaîtront ici
+                        après une réaction supportée.
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="reaction-result-content"
+                    class="reaction-result-content hidden"
+                >
+
+                    <div
+                        id="reaction-result-status"
+                        class="reaction-result-status"
+                    >
+                        —
+                    </div>
+
+
+                    <div class="result-block">
+
+                        <div class="result-label">
+                            Réaction
+                        </div>
+
+                        <div
+                            id="reaction-result-name"
+                            class="result-value"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-block">
+
+                        <div class="result-label">
+                            Réactifs
+                        </div>
+
+                        <div
+                            id="reaction-result-reactants"
+                            class="result-list"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-block">
+
+                        <div class="result-label">
+                            Produits simulés
+                        </div>
+
+                        <div
+                            id="reaction-result-products"
+                            class="result-list"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-block">
+
+                        <div class="result-label">
+                            Observations
+                        </div>
+
+                        <div
+                            id="reaction-result-observations"
+                            class="result-observations"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="result-block">
+
+                        <div class="result-label">
+                            État final
+                        </div>
+
+                        <div
+                            id="reaction-result-final-state"
+                            class="result-value"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================================
+                 ACTION JOURNAL
+            ========================================== -->
+
+            <section
+                id="journal-section"
+                class="right-section journal-section"
+            >
+
+                <div class="section-title-row">
+
+                    <div class="section-title">
+                        <span class="section-icon">
+                            📜
+                        </span>
+                        Journal
+                    </div>
+
+                    <button
+                        id="clear-journal"
+                        type="button"
+                        class="small-action-button"
+                        data-action="clear-journal"
+                    >
+                        Effacer
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="action-journal"
+                    class="action-journal"
+                    aria-live="polite"
+                >
+                    <!-- Actions dynamiques -->
+                </div>
 
             </section>
 
@@ -924,38 +1639,112 @@
     </main>
 
 
-    <!-- =========================================================
-         TRANSFER MODAL
-    ========================================================== -->
+    <!-- =====================================================
+         BOTTOM COMMAND BAR
+    ====================================================== -->
+
+    <footer
+        id="bottom-command-bar"
+        class="bottom-command-bar"
+    >
+
+        <div class="bottom-left">
+
+            <span class="connection-indicator"></span>
+
+            <span>
+                Simulation locale active
+            </span>
+
+            <span class="separator">
+                |
+            </span>
+
+            <span>
+                Chemical Engine
+            </span>
+
+            <strong id="chemical-engine-state">
+                READY
+            </strong>
+
+        </div>
+
+
+        <div class="bottom-center">
+
+            <button
+                type="button"
+                data-action="undo"
+                title="Annuler la dernière action"
+            >
+                ↶ Annuler
+            </button>
+
+            <button
+                type="button"
+                data-action="redo"
+                title="Rétablir"
+            >
+                ↷ Rétablir
+            </button>
+
+        </div>
+
+
+        <div class="bottom-right">
+
+            <span>
+                Version
+            </span>
+
+            <strong>
+                1.0.0
+            </strong>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================================
+         ADD OBJECT MODAL
+    ====================================================== -->
 
     <div
-        id="transferModal"
-        class="chem-modal"
-        aria-hidden="true"
+        id="add-object-modal"
+        class="modal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-object-title"
     >
 
         <div class="modal-backdrop"></div>
 
-        <div
-            class="modal-window transfer-window"
-            role="dialog"
-            aria-modal="true"
-        >
+        <div class="modal-window">
 
             <div class="modal-header">
 
                 <div>
-                    <small>TRANSFERT DE MATIÈRE</small>
 
-                    <h2>
-                        Transférer vers un récipient
-                    </h2>
+                    <div
+                        id="add-object-title"
+                        class="modal-title"
+                    >
+                        Ajouter au laboratoire
+                    </div>
+
+                    <div class="modal-subtitle">
+                        Choisissez un objet ou une substance.
+                    </div>
+
                 </div>
 
                 <button
-                    id="closeTransferModal"
                     type="button"
                     class="modal-close"
+                    data-modal-close="add-object-modal"
+                    aria-label="Fermer"
                 >
                     ×
                 </button>
@@ -963,108 +1752,229 @@
             </div>
 
 
-            <div class="transfer-body">
+            <div class="modal-body">
 
-                <div class="transfer-source">
+                <div
+                    id="modal-library-categories"
+                    class="modal-categories"
+                >
 
-                    <span>
-                        Source
+                    <button
+                        type="button"
+                        class="modal-category active"
+                        data-modal-category="substances"
+                    >
+                        🧪 Substances
+                    </button>
+
+                    <button
+                        type="button"
+                        class="modal-category"
+                        data-modal-category="glassware"
+                    >
+                        ⚗️ Verrerie
+                    </button>
+
+                    <button
+                        type="button"
+                        class="modal-category"
+                        data-modal-category="equipment"
+                    >
+                        🔬 Équipements
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="modal-library-grid"
+                    class="modal-library-grid"
+                >
+                    <!-- Dynamique -->
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         REACTION MODAL
+    ====================================================== -->
+
+    <div
+        id="reaction-modal"
+        class="modal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reaction-modal-title"
+    >
+
+        <div class="modal-backdrop"></div>
+
+        <div class="modal-window reaction-modal-window">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <div
+                        id="reaction-modal-title"
+                        class="modal-title"
+                    >
+                        Base de réactions
+                    </div>
+
+                    <div class="modal-subtitle">
+                        Sélectionnez un modèle supporté.
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    data-modal-close="reaction-modal"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div
+                    id="reaction-modal-list"
+                    class="reaction-modal-list"
+                >
+                    <!-- Réactions dynamiques -->
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SAFETY MODAL
+    ====================================================== -->
+
+    <div
+        id="safety-modal"
+        class="modal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="safety-modal-title"
+    >
+
+        <div class="modal-backdrop"></div>
+
+        <div class="modal-window safety-modal-window">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <div
+                        id="safety-modal-title"
+                        class="modal-title"
+                    >
+                        🛡️ Sécurité du laboratoire
+                    </div>
+
+                    <div class="modal-subtitle">
+                        Règles générales de simulation et de sécurité.
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    data-modal-close="safety-modal"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-body safety-content">
+
+                <div class="safety-card">
+
+                    <span class="safety-card-icon">
+                        🥽
                     </span>
 
-                    <strong id="transferSourceName">
-                        —
-                    </strong>
+                    <div>
 
-                    <small id="transferSourceAmount">
-                        —
-                    </small>
+                        <strong>
+                            Équipement de protection
+                        </strong>
 
-                </div>
-
-
-                <div class="transfer-arrow">
-                    →
-                </div>
-
-
-                <div class="transfer-target">
-
-                    <label for="transferTarget">
-                        Destination
-                    </label>
-
-                    <select
-                        id="transferTarget"
-                    ></select>
-
-                </div>
-
-
-                <div class="transfer-quantity">
-
-                    <label for="transferAmount">
-                        Quantité
-                    </label>
-
-                    <div class="quantity-input">
-
-                        <input
-                            id="transferAmount"
-                            type="number"
-                            min="0"
-                            step="0.1"
-                            value="10"
-                        >
-
-                        <span>
-                            mL
-                        </span>
-
-                    </div>
-
-                    <input
-                        id="transferRange"
-                        type="range"
-                        min="0"
-                        max="100"
-                        value="10"
-                        step="0.1"
-                    >
-
-                    <div class="range-labels">
-
-                        <span>
-                            0 mL
-                        </span>
-
-                        <span id="transferMaxLabel">
-                            100 mL
-                        </span>
+                        <p>
+                            Utilisez les équipements de protection
+                            prévus par le protocole pédagogique.
+                        </p>
 
                     </div>
 
                 </div>
 
-            </div>
+
+                <div class="safety-card">
+
+                    <span class="safety-card-icon">
+                        ⚠️
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Modèles chimiques
+                        </strong>
+
+                        <p>
+                            Les résultats de la simulation proviennent
+                            de modèles définis et ne doivent pas être
+                            interprétés comme une autorisation de réaliser
+                            une manipulation réelle dangereuse.
+                        </p>
+
+                    </div>
+
+                </div>
 
 
-            <div class="modal-footer">
+                <div class="safety-card">
 
-                <button
-                    id="cancelTransferBtn"
-                    type="button"
-                    class="modal-button secondary"
-                >
-                    Annuler
-                </button>
+                    <span class="safety-card-icon">
+                        🗑️
+                    </span>
 
-                <button
-                    id="confirmTransferBtn"
-                    type="button"
-                    class="modal-button primary"
-                >
-                    Effectuer le transfert
-                </button>
+                    <div>
+
+                        <strong>
+                            Gestion des déchets
+                        </strong>
+
+                        <p>
+                            Les produits simulés doivent être traités
+                            selon les règles de gestion des déchets
+                            prévues par l'expérience.
+                        </p>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -1073,39 +1983,44 @@
     </div>
 
 
-
-    <!-- =========================================================
-         MEASUREMENT MODAL
-    ========================================================== -->
+    <!-- =====================================================
+         SAVE / LOAD MODAL
+    ====================================================== -->
 
     <div
-        id="measurementModal"
-        class="chem-modal"
-        aria-hidden="true"
+        id="save-modal"
+        class="modal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="save-modal-title"
     >
 
         <div class="modal-backdrop"></div>
 
-        <div
-            class="modal-window measurement-window"
-            role="dialog"
-            aria-modal="true"
-        >
+        <div class="modal-window">
 
             <div class="modal-header">
 
                 <div>
-                    <small>INSTRUMENT</small>
 
-                    <h2>
-                        Mesure scientifique
-                    </h2>
+                    <div
+                        id="save-modal-title"
+                        class="modal-title"
+                    >
+                        Sauvegarder l'expérience
+                    </div>
+
+                    <div class="modal-subtitle">
+                        Conservez l'état complet de la simulation.
+                    </div>
+
                 </div>
 
                 <button
-                    id="closeMeasurementModal"
                     type="button"
                     class="modal-close"
+                    data-modal-close="save-modal"
+                    aria-label="Fermer"
                 >
                     ×
                 </button>
@@ -1113,85 +2028,59 @@
             </div>
 
 
-            <div class="measurement-modal-body">
+            <div class="modal-body">
 
-                <div class="instrument-visual">
-
-                    <div class="instrument-screen">
-
-                        <span id="instrumentScreenLabel">
-                            MESURE
-                        </span>
-
-                        <strong id="instrumentScreenValue">
-                            —
-                        </strong>
-
-                        <small id="instrumentScreenUnit">
-                            —
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-                <div class="measurement-options">
-
-                    <button
-                        type="button"
-                        class="measurement-option active"
-                        data-measurement="volume"
-                    >
-                        Volume
-                    </button>
-
-                    <button
-                        type="button"
-                        class="measurement-option"
-                        data-measurement="temperature"
-                    >
-                        Température
-                    </button>
-
-                    <button
-                        type="button"
-                        class="measurement-option"
-                        data-measurement="ph"
-                    >
-                        pH
-                    </button>
-
-                    <button
-                        type="button"
-                        class="measurement-option"
-                        data-measurement="mass"
-                    >
-                        Masse
-                    </button>
-
-                    <button
-                        type="button"
-                        class="measurement-option"
-                        data-measurement="density"
-                    >
-                        Densité
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="modal-footer">
-
-                <button
-                    id="closeMeasurementBtn"
-                    type="button"
-                    class="modal-button primary"
+                <label
+                    for="save-experiment-name"
+                    class="form-label"
                 >
-                    Fermer
-                </button>
+                    Nom de l'expérience
+                </label>
+
+                <input
+                    id="save-experiment-name"
+                    class="form-input"
+                    type="text"
+                    maxlength="120"
+                    placeholder="Ex. Mélange expérimental 01"
+                >
+
+
+                <label
+                    for="save-student-name"
+                    class="form-label"
+                >
+                    Nom de l'élève / étudiant
+                </label>
+
+                <input
+                    id="save-student-name"
+                    class="form-input"
+                    type="text"
+                    maxlength="120"
+                    placeholder="Nom"
+                >
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="modal-secondary-button"
+                        data-modal-close="save-modal"
+                    >
+                        Annuler
+                    </button>
+
+                    <button
+                        type="button"
+                        class="modal-primary-button"
+                        data-action="confirm-save"
+                    >
+                        💾 Sauvegarder
+                    </button>
+
+                </div>
 
             </div>
 
@@ -1200,39 +2089,44 @@
     </div>
 
 
-
-    <!-- =========================================================
-         HELP MODAL
-    ========================================================== -->
+    <!-- =====================================================
+         CONFIRM RESET MODAL
+    ====================================================== -->
 
     <div
-        id="helpModal"
-        class="chem-modal"
-        aria-hidden="true"
+        id="reset-confirm-modal"
+        class="modal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="reset-confirm-title"
     >
 
         <div class="modal-backdrop"></div>
 
-        <div
-            class="modal-window help-window"
-            role="dialog"
-            aria-modal="true"
-        >
+        <div class="modal-window small-modal">
 
             <div class="modal-header">
 
                 <div>
-                    <small>FOBAS CHEMISTRY ENGINE</small>
 
-                    <h2>
-                        Laboratoire chimique
-                    </h2>
+                    <div
+                        id="reset-confirm-title"
+                        class="modal-title"
+                    >
+                        Réinitialiser le laboratoire ?
+                    </div>
+
+                    <div class="modal-subtitle">
+                        L'état actuel de la simulation sera supprimé.
+                    </div>
+
                 </div>
 
                 <button
-                    id="closeHelpModal"
                     type="button"
                     class="modal-close"
+                    data-modal-close="reset-confirm-modal"
+                    aria-label="Fermer"
                 >
                     ×
                 </button>
@@ -1240,128 +2134,42 @@
             </div>
 
 
-            <div class="help-content">
+            <div class="modal-body">
 
-                <div class="help-card">
+                <div class="warning-message">
 
-                    <span>01</span>
+                    <span>
+                        ⚠️
+                    </span>
 
-                    <div>
-                        <strong>
-                            Ajouter un matériel
-                        </strong>
-
-                        <p>
-                            Cliquez sur un élément de la bibliothèque
-                            pour l'ajouter automatiquement dans
-                            l'espace de manipulation.
-                        </p>
-                    </div>
+                    <p>
+                        Cette action remettra les objets,
+                        contenus, paramètres et résultats
+                        de l'expérience à leur état initial.
+                    </p>
 
                 </div>
 
 
-                <div class="help-card">
+                <div class="modal-actions">
 
-                    <span>02</span>
+                    <button
+                        type="button"
+                        class="modal-secondary-button"
+                        data-modal-close="reset-confirm-modal"
+                    >
+                        Annuler
+                    </button>
 
-                    <div>
-                        <strong>
-                            Déplacer
-                        </strong>
-
-                        <p>
-                            Activez Déplacer puis faites glisser
-                            les objets dans le laboratoire.
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <div class="help-card">
-
-                    <span>03</span>
-
-                    <div>
-                        <strong>
-                            Transférer
-                        </strong>
-
-                        <p>
-                            Sélectionnez une matière et transférez
-                            une quantité contrôlée vers un récipient.
-                        </p>
-                    </div>
+                    <button
+                        type="button"
+                        class="modal-danger-button"
+                        data-action="confirm-reset"
+                    >
+                        ↻ Réinitialiser
+                    </button>
 
                 </div>
-
-
-                <div class="help-card">
-
-                    <span>04</span>
-
-                    <div>
-                        <strong>
-                            Mélanger
-                        </strong>
-
-                        <p>
-                            Le moteur analyse les composants présents
-                            et actualise l'état chimique.
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <div class="help-card">
-
-                    <span>05</span>
-
-                    <div>
-                        <strong>
-                            Mesurer
-                        </strong>
-
-                        <p>
-                            Utilisez les mesures de volume,
-                            température, pH, masse et densité.
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <div class="help-card">
-
-                    <span>06</span>
-
-                    <div>
-                        <strong>
-                            Chauffer
-                        </strong>
-
-                        <p>
-                            La température du système évolue
-                            dynamiquement selon l'état du matériel.
-                        </p>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="modal-footer">
-
-                <button
-                    id="closeHelpBtn"
-                    type="button"
-                    class="modal-button primary"
-                >
-                    Fermer
-                </button>
 
             </div>
 
@@ -1370,35 +2178,143 @@
     </div>
 
 
-
-    <!-- =========================================================
-         TOAST SYSTEM
-    ========================================================== -->
+    <!-- =====================================================
+         NOTIFICATION / TOAST SYSTEM
+    ====================================================== -->
 
     <div
-        id="chemToastStack"
-        class="toast-stack"
+        id="notification-container"
+        class="notification-container"
         aria-live="polite"
         aria-atomic="true"
-    ></div>
+    >
+        <!-- Notifications dynamiques -->
+    </div>
 
 
-
-    <!-- =========================================================
-         DYNAMIC ACCESSIBILITY / STATUS
-    ========================================================== -->
+    <!-- =====================================================
+         CONTEXT MENU
+    ====================================================== -->
 
     <div
-        id="chemLiveRegion"
+        id="object-context-menu"
+        class="context-menu hidden"
+        role="menu"
+    >
+
+        <button
+            type="button"
+            data-context-action="select"
+            role="menuitem"
+        >
+            ↖ Sélectionner
+        </button>
+
+        <button
+            type="button"
+            data-context-action="add-to-container"
+            role="menuitem"
+        >
+            ＋ Ajouter au récipient
+        </button>
+
+        <button
+            type="button"
+            data-context-action="measure"
+            role="menuitem"
+        >
+            ⚖️ Mesurer
+        </button>
+
+        <button
+            type="button"
+            data-context-action="duplicate"
+            role="menuitem"
+        >
+            ⧉ Dupliquer
+        </button>
+
+        <button
+            type="button"
+            data-context-action="delete"
+            role="menuitem"
+            class="danger"
+        >
+            🗑 Supprimer
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         ACCESSIBILITY LIVE REGION
+    ====================================================== -->
+
+    <div
+        id="accessibility-live-region"
         class="sr-only"
-        aria-live="polite"
+        aria-live="assertive"
         aria-atomic="true"
     ></div>
+
+
+    <!-- =====================================================
+         HIDDEN FILE INPUT
+         Used by Save/Load Engine.
+    ====================================================== -->
+
+    <input
+        id="experience-file-input"
+        type="file"
+        accept=".json,application/json"
+        hidden
+    >
+
+
+    <!-- =====================================================
+         APPLICATION BOOT ERROR
+    ====================================================== -->
+
+    <div
+        id="application-error"
+        class="application-error hidden"
+        role="alert"
+    >
+
+        <div class="application-error-icon">
+            ⚠️
+        </div>
+
+        <h2>
+            Erreur du laboratoire
+        </h2>
+
+        <p id="application-error-message">
+            Une erreur inattendue est survenue.
+        </p>
+
+        <button
+            type="button"
+            data-action="reload-application"
+        >
+            ↻ Recharger
+        </button>
+
+    </div>
 
 </div>
 
 
-<script src="simulationchimicfobas.js"></script>
+<!-- =========================================================
+     JAVASCRIPT APPLICATION ENGINE
+========================================================= -->
+
+<script
+    src="simulationchimicfobas.js"
+    defer
+></script>
 
 </body>
 </html>
+
+
