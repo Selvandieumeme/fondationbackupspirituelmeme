@@ -1,1172 +1,984 @@
 /* ================================================================
-   FOBAS PIANO — SIMULATION MUSICALE PROFESSIONNELLE
-   ================================================================
-   Fichier : simulationpianofobas.js
+   FOBAS PIANO — MOTEUR JAVASCRIPT PRINCIPAL
+   ----------------------------------------------------------------
+   VERSION : 1.0.0
+   TYPE    : Piano virtuel professionnel
+   FICHIER : simulationpianofobas.js
 
-   Compatible avec :
-   simulationpianofobas.html
+   COMPATIBLE AVEC :
+   - simulationpianofobas.html
+   - simulationpianofobas.css
 
-   Fonctionnalités :
-   - 30 touches chromatiques
-   - 21 touches blanches
-   - 9 touches noires
-   - MIDI C2 → F4
-   - Web Audio API
+   FONCTIONNALITÉS :
+   - Clavier piano réaliste généré dynamiquement
+   - Touches blanches et noires
+   - Souris
+   - Écran tactile
+   - Clavier physique ordinateur
    - Polyphonie
+   - Audio Web Audio API
    - Sustain
    - Métronome
    - Volume
    - BPM
-   - Plusieurs timbres
-   - Clavier ordinateur
-   - Touch / Pointer / Souris
-   - Affichage note / octave
-   - Marqueur de partition
+   - Piano / Piano Warm / Piano Bright
+   - Affichage note
+   - Affichage octave
+   - Affichage BPM
+   - Partition visuelle
+   - Animations des touches
+   - Interface responsive
+   - Accessibilité clavier
    ================================================================ */
 
 (() => {
+
     "use strict";
 
+
     /* ============================================================
-       CONFIGURATION PRINCIPALE
+       01 — CONFIGURATION GÉNÉRALE
     ============================================================ */
 
     const CONFIG = {
-        totalKeys: 30,
 
-        firstMidi: 36, // C2
-        lastMidi: 65,  // F4
+        firstMidi: 48,
+
+        lastMidi: 72,
 
         defaultVolume: 0.72,
+
         defaultBpm: 100,
 
-        normalRelease: 0.18,
-        sustainRelease: 1.35,
+        maxPolyphony: 32,
 
-        maxPolyphony: 48,
+        sustainRelease: 0.90
 
-        keyboardMap: [
-            "a",
-            "w",
-            "s",
-            "e",
-            "d",
-            "f",
-            "t",
-            "g",
-            "y",
-            "h",
-            "u",
-            "j",
-            "k",
-            "o",
-            "l",
-            "p",
-            ";",
-            "z",
-            "x",
-            "c",
-            "v",
-            "b",
-            "n",
-            "m",
-            ",",
-            ".",
-            "/",
-            "'",
-            "[",
-            "]"
-        ]
     };
 
+
     /* ============================================================
-       NOTES
+       02 — MAPPING CLAVIER ORDINATEUR
+       ----------------------------------------------------------------
+       A W S E D F T G Y H U J K
+    ============================================================ */
+
+    const KEYBOARD_MAP = {
+
+        "a": 48,
+        "w": 49,
+        "s": 50,
+        "e": 51,
+        "d": 52,
+        "f": 53,
+        "t": 54,
+        "g": 55,
+        "y": 56,
+        "h": 57,
+        "u": 58,
+        "j": 59,
+        "k": 60
+
+    };
+
+
+    /* ============================================================
+       03 — NOMS DES NOTES
     ============================================================ */
 
     const NOTE_NAMES = [
-        "C",
-        "C♯",
-        "D",
-        "D♯",
-        "E",
-        "F",
-        "F♯",
-        "G",
-        "G♯",
-        "A",
-        "A♯",
-        "B"
+
+        "Do",
+        "Do♯",
+        "Ré",
+        "Ré♯",
+        "Mi",
+        "Fa",
+        "Fa♯",
+        "Sol",
+        "Sol♯",
+        "La",
+        "La♯",
+        "Si"
+
     ];
 
-    const BLACK_PITCH_CLASSES = new Set([
-        1,
-        3,
-        6,
-        8,
-        10
+
+    /* ============================================================
+       04 — NOTES BLANCHES
+    ============================================================ */
+
+    const WHITE_NOTES = new Set([
+
+        0,
+        2,
+        4,
+        5,
+        7,
+        9,
+        11
+
     ]);
 
+
     /* ============================================================
-       TIMBRES
+       05 — RÉFÉRENCES DOM
     ============================================================ */
 
-    const VOICES = {
-        piano: {
-            label: "Piano Grand",
-            oscillator1: "triangle",
-            oscillator2: "sine",
-            oscillator3: "triangle",
-            osc2Level: 0.25,
-            osc3Level: 0.08,
-            attack: 0.008,
-            decay: 1.25,
-            sustain: 0.28,
-            release: 1.35,
-            filter: 5200,
-            filterQ: 0.7,
-            detune2: 0,
-            detune3: 0
-        },
+    const $ = (id) => {
 
-        warm: {
-            label: "Piano Warm",
-            oscillator1: "triangle",
-            oscillator2: "sine",
-            oscillator3: "sine",
-            osc2Level: 0.20,
-            osc3Level: 0.10,
-            attack: 0.015,
-            decay: 1.55,
-            sustain: 0.34,
-            release: 1.55,
-            filter: 3600,
-            filterQ: 0.65,
-            detune2: -2,
-            detune3: 2
-        },
+        return document.getElementById(id);
 
-        bright: {
-            label: "Piano Bright",
-            oscillator1: "triangle",
-            oscillator2: "sawtooth",
-            oscillator3: "sine",
-            osc2Level: 0.16,
-            osc3Level: 0.12,
-            attack: 0.004,
-            decay: 0.95,
-            sustain: 0.25,
-            release: 1.10,
-            filter: 7200,
-            filterQ: 0.8,
-            detune2: 1,
-            detune3: -1
-        },
-
-        grave: {
-            label: "Grave",
-            oscillator1: "sine",
-            oscillator2: "triangle",
-            oscillator3: "sine",
-            osc2Level: 0.34,
-            osc3Level: 0.12,
-            attack: 0.012,
-            decay: 1.75,
-            sustain: 0.42,
-            release: 1.80,
-            filter: 2800,
-            filterQ: 0.55,
-            detune2: -3,
-            detune3: 3
-        },
-
-        aigu: {
-            label: "Aigu",
-            oscillator1: "triangle",
-            oscillator2: "sawtooth",
-            oscillator3: "sine",
-            osc2Level: 0.19,
-            osc3Level: 0.10,
-            attack: 0.004,
-            decay: 0.80,
-            sustain: 0.22,
-            release: 0.90,
-            filter: 8200,
-            filterQ: 0.9,
-            detune2: 2,
-            detune3: -2
-        },
-
-        soprano: {
-            label: "Soprano",
-            oscillator1: "sine",
-            oscillator2: "triangle",
-            oscillator3: "sine",
-            osc2Level: 0.30,
-            osc3Level: 0.12,
-            attack: 0.018,
-            decay: 1.20,
-            sustain: 0.38,
-            release: 1.40,
-            filter: 9000,
-            filterQ: 0.7,
-            detune2: 3,
-            detune3: -3
-        },
-
-        alto: {
-            label: "Alto",
-            oscillator1: "triangle",
-            oscillator2: "sine",
-            oscillator3: "triangle",
-            osc2Level: 0.27,
-            osc3Level: 0.10,
-            attack: 0.012,
-            decay: 1.35,
-            sustain: 0.35,
-            release: 1.40,
-            filter: 6000,
-            filterQ: 0.65,
-            detune2: -1,
-            detune3: 1
-        },
-
-        tenor: {
-            label: "Ténor",
-            oscillator1: "triangle",
-            oscillator2: "sine",
-            oscillator3: "sine",
-            osc2Level: 0.32,
-            osc3Level: 0.08,
-            attack: 0.010,
-            decay: 1.50,
-            sustain: 0.40,
-            release: 1.60,
-            filter: 4700,
-            filterQ: 0.60,
-            detune2: -2,
-            detune3: 2
-        },
-
-        basse: {
-            label: "Basse",
-            oscillator1: "sine",
-            oscillator2: "triangle",
-            oscillator3: "sine",
-            osc2Level: 0.38,
-            osc3Level: 0.10,
-            attack: 0.014,
-            decay: 1.80,
-            sustain: 0.46,
-            release: 1.90,
-            filter: 2200,
-            filterQ: 0.50,
-            detune2: -4,
-            detune3: 4
-        }
     };
 
-    /* ============================================================
-       ÉTAT GLOBAL
-    ============================================================ */
-
-    const state = {
-        audioContext: null,
-
-        masterGain: null,
-        compressor: null,
-
-        audioStarted: false,
-
-        volume: CONFIG.defaultVolume,
-        bpm: CONFIG.defaultBpm,
-
-        sustain: false,
-        metronome: false,
-
-        selectedVoice: "piano",
-
-        activeNotes: new Map(),
-
-        pressedComputerKeys: new Set(),
-
-        pointerNotes: new Map(),
-
-        metronomeTimer: null,
-
-        noteSequence: 0
-    };
-
-    /* ============================================================
-       DOM
-    ============================================================ */
-
-    const $ = id => document.getElementById(id);
 
     const pianoKeyboard = $("pianoKeyboard");
+
     const startAudioBtn = $("startAudioBtn");
+
     const sustainBtn = $("sustainBtn");
+
     const metronomeBtn = $("metronomeBtn");
 
-    const currentNote = $("currentNote");
-    const currentOctave = $("currentOctave");
-    const statusText = $("statusText");
+    const volumeControl = $("volume");
 
-    const bpmValue = $("bpmValue");
-    const bpmOutput = $("bpmOutput");
-
-    const volume = $("volume");
     const volumeValue = $("volumeValue");
 
-    const bpm = $("bpm");
-    const waveform = $("waveform");
+    const bpmControl = $("bpm");
+
+    const bpmOutput = $("bpmOutput");
+
+    const bpmValue = $("bpmValue");
+
+    const waveformControl = $("waveform");
+
+    const statusText = $("statusText");
+
+    const currentNote = $("currentNote");
+
+    const currentOctave = $("currentOctave");
 
     const staff = $("staff");
+
     const noteMarker = $("noteMarker");
 
+
     /* ============================================================
-       UTILITAIRES
+       06 — VÉRIFICATION
+    ============================================================ */
+
+    if (!pianoKeyboard) {
+
+        console.error(
+            "FOBAS Piano : #pianoKeyboard introuvable."
+        );
+
+        return;
+
+    }
+
+
+    /* ============================================================
+       07 — ÉTAT AUDIO
+    ============================================================ */
+
+    let audioContext = null;
+
+    let masterGain = null;
+
+    let compressor = null;
+
+    let audioReady = false;
+
+
+    /* ============================================================
+       08 — ÉTAT MUSICAL
+    ============================================================ */
+
+    let sustain = false;
+
+    let metronome = false;
+
+    let bpm = CONFIG.defaultBpm;
+
+    let volume = CONFIG.defaultVolume;
+
+
+    /* ============================================================
+       09 — MÉTRONOME
+    ============================================================ */
+
+    let metroTimer = null;
+
+    let metroNextTime = 0;
+
+
+    /* ============================================================
+       10 — NOTES ACTIVES
+    ============================================================ */
+
+    const activeVoices = new Map();
+
+
+    /* ============================================================
+       11 — TOUCHES ENFONCÉES
+    ============================================================ */
+
+    const pressedKeys = new Set();
+
+
+    /* ============================================================
+       12 — ÉLÉMENTS DU CLAVIER
+    ============================================================ */
+
+    const keyElements = new Map();
+
+
+    /* ============================================================
+       13 — INJECTION DU STYLE VISUEL
+       ----------------------------------------------------------------
+       Ce style donne aux touches une apparence plus proche
+       d'un vrai piano numérique.
+    ============================================================ */
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+
+        #pianoKeyboard.fobas-real-piano {
+
+            --white-key-width: clamp(42px, 5.2vw, 72px);
+
+            --white-key-height: clamp(
+                180px,
+                30vw,
+                360px
+            );
+
+            --black-key-width: clamp(
+                27px,
+                3.25vw,
+                46px
+            );
+
+            --black-key-height: clamp(
+                112px,
+                19vw,
+                235px
+            );
+
+            position: relative !important;
+
+            display: flex !important;
+
+            align-items: flex-start !important;
+
+            justify-content: center !important;
+
+            width: 100% !important;
+
+            min-height:
+                calc(
+                    var(--white-key-height) + 50px
+                ) !important;
+
+            padding:
+                22px
+                12px
+                28px !important;
+
+            box-sizing: border-box !important;
+
+            overflow-x: auto !important;
+
+            overflow-y: hidden !important;
+
+            border-radius:
+                0 0 18px 18px !important;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #1b1b1b 0%,
+                    #090909 55%,
+                    #020202 100%
+                ) !important;
+
+            box-shadow:
+
+                inset 0 10px 18px
+                    rgba(255,255,255,.04),
+
+                inset 0 -12px 22px
+                    rgba(0,0,0,.95),
+
+                0 16px 35px
+                    rgba(0,0,0,.45) !important;
+
+            scrollbar-width: thin;
+
+            -webkit-overflow-scrolling: touch;
+
+            touch-action: pan-x;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-keyboard-inner {
+
+            position: relative;
+
+            flex: 0 0 auto;
+
+            display: flex;
+
+            height:
+                var(--white-key-height);
+
+            margin: 0 auto;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-white-key {
+
+            position: relative;
+
+            flex: 0 0
+                var(--white-key-width);
+
+            height:
+                var(--white-key-height);
+
+            margin: 0;
+
+            padding: 0;
+
+            border:
+                1px solid #b8b8b8;
+
+            border-top:
+                1px solid #ffffff;
+
+            border-radius:
+                0 0 9px 9px;
+
+            cursor: pointer;
+
+            user-select: none;
+
+            -webkit-user-select: none;
+
+            -webkit-tap-highlight-color:
+                transparent;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #cfcfcf 0%,
+                    #ffffff 9%,
+                    #ffffff 76%,
+                    #dedede 100%
+                );
+
+            box-shadow:
+
+                inset 5px 0 8px
+                    rgba(0,0,0,.08),
+
+                inset -5px 0 8px
+                    rgba(0,0,0,.11),
+
+                0 5px 0 #888888,
+
+                0 7px 12px
+                    rgba(0,0,0,.35);
+
+            transition:
+
+                transform .055s ease,
+
+                box-shadow .055s ease,
+
+                background .055s ease;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-white-key::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 5px;
+
+            right: 5px;
+
+            top: 8px;
+
+            height: 12px;
+
+            border-radius: 50%;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(255,255,255,.8),
+                    rgba(255,255,255,0)
+                );
+
+            pointer-events: none;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-white-key::after {
+
+            content: "";
+
+            position: absolute;
+
+            left: 50%;
+
+            bottom: 11px;
+
+            width: 32%;
+
+            height: 5px;
+
+            transform:
+                translateX(-50%);
+
+            border-radius: 50%;
+
+            background:
+                rgba(0,0,0,.08);
+
+            pointer-events: none;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-white-key.is-pressed {
+
+            transform:
+                translateY(5px);
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #bdbdbd,
+                    #f1f1f1 15%,
+                    #d8d8d8 100%
+                );
+
+            box-shadow:
+
+                inset 4px 0 7px
+                    rgba(0,0,0,.12),
+
+                inset -4px 0 7px
+                    rgba(0,0,0,.15),
+
+                0 1px 0 #777777,
+
+                0 2px 5px
+                    rgba(0,0,0,.35);
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-black-key {
+
+            position: absolute;
+
+            z-index: 20;
+
+            top: 0;
+
+            width:
+                var(--black-key-width);
+
+            height:
+                var(--black-key-height);
+
+            margin: 0;
+
+            padding: 0;
+
+            border:
+                1px solid #000000;
+
+            border-top-color:
+                #454545;
+
+            border-radius:
+                0 0 6px 6px;
+
+            cursor: pointer;
+
+            user-select: none;
+
+            -webkit-user-select: none;
+
+            -webkit-tap-highlight-color:
+                transparent;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #030303 0%,
+                    #2b2b2b 23%,
+                    #080808 62%,
+                    #000000 100%
+                );
+
+            box-shadow:
+
+                inset 4px 0 5px
+                    rgba(255,255,255,.08),
+
+                inset -5px 0 7px
+                    rgba(0,0,0,.95),
+
+                0 6px 0 #000000,
+
+                0 9px 12px
+                    rgba(0,0,0,.55);
+
+            transform-origin:
+                top center;
+
+            transition:
+
+                transform .055s ease,
+
+                background .055s ease,
+
+                box-shadow .055s ease;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-black-key::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 5px;
+
+            right: 5px;
+
+            top: 5px;
+
+            height: 30%;
+
+            border-radius: 4px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(255,255,255,.16),
+                    rgba(255,255,255,0)
+                );
+
+            pointer-events: none;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-black-key.is-pressed {
+
+            transform:
+                translateY(5px)
+                scaleY(.985);
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #010101,
+                    #111111 35%,
+                    #020202 100%
+                );
+
+            box-shadow:
+
+                inset 3px 0 4px
+                    rgba(255,255,255,.04),
+
+                inset -4px 0 6px
+                    rgba(0,0,0,.98),
+
+                0 1px 0 #000000,
+
+                0 3px 6px
+                    rgba(0,0,0,.55);
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-key-label {
+
+            position: absolute;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 13px;
+
+            text-align: center;
+
+            font-family:
+                Inter,
+                system-ui,
+                sans-serif;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            letter-spacing: .04em;
+
+            color:
+                rgba(20,20,20,.48);
+
+            pointer-events: none;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-black-key
+        .fobas-key-label {
+
+            bottom: 8px;
+
+            color:
+                rgba(255,255,255,.45);
+
+            font-size: 8px;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-key-glow {
+
+            position: absolute;
+
+            left: 12%;
+
+            right: 12%;
+
+            bottom: 18px;
+
+            height: 8px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(90,180,255,0);
+
+            filter: blur(5px);
+
+            transition:
+                background .08s ease;
+
+            pointer-events: none;
+
+        }
+
+
+        #pianoKeyboard
+        .is-pressed
+        .fobas-key-glow {
+
+            background:
+                rgba(90,180,255,.75);
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-white-key:focus-visible {
+
+            outline:
+                3px solid
+                rgba(90,180,255,.85);
+
+            outline-offset: 2px;
+
+        }
+
+
+        #pianoKeyboard
+        .fobas-black-key:focus-visible {
+
+            outline:
+                3px solid
+                rgba(90,180,255,.85);
+
+            outline-offset: 2px;
+
+        }
+
+
+        @media (max-width: 700px) {
+
+            #pianoKeyboard.fobas-real-piano {
+
+                justify-content:
+                    flex-start !important;
+
+            }
+
+        }
+
+    `;
+
+    document.head.appendChild(style);
+
+
+    /* ============================================================
+       14 — CONVERSION MIDI → NOTE
+    ============================================================ */
+
+    function midiToNote(midi) {
+
+        const pitch =
+            midi % 12;
+
+        const octave =
+            Math.floor(midi / 12) - 1;
+
+        return {
+
+            midi: midi,
+
+            pitch: pitch,
+
+            name:
+                NOTE_NAMES[pitch],
+
+            octave:
+                octave,
+
+            fullName:
+                `${NOTE_NAMES[pitch]}${octave}`
+
+        };
+
+    }
+
+
+    /* ============================================================
+       15 — MIDI → FRÉQUENCE
     ============================================================ */
 
     function midiToFrequency(midi) {
-        return 440 * Math.pow(
-            2,
-            (midi - 69) / 12
-        );
+
+        return 440 *
+            Math.pow(
+                2,
+                (midi - 69) / 12
+            );
+
     }
 
-    function midiToNoteName(midi) {
-        const pitchClass =
-            ((midi % 12) + 12) % 12;
-
-        return NOTE_NAMES[pitchClass];
-    }
-
-    function midiToOctave(midi) {
-        return Math.floor(midi / 12) - 1;
-    }
-
-    function isBlackKey(midi) {
-        const pitchClass =
-            ((midi % 12) + 12) % 12;
-
-        return BLACK_PITCH_CLASSES.has(
-            pitchClass
-        );
-    }
-
-    function getFullNoteName(midi) {
-        return `${midiToNoteName(midi)}${midiToOctave(midi)}`;
-    }
-
-    function clamp(value, min, max) {
-        return Math.min(
-            Math.max(value, min),
-            max
-        );
-    }
 
     /* ============================================================
-       AUDIO ENGINE
+       16 — DÉTERMINER TOUCHE BLANCHE
     ============================================================ */
 
-    async function ensureAudio() {
+    function isWhite(midi) {
 
-        if (!state.audioContext) {
-
-            const AudioContextClass =
-                window.AudioContext ||
-                window.webkitAudioContext;
-
-            if (!AudioContextClass) {
-                throw new Error(
-                    "Web Audio API non disponible."
-                );
-            }
-
-            state.audioContext =
-                new AudioContextClass();
-
-            state.compressor =
-                state.audioContext.createDynamicsCompressor();
-
-            state.compressor.threshold.value = -18;
-            state.compressor.knee.value = 12;
-            state.compressor.ratio.value = 4;
-            state.compressor.attack.value = 0.003;
-            state.compressor.release.value = 0.25;
-
-            state.masterGain =
-                state.audioContext.createGain();
-
-            state.masterGain.gain.value =
-                state.volume;
-
-            state.compressor.connect(
-                state.masterGain
-            );
-
-            state.masterGain.connect(
-                state.audioContext.destination
-            );
-        }
-
-        if (
-            state.audioContext.state ===
-            "suspended"
-        ) {
-            await state.audioContext.resume();
-        }
-
-        state.audioStarted = true;
-
-        updateAudioButton();
-
-        setStatus(
-            "Piano actif — prêt à jouer."
+        return WHITE_NOTES.has(
+            midi % 12
         );
+
     }
 
-    function updateAudioButton() {
-
-        if (!startAudioBtn) {
-            return;
-        }
-
-        if (state.audioStarted) {
-
-            startAudioBtn.textContent =
-                "Piano actif";
-
-            startAudioBtn.classList.add(
-                "active"
-            );
-
-        } else {
-
-            startAudioBtn.textContent =
-                "Activer le piano";
-
-            startAudioBtn.classList.remove(
-                "active"
-            );
-        }
-    }
 
     /* ============================================================
-       VOLUME
+       17 — DÉTERMINER TOUCHE NOIRE
     ============================================================ */
 
-    function updateVolume() {
+    function isBlack(midi) {
 
-        if (!volume) {
-            return;
-        }
+        return !isWhite(midi);
 
-        const value =
-            clamp(
-                Number(volume.value),
-                0,
-                1
-            );
-
-        state.volume = value;
-
-        if (state.masterGain) {
-
-            state.masterGain.gain.setTargetAtTime(
-                value,
-                state.audioContext.currentTime,
-                0.015
-            );
-        }
-
-        if (volumeValue) {
-
-            volumeValue.textContent =
-                `${Math.round(value * 100)}%`;
-        }
     }
+
 
     /* ============================================================
-       CRÉATION D'UNE VOIX
+       18 — COMPTER LES TOUCHES BLANCHES
     ============================================================ */
 
-    function createVoice(
-        midi,
-        velocity = 1
-    ) {
-
-        if (!state.audioContext) {
-            return null;
-        }
-
-        const ctx =
-            state.audioContext;
-
-        const voice =
-            VOICES[state.selectedVoice] ||
-            VOICES.piano;
-
-        const frequency =
-            midiToFrequency(midi);
-
-        const now =
-            ctx.currentTime;
-
-        const output =
-            ctx.createGain();
-
-        const filter =
-            ctx.createBiquadFilter();
-
-        filter.type =
-            "lowpass";
-
-        const filterFrequency =
-            clamp(
-                voice.filter *
-                Math.pow(
-                    2,
-                    (midi - 60) / 36
-                ),
-                900,
-                12000
-            );
-
-        filter.frequency.setValueAtTime(
-            filterFrequency,
-            now
-        );
-
-        filter.Q.value =
-            voice.filterQ;
-
-        output.gain.setValueAtTime(
-            0.0001,
-            now
-        );
-
-        filter.connect(output);
-        output.connect(state.compressor);
-
-        const oscillators = [];
-
-        /* --------------------------------------------------------
-           OSCILLATEUR PRINCIPAL
-        -------------------------------------------------------- */
-
-        const osc1 =
-            ctx.createOscillator();
-
-        osc1.type =
-            voice.oscillator1;
-
-        osc1.frequency.setValueAtTime(
-            frequency,
-            now
-        );
-
-        const gain1 =
-            ctx.createGain();
-
-        gain1.gain.value =
-            1;
-
-        osc1.connect(gain1);
-        gain1.connect(filter);
-
-        oscillators.push(osc1);
-
-        /* --------------------------------------------------------
-           SECOND OSCILLATEUR
-        -------------------------------------------------------- */
-
-        const osc2 =
-            ctx.createOscillator();
-
-        osc2.type =
-            voice.oscillator2;
-
-        osc2.frequency.setValueAtTime(
-            frequency,
-            now
-        );
-
-        osc2.detune.value =
-            voice.detune2;
-
-        const gain2 =
-            ctx.createGain();
-
-        gain2.gain.value =
-            voice.osc2Level;
-
-        osc2.connect(gain2);
-        gain2.connect(filter);
-
-        oscillators.push(osc2);
-
-        /* --------------------------------------------------------
-           TROISIÈME OSCILLATEUR
-        -------------------------------------------------------- */
-
-        const osc3 =
-            ctx.createOscillator();
-
-        osc3.type =
-            voice.oscillator3;
-
-        osc3.frequency.setValueAtTime(
-            frequency * 2,
-            now
-        );
-
-        osc3.detune.value =
-            voice.detune3;
-
-        const gain3 =
-            ctx.createGain();
-
-        gain3.gain.value =
-            voice.osc3Level;
-
-        osc3.connect(gain3);
-        gain3.connect(filter);
-
-        oscillators.push(osc3);
-
-        /* --------------------------------------------------------
-           ENVELOPPE ADSR
-        -------------------------------------------------------- */
-
-        const velocityLevel =
-            clamp(
-                Number(velocity),
-                0.1,
-                1
-            );
-
-        const peak =
-            0.22 *
-            velocityLevel;
-
-        const attackEnd =
-            now + voice.attack;
-
-        const decayEnd =
-            attackEnd + voice.decay;
-
-        output.gain.cancelScheduledValues(
-            now
-        );
-
-        output.gain.setValueAtTime(
-            0.0001,
-            now
-        );
-
-        output.gain.exponentialRampToValueAtTime(
-            Math.max(0.0002, peak),
-            attackEnd
-        );
-
-        output.gain.exponentialRampToValueAtTime(
-            Math.max(
-                0.0001,
-                peak * voice.sustain
-            ),
-            decayEnd
-        );
-
-        /* --------------------------------------------------------
-           DÉMARRAGE
-        -------------------------------------------------------- */
-
-        oscillators.forEach(
-            oscillator => {
-                oscillator.start(now);
-            }
-        );
-
-        return {
-            midi,
-            frequency,
-
-            output,
-            filter,
-
-            oscillators,
-
-            startedAt: now,
-
-            released: false,
-            sustained: false,
-
-            voiceName:
-                state.selectedVoice,
-
-            id:
-                ++state.noteSequence
-        };
-    }
-
-    /* ============================================================
-       JOUER UNE NOTE
-    ============================================================ */
-
-    async function playNote(
-        midi,
-        velocity = 1
-    ) {
-
-        try {
-            await ensureAudio();
-        } catch (error) {
-            setStatus(
-                "Audio non disponible sur cet appareil."
-            );
-            return;
-        }
-
-        midi =
-            Number(midi);
-
-        if (
-            midi < CONFIG.firstMidi ||
-            midi > CONFIG.lastMidi
-        ) {
-            return;
-        }
-
-        /* Si la note existe déjà */
-        if (
-            state.activeNotes.has(midi)
-        ) {
-            releaseNote(
-                midi,
-                true
-            );
-        }
-
-        /* Limite de polyphonie */
-        if (
-            state.activeNotes.size >=
-            CONFIG.maxPolyphony
-        ) {
-
-            const firstNote =
-                state.activeNotes
-                    .values()
-                    .next()
-                    .value;
-
-            if (firstNote) {
-                forceStopNote(
-                    firstNote
-                );
-            }
-        }
-
-        const note =
-            createVoice(
-                midi,
-                velocity
-            );
-
-        if (!note) {
-            return;
-        }
-
-        state.activeNotes.set(
-            midi,
-            note
-        );
-
-        updateNoteDisplay(midi);
-        updateKeyVisual(midi, true);
-
-        setStatus(
-            `${getFullNoteName(midi)} — ${VOICES[state.selectedVoice].label}`
-        );
-    }
-
-    /* ============================================================
-       RELÂCHER UNE NOTE
-    ============================================================ */
-
-    function releaseNote(
-        midi,
-        immediate = false
-    ) {
-
-        const note =
-            state.activeNotes.get(midi);
-
-        if (!note) {
-            return;
-        }
-
-        if (note.released) {
-            return;
-        }
-
-        if (
-            state.sustain &&
-            !immediate
-        ) {
-
-            note.sustained = true;
-
-            updateKeyVisual(
-                midi,
-                false,
-                true
-            );
-
-            return;
-        }
-
-        note.released = true;
-
-        const ctx =
-            state.audioContext;
-
-        if (!ctx) {
-            return;
-        }
-
-        const now =
-            ctx.currentTime;
-
-        const releaseTime =
-            immediate
-                ? 0.025
-                : (
-                    state.sustain
-                        ? CONFIG.sustainRelease
-                        : CONFIG.normalRelease
-                );
-
-        const currentGain =
-            Math.max(
-                0.0001,
-                note.output.gain.value
-            );
-
-        note.output.gain.cancelScheduledValues(
-            now
-        );
-
-        note.output.gain.setValueAtTime(
-            currentGain,
-            now
-        );
-
-        note.output.gain.exponentialRampToValueAtTime(
-            0.0001,
-            now + releaseTime
-        );
-
-        note.oscillators.forEach(
-            oscillator => {
-
-                try {
-                    oscillator.stop(
-                        now + releaseTime + 0.03
-                    );
-                } catch (_) {}
-            }
-        );
-
-        setTimeout(
-            () => {
-
-                try {
-                    note.oscillators.forEach(
-                        oscillator => {
-                            oscillator.disconnect();
-                        }
-                    );
-
-                    note.filter.disconnect();
-                    note.output.disconnect();
-
-                } catch (_) {}
-
-                if (
-                    state.activeNotes.get(midi) ===
-                    note
-                ) {
-                    state.activeNotes.delete(
-                        midi
-                    );
-                }
-
-                updateKeyVisual(
-                    midi,
-                    false
-                );
-
-            },
-            Math.max(
-                80,
-                (releaseTime + 0.08) * 1000
-            )
-        );
-    }
-
-    /* ============================================================
-       ARRÊT FORCÉ
-    ============================================================ */
-
-    function forceStopNote(note) {
-
-        if (!note) {
-            return;
-        }
-
-        const midi =
-            note.midi;
-
-        try {
-
-            note.oscillators.forEach(
-                oscillator => {
-
-                    try {
-                        oscillator.stop();
-                    } catch (_) {}
-
-                    try {
-                        oscillator.disconnect();
-                    } catch (_) {}
-                }
-            );
-
-            note.filter.disconnect();
-            note.output.disconnect();
-
-        } catch (_) {}
-
-        state.activeNotes.delete(
-            midi
-        );
-
-        updateKeyVisual(
-            midi,
-            false
-        );
-    }
-
-    /* ============================================================
-       ARRÊT DE TOUTES LES NOTES
-    ============================================================ */
-
-    function stopAllNotes() {
-
-        const notes =
-            Array.from(
-                state.activeNotes.values()
-            );
-
-        notes.forEach(
-            note => {
-                forceStopNote(note);
-            }
-        );
-
-        state.pointerNotes.clear();
-        state.pressedComputerKeys.clear();
-    }
-
-    /* ============================================================
-       SUSTAIN
-    ============================================================ */
-
-    function setSustain(enabled) {
-
-        state.sustain =
-            Boolean(enabled);
-
-        if (sustainBtn) {
-
-            sustainBtn.setAttribute(
-                "aria-pressed",
-                String(state.sustain)
-            );
-
-            const span =
-                sustainBtn.querySelector("span");
-
-            if (span) {
-                span.textContent =
-                    state.sustain
-                        ? "ON"
-                        : "OFF";
-            }
-
-            sustainBtn.classList.toggle(
-                "active",
-                state.sustain
-            );
-        }
-
-        if (!state.sustain) {
-
-            const sustainedNotes =
-                Array.from(
-                    state.activeNotes.values()
-                ).filter(
-                    note => note.sustained
-                );
-
-            sustainedNotes.forEach(
-                note => {
-                    releaseNote(
-                        note.midi,
-                        false
-                    );
-                }
-            );
-        }
-
-        setStatus(
-            state.sustain
-                ? "Sustain activé."
-                : "Sustain désactivé."
-        );
-    }
-
-    /* ============================================================
-       CRÉATION DU CLAVIER — 30 TOUCHES
-    ============================================================ */
-
-    function buildKeyboard() {
-
-        if (!pianoKeyboard) {
-            return;
-        }
-
-        pianoKeyboard.innerHTML = "";
-
-        pianoKeyboard.setAttribute(
-            "data-key-count",
-            String(CONFIG.totalKeys)
-        );
-
-        pianoKeyboard.style.setProperty(
-            "--white-count",
-            String(
-                countWhiteKeys()
-            )
-        );
-
-        let whiteIndex = 0;
-
-        for (
-            let midi = CONFIG.firstMidi;
-            midi <= CONFIG.lastMidi;
-            midi++
-        ) {
-
-            if (!isBlackKey(midi)) {
-
-                const key =
-                    createPianoKey(
-                        midi,
-                        false,
-                        whiteIndex
-                    );
-
-                pianoKeyboard.appendChild(
-                    key
-                );
-
-                whiteIndex++;
-            }
-        }
-
-        whiteIndex = 0;
-
-        for (
-            let midi = CONFIG.firstMidi;
-            midi <= CONFIG.lastMidi;
-            midi++
-        ) {
-
-            if (isBlackKey(midi)) {
-
-                const key =
-                    createPianoKey(
-                        midi,
-                        true,
-                        findPreviousWhiteIndex(
-                            midi
-                        )
-                    );
-
-                pianoKeyboard.appendChild(
-                    key
-                );
-            } else {
-                whiteIndex++;
-            }
-        }
-
-        updateKeyboardHelp();
-    }
-
-    function countWhiteKeys() {
+    function countWhitesBefore(midi) {
 
         let count = 0;
 
         for (
+            let n = CONFIG.firstMidi;
+            n < midi;
+            n++
+        ) {
+
+            if (isWhite(n)) {
+                count++;
+            }
+
+        }
+
+        return count;
+
+    }
+
+
+    /* ============================================================
+       19 — LIRE UNE VALEUR CSS NUMÉRIQUE
+    ============================================================ */
+
+    function getCssNumber(
+        element,
+        property,
+        fallback
+    ) {
+
+        const value =
+            getComputedStyle(element)
+                .getPropertyValue(property)
+                .trim();
+
+        const parsed =
+            parseFloat(value);
+
+        return Number.isFinite(parsed)
+            ? parsed
+            : fallback;
+
+    }
+
+
+    /* ============================================================
+       20 — CRÉATION DU CLAVIER
+    ============================================================ */
+
+    function buildKeyboard() {
+
+        pianoKeyboard.innerHTML = "";
+
+        pianoKeyboard.classList.add(
+            "fobas-real-piano"
+        );
+
+        const inner =
+            document.createElement("div");
+
+        inner.className =
+            "fobas-keyboard-inner";
+
+        pianoKeyboard.appendChild(inner);
+
+
+        /* --------------------------------------------------------
+           TOUCHES BLANCHES
+        -------------------------------------------------------- */
+
+        for (
             let midi = CONFIG.firstMidi;
             midi <= CONFIG.lastMidi;
             midi++
         ) {
 
-            if (!isBlackKey(midi)) {
-                count++;
+            if (!isWhite(midi)) {
+                continue;
             }
+
+            const key =
+                createKey(
+                    midi,
+                    false
+                );
+
+            inner.appendChild(key);
+
         }
 
-        return count;
-    }
 
-    function findPreviousWhiteIndex(
-        midi
-    ) {
-
-        let index = 0;
+        /* --------------------------------------------------------
+           TOUCHES NOIRES
+        -------------------------------------------------------- */
 
         for (
-            let current =
-                CONFIG.firstMidi;
-            current < midi;
-            current++
+            let midi = CONFIG.firstMidi;
+            midi <= CONFIG.lastMidi;
+            midi++
         ) {
 
-            if (!isBlackKey(current)) {
-                index++;
+            if (!isBlack(midi)) {
+                continue;
             }
+
+            const key =
+                createKey(
+                    midi,
+                    true
+                );
+
+            inner.appendChild(key);
+
         }
 
-        return Math.max(
-            0,
-            index - 1
-        );
+
+        /* --------------------------------------------------------
+           LARGEUR DU CLAVIER
+        -------------------------------------------------------- */
+
+        const whiteCount =
+            Array.from(
+                keyElements.keys()
+            ).filter(isWhite).length;
+
+        const whiteWidth =
+            getCssNumber(
+                inner,
+                "--white-key-width",
+                60
+            );
+
+        inner.style.width =
+            `${whiteCount * whiteWidth}px`;
+
+
+        repositionBlackKeys();
+
     }
 
+
     /* ============================================================
-       CRÉATION D'UNE TOUCHE
+       21 — CRÉER UNE TOUCHE
     ============================================================ */
 
-    function createPianoKey(
+    function createKey(
         midi,
-        black,
-        whiteIndex
+        black
     ) {
+
+        const info =
+            midiToNote(midi);
 
         const key =
             document.createElement("button");
@@ -1175,406 +987,1154 @@
 
         key.className =
             black
-                ? "piano-key black-key"
-                : "piano-key white-key";
+                ? "fobas-black-key"
+                : "fobas-white-key";
 
         key.dataset.midi =
             String(midi);
 
         key.dataset.note =
-            getFullNoteName(midi);
-
-        key.dataset.keyIndex =
-            String(
-                midi -
-                CONFIG.firstMidi
-            );
-
-        key.dataset.whiteIndex =
-            String(whiteIndex);
-
-        const computerKey =
-            CONFIG.keyboardMap[
-                midi - CONFIG.firstMidi
-            ];
-
-        key.dataset.computerKey =
-            computerKey;
+            info.fullName;
 
         key.setAttribute(
             "aria-label",
-            `Note ${getFullNoteName(midi)}`
+            `Jouer ${info.fullName}`
         );
 
-        key.title =
-            `${getFullNoteName(midi)} — touche ${computerKey.toUpperCase()}`;
-
-        key.style.setProperty(
-            "--white-index",
-            String(whiteIndex)
+        key.setAttribute(
+            "tabindex",
+            "0"
         );
 
-        key.style.setProperty(
-            "--white-count",
-            String(countWhiteKeys())
-        );
 
-        const noteLabel =
+        /* --------------------------------------------------------
+           LABEL
+        -------------------------------------------------------- */
+
+        const label =
             document.createElement("span");
 
-        noteLabel.className =
-            "key-note";
+        label.className =
+            "fobas-key-label";
 
-        noteLabel.textContent =
-            getFullNoteName(midi);
+        label.textContent =
+            info.fullName;
 
-        key.appendChild(
-            noteLabel
-        );
 
-        const keyLabel =
+        /* --------------------------------------------------------
+           LUMIÈRE
+        -------------------------------------------------------- */
+
+        const glow =
             document.createElement("span");
 
-        keyLabel.className =
-            "key-computer";
+        glow.className =
+            "fobas-key-glow";
 
-        keyLabel.textContent =
-            computerKey.toUpperCase();
 
-        key.appendChild(
-            keyLabel
-        );
+        key.appendChild(label);
 
-        attachKeyEvents(
-            key,
-            midi
-        );
+        key.appendChild(glow);
 
-        return key;
-    }
 
-    /* ============================================================
-       ÉVÉNEMENTS DES TOUCHES
-    ============================================================ */
-
-    function attachKeyEvents(
-        key,
-        midi
-    ) {
+        /* --------------------------------------------------------
+           POINTER DOWN
+        -------------------------------------------------------- */
 
         key.addEventListener(
             "pointerdown",
-            async event => {
+            (event) => {
 
                 event.preventDefault();
 
                 try {
+
                     key.setPointerCapture(
                         event.pointerId
                     );
+
                 } catch (_) {}
 
-                const velocity =
-                    event.pointerType === "touch"
-                        ? 0.95
-                        : 1;
+                noteOn(midi);
 
-                state.pointerNotes.set(
-                    event.pointerId,
-                    midi
-                );
-
-                key.classList.add(
-                    "active"
-                );
-
-                await playNote(
-                    midi,
-                    velocity
-                );
             }
         );
+
+
+        /* --------------------------------------------------------
+           POINTER UP
+        -------------------------------------------------------- */
 
         key.addEventListener(
             "pointerup",
-            event => {
+            (event) => {
 
                 event.preventDefault();
 
-                const noteMidi =
-                    state.pointerNotes.get(
-                        event.pointerId
-                    );
+                noteOff(midi);
 
-                state.pointerNotes.delete(
-                    event.pointerId
-                );
-
-                releaseNote(
-                    noteMidi ?? midi
-                );
             }
         );
+
+
+        /* --------------------------------------------------------
+           POINTER CANCEL
+        -------------------------------------------------------- */
 
         key.addEventListener(
             "pointercancel",
-            event => {
+            () => {
 
-                const noteMidi =
-                    state.pointerNotes.get(
-                        event.pointerId
-                    );
+                noteOff(midi);
 
-                state.pointerNotes.delete(
-                    event.pointerId
-                );
-
-                releaseNote(
-                    noteMidi ?? midi
-                );
             }
         );
+
+
+        /* --------------------------------------------------------
+           POINTER LEAVE
+        -------------------------------------------------------- */
 
         key.addEventListener(
-            "lostpointercapture",
-            event => {
+            "pointerleave",
+            (event) => {
 
-                const noteMidi =
-                    state.pointerNotes.get(
-                        event.pointerId
-                    );
+                if (event.buttons) {
 
-                if (
-                    noteMidi !== undefined
-                ) {
+                    noteOff(midi);
 
-                    state.pointerNotes.delete(
-                        event.pointerId
-                    );
-
-                    releaseNote(
-                        noteMidi
-                    );
                 }
+
             }
         );
+
+
+        /* --------------------------------------------------------
+           CLAVIER ACCESSIBLE
+        -------------------------------------------------------- */
+
+        key.addEventListener(
+            "keydown",
+            (event) => {
+
+                if (
+                    event.key === " " ||
+                    event.key === "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    noteOn(midi);
+
+                }
+
+            }
+        );
+
+
+        key.addEventListener(
+            "keyup",
+            (event) => {
+
+                if (
+                    event.key === " " ||
+                    event.key === "Enter"
+                ) {
+
+                    event.preventDefault();
+
+                    noteOff(midi);
+
+                }
+
+            }
+        );
+
+
+        /* --------------------------------------------------------
+           CONTEXT MENU
+        -------------------------------------------------------- */
 
         key.addEventListener(
             "contextmenu",
-            event => {
+            (event) => {
+
                 event.preventDefault();
+
             }
         );
+
+
+        keyElements.set(
+            midi,
+            key
+        );
+
+
+        return key;
+
     }
 
+
     /* ============================================================
-       VISUEL DES TOUCHES
+       22 — POSITIONNER LES TOUCHES NOIRES
     ============================================================ */
 
-    function updateKeyVisual(
-        midi,
-        active,
-        sustained = false
-    ) {
+    function repositionBlackKeys() {
 
-        if (!pianoKeyboard) {
+        const inner =
+            pianoKeyboard.querySelector(
+                ".fobas-keyboard-inner"
+            );
+
+        if (!inner) {
             return;
         }
 
-        const key =
-            pianoKeyboard.querySelector(
-                `[data-midi="${midi}"]`
+
+        const whiteWidth =
+            getCssNumber(
+                inner,
+                "--white-key-width",
+                60
             );
+
+
+        const blackWidth =
+            getCssNumber(
+                inner,
+                "--black-key-width",
+                38
+            );
+
+
+        const whiteCount =
+            Array.from(
+                keyElements.keys()
+            ).filter(isWhite).length;
+
+
+        inner.style.width =
+            `${whiteCount * whiteWidth}px`;
+
+
+        keyElements.forEach(
+            (element, midi) => {
+
+                if (!isBlack(midi)) {
+                    return;
+                }
+
+                const left =
+                    countWhitesBefore(midi) *
+                    whiteWidth -
+                    blackWidth / 2;
+
+                element.style.left =
+                    `${left}px`;
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       23 — AJOUTER LES TOUCHES DU CLAVIER ORDINATEUR
+    ============================================================ */
+
+    function updateKeyboardMapLabels() {
+
+        const reverse =
+            new Map();
+
+
+        Object.entries(
+            KEYBOARD_MAP
+        ).forEach(
+            ([key, midi]) => {
+
+                reverse.set(
+                    midi,
+                    key.toUpperCase()
+                );
+
+            }
+        );
+
+
+        keyElements.forEach(
+            (element, midi) => {
+
+                const label =
+                    element.querySelector(
+                        ".fobas-key-label"
+                    );
+
+                if (!label) {
+                    return;
+                }
+
+
+                const keyboardKey =
+                    reverse.get(midi);
+
+
+                if (keyboardKey) {
+
+                    label.textContent =
+                        `${midiToNote(midi).fullName} · ${keyboardKey}`;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       24 — INITIALISER AUDIO
+    ============================================================ */
+
+    function ensureAudio() {
+
+        if (audioReady) {
+            return true;
+        }
+
+
+        try {
+
+            const AudioContextClass =
+                window.AudioContext ||
+                window.webkitAudioContext;
+
+
+            if (!AudioContextClass) {
+
+                setStatus(
+                    "Web Audio API non disponible."
+                );
+
+                return false;
+
+            }
+
+
+            audioContext =
+                new AudioContextClass();
+
+
+            /* ----------------------------------------------------
+               COMPRESSEUR
+            ---------------------------------------------------- */
+
+            compressor =
+                audioContext
+                    .createDynamicsCompressor();
+
+
+            compressor.threshold.value =
+                -18;
+
+            compressor.knee.value =
+                18;
+
+            compressor.ratio.value =
+                5;
+
+            compressor.attack.value =
+                0.003;
+
+            compressor.release.value =
+                0.18;
+
+
+            /* ----------------------------------------------------
+               MASTER GAIN
+            ---------------------------------------------------- */
+
+            masterGain =
+                audioContext.createGain();
+
+
+            masterGain.gain.value =
+                volume;
+
+
+            compressor.connect(
+                masterGain
+            );
+
+
+            masterGain.connect(
+                audioContext.destination
+            );
+
+
+            audioReady = true;
+
+
+            if (
+                audioContext.state ===
+                "suspended"
+            ) {
+
+                audioContext.resume();
+
+            }
+
+
+            setStatus(
+                "Piano activé — prêt à jouer."
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "FOBAS Piano Audio Error:",
+                error
+            );
+
+
+            setStatus(
+                "Impossible d'activer le moteur audio."
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       25 — RÉACTIVER AUDIO
+    ============================================================ */
+
+    async function resumeAudio() {
+
+        if (!ensureAudio()) {
+            return false;
+        }
+
+
+        try {
+
+            if (
+                audioContext.state ===
+                "suspended"
+            ) {
+
+                await audioContext.resume();
+
+            }
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(error);
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       26 — CRÉER UNE VOIX DE PIANO
+    ============================================================ */
+
+    function createPianoVoice(midi) {
+
+        if (!audioReady) {
+            return null;
+        }
+
+
+        const now =
+            audioContext.currentTime;
+
+
+        const frequency =
+            midiToFrequency(midi);
+
+
+        const voice = {
+
+            midi: midi,
+
+            oscillators: [],
+
+            gains: [],
+
+            output: null,
+
+            released: false,
+
+            startTime: now
+
+        };
+
+
+        const output =
+            audioContext.createGain();
+
+
+        output.gain.setValueAtTime(
+            0.0001,
+            now
+        );
+
+
+        output.connect(
+            compressor
+        );
+
+
+        voice.output =
+            output;
+
+
+        /* ========================================================
+           CHOIX DU TIMBRE
+        ======================================================== */
+
+        const waveform =
+            waveformControl
+                ? waveformControl.value
+                : "piano";
+
+
+        let partials;
+
+
+        if (waveform === "warm") {
+
+            partials = [
+
+                [1, 1.00],
+
+                [2, 0.34],
+
+                [3, 0.16],
+
+                [4, 0.08]
+
+            ];
+
+        } else if (
+            waveform === "bright"
+        ) {
+
+            partials = [
+
+                [1, 1.00],
+
+                [2, 0.48],
+
+                [3, 0.27],
+
+                [4, 0.16],
+
+                [5, 0.08]
+
+            ];
+
+        } else {
+
+            partials = [
+
+                [1, 1.00],
+
+                [2, 0.42],
+
+                [3, 0.21],
+
+                [4, 0.12],
+
+                [5, 0.055]
+
+            ];
+
+        }
+
+
+        const velocity = 0.90;
+
+
+        /* ========================================================
+           HARMONIQUES
+        ======================================================== */
+
+        partials.forEach(
+            ([ratio, amount], index) => {
+
+                const osc =
+                    audioContext.createOscillator();
+
+
+                const gain =
+                    audioContext.createGain();
+
+
+                osc.type =
+                    index === 0
+                        ? "triangle"
+                        : "sine";
+
+
+                osc.frequency.setValueAtTime(
+                    frequency * ratio,
+                    now
+                );
+
+
+                if (index > 0) {
+
+                    osc.detune.value =
+                        (index % 2
+                            ? 1
+                            : -1) *
+                        index *
+                        1.7;
+
+                }
+
+
+                const level =
+                    amount *
+                    velocity *
+                    (
+                        index === 0
+                            ? 0.24
+                            : 0.10
+                    );
+
+
+                gain.gain.setValueAtTime(
+                    0.0001,
+                    now
+                );
+
+
+                gain.gain.exponentialRampToValueAtTime(
+                    Math.max(
+                        0.0002,
+                        level
+                    ),
+                    now + 0.008 +
+                    index * 0.002
+                );
+
+
+                gain.gain.exponentialRampToValueAtTime(
+                    Math.max(
+                        0.00015,
+                        level * 0.34
+                    ),
+                    now + 0.55
+                );
+
+
+                gain.gain.exponentialRampToValueAtTime(
+                    0.0001,
+                    now + 5.0
+                );
+
+
+                osc.connect(gain);
+
+                gain.connect(output);
+
+
+                osc.start(now);
+
+
+                voice.oscillators.push(
+                    osc
+                );
+
+                voice.gains.push(
+                    gain
+                );
+
+            }
+        );
+
+
+        /* ========================================================
+           PETIT SON DE MARTEAU
+        ======================================================== */
+
+        const clickOsc =
+            audioContext.createOscillator();
+
+
+        const clickGain =
+            audioContext.createGain();
+
+
+        clickOsc.type =
+            "sine";
+
+
+        clickOsc.frequency.value =
+            Math.min(
+                4200,
+                frequency * 8
+            );
+
+
+        clickGain.gain.setValueAtTime(
+            0.0001,
+            now
+        );
+
+
+        clickGain.gain.exponentialRampToValueAtTime(
+            0.018,
+            now + 0.001
+        );
+
+
+        clickGain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + 0.035
+        );
+
+
+        clickOsc.connect(
+            clickGain
+        );
+
+
+        clickGain.connect(
+            output
+        );
+
+
+        clickOsc.start(now);
+
+
+        clickOsc.stop(
+            now + 0.05
+        );
+
+
+        voice.oscillators.push(
+            clickOsc
+        );
+
+
+        voice.gains.push(
+            clickGain
+        );
+
+
+        /* ========================================================
+           ATTACK PRINCIPAL
+        ======================================================== */
+
+        output.gain.exponentialRampToValueAtTime(
+            1,
+            now + 0.012
+        );
+
+
+        return voice;
+
+    }
+
+
+    /* ============================================================
+       27 — ARRÊTER UNE VOIX
+    ============================================================ */
+
+    function stopVoice(
+        voice,
+        immediate = false
+    ) {
+
+        if (
+            !voice ||
+            voice.released
+        ) {
+
+            return;
+
+        }
+
+
+        voice.released = true;
+
+
+        const now =
+            audioContext.currentTime;
+
+
+        const release =
+            immediate
+                ? 0.025
+                : CONFIG.sustainRelease;
+
+
+        try {
+
+            voice.output.gain.cancelScheduledValues(
+                now
+            );
+
+
+            voice.output.gain.setValueAtTime(
+                Math.max(
+                    0.0001,
+                    voice.output.gain.value
+                ),
+                now
+            );
+
+
+            voice.output.gain.exponentialRampToValueAtTime(
+                0.0001,
+                now + release
+            );
+
+
+            voice.oscillators.forEach(
+                (osc) => {
+
+                    try {
+
+                        osc.stop(
+                            now +
+                            release +
+                            0.04
+                        );
+
+                    } catch (_) {}
+
+                }
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    /* ============================================================
+       28 — JOUER UNE NOTE
+    ============================================================ */
+
+    async function noteOn(midi) {
+
+        if (
+            pressedKeys.has(midi)
+        ) {
+
+            return;
+
+        }
+
+
+        const ready =
+            await resumeAudio();
+
+
+        if (!ready) {
+            return;
+        }
+
+
+        pressedKeys.add(midi);
+
+
+        /* --------------------------------------------------------
+           ÉVITER DOUBLE VOIX
+        -------------------------------------------------------- */
+
+        if (
+            activeVoices.has(midi)
+        ) {
+
+            stopVoice(
+                activeVoices.get(midi),
+                true
+            );
+
+
+            activeVoices.delete(
+                midi
+            );
+
+        }
+
+
+        /* --------------------------------------------------------
+           LIMITE POLYPHONIE
+        -------------------------------------------------------- */
+
+        if (
+            activeVoices.size >=
+            CONFIG.maxPolyphony
+        ) {
+
+            const oldest =
+                activeVoices.keys()
+                    .next()
+                    .value;
+
+
+            if (
+                oldest !== undefined
+            ) {
+
+                stopVoice(
+                    activeVoices.get(oldest),
+                    true
+                );
+
+
+                activeVoices.delete(
+                    oldest
+                );
+
+            }
+
+        }
+
+
+        const voice =
+            createPianoVoice(midi);
+
+
+        if (!voice) {
+            return;
+        }
+
+
+        activeVoices.set(
+            midi,
+            voice
+        );
+
+
+        animateKey(
+            midi,
+            true
+        );
+
+
+        updateMusicalDisplay(
+            midi
+        );
+
+
+        addStaffNote(
+            midi
+        );
+
+    }
+
+
+    /* ============================================================
+       29 — RELÂCHER UNE NOTE
+    ============================================================ */
+
+    function noteOff(midi) {
+
+        if (
+            !pressedKeys.has(midi)
+        ) {
+
+            return;
+
+        }
+
+
+        pressedKeys.delete(
+            midi
+        );
+
+
+        const voice =
+            activeVoices.get(midi);
+
+
+        if (!voice) {
+
+            animateKey(
+                midi,
+                false
+            );
+
+            return;
+
+        }
+
+
+        if (!sustain) {
+
+            stopVoice(
+                voice,
+                false
+            );
+
+
+            activeVoices.delete(
+                midi
+            );
+
+        }
+
+
+        animateKey(
+            midi,
+            false
+        );
+
+    }
+
+
+    /* ============================================================
+       30 — LIBÉRER NOTES SUSTAIN
+    ============================================================ */
+
+    function releaseSustainedVoices() {
+
+        activeVoices.forEach(
+            (voice, midi) => {
+
+                if (
+                    !pressedKeys.has(midi)
+                ) {
+
+                    stopVoice(
+                        voice,
+                        false
+                    );
+
+
+                    activeVoices.delete(
+                        midi
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       31 — SUSTAIN
+    ============================================================ */
+
+    function toggleSustain() {
+
+        sustain =
+            !sustain;
+
+
+        updateToggleButton(
+            sustainBtn,
+            sustain
+        );
+
+
+        if (!sustain) {
+
+            releaseSustainedVoices();
+
+        }
+
+
+        setStatus(
+
+            sustain
+                ? "Sustain activé."
+                : "Sustain désactivé."
+
+        );
+
+    }
+
+
+    /* ============================================================
+       32 — ANIMATION TOUCHE
+    ============================================================ */
+
+    function animateKey(
+        midi,
+        pressed
+    ) {
+
+        const key =
+            keyElements.get(midi);
+
 
         if (!key) {
             return;
         }
 
-        key.classList.toggle(
-            "active",
-            Boolean(active)
-        );
 
         key.classList.toggle(
-            "sustained",
-            Boolean(sustained)
+            "is-pressed",
+            pressed
         );
+
     }
+
 
     /* ============================================================
-       CLAVIER ORDINATEUR
+       33 — AFFICHAGE NOTE / OCTAVE
     ============================================================ */
 
-    function getMidiFromComputerKey(
-        key
-    ) {
-
-        const normalized =
-            String(key)
-                .toLowerCase();
-
-        const index =
-            CONFIG.keyboardMap.indexOf(
-                normalized
-            );
-
-        if (index === -1) {
-            return null;
-        }
-
-        return (
-            CONFIG.firstMidi +
-            index
-        );
-    }
-
-    async function handleComputerKeyDown(
-        event
-    ) {
-
-        if (
-            event.ctrlKey ||
-            event.metaKey ||
-            event.altKey
-        ) {
-            return;
-        }
-
-        const midi =
-            getMidiFromComputerKey(
-                event.key
-            );
-
-        if (midi === null) {
-            return;
-        }
-
-        event.preventDefault();
-
-        const normalized =
-            event.key.toLowerCase();
-
-        if (
-            state.pressedComputerKeys.has(
-                normalized
-            )
-        ) {
-            return;
-        }
-
-        state.pressedComputerKeys.add(
-            normalized
-        );
-
-        await playNote(
-            midi,
-            0.95
-        );
-    }
-
-    function handleComputerKeyUp(
-        event
-    ) {
-
-        const midi =
-            getMidiFromComputerKey(
-                event.key
-            );
-
-        if (midi === null) {
-            return;
-        }
-
-        event.preventDefault();
-
-        const normalized =
-            event.key.toLowerCase();
-
-        state.pressedComputerKeys.delete(
-            normalized
-        );
-
-        releaseNote(
-            midi
-        );
-    }
-
-    /* ============================================================
-       AFFICHAGE NOTE
-    ============================================================ */
-
-    function updateNoteDisplay(
+    function updateMusicalDisplay(
         midi
     ) {
+
+        const info =
+            midiToNote(midi);
+
 
         if (currentNote) {
 
             currentNote.textContent =
-                midiToNoteName(midi);
+                info.name;
+
         }
+
 
         if (currentOctave) {
 
             currentOctave.textContent =
-                midiToOctave(midi);
+                info.octave;
+
         }
 
-        updateStaffMarker(
-            midi
-        );
+
+        if (statusText) {
+
+            statusText.textContent =
+                `Note jouée : ${info.fullName}`;
+
+        }
+
     }
 
-    /* ============================================================
-       PARTITION
-    ============================================================ */
-
-    function updateStaffMarker(
-        midi
-    ) {
-
-        if (!noteMarker) {
-            return;
-        }
-
-        const minMidi =
-            CONFIG.firstMidi;
-
-        const maxMidi =
-            CONFIG.lastMidi;
-
-        const percentage =
-            (
-                (midi - minMidi) /
-                (maxMidi - minMidi)
-            ) * 100;
-
-        noteMarker.style.left =
-            `${clamp(
-                percentage,
-                2,
-                96
-            )}%`;
-
-        noteMarker.textContent =
-            isBlackKey(midi)
-                ? "◆"
-                : "●";
-
-        noteMarker.setAttribute(
-            "aria-label",
-            `Note ${getFullNoteName(midi)}`
-        );
-
-        if (staff) {
-
-            staff.classList.add(
-                "has-note"
-            );
-        }
-    }
 
     /* ============================================================
-       STATUS
+       34 — MESSAGE DE STATUT
     ============================================================ */
 
     function setStatus(
@@ -1582,590 +2142,822 @@
     ) {
 
         if (statusText) {
+
             statusText.textContent =
                 text;
+
         }
+
     }
 
+
     /* ============================================================
-       TIMBRE
+       35 — PARTITION VISUELLE
     ============================================================ */
 
-    function populateVoices() {
+    function addStaffNote(
+        midi
+    ) {
 
-        if (!waveform) {
+        if (!noteMarker) {
             return;
         }
 
-        waveform.innerHTML = "";
 
-        Object.entries(
-            VOICES
-        ).forEach(
-            ([value, voice]) => {
+        const info =
+            midiToNote(midi);
 
-                const option =
-                    document.createElement(
-                        "option"
-                    );
 
-                option.value =
-                    value;
+        const normalized =
+            (
+                midi -
+                CONFIG.firstMidi
+            ) /
+            (
+                CONFIG.lastMidi -
+                CONFIG.firstMidi
+            );
 
-                option.textContent =
-                    voice.label;
+
+        const top =
+            78 -
+            normalized * 58;
+
+
+        noteMarker.textContent =
+            "●";
+
+
+        noteMarker.style.top =
+            `${Math.max(
+                8,
+                Math.min(
+                    82,
+                    top
+                )
+            )}%`;
+
+
+        noteMarker.style.left =
+            "50%";
+
+
+        noteMarker.style.transform =
+            "translate(-50%, -50%)";
+
+
+        noteMarker.title =
+            `Note : ${info.fullName}`;
+
+    }
+
+
+    /* ============================================================
+       36 — CLAVIER ORDINATEUR
+    ============================================================ */
+
+    function setupComputerKeyboard() {
+
+        window.addEventListener(
+            "keydown",
+            async (event) => {
+
+                const key =
+                    event.key.toLowerCase();
+
 
                 if (
-                    value ===
-                    state.selectedVoice
+                    event.ctrlKey ||
+                    event.altKey ||
+                    event.metaKey
                 ) {
-                    option.selected =
-                        true;
+
+                    return;
+
                 }
 
-                waveform.appendChild(
-                    option
+
+                if (event.repeat) {
+                    return;
+                }
+
+
+                const midi =
+                    KEYBOARD_MAP[key];
+
+
+                if (
+                    midi === undefined
+                ) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                await noteOn(
+                    midi
                 );
+
             }
         );
-    }
 
-    function changeVoice(
-        voiceName
-    ) {
 
-        if (
-            !VOICES[voiceName]
-        ) {
-            return;
-        }
+        window.addEventListener(
+            "keyup",
+            (event) => {
 
-        state.selectedVoice =
-            voiceName;
+                const key =
+                    event.key.toLowerCase();
 
-        setStatus(
-            `Timbre sélectionné : ${VOICES[voiceName].label}`
+
+                const midi =
+                    KEYBOARD_MAP[key];
+
+
+                if (
+                    midi === undefined
+                ) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                noteOff(
+                    midi
+                );
+
+            }
         );
+
+
+        window.addEventListener(
+            "blur",
+            () => {
+
+                pressedKeys.forEach(
+                    (midi) => {
+
+                        noteOff(
+                            midi
+                        );
+
+                    }
+                );
+
+
+                if (sustain) {
+
+                    releaseSustainedVoices();
+
+                }
+
+            }
+        );
+
     }
+
 
     /* ============================================================
-       BPM
+       37 — VOLUME
     ============================================================ */
 
-    function updateBpm() {
+    function setupVolume() {
 
-        if (!bpm) {
+        if (!volumeControl) {
             return;
         }
 
-        const value =
-            clamp(
-                Number(bpm.value),
-                40,
-                220
+
+        volume =
+            Number(
+                volumeControl.value
             );
 
-        state.bpm =
-            value;
 
-        if (bpmValue) {
-            bpmValue.textContent =
-                String(value);
+        updateVolumeDisplay();
+
+
+        volumeControl.addEventListener(
+            "input",
+            () => {
+
+                volume =
+                    Number(
+                        volumeControl.value
+                    );
+
+
+                if (
+                    masterGain &&
+                    audioContext
+                ) {
+
+                    masterGain.gain.setTargetAtTime(
+                        volume,
+                        audioContext.currentTime,
+                        0.015
+                    );
+
+                }
+
+
+                updateVolumeDisplay();
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       38 — AFFICHAGE VOLUME
+    ============================================================ */
+
+    function updateVolumeDisplay() {
+
+        if (
+            volumeValue &&
+            volumeControl
+        ) {
+
+            volumeValue.textContent =
+                `${Math.round(
+                    Number(
+                        volumeControl.value
+                    ) * 100
+                )}%`;
+
         }
+
+    }
+
+
+    /* ============================================================
+       39 — BPM
+    ============================================================ */
+
+    function setupBpm() {
+
+        if (!bpmControl) {
+            return;
+        }
+
+
+        bpm =
+            Number(
+                bpmControl.value
+            );
+
+
+        updateBpmDisplay();
+
+
+        bpmControl.addEventListener(
+            "input",
+            () => {
+
+                bpm =
+                    Number(
+                        bpmControl.value
+                    );
+
+
+                updateBpmDisplay();
+
+
+                if (metronome) {
+
+                    restartMetronome();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       40 — AFFICHAGE BPM
+    ============================================================ */
+
+    function updateBpmDisplay() {
 
         if (bpmOutput) {
+
             bpmOutput.textContent =
-                String(value);
+                String(bpm);
+
         }
 
-        if (
-            state.metronome
-        ) {
-            restartMetronome();
+
+        if (bpmValue) {
+
+            bpmValue.textContent =
+                String(bpm);
+
         }
+
     }
+
 
     /* ============================================================
-       MÉTRONOME
+       41 — TOGGLE MÉTRONOME
     ============================================================ */
 
-    function playMetronomeClick() {
+    function toggleMetronome() {
 
-        if (
-            !state.audioContext ||
-            !state.audioStarted
-        ) {
-            return;
-        }
+        metronome =
+            !metronome;
 
-        const ctx =
-            state.audioContext;
 
-        const now =
-            ctx.currentTime;
-
-        const oscillator =
-            ctx.createOscillator();
-
-        const gain =
-            ctx.createGain();
-
-        oscillator.type =
-            "sine";
-
-        oscillator.frequency.setValueAtTime(
-            1100,
-            now
+        updateToggleButton(
+            metronomeBtn,
+            metronome
         );
 
-        gain.gain.setValueAtTime(
-            0.0001,
-            now
-        );
 
-        gain.gain.exponentialRampToValueAtTime(
-            0.12,
-            now + 0.004
-        );
+        if (metronome) {
 
-        gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            now + 0.065
-        );
+            startMetronome();
 
-        oscillator.connect(gain);
-        gain.connect(state.masterGain);
-
-        oscillator.start(now);
-
-        oscillator.stop(
-            now + 0.08
-        );
-    }
-
-    function startMetronome() {
-
-        stopMetronome();
-
-        const interval =
-            60000 /
-            state.bpm;
-
-        playMetronomeClick();
-
-        state.metronomeTimer =
-            setInterval(
-                playMetronomeClick,
-                interval
-            );
-    }
-
-    function stopMetronome() {
-
-        if (
-            state.metronomeTimer
-        ) {
-
-            clearInterval(
-                state.metronomeTimer
-            );
-
-            state.metronomeTimer =
-                null;
-        }
-    }
-
-    function restartMetronome() {
-
-        if (
-            !state.metronome
-        ) {
-            return;
-        }
-
-        startMetronome();
-    }
-
-    function setMetronome(
-        enabled
-    ) {
-
-        state.metronome =
-            Boolean(enabled);
-
-        if (metronomeBtn) {
-
-            metronomeBtn.setAttribute(
-                "aria-pressed",
-                String(state.metronome)
-            );
-
-            const span =
-                metronomeBtn.querySelector(
-                    "span"
-                );
-
-            if (span) {
-
-                span.textContent =
-                    state.metronome
-                        ? "ON"
-                        : "OFF";
-            }
-
-            metronomeBtn.classList.toggle(
-                "active",
-                state.metronome
-            );
-        }
-
-        if (
-            state.metronome
-        ) {
-
-            ensureAudio()
-                .then(() => {
-                    startMetronome();
-                });
 
             setStatus(
-                `Métronome — ${state.bpm} BPM`
+                `Métronome actif — ${bpm} BPM`
             );
 
         } else {
 
             stopMetronome();
 
+
             setStatus(
                 "Métronome désactivé."
             );
+
         }
+
     }
 
+
     /* ============================================================
-       AIDE CLAVIER
+       42 — DÉMARRER MÉTRONOME
     ============================================================ */
 
-    function updateKeyboardHelp() {
+    function startMetronome() {
 
-        const helpCards =
-            document.querySelectorAll(
-                ".help-card"
-            );
+        stopMetronome();
 
-        if (!helpCards.length) {
+
+        if (!ensureAudio()) {
             return;
         }
 
-        const allKeys =
-            CONFIG.keyboardMap.map(
-                key =>
-                    key === " "
-                        ? "ESPACE"
-                        : key.toUpperCase()
+
+        const interval =
+            60000 /
+            Math.max(
+                40,
+                bpm
             );
 
-        const firstCard =
-            helpCards[0];
 
-        if (firstCard) {
+        metroNextTime =
+            audioContext.currentTime +
+            0.05;
 
-            const span =
-                firstCard.querySelector(
-                    "span"
-                );
 
-            if (span) {
+        metroTimer =
+            window.setInterval(
+                () => {
 
-                span.textContent =
-                    allKeys.join(" ");
-            }
-        }
+                    metroClick();
 
-        const whiteKeys = [];
-        const blackKeys = [];
-
-        for (
-            let midi = CONFIG.firstMidi;
-            midi <= CONFIG.lastMidi;
-            midi++
-        ) {
-
-            const index =
-                midi -
-                CONFIG.firstMidi;
-
-            const computerKey =
-                CONFIG.keyboardMap[index];
-
-            if (isBlackKey(midi)) {
-
-                blackKeys.push(
-                    computerKey.toUpperCase()
-                );
-
-            } else {
-
-                whiteKeys.push(
-                    computerKey.toUpperCase()
-                );
-            }
-        }
-
-        const secondCard =
-            helpCards[1];
-
-        if (secondCard) {
-
-            const span =
-                secondCard.querySelector(
-                    "span"
-                );
-
-            if (span) {
-
-                span.textContent =
-                    whiteKeys.join(" · ");
-            }
-        }
-
-        const thirdCard =
-            helpCards[2];
-
-        if (thirdCard) {
-
-            const span =
-                thirdCard.querySelector(
-                    "span"
-                );
-
-            if (span) {
-
-                span.textContent =
-                    blackKeys.join(" · ");
-            }
-        }
-
-        const footerSpans =
-            document.querySelectorAll(
-                ".piano-footer span"
+                },
+                interval
             );
 
-        if (
-            footerSpans.length > 1
-        ) {
 
-            footerSpans[1].textContent =
-                `Clavier ordinateur : ${allKeys.join(" ")}`;
-        }
+        metroClick();
+
     }
 
+
     /* ============================================================
-       BOUTON AUDIO
+       43 — REDÉMARRER MÉTRONOME
     ============================================================ */
 
-    if (startAudioBtn) {
+    function restartMetronome() {
+
+        if (!metronome) {
+            return;
+        }
+
+
+        startMetronome();
+
+    }
+
+
+    /* ============================================================
+       44 — ARRÊTER MÉTRONOME
+    ============================================================ */
+
+    function stopMetronome() {
+
+        if (
+            metroTimer !== null
+        ) {
+
+            clearInterval(
+                metroTimer
+            );
+
+
+            metroTimer =
+                null;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       45 — CLIC MÉTRONOME
+    ============================================================ */
+
+    function metroClick() {
+
+        if (!audioReady) {
+            return;
+        }
+
+
+        const now =
+            audioContext.currentTime;
+
+
+        const osc =
+            audioContext.createOscillator();
+
+
+        const gain =
+            audioContext.createGain();
+
+
+        osc.type =
+            "sine";
+
+
+        osc.frequency.setValueAtTime(
+            1200,
+            now
+        );
+
+
+        gain.gain.setValueAtTime(
+            0.0001,
+            now
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.10,
+            now + 0.001
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + 0.065
+        );
+
+
+        osc.connect(gain);
+
+
+        gain.connect(
+            compressor
+        );
+
+
+        osc.start(now);
+
+
+        osc.stop(
+            now + 0.08
+        );
+
+    }
+
+
+    /* ============================================================
+       46 — BOUTONS ON / OFF
+    ============================================================ */
+
+    function updateToggleButton(
+        button,
+        active
+    ) {
+
+        if (!button) {
+            return;
+        }
+
+
+        button.setAttribute(
+            "aria-pressed",
+            String(active)
+        );
+
+
+        const span =
+            button.querySelector(
+                "span"
+            );
+
+
+        if (span) {
+
+            span.textContent =
+                active
+                    ? "ON"
+                    : "OFF";
+
+        }
+
+
+        button.classList.toggle(
+            "active",
+            active
+        );
+
+
+        button.dataset.state =
+            active
+                ? "on"
+                : "off";
+
+    }
+
+
+    /* ============================================================
+       47 — BOUTON ACTIVATION AUDIO
+    ============================================================ */
+
+    function setupAudioButton() {
+
+        if (!startAudioBtn) {
+            return;
+        }
+
 
         startAudioBtn.addEventListener(
             "click",
             async () => {
 
-                try {
+                const ready =
+                    await resumeAudio();
 
-                    await ensureAudio();
 
-                    setStatus(
-                        "Piano activé — vous pouvez jouer."
-                    );
-
-                } catch (_) {
-
-                    setStatus(
-                        "Impossible d'activer l'audio."
-                    );
+                if (!ready) {
+                    return;
                 }
-            }
-        );
-    }
 
-    /* ============================================================
-       BOUTON SUSTAIN
-    ============================================================ */
 
-    if (sustainBtn) {
+                startAudioBtn.textContent =
+                    "Piano actif";
 
-        sustainBtn.addEventListener(
-            "click",
-            () => {
 
-                setSustain(
-                    !state.sustain
+                startAudioBtn.classList.add(
+                    "active"
                 );
-            }
-        );
-    }
 
-    /* ============================================================
-       BOUTON MÉTRONOME
-    ============================================================ */
 
-    if (metronomeBtn) {
-
-        metronomeBtn.addEventListener(
-            "click",
-            () => {
-
-                setMetronome(
-                    !state.metronome
+                setStatus(
+                    "Piano activé — touchez une touche."
                 );
+
             }
         );
+
     }
 
+
     /* ============================================================
-       VOLUME
+       48 — CONTRÔLES
     ============================================================ */
 
-    if (volume) {
+    function setupControls() {
 
-        volume.addEventListener(
-            "input",
-            updateVolume
-        );
+        if (sustainBtn) {
+
+            sustainBtn.addEventListener(
+                "click",
+                toggleSustain
+            );
+
+        }
+
+
+        if (metronomeBtn) {
+
+            metronomeBtn.addEventListener(
+                "click",
+                toggleMetronome
+            );
+
+        }
+
     }
 
-    /* ============================================================
-       BPM
-    ============================================================ */
-
-    if (bpm) {
-
-        bpm.addEventListener(
-            "input",
-            updateBpm
-        );
-    }
 
     /* ============================================================
-       SÉLECTION DU SON
+       49 — REDIMENSIONNEMENT
     ============================================================ */
 
-    if (waveform) {
+    let resizeTimer =
+        null;
 
-        waveform.addEventListener(
-            "change",
-            event => {
-
-                changeVoice(
-                    event.target.value
-                );
-            }
-        );
-    }
-
-    /* ============================================================
-       CLAVIER PHYSIQUE
-    ============================================================ */
 
     window.addEventListener(
-        "keydown",
-        handleComputerKeyDown
-    );
-
-    window.addEventListener(
-        "keyup",
-        handleComputerKeyUp
-    );
-
-    /* ============================================================
-       SÉCURITÉ — PERTE DE FOCUS
-    ============================================================ */
-
-    window.addEventListener(
-        "blur",
+        "resize",
         () => {
 
-            state.pressedComputerKeys.clear();
+            clearTimeout(
+                resizeTimer
+            );
 
-            if (!state.sustain) {
-                stopAllNotes();
-            }
+
+            resizeTimer =
+                setTimeout(
+                    () => {
+
+                        repositionBlackKeys();
+
+                    },
+                    80
+                );
+
         }
     );
 
-    document.addEventListener(
-        "visibilitychange",
-        () => {
 
-            if (
-                document.hidden
-            ) {
+    /* ============================================================
+       50 — ACCESSIBILITÉ
+    ============================================================ */
 
-                state.pressedComputerKeys.clear();
+    function setupAccessibility() {
 
-                if (!state.sustain) {
-                    stopAllNotes();
-                }
+        keyElements.forEach(
+            (key) => {
+
+                key.addEventListener(
+                    "focus",
+                    () => {
+
+                        key.style.outline =
+                            "3px solid rgba(90,180,255,.75)";
+
+                        key.style.outlineOffset =
+                            "2px";
+
+                    }
+                );
+
+
+                key.addEventListener(
+                    "blur",
+                    () => {
+
+                        key.style.outline =
+                            "";
+
+                        key.style.outlineOffset =
+                            "";
+
+                    }
+                );
+
             }
+        );
+
+    }
+
+
+    /* ============================================================
+       51 — PROTECTION DU CONTEXT MENU
+    ============================================================ */
+
+    pianoKeyboard.addEventListener(
+        "contextmenu",
+        (event) => {
+
+            event.preventDefault();
+
         }
     );
 
+
     /* ============================================================
-       EMPÊCHER LE MENU CONTEXTUEL SUR LE PIANO
+       52 — NETTOYAGE DES VOIX
     ============================================================ */
 
-    if (pianoKeyboard) {
+    window.addEventListener(
+        "beforeunload",
+        () => {
 
-        pianoKeyboard.addEventListener(
-            "contextmenu",
-            event => {
-                event.preventDefault();
-            }
-        );
-    }
+            stopMetronome();
+
+
+            activeVoices.forEach(
+                (voice) => {
+
+                    stopVoice(
+                        voice,
+                        true
+                    );
+
+                }
+            );
+
+
+            activeVoices.clear();
+
+        }
+    );
+
 
     /* ============================================================
-       INITIALISATION
+       53 — INITIALISATION
     ============================================================ */
 
     function init() {
 
         buildKeyboard();
 
-        populateVoices();
 
-        if (volume) {
+        updateKeyboardMapLabels();
 
-            volume.value =
-                String(
-                    CONFIG.defaultVolume
-                );
-        }
 
-        if (bpm) {
+        setupComputerKeyboard();
 
-            bpm.value =
-                String(
-                    CONFIG.defaultBpm
-                );
-        }
 
-        updateVolume();
-        updateBpm();
+        setupVolume();
 
-        setSustain(false);
 
-        setMetronome(false);
+        setupBpm();
 
-        updateAudioButton();
+
+        setupAudioButton();
+
+
+        setupControls();
+
+
+        setupAccessibility();
+
+
+        updateToggleButton(
+            sustainBtn,
+            false
+        );
+
+
+        updateToggleButton(
+            metronomeBtn,
+            false
+        );
+
+
+        updateVolumeDisplay();
+
+
+        updateBpmDisplay();
+
 
         setStatus(
             "Prêt — activez l'audio pour commencer."
         );
+
+
+        console.log(
+            "FOBAS Piano — moteur chargé avec succès."
+        );
+
     }
 
+
     /* ============================================================
-       LANCEMENT
+       54 — LANCEMENT
     ============================================================ */
 
     if (
@@ -2184,1039 +2976,6 @@
     } else {
 
         init();
-    }
-
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ================================================================
-   FOBAS PIANO PRO — VISUAL TOUCH KEYBOARD UPGRADE
-   ---------------------------------------------------------------
-   OBJECTIF
-   ---------------------------------------------------------------
-   - Rendre le piano visuellement professionnel
-   - 88 touches A0 → C8
-   - Design 3D réaliste
-   - Touch mobile / tablette
-   - 2 TOUCHES SIMULTANÉES ET PLUS
-   - Compatible avec le moteur audio existant
-   - Compatible avec le système MIDI existant
-   - Compatible avec Recording / Exercise / Practice
-   - NE MODIFIE PAS le moteur audio existant
-   - NE REMPLACE PAS PianoKeyboardEngine
-   ================================================================ */
-
-(function FOBAS_PIANO_VISUAL_TOUCH_UPGRADE() {
-
-    "use strict";
-
-
-    /* ============================================================
-       01 — PROTECTION
-    ============================================================ */
-
-    if (
-        document.getElementById(
-            "fobasPianoProfessionalTouchStyles"
-        )
-    ) {
-        return;
-    }
-
-
-    /* ============================================================
-       02 — STYLE PROFESSIONNEL
-    ============================================================ */
-
-    const style =
-        document.createElement("style");
-
-    style.id =
-        "fobasPianoProfessionalTouchStyles";
-
-    style.textContent = `
-
-        /* ========================================================
-           PIANO PRINCIPAL
-        ======================================================== */
-
-        #pianoKeyboard {
-
-            position: relative !important;
-
-            display: block !important;
-
-            width: 100% !important;
-
-            min-width: 1100px !important;
-
-            height: 310px !important;
-
-            margin: 0 !important;
-
-            padding: 0 !important;
-
-            overflow: visible !important;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #111827 0%,
-                    #020617 48%,
-                    #000000 100%
-                ) !important;
-
-            border-radius: 14px !important;
-
-            border:
-                2px solid
-                rgba(255,255,255,.10) !important;
-
-            box-shadow:
-
-                inset 0 2px 0
-                rgba(255,255,255,.08),
-
-                inset 0 -12px 20px
-                rgba(0,0,0,.75),
-
-                0 20px 40px
-                rgba(0,0,0,.45) !important;
-
-            user-select: none !important;
-
-            -webkit-user-select: none !important;
-
-            -webkit-touch-callout: none !important;
-
-            touch-action: none !important;
-
-            overscroll-behavior: contain !important;
-
-        }
-
-
-        /* ========================================================
-           BASE VISUELLE
-        ======================================================== */
-
-        #pianoKeyboard::before {
-
-            content: "";
-
-            position: absolute;
-
-            left: 8px;
-
-            right: 8px;
-
-            bottom: 5px;
-
-            height: 12px;
-
-            border-radius: 0 0 9px 9px;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #374151,
-                    #030712
-                );
-
-            box-shadow:
-                inset 0 1px 0
-                rgba(255,255,255,.12),
-
-                0 5px 10px
-                rgba(0,0,0,.65);
-
-            pointer-events: none;
-
-            z-index: 0;
-
-        }
-
-
-        /* ========================================================
-           TOUCHES BLANCHES
-        ======================================================== */
-
-        #pianoKeyboard .piano-white-key {
-
-            position: absolute !important;
-
-            top: 0 !important;
-
-            bottom: 10px !important;
-
-            margin: 0 !important;
-
-            padding: 0 !important;
-
-            border-radius:
-                0 0 8px 8px !important;
-
-            border:
-
-                1px solid
-                rgba(100,116,139,.95) !important;
-
-            border-top: 0 !important;
-
-            background:
-
-                linear-gradient(
-                    180deg,
-                    #ffffff 0%,
-                    #f8fafc 34%,
-                    #e5e7eb 72%,
-                    #cbd5e1 100%
-                ) !important;
-
-            box-shadow:
-
-                inset 2px 0 2px
-                rgba(255,255,255,.90),
-
-                inset -2px 0 3px
-                rgba(0,0,0,.13),
-
-                inset 0 -18px 18px
-                rgba(0,0,0,.10),
-
-                0 5px 5px
-                rgba(0,0,0,.35) !important;
-
-            color: #111827 !important;
-
-            cursor: pointer !important;
-
-            z-index: 1 !important;
-
-            transition:
-                transform .045s ease,
-                background .045s ease,
-                box-shadow .045s ease !important;
-
-            -webkit-tap-highlight-color:
-                transparent !important;
-
-            touch-action: none !important;
-
-        }
-
-
-        /* --------------------------------------------------------
-           REFLET SUR TOUCHES BLANCHES
-        -------------------------------------------------------- */
-
-        #pianoKeyboard
-        .piano-white-key::before {
-
-            content: "";
-
-            position: absolute;
-
-            left: 8%;
-
-            right: 8%;
-
-            top: 4px;
-
-            height: 34%;
-
-            border-radius:
-                0 0 12px 12px;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    rgba(255,255,255,.90),
-                    rgba(255,255,255,0)
-                );
-
-            pointer-events: none;
-
-        }
-
-
-        /* --------------------------------------------------------
-           BAS DE TOUCHE BLANCHE
-        -------------------------------------------------------- */
-
-        #pianoKeyboard
-        .piano-white-key::after {
-
-            content: "";
-
-            position: absolute;
-
-            left: 14%;
-
-            right: 14%;
-
-            bottom: 8px;
-
-            height: 3px;
-
-            border-radius: 20px;
-
-            background:
-                rgba(15,23,42,.13);
-
-            pointer-events: none;
-
-        }
-
-
-        /* ========================================================
-           TOUCHES BLANCHES ACTIVES
-        ======================================================== */
-
-        #pianoKeyboard
-        .piano-white-key.active {
-
-            transform:
-                translateY(7px) !important;
-
-            background:
-
-                linear-gradient(
-                    180deg,
-                    #dbeafe 0%,
-                    #bfdbfe 35%,
-                    #93c5fd 72%,
-                    #60a5fa 100%
-                ) !important;
-
-            box-shadow:
-
-                inset 2px 0 3px
-                rgba(255,255,255,.70),
-
-                inset -2px 0 4px
-                rgba(30,64,175,.25),
-
-                inset 0 -20px 20px
-                rgba(37,99,235,.20),
-
-                0 2px 3px
-                rgba(0,0,0,.38),
-
-                0 0 16px
-                rgba(59,130,246,.35) !important;
-
-        }
-
-
-        /* ========================================================
-           TOUCHES NOIRES
-        ======================================================== */
-
-        #pianoKeyboard .piano-black-key {
-
-            position: absolute !important;
-
-            top: 0 !important;
-
-            height: 63% !important;
-
-            margin: 0 !important;
-
-            padding: 0 !important;
-
-            border-radius:
-                0 0 8px 8px !important;
-
-            border:
-
-                1px solid
-                #020617 !important;
-
-            background:
-
-                linear-gradient(
-                    105deg,
-                    #4b5563 0%,
-                    #1f2937 12%,
-                    #050505 34%,
-                    #000000 70%,
-                    #111827 88%,
-                    #374151 100%
-                ) !important;
-
-            box-shadow:
-
-                inset 2px 0 4px
-                rgba(255,255,255,.17),
-
-                inset -3px 0 6px
-                rgba(0,0,0,.95),
-
-                inset 0 -14px 12px
-                rgba(0,0,0,.60),
-
-                0 8px 9px
-                rgba(0,0,0,.65) !important;
-
-            color: #ffffff !important;
-
-            cursor: pointer !important;
-
-            z-index: 10 !important;
-
-            transform:
-                translateX(-50%) !important;
-
-            transition:
-                transform .045s ease,
-                background .045s ease,
-                box-shadow .045s ease !important;
-
-            -webkit-tap-highlight-color:
-                transparent !important;
-
-            touch-action: none !important;
-
-        }
-
-
-        /* --------------------------------------------------------
-           REFLET TOUCHES NOIRES
-        -------------------------------------------------------- */
-
-        #pianoKeyboard
-        .piano-black-key::before {
-
-            content: "";
-
-            position: absolute;
-
-            left: 4px;
-
-            top: 0;
-
-            width: 38%;
-
-            height: 72%;
-
-            border-radius:
-                0 0 5px 5px;
-
-            background:
-
-                linear-gradient(
-                    180deg,
-                    rgba(255,255,255,.23),
-                    rgba(255,255,255,0)
-                );
-
-            pointer-events: none;
-
-        }
-
-
-        /* ========================================================
-           TOUCHES NOIRES ACTIVES
-        ======================================================== */
-
-        #pianoKeyboard
-        .piano-black-key.active {
-
-            transform:
-                translateX(-50%)
-                translateY(7px) !important;
-
-            background:
-
-                linear-gradient(
-                    105deg,
-                    #bfdbfe 0%,
-                    #3b82f6 18%,
-                    #1e3a8a 52%,
-                    #020617 100%
-                ) !important;
-
-            box-shadow:
-
-                inset 2px 0 4px
-                rgba(255,255,255,.30),
-
-                inset -3px 0 7px
-                rgba(0,0,0,.95),
-
-                0 2px 3px
-                rgba(0,0,0,.60),
-
-                0 0 20px
-                rgba(59,130,246,.55) !important;
-
-        }
-
-
-        /* ========================================================
-           LABELS
-        ======================================================== */
-
-        #pianoKeyboard
-        .fobas-piano-key-label {
-
-            position: absolute !important;
-
-            left: 0 !important;
-
-            right: 0 !important;
-
-            bottom: 12px !important;
-
-            display: block !important;
-
-            text-align: center !important;
-
-            pointer-events: none !important;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif !important;
-
-            font-size: 7px !important;
-
-            line-height: 1 !important;
-
-            font-weight: 800 !important;
-
-            letter-spacing: .2px !important;
-
-            color: #475569 !important;
-
-            opacity: .70 !important;
-
-            white-space: nowrap !important;
-
-        }
-
-
-        /* --------------------------------------------------------
-           LABEL NOIRE
-        -------------------------------------------------------- */
-
-        #pianoKeyboard
-        .piano-black-key
-        .fobas-piano-key-label {
-
-            bottom: 7px !important;
-
-            color: #f8fafc !important;
-
-            opacity: .72 !important;
-
-            font-size: 6px !important;
-
-        }
-
-
-        /* ========================================================
-           TOUCH MULTIPLE
-        ======================================================== */
-
-        #pianoKeyboard
-        .piano-white-key,
-        #pianoKeyboard
-        .piano-black-key {
-
-            -webkit-user-select: none !important;
-
-            user-select: none !important;
-
-            -webkit-touch-callout: none !important;
-
-            touch-action: none !important;
-
-        }
-
-
-        /* ========================================================
-           MOBILE
-        ======================================================== */
-
-        @media (max-width: 900px) {
-
-            #pianoKeyboard {
-
-                min-width: 1000px !important;
-
-                height: 270px !important;
-
-            }
-
-            #pianoKeyboard
-            .fobas-piano-key-label {
-
-                font-size: 6px !important;
-
-            }
-
-            #pianoKeyboard
-            .piano-black-key
-            .fobas-piano-key-label {
-
-                font-size: 5px !important;
-
-            }
-
-        }
-
-
-        /* ========================================================
-           PETIT MOBILE
-        ======================================================== */
-
-        @media (max-width: 600px) {
-
-            #pianoKeyboard {
-
-                min-width: 900px !important;
-
-                height: 245px !important;
-
-                border-radius: 10px !important;
-
-            }
-
-            #pianoKeyboard
-            .fobas-piano-key-label {
-
-                bottom: 8px !important;
-
-                font-size: 5px !important;
-
-            }
-
-            #pianoKeyboard
-            .piano-black-key
-            .fobas-piano-key-label {
-
-                bottom: 5px !important;
-
-                font-size: 4px !important;
-
-            }
-
-        }
-
-
-        /* ========================================================
-           TRÈS PETIT ÉCRAN
-        ======================================================== */
-
-        @media (max-width: 420px) {
-
-            #pianoKeyboard {
-
-                min-width: 820px !important;
-
-                height: 225px !important;
-
-            }
-
-        }
-
-    `;
-
-    document.head.appendChild(style);
-
-
-    /* ============================================================
-       03 — SÉCURITÉ TOUCH
-       ------------------------------------------------------------
-       NE REMPLACE PAS LES ÉVÉNEMENTS DU MOTEUR.
-       On protège uniquement le comportement navigateur.
-    ============================================================ */
-
-    function installTouchProtection() {
-
-        const keyboard =
-            document.getElementById(
-                "pianoKeyboard"
-            );
-
-        if (!keyboard) {
-            return;
-        }
-
-
-        keyboard.addEventListener(
-            "contextmenu",
-            function (event) {
-
-                event.preventDefault();
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        keyboard.addEventListener(
-            "dragstart",
-            function (event) {
-
-                event.preventDefault();
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        keyboard.addEventListener(
-            "selectstart",
-            function (event) {
-
-                event.preventDefault();
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        /*
-         * IMPORTANT :
-         * chaque doigt possède son propre pointerId.
-         * Le moteur actuel peut donc gérer plusieurs touches
-         * simultanément sans fusionner les doigts.
-         */
-
-        keyboard.addEventListener(
-            "pointerdown",
-            function (event) {
-
-                if (
-                    event.pointerType === "touch"
-                ) {
-
-                    event.preventDefault();
-
-                }
-
-            },
-            {
-                passive: false,
-                capture: true
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       04 — RECALCUL DES TOUCHES NOIRES
-       ------------------------------------------------------------
-       Position exacte sur les jonctions des touches blanches.
-    ============================================================ */
-
-    function refreshBlackKeys() {
-
-        const keyboard =
-            document.getElementById(
-                "pianoKeyboard"
-            );
-
-        if (!keyboard) {
-            return;
-        }
-
-
-        const whiteKeys =
-            Array.from(
-                keyboard.querySelectorAll(
-                    ".piano-white-key"
-                )
-            );
-
-
-        const blackKeys =
-            Array.from(
-                keyboard.querySelectorAll(
-                    ".piano-black-key"
-                )
-            );
-
-
-        if (
-            whiteKeys.length === 0 ||
-            blackKeys.length === 0
-        ) {
-            return;
-        }
-
-
-        const keyboardWidth =
-            keyboard.clientWidth;
-
-
-        const whiteWidth =
-            keyboardWidth /
-            whiteKeys.length;
-
-
-        const whiteIndexByMidi =
-            new Map();
-
-
-        whiteKeys.forEach(
-            function (key, index) {
-
-                const midi =
-                    Number(
-                        key.dataset.midi
-                    );
-
-                whiteIndexByMidi.set(
-                    midi,
-                    index
-                );
-
-            }
-        );
-
-
-        blackKeys.forEach(
-            function (key) {
-
-                const midi =
-                    Number(
-                        key.dataset.midi
-                    );
-
-
-                const previousMidi =
-                    midi - 1;
-
-
-                const previousIndex =
-                    whiteIndexByMidi.get(
-                        previousMidi
-                    );
-
-
-                if (
-                    previousIndex === undefined
-                ) {
-                    return;
-                }
-
-
-                const center =
-                    (
-                        previousIndex + 1
-                    ) *
-                    whiteWidth;
-
-
-                key.style.left =
-                    center + "px";
-
-
-                /*
-                 * Largeur professionnelle de la touche noire.
-                 */
-
-                key.style.width =
-                    Math.max(
-                        20,
-                        Math.min(
-                            34,
-                            whiteWidth * 0.62
-                        )
-                    ) + "px";
-
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       05 — OBSERVATION DU PIANO
-       ------------------------------------------------------------
-       Si le moteur reconstruit les 88 touches, on recalcule
-       automatiquement le design sans toucher au moteur.
-    ============================================================ */
-
-    function observeKeyboard() {
-
-        const keyboard =
-            document.getElementById(
-                "pianoKeyboard"
-            );
-
-        if (!keyboard) {
-            return;
-        }
-
-
-        if (
-            keyboard.__fobasVisualObserver
-        ) {
-            return;
-        }
-
-
-        const observer =
-            new MutationObserver(
-                function () {
-
-                    requestAnimationFrame(
-                        refreshBlackKeys
-                    );
-
-                }
-            );
-
-
-        observer.observe(
-            keyboard,
-            {
-                childList: true
-            }
-        );
-
-
-        keyboard.__fobasVisualObserver =
-            observer;
-
-    }
-
-
-    /* ============================================================
-       06 — RESIZE
-    ============================================================ */
-
-    let resizeTimer = null;
-
-
-    window.addEventListener(
-        "resize",
-        function () {
-
-            clearTimeout(
-                resizeTimer
-            );
-
-
-            resizeTimer =
-                setTimeout(
-                    function () {
-
-                        refreshBlackKeys();
-
-                    },
-                    80
-                );
-
-        }
-    );
-
-
-    /* ============================================================
-       07 — ORIENTATION MOBILE
-    ============================================================ */
-
-    window.addEventListener(
-        "orientationchange",
-        function () {
-
-            setTimeout(
-                refreshBlackKeys,
-                150
-            );
-
-        }
-    );
-
-
-    /* ============================================================
-       08 — INITIALISATION
-    ============================================================ */
-
-    function initialize() {
-
-        installTouchProtection();
-
-        observeKeyboard();
-
-        refreshBlackKeys();
-
-
-        /*
-         * Le moteur principal peut construire le piano
-         * légèrement après l'initialisation de la page.
-         */
-
-        setTimeout(
-            refreshBlackKeys,
-            100
-        );
-
-
-        setTimeout(
-            refreshBlackKeys,
-            300
-        );
-
-
-        setTimeout(
-            refreshBlackKeys,
-            700
-        );
-
-
-        setTimeout(
-            refreshBlackKeys,
-            1200
-        );
-
-    }
-
-
-    /* ============================================================
-       09 — DÉMARRAGE
-    ============================================================ */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initialize,
-            {
-                once: true
-            }
-        );
-
-    } else {
-
-        initialize();
 
     }
 
@@ -3224,8 +2983,26 @@
 })();
 
 
-/* ================================================================
-   FIN — FOBAS PIANO PRO VISUAL TOUCH
-================================================================ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
