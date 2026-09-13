@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS Piano — laboratoire musical virtuel professionnel"
+    >
+
+    <meta
+        name="theme-color"
+        content="#090b10"
+    >
+
+    <title>FOBAS Piano — Simulation Musicale</title>
+
+    <link
+        rel="stylesheet"
+        href="simulationpianofobas.css"
+    >
+
+</head>
+
+<body>
+
+<main
+    id="pianoApp"
+    class="piano-app"
+>
+
+    <!-- =========================================================
+         BARRE SUPÉRIEURE
+    ========================================================== -->
+
+    <header class="topbar">
+
+        <div class="brand">
+
+            <span
+                class="brand-mark"
+                aria-hidden="true"
+            >
+                F
+            </span>
+
+            <div class="brand-text">
+
+                <strong>
+                    FOBAS PIANO
+                </strong>
+
+                <small>
+                    Laboratoire Musical Virtuel
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="top-actions">
+
+            <button
+                id="startAudioBtn"
+                class="primary"
+                type="button"
+            >
+                Activer le piano
+            </button>
+
+
+            <button
+                id="sustainBtn"
+                type="button"
+                aria-pressed="false"
+            >
+                Sustain
+
+                <span>
+                    OFF
+                </span>
+
+            </button>
+
+
+            <button
+                id="metronomeBtn"
+                type="button"
+                aria-pressed="false"
+            >
+                Métronome
+
+                <span>
+                    OFF
+                </span>
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         EN-TÊTE DU STUDIO
+    ========================================================== -->
+
+    <section
+        class="studio-head"
+        aria-label="Informations du piano"
+    >
+
+        <div class="studio-title">
+
+            <span class="eyebrow">
+                FOBAS MUSIC ENGINE
+            </span>
+
+            <h1>
+                Studio Piano
+            </h1>
+
+            <p id="statusText">
+                Prêt — activez l'audio pour commencer.
+            </p>
+
+        </div>
+
+
+        <div
+            class="meters"
+            aria-label="Informations musicales"
+        >
+
+            <div class="meter">
+
+                <small>
+                    NOTE
+                </small>
+
+                <b id="currentNote">
+                    —
+                </b>
+
+            </div>
+
+
+            <div class="meter">
+
+                <small>
+                    OCTAVE
+                </small>
+
+                <b id="currentOctave">
+                    —
+                </b>
+
+            </div>
+
+
+            <div class="meter">
+
+                <small>
+                    BPM
+                </small>
+
+                <b id="bpmValue">
+                    100
+                </b>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         PANNEAU DE PARTITION
+    ========================================================== -->
+
+    <section
+        class="music-panel"
+        aria-label="Partition musicale"
+    >
+
+        <div class="panel-title">
+
+            <span>
+                PARTITION
+            </span>
+
+            <span id="staffHint">
+                Zone de lecture
+            </span>
+
+        </div>
+
+
+        <div
+            id="staff"
+            class="staff"
+            aria-label="Partition musicale virtuelle"
+        >
+
+            <div
+                id="noteMarker"
+                class="note-marker"
+                aria-hidden="true"
+            >
+                ♪
+            </div>
+
+
+            <div
+                class="staff-lines"
+                aria-hidden="true"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         ZONE PRINCIPALE DU PIANO
+    ========================================================== -->
+
+    <section
+        class="piano-stage"
+        aria-label="Piano virtuel"
+    >
+
+        <div
+            class="piano-brandplate"
+            aria-hidden="true"
+        >
+            FOBAS
+
+            <span>
+                PIANO
+            </span>
+
+        </div>
+
+
+        <!--
+            IMPORTANT :
+            Le clavier est généré dynamiquement par
+            simulationpianofobas.js.
+        -->
+
+        <div
+            id="pianoKeyboard"
+            class="keyboard"
+            role="application"
+            aria-label="Clavier de piano virtuel"
+        ></div>
+
+    </section>
+
+
+    <!-- =========================================================
+         PANNEAU DE CONTRÔLES
+    ========================================================== -->
+
+    <section
+        class="control-panel"
+        aria-label="Contrôles du piano"
+    >
+
+        <!-- VOLUME -->
+
+        <label
+            for="volume"
+            class="control-item"
+        >
+
+            <span>
+                Volume
+            </span>
+
+            <input
+                id="volume"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0.72"
+                aria-label="Volume"
+            >
+
+            <output
+                id="volumeValue"
+                for="volume"
+            >
+                72%
+            </output>
+
+        </label>
+
+
+        <!-- BPM -->
+
+        <label
+            for="bpm"
+            class="control-item"
+        >
+
+            <span>
+                BPM
+            </span>
+
+            <input
+                id="bpm"
+                type="range"
+                min="40"
+                max="220"
+                value="100"
+                aria-label="Tempo BPM"
+            >
+
+            <output
+                id="bpmOutput"
+                for="bpm"
+            >
+                100
+            </output>
+
+        </label>
+
+
+        <!-- TYPE DE SON -->
+
+        <label
+            for="waveform"
+            class="control-item"
+        >
+
+            <span>
+                Son
+            </span>
+
+            <select
+                id="waveform"
+                aria-label="Type de son du piano"
+            >
+
+                <option value="piano">
+                    Piano
+                </option>
+
+                <option value="warm">
+                    Piano Warm
+                </option>
+
+                <option value="bright">
+                    Piano Bright
+                </option>
+
+            </select>
+
+        </label>
+
+    </section>
+
+
+    <!-- =========================================================
+         INFORMATIONS CLAVIER
+    ========================================================== -->
+
+    <section
+        class="keyboard-help"
+        aria-label="Commandes du clavier"
+    >
+
+        <div class="help-card">
+
+            <strong>
+                Clavier ordinateur
+            </strong>
+
+            <span>
+                A W S E D F T G Y H U J K
+            </span>
+
+        </div>
+
+
+        <div class="help-card">
+
+            <strong>
+                Touches blanches
+            </strong>
+
+            <span>
+                A · S · D · F · G · H · J · K
+            </span>
+
+        </div>
+
+
+        <div class="help-card">
+
+            <strong>
+                Touches noires
+            </strong>
+
+            <span>
+                W · E · T · Y · U
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         PIED DE PAGE
+    ========================================================== -->
+
+    <footer class="piano-footer">
+
+        <span>
+            FOBAS — Simulation musicale professionnelle
+        </span>
+
+        <span>
+            Clavier ordinateur :
+            A W S E D F T G Y H U J K
+        </span>
+
+    </footer>
+
+</main>
+
+
+<!-- =============================================================
+     MOTEUR JAVASCRIPT PRINCIPAL
+============================================================== -->
+
+<script
+    src="simulationpianofobas.js"
+    defer
+></script>
+
+</body>
+</html>
