@@ -5799,16 +5799,85 @@ function executeToolOnObject(
     ============================================================ */
 
 
+function getTransferMode(object) {
+
+    if (!object) {
+        return null;
+    }
+
+
+    /*
+     * SOLIDE
+     * ----------------------------------------
+     * Motè solid ki deja egziste a rete
+     * responsab transfè solid yo.
+     */
+    if (
+        isSolidObject(object)
+    ) {
+
+        return "solid";
+
+    }
+
+
+    /*
+     * LIQUIDE EXISTANT
+     * ----------------------------------------
+     * Konsève sistèm likid ki deja mache.
+     */
+    if (
+        isLiquidObject(object)
+    ) {
+
+        return "liquid";
+
+    }
+
+
+    /*
+     * MATIÈ AVÈK VOLUME
+     * ----------------------------------------
+     * Si objè a se yon materyèl epi li
+     * posede yon volume transfèrab,
+     * sistèm nan rekonèt li dinamikman.
+     */
+    const material =
+        getMaterial(
+            object.materialId
+        );
+
+
+    const volume =
+        Number(
+            object.volume
+        ) || 0;
+
+
+    if (
+        material &&
+        volume > 0
+    ) {
+
+        return "liquid";
+
+    }
+
+
+    return null;
+
+}
+
+
+
+
+
+
+
 function openTransferModal() {
 
         const source =
             getSelectedObject();
-
-
-
-
-
-
 
 
         if (
@@ -5840,39 +5909,46 @@ function openTransferModal() {
          * ============================================================
          */
 
-        const sourceIsSolid =
-            isSolidObject(
-                source
-            );
+        
+
+const transferMode =
+    getTransferMode(
+        source
+    );
 
 
-        const sourceIsLiquid =
-            isLiquidObject(
-                source
-            );
+const sourceIsSolid =
+    transferMode ===
+    "solid";
 
 
-        const sourceIsContainer =
-            isContainer(
-                source
-            );
+const sourceIsLiquid =
+    transferMode ===
+    "liquid";
 
 
-        if (
-            !sourceIsSolid &&
-            !sourceIsLiquid &&
-            !sourceIsContainer
-        ) {
+const sourceIsContainer =
+    isContainer(
+        source
+    );
 
-            showToast(
-                "Le transfert nécessite une matière liquide ou solide.",
-                "warning"
-            );
 
-            return;
+if (
+    !sourceIsSolid &&
+    !sourceIsLiquid &&
+    !sourceIsContainer
+) {
 
-        }
+    showToast(
+        "Le transfert nécessite une matière transférable.",
+        "warning"
+    );
 
+    return;
+
+}
+
+            
 
         /*
          * ============================================================
