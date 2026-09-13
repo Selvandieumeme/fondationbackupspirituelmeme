@@ -7274,15 +7274,21 @@ function mixSelectedObject() {
    ============================================================ */
 
 
+
+
+
 /* ============================================================
-   19.0 — RECHERCHE DIRECTE D'UN COMPOSANT
+   19.0 — RECHERCHE NORMALISÉE D'UN COMPOSANT
    ------------------------------------------------------------
    IMPORTANT :
-   Les composants de composition utilisent :
-       component.materialId
-
-   On ne dépend donc plus de getComponentById()
-   pour identifier un réactif ou un produit.
+   - Recherche d'abord par materialId exact.
+   - Puis par identité chimique.
+   - Supporte les variantes d'un même matériau.
+   - Ne modifie jamais component.materialId.
+   - Ne modifie PAS REACTIONS.
+   - Ne crée aucun composant.
+   - Retourne toujours le composant réel présent
+     dans object.composition.
    ============================================================ */
 
 function findReactionComponent(
@@ -7298,20 +7304,397 @@ function findReactionComponent(
         return null;
     }
 
-    return (
+
+    /* ========================================================
+       01 — RECHERCHE EXACTE PAR MATERIAL ID
+       ======================================================== */
+
+    const requestedId =
+        String(materialId)
+            .trim()
+            .toLowerCase();
+
+
+    if (!requestedId) {
+        return null;
+    }
+
+
+    const directComponent =
         object.composition.find(
             component =>
                 component &&
-                String(component.materialId) ===
-                String(materialId)
-        ) || null
-    );
+                component.materialId &&
+                String(
+                    component.materialId
+                )
+                    .trim()
+                    .toLowerCase() ===
+                requestedId
+        );
+
+
+    if (directComponent) {
+        return directComponent;
+    }
+
+
+    /* ========================================================
+       02 — RÉCUPÉRATION DU MATERIAL DE RÉFÉRENCE
+       ======================================================== */
+
+    const requestedMaterial =
+        typeof getMaterial === "function"
+            ? getMaterial(materialId)
+            : null;
+
+
+    if (!requestedMaterial) {
+        return null;
+    }
+
+
+    /* ========================================================
+       03 — IDENTITÉ CHIMIQUE CANONIQUE
+       --------------------------------------------------------
+       La formule est prioritaire lorsqu'elle existe.
+       Sinon, on utilise les alias connus.
+       ======================================================== */
+
+    function getChemicalIdentity(
+        material
+    ) {
+
+        if (!material) {
+            return "";
+        }
+
+
+        const formula =
+            String(
+                material.formula ||
+                material.chemicalFormula ||
+                ""
+            )
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, "");
+
+
+        /*
+         * Une formule chimique valide constitue
+         * l'identité la plus fiable.
+         */
+
+        if (formula) {
+            return `formula:${formula}`;
+        }
+
+
+        const id =
+            String(
+                material.materialId ||
+                material.id ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        const name =
+            String(
+                material.name ||
+                material.label ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        const aliases = {
+
+            /* Zinc */
+            "zinc":
+                "zn",
+
+            "zn":
+                "zn",
+
+            "zinc-metal":
+                "zn",
+
+            "zinc-pur":
+                "zn",
+
+            "zinc-powder":
+                "zn",
+
+            "zinc-granules":
+                "zn",
+
+
+            /* Fer / Iron */
+            "iron":
+                "fe",
+
+            "fer":
+                "fe",
+
+            "fe":
+                "fe",
+
+            "iron-metal":
+                "fe",
+
+            "fer-metal":
+                "fe",
+
+            "iron-pur":
+                "fe",
+
+            "fer-pur":
+                "fe",
+
+
+            /* Cuivre */
+            "copper":
+                "cu",
+
+            "cuivre":
+                "cu",
+
+            "cu":
+                "cu",
+
+            "copper-metal":
+                "cu",
+
+
+            /* Sulfate de cuivre */
+            "copper-sulfate":
+                "cuso4",
+
+            "cuivre-sulfate":
+                "cuso4",
+
+            "copper-sulfate-solution":
+                "cuso4",
+
+            "cuso4":
+                "cuso4",
+
+
+            /* Acide chlorhydrique */
+            "hydrochloric-acid":
+                "hcl",
+
+            "hydrochloricacid":
+                "hcl",
+
+            "acide-chlorhydrique":
+                "hcl",
+
+            "acide-chlorhydrique-solution":
+                "hcl",
+
+            "hcl":
+                "hcl",
+
+
+            /* Bicarbonate de sodium */
+            "sodium-bicarbonate":
+                "nahco3",
+
+            "sodium-bicarbonate-solid":
+                "nahco3",
+
+            "bicarbonate-de-sodium":
+                "nahco3",
+
+            "bicarbonate":
+                "nahco3",
+
+            "nahco3":
+                "nahco3",
+
+
+            /* Hydroxyde de sodium */
+            "sodium-hydroxide":
+                "naoh",
+
+            "hydroxyde-de-sodium":
+                "naoh",
+
+            "naoh":
+                "naoh",
+
+
+            /* Carbonate de calcium */
+            "calcium-carbonate":
+                "caco3",
+
+            "carbonate-de-calcium":
+                "caco3",
+
+            "caco3":
+                "caco3",
+
+
+            /* Chlorure de sodium */
+            "sodium-chloride":
+                "nacl",
+
+            "chlorure-de-sodium":
+                "nacl",
+
+            "nacl":
+                "nacl",
+
+
+            /* Nitrate d'argent */
+            "silver-nitrate":
+                "agno3",
+
+            "nitrate-dargent":
+                "agno3",
+
+            "agno3":
+                "agno3"
+        };
+
+
+        if (aliases[id]) {
+            return `chemical:${aliases[id]}`;
+        }
+
+
+        if (aliases[name]) {
+            return `chemical:${aliases[name]}`;
+        }
+
+
+        return "";
+    }
+
+
+    const requestedIdentity =
+        getChemicalIdentity(
+            requestedMaterial
+        );
+
+
+    if (!requestedIdentity) {
+        return null;
+    }
+
+
+    /* ========================================================
+       04 — RECHERCHE DES VARIANTES DANS LA COMPOSITION
+       ======================================================== */
+
+    for (
+        const component
+        of object.composition
+    ) {
+
+        if (
+            !component ||
+            !component.materialId
+        ) {
+            continue;
+        }
+
+
+        const componentMaterial =
+            typeof getMaterial === "function"
+                ? getMaterial(
+                    component.materialId
+                )
+                : null;
+
+
+        if (!componentMaterial) {
+            continue;
+        }
+
+
+        const componentIdentity =
+            getChemicalIdentity(
+                componentMaterial
+            );
+
+
+        if (
+            componentIdentity &&
+            componentIdentity ===
+            requestedIdentity
+        ) {
+            return component;
+        }
+    }
+
+
+    /* ========================================================
+       05 — FALLBACK PAR FORMULE DU COMPONENT
+       --------------------------------------------------------
+       Utile si le materialId est une variante mais que
+       la composition conserve déjà la formule chimique.
+       ======================================================== */
+
+    const requestedFormula =
+        String(
+            requestedMaterial.formula ||
+            requestedMaterial.chemicalFormula ||
+            ""
+        )
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "");
+
+
+    if (requestedFormula) {
+
+        const formulaComponent =
+            object.composition.find(
+                component => {
+
+                    if (!component) {
+                        return false;
+                    }
+
+
+                    const componentFormula =
+                        String(
+                            component.formula ||
+                            component.chemicalFormula ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase()
+                            .replace(/\s+/g, "");
+
+
+                    return (
+                        componentFormula &&
+                        componentFormula ===
+                        requestedFormula
+                    );
+                }
+            );
+
+
+        if (formulaComponent) {
+            return formulaComponent;
+        }
+    }
+
+
+    /* ========================================================
+       06 — AUCUNE CORRESPONDANCE
+       ======================================================== */
+
+    return null;
 }
-
-
-
-
-
 
 
 
