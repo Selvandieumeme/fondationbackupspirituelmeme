@@ -6946,6 +6946,194 @@ if (!transferMode) {
 
 
 
+/* ============================================================
+   17 — TRANSFERT DES SOLIDES
+============================================================ */
+
+function transferSolidIntoContainer(
+    source,
+    target
+) {
+
+    if (
+        !source ||
+        !target ||
+        !isSolidObject(
+            source
+        ) ||
+        !isContainer(
+            target
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    ensureComposition(
+        source
+    );
+
+    ensureComposition(
+        target
+    );
+
+
+    const material =
+        getMaterial(
+            source.materialId
+        );
+
+
+    if (
+        !material
+    ) {
+
+        return false;
+
+    }
+
+
+    const solidMass =
+        Number(
+            source.mass
+        ) || 0;
+
+
+    const solidMoles =
+        calculateMolesFromMass(
+            solidMass,
+            material.molarMass
+        );
+
+
+    const existing =
+        getComponentById(
+            target,
+            source.materialId
+        );
+
+
+    if (
+        existing
+    ) {
+
+        existing.mass +=
+            solidMass;
+
+        existing.moles +=
+            solidMoles;
+
+    } else {
+
+        target.composition.push(
+            {
+                materialId:
+                    material.id,
+
+                name:
+                    material.name,
+
+                formula:
+                    material.formula,
+
+                amount:
+                    0,
+
+                volumeMl:
+                    0,
+
+                mass:
+                    solidMass,
+
+                moles:
+                    solidMoles,
+
+                molarity:
+                    null,
+
+                temperature:
+                    source.temperature,
+
+                phase:
+                    "solid"
+            }
+        );
+
+    }
+
+
+    /*
+     * Le solide est consommé dans la manipulation.
+     */
+    state.objects =
+        state.objects.filter(
+            object =>
+                object.id !==
+                source.id
+        );
+
+
+    state.selectedMaterialId =
+        target.id;
+
+
+    recalculateContainer(
+        target
+    );
+
+
+    evaluateCompositionReaction(
+        target
+    );
+
+
+    addObservation(
+        `${
+            source.name
+        } introduit dans ${
+            target.name
+        } : ${
+            formatNumber(
+                solidMass
+            )
+        } g.`
+    );
+
+
+    showToast(
+        `${
+            source.name
+        } ajouté à ${
+            target.name
+        }.`,
+        "success"
+    );
+
+
+    renderWorkspace();
+
+    updateAllUI();
+
+    saveState(false);
+
+
+    return true;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
     /* ============================================================
        17.1 — TRANSFERT CLASSIFICATION
