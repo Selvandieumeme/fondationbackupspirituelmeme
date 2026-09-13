@@ -5807,19 +5807,6 @@ function openTransferModal() {
 
 
 
-const transferMode =
-    getTransferMode(source);
-
-if (!transferMode) {
-
-    showToast(
-        "Cet objet ne contient aucune matière transférable.",
-        "warning"
-    );
-
-    return;
-
-}
 
 
 
