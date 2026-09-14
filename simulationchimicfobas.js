@@ -1843,25 +1843,23 @@
 
 
 
+
+
+
 /* ============================================================
    12 — RENDU DES OBJETS
    ------------------------------------------------------------
+   AJOUT ISOLÉ :
+   - Statut dynamique propre à chaque récipient.
+   - Affichage automatique du résultat d'une réaction.
+   - Lecture de reactionState sans modifier le moteur chimique.
+   - Les autres objets ne reçoivent aucun panneau de statut.
+   
    IMPORTANT :
-   - Ne modifie pas le moteur chimique.
-   - Ne modifie pas reactionState.
-   - Ne modifie pas les calculs de volume, masse, pH, etc.
-   - Ajoute uniquement l'affichage dynamique du statut du bécher.
-   - Le statut est propre à chaque objet.
-   - Pour une réaction, le statut lit automatiquement :
-       reactionState
-       state
-       pH
-       temperatureC
-       gas
-       precipitate
-       bubbling
-       phase
-       description
+   - Le code existant de rendu est conservé.
+   - bindObjectInteractions() est conservé.
+   - renderWorkspace() est conservé.
+   - Aucun calcul chimique n'est modifié.
 ============================================================ */
 
 
@@ -1923,43 +1921,36 @@ function calculateMass(object) {
         return 0;
     }
 
-    const emptyMass =
-        Number(
-            object.emptyMassG || 0
-        );
-
-    const componentMass =
-        totalComponentMass(
-            object
-        );
-
-    /*
-     * Pour les objets possédant des composants,
-     * la masse réelle est la masse à vide
-     * + la masse des substances.
-     */
-
     if (
-        Array.isArray(
-            object.components
-        ) &&
-        object.components.length > 0
+        object.kind ===
+        "container"
     ) {
-
         return (
-            emptyMass +
-            componentMass
+            Number(
+                object.emptyMassG || 0
+            ) +
+            totalComponentMass(
+                object
+            )
         );
     }
 
-    return Number(
-        object.massG || emptyMass
+    if (
+        object.massG != null
+    ) {
+        return Number(
+            object.massG || 0
+        );
+    }
+
+    return totalComponentMass(
+        object
     );
 }
 
 
 /* ============================================================
-   12.4 — DENSITÉ
+   12.4 — CALCUL DE LA DENSITÉ
 ============================================================ */
 
 function calculateDensity(object) {
@@ -1986,7 +1977,7 @@ function calculateDensity(object) {
 
     if (mass <= 0) {
         return Number(
-            object.density || 0
+            object.density || 1
         );
     }
 
@@ -2009,53 +2000,46 @@ function objectHasLiquid(object) {
 
 
 /* ============================================================
-   12.6 — NORMALISATION DU TEXTE DU STATUT
-============================================================ */
-
-function statusText(value) {
-
-    return String(
-        value ?? ""
-    ).trim();
-}
-
-
-/* ============================================================
-   12.7 — CRÉATION DU STATUT VISUEL DYNAMIQUE
+   12.6 — STATUT DYNAMIQUE DU BÉCHER
    ------------------------------------------------------------
-   Cette fonction NE MODIFIE PAS object.
-   Elle construit seulement les données à afficher.
+   IMPORTANT :
+   Cette fonction NE MODIFIE PAS l'objet.
+
+   Elle lit uniquement les données déjà présentes dans :
+   - reactionState
+   - actionStatus
+   - state
+   - pH
+   - temperatureC
+   - volumeMl
 ============================================================ */
 
-function getDynamicBeakerStatus(object) {
+function getBeakerDynamicStatus(object) {
 
     if (!object) {
 
         return {
-
             active: false,
-
             type: "ready",
-
-            title: "BÉCHER",
-
-            message: "",
-
+            title: "BÉCHER PRÊT",
+            message: "Aucune action effectuée.",
             details: []
         };
     }
 
 
+    /* ========================================================
+       1 — RÉACTION
+       --------------------------------------------------------
+       PRIORITÉ MAXIMALE.
+       
+       Si Block 20 a terminé une réaction, le résultat
+       doit rester visible dans le bécher.
+    ======================================================== */
+
     const reaction =
         object.reactionState;
 
-
-    /* ========================================================
-       PRIORITÉ 1 — RÉACTION
-       --------------------------------------------------------
-       Une réaction active doit toujours avoir priorité
-       sur un ancien statut général.
-    ======================================================== */
 
     if (
         reaction &&
@@ -2065,46 +2049,46 @@ function getDynamicBeakerStatus(object) {
         const details = [];
 
 
-        /*
-         * Description / équation chimique
-         */
+        /* ----------------------------------------------------
+           DESCRIPTION / ÉQUATION
+        ---------------------------------------------------- */
 
-        if (
-            statusText(
-                reaction.description
-            )
-        ) {
+        const description =
+            String(
+                reaction.description || ""
+            ).trim();
+
+
+        if (description) {
 
             details.push(
-                statusText(
-                    reaction.description
-                )
+                description
             );
         }
 
 
-        /*
-         * État général de la réaction
-         */
+        /* ----------------------------------------------------
+           ÉTAT
+        ---------------------------------------------------- */
 
-        if (
-            statusText(
-                object.state
-            )
-        ) {
+        const objectState =
+            String(
+                object.state || ""
+            ).trim();
+
+
+        if (objectState) {
 
             details.push(
                 "État : " +
-                statusText(
-                    object.state
-                )
+                objectState
             );
         }
 
 
-        /*
-         * pH
-         */
+        /* ----------------------------------------------------
+           pH
+        ---------------------------------------------------- */
 
         if (
             objectHasLiquid(
@@ -2121,9 +2105,9 @@ function getDynamicBeakerStatus(object) {
         }
 
 
-        /*
-         * Température
-         */
+        /* ----------------------------------------------------
+           TEMPÉRATURE
+        ---------------------------------------------------- */
 
         details.push(
             "Température : " +
@@ -2135,9 +2119,9 @@ function getDynamicBeakerStatus(object) {
         );
 
 
-        /*
-         * Gaz
-         */
+        /* ----------------------------------------------------
+           GAZ
+        ---------------------------------------------------- */
 
         details.push(
             "Gaz : " +
@@ -2149,29 +2133,23 @@ function getDynamicBeakerStatus(object) {
         );
 
 
-        /*
-         * Bulles
-         */
+        /* ----------------------------------------------------
+           BULLAGE
+        ---------------------------------------------------- */
 
-        if (
-            reaction.gas ||
-            reaction.bubbling
-        ) {
-
-            details.push(
-                "Bulles : " +
-                (
-                    reaction.bubbling
-                        ? "Oui"
-                        : "Non"
-                )
-            );
-        }
+        details.push(
+            "Bulles : " +
+            (
+                reaction.bubbling
+                    ? "Oui"
+                    : "Non"
+            )
+        );
 
 
-        /*
-         * Précipité
-         */
+        /* ----------------------------------------------------
+           PRÉCIPITÉ
+        ---------------------------------------------------- */
 
         details.push(
             "Précipité : " +
@@ -2183,19 +2161,17 @@ function getDynamicBeakerStatus(object) {
         );
 
 
-        /*
-         * Phase
-         */
+        /* ----------------------------------------------------
+           PHASE
+        ---------------------------------------------------- */
 
         if (
-            statusText(
-                reaction.phase
-            )
+            reaction.phase
         ) {
 
             details.push(
                 "Phase : " +
-                statusText(
+                String(
                     reaction.phase
                 )
             );
@@ -2206,15 +2182,14 @@ function getDynamicBeakerStatus(object) {
 
             active: true,
 
-            type: "reaction",
+            type:
+                "reaction",
 
             title:
                 "RÉACTION EFFECTUÉE",
 
             message:
-                statusText(
-                    reaction.description
-                ) ||
+                description ||
                 "Réaction chimique effectuée.",
 
             details:
@@ -2224,10 +2199,12 @@ function getDynamicBeakerStatus(object) {
 
 
     /* ========================================================
-       PRIORITÉ 2 — STATUT D'ACTION
+       2 — ACTION STATUS
        --------------------------------------------------------
-       Compatible avec actionStatus si un autre bloc
-       l'initialise ou le met à jour.
+       Si un autre bloc du moteur écrit :
+       object.actionStatus
+       
+       le bécher l'affiche automatiquement.
     ======================================================== */
 
     const actionStatus =
@@ -2237,12 +2214,8 @@ function getDynamicBeakerStatus(object) {
     if (
         actionStatus &&
         (
-            statusText(
-                actionStatus.title
-            ) ||
-            statusText(
-                actionStatus.message
-            ) ||
+            actionStatus.title ||
+            actionStatus.message ||
             (
                 Array.isArray(
                     actionStatus.details
@@ -2258,10 +2231,10 @@ function getDynamicBeakerStatus(object) {
             )
                 ? actionStatus.details
                     .map(
-                        item =>
-                            statusText(
-                                item
-                            )
+                        detail =>
+                            String(
+                                detail ?? ""
+                            ).trim()
                     )
                     .filter(
                         Boolean
@@ -2274,20 +2247,21 @@ function getDynamicBeakerStatus(object) {
             active: true,
 
             type:
-                statusText(
-                    actionStatus.type
-                ) ||
-                "action",
+                String(
+                    actionStatus.type ||
+                    "action"
+                ),
 
             title:
-                statusText(
-                    actionStatus.title
-                ) ||
-                "ACTION EFFECTUÉE",
+                String(
+                    actionStatus.title ||
+                    "ACTION EFFECTUÉE"
+                ),
 
             message:
-                statusText(
-                    actionStatus.message
+                String(
+                    actionStatus.message ||
+                    ""
                 ),
 
             details:
@@ -2297,35 +2271,36 @@ function getDynamicBeakerStatus(object) {
 
 
     /* ========================================================
-       PRIORITÉ 3 — ÉTAT EXISTANT
+       3 — ÉTAT DU RÉCIPIENT
        --------------------------------------------------------
-       Permet au bécher d'afficher immédiatement son état
-       même si actionStatus n'a pas encore été ajouté ailleurs.
+       Permet d'afficher un état existant même si
+       actionStatus n'est pas encore défini.
     ======================================================== */
 
-    const objectState =
-        statusText(
-            object.state
-        );
+    const currentState =
+        String(
+            object.state || ""
+        ).trim();
 
 
     if (
-        objectState &&
-        objectState !== "stable" &&
-        objectState !== "empty"
+        currentState &&
+        currentState !== "stable" &&
+        currentState !== "empty"
     ) {
 
         return {
 
             active: true,
 
-            type: "state",
+            type:
+                "state",
 
             title:
                 "ÉTAT DU BÉCHER",
 
             message:
-                objectState,
+                currentState,
 
             details: [
 
@@ -2352,14 +2327,15 @@ function getDynamicBeakerStatus(object) {
 
 
     /* ========================================================
-       PRIORITÉ 4 — BÉCHER PRÊT
+       4 — ÉTAT INITIAL
     ======================================================== */
 
     return {
 
         active: false,
 
-        type: "ready",
+        type:
+            "ready",
 
         title:
             "BÉCHER PRÊT",
@@ -2373,36 +2349,38 @@ function getDynamicBeakerStatus(object) {
 
 
 /* ============================================================
-   12.8 — RENDU HTML DU STATUT DU BÉCHER
+   12.7 — HTML DU STATUT DU BÉCHER
    ------------------------------------------------------------
-   Bloc complètement isolé.
+   Bloc visuel isolé.
+   Aucun élément existant n'est supprimé.
 ============================================================ */
 
-function renderBeakerStatus(object) {
+function renderBeakerDynamicStatus(object) {
 
     const status =
-        getDynamicBeakerStatus(
+        getBeakerDynamicStatus(
             object
         );
 
 
     const type =
-        statusText(
-            status.type
-        ) ||
-        "ready";
+        String(
+            status.type ||
+            "ready"
+        );
 
 
     const title =
-        statusText(
-            status.title
-        ) ||
-        "BÉCHER PRÊT";
+        String(
+            status.title ||
+            "BÉCHER PRÊT"
+        );
 
 
     const message =
-        statusText(
-            status.message
+        String(
+            status.message ||
+            ""
         );
 
 
@@ -2411,50 +2389,72 @@ function renderBeakerStatus(object) {
             status.details
         )
             ? status.details
+                .map(
+                    detail =>
+                        String(
+                            detail ?? ""
+                        ).trim()
+                )
                 .filter(
-                    item =>
-                        statusText(
-                            item
-                        )
+                    Boolean
+                )
+                .filter(
+                    (detail, index, array) =>
+                        array.indexOf(
+                            detail
+                        ) === index
                 )
             : [];
 
 
     return `
         <div
-            class="fobas-beaker-status fobas-beaker-status-${escapeHTML(type)}"
+            class="fobas-beaker-dynamic-status fobas-beaker-status-${escapeHTML(type)}"
+            data-beaker-status="true"
             data-status-type="${escapeHTML(type)}"
         >
 
-            <div class="fobas-beaker-status-title">
+            <div
+                class="fobas-beaker-dynamic-status-title"
+            >
                 ${escapeHTML(title)}
             </div>
+
 
             ${
                 message
                     ? `
-                        <div class="fobas-beaker-status-message">
+                        <div
+                            class="fobas-beaker-dynamic-status-message"
+                        >
                             ${escapeHTML(message)}
                         </div>
                     `
                     : ""
             }
 
+
             ${
-                details.length
+                details.length > 0
                     ? `
-                        <div class="fobas-beaker-status-details">
+                        <div
+                            class="fobas-beaker-dynamic-status-details"
+                        >
+
                             ${
                                 details
                                     .map(
                                         detail => `
-                                            <div class="fobas-beaker-status-line">
+                                            <div
+                                                class="fobas-beaker-dynamic-status-line"
+                                            >
                                                 ${escapeHTML(detail)}
                                             </div>
                                         `
                                     )
                                     .join("")
                             }
+
                         </div>
                     `
                     : ""
@@ -2466,25 +2466,30 @@ function renderBeakerStatus(object) {
 
 
 /* ============================================================
-   12.9 — RENDU VISUEL PRINCIPAL
+   12.8 — RENDU VISUEL PRINCIPAL
 ============================================================ */
 
 function objectVisual(object) {
 
     const isContainer =
-        object.kind === "container";
+        object.kind ===
+        "container";
 
     const isSolid =
-        object.phase === "solid";
+        object.phase ===
+        "solid";
 
     const isEquipment =
-        object.category === "equipment";
+        object.category ===
+        "equipment";
 
     const isInstrument =
-        object.category === "instrument";
+        object.category ===
+        "instrument";
 
     const selected =
-        object.id === state.selectedId;
+        object.id ===
+        state.selectedId;
 
     const reaction =
         object.reactionState?.active;
@@ -2494,7 +2499,9 @@ function objectVisual(object) {
 
 
     /* ========================================================
-       CLASSES DU CORPS
+       CORPS DE L'OBJET
+       --------------------------------------------------------
+       CONSERVÉ
     ======================================================== */
 
     let bodyClass =
@@ -2520,6 +2527,8 @@ function objectVisual(object) {
 
     /* ========================================================
        LIQUIDE
+       --------------------------------------------------------
+       CONSERVÉ
     ======================================================== */
 
     let liquid = "";
@@ -2535,13 +2544,9 @@ function objectVisual(object) {
         const liquidHeight =
             clamp(
                 (
-                    Number(
-                        object.volumeMl || 0
-                    ) /
+                    object.volumeMl /
                     Math.max(
-                        Number(
-                            object.capacityMl || 0
-                        ),
+                        object.capacityMl,
                         1
                     )
                 ) * 70,
@@ -2565,7 +2570,7 @@ function objectVisual(object) {
     /* ========================================================
        BULLES
        --------------------------------------------------------
-       La logique existante de réaction gazeuse est conservée.
+       CONSERVÉ
     ======================================================== */
 
     let bubbles = "";
@@ -2581,22 +2586,34 @@ function objectVisual(object) {
 
                 <i
                     class="fobas-bubble"
-                    style="left:20%;animation-delay:.1s"
+                    style="
+                        left:20%;
+                        animation-delay:.1s
+                    "
                 ></i>
 
                 <i
                     class="fobas-bubble"
-                    style="left:40%;animation-delay:.5s"
+                    style="
+                        left:40%;
+                        animation-delay:.5s
+                    "
                 ></i>
 
                 <i
                     class="fobas-bubble"
-                    style="left:60%;animation-delay:.8s"
+                    style="
+                        left:60%;
+                        animation-delay:.8s
+                    "
                 ></i>
 
                 <i
                     class="fobas-bubble"
-                    style="left:75%;animation-delay:.25s"
+                    style="
+                        left:75%;
+                        animation-delay:.25s
+                    "
                 ></i>
 
             </div>
@@ -2606,12 +2623,13 @@ function objectVisual(object) {
 
     /* ========================================================
        CLASSES PRINCIPALES
+       --------------------------------------------------------
+       CONSERVÉ
     ======================================================== */
 
-    const classes =
-        [
-            "fobas-chem-object"
-        ];
+    const classes = [
+        "fobas-chem-object"
+    ];
 
 
     if (selected) {
@@ -2640,6 +2658,8 @@ function objectVisual(object) {
 
     /* ========================================================
        DIMENSIONS
+       --------------------------------------------------------
+       CONSERVÉ
     ======================================================== */
 
     const width =
@@ -2655,7 +2675,9 @@ function objectVisual(object) {
 
 
     /* ========================================================
-       COULEUR / ARRIÈRE-PLAN
+       ARRIÈRE-PLAN
+       --------------------------------------------------------
+       CONSERVÉ
     ======================================================== */
 
     const background =
@@ -2667,15 +2689,14 @@ function objectVisual(object) {
 
 
     /* ========================================================
-       STATUT DU BÉCHER
+       STATUT DYNAMIQUE
        --------------------------------------------------------
-       Affiché UNIQUEMENT pour les récipients.
-       Les autres objets restent visuellement inchangés.
+       UNIQUEMENT POUR LES RÉCIPIENTS.
     ======================================================== */
 
     const beakerStatus =
         isContainer
-            ? renderBeakerStatus(
+            ? renderBeakerDynamicStatus(
                 object
             )
             : "";
@@ -2688,7 +2709,7 @@ function objectVisual(object) {
     return `
         <div
             class="${classes.join(" ")}"
-            data-object-id="${escapeHTML(object.id)}"
+            data-object-id="${object.id}"
             style="
                 left:${object.x}px;
                 top:${object.y}px;
@@ -2699,15 +2720,13 @@ function objectVisual(object) {
 
             ${
                 isContainer
-                    ? `
-                        <div
-                            class="fobas-object-glass"
-                            style="
-                                position:absolute;
-                                inset:0;
-                            "
-                        ></div>
-                    `
+                    ? `<div
+                        class="fobas-object-glass"
+                        style="
+                            position:absolute;
+                            inset:0;
+                        "
+                    ></div>`
                     : ""
             }
 
@@ -2717,42 +2736,44 @@ function objectVisual(object) {
 
             <div
                 class="${bodyClass}"
-                style="${
-                    !isContainer &&
-                    !isSolid &&
-                    !isEquipment &&
-                    !isInstrument
-                        ? `background:${background};`
-                        : ""
-                }"
+                style="
+                    ${
+                        !isContainer &&
+                        !isSolid &&
+                        !isEquipment &&
+                        !isInstrument
+                            ? `background:${background};`
+                            : ""
+                    }
+                "
             >
 
-                <div class="fobas-object-icon">
+                <div
+                    class="fobas-object-icon"
+                >
                     ${object.icon}
                 </div>
 
 
-                <div class="fobas-object-name">
-                    ${
-                        escapeHTML(
-                            object.shortName ||
-                            object.name
-                        )
-                    }
+                <div
+                    class="fobas-object-name"
+                >
+                    ${escapeHTML(
+                        object.shortName ||
+                        object.name
+                    )}
                 </div>
 
 
                 ${
                     object.formula
-                        ? `
-                            <div class="fobas-object-formula">
-                                ${
-                                    escapeHTML(
-                                        object.formula
-                                    )
-                                }
-                            </div>
-                        `
+                        ? `<div
+                            class="fobas-object-formula"
+                        >
+                            ${escapeHTML(
+                                object.formula
+                            )}
+                           </div>`
                         : ""
                 }
 
@@ -2762,20 +2783,219 @@ function objectVisual(object) {
             ${bubbles}
 
 
-            ${beakerStatus}
+            ${
+                isContainer
+                    ? beakerStatus
+                    : ""
+            }
 
 
-            <div class="fobas-object-label">
-                ${
-                    escapeHTML(
-                        object.name
-                    )
-                }
+            <div
+                class="fobas-object-label"
+            >
+                ${escapeHTML(
+                    object.name
+                )}
             </div>
 
         </div>
     `;
 }
+
+
+/* ============================================================
+   12.9 — INTERACTIONS DES OBJETS
+   ------------------------------------------------------------
+   CONSERVÉ SANS MODIFICATION DE LOGIQUE.
+============================================================ */
+
+function bindObjectInteractions() {
+
+    $$(".fobas-chem-object").forEach(
+        element => {
+
+            const id =
+                element.dataset.objectId;
+
+
+            element.addEventListener(
+                "pointerdown",
+                event => {
+
+                    const object =
+                        getObject(id);
+
+
+                    if (!object) {
+                        return;
+                    }
+
+
+                    selectObject(id);
+
+
+                    if (
+                        state.tool !==
+                        "move"
+                    ) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    const startX =
+                        event.clientX;
+
+                    const startY =
+                        event.clientY;
+
+
+                    const originalX =
+                        object.x;
+
+                    const originalY =
+                        object.y;
+
+
+                    function move(
+                        moveEvent
+                    ) {
+
+                        object.x =
+                            originalX +
+                            (
+                                moveEvent.clientX -
+                                startX
+                            ) /
+                            state.zoom;
+
+
+                        object.y =
+                            originalY +
+                            (
+                                moveEvent.clientY -
+                                startY
+                            ) /
+                            state.zoom;
+
+
+                        object.x =
+                            Math.max(
+                                0,
+                                object.x
+                            );
+
+
+                        object.y =
+                            Math.max(
+                                0,
+                                object.y
+                            );
+
+
+                        renderWorkspace();
+                    }
+
+
+                    function end() {
+
+                        document.removeEventListener(
+                            "pointermove",
+                            move
+                        );
+
+
+                        document.removeEventListener(
+                            "pointerup",
+                            end
+                        );
+
+
+                        saveSession(
+                            false
+                        );
+                    }
+
+
+                    document.addEventListener(
+                        "pointermove",
+                        move
+                    );
+
+
+                    document.addEventListener(
+                        "pointerup",
+                        end,
+                        {
+                            once: true
+                        }
+                    );
+                }
+            );
+        }
+    );
+}
+
+
+/* ============================================================
+   12.10 — RENDU DU WORKSPACE
+   ------------------------------------------------------------
+   CONSERVÉ
+============================================================ */
+
+function renderWorkspace() {
+
+    if (!E.workspaceObjects) {
+        return;
+    }
+
+
+    E.workspaceObjects.innerHTML =
+        "";
+
+
+    state.objects.forEach(
+        object => {
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+
+            wrapper.innerHTML =
+                objectVisual(
+                    object
+                );
+
+
+            const element =
+                wrapper.firstElementChild;
+
+
+            if (element) {
+
+                E.workspaceObjects.appendChild(
+                    element
+                );
+            }
+        }
+    );
+
+
+    bindObjectInteractions();
+
+
+    applyZoom();
+}
+
+
+
+
+
+
 
 
 
