@@ -5437,30 +5437,35 @@ function renderWorkspace() {
 
 
 
+
+
+
 /* ============================================================
    20 — MOTEUR DE RÉACTIONS CHIMIQUES FOBAS
    ------------------------------------------------------------
-   VERSION ROBUSTE
+   VERSION 4.0 — GROUPE 01 / 25 RÉACTIONS
    ------------------------------------------------------------
-   IMPORTANT :
-   - Ce bloc ne modifie pas les autres blocs du moteur.
-   - Les noms visibles peuvent être scientifiques :
-       Acide chlorhydrique
-       Hydroxyde de sodium
-       Sulfate de cuivre(II)
-       Zinc
-       etc.
-   - Le moteur identifie les substances par :
+   PRINCIPES :
+   - UN seul récipient peut contenir plusieurs substances.
+   - Le moteur peut analyser 2, 5, 10 substances ou davantage.
+   - Une réaction est déclenchée uniquement lorsque TOUS
+     ses réactifs sont présents dans le même récipient.
+   - Les quantités sont calculées en moles.
+   - Les coefficients sont strictement stœchiométriques.
+   - L'identification accepte :
        1. ID interne
        2. formule chimique
-       3. nom normalisé
+       3. nom scientifique normalisé
    - Une seule réaction principale est exécutée par pression.
-   - Les quantités sont calculées en moles.
+   - Les réactions déjà effectuées sont conservées.
+   - Les substances non concernées par une réaction restent
+     dans le récipient.
+   - Ce bloc ne modifie pas les autres blocs du moteur.
    ============================================================ */
 
 
 /* ============================================================
-   20.1 — NORMALISATION
+   20.1 — NORMALISATION DU TEXTE CHIMIQUE
 ============================================================ */
 
 function normalizeChemicalText(value) {
@@ -5555,6 +5560,9 @@ function chemicalIdentityMatches(
 
 /* ============================================================
    20.3 — IDENTITÉS CHIMIQUES INTERNES
+   ------------------------------------------------------------
+   Toutes les substances utilisées par les 25 réactions
+   du présent groupe sont déclarées ici.
 ============================================================ */
 
 const CHEMICAL_IDENTITIES = {
@@ -5700,12 +5708,321 @@ const CHEMICAL_IDENTITIES = {
             "Copper",
             "Copper metal"
         ]
+    },
+
+
+    sodiumBicarbonate: {
+
+        ids: [
+            "sodiumBicarbonate",
+            "nahco3",
+            "bicarbonateDeSodium"
+        ],
+
+        formula:
+            "NaHCO3",
+
+        names: [
+            "Bicarbonate de sodium",
+            "Bicarbonate de sodium (NaHCO₃)",
+            "Sodium bicarbonate"
+        ]
+    },
+
+
+    calciumCarbonate: {
+
+        ids: [
+            "calciumCarbonate",
+            "caco3",
+            "carbonateDeCalcium"
+        ],
+
+        formula:
+            "CaCO3",
+
+        names: [
+            "Carbonate de calcium",
+            "Carbonate de calcium (CaCO₃)",
+            "Calcium carbonate"
+        ]
+    },
+
+
+    sodiumCarbonateSolid: {
+
+        ids: [
+            "sodiumCarbonateSolid",
+            "na2co3",
+            "carbonateDeSodium"
+        ],
+
+        formula:
+            "Na2CO3",
+
+        names: [
+            "Carbonate de sodium",
+            "Carbonate de sodium (Na₂CO₃)",
+            "Sodium carbonate"
+        ]
+    },
+
+
+    magnesium: {
+
+        ids: [
+            "magnesium",
+            "Mg"
+        ],
+
+        formula:
+            "Mg",
+
+        names: [
+            "Magnésium",
+            "Magnésium métallique",
+            "Magnesium",
+            "Magnesium metal"
+        ]
+    },
+
+
+    iron: {
+
+        ids: [
+            "iron",
+            "Fe",
+            "fer"
+        ],
+
+        formula:
+            "Fe",
+
+        names: [
+            "Fer",
+            "Fer métallique",
+            "Iron",
+            "Iron metal"
+        ]
+    },
+
+
+    aluminium: {
+
+        ids: [
+            "aluminium",
+            "aluminum",
+            "Al"
+        ],
+
+        formula:
+            "Al",
+
+        names: [
+            "Aluminium",
+            "Aluminium métallique",
+            "Aluminum",
+            "Aluminum metal"
+        ]
+    },
+
+
+    calciumHydroxide: {
+
+        ids: [
+            "calciumHydroxide",
+            "caoh2",
+            "hydroxydeDeCalcium"
+        ],
+
+        formula:
+            "Ca(OH)2",
+
+        names: [
+            "Hydroxyde de calcium",
+            "Hydroxyde de calcium (Ca(OH)₂)",
+            "Calcium hydroxide"
+        ]
+    },
+
+
+    sulfuricAcid: {
+
+        ids: [
+            "sulfuricAcid",
+            "h2so4",
+            "acideSulfurique"
+        ],
+
+        formula:
+            "H2SO4",
+
+        names: [
+            "Acide sulfurique",
+            "Acide sulfurique (H₂SO₄)",
+            "Sulfuric acid"
+        ]
+    },
+
+
+    nitricAcid: {
+
+        ids: [
+            "nitricAcid",
+            "hno3",
+            "acideNitrique"
+        ],
+
+        formula:
+            "HNO3",
+
+        names: [
+            "Acide nitrique",
+            "Acide nitrique (HNO₃)",
+            "Nitric acid"
+        ]
+    },
+
+
+    aceticAcid: {
+
+        ids: [
+            "aceticAcid",
+            "ch3cooh",
+            "acideAcetique"
+        ],
+
+        formula:
+            "CH3COOH",
+
+        names: [
+            "Acide acétique",
+            "Acide acétique (CH₃COOH)",
+            "Acetic acid"
+        ]
+    },
+
+
+    silverNitrate: {
+
+        ids: [
+            "silverNitrate",
+            "agno3",
+            "nitrateDArgent"
+        ],
+
+        formula:
+            "AgNO3",
+
+        names: [
+            "Nitrate d'argent",
+            "Nitrate d'argent (AgNO₃)",
+            "Silver nitrate"
+        ]
+    },
+
+
+    silver: {
+
+        ids: [
+            "silver",
+            "Ag",
+            "argent"
+        ],
+
+        formula:
+            "Ag",
+
+        names: [
+            "Argent",
+            "Argent métallique",
+            "Silver",
+            "Silver metal"
+        ]
+    },
+
+
+    ferricChloride: {
+
+        ids: [
+            "ferricChloride",
+            "fecl3",
+            "chlorureDeFerIII"
+        ],
+
+        formula:
+            "FeCl3",
+
+        names: [
+            "Chlorure de fer(III)",
+            "Chlorure de fer (III)",
+            "Ferric chloride",
+            "Iron(III) chloride"
+        ]
+    },
+
+
+    ferrousChloride: {
+
+        ids: [
+            "ferrousChloride",
+            "fecl2",
+            "chlorureDeFerII"
+        ],
+
+        formula:
+            "FeCl2",
+
+        names: [
+            "Chlorure de fer(II)",
+            "Chlorure de fer (II)",
+            "Ferrous chloride",
+            "Iron(II) chloride"
+        ]
+    },
+
+
+    potassiumHydroxide: {
+
+        ids: [
+            "potassiumHydroxide",
+            "koh",
+            "hydroxydeDePotassium"
+        ],
+
+        formula:
+            "KOH",
+
+        names: [
+            "Hydroxyde de potassium",
+            "Hydroxyde de potassium (KOH)",
+            "Potassium hydroxide"
+        ]
+    },
+
+
+    potassiumPermanganate: {
+
+        ids: [
+            "potassiumPermanganate",
+            "kmno4",
+            "permanganateDePotassium"
+        ],
+
+        formula:
+            "KMnO4",
+
+        names: [
+            "Permanganate de potassium",
+            "Permanganate de potassium (KMnO₄)",
+            "Potassium permanganate"
+        ]
     }
 };
 
 
 /* ============================================================
-   20.4 — RECHERCHE D'UN COMPOSANT PAR IDENTITÉ CHIMIQUE
+   20.4 — RECHERCHE D'UN COMPOSANT PAR IDENTITÉ
 ============================================================ */
 
 function findChemicalComponent(
@@ -5734,18 +6051,25 @@ function findChemicalComponent(
     const identities = [
 
         {
-            id: identity.ids[0],
+            id:
+                identity.ids[0],
+
             formula:
                 identity.formula,
+
             names:
                 identity.names
         },
 
         ...identity.ids.map(
             id => ({
-                id: id,
+
+                id:
+                    id,
+
                 formula:
                     identity.formula,
+
                 names:
                     identity.names
             })
@@ -5791,9 +6115,7 @@ function hasChemical(
 
 
 /* ============================================================
-   20.6 — COMPATIBILITÉ ANCIENNE API
-   ------------------------------------------------------------
-   Conservée pour ne pas casser le moteur.
+   20.6 — ANCIENNE API
 ============================================================ */
 
 function hasComponent(
@@ -6106,18 +6428,23 @@ function addProduct(
 /* ============================================================
    20.10 — BASE DE DONNÉES DES RÉACTIONS
    ------------------------------------------------------------
-   Les coefficients représentent les rapports molaires.
+   GROUPE 01 — 25 RÉACTIONS
+   ------------------------------------------------------------
+   IMPORTANT :
+   - Les coefficients sont molaires.
+   - Une réaction ne démarre que si TOUS les réactifs
+     sont présents dans le même récipient.
+   - Les substances supplémentaires présentes dans le récipient
+     ne bloquent pas la réaction.
 ============================================================ */
 
 const REACTION_DATABASE = [
 
-    /* --------------------------------------------------------
-       RÉACTION 001
-       HCl + NaOH → NaCl + H₂O
-    -------------------------------------------------------- */
+    /* ========================================================
+       001 — HCl + NaOH → NaCl + H₂O
+    ======================================================== */
 
     {
-
         id:
             "neutralisation_hcl_naoh",
 
@@ -6129,7 +6456,6 @@ const REACTION_DATABASE = [
             {
                 chemical:
                     "hydrochloricAcid",
-
                 coefficient:
                     1
             },
@@ -6137,7 +6463,6 @@ const REACTION_DATABASE = [
             {
                 chemical:
                     "sodiumHydroxide",
-
                 coefficient:
                     1
             }
@@ -6148,10 +6473,8 @@ const REACTION_DATABASE = [
             {
                 material:
                     "sodiumChloride",
-
                 coefficient:
                     1,
-
                 molarMass:
                     58.44
             },
@@ -6159,10 +6482,8 @@ const REACTION_DATABASE = [
             {
                 material:
                     "water",
-
                 coefficient:
                     1,
-
                 molarMass:
                     18.015
             }
@@ -6191,13 +6512,11 @@ const REACTION_DATABASE = [
     },
 
 
-    /* --------------------------------------------------------
-       RÉACTION 002
-       Zn + 2HCl → ZnCl₂ + H₂
-    -------------------------------------------------------- */
+    /* ========================================================
+       002 — Zn + 2HCl → ZnCl₂ + H₂
+    ======================================================== */
 
     {
-
         id:
             "zinc_hcl",
 
@@ -6209,7 +6528,6 @@ const REACTION_DATABASE = [
             {
                 chemical:
                     "zinc",
-
                 coefficient:
                     1
             },
@@ -6217,7 +6535,6 @@ const REACTION_DATABASE = [
             {
                 chemical:
                     "hydrochloricAcid",
-
                 coefficient:
                     2
             }
@@ -6248,25 +6565,22 @@ const REACTION_DATABASE = [
     },
 
 
-    /* --------------------------------------------------------
-       RÉACTION 003
-       Zn + CuSO₄ → ZnSO₄ + Cu
-    -------------------------------------------------------- */
+    /* ========================================================
+       003 — Zn + CuSO₄ → ZnSO₄ + Cu
+    ======================================================== */
 
     {
-
         id:
             "zinc_copper_sulfate",
 
         name:
-            "Déplacement métallique",
+            "Déplacement métallique du cuivre",
 
         reactants: [
 
             {
                 chemical:
                     "zinc",
-
                 coefficient:
                     1
             },
@@ -6274,7 +6588,6 @@ const REACTION_DATABASE = [
             {
                 chemical:
                     "copperSulfate",
-
                 coefficient:
                     1
             }
@@ -6285,10 +6598,8 @@ const REACTION_DATABASE = [
             {
                 material:
                     "copper",
-
                 coefficient:
                     1,
-
                 molarMass:
                     63.546
             }
@@ -6313,7 +6624,1409 @@ const REACTION_DATABASE = [
             "#b87333",
 
         description:
-            "Réaction d'oxydoréduction : Zn + CuSO₄ → ZnSO₄ + Cu."
+            "Oxydoréduction : Zn + CuSO₄ → ZnSO₄ + Cu."
+    },
+
+
+    /* ========================================================
+       004 — HCl + NaHCO₃ → NaCl + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "hcl_sodium_bicarbonate",
+
+        name:
+            "Acide chlorhydrique et bicarbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumBicarbonate",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "sodiumChloride",
+                coefficient:
+                    1,
+                molarMass:
+                    58.44
+            },
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f5f9ff",
+
+        description:
+            "Réaction acide-carbonate avec dégagement de dioxyde de carbone : HCl + NaHCO₃ → NaCl + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       005 — 2HCl + CaCO₃ → CaCl₂ + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "hcl_calcium_carbonate",
+
+        name:
+            "Acide chlorhydrique et carbonate de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "calciumCarbonate",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f8fbff",
+
+        description:
+            "Réaction acide-carbonate : 2HCl + CaCO₃ → CaCl₂ + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       006 — 2HCl + Na₂CO₃ → 2NaCl + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "hcl_sodium_carbonate",
+
+        name:
+            "Acide chlorhydrique et carbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "sodiumCarbonateSolid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "sodiumChloride",
+                coefficient:
+                    2,
+                molarMass:
+                    58.44
+            },
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f5f9ff",
+
+        description:
+            "Réaction acide-carbonate : 2HCl + Na₂CO₃ → 2NaCl + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       007 — Mg + 2HCl → MgCl₂ + H₂
+    ======================================================== */
+
+    {
+        id:
+            "hcl_magnesium",
+
+        name:
+            "Réaction magnésium-acide chlorhydrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "magnesium",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Dégagement de dihydrogène : Mg + 2HCl → MgCl₂ + H₂."
+    },
+
+
+    /* ========================================================
+       008 — Fe + 2HCl → FeCl₂ + H₂
+    ======================================================== */
+
+    {
+        id:
+            "hcl_iron",
+
+        name:
+            "Réaction fer-acide chlorhydrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "iron",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "ferrousChloride",
+                coefficient:
+                    1,
+                molarMass:
+                    126.75
+            }
+        ],
+
+        temperatureDelta:
+            3,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#dbeafe",
+
+        description:
+            "Réaction métal-acide : Fe + 2HCl → FeCl₂ + H₂."
+    },
+
+
+    /* ========================================================
+       009 — 2Al + 6HCl → 2AlCl₃ + 3H₂
+    ======================================================== */
+
+    {
+        id:
+            "hcl_aluminium",
+
+        name:
+            "Réaction aluminium-acide chlorhydrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aluminium",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    6
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : 2Al + 6HCl → 2AlCl₃ + 3H₂."
+    },
+
+
+    /* ========================================================
+       010 — 2HCl + Ca(OH)₂ → CaCl₂ + 2H₂O
+    ======================================================== */
+
+    {
+        id:
+            "hcl_calcium_hydroxide",
+
+        name:
+            "Neutralisation de l'hydroxyde de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "calciumHydroxide",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    2,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            4,
+
+        phase:
+            "aqueous",
+
+        gas:
+            false,
+
+        precipitate:
+            false,
+
+        bubbling:
+            false,
+
+        color:
+            "#eef7ff",
+
+        description:
+            "Neutralisation : 2HCl + Ca(OH)₂ → CaCl₂ + 2H₂O."
+    },
+
+
+    /* ========================================================
+       011 — H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O
+    ======================================================== */
+
+    {
+        id:
+            "h2so4_naoh",
+
+        name:
+            "Neutralisation acide sulfurique-hydroxyde de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumHydroxide",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    2,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "aqueous",
+
+        gas:
+            false,
+
+        precipitate:
+            false,
+
+        bubbling:
+            false,
+
+        color:
+            "#eef7ff",
+
+        description:
+            "Neutralisation : H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O."
+    },
+
+
+    /* ========================================================
+       012 — H₂SO₄ + CaCO₃ → CaSO₄ + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "h2so4_calcium_carbonate",
+
+        name:
+            "Acide sulfurique et carbonate de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "calciumCarbonate",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            true,
+
+        bubbling:
+            true,
+
+        color:
+            "#f1f5f9",
+
+        description:
+            "Réaction acide-carbonate : H₂SO₄ + CaCO₃ → CaSO₄ + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       013 — HNO₃ + NaOH → NaNO₃ + H₂O
+    ======================================================== */
+
+    {
+        id:
+            "hno3_naoh",
+
+        name:
+            "Neutralisation acide nitrique-hydroxyde de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumHydroxide",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            4,
+
+        phase:
+            "aqueous",
+
+        gas:
+            false,
+
+        precipitate:
+            false,
+
+        bubbling:
+            false,
+
+        color:
+            "#eef7ff",
+
+        description:
+            "Neutralisation : HNO₃ + NaOH → NaNO₃ + H₂O."
+    },
+
+
+    /* ========================================================
+       014 — 2HNO₃ + CaCO₃ → Ca(NO₃)₂ + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "hno3_calcium_carbonate",
+
+        name:
+            "Acide nitrique et carbonate de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "calciumCarbonate",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f8fbff",
+
+        description:
+            "Réaction acide-carbonate : 2HNO₃ + CaCO₃ → Ca(NO₃)₂ + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       015 — CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "acetic_sodium_bicarbonate",
+
+        name:
+            "Acide acétique et bicarbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aceticAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumBicarbonate",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f8fafc",
+
+        description:
+            "Réaction acide-base avec dégagement de CO₂ : CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       016 — 2CH₃COOH + Na₂CO₃ → 2CH₃COONa + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "acetic_sodium_carbonate",
+
+        name:
+            "Acide acétique et carbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aceticAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "sodiumCarbonateSolid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f8fafc",
+
+        description:
+            "Réaction acide-carbonate : 2CH₃COOH + Na₂CO₃ → 2CH₃COONa + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       017 — 2AgNO₃ + Cu → Cu(NO₃)₂ + 2Ag
+    ======================================================== */
+
+    {
+        id:
+            "silver_nitrate_copper",
+
+        name:
+            "Déplacement de l'argent par le cuivre",
+
+        reactants: [
+
+            {
+                chemical:
+                    "silverNitrate",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "copper",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "silver",
+                coefficient:
+                    2,
+                molarMass:
+                    107.8682
+            },
+
+            {
+                material:
+                    "copperNitrate",
+                coefficient:
+                    1,
+                molarMass:
+                    187.56
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#d1d5db",
+
+        description:
+            "Oxydoréduction : 2AgNO₃ + Cu → Cu(NO₃)₂ + 2Ag."
+    },
+
+
+    /* ========================================================
+       018 — 2AgNO₃ + Zn → Zn(NO₃)₂ + 2Ag
+    ======================================================== */
+
+    {
+        id:
+            "silver_nitrate_zinc",
+
+        name:
+            "Déplacement de l'argent par le zinc",
+
+        reactants: [
+
+            {
+                chemical:
+                    "silverNitrate",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "zinc",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "silver",
+                coefficient:
+                    2,
+                molarMass:
+                    107.8682
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#d1d5db",
+
+        description:
+            "Oxydoréduction : 2AgNO₃ + Zn → Zn(NO₃)₂ + 2Ag."
+    },
+
+
+    /* ========================================================
+       019 — 2AgNO₃ + Fe → Fe(NO₃)₂ + 2Ag
+    ======================================================== */
+
+    {
+        id:
+            "silver_nitrate_iron",
+
+        name:
+            "Déplacement de l'argent par le fer",
+
+        reactants: [
+
+            {
+                chemical:
+                    "silverNitrate",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "iron",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "silver",
+                coefficient:
+                    2,
+                molarMass:
+                    107.8682
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#d1d5db",
+
+        description:
+            "Oxydoréduction : 2AgNO₃ + Fe → Fe(NO₃)₂ + 2Ag."
+    },
+
+
+    /* ========================================================
+       020 — CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄
+    ======================================================== */
+
+    {
+        id:
+            "cuso4_naoh",
+
+        name:
+            "Précipitation de l'hydroxyde de cuivre(II)",
+
+        reactants: [
+
+            {
+                chemical:
+                    "copperSulfate",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumHydroxide",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "precipitation",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#3b82f6",
+
+        description:
+            "Précipitation : CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄."
+    },
+
+
+    /* ========================================================
+       021 — CuSO₄ + Fe → FeSO₄ + Cu
+    ======================================================== */
+
+    {
+        id:
+            "cuso4_iron",
+
+        name:
+            "Déplacement du cuivre par le fer",
+
+        reactants: [
+
+            {
+                chemical:
+                    "copperSulfate",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "iron",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "ironSulfate",
+                coefficient:
+                    1,
+                molarMass:
+                    151.91
+            },
+
+            {
+                material:
+                    "copper",
+                coefficient:
+                    1,
+                molarMass:
+                    63.546
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#b87333",
+
+        description:
+            "Oxydoréduction : Fe + CuSO₄ → FeSO₄ + Cu."
+    },
+
+
+    /* ========================================================
+       022 — FeCl₃ + 3NaOH → Fe(OH)₃↓ + 3NaCl
+    ======================================================== */
+
+    {
+        id:
+            "fecl3_naoh",
+
+        name:
+            "Précipitation de l'hydroxyde de fer(III)",
+
+        reactants: [
+
+            {
+                chemical:
+                    "ferricChloride",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumHydroxide",
+                coefficient:
+                    3
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "sodiumChloride",
+                coefficient:
+                    3,
+                molarMass:
+                    58.44
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "precipitation",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#92400e",
+
+        description:
+            "Précipitation : FeCl₃ + 3NaOH → Fe(OH)₃↓ + 3NaCl."
+    },
+
+
+    /* ========================================================
+       023 — FeCl₂ + 2NaOH → Fe(OH)₂↓ + 2NaCl
+    ======================================================== */
+
+    {
+        id:
+            "fecl2_naoh",
+
+        name:
+            "Précipitation de l'hydroxyde de fer(II)",
+
+        reactants: [
+
+            {
+                chemical:
+                    "ferrousChloride",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumHydroxide",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "sodiumChloride",
+                coefficient:
+                    2,
+                molarMass:
+                    58.44
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "precipitation",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#86efac",
+
+        description:
+            "Précipitation : FeCl₂ + 2NaOH → Fe(OH)₂↓ + 2NaCl."
+    },
+
+
+    /* ========================================================
+       024 — Ca(OH)₂ + Na₂CO₃ → CaCO₃↓ + 2NaOH
+    ======================================================== */
+
+    {
+        id:
+            "caoh2_na2co3",
+
+        name:
+            "Précipitation du carbonate de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "calciumHydroxide",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumCarbonateSolid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "calciumCarbonate",
+                coefficient:
+                    1,
+                molarMass:
+                    100.0869
+            },
+
+            {
+                material:
+                    "sodiumHydroxide",
+                coefficient:
+                    2,
+                molarMass:
+                    40
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "precipitation",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#eeeeee",
+
+        description:
+            "Précipitation : Ca(OH)₂ + Na₂CO₃ → CaCO₃↓ + 2NaOH."
+    },
+
+
+    /* ========================================================
+       025 — 2KMnO₄ + 16HCl → 2MnCl₂ + 2KCl
+               + 8H₂O + 5Cl₂
+    ======================================================== */
+
+    {
+        id:
+            "kmno4_hcl",
+
+        name:
+            "Oxydoréduction permanganate-acide chlorhydrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "potassiumPermanganate",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+                coefficient:
+                    16
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    8,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            8,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#d8b4fe",
+
+        description:
+            "Oxydoréduction en milieu acide : 2KMnO₄ + 16HCl → 2MnCl₂ + 2KCl + 8H₂O + 5Cl₂."
     }
 ];
 
@@ -6402,6 +8115,7 @@ function executeReaction(
         return false;
     }
 
+
     /* --------------------------------------------------------
        CONSOMMATION DES RÉACTIFS
     -------------------------------------------------------- */
@@ -6417,15 +8131,6 @@ function executeReaction(
                 reactant.coefficient ||
                 1
             );
-
-        const identity =
-            CHEMICAL_IDENTITIES[
-                reactant.chemical
-            ];
-
-        if (!identity) {
-            return false;
-        }
 
         const component =
             findChemicalComponent(
@@ -6487,12 +8192,6 @@ function executeReaction(
                     product.molarMass
                 );
         }
-
-        /*
-         * L'eau produite par neutralisation
-         * est ajoutée comme composant réel
-         * si elle existe dans MATERIALS.
-         */
 
         addProduct(
             object,
@@ -6559,17 +8258,44 @@ function executeReaction(
         reaction.gas
             ? "dégagement gazeux"
             : reaction.precipitate
-                ? "réaction d'oxydoréduction"
+                ? "précipité formé"
                 : "réaction effectuée";
 
 
     /* --------------------------------------------------------
-       pH SPÉCIAL POUR NEUTRALISATION
+       PH SPÉCIAL DES NEUTRALISATIONS
     -------------------------------------------------------- */
 
     if (
         reaction.id ===
         "neutralisation_hcl_naoh"
+    ) {
+
+        object.pH =
+            7;
+    }
+
+    if (
+        reaction.id ===
+        "h2so4_naoh"
+    ) {
+
+        object.pH =
+            7;
+    }
+
+    if (
+        reaction.id ===
+        "hno3_naoh"
+    ) {
+
+        object.pH =
+            7;
+    }
+
+    if (
+        reaction.id ===
+        "hcl_calcium_hydroxide"
     ) {
 
         object.pH =
@@ -6601,7 +8327,6 @@ function executeReaction(
    20.13 — MOTEUR PRINCIPAL
 ============================================================ */
 
-
 function reactSelected() {
 
     const object =
@@ -6624,11 +8349,7 @@ function reactSelected() {
 
 
     /* ========================================================
-       2 — SI UNE RÉACTION EST DÉJÀ TERMINÉE
-       --------------------------------------------------------
-       IMPORTANT :
-       NE JAMAIS EFFACER LE RÉSULTAT D'UNE RÉACTION
-       DÉJÀ EFFECTUÉE.
+       2 — CONSERVATION D'UNE RÉACTION DÉJÀ EFFECTUÉE
     ======================================================== */
 
     if (
@@ -6653,33 +8374,15 @@ function reactSelected() {
 
 
         toast(
-            "Cette réaction a déjà été effectuée. Le résultat reste conservé dans le bécher.",
+            "Cette réaction a déjà été effectuée. Le résultat reste conservé dans le récipient.",
             "info"
         );
 
-
-        /*
-         * On conserve volontairement :
-         * - reactionState
-         * - state
-         * - pH
-         * - température
-         * - produits
-         * - couleur
-         * - gaz
-         * - précipité
-         * - bulles
-         */
 
         recalculateObject(
             object
         );
 
-        /*
-         * IMPORTANT :
-         * recalculateObject() ne doit pas recevoir
-         * l'autorisation de supprimer reactionState.
-         */
 
         renderAll();
 
@@ -6709,6 +8412,9 @@ function reactSelected() {
 
     /* ========================================================
        4 — RECHERCHE D'UNE RÉACTION COMPATIBLE
+       --------------------------------------------------------
+       Le récipient peut contenir plusieurs substances.
+       Seuls les réactifs exigés par une réaction sont utilisés.
     ======================================================== */
 
     let compatibleReaction =
@@ -6747,10 +8453,6 @@ function reactSelected() {
 
     /* ========================================================
        5 — AUCUNE NOUVELLE RÉACTION
-       --------------------------------------------------------
-       IMPORTANT :
-       Si aucune nouvelle réaction n'est disponible,
-       on ne détruit PAS un résultat existant.
     ======================================================== */
 
     if (
@@ -6758,18 +8460,13 @@ function reactSelected() {
         compatibleExtent <= 0
     ) {
 
-        /*
-         * Si le récipient contient déjà un résultat
-         * réactionnel, on le conserve.
-         */
-
         if (
             object.reactionState &&
             object.reactionState.active === true
         ) {
 
             toast(
-                "Aucune nouvelle réaction à effectuer. Le résultat de la réaction précédente est conservé.",
+                "Aucune nouvelle réaction à effectuer. Le résultat précédent est conservé.",
                 "info"
             );
 
@@ -6778,11 +8475,6 @@ function reactSelected() {
             return;
         }
 
-
-        /*
-         * Seulement dans le cas où aucune réaction
-         * n'a encore été effectuée.
-         */
 
         object.reactionState = {
 
@@ -6828,6 +8520,7 @@ function reactSelected() {
             object
         );
 
+
         renderAll();
 
         return;
@@ -6835,7 +8528,7 @@ function reactSelected() {
 
 
     /* ========================================================
-       6 — EXÉCUTION DE LA RÉACTION
+       6 — EXÉCUTION
     ======================================================== */
 
     const success =
@@ -6851,10 +8544,6 @@ function reactSelected() {
     ======================================================== */
 
     if (!success) {
-
-        /*
-         * Ne pas détruire une ancienne réaction valide.
-         */
 
         if (
             object.reactionState &&
@@ -6916,8 +8605,6 @@ function reactSelected() {
 
     /* ========================================================
        8 — RECALCUL FINAL
-       --------------------------------------------------------
-       Le statut réactionnel doit rester présent.
     ======================================================== */
 
     recalculateObject(
@@ -6925,12 +8612,9 @@ function reactSelected() {
     );
 
 
-    /*
-     * RÉAFFIRMATION DU STATUT
-     *
-     * On s'assure que le statut ne disparaisse pas
-     * après le recalcul.
-     */
+    /* ========================================================
+       9 — RÉAFFIRMATION DU STATUT RÉACTIONNEL
+    ======================================================== */
 
     if (
         success &&
@@ -6941,7 +8625,7 @@ function reactSelected() {
             compatibleReaction.gas
                 ? "dégagement gazeux"
                 : compatibleReaction.precipitate
-                    ? "réaction d'oxydoréduction"
+                    ? "précipité formé"
                     : "réaction effectuée";
 
 
@@ -6983,11 +8667,13 @@ function reactSelected() {
 
 
     /* ========================================================
-       9 — AFFICHAGE FINAL
+       10 — AFFICHAGE FINAL
     ======================================================== */
 
     renderAll();
 }
+
+
 
 
 
