@@ -3261,45 +3261,913 @@
         }
     }
 
-    /* ============================================================
-       20 — RÉACTIONS CHIMIQUES
-    ============================================================ */
 
-    function hasComponent(
-        object,
-        id
+
+
+
+
+/* ============================================================
+   20 — MOTEUR DE RÉACTIONS CHIMIQUES FOBAS
+   ------------------------------------------------------------
+   VERSION ROBUSTE
+   ------------------------------------------------------------
+   IMPORTANT :
+   - Ce bloc ne modifie pas les autres blocs du moteur.
+   - Les noms visibles peuvent être scientifiques :
+       Acide chlorhydrique
+       Hydroxyde de sodium
+       Sulfate de cuivre(II)
+       Zinc
+       etc.
+   - Le moteur identifie les substances par :
+       1. ID interne
+       2. formule chimique
+       3. nom normalisé
+   - Une seule réaction principale est exécutée par pression.
+   - Les quantités sont calculées en moles.
+   ============================================================ */
+
+
+/* ============================================================
+   20.1 — NORMALISATION
+============================================================ */
+
+function normalizeChemicalText(value) {
+
+    return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+
+/* ============================================================
+   20.2 — IDENTIFICATION CHIMIQUE ROBUSTE
+============================================================ */
+
+function chemicalIdentityMatches(
+    component,
+    identities
+) {
+
+    if (!component) {
+        return false;
+    }
+
+    const componentId =
+        normalizeChemicalText(
+            component.id
+        );
+
+    const componentFormula =
+        normalizeChemicalText(
+            component.formula
+        );
+
+    const componentName =
+        normalizeChemicalText(
+            component.name
+        );
+
+    return identities.some(
+        identity => {
+
+            const id =
+                normalizeChemicalText(
+                    identity.id
+                );
+
+            const formula =
+                normalizeChemicalText(
+                    identity.formula
+                );
+
+            const names =
+                (identity.names || [])
+                    .map(
+                        name =>
+                            normalizeChemicalText(
+                                name
+                            )
+                    );
+
+            if (
+                id &&
+                componentId === id
+            ) {
+                return true;
+            }
+
+            if (
+                formula &&
+                componentFormula === formula
+            ) {
+                return true;
+            }
+
+            if (
+                componentName &&
+                names.includes(
+                    componentName
+                )
+            ) {
+                return true;
+            }
+
+            return false;
+        }
+    );
+}
+
+
+/* ============================================================
+   20.3 — IDENTITÉS CHIMIQUES INTERNES
+============================================================ */
+
+const CHEMICAL_IDENTITIES = {
+
+    hydrochloricAcid: {
+
+        ids: [
+            "hydrochloricAcid",
+            "hcl",
+            "acideChlorhydrique",
+            "acide_chlorhydrique"
+        ],
+
+        formula:
+            "HCl",
+
+        names: [
+            "Acide chlorhydrique",
+            "Acide chlorhydrique (HCl)",
+            "Hydrochloric acid",
+            "Hydrogen chloride"
+        ]
+    },
+
+
+    sodiumHydroxide: {
+
+        ids: [
+            "sodiumHydroxide",
+            "naoh",
+            "hydroxydeDeSodium",
+            "hydroxyde_de_sodium"
+        ],
+
+        formula:
+            "NaOH",
+
+        names: [
+            "Hydroxyde de sodium",
+            "Hydroxyde de sodium (NaOH)",
+            "Sodium hydroxide"
+        ]
+    },
+
+
+    zinc: {
+
+        ids: [
+            "zinc",
+            "Zn"
+        ],
+
+        formula:
+            "Zn",
+
+        names: [
+            "Zinc",
+            "Zinc métallique",
+            "Zinc metal"
+        ]
+    },
+
+
+    copperSulfate: {
+
+        ids: [
+            "copperSulfate",
+            "cuso4",
+            "cuSo4",
+            "sulfateDeCuivre",
+            "sulfateDeCuivreII"
+        ],
+
+        formula:
+            "CuSO4",
+
+        names: [
+            "Sulfate de cuivre",
+            "Sulfate de cuivre(II)",
+            "Sulfate de cuivre (II)",
+            "Cuivre sulfate",
+            "Copper sulfate",
+            "Copper(II) sulfate"
+        ]
+    },
+
+
+    sodiumChloride: {
+
+        ids: [
+            "sodiumChloride",
+            "nacl",
+            "chlorureDeSodium"
+        ],
+
+        formula:
+            "NaCl",
+
+        names: [
+            "Chlorure de sodium",
+            "Chlorure de sodium (NaCl)",
+            "Sodium chloride"
+        ]
+    },
+
+
+    water: {
+
+        ids: [
+            "water",
+            "h2o",
+            "eau",
+            "eauDistillee"
+        ],
+
+        formula:
+            "H2O",
+
+        names: [
+            "Eau",
+            "Eau distillée",
+            "Eau distillee",
+            "Water",
+            "Distilled water"
+        ]
+    },
+
+
+    copper: {
+
+        ids: [
+            "copper",
+            "cu",
+            "cuivre"
+        ],
+
+        formula:
+            "Cu",
+
+        names: [
+            "Cuivre",
+            "Cuivre métallique",
+            "Copper",
+            "Copper metal"
+        ]
+    }
+};
+
+
+/* ============================================================
+   20.4 — RECHERCHE D'UN COMPOSANT PAR IDENTITÉ CHIMIQUE
+============================================================ */
+
+function findChemicalComponent(
+    object,
+    chemicalKey
+) {
+
+    if (
+        !object ||
+        !Array.isArray(
+            object.components
+        )
     ) {
+        return null;
+    }
 
-        return !!object?.components?.some(
+    const identity =
+        CHEMICAL_IDENTITIES[
+            chemicalKey
+        ];
+
+    if (!identity) {
+        return null;
+    }
+
+    const identities = [
+
+        {
+            id: identity.ids[0],
+            formula:
+                identity.formula,
+            names:
+                identity.names
+        },
+
+        ...identity.ids.map(
+            id => ({
+                id: id,
+                formula:
+                    identity.formula,
+                names:
+                    identity.names
+            })
+        )
+    ];
+
+    return (
+        object.components.find(
+            component => {
+
+                if (
+                    Number(
+                        component.moles || 0
+                    ) <= 0
+                ) {
+                    return false;
+                }
+
+                return chemicalIdentityMatches(
+                    component,
+                    identities
+                );
+            }
+        ) || null
+    );
+}
+
+
+/* ============================================================
+   20.5 — COMPATIBILITÉ D'UNE SUBSTANCE
+============================================================ */
+
+function hasChemical(
+    object,
+    chemicalKey
+) {
+
+    return !!findChemicalComponent(
+        object,
+        chemicalKey
+    );
+}
+
+
+/* ============================================================
+   20.6 — COMPATIBILITÉ ANCIENNE API
+   ------------------------------------------------------------
+   Conservée pour ne pas casser le moteur.
+============================================================ */
+
+function hasComponent(
+    object,
+    id
+) {
+
+    if (
+        !object ||
+        !Array.isArray(
+            object.components
+        )
+    ) {
+        return false;
+    }
+
+    const direct =
+        object.components.some(
             component =>
-                component.id === id &&
+                normalizeChemicalText(
+                    component.id
+                ) ===
+                normalizeChemicalText(
+                    id
+                ) &&
                 Number(
                     component.moles || 0
                 ) > 0
         );
+
+    if (direct) {
+        return true;
     }
 
-    function getComponent(
+    const identityKey =
+        Object.keys(
+            CHEMICAL_IDENTITIES
+        ).find(
+            key =>
+                CHEMICAL_IDENTITIES[
+                    key
+                ].ids.some(
+                    chemicalId =>
+                        normalizeChemicalText(
+                            chemicalId
+                        ) ===
+                        normalizeChemicalText(
+                            id
+                        )
+                )
+        );
+
+    if (!identityKey) {
+        return false;
+    }
+
+    return hasChemical(
         object,
-        id
+        identityKey
+    );
+}
+
+
+/* ============================================================
+   20.7 — GET COMPONENT
+============================================================ */
+
+function getComponent(
+    object,
+    id
+) {
+
+    if (
+        !object ||
+        !Array.isArray(
+            object.components
+        )
     ) {
-
-        return object?.components?.find(
-            component =>
-                component.id === id
-        ) || null;
+        return null;
     }
 
-    function consumeMoles(
+    const direct =
+        object.components.find(
+            component =>
+                normalizeChemicalText(
+                    component.id
+                ) ===
+                normalizeChemicalText(
+                    id
+                )
+        );
+
+    if (direct) {
+        return direct;
+    }
+
+    const identityKey =
+        Object.keys(
+            CHEMICAL_IDENTITIES
+        ).find(
+            key =>
+                CHEMICAL_IDENTITIES[
+                    key
+                ].ids.some(
+                    chemicalId =>
+                        normalizeChemicalText(
+                            chemicalId
+                        ) ===
+                        normalizeChemicalText(
+                            id
+                        )
+                )
+        );
+
+    if (!identityKey) {
+        return null;
+    }
+
+    return findChemicalComponent(
         object,
-        id,
-        amount
+        identityKey
+    );
+}
+
+
+/* ============================================================
+   20.8 — CONSOMMATION DE MOLES
+============================================================ */
+
+function consumeMoles(
+    object,
+    id,
+    amount
+) {
+
+    const component =
+        getComponent(
+            object,
+            id
+        );
+
+    if (!component) {
+        return 0;
+    }
+
+    const available =
+        Number(
+            component.moles || 0
+        );
+
+    const requested =
+        Number(
+            amount || 0
+        );
+
+    if (
+        available <= 0 ||
+        requested <= 0
+    ) {
+        return 0;
+    }
+
+    const consumed =
+        Math.min(
+            available,
+            requested
+        );
+
+    const ratio =
+        available > 0
+            ? consumed / available
+            : 0;
+
+    component.moles =
+        Math.max(
+            0,
+            available - consumed
+        );
+
+    component.massG =
+        Math.max(
+            0,
+            Number(
+                component.massG || 0
+            ) * (1 - ratio)
+        );
+
+    component.volumeMl =
+        Math.max(
+            0,
+            Number(
+                component.volumeMl || 0
+            ) * (1 - ratio)
+        );
+
+    return consumed;
+}
+
+
+/* ============================================================
+   20.9 — AJOUT DE PRODUIT
+============================================================ */
+
+function addProduct(
+    object,
+    materialId,
+    moles,
+    massG = 0,
+    volumeMl = 0
+) {
+
+    if (
+        !object ||
+        !Array.isArray(
+            object.components
+        )
+    ) {
+        return null;
+    }
+
+    if (
+        Number(moles || 0) <= 0
+    ) {
+        return null;
+    }
+
+    const material =
+        getMaterial(
+            materialId
+        );
+
+    if (!material) {
+        return null;
+    }
+
+    let component =
+        getComponent(
+            object,
+            materialId
+        );
+
+    if (!component) {
+
+        component = {
+
+            id:
+                material.id,
+
+            name:
+                material.name,
+
+            formula:
+                material.formula ||
+                "",
+
+            moles:
+                0,
+
+            massG:
+                0,
+
+            volumeMl:
+                0,
+
+            concentrationM:
+                Number(
+                    material.molarity ||
+                    0
+                ),
+
+            density:
+                Number(
+                    material.density ||
+                    1
+                ),
+
+            pH:
+                Number(
+                    material.pH ??
+                    7
+                ),
+
+            phase:
+                material.phase ||
+                "liquid",
+
+            color:
+                material.color ||
+                "#dbeafe"
+        };
+
+        object.components.push(
+            component
+        );
+    }
+
+    component.moles +=
+        Number(moles || 0);
+
+    component.massG +=
+        Number(massG || 0);
+
+    component.volumeMl +=
+        Number(volumeMl || 0);
+
+    return component;
+}
+
+
+/* ============================================================
+   20.10 — BASE DE DONNÉES DES RÉACTIONS
+   ------------------------------------------------------------
+   Les coefficients représentent les rapports molaires.
+============================================================ */
+
+const REACTION_DATABASE = [
+
+    /* --------------------------------------------------------
+       RÉACTION 001
+       HCl + NaOH → NaCl + H₂O
+    -------------------------------------------------------- */
+
+    {
+
+        id:
+            "neutralisation_hcl_naoh",
+
+        name:
+            "Neutralisation acide-base",
+
+        reactants: [
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumHydroxide",
+
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "sodiumChloride",
+
+                coefficient:
+                    1,
+
+                molarMass:
+                    58.44
+            },
+
+            {
+                material:
+                    "water",
+
+                coefficient:
+                    1,
+
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            4,
+
+        phase:
+            "aqueous",
+
+        gas:
+            false,
+
+        precipitate:
+            false,
+
+        bubbling:
+            false,
+
+        color:
+            "#eef7ff",
+
+        description:
+            "Neutralisation acide-base : HCl + NaOH → NaCl + H₂O."
+    },
+
+
+    /* --------------------------------------------------------
+       RÉACTION 002
+       Zn + 2HCl → ZnCl₂ + H₂
+    -------------------------------------------------------- */
+
+    {
+
+        id:
+            "zinc_hcl",
+
+        name:
+            "Réaction zinc-acide chlorhydrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "zinc",
+
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "hydrochloricAcid",
+
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            6,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Dégagement de dihydrogène : Zn + 2HCl → ZnCl₂ + H₂."
+    },
+
+
+    /* --------------------------------------------------------
+       RÉACTION 003
+       Zn + CuSO₄ → ZnSO₄ + Cu
+    -------------------------------------------------------- */
+
+    {
+
+        id:
+            "zinc_copper_sulfate",
+
+        name:
+            "Déplacement métallique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "zinc",
+
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "copperSulfate",
+
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "copper",
+
+                coefficient:
+                    1,
+
+                molarMass:
+                    63.546
+            }
+        ],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#b87333",
+
+        description:
+            "Réaction d'oxydoréduction : Zn + CuSO₄ → ZnSO₄ + Cu."
+    }
+];
+
+
+/* ============================================================
+   20.11 — CALCUL DU MAXIMUM RÉACTIONNEL
+============================================================ */
+
+function calculateReactionExtent(
+    object,
+    reaction
+) {
+
+    let extent =
+        Infinity;
+
+    for (
+        const reactant
+        of reaction.reactants
     ) {
 
         const component =
-            getComponent(
+            findChemicalComponent(
                 object,
-                id
+                reactant.chemical
             );
 
         if (!component) {
@@ -3311,489 +4179,467 @@
                 component.moles || 0
             );
 
-        const consumed =
-            Math.min(
-                available,
-                Math.max(
-                    0,
-                    amount
-                )
+        const coefficient =
+            Number(
+                reactant.coefficient || 1
             );
 
-        const ratio =
-            available > 0
-                ? consumed / available
-                : 0;
+        if (
+            available <= 0 ||
+            coefficient <= 0
+        ) {
+            return 0;
+        }
 
-        component.moles -=
-            consumed;
+        const possible =
+            available /
+            coefficient;
 
-        component.massG *=
-            (1 - ratio);
-
-        component.volumeMl *=
-            (1 - ratio);
-
-        return consumed;
+        extent =
+            Math.min(
+                extent,
+                possible
+            );
     }
 
-    function addProduct(
-        object,
-        materialId,
-        moles,
-        massG = 0,
-        volumeMl = 0
+    return Number.isFinite(
+        extent
+    )
+        ? Math.max(
+            0,
+            extent
+        )
+        : 0;
+}
+
+
+/* ============================================================
+   20.12 — EXÉCUTION D'UNE RÉACTION
+============================================================ */
+
+function executeReaction(
+    object,
+    reaction,
+    extent
+) {
+
+    if (
+        !object ||
+        !reaction ||
+        extent <= 0
+    ) {
+        return false;
+    }
+
+    /* --------------------------------------------------------
+       CONSOMMATION DES RÉACTIFS
+    -------------------------------------------------------- */
+
+    for (
+        const reactant
+        of reaction.reactants
     ) {
 
-        if (moles <= 0) {
-            return;
-        }
-
-        const material =
-            getMaterial(
-                materialId
+        const amount =
+            extent *
+            Number(
+                reactant.coefficient ||
+                1
             );
 
-        if (!material) {
-            return;
+        const identity =
+            CHEMICAL_IDENTITIES[
+                reactant.chemical
+            ];
+
+        if (!identity) {
+            return false;
         }
 
-        let component =
-            getComponent(
+        const component =
+            findChemicalComponent(
                 object,
-                materialId
+                reactant.chemical
             );
 
         if (!component) {
-
-            component = {
-
-                id:
-                    material.id,
-
-                name:
-                    material.name,
-
-                formula:
-                    material.formula,
-
-                moles: 0,
-
-                massG: 0,
-
-                volumeMl: 0,
-
-                concentrationM:
-                    Number(
-                        material.molarity ||
-                        0
-                    ),
-
-                density:
-                    Number(
-                        material.density ||
-                        1
-                    ),
-
-                pH:
-                    Number(
-                        material.pH ??
-                        7
-                    ),
-
-                phase:
-                    material.phase ||
-                    "liquid",
-
-                color:
-                    material.color ||
-                    "#dbeafe"
-            };
-
-            object.components.push(
-                component
-            );
+            return false;
         }
 
-        component.moles +=
-            moles;
+        const consumed =
+            consumeMoles(
+                object,
+                component.id,
+                amount
+            );
 
-        component.massG +=
-            massG;
-
-        component.volumeMl +=
-            volumeMl;
+        if (
+            consumed + 1e-12 <
+            amount
+        ) {
+            return false;
+        }
     }
 
-    function reactSelected() {
 
-        const object =
-            getSelected();
+    /* --------------------------------------------------------
+       FORMATION DES PRODUITS
+    -------------------------------------------------------- */
 
-        if (!object) {
+    for (
+        const product
+        of (
+            reaction.products ||
+            []
+        )
+    ) {
 
-            toast(
-                "Sélectionnez un récipient contenant des substances.",
-                "warning"
+        const amount =
+            extent *
+            Number(
+                product.coefficient ||
+                1
             );
 
-            return;
-        }
+        let mass =
+            0;
 
         if (
-            !object.components?.length
+            Number(
+                product.molarMass || 0
+            ) > 0
         ) {
 
-            toast(
-                "Aucune substance à faire réagir.",
-                "warning"
+            mass =
+                amount *
+                Number(
+                    product.molarMass
+                );
+        }
+
+        /*
+         * L'eau produite par neutralisation
+         * est ajoutée comme composant réel
+         * si elle existe dans MATERIALS.
+         */
+
+        addProduct(
+            object,
+            product.material,
+            amount,
+            mass
+        );
+    }
+
+
+    /* --------------------------------------------------------
+       EFFETS PHYSICO-CHIMIQUES
+    -------------------------------------------------------- */
+
+    const oldTemperature =
+        Number(
+            object.temperatureC ||
+            25
+        );
+
+    const deltaT =
+        Number(
+            reaction.temperatureDelta ||
+            0
+        );
+
+    object.temperatureC =
+        clamp(
+            oldTemperature + deltaT,
+            MIN_TEMPERATURE,
+            MAX_TEMPERATURE
+        );
+
+
+    object.reactionState = {
+
+        active:
+            true,
+
+        gas:
+            !!reaction.gas,
+
+        precipitate:
+            !!reaction.precipitate,
+
+        bubbling:
+            !!reaction.bubbling,
+
+        phase:
+            reaction.phase ||
+            "aqueous",
+
+        color:
+            reaction.color ||
+            object.color,
+
+        description:
+            reaction.description ||
+            reaction.name
+    };
+
+
+    object.state =
+        reaction.gas
+            ? "dégagement gazeux"
+            : reaction.precipitate
+                ? "réaction d'oxydoréduction"
+                : "réaction effectuée";
+
+
+    /* --------------------------------------------------------
+       pH SPÉCIAL POUR NEUTRALISATION
+    -------------------------------------------------------- */
+
+    if (
+        reaction.id ===
+        "neutralisation_hcl_naoh"
+    ) {
+
+        object.pH =
+            7;
+    }
+
+
+    /* --------------------------------------------------------
+       JOURNAL
+    -------------------------------------------------------- */
+
+    logObservation(
+        "Réaction effectuée : " +
+        reaction.description
+    );
+
+    toast(
+        "Réaction effectuée : " +
+        reaction.name +
+        ".",
+        "success"
+    );
+
+    return true;
+}
+
+
+/* ============================================================
+   20.13 — MOTEUR PRINCIPAL
+============================================================ */
+
+function reactSelected() {
+
+    const object =
+        getSelected();
+
+
+    /* --------------------------------------------------------
+       RÉCIPIENT OBLIGATOIRE
+    -------------------------------------------------------- */
+
+    if (!object) {
+
+        toast(
+            "Sélectionnez un récipient contenant des substances.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    /* --------------------------------------------------------
+       COMPOSANTS OBLIGATOIRES
+    -------------------------------------------------------- */
+
+    if (
+        !Array.isArray(
+            object.components
+        ) ||
+        object.components.length === 0
+    ) {
+
+        toast(
+            "Aucune substance à faire réagir.",
+            "warning"
+        );
+
+        return;
+    }
+
+
+    /* --------------------------------------------------------
+       RECHERCHE DES RÉACTIONS COMPATIBLES
+    -------------------------------------------------------- */
+
+    let compatibleReaction =
+        null;
+
+    let compatibleExtent =
+        0;
+
+
+    for (
+        const reaction
+        of REACTION_DATABASE
+    ) {
+
+        const extent =
+            calculateReactionExtent(
+                object,
+                reaction
             );
 
-            return;
-        }
-
-        let reactionFound =
-            false;
-
-        /* ========================================================
-           HCl + NaOH → NaCl + H₂O
-        ======================================================== */
-
         if (
-            hasComponent(
-                object,
-                "hydrochloricAcid"
-            ) &&
-            hasComponent(
-                object,
-                "sodiumHydroxide"
-            )
+            extent > 0
         ) {
 
-            const hcl =
-                getComponent(
-                    object,
-                    "hydrochloricAcid"
-                );
+            compatibleReaction =
+                reaction;
 
-            const naoh =
-                getComponent(
-                    object,
-                    "sodiumHydroxide"
-                );
+            compatibleExtent =
+                extent;
 
-            const reacting =
-                Math.min(
-                    Number(
-                        hcl.moles || 0
-                    ),
-                    Number(
-                        naoh.moles || 0
-                    )
-                );
-
-            if (reacting > 0) {
-
-                consumeMoles(
-                    object,
-                    "hydrochloricAcid",
-                    reacting
-                );
-
-                consumeMoles(
-                    object,
-                    "sodiumHydroxide",
-                    reacting
-                );
-
-                addProduct(
-                    object,
-                    "sodiumChloride",
-                    reacting,
-                    reacting * 58.44
-                );
-
-                object.temperatureC =
-                    clamp(
-                        Number(
-                            object.temperatureC ||
-                            25
-                        ) + 4,
-                        MIN_TEMPERATURE,
-                        MAX_TEMPERATURE
-                    );
-
-                object.pH =
-                    7;
-
-                object.reactionState = {
-
-                    active: true,
-
-                    gas: false,
-
-                    precipitate: false,
-
-                    bubbling: false,
-
-                    phase: "aqueous",
-
-                    color:
-                        "#eef7ff",
-
-                    description:
-                        "Neutralisation acide-base : HCl + NaOH → NaCl + H₂O."
-                };
-
-                object.state =
-                    "réaction effectuée";
-
-                reactionFound =
-                    true;
-
-                logObservation(
-                    "Réaction de neutralisation effectuée : HCl + NaOH → NaCl + H₂O."
-                );
-
-                toast(
-                    "Réaction effectuée : neutralisation acide-base.",
-                    "success"
-                );
-            }
+            /*
+             * Une seule réaction est exécutée
+             * par pression sur le bouton.
+             */
+            break;
         }
+    }
 
-        /* ========================================================
-           Zn + HCl → ZnCl₂ + H₂
-        ======================================================== */
 
-        if (
-            hasComponent(
-                object,
-                "zinc"
-            ) &&
-            hasComponent(
-                object,
-                "hydrochloricAcid"
-            )
-        ) {
+    /* --------------------------------------------------------
+       AUCUNE RÉACTION
+    -------------------------------------------------------- */
 
-            const zinc =
-                getComponent(
-                    object,
-                    "zinc"
-                );
+    if (
+        !compatibleReaction ||
+        compatibleExtent <= 0
+    ) {
 
-            const acid =
-                getComponent(
-                    object,
-                    "hydrochloricAcid"
-                );
+        object.reactionState = {
 
-            const reactionMoles =
-                Math.min(
-                    Number(
-                        zinc.moles || 0
-                    ),
-                    Number(
-                        acid.moles || 0
-                    ) / 2
-                );
+            active:
+                false,
 
-            if (
-                reactionMoles > 0
-            ) {
+            gas:
+                false,
 
-                consumeMoles(
-                    object,
-                    "zinc",
-                    reactionMoles
-                );
+            precipitate:
+                false,
 
-                consumeMoles(
-                    object,
-                    "hydrochloricAcid",
-                    reactionMoles * 2
-                );
+            bubbling:
+                false,
 
-                object.temperatureC =
-                    clamp(
-                        Number(
-                            object.temperatureC ||
-                            25
-                        ) + 6,
-                        MIN_TEMPERATURE,
-                        MAX_TEMPERATURE
-                    );
+            phase:
+                "stable",
 
-                object.reactionState = {
+            color:
+                object.color,
 
-                    active: true,
-
-                    gas: true,
-
-                    precipitate: false,
-
-                    bubbling: true,
-
-                    phase: "gas_evolution",
-
-                    color:
-                        object.color,
-
-                    description:
-                        "Dégagement de dihydrogène : Zn + 2HCl → ZnCl₂ + H₂."
-                };
-
-                object.state =
-                    "dégagement gazeux";
-
-                reactionFound =
-                    true;
-
-                logObservation(
-                    "Dégagement gazeux observé : H₂."
-                );
-
-                toast(
-                    "Réaction effectuée : dégagement de H₂.",
-                    "success"
-                );
-            }
-        }
-
-        /* ========================================================
-           Zn + CuSO₄ → ZnSO₄ + Cu
-        ======================================================== */
-
-        if (
-            hasComponent(
-                object,
-                "zinc"
-            ) &&
-            hasComponent(
-                object,
-                "copperSulfate"
-            )
-        ) {
-
-            const zinc =
-                getComponent(
-                    object,
-                    "zinc"
-                );
-
-            const cu =
-                getComponent(
-                    object,
-                    "copperSulfate"
-                );
-
-            const reactionMoles =
-                Math.min(
-                    Number(
-                        zinc.moles || 0
-                    ),
-                    Number(
-                        cu.moles || 0
-                    )
-                );
-
-            if (
-                reactionMoles > 0
-            ) {
-
-                consumeMoles(
-                    object,
-                    "zinc",
-                    reactionMoles
-                );
-
-                consumeMoles(
-                    object,
-                    "copperSulfate",
-                    reactionMoles
-                );
-
-                addProduct(
-                    object,
-                    "copper",
-                    reactionMoles,
-                    reactionMoles * 63.546
-                );
-
-                object.reactionState = {
-
-                    active: true,
-
-                    gas: false,
-
-                    precipitate: true,
-
-                    bubbling: false,
-
-                    phase: "redox",
-
-                    color:
-                        "#b87333",
-
-                    description:
-                        "Réaction d'oxydoréduction : Zn + CuSO₄ → ZnSO₄ + Cu."
-                };
-
-                object.state =
-                    "réaction d'oxydoréduction";
-
-                reactionFound =
-                    true;
-
-                logObservation(
-                    "Dépôt de cuivre métallique formé."
-                );
-
-                toast(
-                    "Réaction Zn + CuSO₄ effectuée.",
-                    "success"
-                );
-            }
-        }
-
-        if (!reactionFound) {
-
-            object.reactionState = {
-
-                active: false,
-
-                gas: false,
-
-                precipitate: false,
-
-                bubbling: false,
-
-                phase: "stable",
-
-                color:
-                    object.color,
-
-                description:
-                    "Aucune réaction compatible détectée."
-            };
-
-            toast(
-                "Aucune réaction compatible avec les substances présentes.",
-                "info"
-            );
-
-            logObservation(
+            description:
                 "Aucune réaction compatible détectée."
-            );
-        }
+        };
+
+
+        toast(
+            "Aucune réaction compatible avec les substances présentes.",
+            "info"
+        );
+
+
+        logObservation(
+            "Aucune réaction compatible détectée."
+        );
+
 
         recalculateObject(
             object
         );
 
         renderAll();
+
+        return;
     }
+
+
+    /* --------------------------------------------------------
+       EXÉCUTION
+    -------------------------------------------------------- */
+
+    const success =
+        executeReaction(
+            object,
+            compatibleReaction,
+            compatibleExtent
+        );
+
+
+    /* --------------------------------------------------------
+       SÉCURITÉ D'EXÉCUTION
+    -------------------------------------------------------- */
+
+    if (!success) {
+
+        object.reactionState = {
+
+            active:
+                false,
+
+            gas:
+                false,
+
+            precipitate:
+                false,
+
+            bubbling:
+                false,
+
+            phase:
+                "stable",
+
+            color:
+                object.color,
+
+            description:
+                "La réaction n'a pas pu être exécutée."
+        };
+
+
+        toast(
+            "La réaction n'a pas pu être exécutée correctement.",
+            "warning"
+        );
+
+
+        logObservation(
+            "Échec de l'exécution de la réaction : " +
+            compatibleReaction.name
+        );
+    }
+
+
+    /* --------------------------------------------------------
+       RECALCUL GLOBAL
+    -------------------------------------------------------- */
+
+    recalculateObject(
+        object
+    );
+
+    renderAll();
+}
+
+
+
+
+
+
+
 
     /* ============================================================
        21 — MESURES
