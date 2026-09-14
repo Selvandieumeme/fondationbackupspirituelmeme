@@ -1834,79 +1834,208 @@
 
 
 
+/* ---------------- INSTRUMENTS ---------------- */
+
+{
+    id: "electronicBalance",
+    name: "Balance électronique",
+    shortName: "Balance",
+    category: "instrument",
+    kind: "equipment",
+    icon: "⚖️",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#e5e7eb"
+},
+{
+    id: "thermometer",
+    name: "Thermomètre",
+    shortName: "Thermomètre",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🌡️",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#f8fafc"
+},
+{
+    id: "phMeter",
+    name: "pH-mètre",
+    shortName: "pH-mètre",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🧪",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#dbeafe"
+},
+{
+    id: "graduatedPipette",
+    name: "Pipette graduée",
+    shortName: "Pipette",
+    category: "instrument",
+    kind: "equipment",
+    icon: "💧",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#e0f2fe"
+},
+{
+    id: "magneticStirrer",
+    name: "Agitateur magnétique",
+    shortName: "Agitateur",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🔄",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#cbd5e1"
+},
+{
+    id: "conductimeter",
+    name: "Conductimètre",
+    shortName: "Conductimètre",
+    category: "instrument",
+    kind: "equipment",
+    icon: "📟",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#dbeafe"
+},
+{
+    id: "spectrophotometer",
+    name: "Spectrophotomètre",
+    shortName: "Spectrophotomètre",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🌈",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#e0e7ff"
+},
+{
+    id: "centrifuge",
+    name: "Centrifugeuse",
+    shortName: "Centrifugeuse",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🌀",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#e5e7eb"
+},
+{
+    id: "hotPlate",
+    name: "Plaque chauffante",
+    shortName: "Plaque chauffante",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🔥",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#fecaca"
+},
+{
+    id: "digitalCaliper",
+    name: "Pied à coulisse numérique",
+    shortName: "Pied à coulisse",
+    category: "instrument",
+    kind: "equipment",
+    icon: "📏",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#cbd5e1"
+},
+{
+    id: "microscope",
+    name: "Microscope",
+    shortName: "Microscope",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🔬",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#e5e7eb"
+},
+{
+    id: "analyticalBalance",
+    name: "Balance analytique",
+    shortName: "Balance analytique",
+    category: "instrument",
+    kind: "equipment",
+    icon: "⚖️",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#f1f5f9"
+},
+{
+    id: "meltingPointApparatus",
+    name: "Appareil à point de fusion",
+    shortName: "Point de fusion",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🌡️",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#fee2e2"
+},
+{
+    id: "refractometer",
+    name: "Réfractomètre",
+    shortName: "Réfractomètre",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🔭",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#dbeafe"
+},
+{
+    id: "colorimeter",
+    name: "Colorimètre",
+    shortName: "Colorimètre",
+    category: "instrument",
+    kind: "equipment",
+    icon: "🎨",
+    formula: "",
+    phase: "solid",
+    state: "stable",
+    defaultMassG: 0,
+    color: "#ede9fe"
+},
 
 
 
 
-        /* ---------------- INSTRUMENTS ---------------- */
 
-        {
-            id: "balance",
-            name: "Balance électronique",
-            shortName: "Balance",
-            category: "instrument",
-            kind: "instrument",
-            icon: "⚖️",
-            state: "prête",
-            width: 150,
-            height: 90,
-            measurementType: "mass",
-            precisionMass: 0.01
-        },
-
-        {
-            id: "thermometer",
-            name: "Thermomètre",
-            shortName: "Thermomètre",
-            category: "instrument",
-            kind: "instrument",
-            icon: "🌡️",
-            state: "prêt",
-            width: 65,
-            height: 170,
-            measurementType: "temperature",
-            precisionTemperature: 0.1
-        },
-
-        {
-            id: "phMeter",
-            name: "pH-mètre",
-            shortName: "pH-mètre",
-            category: "instrument",
-            kind: "instrument",
-            icon: "📟",
-            state: "prêt",
-            width: 130,
-            height: 95,
-            measurementType: "ph",
-            precisionPH: 0.01
-        },
-
-        {
-            id: "pipette",
-            name: "Pipette graduée",
-            shortName: "Pipette",
-            category: "instrument",
-            kind: "instrument",
-            icon: "💉",
-            state: "prête",
-            width: 55,
-            height: 180,
-            measurementType: "volume",
-            precisionVolume: 0.1
-        },
-
-        {
-            id: "magneticStirrer",
-            name: "Agitateur magnétique",
-            shortName: "Agitateur",
-            category: "instrument",
-            kind: "instrument",
-            icon: "🔄",
-            state: "arrêté",
-            width: 150,
-            height: 80
-        },
 
         /* ---------------- ÉQUIPEMENTS ---------------- */
 
