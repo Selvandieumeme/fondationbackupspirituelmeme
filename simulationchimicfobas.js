@@ -4867,9 +4867,228 @@ function renderWorkspace() {
         }
     }
 
+
+
+
+
     /* ============================================================
        16 — TRANSFERT
+       ------------------------------------------------------------
+       VERSION DYNAMIQUE
+       - Liquides : transfert en mL
+       - Solides / substances sans volume : transfert en g
+       - Aucun matériau spécifique n'est codé en dur
+       - Les moles, masses et volumes des composants sont
+         transférés proportionnellement
+       - Compatible avec les substances ayant 0 mL
     ============================================================ */
+
+    function getTransferMode(source) {
+
+        if (!source) {
+            return "volume";
+        }
+
+        const sourceVolume =
+            Number(
+                source.volumeMl || 0
+            );
+
+        const hasLiquidComponent =
+            Array.isArray(
+                source.components
+            ) &&
+            source.components.some(
+                component =>
+                    component.phase === "liquid" &&
+                    Number(
+                        component.volumeMl || 0
+                    ) > 0
+            );
+
+        /*
+         * Si la source possède réellement du liquide,
+         * le transfert reste basé sur le volume.
+         */
+        if (
+            sourceVolume > 0 ||
+            hasLiquidComponent
+        ) {
+            return "volume";
+        }
+
+        /*
+         * Sinon, si elle possède une masse transférable,
+         * le transfert est automatiquement basé sur les grammes.
+         */
+        const componentMass =
+            Array.isArray(
+                source.components
+            )
+                ? totalComponentMass(
+                    source
+                )
+                : 0;
+
+        const sourceMass =
+            Number(
+                source.massG || 0
+            );
+
+        if (
+            componentMass > 0 ||
+            sourceMass > 0
+        ) {
+            return "mass";
+        }
+
+        return "volume";
+    }
+
+    function getTransferAvailableQuantity(
+        source,
+        mode
+    ) {
+
+        if (!source) {
+            return 0;
+        }
+
+        if (mode === "mass") {
+
+            const componentMass =
+                Array.isArray(
+                    source.components
+                )
+                    ? totalComponentMass(
+                        source
+                    )
+                    : 0;
+
+            if (componentMass > 0) {
+                return componentMass;
+            }
+
+            return Math.max(
+                0,
+                Number(
+                    source.massG || 0
+                )
+            );
+        }
+
+        return Math.max(
+            0,
+            Number(
+                source.volumeMl || 0
+            )
+        );
+    }
+
+    function updateTransferInterface(
+        source
+    ) {
+
+        if (!source) {
+            return;
+        }
+
+        const mode =
+            getTransferMode(
+                source
+            );
+
+        const unit =
+            mode === "mass"
+                ? "g"
+                : "mL";
+
+        const max =
+            getTransferAvailableQuantity(
+                source,
+                mode
+            );
+
+        if (E.transferSourceAmount) {
+
+            E.transferSourceAmount.textContent =
+                `${round(
+                    max,
+                    2
+                )} ${unit}`;
+        }
+
+        if (E.transferRange) {
+
+            E.transferRange.min =
+                "0";
+
+            E.transferRange.max =
+                String(max);
+
+            E.transferRange.step =
+                mode === "mass"
+                    ? "0.001"
+                    : "0.01";
+
+            const currentRange =
+                Number(
+                    E.transferRange.value
+                );
+
+            if (
+                !Number.isFinite(
+                    currentRange
+                ) ||
+                currentRange <= 0 ||
+                currentRange > max
+            ) {
+
+                E.transferRange.value =
+                    String(max);
+            }
+        }
+
+        if (E.transferAmount) {
+
+            E.transferAmount.min =
+                "0";
+
+            E.transferAmount.max =
+                String(max);
+
+            E.transferAmount.step =
+                mode === "mass"
+                    ? "0.001"
+                    : "0.01";
+
+            const currentAmount =
+                Number(
+                    E.transferAmount.value
+                );
+
+            if (
+                !Number.isFinite(
+                    currentAmount
+                ) ||
+                currentAmount <= 0 ||
+                currentAmount > max
+            ) {
+
+                E.transferAmount.value =
+                    String(max);
+            }
+        }
+
+        if (E.transferMaxLabel) {
+
+            E.transferMaxLabel.textContent =
+                `${round(
+                    max,
+                    2
+                )} ${unit} maximum`;
+        }
+    }
 
     function openTransferModal() {
 
@@ -4895,14 +5114,6 @@ function renderWorkspace() {
         if (E.transferSourceName) {
             E.transferSourceName.textContent =
                 source.name;
-        }
-
-        if (E.transferSourceAmount) {
-            E.transferSourceAmount.textContent =
-                `${round(
-                    source.volumeMl || 0,
-                    2
-                )} mL`;
         }
 
         const targets =
@@ -4935,7 +5146,9 @@ function renderWorkspace() {
 
                     option.textContent =
                         `${target.name} — ${round(
-                            target.volumeMl || 0,
+                            Number(
+                                target.volumeMl || 0
+                            ),
                             1
                         )}/${target.capacityMl} mL`;
 
@@ -4946,6 +5159,10 @@ function renderWorkspace() {
             );
         }
 
+        /*
+         * Détermine automatiquement si la source doit être
+         * transférée en mL ou en g.
+         */
         updateTransferMaximum();
 
         openModal(
@@ -4964,34 +5181,9 @@ function renderWorkspace() {
             return;
         }
 
-        const max =
-            Number(
-                source.volumeMl || 0
-            );
-
-        if (E.transferRange) {
-            E.transferRange.max =
-                String(max);
-
-            if (
-                Number(
-                    E.transferRange.value
-                ) > max
-            ) {
-                E.transferRange.value =
-                    String(max);
-            }
-        }
-
-        if (E.transferAmount) {
-            E.transferAmount.max =
-                String(max);
-        }
-
-        if (E.transferMaxLabel) {
-            E.transferMaxLabel.textContent =
-                `${round(max, 2)} mL maximum`;
-        }
+        updateTransferInterface(
+            source
+        );
     }
 
     function executeTransfer() {
@@ -5016,6 +5208,40 @@ function renderWorkspace() {
             return;
         }
 
+        /*
+         * Détermination dynamique du type de transfert.
+         *
+         * volume = mL
+         * mass   = g
+         */
+        const transferMode =
+            getTransferMode(
+                source
+            );
+
+        const availableQuantity =
+            getTransferAvailableQuantity(
+                source,
+                transferMode
+            );
+
+        if (
+            !Number.isFinite(
+                availableQuantity
+            ) ||
+            availableQuantity <= 0
+        ) {
+
+            toast(
+                transferMode === "mass"
+                    ? "Cette substance ne contient aucune masse transférable."
+                    : "Cette substance ne contient aucun volume transférable.",
+                "warning"
+            );
+
+            return;
+        }
+
         let amount =
             Number(
                 E.transferAmount?.value ||
@@ -5023,13 +5249,19 @@ function renderWorkspace() {
                 0
             );
 
+        if (
+            !Number.isFinite(
+                amount
+            )
+        ) {
+            amount = 0;
+        }
+
         amount =
             clamp(
                 amount,
                 0,
-                Number(
-                    source.volumeMl || 0
-                )
+                availableQuantity
             );
 
         if (amount <= 0) {
@@ -5042,85 +5274,210 @@ function renderWorkspace() {
             return;
         }
 
+        /*
+         * Pour un transfert volumique, la capacité du récipient
+         * cible doit être respectée.
+         *
+         * Pour un transfert massique d'une substance sans volume,
+         * aucun faux volume n'est ajouté au récipient.
+         */
         if (
-            target.capacityMl > 0 &&
-            (
-                target.volumeMl +
-                amount
-            ) >
-            target.capacityMl
+            transferMode === "volume"
         ) {
 
-            toast(
-                "Le récipient cible n'a pas assez de capacité.",
-                "error"
-            );
+            const targetVolume =
+                Number(
+                    target.volumeMl || 0
+                );
 
-            return;
+            const targetCapacity =
+                Number(
+                    target.capacityMl || 0
+                );
+
+            if (
+                targetCapacity > 0 &&
+                (
+                    targetVolume +
+                    amount
+                ) >
+                targetCapacity
+            ) {
+
+                toast(
+                    "Le récipient cible n'a pas assez de capacité.",
+                    "error"
+                );
+
+                return;
+            }
         }
 
-        const sourceVolume =
-            Number(
-                source.volumeMl || 0
+        /*
+         * Ratio de transfert.
+         *
+         * Exemple :
+         * source = 5 g
+         * transfert = 2 g
+         * ratio = 0.4
+         *
+         * 40 % des moles, de la masse et du volume
+         * de chaque composant sont transférés.
+         */
+        const ratio =
+            amount /
+            availableQuantity;
+
+        const safeRatio =
+            clamp(
+                ratio,
+                0,
+                1
             );
 
-        const ratio =
-            sourceVolume > 0
-                ? amount / sourceVolume
-                : 0;
+        const sourceComponents =
+            Array.isArray(
+                source.components
+            )
+                ? source.components
+                : [];
 
         const transferred =
-            source.components.map(
+            sourceComponents.map(
                 component => ({
+
                     ...component,
+
                     moles:
                         Number(
                             component.moles || 0
-                        ) * ratio,
+                        ) *
+                        safeRatio,
+
                     massG:
                         Number(
                             component.massG || 0
-                        ) * ratio,
+                        ) *
+                        safeRatio,
+
                     volumeMl:
                         Number(
                             component.volumeMl || 0
-                        ) * ratio
+                        ) *
+                        safeRatio
                 })
             );
 
+        /*
+         * Retrait de la quantité transférée de la source.
+         */
         source.components =
-            source.components.map(
+            sourceComponents.map(
                 component => ({
+
                     ...component,
+
                     moles:
                         Number(
                             component.moles || 0
                         ) *
-                        (1 - ratio),
+                        (
+                            1 -
+                            safeRatio
+                        ),
 
                     massG:
                         Number(
                             component.massG || 0
                         ) *
-                        (1 - ratio),
+                        (
+                            1 -
+                            safeRatio
+                        ),
 
                     volumeMl:
                         Number(
                             component.volumeMl || 0
                         ) *
-                        (1 - ratio)
+                        (
+                            1 -
+                            safeRatio
+                        )
                 })
             );
 
-        source.volumeMl =
-            Math.max(
-                0,
-                sourceVolume -
-                amount
-            );
+        /*
+         * Le volume de la source ne diminue que pour un transfert
+         * réellement volumique.
+         *
+         * Pour une substance solide à 0 mL :
+         * volumeMl reste 0.
+         */
+        if (
+            transferMode === "volume"
+        ) {
+
+            const sourceVolume =
+                Number(
+                    source.volumeMl || 0
+                );
+
+            source.volumeMl =
+                Math.max(
+                    0,
+                    sourceVolume -
+                    amount
+                );
+
+        } else {
+
+            source.volumeMl =
+                Number(
+                    source.volumeMl || 0
+                );
+        }
+
+        /*
+         * Ajout des composants transférés dans la cible.
+         */
+        if (
+            !Array.isArray(
+                target.components
+            )
+        ) {
+
+            target.components = [];
+        }
 
         transferred.forEach(
             component => {
+
+                /*
+                 * Ne rien ajouter si le composant ne contient
+                 * réellement aucune quantité.
+                 */
+                const componentMoles =
+                    Number(
+                        component.moles || 0
+                    );
+
+                const componentMass =
+                    Number(
+                        component.massG || 0
+                    );
+
+                const componentVolume =
+                    Number(
+                        component.volumeMl || 0
+                    );
+
+                if (
+                    componentMoles <= 0 &&
+                    componentMass <= 0 &&
+                    componentVolume <= 0
+                ) {
+                    return;
+                }
 
                 const existing =
                     target.components.find(
@@ -5131,32 +5488,114 @@ function renderWorkspace() {
 
                 if (existing) {
 
-                    existing.moles +=
-                        component.moles;
+                    existing.moles =
+                        Number(
+                            existing.moles || 0
+                        ) +
+                        componentMoles;
 
-                    existing.massG +=
-                        component.massG;
+                    existing.massG =
+                        Number(
+                            existing.massG || 0
+                        ) +
+                        componentMass;
 
-                    existing.volumeMl +=
-                        component.volumeMl;
+                    existing.volumeMl =
+                        Number(
+                            existing.volumeMl || 0
+                        ) +
+                        componentVolume;
 
                 } else {
 
                     target.components.push(
-                        component
+                        {
+                            ...component,
+                            moles:
+                                componentMoles,
+                            massG:
+                                componentMass,
+                            volumeMl:
+                                componentVolume
+                        }
                     );
                 }
             }
         );
 
-        target.volumeMl +=
-            amount;
+        /*
+         * Le volume de la cible augmente uniquement lorsqu'il
+         * s'agit d'un transfert volumique.
+         *
+         * Une substance à 0 mL ne crée donc jamais artificiellement
+         * des mL dans le récipient.
+         */
+        if (
+            transferMode === "volume"
+        ) {
 
-        target.massG =
-            calculateMass(
+            target.volumeMl =
+                Number(
+                    target.volumeMl || 0
+                ) +
+                amount;
+
+        } else {
+
+            target.volumeMl =
+                Number(
+                    target.volumeMl || 0
+                );
+        }
+
+        /*
+         * Mise à jour exacte de la masse de la source.
+         *
+         * Pour un récipient :
+         * masse récipient vide + masse des composants.
+         *
+         * Pour une substance autonome :
+         * masse des composants.
+         */
+        const remainingSourceMass =
+            totalComponentMass(
+                source
+            );
+
+        if (
+            source.kind ===
+            "container"
+        ) {
+
+            source.massG =
+                Number(
+                    source.emptyMassG || 0
+                ) +
+                remainingSourceMass;
+
+        } else {
+
+            source.massG =
+                remainingSourceMass;
+        }
+
+        /*
+         * Mise à jour exacte de la masse de la cible.
+         */
+        const targetContentMass =
+            totalComponentMass(
                 target
             );
 
+        target.massG =
+            Number(
+                target.emptyMassG || 0
+            ) +
+            targetContentMass;
+
+        /*
+         * Recalcul scientifique des deux objets.
+         */
         recalculateObject(
             source
         );
@@ -5172,11 +5611,20 @@ function renderWorkspace() {
             E.transferModal
         );
 
+        /*
+         * Journal dynamique : mL pour liquide,
+         * g pour substance sans volume.
+         */
+        const transferUnit =
+            transferMode === "mass"
+                ? "g"
+                : "mL";
+
         logObservation(
             `${round(
                 amount,
-                2
-            )} mL transférés de ${source.name} vers ${target.name}.`
+                3
+            )} ${transferUnit} transférés de ${source.name} vers ${target.name}.`
         );
 
         toast(
@@ -5186,6 +5634,14 @@ function renderWorkspace() {
 
         renderAll();
     }
+
+
+
+
+
+
+
+
 
     /* ============================================================
        17 — MÉLANGE
