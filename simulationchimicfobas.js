@@ -10662,6 +10662,576 @@ REACTION_DATABASE.push(
 
 
 
+
+
+
+/* ============================================================
+   20 — RÉACTIONS CHIMIQUES
+   ------------------------------------------------------------
+   GROUP 04 — 25 RÉACTIONS
+   ------------------------------------------------------------
+   RÉACTIONS : 076 → 100
+   ------------------------------------------------------------
+   IMPORTANT :
+   - GROUP 01 : 001 → 025
+   - GROUP 02 : 026 → 050
+   - GROUP 03 : 051 → 075
+   - GROUP 04 : 076 → 100
+   - Aucune réaction de GROUP 01, 02 ou 03 n'est répétée.
+   - Utilise le REACTION_DATABASE existant.
+   - Aucun nouveau const REACTION_DATABASE.
+============================================================ */
+
+REACTION_DATABASE.push(
+
+    /* ========================================================
+       076 — H3PO4 + Na2CO3
+       ======================================================== */
+    {
+        id: "group04_076_phosphoric_acid_sodium_carbonate",
+        name: "Acide phosphorique et carbonate de sodium",
+        reactants: [
+            { chemical: "phosphoricAcid", coefficient: 2 },
+            { chemical: "sodiumCarbonateSolid", coefficient: 3 }
+        ],
+        products: [
+            { material: "water", coefficient: 3, molarMass: 18.015 }
+        ],
+        temperatureDelta: 2,
+        phase: "gas_evolution",
+        gas: true,
+        precipitate: false,
+        bubbling: true,
+        color: "#f5f9ff",
+        description: "Réaction acide-carbonate avec dégagement de CO₂ : 2H₃PO₄ + 3Na₂CO₃ → 2Na₃PO₄ + 3H₂O + 3CO₂."
+    },
+
+    /* ========================================================
+       077 — H3PO4 + NaHCO3
+       ======================================================== */
+    {
+        id: "group04_077_phosphoric_acid_sodium_bicarbonate",
+        name: "Acide phosphorique et bicarbonate de sodium",
+        reactants: [
+            { chemical: "phosphoricAcid", coefficient: 1 },
+            { chemical: "sodiumBicarbonate", coefficient: 3 }
+        ],
+        products: [
+            { material: "water", coefficient: 3, molarMass: 18.015 }
+        ],
+        temperatureDelta: 2,
+        phase: "gas_evolution",
+        gas: true,
+        precipitate: false,
+        bubbling: true,
+        color: "#f5f9ff",
+        description: "Réaction acide-bicarbonate avec dégagement de CO₂ : H₃PO₄ + 3NaHCO₃ → Na₃PO₄ + 3H₂O + 3CO₂."
+    },
+
+    /* ========================================================
+       078 — H3PO4 + CaCO3
+       ======================================================== */
+    {
+        id: "group04_078_phosphoric_acid_calcium_carbonate",
+        name: "Acide phosphorique et carbonate de calcium",
+        reactants: [
+            { chemical: "phosphoricAcid", coefficient: 2 },
+            { chemical: "calciumCarbonate", coefficient: 3 }
+        ],
+        products: [
+            { material: "water", coefficient: 3, molarMass: 18.015 }
+        ],
+        temperatureDelta: 2,
+        phase: "gas_evolution",
+        gas: true,
+        precipitate: true,
+        bubbling: true,
+        color: "#f1f5f9",
+        description: "Réaction acide-carbonate du carbonate de calcium avec dégagement de CO₂."
+    },
+
+    /* ========================================================
+       079 — Acide citrique + CaCO3
+       ======================================================== */
+    {
+        id: "group04_079_citric_acid_calcium_carbonate",
+        name: "Acide citrique et carbonate de calcium",
+        reactants: [
+            { chemical: "citricAcid", coefficient: 2 },
+            { chemical: "calciumCarbonate", coefficient: 3 }
+        ],
+        products: [
+            { material: "water", coefficient: 3, molarMass: 18.015 }
+        ],
+        temperatureDelta: 2,
+        phase: "gas_evolution",
+        gas: true,
+        precipitate: false,
+        bubbling: true,
+        color: "#f8fafc",
+        description: "Réaction acide-carbonate avec dégagement de CO₂."
+    },
+
+    /* ========================================================
+       080 — Acide citrique + Ca(OH)2
+       ======================================================== */
+    {
+        id: "group04_080_citric_acid_calcium_hydroxide",
+        name: "Acide citrique et hydroxyde de calcium",
+        reactants: [
+            { chemical: "citricAcid", coefficient: 2 },
+            { chemical: "calciumHydroxide", coefficient: 3 }
+        ],
+        products: [
+            { material: "water", coefficient: 6, molarMass: 18.015 }
+        ],
+        temperatureDelta: 3,
+        phase: "aqueous",
+        gas: false,
+        precipitate: false,
+        bubbling: false,
+        color: "#eef7ff",
+        description: "Neutralisation acide-base entre l'acide citrique et l'hydroxyde de calcium."
+    },
+
+    /* ========================================================
+       081 — NH3 + HCl
+       ======================================================== */
+    {
+        id: "group04_081_ammonia_hydrochloric_acid",
+        name: "Ammoniac et acide chlorhydrique",
+        reactants: [
+            { chemical: "ammoniaSolution", coefficient: 1 },
+            { chemical: "hydrochloricAcid", coefficient: 1 }
+        ],
+        products: [
+            { material: "water", coefficient: 1, molarMass: 18.015 }
+        ],
+        temperatureDelta: 3,
+        phase: "aqueous",
+        gas: false,
+        precipitate: false,
+        bubbling: false,
+        color: "#eef7ff",
+        description: "Réaction acide-base : NH₃ + HCl → NH₄Cl."
+    },
+
+    /* ========================================================
+       082 — NH3 + HNO3
+       ======================================================== */
+    {
+        id: "group04_082_ammonia_nitric_acid",
+        name: "Ammoniac et acide nitrique",
+        reactants: [
+            { chemical: "ammoniaSolution", coefficient: 1 },
+            { chemical: "nitricAcid", coefficient: 1 }
+        ],
+        products: [],
+        temperatureDelta: 3,
+        phase: "aqueous",
+        gas: false,
+        precipitate: false,
+        bubbling: false,
+        color: "#eef7ff",
+        description: "Réaction acide-base : NH₃ + HNO₃ → NH₄NO₃."
+    },
+
+    /* ========================================================
+       083 — NH3 + H2SO4
+       ======================================================== */
+    {
+        id: "group04_083_ammonia_sulfuric_acid",
+        name: "Ammoniac et acide sulfurique",
+        reactants: [
+            { chemical: "ammoniaSolution", coefficient: 2 },
+            { chemical: "sulfuricAcid", coefficient: 1 }
+        ],
+        products: [
+            { material: "water", coefficient: 2, molarMass: 18.015 }
+        ],
+        temperatureDelta: 4,
+        phase: "aqueous",
+        gas: false,
+        precipitate: false,
+        bubbling: false,
+        color: "#eef7ff",
+        description: "Réaction acide-base entre l'ammoniac et l'acide sulfurique."
+    },
+
+    /* ========================================================
+       084 — NH3 + CuSO4
+       ======================================================== */
+    {
+        id: "group04_084_ammonia_copper_sulfate",
+        name: "Ammoniac et sulfate de cuivre",
+        reactants: [
+            { chemical: "ammoniaSolution", coefficient: 2 },
+            { chemical: "copperSulfate", coefficient: 1 }
+        ],
+        products: [],
+        temperatureDelta: 1,
+        phase: "complexation",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#2563eb",
+        description: "Interaction de l'ammoniac avec les ions cuivre(II), avec formation d'une espèce de cuivre complexée."
+    },
+
+    /* ========================================================
+       085 — H2O2 + FeCl2
+       ======================================================== */
+    {
+        id: "group04_085_hydrogen_peroxide_ferrous_chloride",
+        name: "Peroxyde d'hydrogène et chlorure de fer(II)",
+        reactants: [
+            { chemical: "hydrogenPeroxide", coefficient: 1 },
+            { chemical: "ferrousChloride", coefficient: 1 }
+        ],
+        products: [
+            { material: "ferricChloride", coefficient: 1, molarMass: 162.204 }
+        ],
+        temperatureDelta: 4,
+        phase: "redox",
+        gas: false,
+        precipitate: false,
+        bubbling: false,
+        color: "#f59e0b",
+        description: "Oxydation des ions fer(II) en ions fer(III) par le peroxyde d'hydrogène."
+    },
+
+    /* ========================================================
+       086 — H2O2 + KMnO4
+       ======================================================== */
+    {
+        id: "group04_086_hydrogen_peroxide_permanganate",
+        name: "Peroxyde d'hydrogène et permanganate de potassium",
+        reactants: [
+            { chemical: "hydrogenPeroxide", coefficient: 5 },
+            { chemical: "potassiumPermanganate", coefficient: 2 }
+        ],
+        products: [
+            { material: "water", coefficient: 8, molarMass: 18.015 }
+        ],
+        temperatureDelta: 8,
+        phase: "gas_evolution",
+        gas: true,
+        precipitate: true,
+        bubbling: true,
+        color: "#7c3aed",
+        description: "Réaction d'oxydoréduction du permanganate avec le peroxyde d'hydrogène avec dégagement d'oxygène."
+    },
+
+    /* ========================================================
+       087 — FeCl3 + KOH
+       ======================================================== */
+    {
+        id: "group04_087_ferric_chloride_potassium_hydroxide",
+        name: "Chlorure de fer(III) et hydroxyde de potassium",
+        reactants: [
+            { chemical: "ferricChloride", coefficient: 1 },
+            { chemical: "potassiumHydroxide", coefficient: 3 }
+        ],
+        products: [],
+        temperatureDelta: 1,
+        phase: "precipitation",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#9a3412",
+        description: "Précipitation de l'hydroxyde de fer(III) : FeCl₃ + 3KOH → Fe(OH)₃↓ + 3KCl."
+    },
+
+    /* ========================================================
+       088 — FeCl2 + KOH
+       ======================================================== */
+    {
+        id: "group04_088_ferrous_chloride_potassium_hydroxide",
+        name: "Chlorure de fer(II) et hydroxyde de potassium",
+        reactants: [
+            { chemical: "ferrousChloride", coefficient: 1 },
+            { chemical: "potassiumHydroxide", coefficient: 2 }
+        ],
+        products: [],
+        temperatureDelta: 1,
+        phase: "precipitation",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#65a30d",
+        description: "Précipitation de l'hydroxyde de fer(II) : FeCl₂ + 2KOH → Fe(OH)₂↓ + 2KCl."
+    },
+
+    /* ========================================================
+       089 — FeCl3 + Na2CO3
+       ======================================================== */
+    {
+        id: "group04_089_ferric_chloride_sodium_carbonate",
+        name: "Chlorure de fer(III) et carbonate de sodium",
+        reactants: [
+            { chemical: "ferricChloride", coefficient: 2 },
+            { chemical: "sodiumCarbonateSolid", coefficient: 3 }
+        ],
+        products: [
+            { material: "water", coefficient: 3, molarMass: 18.015 }
+        ],
+        temperatureDelta: 2,
+        phase: "precipitation",
+        gas: true,
+        precipitate: true,
+        bubbling: true,
+        color: "#92400e",
+        description: "Interaction entre FeCl₃ et Na₂CO₃ avec formation d'un précipité ferrique et dégagement de CO₂."
+    },
+
+    /* ========================================================
+       090 — FeCl2 + Na2CO3
+       ======================================================== */
+    {
+        id: "group04_090_ferrous_chloride_sodium_carbonate",
+        name: "Chlorure de fer(II) et carbonate de sodium",
+        reactants: [
+            { chemical: "ferrousChloride", coefficient: 1 },
+            { chemical: "sodiumCarbonateSolid", coefficient: 1 }
+        ],
+        products: [],
+        temperatureDelta: 1,
+        phase: "precipitation",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#65a30d",
+        description: "Précipitation du carbonate de fer(II) : FeCl₂ + Na₂CO₃ → FeCO₃↓ + 2NaCl."
+    },
+
+    /* ========================================================
+       091 — CuSO4 + Na2CO3
+       ======================================================== */
+    {
+        id: "group04_091_copper_sulfate_sodium_carbonate",
+        name: "Sulfate de cuivre et carbonate de sodium",
+        reactants: [
+            { chemical: "copperSulfate", coefficient: 1 },
+            { chemical: "sodiumCarbonateSolid", coefficient: 1 }
+        ],
+        products: [],
+        temperatureDelta: 1,
+        phase: "precipitation",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#22c55e",
+        description: "Précipitation d'un carbonate de cuivre à partir de CuSO₄ et Na₂CO₃."
+    },
+
+    /* ========================================================
+       092 — AgNO3 + FeCl3
+       ======================================================== */
+    {
+        id: "group04_092_silver_nitrate_ferric_chloride",
+        name: "Nitrate d'argent et chlorure de fer(III)",
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 3 },
+            { chemical: "ferricChloride", coefficient: 1 }
+        ],
+        products: [],
+        temperatureDelta: 1,
+        phase: "precipitation",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#f8fafc",
+        description: "Précipitation de chlorure d'argent : 3AgNO₃ + FeCl₃ → 3AgCl↓ + Fe(NO₃)₃."
+    },
+
+    /* ========================================================
+       093 — AgNO3 + FeCl2
+       ======================================================== */
+    {
+        id: "group04_093_silver_nitrate_ferrous_chloride",
+        name: "Nitrate d'argent et chlorure de fer(II)",
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 2 },
+            { chemical: "ferrousChloride", coefficient: 1 }
+        ],
+        products: [],
+        temperatureDelta: 1,
+        phase: "precipitation",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#f8fafc",
+        description: "Précipitation de chlorure d'argent : 2AgNO₃ + FeCl₂ → 2AgCl↓ + Fe(NO₃)₂."
+    },
+
+    /* ========================================================
+       094 — AgNO3 + Cu
+       ======================================================== */
+    {
+        id: "group04_094_silver_nitrate_copper",
+        name: "Nitrate d'argent et cuivre",
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 2 },
+            { chemical: "copper", coefficient: 1 }
+        ],
+        products: [
+            { material: "silver", coefficient: 2, molarMass: 107.8682 }
+        ],
+        temperatureDelta: 2,
+        phase: "redox",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#d1d5db",
+        description: "Oxydoréduction : le cuivre déplace l'argent des ions Ag⁺."
+    },
+
+    /* ========================================================
+       095 — AgNO3 + Zn
+       ======================================================== */
+    {
+        id: "group04_095_silver_nitrate_zinc",
+        name: "Nitrate d'argent et zinc",
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 2 },
+            { chemical: "zinc", coefficient: 1 }
+        ],
+        products: [
+            { material: "silver", coefficient: 2, molarMass: 107.8682 }
+        ],
+        temperatureDelta: 2,
+        phase: "redox",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#d1d5db",
+        description: "Oxydoréduction : Zn + 2AgNO₃ → Zn(NO₃)₂ + 2Ag."
+    },
+
+    /* ========================================================
+       096 — AgNO3 + Fe
+       ======================================================== */
+    {
+        id: "group04_096_silver_nitrate_iron",
+        name: "Nitrate d'argent et fer",
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 2 },
+            { chemical: "iron", coefficient: 1 }
+        ],
+        products: [
+            { material: "silver", coefficient: 2, molarMass: 107.8682 }
+        ],
+        temperatureDelta: 2,
+        phase: "redox",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#d1d5db",
+        description: "Oxydoréduction par déplacement de l'argent par le fer."
+    },
+
+    /* ========================================================
+       097 — CuSO4 + Mg
+       ======================================================== */
+    {
+        id: "group04_097_copper_sulfate_magnesium",
+        name: "Sulfate de cuivre et magnésium",
+        reactants: [
+            { chemical: "copperSulfate", coefficient: 1 },
+            { chemical: "magnesium", coefficient: 1 }
+        ],
+        products: [
+            { material: "copper", coefficient: 1, molarMass: 63.546 }
+        ],
+        temperatureDelta: 2,
+        phase: "redox",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#b87333",
+        description: "Oxydoréduction par déplacement : Mg + CuSO₄ → MgSO₄ + Cu."
+    },
+
+    /* ========================================================
+       098 — CuSO4 + Al
+       ======================================================== */
+    {
+        id: "group04_098_copper_sulfate_aluminium",
+        name: "Sulfate de cuivre et aluminium",
+        reactants: [
+            { chemical: "copperSulfate", coefficient: 3 },
+            { chemical: "aluminium", coefficient: 2 }
+        ],
+        products: [
+            { material: "copper", coefficient: 3, molarMass: 63.546 }
+        ],
+        temperatureDelta: 3,
+        phase: "redox",
+        gas: false,
+        precipitate: true,
+        bubbling: false,
+        color: "#b87333",
+        description: "Oxydoréduction par déplacement : 2Al + 3CuSO₄ → Al₂(SO₄)₃ + 3Cu."
+    },
+
+    /* ========================================================
+       099 — FeCl3 + Cu
+       ======================================================== */
+    {
+        id: "group04_099_ferric_chloride_copper",
+        name: "Chlorure de fer(III) et cuivre",
+        reactants: [
+            { chemical: "ferricChloride", coefficient: 2 },
+            { chemical: "copper", coefficient: 1 }
+        ],
+        products: [
+            { material: "ferrousChloride", coefficient: 2, molarMass: 126.751 }
+        ],
+        temperatureDelta: 2,
+        phase: "redox",
+        gas: false,
+        precipitate: false,
+        bubbling: false,
+        color: "#60a5fa",
+        description: "Oxydoréduction : Cu + 2FeCl₃ → CuCl₂ + 2FeCl₂."
+    },
+
+    /* ========================================================
+       100 — H2O2 + FeCl3
+       ======================================================== */
+    {
+        id: "group04_100_hydrogen_peroxide_ferric_chloride",
+        name: "Peroxyde d'hydrogène et chlorure de fer(III)",
+        reactants: [
+            { chemical: "hydrogenPeroxide", coefficient: 1 },
+            { chemical: "ferricChloride", coefficient: 1 }
+        ],
+        products: [
+            { material: "ferrousChloride", coefficient: 1, molarMass: 126.751 }
+        ],
+        temperatureDelta: 2,
+        phase: "redox",
+        gas: false,
+        precipitate: false,
+        bubbling: false,
+        color: "#f59e0b",
+        description: "Interaction redox modélisée entre le peroxyde d'hydrogène et les ions fer(III)."
+    }
+
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ============================================================
    20.11 — CALCUL DU MAXIMUM RÉACTIONNEL
 ============================================================ */
