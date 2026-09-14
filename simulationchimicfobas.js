@@ -4430,15 +4430,16 @@ function executeReaction(
    20.13 — MOTEUR PRINCIPAL
 ============================================================ */
 
+
 function reactSelected() {
 
     const object =
         getSelected();
 
 
-    /* --------------------------------------------------------
-       RÉCIPIENT OBLIGATOIRE
-    -------------------------------------------------------- */
+    /* ========================================================
+       1 — RÉCIPIENT OBLIGATOIRE
+    ======================================================== */
 
     if (!object) {
 
@@ -4451,9 +4452,73 @@ function reactSelected() {
     }
 
 
-    /* --------------------------------------------------------
-       COMPOSANTS OBLIGATOIRES
-    -------------------------------------------------------- */
+    /* ========================================================
+       2 — SI UNE RÉACTION EST DÉJÀ TERMINÉE
+       --------------------------------------------------------
+       IMPORTANT :
+       NE JAMAIS EFFACER LE RÉSULTAT D'UNE RÉACTION
+       DÉJÀ EFFECTUÉE.
+    ======================================================== */
+
+    if (
+        object.reactionState &&
+        object.reactionState.active === true &&
+        object.reactionState.description
+    ) {
+
+        const previousDescription =
+            object.reactionState.description;
+
+
+        object.state =
+            object.state ||
+            "réaction effectuée";
+
+
+        logObservation(
+            "Réaction déjà effectuée dans ce récipient : " +
+            previousDescription
+        );
+
+
+        toast(
+            "Cette réaction a déjà été effectuée. Le résultat reste conservé dans le bécher.",
+            "info"
+        );
+
+
+        /*
+         * On conserve volontairement :
+         * - reactionState
+         * - state
+         * - pH
+         * - température
+         * - produits
+         * - couleur
+         * - gaz
+         * - précipité
+         * - bulles
+         */
+
+        recalculateObject(
+            object
+        );
+
+        /*
+         * IMPORTANT :
+         * recalculateObject() ne doit pas recevoir
+         * l'autorisation de supprimer reactionState.
+         */
+
+        renderAll();
+
+        return;
+    }
+
+
+    /* ========================================================
+       3 — VÉRIFICATION DES COMPOSANTS
+    ======================================================== */
 
     if (
         !Array.isArray(
@@ -4471,9 +4536,9 @@ function reactSelected() {
     }
 
 
-    /* --------------------------------------------------------
-       RECHERCHE DES RÉACTIONS COMPATIBLES
-    -------------------------------------------------------- */
+    /* ========================================================
+       4 — RECHERCHE D'UNE RÉACTION COMPATIBLE
+    ======================================================== */
 
     let compatibleReaction =
         null;
@@ -4493,6 +4558,7 @@ function reactSelected() {
                 reaction
             );
 
+
         if (
             extent > 0
         ) {
@@ -4503,23 +4569,49 @@ function reactSelected() {
             compatibleExtent =
                 extent;
 
-            /*
-             * Une seule réaction est exécutée
-             * par pression sur le bouton.
-             */
             break;
         }
     }
 
 
-    /* --------------------------------------------------------
-       AUCUNE RÉACTION
-    -------------------------------------------------------- */
+    /* ========================================================
+       5 — AUCUNE NOUVELLE RÉACTION
+       --------------------------------------------------------
+       IMPORTANT :
+       Si aucune nouvelle réaction n'est disponible,
+       on ne détruit PAS un résultat existant.
+    ======================================================== */
 
     if (
         !compatibleReaction ||
         compatibleExtent <= 0
     ) {
+
+        /*
+         * Si le récipient contient déjà un résultat
+         * réactionnel, on le conserve.
+         */
+
+        if (
+            object.reactionState &&
+            object.reactionState.active === true
+        ) {
+
+            toast(
+                "Aucune nouvelle réaction à effectuer. Le résultat de la réaction précédente est conservé.",
+                "info"
+            );
+
+            renderAll();
+
+            return;
+        }
+
+
+        /*
+         * Seulement dans le cas où aucune réaction
+         * n'a encore été effectuée.
+         */
 
         object.reactionState = {
 
@@ -4546,6 +4638,10 @@ function reactSelected() {
         };
 
 
+        object.state =
+            "stable";
+
+
         toast(
             "Aucune réaction compatible avec les substances présentes.",
             "info"
@@ -4567,9 +4663,9 @@ function reactSelected() {
     }
 
 
-    /* --------------------------------------------------------
-       EXÉCUTION
-    -------------------------------------------------------- */
+    /* ========================================================
+       6 — EXÉCUTION DE LA RÉACTION
+    ======================================================== */
 
     const success =
         executeReaction(
@@ -4579,11 +4675,31 @@ function reactSelected() {
         );
 
 
-    /* --------------------------------------------------------
-       SÉCURITÉ D'EXÉCUTION
-    -------------------------------------------------------- */
+    /* ========================================================
+       7 — ÉCHEC D'EXÉCUTION
+    ======================================================== */
 
     if (!success) {
+
+        /*
+         * Ne pas détruire une ancienne réaction valide.
+         */
+
+        if (
+            object.reactionState &&
+            object.reactionState.active === true
+        ) {
+
+            toast(
+                "Le résultat de la réaction précédente est conservé.",
+                "warning"
+            );
+
+            renderAll();
+
+            return;
+        }
+
 
         object.reactionState = {
 
@@ -4610,6 +4726,10 @@ function reactSelected() {
         };
 
 
+        object.state =
+            "stable";
+
+
         toast(
             "La réaction n'a pas pu être exécutée correctement.",
             "warning"
@@ -4623,16 +4743,95 @@ function reactSelected() {
     }
 
 
-    /* --------------------------------------------------------
-       RECALCUL GLOBAL
-    -------------------------------------------------------- */
+    /* ========================================================
+       8 — RECALCUL FINAL
+       --------------------------------------------------------
+       Le statut réactionnel doit rester présent.
+    ======================================================== */
 
     recalculateObject(
         object
     );
 
+
+    /*
+     * RÉAFFIRMATION DU STATUT
+     *
+     * On s'assure que le statut ne disparaisse pas
+     * après le recalcul.
+     */
+
+    if (
+        success &&
+        compatibleReaction
+    ) {
+
+        object.state =
+            compatibleReaction.gas
+                ? "dégagement gazeux"
+                : compatibleReaction.precipitate
+                    ? "réaction d'oxydoréduction"
+                    : "réaction effectuée";
+
+
+        if (
+            !object.reactionState
+        ) {
+
+            object.reactionState = {
+
+                active:
+                    true,
+
+                gas:
+                    !!compatibleReaction.gas,
+
+                precipitate:
+                    !!compatibleReaction.precipitate,
+
+                bubbling:
+                    !!compatibleReaction.bubbling,
+
+                phase:
+                    compatibleReaction.phase ||
+                    "aqueous",
+
+                color:
+                    compatibleReaction.color ||
+                    object.color,
+
+                description:
+                    compatibleReaction.description
+            };
+        }
+
+
+        object.reactionState.active =
+            true;
+    }
+
+
+    /* ========================================================
+       9 — AFFICHAGE FINAL
+    ======================================================== */
+
     renderAll();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
