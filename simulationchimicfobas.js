@@ -1838,479 +1838,962 @@
         renderAll();
     }
 
-    /* ============================================================
-       12 — RENDU DES OBJETS
-    ============================================================ */
 
-    function totalComponentMoles(object) {
 
-        if (
-            !object ||
-            !Array.isArray(object.components)
-        ) {
-            return 0;
-        }
 
-        return object.components.reduce(
-            (sum, component) =>
-                sum +
-                Number(
-                    component.moles || 0
-                ),
-            0
+
+
+/* ============================================================
+   12 — RENDU DES OBJETS
+   ------------------------------------------------------------
+   IMPORTANT :
+   - Ne modifie pas le moteur chimique.
+   - Ne modifie pas reactionState.
+   - Ne modifie pas les calculs de volume, masse, pH, etc.
+   - Ajoute uniquement l'affichage dynamique du statut du bécher.
+   - Le statut est propre à chaque objet.
+   - Pour une réaction, le statut lit automatiquement :
+       reactionState
+       state
+       pH
+       temperatureC
+       gas
+       precipitate
+       bubbling
+       phase
+       description
+============================================================ */
+
+
+/* ============================================================
+   12.1 — CALCUL DES MOLES
+============================================================ */
+
+function totalComponentMoles(object) {
+
+    if (
+        !object ||
+        !Array.isArray(object.components)
+    ) {
+        return 0;
+    }
+
+    return object.components.reduce(
+        (sum, component) =>
+            sum +
+            Number(
+                component.moles || 0
+            ),
+        0
+    );
+}
+
+
+/* ============================================================
+   12.2 — CALCUL DE LA MASSE DES COMPOSANTS
+============================================================ */
+
+function totalComponentMass(object) {
+
+    if (
+        !object ||
+        !Array.isArray(object.components)
+    ) {
+        return 0;
+    }
+
+    return object.components.reduce(
+        (sum, component) =>
+            sum +
+            Number(
+                component.massG || 0
+            ),
+        0
+    );
+}
+
+
+/* ============================================================
+   12.3 — CALCUL DE LA MASSE TOTALE
+============================================================ */
+
+function calculateMass(object) {
+
+    if (!object) {
+        return 0;
+    }
+
+    const emptyMass =
+        Number(
+            object.emptyMassG || 0
+        );
+
+    const componentMass =
+        totalComponentMass(
+            object
+        );
+
+    /*
+     * Pour les objets possédant des composants,
+     * la masse réelle est la masse à vide
+     * + la masse des substances.
+     */
+
+    if (
+        Array.isArray(
+            object.components
+        ) &&
+        object.components.length > 0
+    ) {
+
+        return (
+            emptyMass +
+            componentMass
         );
     }
 
-    function totalComponentMass(object) {
+    return Number(
+        object.massG || emptyMass
+    );
+}
 
-        if (
-            !object ||
-            !Array.isArray(object.components)
-        ) {
-            return 0;
-        }
 
-        return object.components.reduce(
-            (sum, component) =>
-                sum +
-                Number(
-                    component.massG || 0
-                ),
-            0
+/* ============================================================
+   12.4 — DENSITÉ
+============================================================ */
+
+function calculateDensity(object) {
+
+    if (!object) {
+        return 0;
+    }
+
+    const volume =
+        Number(
+            object.volumeMl || 0
+        );
+
+    if (volume <= 0) {
+        return Number(
+            object.density || 0
         );
     }
 
-    function calculateMass(object) {
+    const mass =
+        totalComponentMass(
+            object
+        );
 
-        if (!object) {
-            return 0;
-        }
+    if (mass <= 0) {
+        return Number(
+            object.density || 0
+        );
+    }
+
+    return mass / volume;
+}
+
+
+/* ============================================================
+   12.5 — PRÉSENCE DE LIQUIDE
+============================================================ */
+
+function objectHasLiquid(object) {
+
+    return (
+        Number(
+            object?.volumeMl || 0
+        ) > 0
+    );
+}
+
+
+/* ============================================================
+   12.6 — NORMALISATION DU TEXTE DU STATUT
+============================================================ */
+
+function statusText(value) {
+
+    return String(
+        value ?? ""
+    ).trim();
+}
+
+
+/* ============================================================
+   12.7 — CRÉATION DU STATUT VISUEL DYNAMIQUE
+   ------------------------------------------------------------
+   Cette fonction NE MODIFIE PAS object.
+   Elle construit seulement les données à afficher.
+============================================================ */
+
+function getDynamicBeakerStatus(object) {
+
+    if (!object) {
+
+        return {
+
+            active: false,
+
+            type: "ready",
+
+            title: "BÉCHER",
+
+            message: "",
+
+            details: []
+        };
+    }
+
+
+    const reaction =
+        object.reactionState;
+
+
+    /* ========================================================
+       PRIORITÉ 1 — RÉACTION
+       --------------------------------------------------------
+       Une réaction active doit toujours avoir priorité
+       sur un ancien statut général.
+    ======================================================== */
+
+    if (
+        reaction &&
+        reaction.active === true
+    ) {
+
+        const details = [];
+
+
+        /*
+         * Description / équation chimique
+         */
 
         if (
-            object.kind ===
-            "container"
+            statusText(
+                reaction.description
+            )
         ) {
-            return (
-                Number(
-                    object.emptyMassG || 0
-                ) +
-                totalComponentMass(
-                    object
+
+            details.push(
+                statusText(
+                    reaction.description
                 )
             );
         }
 
+
+        /*
+         * État général de la réaction
+         */
+
         if (
-            object.massG != null
+            statusText(
+                object.state
+            )
         ) {
-            return Number(
-                object.massG || 0
+
+            details.push(
+                "État : " +
+                statusText(
+                    object.state
+                )
             );
         }
 
-        return totalComponentMass(
+
+        /*
+         * pH
+         */
+
+        if (
+            objectHasLiquid(
+                object
+            )
+        ) {
+
+            details.push(
+                "pH : " +
+                Number(
+                    object.pH ?? 7
+                ).toFixed(2)
+            );
+        }
+
+
+        /*
+         * Température
+         */
+
+        details.push(
+            "Température : " +
+            Number(
+                object.temperatureC ??
+                DEFAULT_TEMPERATURE
+            ).toFixed(1) +
+            " °C"
+        );
+
+
+        /*
+         * Gaz
+         */
+
+        details.push(
+            "Gaz : " +
+            (
+                reaction.gas
+                    ? "Oui"
+                    : "Non"
+            )
+        );
+
+
+        /*
+         * Bulles
+         */
+
+        if (
+            reaction.gas ||
+            reaction.bubbling
+        ) {
+
+            details.push(
+                "Bulles : " +
+                (
+                    reaction.bubbling
+                        ? "Oui"
+                        : "Non"
+                )
+            );
+        }
+
+
+        /*
+         * Précipité
+         */
+
+        details.push(
+            "Précipité : " +
+            (
+                reaction.precipitate
+                    ? "Oui"
+                    : "Non"
+            )
+        );
+
+
+        /*
+         * Phase
+         */
+
+        if (
+            statusText(
+                reaction.phase
+            )
+        ) {
+
+            details.push(
+                "Phase : " +
+                statusText(
+                    reaction.phase
+                )
+            );
+        }
+
+
+        return {
+
+            active: true,
+
+            type: "reaction",
+
+            title:
+                "RÉACTION EFFECTUÉE",
+
+            message:
+                statusText(
+                    reaction.description
+                ) ||
+                "Réaction chimique effectuée.",
+
+            details:
+                details
+        };
+    }
+
+
+    /* ========================================================
+       PRIORITÉ 2 — STATUT D'ACTION
+       --------------------------------------------------------
+       Compatible avec actionStatus si un autre bloc
+       l'initialise ou le met à jour.
+    ======================================================== */
+
+    const actionStatus =
+        object.actionStatus;
+
+
+    if (
+        actionStatus &&
+        (
+            statusText(
+                actionStatus.title
+            ) ||
+            statusText(
+                actionStatus.message
+            ) ||
+            (
+                Array.isArray(
+                    actionStatus.details
+                ) &&
+                actionStatus.details.length > 0
+            )
+        )
+    ) {
+
+        const details =
+            Array.isArray(
+                actionStatus.details
+            )
+                ? actionStatus.details
+                    .map(
+                        item =>
+                            statusText(
+                                item
+                            )
+                    )
+                    .filter(
+                        Boolean
+                    )
+                : [];
+
+
+        return {
+
+            active: true,
+
+            type:
+                statusText(
+                    actionStatus.type
+                ) ||
+                "action",
+
+            title:
+                statusText(
+                    actionStatus.title
+                ) ||
+                "ACTION EFFECTUÉE",
+
+            message:
+                statusText(
+                    actionStatus.message
+                ),
+
+            details:
+                details
+        };
+    }
+
+
+    /* ========================================================
+       PRIORITÉ 3 — ÉTAT EXISTANT
+       --------------------------------------------------------
+       Permet au bécher d'afficher immédiatement son état
+       même si actionStatus n'a pas encore été ajouté ailleurs.
+    ======================================================== */
+
+    const objectState =
+        statusText(
+            object.state
+        );
+
+
+    if (
+        objectState &&
+        objectState !== "stable" &&
+        objectState !== "empty"
+    ) {
+
+        return {
+
+            active: true,
+
+            type: "state",
+
+            title:
+                "ÉTAT DU BÉCHER",
+
+            message:
+                objectState,
+
+            details: [
+
+                "Volume : " +
+                Number(
+                    object.volumeMl || 0
+                ).toFixed(1) +
+                " mL",
+
+                "Température : " +
+                Number(
+                    object.temperatureC ??
+                    DEFAULT_TEMPERATURE
+                ).toFixed(1) +
+                " °C",
+
+                "pH : " +
+                Number(
+                    object.pH ?? 7
+                ).toFixed(2)
+            ]
+        };
+    }
+
+
+    /* ========================================================
+       PRIORITÉ 4 — BÉCHER PRÊT
+    ======================================================== */
+
+    return {
+
+        active: false,
+
+        type: "ready",
+
+        title:
+            "BÉCHER PRÊT",
+
+        message:
+            "Aucune action effectuée.",
+
+        details: []
+    };
+}
+
+
+/* ============================================================
+   12.8 — RENDU HTML DU STATUT DU BÉCHER
+   ------------------------------------------------------------
+   Bloc complètement isolé.
+============================================================ */
+
+function renderBeakerStatus(object) {
+
+    const status =
+        getDynamicBeakerStatus(
             object
         );
-    }
 
-    function calculateDensity(object) {
 
-        if (!object) {
-            return 0;
-        }
+    const type =
+        statusText(
+            status.type
+        ) ||
+        "ready";
 
-        const volume =
-            Number(
-                object.volumeMl || 0
-            );
 
-        if (volume <= 0) {
-            return Number(
-                object.density || 0
-            );
-        }
+    const title =
+        statusText(
+            status.title
+        ) ||
+        "BÉCHER PRÊT";
 
-        const mass =
-            totalComponentMass(
-                object
-            );
 
-        if (mass <= 0) {
-            return Number(
-                object.density || 1
-            );
-        }
-
-        return mass / volume;
-    }
-
-    function objectHasLiquid(object) {
-
-        return (
-            Number(
-                object?.volumeMl || 0
-            ) > 0
+    const message =
+        statusText(
+            status.message
         );
+
+
+    const details =
+        Array.isArray(
+            status.details
+        )
+            ? status.details
+                .filter(
+                    item =>
+                        statusText(
+                            item
+                        )
+                )
+            : [];
+
+
+    return `
+        <div
+            class="fobas-beaker-status fobas-beaker-status-${escapeHTML(type)}"
+            data-status-type="${escapeHTML(type)}"
+        >
+
+            <div class="fobas-beaker-status-title">
+                ${escapeHTML(title)}
+            </div>
+
+            ${
+                message
+                    ? `
+                        <div class="fobas-beaker-status-message">
+                            ${escapeHTML(message)}
+                        </div>
+                    `
+                    : ""
+            }
+
+            ${
+                details.length
+                    ? `
+                        <div class="fobas-beaker-status-details">
+                            ${
+                                details
+                                    .map(
+                                        detail => `
+                                            <div class="fobas-beaker-status-line">
+                                                ${escapeHTML(detail)}
+                                            </div>
+                                        `
+                                    )
+                                    .join("")
+                            }
+                        </div>
+                    `
+                    : ""
+            }
+
+        </div>
+    `;
+}
+
+
+/* ============================================================
+   12.9 — RENDU VISUEL PRINCIPAL
+============================================================ */
+
+function objectVisual(object) {
+
+    const isContainer =
+        object.kind === "container";
+
+    const isSolid =
+        object.phase === "solid";
+
+    const isEquipment =
+        object.category === "equipment";
+
+    const isInstrument =
+        object.category === "instrument";
+
+    const selected =
+        object.id === state.selectedId;
+
+    const reaction =
+        object.reactionState?.active;
+
+    const heating =
+        object.heating;
+
+
+    /* ========================================================
+       CLASSES DU CORPS
+    ======================================================== */
+
+    let bodyClass =
+        "fobas-object-body";
+
+
+    if (isSolid) {
+
+        bodyClass +=
+            " fobas-solid-body";
     }
 
-    function objectVisual(object) {
 
-        const isContainer =
-            object.kind ===
-            "container";
+    if (
+        isEquipment ||
+        isInstrument
+    ) {
 
-        const isSolid =
-            object.phase ===
-            "solid";
+        bodyClass +=
+            " fobas-equipment-body";
+    }
 
-        const isEquipment =
-            object.category ===
-            "equipment";
 
-        const isInstrument =
-            object.category ===
-            "instrument";
+    /* ========================================================
+       LIQUIDE
+    ======================================================== */
 
-        const selected =
-            object.id ===
-            state.selectedId;
+    let liquid = "";
 
-        const reaction =
-            object.reactionState?.active;
 
-        const heating =
-            object.heating;
+    if (
+        isContainer &&
+        objectHasLiquid(
+            object
+        )
+    ) {
 
-        let bodyClass =
-            "fobas-object-body";
-
-        if (isSolid) {
-            bodyClass +=
-                " fobas-solid-body";
-        }
-
-        if (
-            isEquipment ||
-            isInstrument
-        ) {
-            bodyClass +=
-                " fobas-equipment-body";
-        }
-
-        let liquid = "";
-
-        if (
-            isContainer &&
-            objectHasLiquid(object)
-        ) {
-
-            const liquidHeight =
-                clamp(
-                    (
-                        object.volumeMl /
-                        Math.max(
-                            object.capacityMl,
-                            1
-                        )
-                    ) * 70,
-                    8,
-                    72
-                );
-
-            liquid = `
-                <div
-                    class="fobas-object-liquid"
-                    style="
-                        height:${liquidHeight}%;
-                        background:${object.color};
-                    "
-                ></div>
-            `;
-        }
-
-        let bubbles = "";
-
-        if (
-            reaction &&
-            object.reactionState?.gas
-        ) {
-
-            bubbles = `
-                <div class="fobas-bubbles">
-                    <i class="fobas-bubble" style="left:20%;animation-delay:.1s"></i>
-                    <i class="fobas-bubble" style="left:40%;animation-delay:.5s"></i>
-                    <i class="fobas-bubble" style="left:60%;animation-delay:.8s"></i>
-                    <i class="fobas-bubble" style="left:75%;animation-delay:.25s"></i>
-                </div>
-            `;
-        }
-
-        const classes = [
-            "fobas-chem-object"
-        ];
-
-        if (selected) {
-            classes.push("selected");
-        }
-
-        if (reaction) {
-            classes.push(
-                "fobas-reaction-active"
-            );
-        }
-
-        if (heating) {
-            classes.push(
-                "fobas-heating"
-            );
-        }
-
-        const width =
-            Number(
-                object.width || 110
+        const liquidHeight =
+            clamp(
+                (
+                    Number(
+                        object.volumeMl || 0
+                    ) /
+                    Math.max(
+                        Number(
+                            object.capacityMl || 0
+                        ),
+                        1
+                    )
+                ) * 70,
+                8,
+                72
             );
 
-        const height =
-            Number(
-                object.height || 130
-            );
 
-        const background =
-            isSolid
-                ? object.color
-                : isContainer
-                    ? "rgba(219,234,254,.24)"
-                    : object.color;
-
-        return `
+        liquid = `
             <div
-                class="${classes.join(" ")}"
-                data-object-id="${object.id}"
+                class="fobas-object-liquid"
                 style="
-                    left:${object.x}px;
-                    top:${object.y}px;
-                    width:${width}px;
-                    height:${height}px;
+                    height:${liquidHeight}%;
+                    background:${object.color};
                 "
-            >
+            ></div>
+        `;
+    }
 
-                ${
-                    isContainer
-                        ? `<div
-                            class="fobas-object-glass"
-                            style="
-                                position:absolute;
-                                inset:0;
-                            "
-                           ></div>`
-                        : ""
-                }
 
-                ${liquid}
+    /* ========================================================
+       BULLES
+       --------------------------------------------------------
+       La logique existante de réaction gazeuse est conservée.
+    ======================================================== */
 
-                <div
-                    class="${bodyClass}"
-                    style="
-                        ${
-                            !isContainer &&
-                            !isSolid &&
-                            !isEquipment &&
-                            !isInstrument
-                                ? `background:${background};`
-                                : ""
-                        }
-                    "
-                >
+    let bubbles = "";
 
-                    <div
-                        class="fobas-object-icon"
-                    >
-                        ${object.icon}
-                    </div>
 
-                    <div
-                        class="fobas-object-name"
-                    >
-                        ${escapeHTML(
-                            object.shortName ||
-                            object.name
-                        )}
-                    </div>
+    if (
+        reaction &&
+        object.reactionState?.gas
+    ) {
 
-                    ${
-                        object.formula
-                            ? `<div
-                                class="fobas-object-formula"
-                               >
-                                ${escapeHTML(object.formula)}
-                               </div>`
-                            : ""
-                    }
+        bubbles = `
+            <div class="fobas-bubbles">
 
-                </div>
+                <i
+                    class="fobas-bubble"
+                    style="left:20%;animation-delay:.1s"
+                ></i>
 
-                ${bubbles}
+                <i
+                    class="fobas-bubble"
+                    style="left:40%;animation-delay:.5s"
+                ></i>
 
-                <div
-                    class="fobas-object-label"
-                >
-                    ${escapeHTML(
-                        object.name
-                    )}
-                </div>
+                <i
+                    class="fobas-bubble"
+                    style="left:60%;animation-delay:.8s"
+                ></i>
+
+                <i
+                    class="fobas-bubble"
+                    style="left:75%;animation-delay:.25s"
+                ></i>
 
             </div>
         `;
     }
 
-    function bindObjectInteractions() {
 
-        $$(".fobas-chem-object").forEach(
-            element => {
+    /* ========================================================
+       CLASSES PRINCIPALES
+    ======================================================== */
 
-                const id =
-                    element.dataset.objectId;
+    const classes =
+        [
+            "fobas-chem-object"
+        ];
 
-                element.addEventListener(
-                    "pointerdown",
-                    event => {
 
-                        const object =
-                            getObject(id);
+    if (selected) {
 
-                        if (!object) {
-                            return;
-                        }
+        classes.push(
+            "selected"
+        );
+    }
 
-                        selectObject(id);
 
-                        if (
-                            state.tool !==
-                            "move"
-                        ) {
-                            return;
-                        }
+    if (reaction) {
 
-                        event.preventDefault();
+        classes.push(
+            "fobas-reaction-active"
+        );
+    }
 
-                        const startX =
-                            event.clientX;
 
-                        const startY =
-                            event.clientY;
+    if (heating) {
 
-                        const originalX =
-                            object.x;
+        classes.push(
+            "fobas-heating"
+        );
+    }
 
-                        const originalY =
-                            object.y;
 
-                        function move(
-                            moveEvent
-                        ) {
+    /* ========================================================
+       DIMENSIONS
+    ======================================================== */
 
-                            object.x =
-                                originalX +
-                                (
-                                    moveEvent.clientX -
-                                    startX
-                                ) /
-                                state.zoom;
+    const width =
+        Number(
+            object.width || 110
+        );
 
-                            object.y =
-                                originalY +
-                                (
-                                    moveEvent.clientY -
-                                    startY
-                                ) /
-                                state.zoom;
 
-                            object.x =
-                                Math.max(
-                                    0,
-                                    object.x
-                                );
+    const height =
+        Number(
+            object.height || 130
+        );
 
-                            object.y =
-                                Math.max(
-                                    0,
-                                    object.y
-                                );
 
-                            renderWorkspace();
-                        }
+    /* ========================================================
+       COULEUR / ARRIÈRE-PLAN
+    ======================================================== */
 
-                        function end() {
+    const background =
+        isSolid
+            ? object.color
+            : isContainer
+                ? "rgba(219,234,254,.24)"
+                : object.color;
 
-                            document.removeEventListener(
-                                "pointermove",
-                                move
-                            );
 
-                            document.removeEventListener(
-                                "pointerup",
-                                end
-                            );
+    /* ========================================================
+       STATUT DU BÉCHER
+       --------------------------------------------------------
+       Affiché UNIQUEMENT pour les récipients.
+       Les autres objets restent visuellement inchangés.
+    ======================================================== */
 
-                            saveSession(
-                                false
-                            );
-                        }
+    const beakerStatus =
+        isContainer
+            ? renderBeakerStatus(
+                object
+            )
+            : "";
 
-                        document.addEventListener(
-                            "pointermove",
-                            move
-                        );
 
-                        document.addEventListener(
-                            "pointerup",
-                            end,
-                            {
-                                once: true
-                            }
-                        );
+    /* ========================================================
+       HTML FINAL
+    ======================================================== */
+
+    return `
+        <div
+            class="${classes.join(" ")}"
+            data-object-id="${escapeHTML(object.id)}"
+            style="
+                left:${object.x}px;
+                top:${object.y}px;
+                width:${width}px;
+                height:${height}px;
+            "
+        >
+
+            ${
+                isContainer
+                    ? `
+                        <div
+                            class="fobas-object-glass"
+                            style="
+                                position:absolute;
+                                inset:0;
+                            "
+                        ></div>
+                    `
+                    : ""
+            }
+
+
+            ${liquid}
+
+
+            <div
+                class="${bodyClass}"
+                style="${
+                    !isContainer &&
+                    !isSolid &&
+                    !isEquipment &&
+                    !isInstrument
+                        ? `background:${background};`
+                        : ""
+                }"
+            >
+
+                <div class="fobas-object-icon">
+                    ${object.icon}
+                </div>
+
+
+                <div class="fobas-object-name">
+                    ${
+                        escapeHTML(
+                            object.shortName ||
+                            object.name
+                        )
                     }
-                );
-            }
-        );
-    }
+                </div>
 
-    function renderWorkspace() {
 
-        if (!E.workspaceObjects) {
-            return;
-        }
-
-        E.workspaceObjects.innerHTML = "";
-
-        state.objects.forEach(
-            object => {
-
-                const wrapper =
-                    document.createElement(
-                        "div"
-                    );
-
-                wrapper.innerHTML =
-                    objectVisual(
-                        object
-                    );
-
-                const element =
-                    wrapper.firstElementChild;
-
-                if (element) {
-                    E.workspaceObjects.appendChild(
-                        element
-                    );
+                ${
+                    object.formula
+                        ? `
+                            <div class="fobas-object-formula">
+                                ${
+                                    escapeHTML(
+                                        object.formula
+                                    )
+                                }
+                            </div>
+                        `
+                        : ""
                 }
-            }
-        );
 
-        bindObjectInteractions();
+            </div>
 
-        applyZoom();
-    }
+
+            ${bubbles}
+
+
+            ${beakerStatus}
+
+
+            <div class="fobas-object-label">
+                ${
+                    escapeHTML(
+                        object.name
+                    )
+                }
+            </div>
+
+        </div>
+    `;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /* ============================================================
        13 — INSPECTEUR
