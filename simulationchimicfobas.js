@@ -9151,6 +9151,1513 @@ REACTION_DATABASE.push(
 
 
 
+/* ============================================================
+   20 — RÉACTIONS CHIMIQUES
+   ------------------------------------------------------------
+   GROUP 03 — 25 RÉACTIONS
+   ------------------------------------------------------------
+   RÉACTIONS : 051 → 075
+   ------------------------------------------------------------
+   IMPORTANT :
+   - GROUP 01 reste intact.
+   - GROUP 02 reste intact.
+   - Aucun nouveau const REACTION_DATABASE.
+   - Les réactions sont ajoutées au REACTION_DATABASE existant.
+   - Aucune réaction ne duplique GROUP 01 ou GROUP 02.
+   - Structure compatible avec le moteur principal existant.
+============================================================ */
+
+REACTION_DATABASE.push(
+
+    /* ========================================================
+       051 — HNO₃ + Na₂CO₃ → 2NaNO₃ + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_051_hno3_sodium_carbonate",
+
+        name:
+            "Acide nitrique et carbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "sodiumCarbonateSolid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "sodiumNitrate",
+                coefficient:
+                    2,
+                molarMass:
+                    84.9947
+            },
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f5f9ff",
+
+        description:
+            "Réaction acide-carbonate avec dégagement de CO₂ : 2HNO₃ + Na₂CO₃ → 2NaNO₃ + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       052 — HNO₃ + NaHCO₃ → NaNO₃ + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_052_hno3_sodium_bicarbonate",
+
+        name:
+            "Acide nitrique et bicarbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumBicarbonate",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "sodiumNitrate",
+                coefficient:
+                    1,
+                molarMass:
+                    84.9947
+            },
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f5f9ff",
+
+        description:
+            "Réaction acide-bicarbonate avec dégagement de CO₂ : HNO₃ + NaHCO₃ → NaNO₃ + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       053 — H₂SO₄ + 2NaHCO₃ → Na₂SO₄ + 2H₂O + 2CO₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_053_h2so4_sodium_bicarbonate",
+
+        name:
+            "Acide sulfurique et bicarbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumBicarbonate",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    2,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            2,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f5f9ff",
+
+        description:
+            "Réaction acide-bicarbonate avec dégagement de CO₂ : H₂SO₄ + 2NaHCO₃ → Na₂SO₄ + 2H₂O + 2CO₂."
+    },
+
+
+    /* ========================================================
+       054 — 2CH₃COOH + CaCO₃ → Ca(CH₃COO)₂ + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_054_acetic_calcium_carbonate",
+
+        name:
+            "Acide acétique et carbonate de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aceticAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "calciumCarbonate",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f8fafc",
+
+        description:
+            "Réaction acide-carbonate avec dégagement de CO₂ : 2CH₃COOH + CaCO₃ → Ca(CH₃COO)₂ + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       055 — H₂SO₄ + Na₂CO₃ → Na₂SO₄ + H₂O + CO₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_055_h2so4_sodium_carbonate",
+
+        name:
+            "Acide sulfurique et carbonate de sodium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sodiumCarbonateSolid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    1,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#f5f9ff",
+
+        description:
+            "Réaction acide-carbonate avec dégagement de CO₂ : H₂SO₄ + Na₂CO₃ → Na₂SO₄ + H₂O + CO₂."
+    },
+
+
+    /* ========================================================
+       056 — 2HNO₃ + Ca(OH)₂ → Ca(NO₃)₂ + 2H₂O
+    ======================================================== */
+
+    {
+        id:
+            "group03_056_hno3_calcium_hydroxide",
+
+        name:
+            "Neutralisation HNO₃ et hydroxyde de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "calciumHydroxide",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    2,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            4,
+
+        phase:
+            "aqueous",
+
+        gas:
+            false,
+
+        precipitate:
+            false,
+
+        bubbling:
+            false,
+
+        color:
+            "#eef7ff",
+
+        description:
+            "Neutralisation : 2HNO₃ + Ca(OH)₂ → Ca(NO₃)₂ + 2H₂O."
+    },
+
+
+    /* ========================================================
+       057 — Mg + 2HNO₃ → Mg(NO₃)₂ + H₂
+       Modélisation pédagogique du métal avec acide dilué.
+    ======================================================== */
+
+    {
+        id:
+            "group03_057_magnesium_nitric_acid",
+
+        name:
+            "Magnésium et acide nitrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "magnesium",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide modélisée pédagogiquement : Mg + 2HNO₃ → Mg(NO₃)₂ + H₂."
+    },
+
+
+    /* ========================================================
+       058 — Zn + 2HNO₃ → Zn(NO₃)₂ + gaz
+       ======================================================== */
+
+    {
+        id:
+            "group03_058_zinc_nitric_acid",
+
+        name:
+            "Zinc et acide nitrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "zinc",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            4,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction d'oxydoréduction du zinc avec l'acide nitrique."
+    },
+
+
+    /* ========================================================
+       059 — Cu + HNO₃ → produits gazeux azotés
+       ======================================================== */
+
+    {
+        id:
+            "group03_059_copper_nitric_acid",
+
+        name:
+            "Cuivre et acide nitrique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "copper",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "nitricAcid",
+                coefficient:
+                    4
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            8,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            "#60a5fa",
+
+        description:
+            "Oxydoréduction du cuivre avec l'acide nitrique avec dégagement de produits gazeux azotés."
+    },
+
+
+    /* ========================================================
+       060 — Mg + H₂SO₄ → MgSO₄ + H₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_060_magnesium_sulfuric_acid",
+
+        name:
+            "Magnésium et acide sulfurique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "magnesium",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : Mg + H₂SO₄ → MgSO₄ + H₂."
+    },
+
+
+    /* ========================================================
+       061 — Zn + H₂SO₄ → ZnSO₄ + H₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_061_zinc_sulfuric_acid",
+
+        name:
+            "Zinc et acide sulfurique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "zinc",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : Zn + H₂SO₄ → ZnSO₄ + H₂."
+    },
+
+
+    /* ========================================================
+       062 — Fe + H₂SO₄ → FeSO₄ + H₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_062_iron_sulfuric_acid",
+
+        name:
+            "Fer et acide sulfurique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "iron",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            3,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : Fe + H₂SO₄ → FeSO₄ + H₂."
+    },
+
+
+    /* ========================================================
+       063 — 2Al + 3H₂SO₄ → Al₂(SO₄)₃ + 3H₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_063_aluminium_sulfuric_acid",
+
+        name:
+            "Aluminium et acide sulfurique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aluminium",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    3
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : 2Al + 3H₂SO₄ → Al₂(SO₄)₃ + 3H₂."
+    },
+
+
+    /* ========================================================
+       064 — Mg + 2CH₃COOH → Mg(CH₃COO)₂ + H₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_064_magnesium_acetic_acid",
+
+        name:
+            "Magnésium et acide acétique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "magnesium",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "aceticAcid",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            2,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : Mg + 2CH₃COOH → Mg(CH₃COO)₂ + H₂."
+    },
+
+
+    /* ========================================================
+       065 — Zn + 2CH₃COOH → Zn(CH₃COO)₂ + H₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_065_zinc_acetic_acid",
+
+        name:
+            "Zinc et acide acétique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "zinc",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "aceticAcid",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            2,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : Zn + 2CH₃COOH → Zn(CH₃COO)₂ + H₂."
+    },
+
+
+    /* ========================================================
+       066 — 2CH₃COOH + Ca(OH)₂ → Ca(CH₃COO)₂ + 2H₂O
+    ======================================================== */
+
+    {
+        id:
+            "group03_066_acetic_calcium_hydroxide",
+
+        name:
+            "Neutralisation acide acétique et hydroxyde de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aceticAcid",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "calciumHydroxide",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    2,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            2,
+
+        phase:
+            "aqueous",
+
+        gas:
+            false,
+
+        precipitate:
+            false,
+
+        bubbling:
+            false,
+
+        color:
+            "#eef7ff",
+
+        description:
+            "Neutralisation : 2CH₃COOH + Ca(OH)₂ → Ca(CH₃COO)₂ + 2H₂O."
+    },
+
+
+    /* ========================================================
+       067 — 2Al + 6CH₃COOH → 2Al(CH₃COO)₃ + 3H₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_067_aluminium_acetic_acid",
+
+        name:
+            "Aluminium et acide acétique",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aluminium",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "aceticAcid",
+                coefficient:
+                    6
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            2,
+
+        phase:
+            "gas_evolution",
+
+        gas:
+            true,
+
+        precipitate:
+            false,
+
+        bubbling:
+            true,
+
+        color:
+            null,
+
+        description:
+            "Réaction métal-acide : 2Al + 6CH₃COOH → 2Al(CH₃COO)₃ + 3H₂."
+    },
+
+
+    /* ========================================================
+       068 — Mg + FeCl₂ → MgCl₂ + Fe
+    ======================================================== */
+
+    {
+        id:
+            "group03_068_magnesium_ferrous_chloride",
+
+        name:
+            "Déplacement du fer par le magnésium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "magnesium",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "ferrousChloride",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "iron",
+                coefficient:
+                    1,
+                molarMass:
+                    55.845
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#6b7280",
+
+        description:
+            "Oxydoréduction par déplacement : Mg + FeCl₂ → MgCl₂ + Fe."
+    },
+
+
+    /* ========================================================
+       069 — Zn + FeCl₂ → ZnCl₂ + Fe
+    ======================================================== */
+
+    {
+        id:
+            "group03_069_zinc_ferrous_chloride",
+
+        name:
+            "Déplacement du fer par le zinc",
+
+        reactants: [
+
+            {
+                chemical:
+                    "zinc",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "ferrousChloride",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "iron",
+                coefficient:
+                    1,
+                molarMass:
+                    55.845
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#6b7280",
+
+        description:
+            "Oxydoréduction par déplacement : Zn + FeCl₂ → ZnCl₂ + Fe."
+    },
+
+
+    /* ========================================================
+       070 — 2Al + 3FeCl₃ → Al₂(SO₄)₃ + 3Fe
+       Modèle de déplacement métallique.
+    ======================================================== */
+
+    {
+        id:
+            "group03_070_aluminium_ferric_chloride",
+
+        name:
+            "Déplacement du fer par l'aluminium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aluminium",
+                coefficient:
+                    2
+            },
+
+            {
+                chemical:
+                    "ferricChloride",
+                coefficient:
+                    3
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "iron",
+                coefficient:
+                    3,
+                molarMass:
+                    55.845
+            }
+        ],
+
+        temperatureDelta:
+            2,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#6b7280",
+
+        description:
+            "Oxydoréduction par déplacement : l'aluminium réduit les ions fer(III)."
+    },
+
+
+    /* ========================================================
+       071 — Cu + 2FeCl₃ → CuCl₂ + 2FeCl₂
+    ======================================================== */
+
+    {
+        id:
+            "group03_071_copper_ferric_chloride",
+
+        name:
+            "Oxydation du cuivre par FeCl₃",
+
+        reactants: [
+
+            {
+                chemical:
+                    "copper",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "ferricChloride",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "ferrousChloride",
+                coefficient:
+                    2,
+                molarMass:
+                    126.75
+            }
+        ],
+
+        temperatureDelta:
+            2,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            false,
+
+        bubbling:
+            false,
+
+        color:
+            "#60a5fa",
+
+        description:
+            "Oxydoréduction : Cu + 2FeCl₃ → CuCl₂ + 2FeCl₂."
+    },
+
+
+    /* ========================================================
+       072 — Mg + 2AgNO₃ → Mg(NO₃)₂ + 2Ag
+    ======================================================== */
+
+    {
+        id:
+            "group03_072_magnesium_silver_nitrate",
+
+        name:
+            "Déplacement de l'argent par le magnésium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "magnesium",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "silverNitrate",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "silver",
+                coefficient:
+                    2,
+                molarMass:
+                    107.8682
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#d1d5db",
+
+        description:
+            "Oxydoréduction par déplacement : Mg + 2AgNO₃ → Mg(NO₃)₂ + 2Ag."
+    },
+
+
+    /* ========================================================
+       073 — Al + 3AgNO₃ → Al(NO₃)₃ + 3Ag
+    ======================================================== */
+
+    {
+        id:
+            "group03_073_aluminium_silver_nitrate",
+
+        name:
+            "Déplacement de l'argent par l'aluminium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "aluminium",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "silverNitrate",
+                coefficient:
+                    3
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "silver",
+                coefficient:
+                    3,
+                molarMass:
+                    107.8682
+            }
+        ],
+
+        temperatureDelta:
+            1,
+
+        phase:
+            "redox",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#d1d5db",
+
+        description:
+            "Oxydoréduction par déplacement : Al + 3AgNO₃ → Al(NO₃)₃ + 3Ag."
+    },
+
+
+    /* ========================================================
+       074 — H₂SO₄ + Ca(OH)₂ → CaSO₄ + 2H₂O
+    ======================================================== */
+
+    {
+        id:
+            "group03_074_h2so4_calcium_hydroxide",
+
+        name:
+            "Neutralisation acide sulfurique et hydroxyde de calcium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "sulfuricAcid",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "calciumHydroxide",
+                coefficient:
+                    1
+            }
+        ],
+
+        products: [
+
+            {
+                material:
+                    "water",
+                coefficient:
+                    2,
+                molarMass:
+                    18.015
+            }
+        ],
+
+        temperatureDelta:
+            5,
+
+        phase:
+            "precipitation",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#eeeeee",
+
+        description:
+            "Neutralisation avec formation de sulfate de calcium : H₂SO₄ + Ca(OH)₂ → CaSO₄ + 2H₂O."
+    },
+
+
+    /* ========================================================
+       075 — CuSO₄ + 2KOH → Cu(OH)₂↓ + K₂SO₄
+    ======================================================== */
+
+    {
+        id:
+            "group03_075_cuso4_koh",
+
+        name:
+            "Précipitation avec hydroxyde de potassium",
+
+        reactants: [
+
+            {
+                chemical:
+                    "copperSulfate",
+                coefficient:
+                    1
+            },
+
+            {
+                chemical:
+                    "potassiumHydroxide",
+                coefficient:
+                    2
+            }
+        ],
+
+        products: [],
+
+        temperatureDelta:
+            0,
+
+        phase:
+            "precipitation",
+
+        gas:
+            false,
+
+        precipitate:
+            true,
+
+        bubbling:
+            false,
+
+        color:
+            "#3b82f6",
+
+        description:
+            "Précipitation : CuSO₄ + 2KOH → Cu(OH)₂↓ + K₂SO₄."
+    }
+
+);
+
+
+
+
 
 
 
