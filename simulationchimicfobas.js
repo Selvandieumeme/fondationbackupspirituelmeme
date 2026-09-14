@@ -8483,7 +8483,663 @@ const REACTION_DATABASE = [
 
         description:
             "Oxydoréduction en milieu acide : 2KMnO₄ + 16HCl → 2MnCl₂ + 2KCl + 8H₂O + 5Cl₂."
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   20 — RÉACTIONS CHIMIQUES
+   ------------------------------------------------------------
+   GROUP 02 — 25 RÉACTIONS
+   ------------------------------------------------------------
+   IMPORTANT :
+   - GROUP 01 reste totalement intact.
+   - Aucun nouveau const REACTION_DATABASE_GROUP_02.
+   - Les 25 réactions sont ajoutées au REACTION_DATABASE existant.
+   - Compatible avec 2, 3 ou plusieurs réactifs.
+   - Aucun remplacement du moteur principal.
+   ============================================================ */
+
+REACTION_DATABASE.push(
+
+    /* ========================================================
+       026 — ACIDE NITRIQUE + HYDROXYDE DE POTASSIUM
+       HNO3 + KOH → KNO3 + H2O
+       ======================================================== */
+    {
+        id: "group02_026_hno3_koh",
+        name: "Neutralisation HNO₃ + KOH",
+        equation: "HNO₃ + KOH → KNO₃ + H₂O",
+
+        reactants: [
+            { chemical: "nitricAcid", coefficient: 1 },
+            { chemical: "potassiumHydroxide", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "potassiumNitrate", coefficient: 1 },
+            { material: "water", coefficient: 1 }
+        ],
+
+        deltaT: 4,
+        type: "neutralisation",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       027 — ACIDE ACÉTIQUE + HYDROXYDE DE SODIUM
+       CH3COOH + NaOH → CH3COONa + H2O
+       ======================================================== */
+    {
+        id: "group02_027_acetic_naoh",
+        name: "Neutralisation acide acétique + NaOH",
+        equation: "CH₃COOH + NaOH → CH₃COONa + H₂O",
+
+        reactants: [
+            { chemical: "aceticAcid", coefficient: 1 },
+            { chemical: "sodiumHydroxide", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "water", coefficient: 1 }
+        ],
+
+        deltaT: 2,
+        type: "neutralisation",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       028 — ACIDE PHOSPHORIQUE + NaOH
+       H3PO4 + 3NaOH → Na3PO4 + 3H2O
+       ======================================================== */
+    {
+        id: "group02_028_h3po4_naoh",
+        name: "Neutralisation acide phosphorique + NaOH",
+        equation: "H₃PO₄ + 3NaOH → Na₃PO₄ + 3H₂O",
+
+        reactants: [
+            { chemical: "phosphoricAcid", coefficient: 1 },
+            { chemical: "sodiumHydroxide", coefficient: 3 }
+        ],
+
+        products: [
+            { material: "water", coefficient: 3 }
+        ],
+
+        deltaT: 3,
+        type: "neutralisation",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       029 — ACIDE CITRIQUE + NaOH
+       C6H8O7 + 3NaOH → Na3C6H5O7 + 3H2O
+       ======================================================== */
+    {
+        id: "group02_029_citric_naoh",
+        name: "Neutralisation acide citrique + NaOH",
+        equation: "C₆H₈O₇ + 3NaOH → Na₃C₆H₅O₇ + 3H₂O",
+
+        reactants: [
+            { chemical: "citricAcid", coefficient: 1 },
+            { chemical: "sodiumHydroxide", coefficient: 3 }
+        ],
+
+        products: [
+            { material: "water", coefficient: 3 }
+        ],
+
+        deltaT: 3,
+        type: "neutralisation",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       030 — ACIDE SULFURIQUE + KOH
+       H2SO4 + 2KOH → K2SO4 + 2H2O
+       ======================================================== */
+    {
+        id: "group02_030_h2so4_koh",
+        name: "Neutralisation H₂SO₄ + KOH",
+        equation: "H₂SO₄ + 2KOH → K₂SO₄ + 2H₂O",
+
+        reactants: [
+            { chemical: "sulfuricAcid", coefficient: 1 },
+            { chemical: "potassiumHydroxide", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "water", coefficient: 2 }
+        ],
+
+        deltaT: 5,
+        type: "neutralisation",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       031 — DÉCOMPOSITION DU PEROXYDE D'HYDROGÈNE
+       2H2O2 → 2H2O + O2
+       ======================================================== */
+    {
+        id: "group02_031_h2o2_decomposition",
+        name: "Décomposition du peroxyde d'hydrogène",
+        equation: "2H₂O₂ → 2H₂O + O₂",
+
+        reactants: [
+            { chemical: "hydrogenPeroxide", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "water", coefficient: 2 }
+        ],
+
+        deltaT: 1,
+        type: "decomposition",
+        gas: true,
+        bubbling: true,
+        state: "gas_evolution"
+    },
+
+
+    /* ========================================================
+       032 — H2O2 + KI + H2SO4
+       H2O2 + 2KI + H2SO4 → I2 + K2SO4 + 2H2O
+       ======================================================== */
+    {
+        id: "group02_032_h2o2_ki_h2so4",
+        name: "Oxydation des iodures par H₂O₂ en milieu acide",
+        equation: "H₂O₂ + 2KI + H₂SO₄ → I₂ + K₂SO₄ + 2H₂O",
+
+        reactants: [
+            { chemical: "hydrogenPeroxide", coefficient: 1 },
+            { chemical: "potassiumIodideSolution", coefficient: 2 },
+            { chemical: "sulfuricAcid", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "iodine", coefficient: 1 },
+            { material: "water", coefficient: 2 }
+        ],
+
+        deltaT: 2,
+        type: "redox",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       033 — CALCIUM + EAU
+       Ca + 2H2O → Ca(OH)2 + H2
+       ======================================================== */
+    {
+        id: "group02_033_calcium_water",
+        name: "Calcium + eau",
+        equation: "Ca + 2H₂O → Ca(OH)₂ + H₂",
+
+        reactants: [
+            { chemical: "calcium", coefficient: 1 },
+            { chemical: "water", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "limewater", coefficient: 1 }
+        ],
+
+        deltaT: 3,
+        type: "redox",
+        gas: true,
+        bubbling: true,
+        state: "gas_evolution"
+    },
+
+
+    /* ========================================================
+       034 — SODIUM + EAU
+       2Na + 2H2O → 2NaOH + H2
+       ======================================================== */
+    {
+        id: "group02_034_sodium_water",
+        name: "Sodium + eau",
+        equation: "2Na + 2H₂O → 2NaOH + H₂",
+
+        reactants: [
+            { chemical: "sodium", coefficient: 2 },
+            { chemical: "water", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "sodiumHydroxide", coefficient: 2 }
+        ],
+
+        deltaT: 7,
+        type: "redox",
+        gas: true,
+        bubbling: true,
+        state: "gas_evolution"
+    },
+
+
+    /* ========================================================
+       035 — POTASSIUM + EAU
+       2K + 2H2O → 2KOH + H2
+       ======================================================== */
+    {
+        id: "group02_035_potassium_water",
+        name: "Potassium + eau",
+        equation: "2K + 2H₂O → 2KOH + H₂",
+
+        reactants: [
+            { chemical: "potassium", coefficient: 2 },
+            { chemical: "water", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "potassiumHydroxide", coefficient: 2 }
+        ],
+
+        deltaT: 10,
+        type: "redox",
+        gas: true,
+        bubbling: true,
+        state: "gas_evolution"
+    },
+
+
+    /* ========================================================
+       036 — Mg + CuSO4
+       Mg + CuSO4 → MgSO4 + Cu
+       ======================================================== */
+    {
+        id: "group02_036_mg_cuso4",
+        name: "Déplacement magnésium + sulfate de cuivre",
+        equation: "Mg + CuSO₄ → MgSO₄ + Cu",
+
+        reactants: [
+            { chemical: "magnesium", coefficient: 1 },
+            { chemical: "copperSulfate", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "magnesiumSulfate", coefficient: 1 },
+            { material: "copper", coefficient: 1 }
+        ],
+
+        deltaT: 2,
+        type: "single_displacement",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       037 — Al + CuSO4
+       2Al + 3CuSO4 → Al2(SO4)3 + 3Cu
+       ======================================================== */
+    {
+        id: "group02_037_al_cuso4",
+        name: "Déplacement aluminium + sulfate de cuivre",
+        equation: "2Al + 3CuSO₄ → Al₂(SO₄)₃ + 3Cu",
+
+        reactants: [
+            { chemical: "aluminium", coefficient: 2 },
+            { chemical: "copperSulfate", coefficient: 3 }
+        ],
+
+        products: [
+            { material: "copper", coefficient: 3 }
+        ],
+
+        deltaT: 2,
+        type: "single_displacement",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       038 — Ni + CuSO4
+       Ni + CuSO4 → NiSO4 + Cu
+       ======================================================== */
+    {
+        id: "group02_038_ni_cuso4",
+        name: "Déplacement nickel + sulfate de cuivre",
+        equation: "Ni + CuSO₄ → NiSO₄ + Cu",
+
+        reactants: [
+            { chemical: "nickel", coefficient: 1 },
+            { chemical: "copperSulfate", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "copper", coefficient: 1 }
+        ],
+
+        deltaT: 1,
+        type: "single_displacement",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       039 — Sn + CuSO4
+       Sn + CuSO4 → SnSO4 + Cu
+       ======================================================== */
+    {
+        id: "group02_039_sn_cuso4",
+        name: "Déplacement étain + sulfate de cuivre",
+        equation: "Sn + CuSO₄ → SnSO₄ + Cu",
+
+        reactants: [
+            { chemical: "tin", coefficient: 1 },
+            { chemical: "copperSulfate", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "copper", coefficient: 1 }
+        ],
+
+        deltaT: 1,
+        type: "single_displacement",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       040 — Pb + CuSO4
+       Pb + CuSO4 → PbSO4 + Cu
+       ======================================================== */
+    {
+        id: "group02_040_pb_cuso4",
+        name: "Déplacement plomb + sulfate de cuivre",
+        equation: "Pb + CuSO₄ → PbSO₄ + Cu",
+
+        reactants: [
+            { chemical: "lead", coefficient: 1 },
+            { chemical: "copperSulfate", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "copper", coefficient: 1 }
+        ],
+
+        deltaT: 1,
+        type: "single_displacement",
+        precipitate: true,
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       041 — AgNO3 + NaCl
+       AgNO3 + NaCl → AgCl↓ + NaNO3
+       ======================================================== */
+    {
+        id: "group02_041_agno3_nacl",
+        name: "Précipitation du chlorure d'argent",
+        equation: "AgNO₃ + NaCl → AgCl↓ + NaNO₃",
+
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 1 },
+            { chemical: "sodiumChloride", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "sodiumNitrate", coefficient: 1 }
+        ],
+
+        deltaT: 0,
+        type: "precipitation",
+        precipitate: true,
+        precipitateColor: "white",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       042 — AgNO3 + NaBr
+       AgNO3 + NaBr → AgBr↓ + NaNO3
+       ======================================================== */
+    {
+        id: "group02_042_agno3_nabr",
+        name: "Précipitation du bromure d'argent",
+        equation: "AgNO₃ + NaBr → AgBr↓ + NaNO₃",
+
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 1 },
+            { chemical: "sodiumBromideSolution", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "sodiumNitrate", coefficient: 1 }
+        ],
+
+        deltaT: 0,
+        type: "precipitation",
+        precipitate: true,
+        precipitateColor: "pale_yellow",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       043 — AgNO3 + KI
+       AgNO3 + KI → AgI↓ + KNO3
+       ======================================================== */
+    {
+        id: "group02_043_agno3_ki",
+        name: "Précipitation de l'iodure d'argent",
+        equation: "AgNO₃ + KI → AgI↓ + KNO₃",
+
+        reactants: [
+            { chemical: "silverNitrate", coefficient: 1 },
+            { chemical: "potassiumIodideSolution", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "potassiumNitrate", coefficient: 1 }
+        ],
+
+        deltaT: 0,
+        type: "precipitation",
+        precipitate: true,
+        precipitateColor: "yellow",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       044 — FeCl3 + KI
+       2FeCl3 + 2KI → 2FeCl2 + I2 + 2KCl
+       ======================================================== */
+    {
+        id: "group02_044_fecl3_ki",
+        name: "Réaction redox FeCl₃ + KI",
+        equation: "2FeCl₃ + 2KI → 2FeCl₂ + I₂ + 2KCl",
+
+        reactants: [
+            { chemical: "ferricChloride", coefficient: 2 },
+            { chemical: "potassiumIodideSolution", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "ferrousChloride", coefficient: 2 },
+            { material: "iodine", coefficient: 1 }
+        ],
+
+        deltaT: 1,
+        type: "redox",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       045 — CuO + H2SO4
+       CuO + H2SO4 → CuSO4 + H2O
+       ======================================================== */
+    {
+        id: "group02_045_cuo_h2so4",
+        name: "Oxyde de cuivre + acide sulfurique",
+        equation: "CuO + H₂SO₄ → CuSO₄ + H₂O",
+
+        reactants: [
+            { chemical: "copperOxide", coefficient: 1 },
+            { chemical: "sulfuricAcid", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "copperSulfate", coefficient: 1 },
+            { material: "water", coefficient: 1 }
+        ],
+
+        deltaT: 3,
+        type: "acid_base",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       046 — CuO + HNO3
+       CuO + 2HNO3 → Cu(NO3)2 + H2O
+       ======================================================== */
+    {
+        id: "group02_046_cuo_hno3",
+        name: "Oxyde de cuivre + acide nitrique",
+        equation: "CuO + 2HNO₃ → Cu(NO₃)₂ + H₂O",
+
+        reactants: [
+            { chemical: "copperOxide", coefficient: 1 },
+            { chemical: "nitricAcid", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "copperNitrate", coefficient: 1 },
+            { material: "water", coefficient: 1 }
+        ],
+
+        deltaT: 3,
+        type: "acid_base",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       047 — Fe2O3 + HCl
+       Fe2O3 + 6HCl → 2FeCl3 + 3H2O
+       ======================================================== */
+    {
+        id: "group02_047_fe2o3_hcl",
+        name: "Oxyde de fer(III) + acide chlorhydrique",
+        equation: "Fe₂O₃ + 6HCl → 2FeCl₃ + 3H₂O",
+
+        reactants: [
+            { chemical: "ironOxide", coefficient: 1 },
+            { chemical: "hydrochloricAcid", coefficient: 6 }
+        ],
+
+        products: [
+            { material: "ferricChloride", coefficient: 2 },
+            { material: "water", coefficient: 3 }
+        ],
+
+        deltaT: 3,
+        type: "acid_base",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       048 — ZnO + HCl
+       ZnO + 2HCl → ZnCl2 + H2O
+       ======================================================== */
+    {
+        id: "group02_048_zno_hcl",
+        name: "Oxyde de zinc + acide chlorhydrique",
+        equation: "ZnO + 2HCl → ZnCl₂ + H₂O",
+
+        reactants: [
+            { chemical: "zincOxide", coefficient: 1 },
+            { chemical: "hydrochloricAcid", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "water", coefficient: 1 }
+        ],
+
+        deltaT: 2,
+        type: "acid_base",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       049 — CuO + HCl
+       CuO + 2HCl → CuCl2 + H2O
+       ======================================================== */
+    {
+        id: "group02_049_cuo_hcl",
+        name: "Oxyde de cuivre + acide chlorhydrique",
+        equation: "CuO + 2HCl → CuCl₂ + H₂O",
+
+        reactants: [
+            { chemical: "copperOxide", coefficient: 1 },
+            { chemical: "hydrochloricAcid", coefficient: 2 }
+        ],
+
+        products: [
+            { material: "water", coefficient: 1 }
+        ],
+
+        deltaT: 2,
+        type: "acid_base",
+        state: "aqueous"
+    },
+
+
+    /* ========================================================
+       050 — RÉDUCTION DE CuO PAR LE CARBONE
+       2CuO + C → 2Cu + CO2
+       ======================================================== */
+    {
+        id: "group02_050_cuo_carbon",
+        name: "Réduction de l'oxyde de cuivre par le carbone",
+        equation: "2CuO + C → 2Cu + CO₂",
+
+        reactants: [
+            { chemical: "copperOxide", coefficient: 2 },
+            { chemical: "carbon", coefficient: 1 }
+        ],
+
+        products: [
+            { material: "copper", coefficient: 2 }
+        ],
+
+        deltaT: 25,
+        type: "redox",
+        gas: true,
+        state: "gas_evolution"
     }
+
+
+
+
 ];
 
 
