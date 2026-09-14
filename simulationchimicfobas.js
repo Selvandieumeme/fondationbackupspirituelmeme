@@ -8483,7 +8483,9 @@ const REACTION_DATABASE = [
 
         description:
             "Oxydoréduction en milieu acide : 2KMnO₄ + 16HCl → 2MnCl₂ + 2KCl + 8H₂O + 5Cl₂."
-    },
+    }
+
+   ];
 
 
 
@@ -9140,7 +9142,17 @@ REACTION_DATABASE.push(
     );
 
 
-];
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ============================================================
