@@ -556,3 +556,735 @@
 
 
 
+/* ============================================================
+   SIMULATION GUITAR FOBAS
+   BLOK 2 — 3D GUITAR RENDERER / FRETS / STRINGS / HAND
+   ============================================================ */
+
+(() => {
+    "use strict";
+
+    const G = window.FOBASGuitarEngine;
+    const state = G.state;
+    const DOM = G.DOM;
+
+    const $ = (selector, root = document) => {
+        try {
+            return root.querySelector(selector);
+        } catch {
+            return null;
+        }
+    };
+
+    const $$ = (selector, root = document) => {
+        try {
+            return Array.from(root.querySelectorAll(selector));
+        } catch {
+            return [];
+        }
+    };
+
+    const clamp = (v, min, max) =>
+        Math.min(Math.max(v, min), max);
+
+    /* ---------------------------------------------------------
+       GUITAR GEOMETRY
+       --------------------------------------------------------- */
+
+    const Geometry = {
+
+        fretPosition(fret, fretCount) {
+
+            if (fret <= 0) return 0;
+
+            const ratio =
+                1 -
+                Math.pow(
+                    2,
+                    -fret / 12
+                );
+
+            return clamp(
+                ratio * 100,
+                0,
+                98
+            );
+        },
+
+        stringPosition(index, count) {
+
+            if (count <= 1) return 50;
+
+            return (
+                8 +
+                (
+                    index /
+                    (count - 1)
+                ) * 84
+            );
+        }
+    };
+
+    /* ---------------------------------------------------------
+       CREATE FRETS
+       --------------------------------------------------------- */
+
+    function renderFrets() {
+
+        if (!DOM.fretboard) return;
+
+        let layer =
+            DOM.fretboard.querySelector(
+                ".frets-layer"
+            );
+
+        if (!layer) {
+
+            layer =
+                document.createElement("div");
+
+            layer.className =
+                "frets-layer";
+
+            DOM.fretboard.appendChild(layer);
+        }
+
+        layer.innerHTML = "";
+
+        const instrument =
+            G.getInstrument();
+
+        for (
+            let fret = 1;
+            fret <= instrument.frets;
+            fret++
+        ) {
+
+            const el =
+                document.createElement("div");
+
+            el.className = "fret";
+
+            el.dataset.fret = fret;
+
+            el.style.left =
+                `${Geometry.fretPosition(
+                    fret,
+                    instrument.frets
+                )}%`;
+
+            layer.appendChild(el);
+        }
+
+        renderFretMarkers();
+    }
+
+    /* ---------------------------------------------------------
+       FRET MARKERS
+       --------------------------------------------------------- */
+
+    function renderFretMarkers() {
+
+        if (!DOM.fretboard) return;
+
+        let markers =
+            DOM.fretboard.querySelector(
+                ".fret-markers"
+            );
+
+        if (!markers) {
+
+            markers =
+                document.createElement("div");
+
+            markers.className =
+                "fret-markers";
+
+            DOM.fretboard.appendChild(markers);
+        }
+
+        markers.innerHTML = "";
+
+        const instrument =
+            G.getInstrument();
+
+        const positions =
+            [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
+
+        positions.forEach(fret => {
+
+            if (fret > instrument.frets) return;
+
+            const marker =
+                document.createElement("div");
+
+            marker.className =
+                "fret-marker";
+
+            if (
+                fret === 12 ||
+                fret === 24
+            ) {
+                marker.classList.add(
+                    "double"
+                );
+            }
+
+            marker.dataset.fret = fret;
+
+            marker.style.left =
+                `${Geometry.fretPosition(
+                    fret - 0.5,
+                    instrument.frets
+                )}%`;
+
+            markers.appendChild(marker);
+        });
+    }
+
+    /* ---------------------------------------------------------
+       CREATE STRINGS
+       --------------------------------------------------------- */
+
+    function renderStrings() {
+
+        if (!DOM.stringsLayer) return;
+
+        DOM.stringsLayer.innerHTML = "";
+
+        const instrument =
+            G.getInstrument();
+
+        instrument.tuning.forEach(
+            (stringData, index) => {
+
+                const string =
+                    document.createElement("div");
+
+                string.className =
+                    "guitar-string";
+
+                string.dataset.string =
+                    index;
+
+                string.dataset.note =
+                    stringData.note;
+
+                string.dataset.frequency =
+                    stringData.frequency;
+
+                string.style.setProperty(
+                    "--string-thickness",
+                    `${instrument.stringThickness[index]}px`
+                );
+
+                string.style.setProperty(
+                    "--string-y",
+                    `${Geometry.stringPosition(
+                        index,
+                        instrument.strings
+                    )}%`
+                );
+
+                string.setAttribute(
+                    "role",
+                    "button"
+                );
+
+                string.setAttribute(
+                    "aria-label",
+                    `String ${index + 1}, ${stringData.note}`
+                );
+
+                DOM.stringsLayer.appendChild(
+                    string
+                );
+            }
+        );
+    }
+
+    /* ---------------------------------------------------------
+       CREATE FRET TOUCH AREAS
+       --------------------------------------------------------- */
+
+    function renderFretTouchZones() {
+
+        if (!DOM.fretTouchLayer) return;
+
+        DOM.fretTouchLayer.innerHTML = "";
+
+        const instrument =
+            G.getInstrument();
+
+        for (
+            let stringIndex = 0;
+            stringIndex < instrument.strings;
+            stringIndex++
+        ) {
+
+            for (
+                let fret = 0;
+                fret <= instrument.frets;
+                fret++
+            ) {
+
+                const touch =
+                    document.createElement("div");
+
+                touch.className =
+                    "fret-touch";
+
+                touch.dataset.string =
+                    stringIndex;
+
+                touch.dataset.fret =
+                    fret;
+
+                touch.setAttribute(
+                    "aria-label",
+                    `String ${stringIndex + 1}, fret ${fret}`
+                );
+
+                const leftStart =
+                    fret === 0
+                        ? 0
+                        : Geometry.fretPosition(
+                            fret - 1,
+                            instrument.frets
+                        );
+
+                const leftEnd =
+                    fret === instrument.frets
+                        ? 100
+                        : Geometry.fretPosition(
+                            fret,
+                            instrument.frets
+                        );
+
+                touch.style.left =
+                    `${leftStart}%`;
+
+                touch.style.width =
+                    `${Math.max(
+                        leftEnd - leftStart,
+                        1.5
+                    )}%`;
+
+                touch.style.top =
+                    `${Geometry.stringPosition(
+                        stringIndex,
+                        instrument.strings
+                    )}%`;
+
+                touch.style.height =
+                    instrument.strings <= 6
+                        ? "18%"
+                        : "12%";
+
+                DOM.fretTouchLayer.appendChild(
+                    touch
+                );
+            }
+        }
+    }
+
+    /* ---------------------------------------------------------
+       CREATE TUNING PEGS
+       --------------------------------------------------------- */
+
+    function renderTuningPegs() {
+
+        if (!DOM.tuningPegs) return;
+
+        DOM.tuningPegs.innerHTML = "";
+
+        const instrument =
+            G.getInstrument();
+
+        for (
+            let i = 0;
+            i < instrument.strings;
+            i++
+        ) {
+
+            const peg =
+                document.createElement("div");
+
+            peg.className =
+                "tuning-peg";
+
+            peg.dataset.string = i;
+
+            const side =
+                i % 2 === 0
+                    ? "left"
+                    : "right";
+
+            peg.dataset.side = side;
+
+            peg.style.top =
+                `${10 +
+                (
+                    Math.floor(i / 2) /
+                    Math.max(
+                        Math.ceil(
+                            instrument.strings / 2
+                        ) - 1,
+                        1
+                    )
+                ) * 80}%`;
+
+            peg.classList.add(side);
+
+            DOM.tuningPegs.appendChild(
+                peg
+            );
+        }
+    }
+
+    /* ---------------------------------------------------------
+       VIRTUAL HAND
+       --------------------------------------------------------- */
+
+    function ensureHands() {
+
+        if (!DOM.stage) return;
+
+        let hand =
+            DOM.stage.querySelector(
+                ".virtual-hand.fretting-hand"
+            );
+
+        if (!hand) {
+
+            hand =
+                document.createElement("div");
+
+            hand.className =
+                "virtual-hand fretting-hand";
+
+            hand.innerHTML = `
+                <div class="hand-palm"></div>
+                <div class="hand-finger thumb"></div>
+                <div class="hand-finger index"></div>
+                <div class="hand-finger middle"></div>
+                <div class="hand-finger ring"></div>
+                <div class="hand-finger little"></div>
+            `;
+
+            DOM.stage.appendChild(hand);
+        }
+
+        let strumHand =
+            DOM.stage.querySelector(
+                ".virtual-hand.strumming-hand"
+            );
+
+        if (!strumHand) {
+
+            strumHand =
+                document.createElement("div");
+
+            strumHand.className =
+                "virtual-hand strumming-hand";
+
+            strumHand.innerHTML = `
+                <div class="hand-palm"></div>
+                <div class="hand-finger thumb"></div>
+                <div class="hand-finger index"></div>
+                <div class="hand-finger middle"></div>
+                <div class="hand-finger ring"></div>
+                <div class="hand-finger little"></div>
+            `;
+
+            DOM.stage.appendChild(
+                strumHand
+            );
+        }
+    }
+
+    /* ---------------------------------------------------------
+       RENDER FINGER
+       --------------------------------------------------------- */
+
+    function renderFinger(
+        stringIndex,
+        fret
+    ) {
+
+        if (!DOM.fingerLayer) return;
+
+        let finger =
+            DOM.fingerLayer.querySelector(
+                `.virtual-finger[data-string="${stringIndex}"]`
+            );
+
+        if (!finger) {
+
+            finger =
+                document.createElement("div");
+
+            finger.className =
+                "virtual-finger";
+
+            finger.dataset.string =
+                stringIndex;
+
+            DOM.fingerLayer.appendChild(
+                finger
+            );
+        }
+
+        const instrument =
+            G.getInstrument();
+
+        const left =
+            fret <= 0
+                ? 2
+                : Geometry.fretPosition(
+                    fret - 0.5,
+                    instrument.frets
+                );
+
+        const top =
+            Geometry.stringPosition(
+                stringIndex,
+                instrument.strings
+            );
+
+        finger.style.left =
+            `${left}%`;
+
+        finger.style.top =
+            `${top}%`;
+
+        finger.dataset.fret =
+            fret;
+
+        finger.classList.add(
+            "active"
+        );
+
+        positionFrettingHand(
+            stringIndex,
+            fret
+        );
+    }
+
+    /* ---------------------------------------------------------
+       REMOVE FINGER
+       --------------------------------------------------------- */
+
+    function removeFinger(stringIndex) {
+
+        if (!DOM.fingerLayer) return;
+
+        const finger =
+            DOM.fingerLayer.querySelector(
+                `.virtual-finger[data-string="${stringIndex}"]`
+            );
+
+        if (finger) {
+            finger.remove();
+        }
+
+        if (
+            state.frettedStrings.size === 0
+        ) {
+
+            const hand =
+                DOM.stage?.querySelector(
+                    ".fretting-hand"
+                );
+
+            hand?.classList.remove(
+                "visible"
+            );
+        }
+    }
+
+    /* ---------------------------------------------------------
+       POSITION HAND
+       --------------------------------------------------------- */
+
+    function positionFrettingHand(
+        stringIndex,
+        fret
+    ) {
+
+        if (!DOM.stage) return;
+
+        const hand =
+            DOM.stage.querySelector(
+                ".fretting-hand"
+            );
+
+        if (!hand) return;
+
+        const instrument =
+            G.getInstrument();
+
+        hand.style.left =
+            `${clamp(
+                Geometry.fretPosition(
+                    Math.max(fret, 1) - 0.5,
+                    instrument.frets
+                ) + 3,
+                3,
+                92
+            )}%`;
+
+        hand.style.top =
+            `${clamp(
+                Geometry.stringPosition(
+                    stringIndex,
+                    instrument.strings
+                ),
+                10,
+                82
+            )}%`;
+
+        hand.classList.add(
+            "visible"
+        );
+    }
+
+    /* ---------------------------------------------------------
+       SHOW STRUM HAND
+       --------------------------------------------------------- */
+
+    function showStrummingHand(
+        direction = "down"
+    ) {
+
+        if (!DOM.stage) return;
+
+        const hand =
+            DOM.stage.querySelector(
+                ".strumming-hand"
+            );
+
+        if (!hand) return;
+
+        hand.dataset.direction =
+            direction;
+
+        hand.classList.add(
+            "visible"
+        );
+
+        clearTimeout(
+            showStrummingHand.timer
+        );
+
+        showStrummingHand.timer =
+            setTimeout(() => {
+
+                hand.classList.remove(
+                    "visible"
+                );
+
+            }, 350);
+    }
+
+    /* ---------------------------------------------------------
+       REFRESH WHOLE GUITAR
+       --------------------------------------------------------- */
+
+    function renderGuitar() {
+
+        renderFrets();
+        renderStrings();
+        renderFretTouchZones();
+        renderTuningPegs();
+        ensureHands();
+
+        state.frettedStrings.clear();
+
+        if (DOM.fingerLayer) {
+            DOM.fingerLayer.innerHTML = "";
+        }
+
+        updateInstrumentUI();
+    }
+
+    /* ---------------------------------------------------------
+       UPDATE UI
+       --------------------------------------------------------- */
+
+    function updateInstrumentUI() {
+
+        const instrument =
+            G.getInstrument();
+
+        if (DOM.guitarName) {
+
+            DOM.guitarName.textContent =
+                instrument.name;
+        }
+
+        if (DOM.guitarTuning) {
+
+            DOM.guitarTuning.textContent =
+                instrument.tuning
+                    .map(s => s.note)
+                    .join(" • ");
+        }
+
+        if (DOM.stringCountBadge) {
+
+            DOM.stringCountBadge.textContent =
+                `${instrument.strings} Strings`;
+        }
+
+        $$(".instrument-card").forEach(
+            card => {
+
+                const id =
+                    card.dataset.instrument ||
+                    card.dataset.type ||
+                    card.getAttribute(
+                        "data-guitar"
+                    );
+
+                const text =
+                    card.textContent
+                        .toLowerCase();
+
+                const match =
+                    id === instrument.id ||
+                    (
+                        !id &&
+                        (
+                            text.includes(
+                                instrument.shortName
+                                    .toLowerCase()
+                            ) ||
+                            text.includes(
+                                instrument.name
+                                    .toLowerCase()
+                            )
+                        )
+                    );
+
+                card.classList.toggle(
+                    "active",
+                    match
+                );
+            }
+        );
+    }
+
+    G.Geometry = Geometry;
+    G.renderGuitar = renderGuitar;
+    G.renderFinger = renderFinger;
+    G.removeFinger = removeFinger;
+    G.showStrummingHand =
+        showStrummingHand;
+    G.updateInstrumentUI =
+        updateInstrumentUI;
+
+})();
+
+
+
