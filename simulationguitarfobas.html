@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    >
+
+    <meta
+        name="theme-color"
+        content="#101820"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS Guitar Simulator - Interactive digital guitar instrument for Android."
+    >
+
+    <title>FOBAS Guitar Simulator</title>
+
+    <link
+        rel="stylesheet"
+        href="simulationguitarfobas.css"
+    >
+</head>
+
+<body>
+
+<div
+    id="fobas-guitar-app"
+    class="fobas-guitar-app"
+    data-engine="FOBAS-GuitarEngine"
+    data-version="1.0.0"
+>
+
+    <!-- =========================================================
+         APP HEADER
+    ========================================================== -->
+
+    <header
+        id="guitar-header"
+        class="guitar-header"
+    >
+
+        <div class="brand-block">
+
+            <div
+                id="brand-logo"
+                class="brand-logo"
+                aria-hidden="true"
+            >
+                🎸
+            </div>
+
+            <div class="brand-text">
+
+                <h1>FOBAS GUITAR</h1>
+
+                <span id="instrument-title">
+                    Digital Instrument
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="header-status"
+            class="header-status"
+            aria-live="polite"
+        >
+
+            <span
+                id="audio-status"
+                class="status-dot status-off"
+            ></span>
+
+            <span id="audio-status-text">
+                Audio Ready
+            </span>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         MAIN APPLICATION
+    ========================================================== -->
+
+    <main
+        id="guitar-main"
+        class="guitar-main"
+    >
+
+
+        <!-- =====================================================
+             INSTRUMENT SELECTOR
+        ====================================================== -->
+
+        <section
+            id="instrument-panel"
+            class="instrument-panel"
+            aria-label="Instrument selection"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        INSTRUMENT
+                    </span>
+
+                    <h2>
+                        Chwazi gita ou
+                    </h2>
+
+                </div>
+
+                <span
+                    id="instrument-string-count"
+                    class="string-count-badge"
+                >
+                    6 Strings
+                </span>
+
+            </div>
+
+
+            <div
+                id="instrument-selector"
+                class="instrument-selector"
+            >
+
+                <button
+                    type="button"
+                    class="instrument-card active"
+                    data-instrument="acoustic"
+                    aria-pressed="true"
+                >
+
+                    <span class="instrument-icon">
+                        🎸
+                    </span>
+
+                    <span class="instrument-name">
+                        Acoustic
+                    </span>
+
+                    <span class="instrument-meta">
+                        6 Strings
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="instrument-card"
+                    data-instrument="classical"
+                    aria-pressed="false"
+                >
+
+                    <span class="instrument-icon">
+                        🎼
+                    </span>
+
+                    <span class="instrument-name">
+                        Classical
+                    </span>
+
+                    <span class="instrument-meta">
+                        6 Strings
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="instrument-card"
+                    data-instrument="electric"
+                    aria-pressed="false"
+                >
+
+                    <span class="instrument-icon">
+                        ⚡
+                    </span>
+
+                    <span class="instrument-name">
+                        Electric
+                    </span>
+
+                    <span class="instrument-meta">
+                        6 Strings
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="instrument-card"
+                    data-instrument="bass4"
+                    aria-pressed="false"
+                >
+
+                    <span class="instrument-icon">
+                        🎸
+                    </span>
+
+                    <span class="instrument-name">
+                        Bass 4
+                    </span>
+
+                    <span class="instrument-meta">
+                        4 Strings
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="instrument-card"
+                    data-instrument="bass5"
+                    aria-pressed="false"
+                >
+
+                    <span class="instrument-icon">
+                        🎸
+                    </span>
+
+                    <span class="instrument-name">
+                        Bass 5
+                    </span>
+
+                    <span class="instrument-meta">
+                        5 Strings
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="instrument-card"
+                    data-instrument="guitar12"
+                    aria-pressed="false"
+                >
+
+                    <span class="instrument-icon">
+                        🎶
+                    </span>
+
+                    <span class="instrument-name">
+                        12 String
+                    </span>
+
+                    <span class="instrument-meta">
+                        12 Strings
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             GUITAR 3D STAGE
+        ====================================================== -->
+
+        <section
+            id="guitar-section"
+            class="guitar-section"
+            aria-label="Guitar simulator"
+        >
+
+            <div
+                id="guitar-stage"
+                class="guitar-stage"
+                data-render-mode="3d"
+            >
+
+                <!-- 3D CAMERA LAYER -->
+
+                <div
+                    id="guitar-camera"
+                    class="guitar-camera"
+                >
+
+                    <!-- GUITAR BODY -->
+
+                    <div
+                        id="guitar-body"
+                        class="guitar-body"
+                    >
+
+                        <div
+                            id="guitar-body-shadow"
+                            class="guitar-body-shadow"
+                        ></div>
+
+
+                        <div
+                            id="guitar-sound-hole"
+                            class="guitar-sound-hole"
+                            aria-hidden="true"
+                        >
+
+                            <div class="sound-hole-ring ring-one"></div>
+                            <div class="sound-hole-ring ring-two"></div>
+                            <div class="sound-hole-center"></div>
+
+                        </div>
+
+
+                        <div
+                            id="guitar-bridge"
+                            class="guitar-bridge"
+                        >
+
+                            <div
+                                id="guitar-saddle"
+                                class="guitar-saddle"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- NECK / FRETBOARD -->
+
+                    <div
+                        id="guitar-neck"
+                        class="guitar-neck"
+                    >
+
+                        <div
+                            id="nut"
+                            class="guitar-nut"
+                        ></div>
+
+
+                        <div
+                            id="fretboard"
+                            class="fretboard"
+                            role="application"
+                            aria-label="Guitar fretboard"
+                        >
+
+                            <div
+                                id="fret-markers"
+                                class="fret-markers"
+                            ></div>
+
+
+                            <div
+                                id="frets-layer"
+                                class="frets-layer"
+                            ></div>
+
+
+                            <div
+                                id="strings-layer"
+                                class="strings-layer"
+                                aria-label="Guitar strings"
+                            ></div>
+
+
+                            <div
+                                id="finger-layer"
+                                class="finger-layer"
+                                aria-hidden="true"
+                            ></div>
+
+
+                            <div
+                                id="fret-touch-layer"
+                                class="fret-touch-layer"
+                                aria-label="Playable fretboard"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- HEADSTOCK -->
+
+                    <div
+                        id="guitar-headstock"
+                        class="guitar-headstock"
+                    >
+
+                        <div
+                            id="tuning-pegs"
+                            class="tuning-pegs"
+                        ></div>
+
+                    </div>
+
+
+                    <!-- STRUMMING HAND -->
+
+                    <div
+                        id="strumming-hand"
+                        class="virtual-hand strumming-hand"
+                        aria-hidden="true"
+                    >
+
+                        <div class="hand-palm"></div>
+
+                        <div class="hand-finger thumb"></div>
+                        <div class="hand-finger index"></div>
+                        <div class="hand-finger middle"></div>
+                        <div class="hand-finger ring"></div>
+                        <div class="hand-finger little"></div>
+
+                    </div>
+
+
+                    <!-- FRETBOARD HAND -->
+
+                    <div
+                        id="fretting-hand"
+                        class="virtual-hand fretting-hand"
+                        aria-hidden="true"
+                    >
+
+                        <div class="hand-palm"></div>
+
+                        <div class="hand-finger thumb"></div>
+                        <div class="hand-finger index"></div>
+                        <div class="hand-finger middle"></div>
+                        <div class="hand-finger ring"></div>
+                        <div class="hand-finger little"></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     NOTE DISPLAY
+                ================================================== -->
+
+                <div
+                    id="note-display"
+                    class="note-display"
+                    aria-live="polite"
+                >
+
+                    <span
+                        id="current-note"
+                        class="current-note"
+                    >
+                        —
+                    </span>
+
+                    <span
+                        id="current-frequency"
+                        class="current-frequency"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+
+                <!-- =================================================
+                     GUITAR INFORMATION
+                ================================================== -->
+
+                <div
+                    id="guitar-info"
+                    class="guitar-info"
+                >
+
+                    <span id="guitar-name">
+                        Acoustic Guitar
+                    </span>
+
+                    <span
+                        id="guitar-tuning"
+                        class="guitar-tuning"
+                    >
+                        E A D G B E
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PLAYING CONTROLS
+        ====================================================== -->
+
+        <section
+            id="playing-controls"
+            class="playing-controls"
+            aria-label="Playing controls"
+        >
+
+            <button
+                id="btn-strum-down"
+                type="button"
+                class="play-control strum-control"
+                data-direction="down"
+            >
+                ↓
+                <span>Strum</span>
+            </button>
+
+
+            <button
+                id="btn-strum-up"
+                type="button"
+                class="play-control strum-control"
+                data-direction="up"
+            >
+                ↑
+                <span>Strum</span>
+            </button>
+
+
+            <button
+                id="btn-mute"
+                type="button"
+                class="play-control"
+                aria-pressed="false"
+            >
+                <span>✋</span>
+                <span>Mute</span>
+            </button>
+
+
+            <button
+                id="btn-stop-all"
+                type="button"
+                class="play-control danger-control"
+            >
+                <span>■</span>
+                <span>Stop</span>
+            </button>
+
+        </section>
+
+
+        <!-- =====================================================
+             CHORD PANEL
+        ====================================================== -->
+
+        <section
+            id="chord-panel"
+            class="chord-panel"
+            aria-label="Guitar chords"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        CHORDS
+                    </span>
+
+                    <h2>
+                        Chords
+                    </h2>
+
+                </div>
+
+                <button
+                    id="btn-clear-chord"
+                    type="button"
+                    class="small-action"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+
+            <div
+                id="chord-selector"
+                class="chord-selector"
+            >
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="C"
+                >
+                    C
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="D"
+                >
+                    D
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="E"
+                >
+                    E
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="F"
+                >
+                    F
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="G"
+                >
+                    G
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="A"
+                >
+                    A
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="Am"
+                >
+                    Am
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="Em"
+                >
+                    Em
+                </button>
+
+                <button
+                    type="button"
+                    class="chord-button"
+                    data-chord="Dm"
+                >
+                    Dm
+                </button>
+
+            </div>
+
+
+            <div
+                id="active-chord-display"
+                class="active-chord-display"
+            >
+
+                <span>
+                    Chord:
+                </span>
+
+                <strong id="active-chord">
+                    —
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             TUNER
+        ====================================================== -->
+
+        <section
+            id="tuner-panel"
+            class="tool-panel"
+            aria-label="Guitar tuner"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        TUNER
+                    </span>
+
+                    <h2>
+                        Guitar Tuner
+                    </h2>
+
+                </div>
+
+                <span
+                    id="tuner-status"
+                    class="tool-status"
+                >
+                    Ready
+                </span>
+
+            </div>
+
+
+            <div
+                id="tuner-display"
+                class="tuner-display"
+            >
+
+                <span
+                    id="tuner-note"
+                    class="tuner-note"
+                >
+                    —
+                </span>
+
+                <div
+                    id="tuner-meter"
+                    class="tuner-meter"
+                >
+
+                    <div
+                        id="tuner-center"
+                        class="tuner-center"
+                    ></div>
+
+                    <div
+                        id="tuner-needle"
+                        class="tuner-needle"
+                    ></div>
+
+                </div>
+
+                <span
+                    id="tuner-cents"
+                    class="tuner-cents"
+                >
+                    0 cents
+                </span>
+
+            </div>
+
+
+            <button
+                id="btn-tuner"
+                type="button"
+                class="primary-action"
+            >
+                Start Tuner
+            </button>
+
+        </section>
+
+
+        <!-- =====================================================
+             METRONOME
+        ====================================================== -->
+
+        <section
+            id="metronome-panel"
+            class="tool-panel"
+            aria-label="Metronome"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        RHYTHM
+                    </span>
+
+                    <h2>
+                        Metronome
+                    </h2>
+
+                </div>
+
+                <span id="bpm-display">
+                    80 BPM
+                </span>
+
+            </div>
+
+
+            <div class="bpm-controls">
+
+                <button
+                    id="btn-bpm-minus"
+                    type="button"
+                    class="round-control"
+                >
+                    −
+                </button>
+
+
+                <input
+                    id="bpm-range"
+                    type="range"
+                    min="40"
+                    max="220"
+                    value="80"
+                    step="1"
+                    aria-label="Tempo BPM"
+                >
+
+
+                <button
+                    id="btn-bpm-plus"
+                    type="button"
+                    class="round-control"
+                >
+                    +
+                </button>
+
+            </div>
+
+
+            <button
+                id="btn-metronome"
+                type="button"
+                class="primary-action"
+                aria-pressed="false"
+            >
+                Start Metronome
+            </button>
+
+        </section>
+
+
+        <!-- =====================================================
+             AUDIO CONTROLS
+        ====================================================== -->
+
+        <section
+            id="audio-panel"
+            class="tool-panel"
+            aria-label="Audio settings"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        AUDIO
+                    </span>
+
+                    <h2>
+                        Sound
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="audio-controls">
+
+                <label
+                    for="volume-range"
+                    class="control-label"
+                >
+                    Volume
+                </label>
+
+                <input
+                    id="volume-range"
+                    type="range"
+                    min="0"
+                    max="1"
+                    value="0.85"
+                    step="0.01"
+                    aria-label="Master volume"
+                >
+
+
+                <span
+                    id="volume-display"
+                    class="control-value"
+                >
+                    85%
+                </span>
+
+            </div>
+
+
+            <div class="audio-controls">
+
+                <label
+                    for="reverb-range"
+                    class="control-label"
+                >
+                    Resonance
+                </label>
+
+                <input
+                    id="reverb-range"
+                    type="range"
+                    min="0"
+                    max="1"
+                    value="0.25"
+                    step="0.01"
+                    aria-label="Guitar resonance"
+                >
+
+
+                <span
+                    id="reverb-display"
+                    class="control-value"
+                >
+                    25%
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             LEARNING / LESSON PANEL
+        ====================================================== -->
+
+        <section
+            id="lesson-panel"
+            class="lesson-panel"
+            aria-label="Guitar learning"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        LEARNING
+                    </span>
+
+                    <h2>
+                        Practice
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="lesson-progress"
+                class="lesson-progress"
+            >
+
+                <div
+                    id="lesson-progress-bar"
+                    class="lesson-progress-bar"
+                ></div>
+
+            </div>
+
+
+            <div
+                id="lesson-message"
+                class="lesson-message"
+            >
+
+                Chwazi yon chord oswa touche yon string pou kòmanse.
+
+            </div>
+
+
+            <button
+                id="btn-start-practice"
+                type="button"
+                class="primary-action"
+            >
+                Start Practice
+            </button>
+
+        </section>
+
+
+        <!-- =====================================================
+             PERFORMANCE
+        ====================================================== -->
+
+        <section
+            id="performance-panel"
+            class="performance-panel"
+            aria-label="Performance"
+        >
+
+            <div class="performance-item">
+
+                <span class="performance-label">
+                    Notes
+                </span>
+
+                <strong
+                    id="performance-notes"
+                    class="performance-value"
+                >
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="performance-item">
+
+                <span class="performance-label">
+                    Chords
+                </span>
+
+                <strong
+                    id="performance-chords"
+                    class="performance-value"
+                >
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="performance-item">
+
+                <span class="performance-label">
+                    Accuracy
+                </span>
+
+                <strong
+                    id="performance-accuracy"
+                    class="performance-value"
+                >
+                    100%
+                </strong>
+
+            </div>
+
+
+            <div class="performance-item">
+
+                <span class="performance-label">
+                    Practice
+                </span>
+
+                <strong
+                    id="performance-time"
+                    class="performance-value"
+                >
+                    00:00
+                </strong>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =========================================================
+         BOTTOM NAVIGATION
+    ========================================================== -->
+
+    <nav
+        id="bottom-navigation"
+        class="bottom-navigation"
+        aria-label="Main navigation"
+    >
+
+        <button
+            type="button"
+            class="nav-button active"
+            data-view="guitar"
+            aria-pressed="true"
+        >
+
+            <span>🎸</span>
+            <small>Guitar</small>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-button"
+            data-view="chords"
+            aria-pressed="false"
+        >
+
+            <span>🎵</span>
+            <small>Chords</small>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-button"
+            data-view="tuner"
+            aria-pressed="false"
+        >
+
+            <span>🎚️</span>
+            <small>Tuner</small>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-button"
+            data-view="practice"
+            aria-pressed="false"
+        >
+
+            <span>🎯</span>
+            <small>Practice</small>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="nav-button"
+            data-view="settings"
+            aria-pressed="false"
+        >
+
+            <span>⚙️</span>
+            <small>Settings</small>
+
+        </button>
+
+    </nav>
+
+
+    <!-- =========================================================
+         GLOBAL TOUCH / AUDIO MESSAGE
+    ========================================================== -->
+
+    <div
+        id="interaction-message"
+        class="interaction-message"
+        role="status"
+        aria-live="polite"
+    ></div>
+
+
+    <!-- =========================================================
+         APPLICATION ERROR OVERLAY
+    ========================================================== -->
+
+    <div
+        id="app-error"
+        class="app-error"
+        hidden
+    >
+
+        <div class="error-card">
+
+            <strong>
+                FOBAS Guitar
+            </strong>
+
+            <p id="app-error-message">
+                Yon pwoblèm teknik rive.
+            </p>
+
+            <button
+                id="btn-error-close"
+                type="button"
+                class="primary-action"
+            >
+                Fèmen
+            </button>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =============================================================
+     JAVASCRIPT ENGINE
+============================================================== -->
+
+<script
+    src="simulationguitarfobas.js"
+    defer
+></script>
+
+</body>
+</html>
