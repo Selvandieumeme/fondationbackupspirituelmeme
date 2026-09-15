@@ -6,6 +6,8 @@ const APP_SHELL = [
     "./simulationchimicfobas.css",
     "./simulationchimicfobas.js",
     "./manifest.webmanifest"
+   "./fobaschimique192.png",
+"./fobaschimique512.png"
 ];
 
 
