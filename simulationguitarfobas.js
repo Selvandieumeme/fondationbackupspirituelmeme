@@ -1787,7 +1787,7 @@
             frequency
         );
 
-})()
+})();
 
 
 
@@ -3062,5 +3062,416 @@
             0
         );
     }
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   SIMULATION GUITAR FOBAS
+   BLOK 6 — PROFESSIONAL TUNER
+   ============================================================ */
+
+(() => {
+    "use strict";
+
+    const G = window.FOBASGuitarEngine;
+    const state = G.state;
+    const DOM = G.DOM;
+
+    const Tuner = {
+
+        stream: null,
+        context: null,
+        analyser: null,
+        data: null,
+        raf: null,
+
+        async start() {
+
+            if (state.tunerActive) {
+                return;
+            }
+
+            if (
+                !navigator.mediaDevices ||
+                !navigator.mediaDevices.getUserMedia
+            ) {
+
+                G.showMessage(
+                    "Mikwo pa disponib sou navigatè sa a."
+                );
+
+                return;
+            }
+
+            try {
+
+                this.stream =
+                    await navigator.mediaDevices
+                        .getUserMedia({
+                            audio: {
+                                echoCancellation: false,
+                                noiseSuppression: false,
+                                autoGainControl: false
+                            }
+                        });
+
+                const AudioContext =
+                    window.AudioContext ||
+                    window.webkitAudioContext;
+
+                this.context =
+                    new AudioContext();
+
+                const source =
+                    this.context.createMediaStreamSource(
+                        this.stream
+                    );
+
+                this.analyser =
+                    this.context.createAnalyser();
+
+                this.analyser.fftSize =
+                    4096;
+
+                this.analyser.smoothingTimeConstant =
+                    0.15;
+
+                this.data =
+                    new Float32Array(
+                        this.analyser.fftSize
+                    );
+
+                source.connect(
+                    this.analyser
+                );
+
+                state.tunerActive =
+                    true;
+
+                this.updateUI();
+
+                this.loop();
+
+                G.showMessage(
+                    "Tuner aktive — jwe yon string."
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Tuner microphone error:",
+                    error
+                );
+
+                G.showMessage(
+                    "FOBAS Guitar bezwen pèmisyon mikwo pou tuner."
+                );
+            }
+        },
+
+        stop() {
+
+            state.tunerActive =
+                false;
+
+            cancelAnimationFrame(
+                this.raf
+            );
+
+            if (this.stream) {
+
+                this.stream
+                    .getTracks()
+                    .forEach(
+                        track =>
+                            track.stop()
+                    );
+            }
+
+            this.stream = null;
+
+            if (this.context) {
+
+                this.context.close()
+                    .catch(() => {});
+            }
+
+            this.context = null;
+
+            if (DOM.tunerNeedle) {
+
+                DOM.tunerNeedle.style.transform =
+                    "translateX(-50%) rotate(0deg)";
+            }
+
+            if (DOM.tunerCents) {
+
+                DOM.tunerCents.textContent =
+                    "0 cents";
+            }
+
+            G.showMessage(
+                "Tuner etenn."
+            );
+        },
+
+        loop() {
+
+            if (
+                !state.tunerActive ||
+                !this.analyser
+            ) {
+                return;
+            }
+
+            this.analyser.getFloatTimeDomainData(
+                this.data
+            );
+
+            const frequency =
+                this.detectPitch(
+                    this.data,
+                    this.context.sampleRate
+                );
+
+            if (frequency) {
+
+                this.updatePitch(
+                    frequency
+                );
+            }
+
+            this.raf =
+                requestAnimationFrame(
+                    () => this.loop()
+                );
+        },
+
+        detectPitch(
+            buffer,
+            sampleRate
+        ) {
+
+            let rms = 0;
+
+            for (
+                let i = 0;
+                i < buffer.length;
+                i++
+            ) {
+
+                rms +=
+                    buffer[i] *
+                    buffer[i];
+            }
+
+            rms =
+                Math.sqrt(
+                    rms /
+                    buffer.length
+                );
+
+            if (rms < 0.008) {
+                return null;
+            }
+
+            let bestOffset = -1;
+            let bestCorrelation = 0;
+
+            const minFrequency = 35;
+            const maxFrequency = 1000;
+
+            const minOffset =
+                Math.floor(
+                    sampleRate /
+                    maxFrequency
+                );
+
+            const maxOffset =
+                Math.floor(
+                    sampleRate /
+                    minFrequency
+                );
+
+            for (
+                let offset = minOffset;
+                offset <=
+                Math.min(
+                    maxOffset,
+                    buffer.length - 1
+                );
+                offset++
+            ) {
+
+                let correlation = 0;
+
+                for (
+                    let i = 0;
+                    i <
+                    buffer.length - offset;
+                    i++
+                ) {
+
+                    correlation +=
+                        buffer[i] *
+                        buffer[i + offset];
+                }
+
+                correlation /=
+                    buffer.length - offset;
+
+                if (
+                    correlation >
+                    bestCorrelation
+                ) {
+
+                    bestCorrelation =
+                        correlation;
+
+                    bestOffset =
+                        offset;
+                }
+            }
+
+            if (
+                bestOffset <= 0 ||
+                bestCorrelation < 0.01
+            ) {
+                return null;
+            }
+
+            return (
+                sampleRate /
+                bestOffset
+            );
+        },
+
+        updatePitch(
+            frequency
+        ) {
+
+            const midi =
+                Math.round(
+                    69 +
+                    12 *
+                    Math.log2(
+                        frequency / 440
+                    )
+                );
+
+            const target =
+                440 *
+                Math.pow(
+                    2,
+                    (
+                        midi - 69
+                    ) / 12
+                );
+
+            const cents =
+                1200 *
+                Math.log2(
+                    frequency /
+                    target
+                );
+
+            const names = [
+                "C", "C#", "D", "D#", "E",
+                "F", "F#", "G", "G#", "A",
+                "A#", "B"
+            ];
+
+            const note =
+                names[
+                    ((midi % 12) + 12) % 12
+                ];
+
+            if (DOM.tunerNote) {
+
+                DOM.tunerNote.textContent =
+                    note;
+            }
+
+            if (DOM.tunerCents) {
+
+                const rounded =
+                    Math.round(cents);
+
+                DOM.tunerCents.textContent =
+                    `${rounded > 0 ? "+" : ""}${rounded} cents`;
+            }
+
+            if (DOM.tunerNeedle) {
+
+                const angle =
+                    Math.max(
+                        -45,
+                        Math.min(
+                            45,
+                            cents * 0.45
+                        )
+                    );
+
+                DOM.tunerNeedle.style.transform =
+                    `translateX(-50%) rotate(${angle}deg)`;
+            }
+        },
+
+        updateUI() {
+
+            document
+                .querySelectorAll(
+                    "[data-action='tuner'], #tuner, .tuner-button"
+                )
+                .forEach(
+                    button => {
+
+                        button.classList.toggle(
+                            "active",
+                            state.tunerActive
+                        );
+                    }
+                );
+        },
+
+        toggle() {
+
+            if (
+                state.tunerActive
+            ) {
+                this.stop();
+            } else {
+                this.start();
+            }
+        }
+    };
+
+    G.Tuner = Tuner;
+
+    document
+        .querySelectorAll(
+            "[data-action='tuner'], #tuner, .tuner-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => Tuner.toggle()
+                );
+            }
+        );
 
 })();
