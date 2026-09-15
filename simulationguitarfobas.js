@@ -1288,3 +1288,503 @@
 
 
 
+
+
+
+
+
+
+
+
+/* ============================================================
+   SIMULATION GUITAR FOBAS
+   BLOK 3 — REAL WEB AUDIO ENGINE
+   ============================================================ */
+
+(() => {
+    "use strict";
+
+    const G = window.FOBASGuitarEngine;
+    const state = G.state;
+
+    const AudioEngine = {
+
+        context: null,
+        master: null,
+        dry: null,
+        wet: null,
+        convolver: null,
+        compressor: null,
+        analyser: null,
+        initialized: false,
+        buffers: new Map(),
+
+        async init() {
+
+            if (this.initialized) {
+
+                if (
+                    this.context &&
+                    this.context.state === "suspended"
+                ) {
+                    await this.context.resume();
+                }
+
+                return;
+            }
+
+            const AudioContext =
+                window.AudioContext ||
+                window.webkitAudioContext;
+
+            if (!AudioContext) {
+
+                G.showError(
+                    "Web Audio API pa disponib sou navigatè sa a."
+                );
+
+                return;
+            }
+
+            this.context =
+                new AudioContext();
+
+            this.master =
+                this.context.createGain();
+
+            this.dry =
+                this.context.createGain();
+
+            this.wet =
+                this.context.createGain();
+
+            this.convolver =
+                this.context.createConvolver();
+
+            this.compressor =
+                this.context.createDynamicsCompressor();
+
+            this.analyser =
+                this.context.createAnalyser();
+
+            this.analyser.fftSize = 2048;
+
+            this.master.gain.value =
+                state.volume;
+
+            this.dry.gain.value =
+                1 - state.reverb * 0.55;
+
+            this.wet.gain.value =
+                state.reverb;
+
+            this.compressor.threshold.value =
+                -18;
+
+            this.compressor.knee.value =
+                18;
+
+            this.compressor.ratio.value =
+                5;
+
+            this.compressor.attack.value =
+                0.003;
+
+            this.compressor.release.value =
+                0.25;
+
+            this.createImpulseResponse();
+
+            this.dry.connect(
+                this.compressor
+            );
+
+            this.wet.connect(
+                this.convolver
+            );
+
+            this.convolver.connect(
+                this.compressor
+            );
+
+            this.compressor.connect(
+                this.analyser
+            );
+
+            this.analyser.connect(
+                this.master
+            );
+
+            this.master.connect(
+                this.context.destination
+            );
+
+            this.initialized = true;
+
+            await this.context.resume();
+        },
+
+        createImpulseResponse() {
+
+            if (!this.context) return;
+
+            const duration = 1.8;
+
+            const length =
+                Math.floor(
+                    this.context.sampleRate *
+                    duration
+                );
+
+            const impulse =
+                this.context.createBuffer(
+                    2,
+                    length,
+                    this.context.sampleRate
+                );
+
+            for (
+                let channel = 0;
+                channel < 2;
+                channel++
+            ) {
+
+                const data =
+                    impulse.getChannelData(
+                        channel
+                    );
+
+                for (
+                    let i = 0;
+                    i < length;
+                    i++
+                ) {
+
+                    const decay =
+                        Math.pow(
+                            1 - i / length,
+                            2.8
+                        );
+
+                    data[i] =
+                        (
+                            Math.random() * 2 - 1
+                        ) *
+                        decay *
+                        0.32;
+                }
+            }
+
+            this.convolver.buffer =
+                impulse;
+        },
+
+        setVolume(value) {
+
+            state.volume =
+                Math.max(
+                    0,
+                    Math.min(1, value)
+                );
+
+            if (this.master) {
+
+                this.master.gain.setTargetAtTime(
+                    state.volume,
+                    this.context.currentTime,
+                    0.015
+                );
+            }
+
+            G.saveState();
+        },
+
+        setReverb(value) {
+
+            state.reverb =
+                Math.max(
+                    0,
+                    Math.min(1, value)
+                );
+
+            if (this.dry && this.wet) {
+
+                this.dry.gain.value =
+                    1 - state.reverb * 0.55;
+
+                this.wet.gain.value =
+                    state.reverb;
+            }
+
+            G.saveState();
+        },
+
+        generateBuffer(
+            frequency,
+            instrumentType = "guitar"
+        ) {
+
+            if (!this.context) return null;
+
+            const key =
+                `${frequency.toFixed(3)}_${instrumentType}`;
+
+            if (
+                this.buffers.has(key)
+            ) {
+                return this.buffers.get(key);
+            }
+
+            const duration =
+                instrumentType === "bass"
+                    ? 3.0
+                    : 2.25;
+
+            const length =
+                Math.floor(
+                    this.context.sampleRate *
+                    duration
+                );
+
+            const buffer =
+                this.context.createBuffer(
+                    1,
+                    length,
+                    this.context.sampleRate
+                );
+
+            const data =
+                buffer.getChannelData(0);
+
+            const sampleRate =
+                this.context.sampleRate;
+
+            const harmonics =
+                instrumentType === "bass"
+                    ? [
+                        [1, 1.00],
+                        [2, 0.42],
+                        [3, 0.18],
+                        [4, 0.08]
+                    ]
+                    : [
+                        [1, 1.00],
+                        [2, 0.45],
+                        [3, 0.25],
+                        [4, 0.13],
+                        [5, 0.08],
+                        [6, 0.045]
+                    ];
+
+            for (
+                let i = 0;
+                i < length;
+                i++
+            ) {
+
+                const t =
+                    i / sampleRate;
+
+                const attack =
+                    Math.min(
+                        1,
+                        t * 280
+                    );
+
+                const decay =
+                    Math.exp(
+                        -t *
+                        (
+                            instrumentType === "bass"
+                                ? 1.25
+                                : 1.9
+                        )
+                    );
+
+                let sample = 0;
+
+                harmonics.forEach(
+                    ([harmonic, amplitude]) => {
+
+                        const harmonicDecay =
+                            Math.exp(
+                                -t *
+                                (
+                                    0.12 *
+                                    harmonic
+                                )
+                            );
+
+                        sample +=
+                            Math.sin(
+                                2 *
+                                Math.PI *
+                                frequency *
+                                harmonic *
+                                t
+                            ) *
+                            amplitude *
+                            harmonicDecay;
+                    }
+                );
+
+                const noise =
+                    (
+                        Math.random() * 2 - 1
+                    ) *
+                    Math.exp(-t * 180);
+
+                data[i] =
+                    (
+                        sample * 0.72 +
+                        noise * 0.28
+                    ) *
+                    attack *
+                    decay *
+                    0.38;
+            }
+
+            this.buffers.set(
+                key,
+                buffer
+            );
+
+            return buffer;
+        },
+
+        async playFrequency(
+            frequency,
+            options = {}
+        ) {
+
+            await this.init();
+
+            if (!this.context) return;
+
+            if (state.muted) return;
+
+            frequency =
+                Math.max(
+                    20,
+                    Math.min(
+                        5000,
+                        frequency
+                    )
+                );
+
+            const instrument =
+                G.getInstrument();
+
+            const buffer =
+                this.generateBuffer(
+                    frequency,
+                    instrument.type
+                );
+
+            if (!buffer) return;
+
+            const source =
+                this.context.createBufferSource();
+
+            const gain =
+                this.context.createGain();
+
+            const filter =
+                this.context.createBiquadFilter();
+
+            filter.type =
+                "lowpass";
+
+            filter.frequency.value =
+                instrument.type === "bass"
+                    ? 2500
+                    : 6200;
+
+            filter.Q.value =
+                0.55 +
+                state.resonance * 2.2;
+
+            source.buffer =
+                buffer;
+
+            const velocity =
+                options.velocity ?? 0.9;
+
+            const now =
+                this.context.currentTime;
+
+            gain.gain.setValueAtTime(
+                0.0001,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                Math.max(
+                    0.001,
+                    velocity
+                ),
+                now + 0.008
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.0001,
+                now +
+                (
+                    instrument.type === "bass"
+                        ? 2.7
+                        : 2.0
+                )
+            );
+
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.dry);
+            gain.connect(this.wet);
+
+            source.onended = () => {
+
+                state.playingSources.delete(
+                    source
+                );
+            };
+
+            state.playingSources.add(
+                source
+            );
+
+            source.start();
+
+            if (options.duration) {
+
+                source.stop(
+                    now +
+                    options.duration
+                );
+            }
+
+            return source;
+        },
+
+        stopAll() {
+
+            state.playingSources.forEach(
+                source => {
+
+                    try {
+                        source.stop();
+                    } catch {}
+                }
+            );
+
+            state.playingSources.clear();
+        }
+    };
+
+    G.Audio = AudioEngine;
+
+    G.playFrequency = frequency =>
+        AudioEngine.playFrequency(
+            frequency
+        );
+
+})();
