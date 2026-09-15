@@ -5,7 +5,7 @@ const APP_SHELL = [
     "./simulationchimicfobas.html",
     "./simulationchimicfobas.css",
     "./simulationchimicfobas.js",
-    "./manifest.webmanifest"
+    "./manifest.webmanifest",
    "./fobaschimique192.png",
 "./fobaschimique512.png"
 ];
