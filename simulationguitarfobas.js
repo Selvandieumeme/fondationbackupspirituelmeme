@@ -1787,4 +1787,860 @@
             frequency
         );
 
+})()
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   SIMULATION GUITAR FOBAS
+   BLOK 4 — TOUCH / STRINGS / FRETS / STRUMMING
+   ============================================================ */
+
+(() => {
+    "use strict";
+
+    const G = window.FOBASGuitarEngine;
+    const state = G.state;
+    const DOM = G.DOM;
+
+    const $$ = (selector, root = document) => {
+        try {
+            return Array.from(
+                root.querySelectorAll(selector)
+            );
+        } catch {
+            return [];
+        }
+    };
+
+    /* ---------------------------------------------------------
+       GET STRING DATA
+       --------------------------------------------------------- */
+
+    function getStringData(
+        stringIndex,
+        fret = 0
+    ) {
+
+        const instrument =
+            G.getInstrument();
+
+        const string =
+            instrument.tuning[
+                stringIndex
+            ];
+
+        if (!string) return null;
+
+        const midi =
+            string.midi +
+            Number(fret);
+
+        return {
+            stringIndex,
+            fret,
+            midi,
+            note:
+                G.getInstrument().tuning[
+                    stringIndex
+                ].note,
+            frequency:
+                440 *
+                Math.pow(
+                    2,
+                    (midi - 69) / 12
+                )
+        };
+    }
+
+    /* ---------------------------------------------------------
+       PRESS STRING / FRET
+       --------------------------------------------------------- */
+
+    function fretString(
+        stringIndex,
+        fret
+    ) {
+
+        const instrument =
+            G.getInstrument();
+
+        if (
+            stringIndex < 0 ||
+            stringIndex >= instrument.strings
+        ) return;
+
+        fret =
+            Math.max(
+                0,
+                Math.min(
+                    instrument.frets,
+                    Number(fret)
+                )
+            );
+
+        state.frettedStrings.set(
+            stringIndex,
+            fret
+        );
+
+        $$(".fret-touch").forEach(
+            element => {
+
+                element.classList.toggle(
+                    "active",
+                    Number(
+                        element.dataset.string
+                    ) === stringIndex &&
+                    Number(
+                        element.dataset.fret
+                    ) === fret
+                );
+            }
+        );
+
+        G.renderFinger(
+            stringIndex,
+            fret
+        );
+
+        G.showMessage(
+            fret === 0
+                ? `String ${stringIndex + 1} ouverte`
+                : `Fret ${fret}`
+        );
+    }
+
+    /* ---------------------------------------------------------
+       RELEASE FRET
+       --------------------------------------------------------- */
+
+    function releaseString(
+        stringIndex
+    ) {
+
+        state.frettedStrings.delete(
+            stringIndex
+        );
+
+        $$(".fret-touch").forEach(
+            element => {
+
+                if (
+                    Number(
+                        element.dataset.string
+                    ) === stringIndex
+                ) {
+                    element.classList.remove(
+                        "active"
+                    );
+                }
+            }
+        );
+
+        G.removeFinger(
+            stringIndex
+        );
+    }
+
+    /* ---------------------------------------------------------
+       CALCULATE NOTE
+       --------------------------------------------------------- */
+
+    function getPlayedString(
+        stringIndex
+    ) {
+
+        const instrument =
+            G.getInstrument();
+
+        const base =
+            instrument.tuning[
+                stringIndex
+            ];
+
+        if (!base) return null;
+
+        const fret =
+            state.frettedStrings.has(
+                stringIndex
+            )
+                ? state.frettedStrings.get(
+                    stringIndex
+                )
+                : 0;
+
+        return {
+            stringIndex,
+            fret,
+            midi:
+                base.midi + fret,
+            frequency:
+                base.frequency *
+                Math.pow(
+                    2,
+                    fret / 12
+                )
+        };
+    }
+
+    /* ---------------------------------------------------------
+       PLAY STRING
+       --------------------------------------------------------- */
+
+    async function playString(
+        stringIndex,
+        velocity = 0.9,
+        direction = "down"
+    ) {
+
+        if (state.muted) return;
+
+        const played =
+            getPlayedString(
+                stringIndex
+            );
+
+        if (!played) return;
+
+        await G.Audio.playFrequency(
+            played.frequency,
+            {
+                velocity:
+                    Math.max(
+                        0.12,
+                        Math.min(
+                            1,
+                            velocity
+                        )
+                    )
+            }
+        );
+
+        const element =
+            DOM.stringsLayer?.querySelector(
+                `.guitar-string[data-string="${stringIndex}"]`
+            );
+
+        if (element) {
+
+            element.classList.add(
+                "active"
+            );
+
+            element.dataset.note =
+                G.frequencyToNote
+                    ? G.frequencyToNote(
+                        played.frequency
+                    )?.note || ""
+                    : "";
+
+            setTimeout(() => {
+
+                element.classList.remove(
+                    "active"
+                );
+
+            }, 160);
+        }
+
+        state.noteCount++;
+
+        state.lastString =
+            stringIndex;
+
+        state.lastFret =
+            played.fret;
+
+        state.lastFrequency =
+            played.frequency;
+
+        updateNoteDisplay(
+            played.frequency,
+            stringIndex,
+            played.fret
+        );
+
+        if (G.Practice) {
+            G.Practice.registerNote(
+                played
+            );
+        }
+    }
+
+    /* ---------------------------------------------------------
+       NOTE DISPLAY
+       --------------------------------------------------------- */
+
+    function updateNoteDisplay(
+        frequency,
+        stringIndex,
+        fret
+    ) {
+
+        const note =
+            frequencyToNoteLocal(
+                frequency
+            );
+
+        if (DOM.currentNote) {
+
+            DOM.currentNote.textContent =
+                note
+                    ? note.note
+                    : "—";
+        }
+
+        if (DOM.currentFrequency) {
+
+            DOM.currentFrequency.textContent =
+                note
+                    ? `${note.frequency.toFixed(2)} Hz`
+                    : "— Hz";
+        }
+
+        const status =
+            DOM.toolStatus;
+
+        if (status) {
+
+            status.textContent =
+                `String ${stringIndex + 1} • Fret ${fret}`;
+        }
+    }
+
+    function frequencyToNoteLocal(
+        frequency
+    ) {
+
+        if (
+            !frequency ||
+            frequency <= 0
+        ) return null;
+
+        const midi =
+            Math.round(
+                69 +
+                12 *
+                Math.log2(
+                    frequency / 440
+                )
+            );
+
+        const names = [
+            "C", "C#", "D", "D#", "E",
+            "F", "F#", "G", "G#", "A",
+            "A#", "B"
+        ];
+
+        return {
+            note:
+                names[
+                    ((midi % 12) + 12) % 12
+                ],
+            frequency:
+                440 *
+                Math.pow(
+                    2,
+                    (midi - 69) / 12
+                )
+        };
+    }
+
+    /* ---------------------------------------------------------
+       STRUM ALL STRINGS
+       --------------------------------------------------------- */
+
+    async function strum(
+        direction = "down",
+        velocity = 0.9
+    ) {
+
+        if (state.muted) return;
+
+        await G.Audio.init();
+
+        const instrument =
+            G.getInstrument();
+
+        G.showStrummingHand(
+            direction
+        );
+
+        const indices =
+            direction === "up"
+                ? [...Array(
+                    instrument.strings
+                ).keys()].reverse()
+                : [...Array(
+                    instrument.strings
+                ).keys()];
+
+        const delay =
+            instrument.type === "bass"
+                ? 20
+                : 13;
+
+        for (
+            let i = 0;
+            i < indices.length;
+            i++
+        ) {
+
+            const stringIndex =
+                indices[i];
+
+            setTimeout(
+                () => {
+
+                    playString(
+                        stringIndex,
+                        velocity,
+                        direction
+                    );
+
+                },
+                i * delay
+            );
+        }
+
+        if (G.Practice) {
+            G.Practice.registerStrum(
+                direction
+            );
+        }
+    }
+
+    /* ---------------------------------------------------------
+       MUTE
+       --------------------------------------------------------- */
+
+    function muteAll() {
+
+        state.muted = true;
+
+        G.Audio.stopAll();
+
+        $$(".guitar-string").forEach(
+            string => {
+
+                string.classList.remove(
+                    "active"
+                );
+
+                string.classList.add(
+                    "muted"
+                );
+            }
+        );
+
+        G.showMessage(
+            "Strings mute"
+        );
+    }
+
+    /* ---------------------------------------------------------
+       UNMUTE
+       --------------------------------------------------------- */
+
+    function unmuteAll() {
+
+        state.muted = false;
+
+        $$(".guitar-string").forEach(
+            string => {
+
+                string.classList.remove(
+                    "muted"
+                );
+            }
+        );
+
+        G.showMessage(
+            "Strings aktive"
+        );
+    }
+
+    /* ---------------------------------------------------------
+       STOP
+       --------------------------------------------------------- */
+
+    function stopAll() {
+
+        G.Audio.stopAll();
+
+        $$(".guitar-string").forEach(
+            string => {
+
+                string.classList.remove(
+                    "active"
+                );
+            }
+        );
+    }
+
+    /* ---------------------------------------------------------
+       POINTER — FRET
+       --------------------------------------------------------- */
+
+    function bindFretTouch() {
+
+        if (!DOM.fretTouchLayer) return;
+
+        DOM.fretTouchLayer.style.pointerEvents =
+            "auto";
+
+        DOM.fretTouchLayer.addEventListener(
+            "pointerdown",
+            event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const target =
+                    event.target.closest(
+                        ".fret-touch"
+                    );
+
+                if (!target) return;
+
+                const stringIndex =
+                    Number(
+                        target.dataset.string
+                    );
+
+                const fret =
+                    Number(
+                        target.dataset.fret
+                    );
+
+                try {
+                    target.setPointerCapture(
+                        event.pointerId
+                    );
+                } catch {}
+
+                state.activePointers.set(
+                    event.pointerId,
+                    {
+                        mode: "fret",
+                        stringIndex,
+                        fret
+                    }
+                );
+
+                fretString(
+                    stringIndex,
+                    fret
+                );
+            },
+            {
+                passive: false
+            }
+        );
+
+        DOM.fretTouchLayer.addEventListener(
+            "pointerup",
+            event => {
+
+                const pointer =
+                    state.activePointers.get(
+                        event.pointerId
+                    );
+
+                if (
+                    pointer &&
+                    pointer.mode === "fret"
+                ) {
+
+                    state.activePointers.delete(
+                        event.pointerId
+                    );
+                }
+
+            },
+            {
+                passive: false
+            }
+        );
+
+        DOM.fretTouchLayer.addEventListener(
+            "pointercancel",
+            event => {
+
+                state.activePointers.delete(
+                    event.pointerId
+                );
+            }
+        );
+    }
+
+    /* ---------------------------------------------------------
+       STRING POINTER
+       --------------------------------------------------------- */
+
+    function bindStringTouch() {
+
+        if (!DOM.stringsLayer) return;
+
+        DOM.stringsLayer.style.pointerEvents =
+            "auto";
+
+        DOM.stringsLayer.addEventListener(
+            "pointerdown",
+            async event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const target =
+                    event.target.closest(
+                        ".guitar-string"
+                    );
+
+                if (!target) return;
+
+                const stringIndex =
+                    Number(
+                        target.dataset.string
+                    );
+
+                state.activePointers.set(
+                    event.pointerId,
+                    {
+                        mode: "strum",
+                        lastString:
+                            stringIndex,
+                        startY: event.clientY
+                    }
+                );
+
+                try {
+                    target.setPointerCapture(
+                        event.pointerId
+                    );
+                } catch {}
+
+                await playString(
+                    stringIndex,
+                    0.92
+                );
+            },
+            {
+                passive: false
+            }
+        );
+
+        DOM.stringsLayer.addEventListener(
+            "pointermove",
+            async event => {
+
+                const pointer =
+                    state.activePointers.get(
+                        event.pointerId
+                    );
+
+                if (
+                    !pointer ||
+                    pointer.mode !== "strum"
+                ) return;
+
+                const instrument =
+                    G.getInstrument();
+
+                const rect =
+                    DOM.stringsLayer.getBoundingClientRect();
+
+                if (!rect.height) return;
+
+                const y =
+                    event.clientY -
+                    rect.top;
+
+                const index =
+                    Math.round(
+                        (
+                            y /
+                            rect.height
+                        ) *
+                        (
+                            instrument.strings - 1
+                        )
+                    );
+
+                const stringIndex =
+                    Math.max(
+                        0,
+                        Math.min(
+                            instrument.strings - 1,
+                            index
+                        )
+                    );
+
+                if (
+                    stringIndex !==
+                    pointer.lastString
+                ) {
+
+                    const direction =
+                        stringIndex >
+                        pointer.lastString
+                            ? "down"
+                            : "up";
+
+                    pointer.lastString =
+                        stringIndex;
+
+                    await playString(
+                        stringIndex,
+                        0.72,
+                        direction
+                    );
+                }
+            },
+            {
+                passive: false
+            }
+        );
+
+        const finish =
+            event => {
+
+                state.activePointers.delete(
+                    event.pointerId
+                );
+            };
+
+        DOM.stringsLayer.addEventListener(
+            "pointerup",
+            finish
+        );
+
+        DOM.stringsLayer.addEventListener(
+            "pointercancel",
+            finish
+        );
+    }
+
+    /* ---------------------------------------------------------
+       BUTTON ACTION FINDER
+       --------------------------------------------------------- */
+
+    function findActionButton(
+        actions
+    ) {
+
+        for (
+            const action of actions
+        ) {
+
+            const selectors = [
+                `[data-action="${action}"]`,
+                `[data-control="${action}"]`,
+                `#${action}`,
+                `.action-${action}`,
+                `.control-${action}`
+            ];
+
+            for (
+                const selector of selectors
+            ) {
+
+                const el =
+                    document.querySelector(
+                        selector
+                    );
+
+                if (el) return el;
+            }
+        }
+
+        return null;
+    }
+
+    /* ---------------------------------------------------------
+       BUTTONS
+       --------------------------------------------------------- */
+
+    function bindStringControls() {
+
+        const down =
+            findActionButton([
+                "strum-down",
+                "strumDown",
+                "down"
+            ]);
+
+        const up =
+            findActionButton([
+                "strum-up",
+                "strumUp",
+                "up"
+            ]);
+
+        const mute =
+            findActionButton([
+                "mute-all",
+                "mute",
+                "muteAll"
+            ]);
+
+        const stop =
+            findActionButton([
+                "stop-all",
+                "stop",
+                "stopAll"
+            ]);
+
+        down?.addEventListener(
+            "click",
+            () => strum("down", 0.92)
+        );
+
+        up?.addEventListener(
+            "click",
+            () => strum("up", 0.92)
+        );
+
+        mute?.addEventListener(
+            "click",
+            () => {
+
+                if (state.muted) {
+                    unmuteAll();
+                } else {
+                    muteAll();
+                }
+            }
+        );
+
+        stop?.addEventListener(
+            "click",
+            stopAll
+        );
+    }
+
+    G.fretString = fretString;
+    G.releaseString = releaseString;
+    G.playString = playString;
+    G.strum = strum;
+    G.muteAll = muteAll;
+    G.unmuteAll = unmuteAll;
+    G.stopAll = stopAll;
+
+    bindFretTouch();
+    bindStringTouch();
+    bindStringControls();
+
 })();
+
+;
