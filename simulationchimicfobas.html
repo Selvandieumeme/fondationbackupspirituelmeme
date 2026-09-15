@@ -1407,7 +1407,44 @@
 </div>
 
 
+
+
+
+
+
+
+
+
 <script src="simulationchimicfobas.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker
+            .register("./service-worker.js")
+            .then(registration => {
+
+                console.log(
+                    "FOBAS Laboratoire Chimique — Service Worker actif.",
+                    registration.scope
+                );
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "FOBAS Laboratoire Chimique — Échec du Service Worker :",
+                    error
+                );
+
+            });
+
+    });
+
+}
+</script>
 
 </body>
 </html>
