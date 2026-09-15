@@ -26,13 +26,13 @@
 
 "icons": [
     {
-        "src": "./icon-192.png",
+        "src": "./fobaschimique192.png",
         "sizes": "192x192",
         "type": "image/png",
         "purpose": "any maskable"
     },
     {
-        "src": "./icon-512.png",
+        "src": "./fobaschimique512.png",
         "sizes": "512x512",
         "type": "image/png",
         "purpose": "any maskable"
