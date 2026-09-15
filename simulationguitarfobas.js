@@ -2643,4 +2643,424 @@
 
 })();
 
-;
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   SIMULATION GUITAR FOBAS
+   BLOK 5 — CHORD ENGINE
+   ============================================================ */
+
+(() => {
+    "use strict";
+
+    const G = window.FOBASGuitarEngine;
+    const state = G.state;
+
+    const CHORDS = G.chords;
+
+    function chordForInstrument(
+        chordName
+    ) {
+
+        const instrument =
+            G.getInstrument();
+
+        const guitarShape =
+            CHORDS[chordName];
+
+        if (!guitarShape) return null;
+
+        if (
+            instrument.strings === 6
+        ) {
+
+            return guitarShape.slice();
+        }
+
+        if (
+            instrument.strings === 12
+        ) {
+
+            const shape = [];
+
+            guitarShape.forEach(
+                fret => {
+
+                    shape.push(fret);
+                    shape.push(fret);
+                }
+            );
+
+            return shape;
+        }
+
+        /*
+         * Bass instruments:
+         * We keep the chord useful as a
+         * playable low-register shape.
+         */
+
+        if (
+            instrument.strings === 4
+        ) {
+
+            const rootMap = {
+                C: 8,
+                D: 10,
+                E: 12,
+                F: 13,
+                G: 15,
+                A: 17,
+                Am: 17,
+                Em: 12,
+                Dm: 10
+            };
+
+            const root =
+                rootMap[chordName] ??
+                12;
+
+            return [
+                root,
+                root + 5,
+                root + 7,
+                root + 12
+            ];
+        }
+
+        if (
+            instrument.strings === 5
+        ) {
+
+            const rootMap = {
+                C: 3,
+                D: 5,
+                E: 7,
+                F: 8,
+                G: 10,
+                A: 12,
+                Am: 12,
+                Em: 7,
+                Dm: 5
+            };
+
+            const root =
+                rootMap[chordName] ??
+                7;
+
+            return [
+                root,
+                root + 5,
+                root + 7,
+                root + 12,
+                root + 17
+            ];
+        }
+
+        return null;
+    }
+
+    /* ---------------------------------------------------------
+       APPLY CHORD FINGERS
+       --------------------------------------------------------- */
+
+    function applyChord(
+        chordName
+    ) {
+
+        const shape =
+            chordForInstrument(
+                chordName
+            );
+
+        if (!shape) {
+
+            G.showMessage(
+                "Chord sa pa disponib."
+            );
+
+            return;
+        }
+
+        state.frettedStrings.clear();
+
+        for (
+            let i = 0;
+            i < shape.length;
+            i++
+        ) {
+
+            const fret =
+                Number(shape[i]);
+
+            if (fret >= 0) {
+
+                state.frettedStrings.set(
+                    i,
+                    fret
+                );
+
+            }
+        }
+
+        document
+            .querySelectorAll(
+                ".virtual-finger"
+            )
+            .forEach(
+                finger => finger.remove()
+            );
+
+        document
+            .querySelectorAll(
+                ".fret-touch"
+            )
+            .forEach(
+                touch => {
+
+                    touch.classList.remove(
+                        "active"
+                    );
+                }
+            );
+
+        state.frettedStrings.forEach(
+            (fret, stringIndex) => {
+
+                if (fret > 0) {
+
+                    G.renderFinger(
+                        stringIndex,
+                        fret
+                    );
+                }
+
+                const touch =
+                    document.querySelector(
+                        `.fret-touch[data-string="${stringIndex}"][data-fret="${fret}"]`
+                    );
+
+                touch?.classList.add(
+                    "active"
+                );
+            }
+        );
+
+        state.selectedChord =
+            chordName;
+
+        localStorage.setItem(
+            "fobas_guitar_chord",
+            chordName
+        );
+
+        updateChordUI(
+            chordName
+        );
+
+        G.showMessage(
+            `Chord ${chordName} pare`
+        );
+    }
+
+    /* ---------------------------------------------------------
+       PLAY CHORD
+       --------------------------------------------------------- */
+
+    async function playChord(
+        chordName,
+        direction = "down"
+    ) {
+
+        applyChord(
+            chordName
+        );
+
+        state.chordCount++;
+
+        const instrument =
+            G.getInstrument();
+
+        const indices =
+            direction === "up"
+                ? [...Array(
+                    instrument.strings
+                ).keys()].reverse()
+                : [...Array(
+                    instrument.strings
+                ).keys()];
+
+        for (
+            let i = 0;
+            i < indices.length;
+            i++
+        ) {
+
+            const stringIndex =
+                indices[i];
+
+            const shape =
+                chordForInstrument(
+                    chordName
+                );
+
+            if (!shape) continue;
+
+            const fret =
+                shape[stringIndex];
+
+            if (
+                fret === undefined ||
+                fret < 0
+            ) {
+                continue;
+            }
+
+            setTimeout(
+                () => {
+
+                    G.playString(
+                        stringIndex,
+                        0.82,
+                        direction
+                    );
+
+                },
+                i *
+                (
+                    instrument.type === "bass"
+                        ? 35
+                        : 22
+                )
+            );
+        }
+
+        if (G.Practice) {
+
+            G.Practice.registerChord(
+                chordName
+            );
+        }
+    }
+
+    /* ---------------------------------------------------------
+       UPDATE CHORD UI
+       --------------------------------------------------------- */
+
+    function updateChordUI(
+        chordName
+    ) {
+
+        document
+            .querySelectorAll(
+                ".chord-button"
+            )
+            .forEach(
+                button => {
+
+                    const value =
+                        button.dataset.chord ||
+                        button.dataset.value ||
+                        button.textContent.trim();
+
+                    button.classList.toggle(
+                        "active",
+                        value === chordName
+                    );
+                }
+            );
+
+        const display =
+            document.querySelector(
+                ".active-chord-display strong"
+            );
+
+        if (display) {
+
+            display.textContent =
+                chordName;
+        }
+    }
+
+    /* ---------------------------------------------------------
+       BIND CHORD BUTTONS
+       --------------------------------------------------------- */
+
+    function bindChordButtons() {
+
+        document
+            .querySelectorAll(
+                ".chord-button"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        async () => {
+
+                            const chord =
+                                button.dataset.chord ||
+                                button.dataset.value ||
+                                button.textContent.trim();
+
+                            if (!chord) return;
+
+                            await G.Audio.init();
+
+                            applyChord(
+                                chord
+                            );
+
+                            /*
+                             * Double click or separate
+                             * play action can trigger sound.
+                             * Normal click plays chord directly
+                             * because simulator must be interactive.
+                             */
+
+                            await playChord(
+                                chord,
+                                "down"
+                            );
+                        }
+                    );
+                }
+            );
+    }
+
+    G.applyChord = applyChord;
+    G.playChord = playChord;
+
+    bindChordButtons();
+
+    if (state.selectedChord) {
+
+        setTimeout(
+            () => {
+
+                if (
+                    CHORDS[
+                        state.selectedChord
+                    ]
+                ) {
+
+                    applyChord(
+                        state.selectedChord
+                    );
+                }
+
+            },
+            0
+        );
+    }
+
+})();
