@@ -4463,8 +4463,12 @@
 
                 } else {
 
-                    DOM.lessonMessage.textContent =
-                        "Objektif practice la rive 100%.`;
+
+
+DOM.lessonMessage.textContent =
+    "Objektif practice la rive 100%.";
+
+
                 }
             }
         },
@@ -4673,3 +4677,6 @@
     G.setReverb = setReverb;
 
 })();
+
+
+
