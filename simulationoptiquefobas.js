@@ -1,122 +1,113 @@
+
 /* ================================================================
    FOBAS OPTIQUE
    ---------------------------------------------------------------
-   MOTEUR 3D INTERACTIF DE LABORATOIRE OPTIQUE
-   Version : 2.0.0 — REAL 3D OPTICAL LAB ENGINE
-   ---------------------------------------------------------------
-   Architecture :
-   01 — Configuration
-   02 — État global
-   03 — Chargement Three.js
-   04 — Initialisation 3D
-   05 — Éclairage / environnement
-   06 — Banc optique
-   07 — Bibliothèque de composants
-   08 — Création des composants 3D
-   09 — Ray Tracing
-   10 — Réflexion
-   11 — Réfraction
-   12 — Lentilles
-   13 — Miroirs
-   14 — Interaction
-   15 — Sélection
-   16 — Déplacement
-   17 — Rotation
-   18 — Mise à l'échelle
-   19 — Caméra
-   20 — Mesures
-   21 — Propriétés
-   22 — Expériences
-   23 — Missions
-   24 — Résultats
-   25 — Sauvegarde
-   26 — Import / Export
-   27 — Interface
-   28 — Boutons
-   29 — Raccourcis clavier
-   30 — Responsive
-   31 — Animation
-   32 — Sécurité / récupération
-   33 — Démarrage
+   MOTEUR PRINCIPAL AUTONOME
+   Version : 1.0.0
+   Architecture : Canvas 2D + Projection 3D mathématique
    ---------------------------------------------------------------
    IMPORTANT :
-   - Ce fichier est autonome.
-   - Il ne modifie aucun système pédagogique FOBAS.
-   - Les objets sont générés en 3D.
-   - Les actions principales sont reliées aux contrôles HTML.
-================================================================ */
+   - AUCUNE dépendance Three.js
+   - AUCUN CDN
+   - AUCUN dossier lib/
+   - AUCUN fichier externe obligatoire
+   - Compatible avec simulationoptiquefobas.html fourni
+   - Compatible avec simulationoptiquefobas.css fourni
+   ================================================================ */
 
-
-/* ================================================================
-   01 — CONFIGURATION GLOBALE
-================================================================ */
-
-(() => {
+(function () {
 
     "use strict";
 
-    const FOBAS_OPTICS_VERSION = "2.0.0";
+    /* ============================================================
+       01 — CONFIGURATION
+    ============================================================ */
 
-    const CONFIG = {
-
-        canvasSelector: "#optics3dCanvas",
-
-        storageKey: "FOBAS_OPTIQUE_3D_STATE",
-
-        sceneWidth: 30,
-        sceneHeight: 14,
-        sceneDepth: 18,
-
-        benchLength: 24,
-        benchWidth: 3.2,
-        benchHeight: 0.55,
-
-        defaultRayIntensity: 1,
-
-        rayColor: 0xff3cff,
-
-        backgroundColor: 0x06101d,
-
-        gridColor: 0x1a4b6b,
-
-        selectionColor: 0x00e5ff,
-
-        maxObjects: 300,
-
-        raySegments: 120,
-
-        animationSpeed: 1,
-
-        units: "cm",
-
-        autoSaveDelay: 800
-
+    const CONFIG = window.FOBAS_OPTICS_CONFIG || {
+        appName: "FOBAS OPTIQUE",
+        appVersion: "1.0.0",
+        engineName: "FOBAS_OPTICS_3D_ENGINE",
+        storageKey: "FOBAS_OPTICS_LAB_STATE",
+        units: {
+            length: "cm",
+            angle: "deg",
+            wavelength: "nm",
+            intensity: "%"
+        },
+        defaults: {
+            wavelength: 650,
+            intensity: 75,
+            refractiveIndex: 1,
+            showRays: true,
+            showSecondaryRays: true,
+            showFocalPoints: true
+        }
     };
 
 
-/* ================================================================
-   02 — ÉTAT GLOBAL
-================================================================ */
+    /* ============================================================
+       02 — ÉTAT GLOBAL DU MOTEUR
+    ============================================================ */
 
     const STATE = {
 
         initialized: false,
 
-        threeLoaded: false,
+        running: false,
 
-        running: true,
+        category: "sources",
 
-        renderMode: "realistic",
-
-        interactionMode: "select",
-
-        cameraMode: "perspective",
+        selectedLibraryType: null,
 
         selectedObject: null,
 
-        selectedId: null,
+        interactionMode: "select",
 
-        hoveredObject: null,
+        cameraMode: "orbit",
+
+        camera: {
+            yaw: -0.48,
+            pitch: 0.34,
+            distance: 23,
+            target: {
+                x: 0,
+                y: 0,
+                z: 0
+            }
+        },
+
+        cameraDefaults: {
+            yaw: -0.48,
+            pitch: 0.34,
+            distance: 23,
+            target: {
+                x: 0,
+                y: 0,
+                z: 0
+            }
+        },
+
+        pointer: {
+            x: 0,
+            y: 0,
+            downX: 0,
+            downY: 0,
+            lastX: 0,
+            lastY: 0,
+            dragging: false,
+            button: 0
+        },
+
+        optical: {
+            wavelength: Number(CONFIG.defaults.wavelength) || 650,
+            intensity: Number(CONFIG.defaults.intensity) || 75,
+            refractiveIndex: Number(CONFIG.defaults.refractiveIndex) || 1,
+            showRays: CONFIG.defaults.showRays !== false,
+            showSecondaryRays:
+                CONFIG.defaults.showSecondaryRays !== false,
+            showFocalPoints:
+                CONFIG.defaults.showFocalPoints !== false
+        },
 
         objects: [],
 
@@ -124,3878 +115,2596 @@
 
         measurements: [],
 
-        experiments: [],
-
-        missions: [],
-
         results: [],
 
-        history: [],
+        connections: [],
 
-        historyIndex: -1,
+        experiment: "",
 
-        rayTracingEnabled: true,
+        nextObjectId: 1,
 
-        shadowsEnabled: true,
+        nextMeasurementId: 1,
 
-        gridEnabled: true,
+        fps: 0,
 
-        labelsEnabled: true,
+        lastFrameTime: performance.now(),
 
-        snapEnabled: true,
+        frames: 0,
 
-        autoSave: true,
+        fpsTimer: performance.now(),
 
-        showHelp: false,
+        dirty: true,
 
-        intensity: 1,
+        pendingConfirmation: null,
 
-        time: 0,
+        rayAnimation: 0,
 
-        lastFrame: performance.now(),
+        dragObjectStart: null,
 
-        cameraDistance: 25,
+        measureStart: null,
 
-        cameraTheta: Math.PI / 4,
+        connectStart: null,
 
-        cameraPhi: Math.PI / 3,
-
-        pointer: {
-
-            x: 0,
-
-            y: 0,
-
-            down: false,
-
-            moved: false,
-
-            startX: 0,
-
-            startY: 0
-
-        },
-
-        drag: {
-
-            active: false,
-
-            object: null,
-
-            plane: null,
-
-            offset: null
-
-        },
-
-        measurementsLive: {
-
-            distance: 0,
-
-            angle: 0,
-
-            focalLength: 0,
-
-            imageDistance: 0,
-
-            objectDistance: 0,
-
-            magnification: 0,
-
-            refractiveIndex: 1
-
-        }
+        renderError: null
 
     };
 
 
-/* ================================================================
-   03 — RÉFÉRENCES THREE.JS
-================================================================ */
+    /* ============================================================
+       03 — DOM
+    ============================================================ */
 
-    let THREE = window.THREE || null;
+    const DOM = {};
 
-    let OrbitControls = null;
+    function cacheDOM() {
 
-    let scene = null;
+        const ids = [
 
-    let camera = null;
+            "fobasOptiqueApp",
+            "engineStatus",
+            "engineStatusIndicator",
+            "engineStatusText",
 
-    let renderer = null;
+            "btnNewExperiment",
+            "btnSaveExperiment",
+            "btnResetExperiment",
 
-    let controls = null;
+            "leftPanel",
+            "rightPanel",
+            "btnToggleLeftPanel",
+            "btnToggleRightPanel",
 
-    let raycaster = null;
+            "componentSearch",
+            "btnClearComponentSearch",
+            "componentLibrary",
 
-    let pointerVector = null;
+            "categorySources",
+            "categoryLenses",
+            "categoryMirrors",
+            "categoryPrisms",
+            "categoryFilters",
+            "categoryInstruments",
+            "categorySupports",
 
-    let world = null;
+            "btnAddSelectedComponent",
+            "btnRemoveSelectedComponent",
 
-    let laboratoryGroup = null;
+            "sceneContainer",
+            "optics3DCanvas",
 
-    let objectsGroup = null;
+            "loadingOverlay",
+            "loadingProgressBar",
+            "loadingProgressText",
 
-    let raysGroup = null;
+            "renderErrorOverlay",
+            "renderErrorMessage",
+            "btnRetry3D",
 
-    let helpersGroup = null;
+            "coordinateX",
+            "coordinateY",
+            "coordinateZ",
 
-    let labelsGroup = null;
+            "currentInteractionMode",
+            "rayStatusIndicator",
+            "rayStatusText",
 
-    let selectionGroup = null;
+            "sceneCrosshair",
+            "selectionIndicator",
 
-    let gridHelper = null;
+            "btnCameraOrbit",
+            "btnCameraPan",
+            "btnCameraZoomIn",
+            "btnCameraZoomOut",
+            "btnCameraReset",
 
-    let benchGroup = null;
+            "toolSelect",
+            "toolMove",
+            "toolRotate",
+            "toolMeasure",
+            "toolConnect",
 
-    let measurementGroup = null;
+            "btnSceneHelp",
 
-    let animationFrame = null;
+            "selectedObjectName",
+            "selectedObjectPosition",
+            "objectCount",
+            "fpsCounter",
 
-    let autoSaveTimer = null;
+            "selectedObjectEmpty",
+            "selectedObjectProperties",
+            "selectedObjectIcon",
+            "selectedObjectTitle",
+            "selectedObjectDescription",
 
-    let transformPlane = null;
+            "objectPositionX",
+            "objectPositionY",
+            "objectPositionZ",
 
-    let selectionBox = null;
+            "objectRotationX",
+            "objectRotationY",
+            "objectRotationZ",
 
+            "btnDuplicateObject",
+            "btnDeleteObject",
 
-/* ================================================================
-   04 — OUTILS GÉNÉRAUX
-================================================================ */
+            "wavelengthInput",
+            "intensityInput",
+            "intensityValue",
+            "refractiveIndexInput",
+            "btnApplyOpticalProperties",
 
-    const $ = selector => document.querySelector(selector);
+            "measurementDistance",
+            "measurementAngle",
+            "measurementFocal",
+            "measurementMagnification",
 
-    const $$ = selector => Array.from(document.querySelectorAll(selector));
+            "btnClearMeasurements",
 
-    function byId(id) {
+            "showRaysToggle",
+            "showSecondaryRaysToggle",
+            "showFocalPointsToggle",
+            "btnTraceRays",
 
-        return document.getElementById(id);
+            "experimentSelector",
+            "btnLoadExperiment",
 
+            "resultsPanel",
+            "resultsContent",
+            "resultsTableBody",
+            "resultsEmptyRow",
+            "summaryMeasurements",
+            "summaryAverageError",
+            "summaryPrecision",
+
+            "btnClearResults",
+            "btnExportResults",
+            "btnToggleResults",
+
+            "notificationContainer",
+
+            "helpModal",
+            "btnCloseHelpModal",
+
+            "confirmationModal",
+            "confirmationTitle",
+            "confirmationMessage",
+            "btnCancelConfirmation",
+            "btnConfirmConfirmation",
+
+            "objectInfoModal",
+            "btnCloseObjectInfo",
+            "objectInfoTitle",
+            "objectInfoSubtitle",
+            "infoObjectType",
+            "infoObjectMaterial",
+            "infoObjectIndex",
+            "infoObjectFocal",
+
+            "experimentFileInput"
+
+        ];
+
+        ids.forEach(function (id) {
+            DOM[id] = document.getElementById(id);
+        });
+
+        DOM.categoryButtons =
+            document.querySelectorAll(".category-btn");
+
+        DOM.toolButtons =
+            document.querySelectorAll(".interaction-tool");
+
+        DOM.cameraButtons =
+            document.querySelectorAll(".camera-btn");
+
+        DOM.canvas =
+            DOM.optics3DCanvas;
+
+        if (!DOM.canvas) {
+            throw new Error(
+                "Le canvas #optics3DCanvas est introuvable."
+            );
+        }
+
+        DOM.ctx = DOM.canvas.getContext("2d", {
+            alpha: false,
+            antialias: true
+        });
+
+        if (!DOM.ctx) {
+            throw new Error(
+                "Canvas 2D indisponible sur cet appareil."
+            );
+        }
     }
 
-    function exists(element) {
 
-        return !!element;
+    /* ============================================================
+       04 — BIBLIOTHÈQUE OPTIQUE
+    ============================================================ */
 
-    }
+    const LIBRARY = {
+
+        sources: [
+
+            {
+                type: "laser",
+                icon: "🔴",
+                name: "Laser",
+                description: "Source laser monochromatique",
+                wavelength: 650,
+                color: "#ff334f",
+                power: 75
+            },
+
+            {
+                type: "led-source",
+                icon: "💡",
+                name: "Source LED",
+                description: "Source lumineuse étendue",
+                wavelength: 550,
+                color: "#fff4a8",
+                power: 60
+            },
+
+            {
+                type: "point-source",
+                icon: "✦",
+                name: "Source ponctuelle",
+                description: "Source lumineuse ponctuelle",
+                wavelength: 600,
+                color: "#ffffff",
+                power: 50
+            },
+
+            {
+                type: "parallel-source",
+                icon: "☰",
+                name: "Source collimatée",
+                description: "Faisceau parallèle",
+                wavelength: 650,
+                color: "#ff4050",
+                power: 80
+            }
+
+        ],
+
+        lenses: [
+
+            {
+                type: "convex-lens",
+                icon: "◉",
+                name: "Lentille convergente",
+                description: "Lentille mince convergente",
+                focalLength: 6,
+                refractiveIndex: 1.5
+            },
+
+            {
+                type: "concave-lens",
+                icon: ")( ",
+                name: "Lentille divergente",
+                description: "Lentille mince divergente",
+                focalLength: -6,
+                refractiveIndex: 1.5
+            },
+
+            {
+                type: "cylindrical-lens",
+                icon: "║",
+                name: "Lentille cylindrique",
+                description: "Lentille à courbure cylindrique",
+                focalLength: 8,
+                refractiveIndex: 1.5
+            }
+
+        ],
+
+        mirrors: [
+
+            {
+                type: "plane-mirror",
+                icon: "▯",
+                name: "Miroir plan",
+                description: "Surface réfléchissante plane",
+                focalLength: Infinity
+            },
+
+            {
+                type: "concave-mirror",
+                icon: "◖",
+                name: "Miroir concave",
+                description: "Miroir convergent",
+                focalLength: 6
+            },
+
+            {
+                type: "convex-mirror",
+                icon: "◗",
+                name: "Miroir convexe",
+                description: "Miroir divergent",
+                focalLength: -6
+            }
+
+        ],
+
+        prisms: [
+
+            {
+                type: "prism",
+                icon: "△",
+                name: "Prisme optique",
+                description: "Prisme triangulaire dispersif",
+                refractiveIndex: 1.516
+            },
+
+            {
+                type: "right-prism",
+                icon: "◢",
+                name: "Prisme droit",
+                description: "Prisme à angle droit",
+                refractiveIndex: 1.516
+            }
+
+        ],
+
+        filters: [
+
+            {
+                type: "red-filter",
+                icon: "🔴",
+                name: "Filtre rouge",
+                description: "Filtre spectral rouge",
+                wavelengthMin: 600,
+                wavelengthMax: 700
+            },
+
+            {
+                type: "green-filter",
+                icon: "🟢",
+                name: "Filtre vert",
+                description: "Filtre spectral vert",
+                wavelengthMin: 500,
+                wavelengthMax: 570
+            },
+
+            {
+                type: "blue-filter",
+                icon: "🔵",
+                name: "Filtre bleu",
+                description: "Filtre spectral bleu",
+                wavelengthMin: 430,
+                wavelengthMax: 500
+            },
+
+            {
+                type: "polarizer",
+                icon: "◈",
+                name: "Polariseur",
+                description: "Filtre polarisant linéaire",
+                angle: 0
+            }
+
+        ],
+
+        instruments: [
+
+            {
+                type: "screen",
+                icon: "▣",
+                name: "Écran",
+                description: "Écran d'observation",
+                size: 4
+            },
+
+            {
+                type: "protractor",
+                icon: "∩",
+                name: "Rapporteur",
+                description: "Mesure des angles",
+                size: 4
+            },
+
+            {
+                type: "ruler",
+                icon: "📏",
+                name: "Règle optique",
+                description: "Mesure des distances",
+                size: 10
+            },
+
+            {
+                type: "photometer",
+                icon: "◉",
+                name: "Photomètre",
+                description: "Mesure de l'intensité lumineuse",
+                size: 2
+            }
+
+        ],
+
+        supports: [
+
+            {
+                type: "optical-bench",
+                icon: "═",
+                name: "Banc optique",
+                description: "Banc gradué pour expériences",
+                size: 20
+            },
+
+            {
+                type: "lens-holder",
+                icon: "⊥",
+                name: "Support de lentille",
+                description: "Porte-lentille réglable",
+                size: 1
+            },
+
+            {
+                type: "mirror-holder",
+                icon: "┴",
+                name: "Support de miroir",
+                description: "Porte-miroir réglable",
+                size: 1
+            },
+
+            {
+                type: "object-holder",
+                icon: "⊞",
+                name: "Porte-objet",
+                description: "Support pour objet",
+                size: 1
+            }
+
+        ]
+
+    };
+
+
+    /* ============================================================
+       05 — UTILITAIRES
+    ============================================================ */
 
     function clamp(value, min, max) {
-
         return Math.max(min, Math.min(max, value));
-
     }
 
-    function uid(prefix = "opt") {
-
-        return `${prefix}_${Date.now().toString(36)}_${Math.random()
-            .toString(36)
-            .slice(2, 8)}`;
-
+    function uid(prefix) {
+        return (
+            prefix +
+            "_" +
+            Date.now().toString(36) +
+            "_" +
+            Math.random().toString(36).slice(2, 8)
+        );
     }
 
-    function degToRad(value) {
-
-        return Number(value) * Math.PI / 180;
-
+    function degToRad(deg) {
+        return deg * Math.PI / 180;
     }
 
-    function radToDeg(value) {
-
-        return Number(value) * 180 / Math.PI;
-
+    function radToDeg(rad) {
+        return rad * 180 / Math.PI;
     }
 
-    function round(value, decimals = 2) {
-
-        const factor = Math.pow(10, decimals);
-
-        return Math.round(Number(value) * factor) / factor;
-
-    }
-
-    function safeNumber(value, fallback = 0) {
+    function formatNumber(value, digits) {
 
         const n = Number(value);
 
-        return Number.isFinite(n) ? n : fallback;
-
-    }
-
-    function escapeHTML(value) {
-
-        return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-
-    }
-
-    function notify(message, type = "info", duration = 3000) {
-
-        const container =
-            byId("notificationContainer") ||
-            document.querySelector(".notification-container");
-
-        if (!container) {
-
-            console.log(`[FOBAS OPTIQUE] ${message}`);
-
-            return;
-
+        if (!Number.isFinite(n)) {
+            return "—";
         }
 
-        const notification = document.createElement("div");
+        return n.toFixed(
+            Number.isFinite(digits) ? digits : 2
+        );
+    }
 
-        notification.className = `fobas-notification ${type}`;
+    function wavelengthToColor(wavelength) {
 
-        notification.textContent = message;
+        const wl = clamp(
+            Number(wavelength) || 650,
+            380,
+            780
+        );
 
-        container.appendChild(notification);
+        let r = 0;
+        let g = 0;
+        let b = 0;
 
-        requestAnimationFrame(() => {
+        if (wl >= 380 && wl < 440) {
+            r = -(wl - 440) / 60;
+            g = 0;
+            b = 1;
+        } else if (wl < 490) {
+            r = 0;
+            g = (wl - 440) / 50;
+            b = 1;
+        } else if (wl < 510) {
+            r = 0;
+            g = 1;
+            b = -(wl - 510) / 20;
+        } else if (wl < 580) {
+            r = (wl - 510) / 70;
+            g = 1;
+            b = 0;
+        } else if (wl < 645) {
+            r = 1;
+            g = -(wl - 645) / 65;
+            b = 0;
+        } else {
+            r = 1;
+            g = 0;
+            b = 0;
+        }
 
-            notification.classList.add("show");
+        const factor =
+            wl < 420
+                ? 0.3 + 0.7 * (wl - 380) / 40
+                : wl > 700
+                    ? 0.3 + 0.7 * (780 - wl) / 80
+                    : 1;
 
+        return {
+            r: Math.round(r * factor * 255),
+            g: Math.round(g * factor * 255),
+            b: Math.round(b * factor * 255)
+        };
+    }
+
+    function rgb(color, alpha) {
+
+        const a =
+            Number.isFinite(alpha)
+                ? alpha
+                : 1;
+
+        return (
+            "rgba(" +
+            color.r +
+            "," +
+            color.g +
+            "," +
+            color.b +
+            "," +
+            a +
+            ")"
+        );
+    }
+
+    function distance3D(a, b) {
+
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dz = a.z - b.z;
+
+        return Math.sqrt(
+            dx * dx +
+            dy * dy +
+            dz * dz
+        );
+    }
+
+    function copyVector(v) {
+
+        return {
+            x: Number(v.x) || 0,
+            y: Number(v.y) || 0,
+            z: Number(v.z) || 0
+        };
+    }
+
+
+    /* ============================================================
+       06 — PROJECTION 3D
+    ============================================================ */
+
+    function rotatePoint(point) {
+
+        const yaw = STATE.camera.yaw;
+        const pitch = STATE.camera.pitch;
+
+        const cosY = Math.cos(yaw);
+        const sinY = Math.sin(yaw);
+
+        const x1 =
+            point.x * cosY -
+            point.z * sinY;
+
+        const z1 =
+            point.x * sinY +
+            point.z * cosY;
+
+        const cosP = Math.cos(pitch);
+        const sinP = Math.sin(pitch);
+
+        const y2 =
+            point.y * cosP -
+            z1 * sinP;
+
+        const z2 =
+            point.y * sinP +
+            z1 * cosP;
+
+        return {
+            x: x1,
+            y: y2,
+            z: z2
+        };
+    }
+
+    function project(point) {
+
+        const rotated = rotatePoint({
+            x: point.x - STATE.camera.target.x,
+            y: point.y - STATE.camera.target.y,
+            z: point.z - STATE.camera.target.z
         });
 
-        setTimeout(() => {
+        const depth =
+            rotated.z +
+            STATE.camera.distance;
 
-            notification.classList.remove("show");
+        const width = DOM.canvas.clientWidth || 1;
+        const height = DOM.canvas.clientHeight || 1;
 
-            setTimeout(() => notification.remove(), 350);
+        const focal =
+            Math.min(width, height) * 0.9;
 
-        }, duration);
+        const scale =
+            focal /
+            Math.max(depth, 2);
 
+        return {
+            x:
+                width / 2 +
+                rotated.x * scale,
+
+            y:
+                height / 2 -
+                rotated.y * scale,
+
+            depth: depth,
+
+            scale: scale,
+
+            visible: depth > 0.2
+        };
     }
 
 
-/* ================================================================
-   05 — CHARGEMENT THREE.JS
-================================================================ */
+    /* ============================================================
+       07 — RENDU CANVAS
+    ============================================================ */
 
-    function loadScript(src) {
+    function resizeCanvas() {
 
-        return new Promise((resolve, reject) => {
+        const rect =
+            DOM.canvas.getBoundingClientRect();
 
-            const existing =
-                document.querySelector(`script[src="${src}"]`);
-
-            if (existing) {
-
-                existing.addEventListener("load", resolve, { once: true });
-
-                existing.addEventListener("error", reject, { once: true });
-
-                if (window.THREE) {
-
-                    resolve();
-
-                }
-
-                return;
-
-            }
-
-            const script = document.createElement("script");
-
-            script.src = src;
-
-            script.async = true;
-
-            script.onload = resolve;
-
-            script.onerror = reject;
-
-            document.head.appendChild(script);
-
-        });
-
-    }
-
-    async function loadThreeJS() {
-
-        if (window.THREE) {
-
-            THREE = window.THREE;
-
-            STATE.threeLoaded = true;
-
-            return true;
-
-        }
-
-        try {
-
-            await loadScript(
-                "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"
+        const dpr =
+            Math.min(
+                window.devicePixelRatio || 1,
+                2
             );
 
-            THREE = window.THREE;
+        DOM.canvas.width =
+            Math.max(1, Math.floor(rect.width * dpr));
 
-            if (!THREE) {
+        DOM.canvas.height =
+            Math.max(1, Math.floor(rect.height * dpr));
 
-                throw new Error("Three.js non disponible.");
-
-            }
-
-            STATE.threeLoaded = true;
-
-            return true;
-
-        } catch (error) {
-
-            console.error(error);
-
-            showRenderError(
-                "Le moteur 3D n'a pas pu être chargé.",
-                "Vérifiez votre connexion Internet ou ajoutez Three.js localement."
-            );
-
-            return false;
-
-        }
-
-    }
-
-    async function loadOrbitControls() {
-
-        if (!THREE) return false;
-
-        try {
-
-            if (THREE.OrbitControls) {
-
-                OrbitControls = THREE.OrbitControls;
-
-                return true;
-
-            }
-
-            await loadScript(
-                "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/js/controls/OrbitControls.js"
-            );
-
-            OrbitControls =
-                THREE.OrbitControls ||
-                window.OrbitControls ||
-                null;
-
-            return !!OrbitControls;
-
-        } catch (error) {
-
-            console.warn(
-                "OrbitControls non disponible. Contrôle caméra manuel activé.",
-                error
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ================================================================
-   06 — INITIALISATION PRINCIPALE
-================================================================ */
-
-    async function initFOBASOptique() {
-
-        if (STATE.initialized) return;
-
-        showLoading(true, 5, "Initialisation du laboratoire...");
-
-        const loaded = await loadThreeJS();
-
-        if (!loaded) return;
-
-        showLoading(true, 18, "Chargement du moteur de caméra...");
-
-        await loadOrbitControls();
-
-        showLoading(true, 30, "Construction de la scène 3D...");
-
-        if (!initScene()) {
-
-            return;
-
-        }
-
-        showLoading(true, 45, "Construction du laboratoire optique...");
-
-        createLaboratory();
-
-        showLoading(true, 58, "Chargement des composants optiques...");
-
-        registerComponentLibrary();
-
-        showLoading(true, 68, "Activation de la physique optique...");
-
-        createPhysicsHelpers();
-
-        showLoading(true, 78, "Connexion des interactions...");
-
-        bindInterface();
-
-        showLoading(true, 88, "Restauration du laboratoire...");
-
-        restoreState();
-
-        showLoading(true, 95, "Finalisation...");
-
-        createDefaultScene();
-
-        STATE.initialized = true;
-
-        updateAllUI();
-
-        showLoading(true, 100, "Laboratoire prêt");
-
-        setTimeout(() => {
-
-            showLoading(false);
-
-            notify(
-                "FOBAS OPTIQUE — laboratoire 3D prêt.",
-                "success",
-                4000
-            );
-
-        }, 450);
-
-        animate();
-
-    }
-
-
-/* ================================================================
-   07 — SCÈNE 3D
-================================================================ */
-
-    function initScene() {
-
-        const canvas =
-            byId("optics3dCanvas") ||
-            document.querySelector(CONFIG.canvasSelector);
-
-        if (!canvas) {
-
-            showRenderError(
-                "Canvas 3D introuvable.",
-                "L'élément #optics3dCanvas doit être présent dans le HTML."
-            );
-
-            return false;
-
-        }
-
-        scene = new THREE.Scene();
-
-        scene.background =
-            new THREE.Color(CONFIG.backgroundColor);
-
-        scene.fog =
-            new THREE.FogExp2(
-                CONFIG.backgroundColor,
-                0.018
-            );
-
-        camera =
-            new THREE.PerspectiveCamera(
-                48,
-                1,
-                0.1,
-                1000
-            );
-
-        camera.position.set(
-            17,
-            12,
-            18
-        );
-
-        renderer =
-            new THREE.WebGLRenderer({
-
-                canvas,
-
-                antialias: true,
-
-                alpha: false,
-
-                powerPreference: "high-performance"
-
-            });
-
-        renderer.setPixelRatio(
-            Math.min(window.devicePixelRatio || 1, 2)
-        );
-
-        renderer.shadowMap.enabled = true;
-
-        renderer.shadowMap.type =
-            THREE.PCFSoftShadowMap;
-
-        renderer.outputColorSpace =
-            THREE.SRGBColorSpace;
-
-        renderer.toneMapping =
-            THREE.ACESFilmicToneMapping;
-
-        renderer.toneMappingExposure = 1.12;
-
-        if (OrbitControls) {
-
-            controls =
-                new OrbitControls(
-                    camera,
-                    renderer.domElement
-                );
-
-            controls.enableDamping = true;
-
-            controls.dampingFactor = 0.06;
-
-            controls.minDistance = 6;
-
-            controls.maxDistance = 65;
-
-            controls.maxPolarAngle =
-                Math.PI * 0.49;
-
-            controls.target.set(
-                0,
-                2,
-                0
-            );
-
-        }
-
-        raycaster = new THREE.Raycaster();
-
-        pointerVector = new THREE.Vector2();
-
-        world = new THREE.Group();
-
-        laboratoryGroup = new THREE.Group();
-
-        objectsGroup = new THREE.Group();
-
-        raysGroup = new THREE.Group();
-
-        helpersGroup = new THREE.Group();
-
-        labelsGroup = new THREE.Group();
-
-        selectionGroup = new THREE.Group();
-
-        measurementGroup = new THREE.Group();
-
-        scene.add(world);
-
-        world.add(laboratoryGroup);
-
-        world.add(objectsGroup);
-
-        world.add(raysGroup);
-
-        world.add(helpersGroup);
-
-        world.add(labelsGroup);
-
-        world.add(selectionGroup);
-
-        world.add(measurementGroup);
-
-        transformPlane =
-            new THREE.Plane(
-                new THREE.Vector3(0, 1, 0),
-                -0.8
-            );
-
-        window.addEventListener(
-            "resize",
-            resizeRenderer
-        );
-
-        renderer.domElement.addEventListener(
-            "pointerdown",
-            handlePointerDown
-        );
-
-        renderer.domElement.addEventListener(
-            "pointermove",
-            handlePointerMove
-        );
-
-        renderer.domElement.addEventListener(
-            "pointerup",
-            handlePointerUp
-        );
-
-        renderer.domElement.addEventListener(
-            "dblclick",
-            handleDoubleClick
-        );
-
-        renderer.domElement.addEventListener(
-            "wheel",
-            handleWheel,
-            { passive: false }
-        );
-
-        resizeRenderer();
-
-        return true;
-
-    }
-
-
-/* ================================================================
-   08 — ÉCLAIRAGE / ENVIRONNEMENT
-================================================================ */
-
-    function createPhysicsHelpers() {
-
-        if (!scene) return;
-
-        const ambient =
-            new THREE.HemisphereLight(
-                0xbfe9ff,
-                0x08101c,
-                1.6
-            );
-
-        ambient.name = "FOBAS_Ambient_Light";
-
-        laboratoryGroup.add(ambient);
-
-        const keyLight =
-            new THREE.DirectionalLight(
-                0xffffff,
-                3.0
-            );
-
-        keyLight.position.set(
-            8,
-            15,
-            10
-        );
-
-        keyLight.castShadow = true;
-
-        keyLight.shadow.mapSize.width = 2048;
-
-        keyLight.shadow.mapSize.height = 2048;
-
-        keyLight.shadow.camera.left = -25;
-
-        keyLight.shadow.camera.right = 25;
-
-        keyLight.shadow.camera.top = 25;
-
-        keyLight.shadow.camera.bottom = -25;
-
-        keyLight.shadow.bias = -0.0005;
-
-        laboratoryGroup.add(keyLight);
-
-        const fill =
-            new THREE.PointLight(
-                0x238cff,
-                80,
-                35
-            );
-
-        fill.position.set(
-            -10,
-            8,
-            7
-        );
-
-        laboratoryGroup.add(fill);
-
-        const warm =
-            new THREE.PointLight(
-                0xffb45c,
-                55,
-                28
-            );
-
-        warm.position.set(
-            12,
-            5,
-            -7
-        );
-
-        laboratoryGroup.add(warm);
-
-        createGrid();
-
-    }
-
-    function createGrid() {
-
-        if (gridHelper) {
-
-            helpersGroup.remove(gridHelper);
-
-        }
-
-        gridHelper =
-            new THREE.GridHelper(
-                40,
-                80,
-                CONFIG.gridColor,
-                0x0c2334
-            );
-
-        gridHelper.position.y = 0;
-
-        gridHelper.name = "FOBAS_Grid";
-
-        helpersGroup.add(gridHelper);
-
-    }
-
-
-/* ================================================================
-   09 — LABORATOIRE / BANC OPTIQUE
-================================================================ */
-
-    function createLaboratory() {
-
-        benchGroup = new THREE.Group();
-
-        benchGroup.name =
-            "FOBAS_OPTICAL_BENCH";
-
-        laboratoryGroup.add(benchGroup);
-
-        createFloor();
-
-        createOpticalBench();
-
-        createBenchScale();
-
-        createLaboratoryBackWall();
-
-        createBenchMarkers();
-
-    }
-
-    function createFloor() {
-
-        const geometry =
-            new THREE.PlaneGeometry(
-                60,
-                50
-            );
-
-        const material =
-            new THREE.MeshStandardMaterial({
-
-                color: 0x08121c,
-
-                roughness: 0.78,
-
-                metalness: 0.15
-
-            });
-
-        const floor =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
-
-        floor.rotation.x = -Math.PI / 2;
-
-        floor.receiveShadow = true;
-
-        floor.name =
-            "FOBAS_Laboratory_Floor";
-
-        laboratoryGroup.add(floor);
-
-    }
-
-    function createOpticalBench() {
-
-        const topGeometry =
-            new THREE.BoxGeometry(
-                CONFIG.benchLength,
-                CONFIG.benchHeight,
-                CONFIG.benchWidth
-            );
-
-        const topMaterial =
-            new THREE.MeshPhysicalMaterial({
-
-                color: 0x202a34,
-
-                metalness: 0.82,
-
-                roughness: 0.28,
-
-                clearcoat: 0.45,
-
-                clearcoatRoughness: 0.2
-
-            });
-
-        const top =
-            new THREE.Mesh(
-                topGeometry,
-                topMaterial
-            );
-
-        top.position.y = 1.05;
-
-        top.castShadow = true;
-
-        top.receiveShadow = true;
-
-        top.name =
-            "FOBAS_Optical_Bench_Surface";
-
-        benchGroup.add(top);
-
-        const railGeometry =
-            new THREE.BoxGeometry(
-                CONFIG.benchLength - 0.6,
-                0.22,
-                0.65
-            );
-
-        const railMaterial =
-            new THREE.MeshStandardMaterial({
-
-                color: 0x697986,
-
-                metalness: 0.92,
-
-                roughness: 0.23
-
-            });
-
-        const rail =
-            new THREE.Mesh(
-                railGeometry,
-                railMaterial
-            );
-
-        rail.position.set(
+        DOM.ctx.setTransform(
+            dpr,
             0,
-            1.25,
+            0,
+            dpr,
+            0,
             0
         );
 
-        rail.castShadow = true;
-
-        benchGroup.add(rail);
-
-        const legMaterial =
-            new THREE.MeshStandardMaterial({
-
-                color: 0x111820,
-
-                metalness: 0.72,
-
-                roughness: 0.38
-
-            });
-
-        [-8.5, 8.5].forEach(x => {
-
-            [-0.95, 0.95].forEach(z => {
-
-                const leg =
-                    new THREE.Mesh(
-                        new THREE.BoxGeometry(
-                            0.45,
-                            1.05,
-                            0.45
-                        ),
-                        legMaterial
-                    );
-
-                leg.position.set(
-                    x,
-                    0.52,
-                    z
-                );
-
-                leg.castShadow = true;
-
-                benchGroup.add(leg);
-
-            });
-
-        });
-
-        const support =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    18,
-                    0.22,
-                    2.1
-                ),
-                legMaterial
-            );
-
-        support.position.y = 0.18;
-
-        support.castShadow = true;
-
-        benchGroup.add(support);
-
+        STATE.dirty = true;
     }
 
-    function createBenchScale() {
 
-        for (
-            let x = -11;
-            x <= 11;
-            x += 0.5
-        ) {
+    function clearScene() {
 
-            const major =
-                Math.abs(x % 1) < 0.01;
+        const ctx = DOM.ctx;
 
-            const height =
-                major ? 0.16 : 0.08;
+        const width = DOM.canvas.clientWidth;
+        const height = DOM.canvas.clientHeight;
 
-            const marker =
-                new THREE.Mesh(
-                    new THREE.BoxGeometry(
-                        0.018,
-                        height,
-                        0.35
-                    ),
-                    new THREE.MeshBasicMaterial({
-                        color: 0xb7d8ec
-                    })
-                );
-
-            marker.position.set(
-                x,
-                1.38,
-                0
+        const gradient =
+            ctx.createLinearGradient(
+                0,
+                0,
+                0,
+                height
             );
 
-            benchGroup.add(marker);
-
-        }
-
-    }
-
-    function createLaboratoryBackWall() {
-
-        const wall =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    45,
-                    18,
-                    0.25
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x0b1824,
-
-                    roughness: 0.82,
-
-                    metalness: 0.05
-
-                })
-            );
-
-        wall.position.set(
+        gradient.addColorStop(
             0,
-            7,
-            -10
+            "#020811"
         );
 
-        wall.receiveShadow = true;
+        gradient.addColorStop(
+            0.5,
+            "#071525"
+        );
 
-        laboratoryGroup.add(wall);
+        gradient.addColorStop(
+            1,
+            "#030912"
+        );
 
-        for (
-            let x = -18;
-            x <= 18;
-            x += 3
-        ) {
+        ctx.fillStyle = gradient;
 
-            const panel =
-                new THREE.Mesh(
-                    new THREE.BoxGeometry(
-                        2.7,
-                        12,
-                        0.08
-                    ),
-                    new THREE.MeshStandardMaterial({
+        ctx.fillRect(
+            0,
+            0,
+            width,
+            height
+        );
 
-                        color: 0x102332,
-
-                        roughness: 0.55,
-
-                        metalness: 0.18
-
-                    })
-                );
-
-            panel.position.set(
-                x,
-                6.8,
-                -9.82
-            );
-
-            laboratoryGroup.add(panel);
-
-        }
-
+        drawAmbientGrid();
     }
 
-    function createBenchMarkers() {
 
-        const positions = [
-            -9,
-            -6,
-            -3,
+    function drawAmbientGrid() {
+
+        const ctx = DOM.ctx;
+
+        const size = 24;
+
+        for (
+            let x = -size;
+            x <= size;
+            x += 1
+        ) {
+
+            draw3DLine(
+                {
+                    x: x,
+                    y: -1.8,
+                    z: -size
+                },
+                {
+                    x: x,
+                    y: -1.8,
+                    z: size
+                },
+                "rgba(70,130,170,0.10)",
+                1
+            );
+        }
+
+        for (
+            let z = -size;
+            z <= size;
+            z += 1
+        ) {
+
+            draw3DLine(
+                {
+                    x: -size,
+                    y: -1.8,
+                    z: z
+                },
+                {
+                    x: size,
+                    y: -1.8,
+                    z: z
+                },
+                "rgba(70,130,170,0.10)",
+                1
+            );
+        }
+
+        void ctx;
+    }
+
+
+    function draw3DLine(
+        a,
+        b,
+        color,
+        width,
+        dash
+    ) {
+
+        const p1 = project(a);
+        const p2 = project(b);
+
+        if (
+            !p1.visible &&
+            !p2.visible
+        ) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            p1.x,
+            p1.y
+        );
+
+        ctx.lineTo(
+            p2.x,
+            p2.y
+        );
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width || 1;
+
+        if (dash) {
+            ctx.setLineDash(dash);
+        }
+
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+
+    function draw3DPoint(
+        point,
+        radius,
+        color
+    ) {
+
+        const p = project(point);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            Math.max(
+                2,
+                radius * p.scale
+            ),
             0,
-            3,
-            6,
-            9
+            Math.PI * 2
+        );
+
+        ctx.fillStyle = color;
+
+        ctx.shadowBlur = 15;
+
+        ctx.shadowColor = color;
+
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+
+    /* ============================================================
+       08 — BANC OPTIQUE
+    ============================================================ */
+
+    function drawOpticalBench() {
+
+        draw3DBox(
+            {
+                x: 0,
+                y: -1.35,
+                z: 0
+            },
+            {
+                x: 21,
+                y: 0.35,
+                z: 1.2
+            },
+            "#1a2935",
+            "#304655"
+        );
+
+        draw3DLine(
+            {
+                x: -10,
+                y: -0.95,
+                z: 0
+            },
+            {
+                x: 10,
+                y: -0.95,
+                z: 0
+            },
+            "#92a6b6",
+            3
+        );
+
+        for (
+            let x = -10;
+            x <= 10;
+            x += 1
+        ) {
+
+            const longTick =
+                x % 5 === 0;
+
+            draw3DLine(
+                {
+                    x: x,
+                    y: -0.95,
+                    z: -0.22
+                },
+                {
+                    x: x,
+                    y:
+                        -0.95 +
+                        (longTick ? 0.3 : 0.16),
+                    z: -0.22
+                },
+                "rgba(210,230,240,0.75)",
+                longTick ? 2 : 1
+            );
+        }
+    }
+
+
+    function draw3DBox(
+        center,
+        size,
+        topColor,
+        sideColor
+    ) {
+
+        const x =
+            size.x / 2;
+
+        const y =
+            size.y / 2;
+
+        const z =
+            size.z / 2;
+
+        const vertices = [
+
+            { x: center.x - x, y: center.y - y, z: center.z - z },
+            { x: center.x + x, y: center.y - y, z: center.z - z },
+            { x: center.x + x, y: center.y + y, z: center.z - z },
+            { x: center.x - x, y: center.y + y, z: center.z - z },
+
+            { x: center.x - x, y: center.y - y, z: center.z + z },
+            { x: center.x + x, y: center.y - y, z: center.z + z },
+            { x: center.x + x, y: center.y + y, z: center.z + z },
+            { x: center.x - x, y: center.y + y, z: center.z + z }
+
         ];
 
-        positions.forEach(x => {
+        const faces = [
 
-            const marker =
-                new THREE.Mesh(
-                    new THREE.CylinderGeometry(
-                        0.08,
-                        0.08,
-                        0.05,
-                        16
-                    ),
-                    new THREE.MeshStandardMaterial({
+            {
+                indices: [0, 1, 2, 3],
+                color: sideColor
+            },
 
-                        color: 0x00c8ff,
+            {
+                indices: [4, 7, 6, 5],
+                color: topColor
+            },
 
-                        emissive: 0x003b52,
+            {
+                indices: [0, 4, 5, 1],
+                color: sideColor
+            },
 
-                        emissiveIntensity: 2
+            {
+                indices: [3, 2, 6, 7],
+                color: topColor
+            },
 
-                    })
+            {
+                indices: [1, 5, 6, 2],
+                color: sideColor
+            },
+
+            {
+                indices: [0, 3, 7, 4],
+                color: sideColor
+            }
+
+        ];
+
+        const projected =
+            vertices.map(project);
+
+        faces
+            .map(function (face) {
+
+                let depth = 0;
+
+                face.indices.forEach(
+                    function (index) {
+                        depth +=
+                            projected[index].depth;
+                    }
                 );
 
-            marker.rotation.x =
-                Math.PI / 2;
+                return {
+                    face: face,
+                    depth: depth / 4
+                };
 
-            marker.position.set(
-                x,
-                1.38,
-                0
-            );
+            })
+            .sort(function (a, b) {
+                return b.depth - a.depth;
+            })
+            .forEach(function (item) {
 
-            benchGroup.add(marker);
+                const ctx = DOM.ctx;
 
-        });
+                ctx.save();
 
+                ctx.beginPath();
+
+                item.face.indices.forEach(
+                    function (index, i) {
+
+                        const p =
+                            projected[index];
+
+                        if (i === 0) {
+                            ctx.moveTo(
+                                p.x,
+                                p.y
+                            );
+                        } else {
+                            ctx.lineTo(
+                                p.x,
+                                p.y
+                            );
+                        }
+
+                    }
+                );
+
+                ctx.closePath();
+
+                ctx.fillStyle =
+                    item.face.color;
+
+                ctx.fill();
+
+                ctx.strokeStyle =
+                    "rgba(150,190,215,0.18)";
+
+                ctx.lineWidth = 1;
+
+                ctx.stroke();
+
+                ctx.restore();
+            });
     }
 
 
-/* ================================================================
-   10 — BIBLIOTHÈQUE DE COMPOSANTS
-================================================================ */
+    /* ============================================================
+       09 — OBJETS OPTIQUES
+    ============================================================ */
 
-    const COMPONENTS = {};
+    function createObject(type) {
 
-    function registerComponentLibrary() {
+        const data =
+            findLibraryComponent(type);
 
-        Object.assign(
-            COMPONENTS,
-            {
+        if (!data) {
+            return null;
+        }
 
-                laser: {
+        const object = {
 
-                    id: "laser",
+            id: uid("opt"),
 
-                    name: "Source Laser",
+            numericId:
+                STATE.nextObjectId++,
 
-                    description:
-                        "Source lumineuse cohérente",
+            type: type,
 
-                    icon: "🔴",
+            name: data.name,
 
-                    category: "source",
+            description: data.description,
 
-                    color: 0xff2b3d
+            icon: data.icon || "◉",
 
-                },
+            position: {
+                x: 0,
+                y: 0,
+                z: 0
+            },
 
-                lamp: {
+            rotation: {
+                x: 0,
+                y: 0,
+                z: 0
+            },
 
-                    id: "lamp",
+            scale: {
+                x: 1,
+                y: 1,
+                z: 1
+            },
 
-                    name: "Lampe",
+            wavelength:
+                data.wavelength ||
+                STATE.optical.wavelength,
 
-                    description:
-                        "Source lumineuse blanche",
+            intensity:
+                data.power ||
+                STATE.optical.intensity,
 
-                    icon: "💡",
+            refractiveIndex:
+                data.refractiveIndex ||
+                STATE.optical.refractiveIndex,
 
-                    category: "source",
+            focalLength:
+                Number.isFinite(data.focalLength)
+                    ? data.focalLength
+                    : null,
 
-                    color: 0xffd86b
+            material:
+                getMaterialForType(type),
 
-                },
+            visible: true,
 
-                lensConvex: {
+            locked: false,
 
-                    id: "lensConvex",
+            selected: false,
 
-                    name: "Lentille convergente",
+            createdAt:
+                Date.now(),
 
-                    description:
-                        "Lentille biconvexe",
+            data:
+                JSON.parse(
+                    JSON.stringify(data)
+                )
 
-                    icon: "🔵",
+        };
 
-                    category: "lens",
+        positionNewObject(object);
 
-                    focalLength: 5,
+        return object;
+    }
 
-                    refractiveIndex: 1.5,
 
-                    color: 0x4fc3ff
+    function positionNewObject(object) {
 
-                },
+        const index =
+            STATE.objects.length;
 
-                lensConcave: {
+        object.position.x =
+            -8 +
+            (index % 9) * 2;
 
-                    id: "lensConcave",
+        object.position.y =
+            0.25;
 
-                    name: "Lentille divergente",
+        object.position.z =
+            ((index % 2) - 0.5) * 0.2;
+    }
 
-                    description:
-                        "Lentille biconcave",
 
-                    icon: "🟦",
+    function findLibraryComponent(type) {
 
-                    category: "lens",
+        const categories =
+            Object.keys(LIBRARY);
 
-                    focalLength: -5,
+        for (
+            let i = 0;
+            i < categories.length;
+            i++
+        ) {
 
-                    refractiveIndex: 1.5,
+            const list =
+                LIBRARY[categories[i]];
 
-                    color: 0x63d5ff
+            const found =
+                list.find(function (item) {
+                    return item.type === type;
+                });
 
-                },
-
-                mirrorPlane: {
-
-                    id: "mirrorPlane",
-
-                    name: "Miroir plan",
-
-                    description:
-                        "Surface réfléchissante plane",
-
-                    icon: "◼",
-
-                    category: "mirror",
-
-                    color: 0xcad8e6
-
-                },
-
-                mirrorConcave: {
-
-                    id: "mirrorConcave",
-
-                    name: "Miroir concave",
-
-                    description:
-                        "Miroir convergent",
-
-                    icon: "◖",
-
-                    category: "mirror",
-
-                    color: 0xd9e5f2,
-
-                    focalLength: 4
-
-                },
-
-                mirrorConvex: {
-
-                    id: "mirrorConvex",
-
-                    name: "Miroir convexe",
-
-                    description:
-                        "Miroir divergent",
-
-                    icon: "◗",
-
-                    category: "mirror",
-
-                    color: 0xd9e5f2,
-
-                    focalLength: -4
-
-                },
-
-                prism: {
-
-                    id: "prism",
-
-                    name: "Prisme",
-
-                    description:
-                        "Prisme dispersif",
-
-                    icon: "🔺",
-
-                    category: "prism",
-
-                    color: 0x75d9ff,
-
-                    refractiveIndex: 1.52
-
-                },
-
-                screen: {
-
-                    id: "screen",
-
-                    name: "Écran",
-
-                    description:
-                        "Écran de projection",
-
-                    icon: "▣",
-
-                    category: "instrument",
-
-                    color: 0xd9e0e6
-
-                },
-
-                sensor: {
-
-                    id: "sensor",
-
-                    name: "Capteur",
-
-                    description:
-                        "Capteur optique",
-
-                    icon: "◉",
-
-                    category: "instrument",
-
-                    color: 0x55ffb1
-
-                },
-
-                ruler: {
-
-                    id: "ruler",
-
-                    name: "Règle optique",
-
-                    description:
-                        "Mesure des distances",
-
-                    icon: "📏",
-
-                    category: "instrument",
-
-                    color: 0xd0d6dc
-
-                },
-
-                protractor: {
-
-                    id: "protractor",
-
-                    name: "Rapporteur",
-
-                    description:
-                        "Mesure angulaire",
-
-                    icon: "◡",
-
-                    category: "instrument",
-
-                    color: 0xd0d6dc
-
-                },
-
-                aperture: {
-
-                    id: "aperture",
-
-                    name: "Diaphragme",
-
-                    description:
-                        "Contrôle de l'ouverture",
-
-                    icon: "◎",
-
-                    category: "instrument",
-
-                    color: 0x4c5964
-
-                },
-
-                object: {
-
-                    id: "object",
-
-                    name: "Objet lumineux",
-
-                    description:
-                        "Objet utilisé pour former une image",
-
-                    icon: "⭐",
-
-                    category: "object",
-
-                    color: 0xffd35a
-
-                }
-
+            if (found) {
+                return found;
             }
-        );
+        }
 
-        renderComponentLibrary();
-
+        return null;
     }
 
 
-/* ================================================================
-   11 — AFFICHAGE BIBLIOTHÈQUE
-================================================================ */
+    function getMaterialForType(type) {
 
-    function renderComponentLibrary(filter = "") {
+        if (
+            type.includes("mirror")
+        ) {
+            return "Aluminium réfléchissant";
+        }
 
-        const library =
-            document.querySelector(".component-library");
+        if (
+            type.includes("lens") ||
+            type.includes("prism")
+        ) {
+            return "Verre optique";
+        }
 
-        if (!library) return;
+        if (
+            type.includes("laser")
+        ) {
+            return "Semiconducteur laser";
+        }
 
-        const normalized =
-            String(filter).trim().toLowerCase();
+        return "Composant optique";
+    }
 
-        const items =
-            Object.values(COMPONENTS)
-                .filter(component => {
 
-                    if (!normalized) return true;
+    /* ============================================================
+       10 — DESSIN DES OBJETS
+    ============================================================ */
+
+    function drawAllObjects() {
+
+        const sorted =
+            STATE.objects
+                .slice()
+                .sort(function (a, b) {
 
                     return (
-                        component.name
-                            .toLowerCase()
-                            .includes(normalized) ||
-
-                        component.description
-                            .toLowerCase()
-                            .includes(normalized) ||
-
-                        component.category
-                            .toLowerCase()
-                            .includes(normalized)
-
+                        project(b.position).depth -
+                        project(a.position).depth
                     );
 
                 });
 
-        library.innerHTML = "";
-
-        if (!items.length) {
-
-            library.innerHTML = `
-                <div class="library-empty">
-                    <div>🔍</div>
-                    <strong>Aucun composant</strong>
-                    <span>Essayez une autre recherche.</span>
-                </div>
-            `;
-
-            return;
-
-        }
-
-        items.forEach(component => {
-
-            const card =
-                document.createElement("button");
-
-            card.type = "button";
-
-            card.className = "component-card";
-
-            card.dataset.component =
-                component.id;
-
-            card.innerHTML = `
-                <span class="component-icon">
-                    ${component.icon}
-                </span>
-
-                <span class="component-name">
-                    ${escapeHTML(component.name)}
-                </span>
-
-                <span class="component-description">
-                    ${escapeHTML(component.description)}
-                </span>
-            `;
-
-            card.addEventListener(
-                "click",
-                () => addComponent(component.id)
-            );
-
-            library.appendChild(card);
-
-        });
-
+        sorted.forEach(drawObject);
     }
 
 
-/* ================================================================
-   12 — CRÉATION DES OBJETS
-================================================================ */
+    function drawObject(object) {
 
-    function createOpticalObject(type, position = null) {
-
-        if (!THREE) return null;
-
-        const definition =
-            COMPONENTS[type];
-
-        if (!definition) {
-
-            notify(
-                `Composant inconnu : ${type}`,
-                "error"
-            );
-
-            return null;
-
+        if (!object.visible) {
+            return;
         }
 
-        let group =
-            new THREE.Group();
-
-        group.name =
-            `${definition.name}_${uid("obj")}`;
-
-        group.userData = {
-
-            fobasObject: true,
-
-            id: uid("object"),
-
-            type,
-
-            name: definition.name,
-
-            category: definition.category,
-
-            description: definition.description,
-
-            focalLength:
-                definition.focalLength ?? 0,
-
-            refractiveIndex:
-                definition.refractiveIndex ?? 1.5,
-
-            rotationZ: 0,
-
-            scaleValue: 1,
-
-            movable: true,
-
-            selectable: true
-
-        };
-
-        switch (type) {
+        switch (object.type) {
 
             case "laser":
+            case "led-source":
+            case "point-source":
+            case "parallel-source":
 
-                buildLaser(group);
-
-                break;
-
-            case "lamp":
-
-                buildLamp(group);
+                drawSource(object);
 
                 break;
 
-            case "lensConvex":
+            case "convex-lens":
+            case "concave-lens":
+            case "cylindrical-lens":
 
-                buildConvexLens(group);
-
-                break;
-
-            case "lensConcave":
-
-                buildConcaveLens(group);
+                drawLens(object);
 
                 break;
 
-            case "mirrorPlane":
+            case "plane-mirror":
+            case "concave-mirror":
+            case "convex-mirror":
 
-                buildPlaneMirror(group);
-
-                break;
-
-            case "mirrorConcave":
-
-                buildConcaveMirror(group);
-
-                break;
-
-            case "mirrorConvex":
-
-                buildConvexMirror(group);
+                drawMirror(object);
 
                 break;
 
             case "prism":
+            case "right-prism":
 
-                buildPrism(group);
+                drawPrism(object);
+
+                break;
+
+            case "red-filter":
+            case "green-filter":
+            case "blue-filter":
+            case "polarizer":
+
+                drawFilter(object);
 
                 break;
 
             case "screen":
-
-                buildScreen(group);
-
-                break;
-
-            case "sensor":
-
-                buildSensor(group);
-
-                break;
-
-            case "ruler":
-
-                buildRuler(group);
-
+                drawScreen(object);
                 break;
 
             case "protractor":
-
-                buildProtractor(group);
-
+                drawProtractor(object);
                 break;
 
-            case "aperture":
-
-                buildAperture(group);
-
+            case "ruler":
+                drawRuler(object);
                 break;
 
-            case "object":
+            case "photometer":
+                drawPhotometer(object);
+                break;
 
-                buildObjectMarker(group);
+            case "optical-bench":
+                drawOpticalBench();
+                break;
+
+            case "lens-holder":
+            case "mirror-holder":
+            case "object-holder":
+
+                drawSupport(object);
 
                 break;
 
             default:
-
-                buildGenericObject(
-                    group,
-                    definition.color
-                );
-
+                drawGenericObject(object);
         }
+
+        if (object.selected) {
+            drawSelection(object);
+        }
+    }
+
+
+    function drawSource(object) {
+
+        const ctx = DOM.ctx;
 
         const p =
-            position ||
-            findFreeBenchPosition();
+            project(object.position);
 
-        group.position.copy(p);
-
-        objectsGroup.add(group);
-
-        STATE.objects.push(group);
-
-        enableShadows(group);
-
-        registerHistory();
-
-        scheduleAutoSave();
-
-        selectObject(group);
-
-        recalculatePhysics();
-
-        return group;
-
-    }
-
-
-/* ================================================================
-   13 — OBJETS OPTIQUES 3D
-================================================================ */
-
-    function buildLaser(group) {
-
-        const bodyMaterial =
-            new THREE.MeshPhysicalMaterial({
-
-                color: 0x202932,
-
-                metalness: 0.85,
-
-                roughness: 0.24,
-
-                clearcoat: 0.65
-
-            });
-
-        const body =
-            new THREE.Mesh(
-                new THREE.CylinderGeometry(
-                    0.34,
-                    0.34,
-                    2.2,
-                    32
-                ),
-                bodyMaterial
-            );
-
-        body.rotation.z =
-            Math.PI / 2;
-
-        body.castShadow = true;
-
-        group.add(body);
-
-        const emitter =
-            new THREE.Mesh(
-                new THREE.CylinderGeometry(
-                    0.19,
-                    0.19,
-                    0.2,
-                    24
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x33070d,
-
-                    emissive: 0xff0033,
-
-                    emissiveIntensity: 2.5
-
-                })
-            );
-
-        emitter.rotation.z =
-            Math.PI / 2;
-
-        emitter.position.x = 1.15;
-
-        group.add(emitter);
-
-        const glow =
-            new THREE.PointLight(
-                0xff1744,
-                2,
-                4
-            );
-
-        glow.position.x = 1.3;
-
-        group.add(glow);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -0.7;
-
-        group.add(mount);
-
-        createRayEmitter(group);
-
-    }
-
-    function buildLamp(group) {
-
-        const stand =
-            new THREE.Mesh(
-                new THREE.CylinderGeometry(
-                    0.12,
-                    0.2,
-                    1.2,
-                    20
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x788b99,
-
-                    metalness: 0.7,
-
-                    roughness: 0.3
-
-                })
-            );
-
-        stand.position.y = 0.4;
-
-        group.add(stand);
-
-        const bulb =
-            new THREE.Mesh(
-                new THREE.SphereGeometry(
-                    0.42,
-                    32,
-                    20
-                ),
-                new THREE.MeshPhysicalMaterial({
-
-                    color: 0xffe6a4,
-
-                    emissive: 0xffa600,
-
-                    emissiveIntensity: 2.8,
-
-                    transmission: 0.18,
-
-                    roughness: 0.18
-
-                })
-            );
-
-        bulb.position.y = 1.1;
-
-        group.add(bulb);
-
-        const light =
-            new THREE.PointLight(
-                0xffc96b,
-                6,
-                12
-            );
-
-        light.position.y = 1.1;
-
-        group.add(light);
-
-        createMount(group);
-
-    }
-
-    function buildConvexLens(group) {
-
-        const lens =
-            createLensGeometry(
-                false,
-                1.05,
-                0.22
-            );
-
-        const material =
-            createGlassMaterial(
-                0x65d8ff
-            );
-
-        const mesh =
-            new THREE.Mesh(
-                lens,
-                material
-            );
-
-        mesh.rotation.y =
-            Math.PI / 2;
-
-        mesh.castShadow = true;
-
-        group.add(mesh);
-
-        addLensRim(group);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -1.25;
-
-        group.add(mount);
-
-    }
-
-    function buildConcaveLens(group) {
-
-        const lens =
-            createLensGeometry(
-                true,
-                1.05,
-                0.22
-            );
-
-        const material =
-            createGlassMaterial(
-                0x58cfff
-            );
-
-        const mesh =
-            new THREE.Mesh(
-                lens,
-                material
-            );
-
-        mesh.rotation.y =
-            Math.PI / 2;
-
-        mesh.castShadow = true;
-
-        group.add(mesh);
-
-        addLensRim(group);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -1.25;
-
-        group.add(mount);
-
-    }
-
-    function buildPlaneMirror(group) {
-
-        const frame =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    0.25,
-                    3.2,
-                    2.6
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x303b45,
-
-                    metalness: 0.75,
-
-                    roughness: 0.27
-
-                })
-            );
-
-        group.add(frame);
-
-        const mirror =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    0.08,
-                    2.8,
-                    2.25
-                ),
-                new THREE.MeshPhysicalMaterial({
-
-                    color: 0xbfd6e7,
-
-                    metalness: 0.95,
-
-                    roughness: 0.08,
-
-                    clearcoat: 1
-
-                })
-            );
-
-        mirror.position.x = 0.16;
-
-        mirror.castShadow = true;
-
-        group.add(mirror);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -2;
-
-        group.add(mount);
-
-    }
-
-    function buildConcaveMirror(group) {
-
-        const mirror =
-            createCurvedMirror(
-                true
-            );
-
-        group.add(mirror);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -1.8;
-
-        group.add(mount);
-
-    }
-
-    function buildConvexMirror(group) {
-
-        const mirror =
-            createCurvedMirror(
-                false
-            );
-
-        group.add(mirror);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -1.8;
-
-        group.add(mount);
-
-    }
-
-    function buildPrism(group) {
-
-        const geometry =
-            new THREE.CylinderGeometry(
-                1.25,
-                1.25,
-                2.2,
-                3
-            );
-
-        const material =
-            createGlassMaterial(
-                0x62d7ff
-            );
-
-        const prism =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
-
-        prism.rotation.z =
-            Math.PI / 2;
-
-        prism.castShadow = true;
-
-        group.add(prism);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -1.55;
-
-        group.add(mount);
-
-    }
-
-    function buildScreen(group) {
-
-        const panel =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    0.2,
-                    3.2,
-                    3.5
-                ),
-                new THREE.MeshPhysicalMaterial({
-
-                    color: 0xe8eef3,
-
-                    roughness: 0.48,
-
-                    metalness: 0.08
-
-                })
-            );
-
-        panel.castShadow = true;
-
-        group.add(panel);
-
-        const frame =
-            new THREE.LineSegments(
-                new THREE.EdgesGeometry(
-                    new THREE.BoxGeometry(
-                        0.24,
-                        3.3,
-                        3.6
-                    )
-                ),
-                new THREE.LineBasicMaterial({
-                    color: 0x79a0b8
-                })
-            );
-
-        group.add(frame);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -1.9;
-
-        group.add(mount);
-
-    }
-
-    function buildSensor(group) {
-
-        const body =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    0.65,
-                    0.65,
-                    0.65
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x202d35,
-
-                    metalness: 0.7,
-
-                    roughness: 0.28
-
-                })
-            );
-
-        body.castShadow = true;
-
-        group.add(body);
-
-        const detector =
-            new THREE.Mesh(
-                new THREE.CylinderGeometry(
-                    0.22,
-                    0.22,
-                    0.1,
-                    32
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x13251f,
-
-                    emissive: 0x00ff9a,
-
-                    emissiveIntensity: 1.5
-
-                })
-            );
-
-        detector.rotation.z =
-            Math.PI / 2;
-
-        detector.position.x = 0.36;
-
-        group.add(detector);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -0.85;
-
-        group.add(mount);
-
-    }
-
-    function buildRuler(group) {
-
-        const body =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    6,
-                    0.08,
-                    0.35
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0xd9e0e5,
-
-                    metalness: 0.25,
-
-                    roughness: 0.45
-
-                })
-            );
-
-        group.add(body);
-
-        for (
-            let x = -3;
-            x <= 3;
-            x += 0.25
-        ) {
-
-            const major =
-                Math.abs(x % 1) < 0.01;
-
-            const tick =
-                new THREE.Mesh(
-                    new THREE.BoxGeometry(
-                        0.015,
-                        major ? 0.16 : 0.08,
-                        0.03
-                    ),
-                    new THREE.MeshBasicMaterial({
-                        color: 0x17232d
-                    })
-                );
-
-            tick.position.set(
-                x,
-                major ? 0.09 : 0.07,
-                0
-            );
-
-            group.add(tick);
-
-        }
-
-    }
-
-    function buildProtractor(group) {
-
-        const curve =
-            new THREE.EllipseCurve(
-                0,
-                0,
-                1.7,
-                1.7,
-                0,
-                Math.PI,
-                false,
-                0
-            );
-
-        const points =
-            curve.getPoints(64);
-
-        const geometry =
-            new THREE.BufferGeometry()
-                .setFromPoints(points);
-
-        const line =
-            new THREE.Line(
-                geometry,
-                new THREE.LineBasicMaterial({
-                    color: 0xcbd6df
-                })
-            );
-
-        line.rotation.x =
-            -Math.PI / 2;
-
-        group.add(line);
-
-    }
-
-    function buildAperture(group) {
-
-        const ring =
-            new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    0.85,
-                    0.12,
-                    16,
-                    48
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x394852,
-
-                    metalness: 0.85,
-
-                    roughness: 0.23
-
-                })
-            );
-
-        ring.rotation.y =
-            Math.PI / 2;
-
-        group.add(ring);
-
-        const hole =
-            new THREE.Mesh(
-                new THREE.CircleGeometry(
-                    0.58,
-                    48
-                ),
-                new THREE.MeshBasicMaterial({
-                    color: 0x02070b
-                })
-            );
-
-        hole.rotation.y =
-            Math.PI / 2;
-
-        hole.position.x = 0.01;
-
-        group.add(hole);
-
-        const mount =
-            createMount();
-
-        mount.position.y = -1.2;
-
-        group.add(mount);
-
-    }
-
-    function buildObjectMarker(group) {
-
-        const geometry =
-            new THREE.ConeGeometry(
-                0.65,
-                2.5,
-                3
-            );
-
-        const material =
-            new THREE.MeshStandardMaterial({
-
-                color: 0xffc928,
-
-                emissive: 0x5c3b00,
-
-                emissiveIntensity: 0.8,
-
-                metalness: 0.15,
-
-                roughness: 0.32
-
-            });
-
-        const object =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
-
-        object.rotation.z =
-            -Math.PI / 2;
-
-        object.castShadow = true;
-
-        group.add(object);
-
-        createMount(group);
-
-    }
-
-    function buildGenericObject(group, color) {
-
-        const mesh =
-            new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    1,
-                    1,
-                    1
-                ),
-                new THREE.MeshStandardMaterial({
-                    color
-                })
-            );
-
-        group.add(mesh);
-
-    }
-
-
-/* ================================================================
-   14 — GÉOMÉTRIE OPTIQUE
-================================================================ */
-
-    function createLensGeometry(
-        concave = false,
-        radius = 1,
-        thickness = 0.22
-    ) {
-
-        const shape =
-            new THREE.Shape();
-
-        const width =
-            concave ? 0.35 : 0.75;
-
-        const height = radius;
-
-        shape.moveTo(
-            -width,
-            -height
-        );
-
-        shape.quadraticCurveTo(
-            0,
-            -height * 0.35,
-            width,
-            -height
-        );
-
-        shape.lineTo(
-            width,
-            height
-        );
-
-        shape.quadraticCurveTo(
-            0,
-            height * 0.35,
-            -width,
-            height
-        );
-
-        shape.closePath();
-
-        const geometry =
-            new THREE.ExtrudeGeometry(
-                shape,
-                {
-
-                    depth: thickness,
-
-                    bevelEnabled: true,
-
-                    bevelSegments: 5,
-
-                    bevelSize: 0.035,
-
-                    bevelThickness: 0.025,
-
-                    curveSegments: 12
-
-                }
-            );
-
-        geometry.center();
-
-        if (concave) {
-
-            geometry.scale(
-                0.65,
-                1,
-                1
-            );
-
-        }
-
-        return geometry;
-
-    }
-
-    function createGlassMaterial(color) {
-
-        return new THREE.MeshPhysicalMaterial({
-
-            color,
-
-            transmission: 0.68,
-
-            opacity: 0.55,
-
-            transparent: true,
-
-            roughness: 0.08,
-
-            metalness: 0.04,
-
-            thickness: 0.35,
-
-            ior: 1.5,
-
-            clearcoat: 0.8,
-
-            clearcoatRoughness: 0.1,
-
-            side: THREE.DoubleSide
-
-        });
-
-    }
-
-    function createCurvedMirror(concave) {
-
-        const shape =
-            new THREE.Shape();
-
-        const width = 0.75;
-
-        const height = 1.6;
-
-        shape.moveTo(
-            0,
-            -height
-        );
-
-        shape.quadraticCurveTo(
-            concave ? -width : width,
-            0,
-            0,
-            height
-        );
-
-        shape.lineTo(
-            0.18,
-            height
-        );
-
-        shape.quadraticCurveTo(
-            concave ? -(width + 0.18) : (width + 0.18),
-            0,
-            0.18,
-            -height
-        );
-
-        shape.closePath();
-
-        const geometry =
-            new THREE.ExtrudeGeometry(
-                shape,
-                {
-
-                    depth: 2.25,
-
-                    bevelEnabled: true,
-
-                    bevelSize: 0.04,
-
-                    bevelThickness: 0.03
-
-                }
-            );
-
-        geometry.center();
-
-        const material =
-            new THREE.MeshPhysicalMaterial({
-
-                color: 0xcbd8e4,
-
-                metalness: 0.96,
-
-                roughness: 0.07,
-
-                clearcoat: 1
-
-            });
-
-        const mesh =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
-
-        mesh.rotation.y =
-            Math.PI / 2;
-
-        mesh.castShadow = true;
-
-        return mesh;
-
-    }
-
-    function createMount() {
-
-        const group =
-            new THREE.Group();
-
-        const base =
-            new THREE.Mesh(
-                new THREE.CylinderGeometry(
-                    0.48,
-                    0.56,
-                    0.18,
-                    32
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x303c47,
-
-                    metalness: 0.82,
-
-                    roughness: 0.27
-
-                })
-            );
-
-        base.position.y = 0;
-
-        group.add(base);
-
-        const stem =
-            new THREE.Mesh(
-                new THREE.CylinderGeometry(
-                    0.12,
-                    0.12,
-                    1.3,
-                    20
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x697985,
-
-                    metalness: 0.9,
-
-                    roughness: 0.22
-
-                })
-            );
-
-        stem.position.y = 0.68;
-
-        group.add(stem);
-
-        return group;
-
-    }
-
-    function addLensRim(group) {
-
-        const rim =
-            new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    1.03,
-                    0.045,
-                    12,
-                    48
-                ),
-                new THREE.MeshStandardMaterial({
-
-                    color: 0x9ed9ed,
-
-                    metalness: 0.75,
-
-                    roughness: 0.2
-
-                })
-            );
-
-        rim.rotation.y =
-            Math.PI / 2;
-
-        group.add(rim);
-
-    }
-
-    function createRayEmitter(group) {
-
-        group.userData.emitter = true;
-
-    }
-
-
-/* ================================================================
-   15 — OMBRES
-================================================================ */
-
-    function enableShadows(object) {
-
-        object.traverse(child => {
-
-            if (child.isMesh) {
-
-                child.castShadow = true;
-
-                child.receiveShadow = true;
-
-            }
-
-        });
-
-    }
-
-
-/* ================================================================
-   16 — AJOUT D'UN COMPOSANT
-================================================================ */
-
-    function addComponent(type) {
-
-        if (!STATE.initialized && !scene) return null;
-
-        if (STATE.objects.length >= CONFIG.maxObjects) {
-
-            notify(
-                "Nombre maximal de composants atteint.",
-                "warning"
-            );
-
-            return null;
-
-        }
-
-        const object =
-            createOpticalObject(type);
-
-        if (object) {
-
-            notify(
-                `${COMPONENTS[type].name} ajouté au laboratoire.`,
-                "success"
-            );
-
-            focusObject(object);
-
-        }
-
-        return object;
-
-    }
-
-    function findFreeBenchPosition() {
-
-        const occupied =
-            STATE.objects.map(
-                object => object.position.x
-            );
-
-        let x = -9;
-
-        while (
-            occupied.some(
-                value => Math.abs(value - x) < 1.8
-            ) &&
-            x < 10
-        ) {
-
-            x += 1.8;
-
-        }
-
-        return new THREE.Vector3(
-            x,
-            1.4,
-            0
-        );
-
-    }
-
-
-/* ================================================================
-   17 — SÉLECTION
-================================================================ */
-
-    function selectObject(object) {
-
-        if (!object) {
-
-            clearSelection();
-
+        if (!p.visible) {
             return;
-
         }
-
-        if (!object.userData?.fobasObject) {
-
-            return;
-
-        }
-
-        clearSelection();
-
-        STATE.selectedObject = object;
-
-        STATE.selectedId =
-            object.userData.id;
-
-        createSelectionIndicator(object);
-
-        updatePropertiesPanel(object);
-
-        notify(
-            `${object.userData.name} sélectionné.`,
-            "info",
-            1800
-        );
-
-    }
-
-    function clearSelection() {
-
-        STATE.selectedObject = null;
-
-        STATE.selectedId = null;
-
-        clearSelectionIndicator();
-
-        updatePropertiesPanel(null);
-
-    }
-
-    function createSelectionIndicator(object) {
-
-        clearSelectionIndicator();
-
-        const box =
-            new THREE.Box3()
-                .setFromObject(object);
-
-        const size =
-            new THREE.Vector3();
-
-        const center =
-            new THREE.Vector3();
-
-        box.getSize(size);
-
-        box.getCenter(center);
-
-        selectionBox =
-            new THREE.Box3Helper(
-                box,
-                CONFIG.selectionColor
-            );
-
-        selectionBox.name =
-            "FOBAS_SELECTION";
-
-        selectionGroup.add(
-            selectionBox
-        );
-
-    }
-
-    function clearSelectionIndicator() {
-
-        if (!selectionBox) return;
-
-        selectionGroup.remove(
-            selectionBox
-        );
-
-        selectionBox.geometry?.dispose();
-
-        selectionBox = null;
-
-    }
-
-
-/* ================================================================
-   18 — INTERACTION SOURIS / TACTILE
-================================================================ */
-
-    function updatePointer(event) {
-
-        const rect =
-            renderer.domElement.getBoundingClientRect();
-
-        STATE.pointer.x =
-            (
-                (event.clientX - rect.left) /
-                rect.width
-            ) * 2 - 1;
-
-        STATE.pointer.y =
-            -(
-                (event.clientY - rect.top) /
-                rect.height
-            ) * 2 + 1;
-
-        pointerVector.set(
-            STATE.pointer.x,
-            STATE.pointer.y
-        );
-
-    }
-
-    function raycastObjects() {
-
-        if (!raycaster || !camera) return [];
-
-        raycaster.setFromCamera(
-            pointerVector,
-            camera
-        );
-
-        const meshes = [];
-
-        STATE.objects.forEach(object => {
-
-            object.traverse(child => {
-
-                if (
-                    child.isMesh ||
-                    child.isLine
-                ) {
-
-                    meshes.push(child);
-
-                }
-
-            });
-
-        });
-
-        return raycaster.intersectObjects(
-            meshes,
-            true
-        );
-
-    }
-
-    function findParentOpticalObject(object) {
-
-        let current = object;
-
-        while (
-            current &&
-            current !== objectsGroup
-        ) {
-
-            if (
-                current.userData &&
-                current.userData.fobasObject
-            ) {
-
-                return current;
-
-            }
-
-            current = current.parent;
-
-        }
-
-        return null;
-
-    }
-
-    function handlePointerDown(event) {
-
-        if (!renderer) return;
-
-        updatePointer(event);
-
-        STATE.pointer.down = true;
-
-        STATE.pointer.moved = false;
-
-        STATE.pointer.startX =
-            event.clientX;
-
-        STATE.pointer.startY =
-            event.clientY;
-
-        const hits =
-            raycastObjects();
-
-        if (!hits.length) {
-
-            if (
-                STATE.interactionMode ===
-                "select"
-            ) {
-
-                clearSelection();
-
-            }
-
-            return;
-
-        }
-
-        const object =
-            findParentOpticalObject(
-                hits[0].object
-            );
-
-        if (!object) return;
-
-        selectObject(object);
-
-        if (
-            STATE.interactionMode ===
-            "move"
-        ) {
-
-            beginDrag(object);
-
-        }
-
-    }
-
-    function handlePointerMove(event) {
-
-        if (!renderer) return;
-
-        updatePointer(event);
-
-        if (!STATE.pointer.down) {
-
-            updateHover();
-
-            return;
-
-        }
-
-        const dx =
-            event.clientX -
-            STATE.pointer.startX;
-
-        const dy =
-            event.clientY -
-            STATE.pointer.startY;
-
-        if (
-            Math.abs(dx) > 4 ||
-            Math.abs(dy) > 4
-        ) {
-
-            STATE.pointer.moved = true;
-
-        }
-
-        if (
-            STATE.drag.active &&
-            STATE.selectedObject
-        ) {
-
-            moveDraggedObject();
-
-        }
-
-    }
-
-    function handlePointerUp() {
-
-        STATE.pointer.down = false;
-
-        endDrag();
-
-    }
-
-    function handleDoubleClick() {
-
-        if (
-            STATE.selectedObject
-        ) {
-
-            focusObject(
-                STATE.selectedObject
-            );
-
-        }
-
-    }
-
-    function updateHover() {
-
-        const hits =
-            raycastObjects();
-
-        if (!hits.length) {
-
-            STATE.hoveredObject = null;
-
-            renderer.domElement.style.cursor =
-                "default";
-
-            return;
-
-        }
-
-        const object =
-            findParentOpticalObject(
-                hits[0].object
-            );
-
-        STATE.hoveredObject =
-            object;
-
-        renderer.domElement.style.cursor =
-            object ? "pointer" : "default";
-
-    }
-
-
-/* ================================================================
-   19 — DÉPLACEMENT
-================================================================ */
-
-    function beginDrag(object) {
-
-        if (!object?.userData?.movable) return;
-
-        STATE.drag.active = true;
-
-        STATE.drag.object = object;
-
-        renderer.domElement.style.cursor =
-            "grabbing";
-
-    }
-
-    function moveDraggedObject() {
-
-        const object =
-            STATE.drag.object;
-
-        if (!object) return;
-
-        const point =
-            new THREE.Vector3();
-
-        raycaster.setFromCamera(
-            pointerVector,
-            camera
-        );
-
-        if (
-            raycaster.ray.intersectPlane(
-                transformPlane,
-                point
-            )
-        ) {
-
-            object.position.x =
-                snapValue(point.x);
-
-            object.position.z =
-                snapValue(point.z);
-
-            object.position.y =
-                1.4;
-
-            updateSelectionBox();
-
-            updatePropertiesPanel(
-                object
-            );
-
-            recalculatePhysics();
-
-        }
-
-    }
-
-    function endDrag() {
-
-        if (!STATE.drag.active) return;
-
-        STATE.drag.active = false;
-
-        STATE.drag.object = null;
-
-        renderer.domElement.style.cursor =
-            "default";
-
-        registerHistory();
-
-        scheduleAutoSave();
-
-    }
-
-    function snapValue(value) {
-
-        if (!STATE.snapEnabled) {
-
-            return value;
-
-        }
-
-        return Math.round(
-            value * 2
-        ) / 2;
-
-    }
-
-
-/* ================================================================
-   20 — ROTATION / SCALE
-================================================================ */
-
-    function rotateSelected(deltaDegrees) {
-
-        const object =
-            STATE.selectedObject;
-
-        if (!object) {
-
-            notify(
-                "Sélectionnez d'abord un composant.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        object.rotation.y +=
-            degToRad(deltaDegrees);
-
-        object.userData.rotationZ =
-            radToDeg(
-                object.rotation.y
-            );
-
-        updateSelectionBox();
-
-        updatePropertiesPanel(object);
-
-        recalculatePhysics();
-
-        registerHistory();
-
-        scheduleAutoSave();
-
-    }
-
-    function scaleSelected(factor) {
-
-        const object =
-            STATE.selectedObject;
-
-        if (!object) return;
-
-        const next =
-            clamp(
-                object.scale.x * factor,
-                0.35,
-                3
-            );
-
-        object.scale.setScalar(next);
-
-        object.userData.scaleValue =
-            next;
-
-        updateSelectionBox();
-
-        updatePropertiesPanel(object);
-
-        registerHistory();
-
-        scheduleAutoSave();
-
-    }
-
-    function deleteSelected() {
-
-        const object =
-            STATE.selectedObject;
-
-        if (!object) {
-
-            notify(
-                "Aucun objet sélectionné.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        const name =
-            object.userData.name;
-
-        removeObject(object);
-
-        notify(
-            `${name} supprimé.`,
-            "success"
-        );
-
-    }
-
-    function removeObject(object) {
-
-        const index =
-            STATE.objects.indexOf(object);
-
-        if (index >= 0) {
-
-            STATE.objects.splice(
-                index,
-                1
-            );
-
-        }
-
-        object.parent?.remove(object);
-
-        disposeObject(object);
-
-        clearSelection();
-
-        recalculatePhysics();
-
-        registerHistory();
-
-        scheduleAutoSave();
-
-    }
-
-    function disposeObject(object) {
-
-        object.traverse(child => {
-
-            if (child.geometry) {
-
-                child.geometry.dispose();
-
-            }
-
-            if (child.material) {
-
-                const materials =
-                    Array.isArray(
-                        child.material
-                    )
-                        ? child.material
-                        : [child.material];
-
-                materials.forEach(material => {
-
-                    Object.keys(material)
-                        .forEach(key => {
-
-                            const value =
-                                material[key];
-
-                            if (
-                                value &&
-                                value.isTexture
-                            ) {
-
-                                value.dispose();
-
-                            }
-
-                        });
-
-                    material.dispose();
-
-                });
-
-            }
-
-        });
-
-    }
-
-
-/* ================================================================
-   21 — CAMÉRA
-================================================================ */
-
-    function resetCamera() {
-
-        if (!camera) return;
-
-        camera.position.set(
-            17,
-            12,
-            18
-        );
-
-        if (controls) {
-
-            controls.target.set(
-                0,
-                2,
-                0
-            );
-
-            controls.update();
-
-        }
-
-    }
-
-    function setCameraView(view) {
-
-        if (!camera) return;
-
-        const target =
-            new THREE.Vector3(
-                0,
-                2,
-                0
-            );
-
-        switch (view) {
-
-            case "top":
-
-                camera.position.set(
-                    0,
-                    28,
-                    0.01
-                );
-
-                break;
-
-            case "front":
-
-                camera.position.set(
-                    0,
-                    5,
-                    30
-                );
-
-                break;
-
-            case "side":
-
-                camera.position.set(
-                    30,
-                    5,
-                    0
-                );
-
-                break;
-
-            case "isometric":
-
-            default:
-
-                camera.position.set(
-                    17,
-                    12,
-                    18
-                );
-
-                break;
-
-        }
-
-        if (controls) {
-
-            controls.target.copy(target);
-
-            controls.update();
-
-        } else {
-
-            camera.lookAt(target);
-
-        }
-
-    }
-
-    function focusObject(object) {
-
-        if (!object || !camera) return;
-
-        const box =
-            new THREE.Box3()
-                .setFromObject(object);
-
-        const center =
-            new THREE.Vector3();
-
-        box.getCenter(center);
-
-        const size =
-            new THREE.Vector3();
-
-        box.getSize(size);
-
-        const distance =
-            Math.max(
-                5,
-                Math.max(
-                    size.x,
-                    size.y,
-                    size.z
-                ) * 4
-            );
-
-        const direction =
-            new THREE.Vector3(
-                1,
-                0.65,
-                1
-            )
-                .normalize();
-
-        camera.position.copy(
-            center.clone()
-                .add(
-                    direction.multiplyScalar(
-                        distance
-                    )
-                )
-        );
-
-        if (controls) {
-
-            controls.target.copy(center);
-
-            controls.update();
-
-        } else {
-
-            camera.lookAt(center);
-
-        }
-
-    }
-
-    function handleWheel(event) {
-
-        if (!controls) return;
-
-        if (
-            event.ctrlKey ||
-            event.metaKey
-        ) {
-
-            event.preventDefault();
-
-        }
-
-    }
-
-
-/* ================================================================
-   22 — PHYSIQUE OPTIQUE
-================================================================ */
-
-    function recalculatePhysics() {
-
-        clearRays();
-
-        if (!STATE.rayTracingEnabled) {
-
-            updateMeasurements();
-
-            return;
-
-        }
-
-        const sources =
-            STATE.objects.filter(
-                object =>
-                    object.userData.type === "laser" ||
-                    object.userData.type === "lamp" ||
-                    object.userData.type === "object"
-            );
-
-        sources.forEach(source => {
-
-            traceSource(source);
-
-        });
-
-        updateMeasurements();
-
-    }
-
-    function traceSource(source) {
-
-        if (!source) return;
-
-        const origin =
-            source.getWorldPosition(
-                new THREE.Vector3()
-            );
-
-        const direction =
-            new THREE.Vector3(
-                1,
-                0,
-                0
-            );
-
-        direction.applyQuaternion(
-            source.getWorldQuaternion(
-                new THREE.Quaternion()
-            )
-        );
-
-        direction.normalize();
 
         const color =
-            source.userData.type === "laser"
-                ? 0xff2855
-                : 0xffe59a;
+            wavelengthToColor(
+                object.wavelength
+            );
 
-        traceRay(
-            origin,
-            direction,
-            color,
-            CONFIG.raySegments,
-            1
+        const radius =
+            0.28 * p.scale;
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            Math.max(5, radius),
+            0,
+            Math.PI * 2
         );
 
+        const gradient =
+            ctx.createRadialGradient(
+                p.x,
+                p.y,
+                1,
+                p.x,
+                p.y,
+                Math.max(18, radius * 5)
+            );
+
+        gradient.addColorStop(
+            0,
+            "rgba(255,255,255,1)"
+        );
+
+        gradient.addColorStop(
+            0.2,
+            rgb(color, 0.95)
+        );
+
+        gradient.addColorStop(
+            1,
+            rgb(color, 0)
+        );
+
+        ctx.fillStyle = gradient;
+
+        ctx.shadowBlur = 22;
+
+        ctx.shadowColor =
+            rgb(color, 1);
+
+        ctx.fill();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            Math.max(2, radius * 0.45),
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.fill();
+
+        ctx.restore();
+
+        drawSourceHousing(object);
     }
 
-    function traceRay(
-        origin,
-        direction,
-        color,
-        remaining,
-        intensity
-    ) {
+
+    function drawSourceHousing(object) {
+
+        draw3DBox(
+            {
+                x: object.position.x - 0.42,
+                y: object.position.y,
+                z: object.position.z
+            },
+            {
+                x: 0.55,
+                y: 0.8,
+                z: 0.55
+            },
+            "#334957",
+            "#182731"
+        );
+    }
+
+
+    function drawLens(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        const focal =
+            Number(object.focalLength) || 6;
+
+        const converging =
+            focal > 0;
+
+        const height =
+            Math.max(
+                25,
+                2.7 * p.scale
+            );
+
+        const width =
+            Math.max(
+                10,
+                0.65 * p.scale
+            );
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        if (converging) {
+
+            ctx.moveTo(
+                p.x - width,
+                p.y - height
+            );
+
+            ctx.quadraticCurveTo(
+                p.x - width * 0.15,
+                p.y,
+                p.x - width,
+                p.y + height
+            );
+
+            ctx.quadraticCurveTo(
+                p.x + width * 0.15,
+                p.y,
+                p.x + width,
+                p.y - height
+            );
+
+        } else {
+
+            ctx.moveTo(
+                p.x - width,
+                p.y - height
+            );
+
+            ctx.quadraticCurveTo(
+                p.x + width * 0.35,
+                p.y,
+                p.x - width,
+                p.y + height
+            );
+
+            ctx.quadraticCurveTo(
+                p.x - width * 0.35,
+                p.y,
+                p.x + width,
+                p.y - height
+            );
+
+        }
+
+        ctx.closePath();
+
+        const gradient =
+            ctx.createLinearGradient(
+                p.x - width,
+                p.y,
+                p.x + width,
+                p.y
+            );
+
+        gradient.addColorStop(
+            0,
+            "rgba(70,170,255,0.18)"
+        );
+
+        gradient.addColorStop(
+            0.5,
+            "rgba(210,245,255,0.72)"
+        );
+
+        gradient.addColorStop(
+            1,
+            "rgba(60,160,255,0.15)"
+        );
+
+        ctx.fillStyle = gradient;
+
+        ctx.fill();
+
+        ctx.strokeStyle =
+            "rgba(190,235,255,0.9)";
+
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+        ctx.restore();
 
         if (
-            remaining <= 0 ||
-            intensity < 0.025
+            STATE.optical.showFocalPoints &&
+            Number.isFinite(focal)
         ) {
 
-            return;
-
-        }
-
-        const start =
-            origin.clone();
-
-        const dir =
-            direction.clone().normalize();
-
-        const intersections =
-            getOpticalIntersections(
-                start,
-                dir
+            draw3DPoint(
+                {
+                    x:
+                        object.position.x +
+                        focal,
+                    y: object.position.y,
+                    z: object.position.z
+                },
+                0.08,
+                "#ffdf63"
             );
 
-        if (!intersections.length) {
-
-            const end =
-                start.clone()
-                    .add(
-                        dir.multiplyScalar(
-                            18
-                        )
-                    );
-
-            createRaySegment(
-                start,
-                end,
-                color,
-                intensity
+            draw3DPoint(
+                {
+                    x:
+                        object.position.x -
+                        focal,
+                    y: object.position.y,
+                    z: object.position.z
+                },
+                0.08,
+                "#ffdf63"
             );
-
-            return;
-
         }
-
-        const hit =
-            intersections[0];
-
-        const hitPoint =
-            hit.point.clone();
-
-        createRaySegment(
-            start,
-            hitPoint,
-            color,
-            intensity
-        );
-
-        processOpticalInteraction(
-            hit.objectRoot,
-            hitPoint,
-            dir,
-            color,
-            intensity,
-            remaining
-        );
-
     }
 
-    function getOpticalIntersections(
-        origin,
-        direction
-    ) {
 
-        raycaster.set(
-            origin,
-            direction
+    function drawMirror(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        const h =
+            Math.max(30, 3.2 * p.scale);
+
+        const w =
+            Math.max(8, 0.25 * p.scale);
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.roundRect(
+            p.x - w,
+            p.y - h,
+            w * 2,
+            h * 2,
+            5
         );
 
-        const meshes = [];
+        const gradient =
+            ctx.createLinearGradient(
+                p.x - w,
+                p.y,
+                p.x + w,
+                p.y
+            );
 
-        STATE.objects.forEach(object => {
+        gradient.addColorStop(
+            0,
+            "#dbe9ef"
+        );
 
-            if (
-                object.userData.type ===
-                "laser" ||
-                object.userData.type ===
-                "lamp" ||
-                object.userData.type ===
-                "object"
-            ) {
+        gradient.addColorStop(
+            0.45,
+            "#ffffff"
+        );
 
-                return;
+        gradient.addColorStop(
+            0.65,
+            "#7e9aa9"
+        );
 
-            }
+        gradient.addColorStop(
+            1,
+            "#243b47"
+        );
 
-            object.traverse(child => {
+        ctx.fillStyle =
+            gradient;
 
-                if (
-                    child.isMesh &&
-                    child.visible
-                ) {
+        ctx.fill();
 
-                    meshes.push(child);
+        ctx.strokeStyle =
+            "#bde5f5";
 
-                }
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+        ctx.restore();
+
+        for (
+            let i = -2;
+            i <= 2;
+            i++
+        ) {
+
+            draw3DLine(
+                {
+                    x:
+                        object.position.x +
+                        0.2,
+                    y:
+                        object.position.y +
+                        i * 0.45,
+                    z:
+                        object.position.z
+                },
+                {
+                    x:
+                        object.position.x +
+                        0.55,
+                    y:
+                        object.position.y +
+                        i * 0.45 +
+                        0.25,
+                    z:
+                        object.position.z
+                },
+                "rgba(100,160,180,0.55)",
+                1
+            );
+        }
+    }
+
+
+    function drawPrism(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        const size =
+            Math.max(
+                24,
+                2.2 * p.scale
+            );
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            p.x,
+            p.y - size
+        );
+
+        ctx.lineTo(
+            p.x + size,
+            p.y + size
+        );
+
+        ctx.lineTo(
+            p.x - size,
+            p.y + size
+        );
+
+        ctx.closePath();
+
+        const gradient =
+            ctx.createLinearGradient(
+                p.x - size,
+                p.y,
+                p.x + size,
+                p.y
+            );
+
+        gradient.addColorStop(
+            0,
+            "rgba(120,220,255,0.18)"
+        );
+
+        gradient.addColorStop(
+            0.5,
+            "rgba(230,255,255,0.70)"
+        );
+
+        gradient.addColorStop(
+            1,
+            "rgba(150,170,255,0.18)"
+        );
+
+        ctx.fillStyle = gradient;
+
+        ctx.fill();
+
+        ctx.strokeStyle =
+            "rgba(200,245,255,0.95)";
+
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+
+    function drawFilter(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        let color = "#ffffff";
+
+        if (object.type === "red-filter") {
+            color = "#ff3045";
+        }
+
+        if (object.type === "green-filter") {
+            color = "#35e88a";
+        }
+
+        if (object.type === "blue-filter") {
+            color = "#398bff";
+        }
+
+        if (object.type === "polarizer") {
+            color = "#a8d8ff";
+        }
+
+        const ctx = DOM.ctx;
+
+        ctx.save();
+
+        ctx.fillStyle =
+            color.replace(
+                ")",
+                ",0.28)"
+            );
+
+        ctx.globalAlpha = 0.55;
+
+        ctx.fillRect(
+            p.x - 12,
+            p.y - 34,
+            24,
+            68
+        );
+
+        ctx.globalAlpha = 1;
+
+        ctx.strokeStyle = color;
+
+        ctx.lineWidth = 2;
+
+        ctx.strokeRect(
+            p.x - 12,
+            p.y - 34,
+            24,
+            68
+        );
+
+        ctx.restore();
+    }
+
+
+    function drawScreen(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        ctx.save();
+
+        ctx.fillStyle =
+            "rgba(210,225,235,0.82)";
+
+        ctx.fillRect(
+            p.x - 4,
+            p.y - 45,
+            8,
+            90
+        );
+
+        ctx.strokeStyle =
+            "#e8f6ff";
+
+        ctx.lineWidth = 2;
+
+        ctx.strokeRect(
+            p.x - 4,
+            p.y - 45,
+            8,
+            90
+        );
+
+        ctx.restore();
+    }
+
+
+    function drawProtractor(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            40,
+            Math.PI,
+            Math.PI * 2
+        );
+
+        ctx.strokeStyle =
+            "rgba(170,220,245,0.8)";
+
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+        for (
+            let angle = 0;
+            angle <= 180;
+            angle += 10
+        ) {
+
+            const a =
+                Math.PI +
+                degToRad(angle);
+
+            const r1 =
+                angle % 30 === 0
+                    ? 30
+                    : 35;
+
+            const r2 = 40;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                p.x +
+                Math.cos(a) * r1,
+                p.y +
+                Math.sin(a) * r1
+            );
+
+            ctx.lineTo(
+                p.x +
+                Math.cos(a) * r2,
+                p.y +
+                Math.sin(a) * r2
+            );
+
+            ctx.stroke();
+
+        }
+
+        ctx.restore();
+    }
+
+
+    function drawRuler(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        ctx.save();
+
+        ctx.fillStyle =
+            "rgba(210,185,100,0.70)";
+
+        ctx.fillRect(
+            p.x - 80,
+            p.y - 7,
+            160,
+            14
+        );
+
+        ctx.strokeStyle =
+            "#e8d77b";
+
+        ctx.strokeRect(
+            p.x - 80,
+            p.y - 7,
+            160,
+            14
+        );
+
+        for (
+            let i = 0;
+            i <= 20;
+            i++
+        ) {
+
+            const x =
+                p.x - 80 + i * 8;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                x,
+                p.y - 7
+            );
+
+            ctx.lineTo(
+                x,
+                p.y -
+                (i % 5 === 0 ? 1 : 3)
+            );
+
+            ctx.stroke();
+
+        }
+
+        ctx.restore();
+    }
+
+
+    function drawPhotometer(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        draw3DBox(
+            object.position,
+            {
+                x: 0.8,
+                y: 0.8,
+                z: 0.8
+            },
+            "#243c49",
+            "#152631"
+        );
+
+        draw3DPoint(
+            {
+                x: object.position.x,
+                y: object.position.y + 0.42,
+                z: object.position.z
+            },
+            0.12,
+            "#56d7ff"
+        );
+    }
+
+
+    function drawSupport(object) {
+
+        draw3DBox(
+            {
+                x: object.position.x,
+                y: object.position.y - 0.35,
+                z: object.position.z
+            },
+            {
+                x: 0.75,
+                y: 0.75,
+                z: 0.75
+            },
+            "#53636b",
+            "#26343b"
+        );
+
+        draw3DLine(
+            {
+                x: object.position.x,
+                y: object.position.y,
+                z: object.position.z
+            },
+            {
+                x: object.position.x,
+                y: object.position.y + 1.5,
+                z: object.position.z
+            },
+            "#899da8",
+            4
+        );
+    }
+
+
+    function drawGenericObject(object) {
+
+        draw3DBox(
+            object.position,
+            {
+                x: 1,
+                y: 1,
+                z: 1
+            },
+            "#4b7185",
+            "#243945"
+        );
+    }
+
+
+    function drawSelection(object) {
+
+        const p =
+            project(object.position);
+
+        if (!p.visible) {
+            return;
+        }
+
+        const ctx = DOM.ctx;
+
+        const size =
+            30 +
+            5 *
+            Math.sin(
+                STATE.rayAnimation * 0.06
+            );
+
+        ctx.save();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            size,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.strokeStyle =
+            "rgba(75,205,255,0.85)";
+
+        ctx.lineWidth = 2;
+
+        ctx.setLineDash([
+            6,
+            5
+        ]);
+
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+
+    /* ============================================================
+       11 — RAYONS LUMINEUX
+    ============================================================ */
+
+    function clearRays() {
+
+        STATE.rays = [];
+
+        STATE.dirty = true;
+
+        updateRayStatus();
+    }
+
+
+    function traceRays() {
+
+        STATE.rays = [];
+
+        const sources =
+            STATE.objects.filter(function (object) {
+
+                return (
+                    object.type === "laser" ||
+                    object.type === "led-source" ||
+                    object.type === "point-source" ||
+                    object.type === "parallel-source"
+                );
 
             });
 
-        });
+        if (!sources.length) {
 
-        const hits =
-            raycaster.intersectObjects(
-                meshes,
-                true
+            notify(
+                "Ajoutez une source lumineuse avant de tracer les rayons.",
+                "warning"
             );
 
-        return hits
-            .map(hit => {
+            updateRayStatus();
 
-                const root =
-                    findParentOpticalObject(
-                        hit.object
-                    );
+            return;
+        }
 
-                return {
+        sources.forEach(function (source) {
 
-                    ...hit,
+            const wavelength =
+                Number(source.wavelength) ||
+                STATE.optical.wavelength;
 
-                    objectRoot: root
-
-                };
-
-            })
-            .filter(
-                hit => !!hit.objectRoot
-            );
-
-    }
-
-    function processOpticalInteraction(
-        object,
-        point,
-        incoming,
-        color,
-        intensity,
-        remaining
-    ) {
-
-        if (!object) return;
-
-        const type =
-            object.userData.type;
-
-        if (
-            type === "mirrorPlane" ||
-            type === "mirrorConcave" ||
-            type === "mirrorConvex"
-        ) {
-
-            const normal =
-                getApproximateNormal(
-                    object,
-                    point
+            const color =
+                wavelengthToColor(
+                    wavelength
                 );
 
-            const reflected =
-                reflectVector(
-                    incoming,
-                    normal
-                ).normalize();
+            const start = {
+                x: source.position.x + 0.35,
+                y: source.position.y,
+                z: source.position.z
+            };
 
-            traceRay(
-                point.clone()
-                    .add(
-                        reflected.clone()
-                            .multiplyScalar(0.03)
-                    ),
-                reflected,
+            const direction = {
+                x: 1,
+                y: 0,
+                z: 0
+            };
+
+            traceRayChain(
+                start,
+                direction,
+                0,
                 color,
-                remaining - 1,
-                intensity * 0.92
+                source
+            );
+
+        });
+
+        STATE.dirty = true;
+
+        updateRayStatus();
+
+        notify(
+            STATE.rays.length +
+            " rayon(s) calculé(s).",
+            "success"
+        );
+    }
+
+
+    function traceRayChain(
+        start,
+        direction,
+        depth,
+        color,
+        source
+    ) {
+
+        if (depth > 6) {
+            return;
+        }
+
+        const maxDistance = 30;
+
+        const nearest =
+            findNearestOpticalIntersection(
+                start,
+                direction,
+                source
+            );
+
+        if (!nearest) {
+
+            STATE.rays.push({
+
+                start: copyVector(start),
+
+                end: {
+                    x:
+                        start.x +
+                        direction.x *
+                        maxDistance,
+
+                    y:
+                        start.y +
+                        direction.y *
+                        maxDistance,
+
+                    z:
+                        start.z +
+                        direction.z *
+                        maxDistance
+                },
+
+                color: color,
+
+                intensity:
+                    Math.max(
+                        0.05,
+                        STATE.optical.intensity /
+                        100
+                    ),
+
+                depth: depth,
+
+                animated: true
+
+            });
+
+            return;
+        }
+
+        STATE.rays.push({
+
+            start: copyVector(start),
+
+            end: copyVector(nearest.point),
+
+            color: color,
+
+            intensity:
+                Math.max(
+                    0.05,
+                    STATE.optical.intensity /
+                    100
+                ),
+
+            depth: depth,
+
+            animated: true
+
+        });
+
+        const object =
+            nearest.object;
+
+        if (
+            object.type.includes("mirror")
+        ) {
+
+            const reflected =
+                reflect(
+                    direction,
+                    nearest.normal
+                );
+
+            traceRayChain(
+                addVector(
+                    nearest.point,
+                    multiplyVector(
+                        reflected,
+                        0.03
+                    )
+                ),
+                reflected,
+                depth + 1,
+                color,
+                source
             );
 
             return;
-
         }
 
         if (
-            type === "lensConvex" ||
-            type === "lensConcave"
+            object.type.includes("lens") ||
+            object.type.includes("prism")
         ) {
 
             const n1 = 1;
 
             const n2 =
-                safeNumber(
-                    object.userData.refractiveIndex,
-                    1.5
-                );
-
-            const normal =
-                getApproximateNormal(
-                    object,
-                    point
-                );
+                Number(
+                    object.refractiveIndex
+                ) || 1.5;
 
             const refracted =
-                refractVector(
-                    incoming,
-                    normal,
+                refract(
+                    direction,
+                    nearest.normal,
                     n1,
                     n2
                 );
 
             if (refracted) {
 
-                traceRay(
-                    point.clone()
-                        .add(
-                            refracted.clone()
-                                .multiplyScalar(
-                                    0.04
-                                )
-                        ),
-                    refracted,
-                    color,
-                    remaining - 1,
-                    intensity * 0.86
-                );
-
-            }
-
-            return;
-
-        }
-
-        if (type === "prism") {
-
-            const refracted =
-                refractVector(
-                    incoming,
-                    new THREE.Vector3(
-                        1,
-                        0,
-                        0
+                traceRayChain(
+                    addVector(
+                        nearest.point,
+                        multiplyVector(
+                            refracted,
+                            0.03
+                        )
                     ),
-                    1,
-                    object.userData
-                        .refractiveIndex || 1.52
-                );
-
-            if (refracted) {
-
-                traceDispersion(
-                    point,
                     refracted,
-                    intensity
+                    depth + 1,
+                    color,
+                    source
                 );
 
+            } else {
+
+                const reflected =
+                    reflect(
+                        direction,
+                        nearest.normal
+                    );
+
+                traceRayChain(
+                    addVector(
+                        nearest.point,
+                        multiplyVector(
+                            reflected,
+                            0.03
+                        )
+                    ),
+                    reflected,
+                    depth + 1,
+                    color,
+                    source
+                );
+            }
+        }
+    }
+
+
+    function findNearestOpticalIntersection(
+        origin,
+        direction,
+        source
+    ) {
+
+        let nearest = null;
+
+        STATE.objects.forEach(function (object) {
+
+            if (
+                object === source ||
+                !object.visible
+            ) {
+                return;
             }
 
-            return;
+            const isOptical =
+                object.type.includes("lens") ||
+                object.type.includes("mirror") ||
+                object.type.includes("prism") ||
+                object.type.includes("filter");
 
-        }
+            if (!isOptical) {
+                return;
+            }
 
-        if (
-            type === "screen" ||
-            type === "sensor"
-        ) {
+            const dx =
+                object.position.x -
+                origin.x;
 
-            registerHit(
-                object,
-                point,
-                intensity
-            );
+            const dy =
+                object.position.y -
+                origin.y;
 
-        }
+            const dz =
+                object.position.z -
+                origin.z;
 
+            const projection =
+                dx * direction.x +
+                dy * direction.y +
+                dz * direction.z;
+
+            if (projection <= 0.15) {
+                return;
+            }
+
+            const closest = {
+                x:
+                    origin.x +
+                    direction.x *
+                    projection,
+
+                y:
+                    origin.y +
+                    direction.y *
+                    projection,
+
+                z:
+                    origin.z +
+                    direction.z *
+                    projection
+            };
+
+            const distance =
+                distance3D(
+                    closest,
+                    object.position
+                );
+
+            const radius =
+                object.type.includes("prism")
+                    ? 1.5
+                    : 0.65;
+
+            if (distance <= radius) {
+
+                if (
+                    !nearest ||
+                    projection <
+                    nearest.distance
+                ) {
+
+                    nearest = {
+
+                        object: object,
+
+                        point: closest,
+
+                        distance: projection,
+
+                        normal: {
+                            x: -1,
+                            y: 0,
+                            z: 0
+                        }
+
+                    };
+
+                }
+            }
+        });
+
+        return nearest;
     }
 
-    function getApproximateNormal(
-        object,
-        point
-    ) {
 
-        const worldQuaternion =
-            object.getWorldQuaternion(
-                new THREE.Quaternion()
-            );
+    function reflect(direction, normal) {
 
-        const normal =
-            new THREE.Vector3(
-                1,
-                0,
-                0
-            );
+        const dot =
+            direction.x * normal.x +
+            direction.y * normal.y +
+            direction.z * normal.z;
 
-        normal.applyQuaternion(
-            worldQuaternion
-        );
+        return normalize({
+            x:
+                direction.x -
+                2 * dot * normal.x,
 
-        normal.normalize();
+            y:
+                direction.y -
+                2 * dot * normal.y,
 
-        return normal;
-
+            z:
+                direction.z -
+                2 * dot * normal.z
+        });
     }
 
-    function reflectVector(
-        incident,
-        normal
-    ) {
 
-        return incident.clone()
-            .sub(
-                normal.clone()
-                    .multiplyScalar(
-                        2 *
-                        incident.dot(normal)
-                    )
-            );
-
-    }
-
-    function refractVector(
-        incident,
+    function refract(
+        direction,
         normal,
         n1,
         n2
     ) {
 
-        let N =
-            normal.clone().normalize();
-
-        let I =
-            incident.clone().normalize();
-
         let cosI =
-            clamp(
-                -I.dot(N),
-                -1,
-                1
+            -(
+                direction.x * normal.x +
+                direction.y * normal.y +
+                direction.z * normal.z
             );
 
-        let eta =
-            n1 / n2;
+        let n1Local = n1;
+        let n2Local = n2;
+
+        let localNormal = normal;
 
         if (cosI < 0) {
 
             cosI = -cosI;
 
-            N.negate();
+            localNormal = {
+                x: -normal.x,
+                y: -normal.y,
+                z: -normal.z
+            };
 
-            eta =
-                n2 / n1;
-
+            n1Local = n2;
+            n2Local = n1;
         }
+
+        const eta =
+            n1Local / n2Local;
 
         const k =
             1 -
@@ -4003,1532 +2712,1766 @@
             (1 - cosI * cosI);
 
         if (k < 0) {
-
-            return reflectVector(
-                I,
-                N
-            ).normalize();
-
+            return null;
         }
 
-        return I
-            .multiplyScalar(eta)
-            .add(
-                N.multiplyScalar(
+        return normalize({
+
+            x:
+                eta * direction.x +
+                (
                     eta * cosI -
                     Math.sqrt(k)
-                )
-            )
-            .normalize();
+                ) *
+                localNormal.x,
 
-    }
+            y:
+                eta * direction.y +
+                (
+                    eta * cosI -
+                    Math.sqrt(k)
+                ) *
+                localNormal.y,
 
-    function traceDispersion(
-        point,
-        direction,
-        intensity
-    ) {
-
-        const wavelengths = [
-
-            {
-                color: 0xff3030,
-                offset: 0.16
-            },
-
-            {
-                color: 0xffd33d,
-                offset: 0
-            },
-
-            {
-                color: 0x4fa3ff,
-                offset: -0.16
-
-            }
-
-        ];
-
-        wavelengths.forEach(item => {
-
-            const dir =
-                direction.clone();
-
-            dir.y +=
-                item.offset;
-
-            dir.normalize();
-
-            const end =
-                point.clone()
-                    .add(
-                        dir.multiplyScalar(
-                            12
-                        )
-                    );
-
-            createRaySegment(
-                point,
-                end,
-                item.color,
-                intensity
-            );
+            z:
+                eta * direction.z +
+                (
+                    eta * cosI -
+                    Math.sqrt(k)
+                ) *
+                localNormal.z
 
         });
-
     }
 
 
-/* ================================================================
-   23 — RAYONS 3D
-================================================================ */
+    function normalize(v) {
 
-    function createRaySegment(
-        start,
-        end,
-        color,
-        intensity
-    ) {
-
-        const geometry =
-            new THREE.BufferGeometry()
-                .setFromPoints([
-                    start,
-                    end
-                ]);
-
-        const material =
-            new THREE.LineBasicMaterial({
-
-                color,
-
-                transparent: true,
-
-                opacity:
-                    clamp(
-                        intensity,
-                        0.08,
-                        1
-                    ),
-
-                linewidth: 2
-
-            });
-
-        const line =
-            new THREE.Line(
-                geometry,
-                material
+        const length =
+            Math.sqrt(
+                v.x * v.x +
+                v.y * v.y +
+                v.z * v.z
             );
 
-        line.userData.isOpticalRay = true;
+        if (length === 0) {
+            return {
+                x: 0,
+                y: 0,
+                z: 0
+            };
+        }
 
-        raysGroup.add(line);
-
-        STATE.rays.push(line);
-
-    }
-
-    function clearRays() {
-
-        STATE.rays.forEach(ray => {
-
-            ray.geometry?.dispose();
-
-            ray.material?.dispose();
-
-            raysGroup.remove(ray);
-
-        });
-
-        STATE.rays = [];
-
-    }
-
-    function registerHit(
-        object,
-        point,
-        intensity
-    ) {
-
-        object.userData.lastHit = {
-
-            x: point.x,
-
-            y: point.y,
-
-            z: point.z,
-
-            intensity
-
+        return {
+            x: v.x / length,
+            y: v.y / length,
+            z: v.z / length
         };
-
     }
 
 
-/* ================================================================
-   24 — MESURES
-================================================================ */
+    function addVector(a, b) {
 
-    function updateMeasurements() {
+        return {
+            x: a.x + b.x,
+            y: a.y + b.y,
+            z: a.z + b.z
+        };
+    }
 
-        const selected =
-            STATE.selectedObject;
 
-        if (!selected) {
+    function multiplyVector(v, factor) {
 
-            updateMeasurementValues({
+        return {
+            x: v.x * factor,
+            y: v.y * factor,
+            z: v.z * factor
+        };
+    }
 
-                distance: 0,
 
-                angle: 0,
+    function drawRays() {
 
-                focalLength: 0,
-
-                imageDistance: 0,
-
-                objectDistance: 0,
-
-                magnification: 0,
-
-                refractiveIndex: 0
-
-            });
-
+        if (!STATE.optical.showRays) {
             return;
-
         }
 
-        let focal =
-            safeNumber(
-                selected.userData.focalLength,
-                0
-            );
+        STATE.rays.forEach(function (ray) {
 
-        let objectDistance = 0;
+            const a =
+                project(ray.start);
 
-        let imageDistance = 0;
-
-        let magnification = 0;
-
-        const object =
-            STATE.objects.find(
-                item =>
-                    item.userData.type ===
-                    "object"
-            );
-
-        if (object) {
-
-            objectDistance =
-                Math.abs(
-                    selected.position.x -
-                    object.position.x
-                );
-
-        }
-
-        if (focal !== 0 && objectDistance !== 0) {
-
-            const denominator =
-                1 / focal -
-                1 / objectDistance;
+            const b =
+                project(ray.end);
 
             if (
-                Math.abs(denominator) >
-                0.000001
+                !a.visible &&
+                !b.visible
             ) {
-
-                imageDistance =
-                    1 / denominator;
-
-                magnification =
-                    -imageDistance /
-                    objectDistance;
-
+                return;
             }
 
+            const ctx = DOM.ctx;
+
+            const pulse =
+                0.78 +
+                Math.sin(
+                    STATE.rayAnimation * 0.08
+                ) * 0.15;
+
+            ctx.save();
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                a.x,
+                a.y
+            );
+
+            ctx.lineTo(
+                b.x,
+                b.y
+            );
+
+            ctx.strokeStyle =
+                rgb(
+                    ray.color,
+                    pulse *
+                    ray.intensity
+                );
+
+            ctx.lineWidth =
+                ray.depth === 0
+                    ? 2.5
+                    : 1.4;
+
+            ctx.shadowBlur =
+                ray.depth === 0
+                    ? 14
+                    : 7;
+
+            ctx.shadowColor =
+                rgb(
+                    ray.color,
+                    0.8
+                );
+
+            ctx.stroke();
+
+            ctx.restore();
+
+            if (
+                ray.animated
+            ) {
+
+                const t =
+                    (
+                        STATE.rayAnimation *
+                        0.012
+                    ) % 1;
+
+                const x =
+                    ray.start.x +
+                    (
+                        ray.end.x -
+                        ray.start.x
+                    ) * t;
+
+                const y =
+                    ray.start.y +
+                    (
+                        ray.end.y -
+                        ray.start.y
+                    ) * t;
+
+                const z =
+                    ray.start.z +
+                    (
+                        ray.end.z -
+                        ray.start.z
+                    ) * t;
+
+                draw3DPoint(
+                    {
+                        x: x,
+                        y: y,
+                        z: z
+                    },
+                    0.045,
+                    rgb(
+                        ray.color,
+                        1
+                    )
+                );
+            }
+        });
+    }
+
+
+    function updateRayStatus() {
+
+        if (!DOM.rayStatusText) {
+            return;
         }
 
-        updateMeasurementValues({
+        const active =
+            STATE.optical.showRays &&
+            STATE.rays.length > 0;
 
-            distance:
-                selected.position.length(),
+        DOM.rayStatusText.textContent =
+            active
+                ? "ACTIFS"
+                : "INACTIFS";
 
-            angle:
-                radToDeg(
-                    selected.rotation.y
-                ),
+        if (DOM.rayStatusIndicator) {
 
-            focalLength:
-                focal,
+            DOM.rayStatusIndicator.style.opacity =
+                active ? "1" : "0.35";
+        }
+    }
 
-            imageDistance,
 
-            objectDistance,
+    /* ============================================================
+       12 — SÉLECTION
+    ============================================================ */
 
-            magnification,
+    function selectObject(object) {
 
-            refractiveIndex:
-                safeNumber(
-                    selected.userData
-                        .refractiveIndex,
-                    0
-                )
-
+        STATE.objects.forEach(function (item) {
+            item.selected = false;
         });
-
-    }
-
-    function updateMeasurementValues(values) {
-
-        STATE.measurementsLive = values;
-
-        setText(
-            "distanceValue",
-            `${round(values.distance)} cm`
-        );
-
-        setText(
-            "angleValue",
-            `${round(values.angle)}°`
-        );
-
-        setText(
-            "focalLengthValue",
-            values.focalLength
-                ? `${round(values.focalLength)} cm`
-                : "—"
-        );
-
-        setText(
-            "imageDistanceValue",
-            values.imageDistance
-                ? `${round(values.imageDistance)} cm`
-                : "—"
-        );
-
-        setText(
-            "objectDistanceValue",
-            values.objectDistance
-                ? `${round(values.objectDistance)} cm`
-                : "—"
-        );
-
-        setText(
-            "magnificationValue",
-            values.magnification
-                ? `${round(values.magnification)}×`
-                : "—"
-        );
-
-        setText(
-            "refractiveIndexValue",
-            values.refractiveIndex
-                ? round(
-                    values.refractiveIndex,
-                    3
-                )
-                : "—"
-        );
-
-    }
-
-
-/* ================================================================
-   25 — PANNEAU PROPRIÉTÉS
-================================================================ */
-
-    function updatePropertiesPanel(object) {
-
-        const empty =
-            document.querySelector(
-                ".property-empty"
-            );
-
-        const content =
-            document.querySelector(
-                ".property-content"
-            );
-
-        if (!content) return;
 
         if (!object) {
 
-            if (empty) {
+            STATE.selectedObject = null;
 
-                empty.style.display =
-                    "";
+            updatePropertiesPanel();
 
-            }
-
-            content.style.display =
-                "none";
+            updateStatusBar();
 
             return;
-
         }
 
-        if (empty) {
+        object.selected = true;
 
-            empty.style.display =
-                "none";
+        STATE.selectedObject = object;
 
-        }
+        updatePropertiesPanel();
 
-        content.style.display =
-            "";
+        updateStatusBar();
 
-        setText(
-            "selectedObjectTitle",
-            object.userData.name
-        );
-
-        setText(
-            "selectedObjectDescription",
-            object.userData.description
-        );
-
-        setInputValue(
-            "objectPosX",
-            round(object.position.x)
-        );
-
-        setInputValue(
-            "objectPosY",
-            round(object.position.y)
-        );
-
-        setInputValue(
-            "objectPosZ",
-            round(object.position.z)
-        );
-
-        setInputValue(
-            "objectRotation",
-            round(
-                radToDeg(
-                    object.rotation.y
-                )
-            )
-        );
-
-        setInputValue(
-            "objectFocalLength",
-            object.userData.focalLength || ""
-        );
-
-        setInputValue(
-            "objectRefractiveIndex",
-            object.userData.refractiveIndex || ""
-        );
-
-        setText(
-            "selectedObjectType",
-            object.userData.type
-        );
-
+        STATE.dirty = true;
     }
 
-    function applyPropertyChanges() {
+
+    function objectAtScreenPosition(
+        screenX,
+        screenY
+    ) {
+
+        let closest = null;
+
+        let closestDistance = Infinity;
+
+        STATE.objects.forEach(function (object) {
+
+            if (!object.visible) {
+                return;
+            }
+
+            const p =
+                project(object.position);
+
+            if (!p.visible) {
+                return;
+            }
+
+            const dx =
+                p.x - screenX;
+
+            const dy =
+                p.y - screenY;
+
+            const distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                );
+
+            const threshold =
+                object.type === "optical-bench"
+                    ? 80
+                    : 45;
+
+            if (
+                distance <= threshold &&
+                distance < closestDistance
+            ) {
+
+                closest =
+                    object;
+
+                closestDistance =
+                    distance;
+            }
+        });
+
+        return closest;
+    }
+
+
+    /* ============================================================
+       13 — PROPRIÉTÉS
+    ============================================================ */
+
+    function updatePropertiesPanel() {
 
         const object =
             STATE.selectedObject;
 
-        if (!object) return;
+        if (!object) {
 
-        const x =
-            safeNumber(
-                getInputValue(
-                    "objectPosX"
-                ),
-                object.position.x
+            if (DOM.selectedObjectEmpty) {
+                DOM.selectedObjectEmpty.classList.remove(
+                    "hidden"
+                );
+            }
+
+            if (DOM.selectedObjectProperties) {
+                DOM.selectedObjectProperties.classList.add(
+                    "hidden"
+                );
+            }
+
+            return;
+        }
+
+        if (DOM.selectedObjectEmpty) {
+            DOM.selectedObjectEmpty.classList.add(
+                "hidden"
             );
+        }
 
-        const y =
-            safeNumber(
-                getInputValue(
-                    "objectPosY"
-                ),
-                object.position.y
+        if (DOM.selectedObjectProperties) {
+            DOM.selectedObjectProperties.classList.remove(
+                "hidden"
             );
+        }
 
-        const z =
-            safeNumber(
-                getInputValue(
-                    "objectPosZ"
-                ),
-                object.position.z
-            );
+        if (DOM.selectedObjectIcon) {
+            DOM.selectedObjectIcon.textContent =
+                object.icon || "◉";
+        }
 
-        const rotation =
-            safeNumber(
-                getInputValue(
-                    "objectRotation"
-                ),
-                radToDeg(
-                    object.rotation.y
-                )
-            );
+        if (DOM.selectedObjectTitle) {
+            DOM.selectedObjectTitle.textContent =
+                object.name;
+        }
 
-        object.position.set(
-            x,
-            y,
-            z
+        if (DOM.selectedObjectDescription) {
+            DOM.selectedObjectDescription.textContent =
+                object.description;
+        }
+
+        setInputValue(
+            DOM.objectPositionX,
+            object.position.x
         );
 
+        setInputValue(
+            DOM.objectPositionY,
+            object.position.y
+        );
+
+        setInputValue(
+            DOM.objectPositionZ,
+            object.position.z
+        );
+
+        setInputValue(
+            DOM.objectRotationX,
+            radToDeg(object.rotation.x)
+        );
+
+        setInputValue(
+            DOM.objectRotationY,
+            radToDeg(object.rotation.y)
+        );
+
+        setInputValue(
+            DOM.objectRotationZ,
+            radToDeg(object.rotation.z)
+        );
+
+        updateMeasurementPanel();
+    }
+
+
+    function setInputValue(
+        input,
+        value
+    ) {
+
+        if (!input) {
+            return;
+        }
+
+        input.value =
+            Number.isFinite(Number(value))
+                ? Number(value).toFixed(2)
+                : "0";
+    }
+
+
+    function updateSelectedObjectFromInputs() {
+
+        const object =
+            STATE.selectedObject;
+
+        if (!object) {
+            return;
+        }
+
+        object.position.x =
+            Number(DOM.objectPositionX.value) || 0;
+
+        object.position.y =
+            Number(DOM.objectPositionY.value) || 0;
+
+        object.position.z =
+            Number(DOM.objectPositionZ.value) || 0;
+
+        object.rotation.x =
+            degToRad(
+                Number(DOM.objectRotationX.value) || 0
+            );
+
         object.rotation.y =
-            degToRad(rotation);
+            degToRad(
+                Number(DOM.objectRotationY.value) || 0
+            );
+
+        object.rotation.z =
+            degToRad(
+                Number(DOM.objectRotationZ.value) || 0
+            );
+
+        updateStatusBar();
+
+        STATE.dirty = true;
+
+        saveStateSilently();
+    }
+
+
+    /* ============================================================
+       14 — MESURES
+    ============================================================ */
+
+    function calculateObjectMeasurement() {
+
+        const object =
+            STATE.selectedObject;
+
+        if (!object) {
+            return;
+        }
+
+        let focal =
+            Number.isFinite(object.focalLength)
+                ? object.focalLength
+                : null;
+
+        let distance = null;
+
+        let angle = null;
+
+        let magnification = null;
 
         if (
-            getInputValue(
-                "objectFocalLength"
-            ) !== ""
+            STATE.measureStart &&
+            object.position
         ) {
 
-            object.userData.focalLength =
-                safeNumber(
-                    getInputValue(
-                        "objectFocalLength"
-                    )
+            distance =
+                distance3D(
+                    STATE.measureStart,
+                    object.position
                 );
 
         }
 
         if (
-            getInputValue(
-                "objectRefractiveIndex"
-            ) !== ""
+            focal !== null &&
+            focal !== 0
         ) {
 
-            object.userData.refractiveIndex =
-                safeNumber(
-                    getInputValue(
-                        "objectRefractiveIndex"
-                    ),
-                    1.5
+            magnification =
+                -1;
+        }
+
+        if (
+            object.type.includes("mirror") ||
+            object.type.includes("lens")
+        ) {
+
+            angle =
+                radToDeg(
+                    object.rotation.z
                 );
 
         }
 
-        updateSelectionBox();
+        DOM.measurementDistance.textContent =
+            distance !== null
+                ? formatNumber(distance, 2)
+                : "—";
 
-        recalculatePhysics();
+        DOM.measurementAngle.textContent =
+            angle !== null
+                ? formatNumber(angle, 2)
+                : "—";
 
-        registerHistory();
+        DOM.measurementFocal.textContent =
+            focal !== null
+                ? formatNumber(focal, 2)
+                : "—";
 
-        scheduleAutoSave();
+        DOM.measurementMagnification.textContent =
+            magnification !== null
+                ? formatNumber(magnification, 2)
+                : "—";
+    }
+
+
+    function updateMeasurementPanel() {
+
+        calculateObjectMeasurement();
+    }
+
+
+    function createMeasurement(
+        a,
+        b
+    ) {
+
+        const distance =
+            distance3D(a, b);
+
+        const dx =
+            b.x - a.x;
+
+        const dz =
+            b.z - a.z;
+
+        const angle =
+            radToDeg(
+                Math.atan2(dz, dx)
+            );
+
+        const measurement = {
+
+            id:
+                "measure_" +
+                STATE.nextMeasurementId++,
+
+            distance:
+                distance,
+
+            angle:
+                angle,
+
+            start:
+                copyVector(a),
+
+            end:
+                copyVector(b),
+
+            createdAt:
+                Date.now()
+
+        };
+
+        STATE.measurements.push(
+            measurement
+        );
+
+        DOM.measurementDistance.textContent =
+            formatNumber(distance, 2);
+
+        DOM.measurementAngle.textContent =
+            formatNumber(angle, 2);
+
+        addResult(
+            "Distance",
+            distance,
+            distance,
+            "cm"
+        );
+
+        addResult(
+            "Angle",
+            angle,
+            angle,
+            "°"
+        );
+
+        updateResults();
 
         notify(
-            "Propriétés appliquées.",
+            "Mesure : " +
+            formatNumber(distance, 2) +
+            " cm",
             "success"
         );
 
+        return measurement;
     }
 
 
-/* ================================================================
-   26 — EXPÉRIENCES OPTIQUES
-================================================================ */
-
-    const EXPERIMENTS = {
-
-        reflection: {
-
-            id: "reflection",
-
-            name: "Loi de la réflexion",
-
-            description:
-                "Vérification de l'égalité entre angle d'incidence et angle de réflexion.",
-
-            setup() {
-
-                clearLaboratory();
-
-                const laser =
-                    addComponent("laser");
-
-                const mirror =
-                    addComponent("mirrorPlane");
-
-                if (laser && mirror) {
-
-                    laser.position.set(
-                        -6,
-                        1.4,
-                        0
-                    );
-
-                    mirror.position.set(
-                        1,
-                        1.4,
-                        0
-                    );
-
-                    mirror.rotation.y =
-                        degToRad(90);
-
-                }
-
-                recalculatePhysics();
-
-            }
-
-        },
-
-        refraction: {
-
-            id: "refraction",
-
-            name: "Réfraction",
-
-            description:
-                "Étude du changement de direction d'un rayon lumineux à l'entrée d'un milieu transparent.",
-
-            setup() {
-
-                clearLaboratory();
-
-                const laser =
-                    addComponent("laser");
-
-                const lens =
-                    addComponent("lensConvex");
-
-                const screen =
-                    addComponent("screen");
-
-                if (
-                    laser &&
-                    lens &&
-                    screen
-                ) {
-
-                    laser.position.set(
-                        -7,
-                        1.4,
-                        0
-                    );
-
-                    lens.position.set(
-                        0,
-                        1.4,
-                        0
-                    );
-
-                    screen.position.set(
-                        6,
-                        1.4,
-                        0
-                    );
-
-                }
-
-                recalculatePhysics();
-
-            }
-
-        },
-
-        lens: {
-
-            id: "lens",
-
-            name: "Formation d'une image",
-
-            description:
-                "Étude de la formation d'une image par une lentille convergente.",
-
-            setup() {
-
-                clearLaboratory();
-
-                const object =
-                    addComponent("object");
-
-                const lens =
-                    addComponent("lensConvex");
-
-                const screen =
-                    addComponent("screen");
-
-                if (
-                    object &&
-                    lens &&
-                    screen
-                ) {
-
-                    object.position.set(
-                        -6,
-                        1.4,
-                        0
-                    );
-
-                    lens.position.set(
-                        0,
-                        1.4,
-                        0
-                    );
-
-                    screen.position.set(
-                        7,
-                        1.4,
-                        0
-                    );
-
-                    lens.userData.focalLength =
-                        4;
-
-                }
-
-                recalculatePhysics();
-
-            }
-
-        },
-
-        dispersion: {
-
-            id: "dispersion",
-
-            name: "Dispersion de la lumière",
-
-            description:
-                "Séparation de la lumière blanche par un prisme.",
-
-            setup() {
-
-                clearLaboratory();
-
-                const lamp =
-                    addComponent("lamp");
-
-                const prism =
-                    addComponent("prism");
-
-                const screen =
-                    addComponent("screen");
-
-                if (
-                    lamp &&
-                    prism &&
-                    screen
-                ) {
-
-                    lamp.position.set(
-                        -7,
-                        1.4,
-                        0
-                    );
-
-                    prism.position.set(
-                        0,
-                        1.4,
-                        0
-                    );
-
-                    screen.position.set(
-                        7,
-                        1.4,
-                        0
-                    );
-
-                }
-
-                recalculatePhysics();
-
-            }
-
-        }
-
-    };
-
-
-/* ================================================================
-   27 — MISSIONS
-================================================================ */
-
-    const MISSIONS = {
-
-        tpReflection: {
-
-            id: "tpReflection",
-
-            name:
-                "TP — Vérifier la loi de réflexion",
-
-            objective:
-                "Mesurer les angles d'incidence et de réflexion puis comparer leurs valeurs.",
-
-            validate() {
-
-                const laser =
-                    findObjectByType("laser");
-
-                const mirror =
-                    findObjectByType(
-                        "mirrorPlane"
-                    );
-
-                if (!laser || !mirror) {
-
-                    return {
-
-                        success: false,
-
-                        message:
-                            "Placez une source laser et un miroir plan."
-
-                    };
-
-                }
-
-                return {
-
-                    success: true,
-
-                    message:
-                        "Configuration optique détectée. Vous pouvez effectuer les mesures."
-
-                };
-
-            }
-
-        },
-
-        tpLens: {
-
-            id: "tpLens",
-
-            name:
-                "TP — Lentille convergente",
-
-            objective:
-                "Déterminer la distance focale d'une lentille convergente.",
-
-            validate() {
-
-                const lens =
-                    findObjectByType(
-                        "lensConvex"
-                    );
-
-                const screen =
-                    findObjectByType(
-                        "screen"
-                    );
-
-                if (!lens || !screen) {
-
-                    return {
-
-                        success: false,
-
-                        message:
-                            "Une lentille convergente et un écran sont nécessaires."
-
-                    };
-
-                }
-
-                return {
-
-                    success: true,
-
-                    message:
-                        "Montage valide. Procédez aux mesures."
-
-                };
-
-            }
-
-        }
-
-    };
-
-
-/* ================================================================
-   28 — UTILITAIRES OBJETS
-================================================================ */
-
-    function findObjectByType(type) {
-
-        return STATE.objects.find(
-            object =>
-                object.userData.type === type
-        ) || null;
-
-    }
-
-    function findObjectsByType(type) {
-
-        return STATE.objects.filter(
-            object =>
-                object.userData.type === type
-        );
-
-    }
-
-    function clearLaboratory() {
-
-        [...STATE.objects].forEach(
-            object => removeObject(object)
-        );
-
-        clearRays();
-
-        clearSelection();
-
-        notify(
-            "Laboratoire réinitialisé.",
-            "info"
-        );
-
-    }
-
-    function createDefaultScene() {
-
-        if (STATE.objects.length) {
-
-            recalculatePhysics();
-
-            return;
-
-        }
-
-        const laser =
-            addComponent("laser");
-
-        const lens =
-            addComponent("lensConvex");
-
-        const screen =
-            addComponent("screen");
-
-        if (laser) {
-
-            laser.position.set(
-                -7,
-                1.4,
-                0
-            );
-
-        }
-
-        if (lens) {
-
-            lens.position.set(
-                0,
-                1.4,
-                0
-            );
-
-        }
-
-        if (screen) {
-
-            screen.position.set(
-                7,
-                1.4,
-                0
-            );
-
-        }
-
-        recalculatePhysics();
-
-        clearSelection();
-
-    }
-
-
-/* ================================================================
-   29 — INTERFACE
-================================================================ */
-
-    function bindInterface() {
-
-        bindSearch();
-
-        bindCategoryButtons();
-
-        bindCameraButtons();
-
-        bindInteractionButtons();
-
-        bindGlobalControls();
-
-        bindPropertyControls();
-
-        bindPhysicsControls();
-
-        bindExperimentControls();
-
-        bindMissionControls();
-
-        bindResultsControls();
-
-        bindKeyboard();
-
-    }
-
-    function bindSearch() {
-
-        const search =
-            byId("componentSearch");
-
-        const clear =
-            document.querySelector(
-                ".clear-search-btn"
-            );
-
-        if (search) {
-
-            search.addEventListener(
-                "input",
-                () =>
-                    renderComponentLibrary(
-                        search.value
-                    )
-            );
-
-        }
-
-        if (clear) {
-
-            clear.addEventListener(
-                "click",
-                () => {
-
-                    if (search) {
-
-                        search.value = "";
-
-                        renderComponentLibrary();
-
-                        search.focus();
-
-                    }
-
-                }
-            );
-
-        }
-
-    }
-
-    function bindCategoryButtons() {
-
-        $$(".category-btn")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        $$(".category-btn")
-                            .forEach(
-                                item =>
-                                    item.classList.remove(
-                                        "active"
-                                    )
-                            );
-
-                        button.classList.add(
-                            "active"
-                        );
-
-                        const category =
-                            button.dataset.category ||
-                            button.dataset.filter ||
-                            "all";
-
-                        if (
-                            category === "all"
-                        ) {
-
-                            renderComponentLibrary();
-
-                            return;
-
-                        }
-
-                        const library =
-                            document.querySelector(
-                                ".component-library"
-                            );
-
-                        if (!library) return;
-
-                        library.innerHTML = "";
-
-                        Object.values(
-                            COMPONENTS
-                        )
-                            .filter(
-                                component =>
-                                    component.category ===
-                                    category
-                            )
-                            .forEach(
-                                component =>
-                                    createComponentCard(
-                                        library,
-                                        component
-                                    )
-                            );
-
-                    }
-                );
-
-            });
-
-    }
-
-    function createComponentCard(
-        library,
-        component
+    /* ============================================================
+       15 — PHYSIQUE EXPÉRIMENTALE
+    ============================================================ */
+
+    function calculateLensImage(
+        focalLength,
+        objectDistance
     ) {
 
-        const card =
-            document.createElement("button");
+        const f =
+            Number(focalLength);
 
-        card.type = "button";
+        const d =
+            Number(objectDistance);
 
-        card.className =
-            "component-card";
+        if (
+            !Number.isFinite(f) ||
+            !Number.isFinite(d) ||
+            d === 0
+        ) {
+            return null;
+        }
 
-        card.dataset.component =
-            component.id;
+        const denominator =
+            (1 / f) -
+            (1 / d);
 
-        card.innerHTML = `
-            <span class="component-icon">
-                ${component.icon}
-            </span>
-            <span class="component-name">
-                ${escapeHTML(component.name)}
-            </span>
-            <span class="component-description">
-                ${escapeHTML(component.description)}
-            </span>
-        `;
+        if (
+            Math.abs(denominator) <
+            1e-9
+        ) {
 
-        card.addEventListener(
-            "click",
-            () =>
-                addComponent(
-                    component.id
-                )
-        );
+            return {
+                imageDistance: Infinity,
+                magnification: Infinity
+            };
+        }
 
-        library.appendChild(card);
+        const imageDistance =
+            1 / denominator;
 
+        const magnification =
+            -imageDistance / d;
+
+        return {
+            imageDistance:
+                imageDistance,
+
+            magnification:
+                magnification
+        };
     }
 
-    function bindCameraButtons() {
 
-        $$(
-            ".camera-btn"
-        ).forEach(button => {
+    function runReflectionExperiment() {
 
-            button.addEventListener(
-                "click",
-                () => {
+        const mirror =
+            findObjectByTypes([
+                "plane-mirror",
+                "concave-mirror",
+                "convex-mirror"
+            ]);
 
-                    const action =
-                        button.dataset.action ||
-                        button.dataset.camera ||
-                        button.dataset.view;
+        const source =
+            findObjectByTypes([
+                "laser",
+                "parallel-source",
+                "point-source",
+                "led-source"
+            ]);
 
-                    handleCameraAction(
-                        action
+        if (!mirror || !source) {
+
+            notify(
+                "Cette expérience nécessite une source et un miroir.",
+                "warning"
+            );
+
+            return;
+        }
+
+        const incidence =
+            30;
+
+        const reflection =
+            incidence;
+
+        addResult(
+            "Angle d'incidence",
+            incidence,
+            incidence,
+            "°"
+        );
+
+        addResult(
+            "Angle de réflexion",
+            reflection,
+            reflection,
+            "°"
+        );
+
+        addResult(
+            "Loi de réflexion",
+            "i = r",
+            "i = r",
+            ""
+        );
+
+        updateResults();
+
+        traceRays();
+
+        notify(
+            "Expérience de réflexion chargée.",
+            "success"
+        );
+    }
+
+
+    function runRefractionExperiment() {
+
+        const n1 = 1.000;
+
+        const n2 =
+            Number(
+                DOM.refractiveIndexInput.value
+            ) || 1.5;
+
+        const incidence =
+            30;
+
+        const sinR =
+            (
+                n1 /
+                n2
+            ) *
+            Math.sin(
+                degToRad(incidence)
+            );
+
+        if (Math.abs(sinR) > 1) {
+
+            notify(
+                "Réflexion totale interne.",
+                "warning"
+            );
+
+            addResult(
+                "Réfraction",
+                "Réflexion totale",
+                "Réflexion totale",
+                ""
+            );
+
+            updateResults();
+
+            return;
+        }
+
+        const refraction =
+            radToDeg(
+                Math.asin(sinR)
+            );
+
+        addResult(
+            "Angle incident",
+            incidence,
+            incidence,
+            "°"
+        );
+
+        addResult(
+            "Angle réfracté",
+            refraction,
+            refraction,
+            "°"
+        );
+
+        addResult(
+            "Indice n₂",
+            n2,
+            n2,
+            ""
+        );
+
+        updateResults();
+
+        traceRays();
+
+        notify(
+            "Expérience de réfraction calculée.",
+            "success"
+        );
+    }
+
+
+    function runLensExperiment(
+        converging
+    ) {
+
+        let lens = null;
+
+        if (converging) {
+
+            lens =
+                findObjectByTypes([
+                    "convex-lens"
+                ]);
+
+        } else {
+
+            lens =
+                findObjectByTypes([
+                    "concave-lens"
+                ]);
+        }
+
+        const source =
+            findObjectByTypes([
+                "laser",
+                "parallel-source",
+                "point-source"
+            ]);
+
+        if (!lens || !source) {
+
+            notify(
+                "Ajoutez la lentille et la source correspondantes.",
+                "warning"
+            );
+
+            return;
+        }
+
+        const objectDistance =
+            Math.max(
+                2,
+                Math.abs(
+                    lens.position.x -
+                    source.position.x
+                )
+            );
+
+        const result =
+            calculateLensImage(
+                lens.focalLength,
+                objectDistance
+            );
+
+        if (!result) {
+            return;
+        }
+
+        addResult(
+            "Distance objet",
+            objectDistance,
+            objectDistance,
+            "cm"
+        );
+
+        if (
+            Number.isFinite(
+                result.imageDistance
+            )
+        ) {
+
+            addResult(
+                "Distance image",
+                result.imageDistance,
+                result.imageDistance,
+                "cm"
+            );
+
+            addResult(
+                "Grossissement",
+                result.magnification,
+                result.magnification,
+                "×"
+            );
+
+        }
+
+        updateResults();
+
+        traceRays();
+
+        notify(
+            converging
+                ? "Expérience de lentille convergente calculée."
+                : "Expérience de lentille divergente calculée.",
+            "success"
+        );
+    }
+
+
+    function runMirrorExperiment(
+        type
+    ) {
+
+        const mirror =
+            findObjectByTypes([
+                type
+            ]);
+
+        if (!mirror) {
+
+            notify(
+                "Ajoutez le miroir demandé.",
+                "warning"
+            );
+
+            return;
+        }
+
+        const focal =
+            Number(mirror.focalLength);
+
+        if (
+            Number.isFinite(focal)
+        ) {
+
+            const radius =
+                focal * 2;
+
+            addResult(
+                "Distance focale",
+                focal,
+                focal,
+                "cm"
+            );
+
+            addResult(
+                "Rayon de courbure",
+                radius,
+                radius,
+                "cm"
+            );
+        }
+
+        traceRays();
+
+        updateResults();
+
+        notify(
+            "Expérience du miroir chargée.",
+            "success"
+        );
+    }
+
+
+    function runPrismExperiment() {
+
+        const prism =
+            findObjectByTypes([
+                "prism",
+                "right-prism"
+            ]);
+
+        const source =
+            findObjectByTypes([
+                "laser",
+                "parallel-source"
+            ]);
+
+        if (!prism || !source) {
+
+            notify(
+                "Ajoutez un prisme et une source.",
+                "warning"
+            );
+
+            return;
+        }
+
+        const wavelengths = [
+            450,
+            500,
+            550,
+            600,
+            650
+        ];
+
+        wavelengths.forEach(
+            function (wavelength) {
+
+                const color =
+                    wavelengthToColor(
+                        wavelength
                     );
 
+                STATE.rays.push({
+
+                    start: {
+                        x: source.position.x,
+                        y: source.position.y,
+                        z: source.position.z
+                    },
+
+                    end: {
+                        x:
+                            prism.position.x + 6,
+
+                        y:
+                            prism.position.y +
+                            (
+                                650 -
+                                wavelength
+                            ) * 0.006,
+
+                        z:
+                            prism.position.z
+                    },
+
+                    color: color,
+
+                    intensity: 0.85,
+
+                    depth: 0,
+
+                    animated: true
+
+                });
+
+            }
+        );
+
+        addResult(
+            "Dispersion",
+            "Spectre visible",
+            "Spectre visible",
+            ""
+        );
+
+        updateResults();
+
+        notify(
+            "Dispersion simulée dans le prisme.",
+            "success"
+        );
+    }
+
+
+    function runFiberExperiment() {
+
+        const source =
+            findObjectByTypes([
+                "laser"
+            ]);
+
+        if (!source) {
+
+            notify(
+                "Ajoutez un laser pour l'expérience de fibre optique.",
+                "warning"
+            );
+
+            return;
+        }
+
+        const nCore = 1.48;
+
+        const nCladding = 1.46;
+
+        const critical =
+            radToDeg(
+                Math.asin(
+                    nCladding /
+                    nCore
+                )
+            );
+
+        addResult(
+            "Indice cœur",
+            nCore,
+            nCore,
+            ""
+        );
+
+        addResult(
+            "Indice gaine",
+            nCladding,
+            nCladding,
+            ""
+        );
+
+        addResult(
+            "Angle critique",
+            critical,
+            critical,
+            "°"
+        );
+
+        updateResults();
+
+        notify(
+            "Paramètres de fibre optique calculés.",
+            "success"
+        );
+    }
+
+
+    function findObjectByTypes(types) {
+
+        return STATE.objects.find(
+            function (object) {
+
+                return types.includes(
+                    object.type
+                );
+
+            }
+        ) || null;
+    }
+
+
+    /* ============================================================
+       16 — EXPÉRIENCES
+    ============================================================ */
+
+    function loadExperiment(name) {
+
+        if (!name) {
+
+            notify(
+                "Sélectionnez une expérience.",
+                "warning"
+            );
+
+            return;
+        }
+
+        STATE.experiment = name;
+
+        switch (name) {
+
+            case "reflection":
+                runReflectionExperiment();
+                break;
+
+            case "refraction":
+                runRefractionExperiment();
+                break;
+
+            case "converging-lens":
+                runLensExperiment(true);
+                break;
+
+            case "diverging-lens":
+                runLensExperiment(false);
+                break;
+
+            case "plane-mirror":
+                runMirrorExperiment(
+                    "plane-mirror"
+                );
+                break;
+
+            case "concave-mirror":
+                runMirrorExperiment(
+                    "concave-mirror"
+                );
+                break;
+
+            case "convex-mirror":
+                runMirrorExperiment(
+                    "convex-mirror"
+                );
+                break;
+
+            case "prism-dispersion":
+                runPrismExperiment();
+                break;
+
+            case "optical-fiber":
+                runFiberExperiment();
+                break;
+
+            default:
+                notify(
+                    "Expérience inconnue.",
+                    "error"
+                );
+        }
+    }
+
+
+    /* ============================================================
+       17 — RÉSULTATS
+    ============================================================ */
+
+    function addResult(
+        measurement,
+        theoretical,
+        experimental,
+        unit
+    ) {
+
+        let error = "—";
+
+        let difference = "—";
+
+        if (
+            typeof theoretical === "number" &&
+            typeof experimental === "number"
+        ) {
+
+            difference =
+                experimental -
+                theoretical;
+
+            if (
+                theoretical !== 0
+            ) {
+
+                error =
+                    Math.abs(
+                        difference /
+                        theoretical
+                    ) *
+                    100;
+
+            } else {
+
+                error = 0;
+            }
+        }
+
+        STATE.results.push({
+
+            id: uid("result"),
+
+            measurement:
+                measurement,
+
+            theoretical:
+                theoretical,
+
+            experimental:
+                experimental,
+
+            difference:
+                difference,
+
+            error:
+                error,
+
+            unit:
+                unit || ""
+
+        });
+    }
+
+
+    function updateResults() {
+
+        if (!DOM.resultsTableBody) {
+            return;
+        }
+
+        DOM.resultsTableBody.innerHTML = "";
+
+        if (!STATE.results.length) {
+
+            const row =
+                document.createElement("tr");
+
+            const cell =
+                document.createElement("td");
+
+            cell.colSpan = 6;
+
+            cell.className =
+                "results-empty";
+
+            cell.textContent =
+                "Aucune mesure disponible. Lancez une expérience pour obtenir des résultats.";
+
+            row.appendChild(cell);
+
+            DOM.resultsTableBody.appendChild(
+                row
+            );
+
+        } else {
+
+            STATE.results.forEach(
+                function (result) {
+
+                    const row =
+                        document.createElement("tr");
+
+                    appendCell(
+                        row,
+                        result.measurement
+                    );
+
+                    appendCell(
+                        row,
+                        formatScientific(
+                            result.theoretical
+                        )
+                    );
+
+                    appendCell(
+                        row,
+                        formatScientific(
+                            result.experimental
+                        )
+                    );
+
+                    appendCell(
+                        row,
+                        formatScientific(
+                            result.difference
+                        )
+                    );
+
+                    appendCell(
+                        row,
+                        typeof result.error === "number"
+                            ? formatNumber(
+                                result.error,
+                                2
+                            ) + " %"
+                            : result.error
+                    );
+
+                    appendCell(
+                        row,
+                        result.unit
+                    );
+
+                    DOM.resultsTableBody.appendChild(
+                        row
+                    );
+                }
+            );
+        }
+
+        updateResultsSummary();
+    }
+
+
+    function appendCell(row, text) {
+
+        const cell =
+            document.createElement("td");
+
+        cell.textContent =
+            text === undefined ||
+            text === null
+                ? "—"
+                : String(text);
+
+        row.appendChild(cell);
+    }
+
+
+    function formatScientific(value) {
+
+        if (
+            typeof value !== "number"
+        ) {
+            return String(value);
+        }
+
+        if (!Number.isFinite(value)) {
+            return "∞";
+        }
+
+        return formatNumber(
+            value,
+            4
+        );
+    }
+
+
+    function updateResultsSummary() {
+
+        const count =
+            STATE.results.length;
+
+        if (DOM.summaryMeasurements) {
+            DOM.summaryMeasurements.textContent =
+                String(count);
+        }
+
+        const numericErrors =
+            STATE.results
+                .map(function (result) {
+                    return result.error;
+                })
+                .filter(function (error) {
+                    return typeof error === "number" &&
+                        Number.isFinite(error);
+                });
+
+        if (!numericErrors.length) {
+
+            if (DOM.summaryAverageError) {
+                DOM.summaryAverageError.textContent =
+                    "—";
+            }
+
+            if (DOM.summaryPrecision) {
+                DOM.summaryPrecision.textContent =
+                    "—";
+            }
+
+            return;
+        }
+
+        const average =
+            numericErrors.reduce(
+                function (sum, value) {
+                    return sum + value;
+                },
+                0
+            ) /
+            numericErrors.length;
+
+        const precision =
+            Math.max(
+                0,
+                100 - average
+            );
+
+        if (DOM.summaryAverageError) {
+            DOM.summaryAverageError.textContent =
+                formatNumber(
+                    average,
+                    2
+                ) + " %";
+        }
+
+        if (DOM.summaryPrecision) {
+            DOM.summaryPrecision.textContent =
+                formatNumber(
+                    precision,
+                    2
+                ) + " %";
+        }
+    }
+
+
+    /* ============================================================
+       18 — BIBLIOTHÈQUE UI
+    ============================================================ */
+
+    function renderLibrary() {
+
+        if (!DOM.componentLibrary) {
+            return;
+        }
+
+        const list =
+            LIBRARY[STATE.category] || [];
+
+        const search =
+            (
+                DOM.componentSearch &&
+                DOM.componentSearch.value
+            )
+                ? DOM.componentSearch.value
+                    .trim()
+                    .toLowerCase()
+                : "";
+
+        const filtered =
+            list.filter(function (item) {
+
+                if (!search) {
+                    return true;
+                }
+
+                const text =
+                    (
+                        item.name +
+                        " " +
+                        item.description
+                    ).toLowerCase();
+
+                return text.includes(search);
+            });
+
+        DOM.componentLibrary.innerHTML = "";
+
+        if (!filtered.length) {
+
+            const empty =
+                document.createElement("div");
+
+            empty.className =
+                "library-empty";
+
+            empty.innerHTML =
+                "<div class=\"library-empty-icon\">🔬</div>" +
+                "<div class=\"library-empty-title\">Aucun composant</div>" +
+                "<div class=\"library-empty-text\">Aucun élément ne correspond à votre recherche.</div>";
+
+            DOM.componentLibrary.appendChild(
+                empty
+            );
+
+            updateLibraryButtons();
+
+            return;
+        }
+
+        filtered.forEach(function (item) {
+
+            const card =
+                document.createElement("button");
+
+            card.type = "button";
+
+            card.className =
+                "component-card";
+
+            card.dataset.type =
+                item.type;
+
+            card.innerHTML =
+                "<span class=\"component-icon\">" +
+                escapeHTML(item.icon || "◉") +
+                "</span>" +
+
+                "<span class=\"component-name\">" +
+                escapeHTML(item.name) +
+                "</span>" +
+
+                "<span class=\"component-description\">" +
+                escapeHTML(item.description) +
+                "</span>";
+
+            card.addEventListener(
+                "click",
+                function () {
+
+                    STATE.selectedLibraryType =
+                        item.type;
+
+                    document
+                        .querySelectorAll(
+                            ".component-card"
+                        )
+                        .forEach(
+                            function (element) {
+                                element.classList.remove(
+                                    "selected"
+                                );
+                            }
+                        );
+
+                    card.classList.add(
+                        "selected"
+                    );
+
+                    updateLibraryButtons();
                 }
             );
 
+            card.addEventListener(
+                "dblclick",
+                function () {
+
+                    STATE.selectedLibraryType =
+                        item.type;
+
+                    addSelectedComponent();
+                }
+            );
+
+            DOM.componentLibrary.appendChild(
+                card
+            );
         });
 
+        updateLibraryButtons();
     }
 
-    function handleCameraAction(action) {
 
-        switch (action) {
+    function escapeHTML(value) {
 
-            case "reset":
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-            case "home":
 
-                resetCamera();
+    function updateLibraryButtons() {
 
-                break;
+        const hasLibrarySelection =
+            Boolean(
+                STATE.selectedLibraryType
+            );
 
-            case "top":
+        if (DOM.btnAddSelectedComponent) {
+            DOM.btnAddSelectedComponent.disabled =
+                !hasLibrarySelection;
+        }
 
-                setCameraView("top");
+        if (DOM.btnRemoveSelectedComponent) {
+            DOM.btnRemoveSelectedComponent.disabled =
+                !STATE.selectedObject;
+        }
+    }
 
-                break;
 
-            case "front":
+    function addSelectedComponent() {
 
-                setCameraView("front");
+        const type =
+            STATE.selectedLibraryType;
 
-                break;
+        if (!type) {
 
-            case "side":
+            notify(
+                "Sélectionnez d'abord un composant.",
+                "warning"
+            );
 
-                setCameraView("side");
+            return;
+        }
 
-                break;
+        const object =
+            createObject(type);
 
-            case "isometric":
+        if (!object) {
 
-                setCameraView("isometric");
+            notify(
+                "Impossible de créer ce composant.",
+                "error"
+            );
 
-                break;
+            return;
+        }
 
-            case "zoomIn":
+        STATE.objects.push(object);
 
-                zoomCamera(
-                    0.82
-                );
+        selectObject(object);
 
-                break;
+        updateStatusBar();
 
-            case "zoomOut":
+        STATE.dirty = true;
 
-                zoomCamera(
-                    1.18
-                );
+        notify(
+            object.name +
+            " ajouté au laboratoire.",
+            "success"
+        );
 
-                break;
+        saveStateSilently();
+    }
 
-            case "focus":
 
-                focusObject(
+    function removeSelectedComponent() {
+
+        if (!STATE.selectedObject) {
+
+            notify(
+                "Aucun objet sélectionné.",
+                "warning"
+            );
+
+            return;
+        }
+
+        confirmAction(
+            "Supprimer l'objet",
+            "Voulez-vous réellement supprimer « " +
+            STATE.selectedObject.name +
+            " » ?",
+            function () {
+
+                deleteObject(
                     STATE.selectedObject
                 );
 
-                break;
+            }
+        );
+    }
 
-            default:
 
-                break;
+    function deleteObject(object) {
 
+        if (!object) {
+            return;
         }
 
-    }
+        STATE.objects =
+            STATE.objects.filter(
+                function (item) {
+                    return item !== object;
+                }
+            );
 
-    function zoomCamera(factor) {
-
-        if (!camera) return;
-
-        const target =
-            controls
-                ? controls.target
-                : new THREE.Vector3(
-                    0,
-                    2,
-                    0
-                );
-
-        const direction =
-            camera.position
-                .clone()
-                .sub(target);
-
-        direction.multiplyScalar(
-            factor
-        );
-
-        camera.position.copy(
-            target.clone()
-                .add(direction)
-        );
-
-        if (controls) {
-
-            controls.update();
-
-        }
-
-    }
-
-
-/* ================================================================
-   30 — BARRE D'INTERACTION
-================================================================ */
-
-    function bindInteractionButtons() {
-
-        $$(".interaction-tool")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const mode =
-                            button.dataset.mode ||
-                            button.dataset.tool ||
-                            button.dataset.action;
-
-                        setInteractionMode(
-                            mode
-                        );
-
-                    }
-                );
-
-            });
-
-    }
-
-    function setInteractionMode(mode) {
-
-        const normalized =
-            String(mode || "")
-                .toLowerCase();
+        STATE.connections =
+            STATE.connections.filter(
+                function (connection) {
+                    return (
+                        connection.a !== object.id &&
+                        connection.b !== object.id
+                    );
+                }
+            );
 
         if (
-            [
-                "select",
-                "move",
-                "rotate",
-                "scale",
-                "connect",
-                "measure"
-            ].includes(normalized)
+            STATE.selectedObject === object
         ) {
-
-            STATE.interactionMode =
-                normalized;
-
+            STATE.selectedObject = null;
         }
 
-        $$(".interaction-tool")
-            .forEach(button => {
+        updatePropertiesPanel();
 
-                const value =
-                    button.dataset.mode ||
-                    button.dataset.tool ||
-                    button.dataset.action;
+        updateStatusBar();
 
-                button.classList.toggle(
-                    "active",
-                    String(value)
-                        .toLowerCase() ===
-                    STATE.interactionMode
-                );
+        updateLibraryButtons();
 
-            });
+        STATE.dirty = true;
 
-        setText(
-            "interactionModeValue",
-            STATE.interactionMode
+        notify(
+            object.name +
+            " supprimé.",
+            "success"
         );
 
+        saveStateSilently();
     }
 
 
-/* ================================================================
-   31 — CONTRÔLES GLOBAUX
-================================================================ */
+    /* ============================================================
+       19 — DUPLICATION
+    ============================================================ */
 
-    function bindGlobalControls() {
+    function duplicateSelectedObject() {
 
-        $$(
-            ".top-control-btn"
-        ).forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const action =
-                        button.dataset.action ||
-                        button.dataset.command;
-
-                    handleGlobalAction(
-                        action
-                    );
-
-                }
-            );
-
-        });
-
-        const helpButton =
-            byId("helpBtn") ||
-            document.querySelector(
-                ".scene-help-btn"
-            );
-
-        if (helpButton) {
-
-            helpButton.addEventListener(
-                "click",
-                showHelpModal
-            );
-
-        }
-
-        const clearButton =
-            byId("clearLabBtn");
-
-        if (clearButton) {
-
-            clearButton.addEventListener(
-                "click",
-                () => {
-
-                    if (
-                        window.confirm(
-                            "Voulez-vous réellement vider le laboratoire ?"
-                        )
-                    ) {
-
-                        clearLaboratory();
-
-                    }
-
-                }
-            );
-
-        }
-
-    }
-
-    function handleGlobalAction(action) {
-
-        switch (action) {
-
-            case "new":
-
-            case "newLab":
-
-            case "clear":
-
-                if (
-                    window.confirm(
-                        "Créer un nouveau laboratoire ?"
-                    )
-                ) {
-
-                    clearLaboratory();
-
-                }
-
-                break;
-
-            case "save":
-
-                saveState(true);
-
-                break;
-
-            case "load":
-
-                restoreState(true);
-
-                break;
-
-            case "reset":
-
-                resetApplication();
-
-                break;
-
-            case "help":
-
-                showHelpModal();
-
-                break;
-
-            case "measure":
-
-                setInteractionMode(
-                    "measure"
-                );
-
-                break;
-
-            case "run":
-
-            case "simulate":
-
-                recalculatePhysics();
-
-                notify(
-                    "Simulation optique exécutée.",
-                    "success"
-                );
-
-                break;
-
-            default:
-
-                break;
-
-        }
-
-    }
-
-
-/* ================================================================
-   32 — CONTRÔLES PROPRIÉTÉS
-================================================================ */
-
-    function bindPropertyControls() {
-
-        const apply =
-            byId("applyPropertiesBtn") ||
-            document.querySelector(
-                ".apply-properties-btn"
-            );
-
-        if (apply) {
-
-            apply.addEventListener(
-                "click",
-                applyPropertyChanges
-            );
-
-        }
-
-        const deleteButton =
-            byId("deleteObjectBtn");
-
-        if (deleteButton) {
-
-            deleteButton.addEventListener(
-                "click",
-                deleteSelected
-            );
-
-        }
-
-        const duplicateButton =
-            byId("duplicateObjectBtn");
-
-        if (duplicateButton) {
-
-            duplicateButton.addEventListener(
-                "click",
-                duplicateSelected
-            );
-
-        }
-
-    }
-
-    function duplicateSelected() {
-
-        const original =
+        const source =
             STATE.selectedObject;
 
-        if (!original) {
+        if (!source) {
 
             notify(
                 "Sélectionnez un objet à dupliquer.",
@@ -5536,459 +4479,960 @@
             );
 
             return;
-
         }
 
         const clone =
-            createOpticalObject(
-                original.userData.type,
-                original.position.clone()
-                    .add(
-                        new THREE.Vector3(
-                            1.5,
-                            0,
-                            0
-                        )
-                    )
+            JSON.parse(
+                JSON.stringify(source)
             );
 
-        if (!clone) return;
+        clone.id =
+            uid("opt");
 
-        clone.rotation.copy(
-            original.rotation
-        );
+        clone.numericId =
+            STATE.nextObjectId++;
 
-        clone.scale.copy(
-            original.scale
-        );
+        clone.name =
+            source.name +
+            " — copie";
 
-        clone.userData.focalLength =
-            original.userData.focalLength;
+        clone.position.x += 1.2;
 
-        clone.userData.refractiveIndex =
-            original.userData.refractiveIndex;
+        clone.selected = false;
+
+        STATE.objects.push(clone);
 
         selectObject(clone);
 
-        recalculatePhysics();
+        STATE.dirty = true;
 
         notify(
-            "Composant dupliqué.",
+            "Objet dupliqué.",
             "success"
         );
 
+        saveStateSilently();
     }
 
 
-/* ================================================================
-   33 — CONTRÔLES PHYSIQUES
-================================================================ */
+    /* ============================================================
+       20 — INTERACTION
+    ============================================================ */
 
-    function bindPhysicsControls() {
+    function setInteractionMode(mode) {
 
-        const rayToggle =
-            byId("rayTracingToggle");
+        const validModes = [
+            "select",
+            "move",
+            "rotate",
+            "measure",
+            "connect"
+        ];
 
-        if (rayToggle) {
-
-            rayToggle.addEventListener(
-                "change",
-                () => {
-
-                    STATE.rayTracingEnabled =
-                        rayToggle.checked;
-
-                    recalculatePhysics();
-
-                }
-            );
-
+        if (
+            !validModes.includes(mode)
+        ) {
+            return;
         }
 
-        const gridToggle =
-            byId("gridToggle");
+        STATE.interactionMode =
+            mode;
 
-        if (gridToggle) {
+        DOM.toolButtons.forEach(
+            function (button) {
 
-            gridToggle.addEventListener(
-                "change",
-                () => {
+                button.classList.toggle(
+                    "active",
+                    button.dataset.tool === mode
+                );
+            }
+        );
 
-                    STATE.gridEnabled =
-                        gridToggle.checked;
+        if (DOM.currentInteractionMode) {
 
-                    if (gridHelper) {
+            const names = {
 
-                        gridHelper.visible =
-                            STATE.gridEnabled;
+                select: "SÉLECTION",
 
-                    }
+                move: "DÉPLACEMENT",
 
-                }
-            );
+                rotate: "ROTATION",
 
+                measure: "MESURE",
+
+                connect: "CONNEXION"
+
+            };
+
+            DOM.currentInteractionMode.textContent =
+                names[mode];
         }
 
-        const shadowToggle =
-            byId("shadowsToggle");
+        if (mode === "measure") {
 
-        if (shadowToggle) {
-
-            shadowToggle.addEventListener(
-                "change",
-                () => {
-
-                    STATE.shadowsEnabled =
-                        shadowToggle.checked;
-
-                    if (renderer) {
-
-                        renderer.shadowMap.enabled =
-                            STATE.shadowsEnabled;
-
-                    }
-
-                }
+            DOM.sceneCrosshair.classList.remove(
+                "hidden"
             );
 
-        }
+        } else {
 
-        const snapToggle =
-            byId("snapToggle");
-
-        if (snapToggle) {
-
-            snapToggle.addEventListener(
-                "change",
-                () => {
-
-                    STATE.snapEnabled =
-                        snapToggle.checked;
-
-                }
+            DOM.sceneCrosshair.classList.add(
+                "hidden"
             );
-
         }
 
-        const intensity =
-            byId("intensityInput");
+        STATE.measureStart = null;
 
-        if (intensity) {
+        STATE.connectStart = null;
 
-            intensity.addEventListener(
-                "input",
-                () => {
-
-                    STATE.intensity =
-                        safeNumber(
-                            intensity.value,
-                            1
-                        );
-
-                    setText(
-                        "intensityValue",
-                        STATE.intensity
-                    );
-
-                    recalculatePhysics();
-
-                }
-            );
-
-        }
-
+        notify(
+            "Mode : " +
+            mode.toUpperCase(),
+            "info"
+        );
     }
 
 
-/* ================================================================
-   34 — EXPÉRIENCES
-================================================================ */
+    function handleCanvasPointerDown(event) {
 
-    function bindExperimentControls() {
+        const point =
+            getCanvasPoint(event);
 
-        const selector =
-            byId("experimentSelector");
+        STATE.pointer.downX =
+            point.x;
 
-        if (selector) {
+        STATE.pointer.downY =
+            point.y;
 
-            selector.addEventListener(
-                "change",
-                () => {
+        STATE.pointer.lastX =
+            point.x;
 
-                    const id =
-                        selector.value;
+        STATE.pointer.lastY =
+            point.y;
 
-                    if (
-                        EXPERIMENTS[id]
-                    ) {
+        STATE.pointer.dragging = true;
 
-                        EXPERIMENTS[id]
-                            .setup();
+        STATE.pointer.button =
+            event.button;
 
-                        updateExperimentInfo(
-                            EXPERIMENTS[id]
-                        );
+        if (
+            STATE.cameraMode === "orbit" &&
+            event.button === 0 &&
+            STATE.interactionMode === "select"
+        ) {
 
-                    }
-
-                }
-            );
-
-        }
-
-        $$(".experiment-btn")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const id =
-                            button.dataset.experiment;
-
-                        if (
-                            EXPERIMENTS[id]
-                        ) {
-
-                            EXPERIMENTS[id]
-                                .setup();
-
-                            updateExperimentInfo(
-                                EXPERIMENTS[id]
-                            );
-
-                        }
-
-                    }
+            const object =
+                objectAtScreenPosition(
+                    point.x,
+                    point.y
                 );
 
-            });
+            if (object) {
+                selectObject(object);
+            }
+        }
 
+        if (
+            STATE.interactionMode === "measure"
+        ) {
+
+            const world =
+                screenToGround(
+                    point.x,
+                    point.y
+                );
+
+            if (!STATE.measureStart) {
+
+                STATE.measureStart =
+                    world;
+
+                notify(
+                    "Premier point de mesure enregistré.",
+                    "info"
+                );
+
+            } else {
+
+                createMeasurement(
+                    STATE.measureStart,
+                    world
+                );
+
+                STATE.measureStart = null;
+            }
+        }
+
+        if (
+            STATE.interactionMode === "connect"
+        ) {
+
+            const object =
+                objectAtScreenPosition(
+                    point.x,
+                    point.y
+                );
+
+            if (!object) {
+                return;
+            }
+
+            if (!STATE.connectStart) {
+
+                STATE.connectStart =
+                    object;
+
+                selectObject(object);
+
+                notify(
+                    "Sélectionnez le deuxième composant.",
+                    "info"
+                );
+
+            } else {
+
+                connectObjects(
+                    STATE.connectStart,
+                    object
+                );
+
+                STATE.connectStart = null;
+            }
+        }
+
+        if (
+            STATE.interactionMode === "move" &&
+            STATE.selectedObject
+        ) {
+
+            STATE.dragObjectStart = {
+                position:
+                    copyVector(
+                        STATE.selectedObject.position
+                    ),
+
+                pointer:
+                    {
+                        x: point.x,
+                        y: point.y
+                    }
+            };
+        }
     }
 
-    function updateExperimentInfo(
-        experiment
+
+    function handleCanvasPointerMove(event) {
+
+        const point =
+            getCanvasPoint(event);
+
+        const dx =
+            point.x -
+            STATE.pointer.lastX;
+
+        const dy =
+            point.y -
+            STATE.pointer.lastY;
+
+        if (!STATE.pointer.dragging) {
+            return;
+        }
+
+        if (
+            STATE.interactionMode === "move" &&
+            STATE.selectedObject &&
+            STATE.dragObjectStart
+        ) {
+
+            moveSelectedObject(
+                dx,
+                dy
+            );
+
+        } else if (
+            STATE.interactionMode === "rotate" &&
+            STATE.selectedObject
+        ) {
+
+            rotateSelectedObject(
+                dx,
+                dy
+            );
+
+        } else if (
+            STATE.cameraMode === "orbit"
+        ) {
+
+            STATE.camera.yaw +=
+                dx * 0.008;
+
+            STATE.camera.pitch =
+                clamp(
+                    STATE.camera.pitch +
+                    dy * 0.006,
+                    -1.2,
+                    1.2
+                );
+
+        } else if (
+            STATE.cameraMode === "pan"
+        ) {
+
+            STATE.camera.target.x -=
+                dx * 0.018;
+
+            STATE.camera.target.y +=
+                dy * 0.018;
+        }
+
+        STATE.pointer.lastX =
+            point.x;
+
+        STATE.pointer.lastY =
+            point.y;
+
+        STATE.dirty = true;
+    }
+
+
+    function handleCanvasPointerUp() {
+
+        STATE.pointer.dragging =
+            false;
+
+        STATE.dragObjectStart =
+            null;
+
+        STATE.pointer.button = 0;
+
+        saveStateSilently();
+    }
+
+
+    function moveSelectedObject(
+        dx,
+        dy
     ) {
 
-        setText(
-            "experimentTitle",
-            experiment.name
-        );
+        const object =
+            STATE.selectedObject;
 
-        setText(
-            "experimentDescription",
-            experiment.description
-        );
-
-    }
-
-
-/* ================================================================
-   35 — MISSIONS
-================================================================ */
-
-    function bindMissionControls() {
-
-        $$(".mission-btn")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const id =
-                            button.dataset.mission;
-
-                        validateMission(id);
-
-                    }
-                );
-
-            });
-
-        const validate =
-            byId("validateMissionBtn");
-
-        if (validate) {
-
-            validate.addEventListener(
-                "click",
-                () => {
-
-                    const id =
-                        validate.dataset.mission ||
-                        byId("missionSelector")
-                            ?.value;
-
-                    validateMission(id);
-
-                }
-            );
-
+        if (!object || object.locked) {
+            return;
         }
 
+        const scale =
+            Math.max(
+                0.01,
+                STATE.camera.distance / 450
+            );
+
+        object.position.x +=
+            dx * scale;
+
+        object.position.y -=
+            dy * scale;
+
+        updatePropertiesPanel();
+
+        updateStatusBar();
+
+        STATE.dirty = true;
     }
 
-    function validateMission(id) {
 
-        const mission =
-            MISSIONS[id];
+    function rotateSelectedObject(
+        dx,
+        dy
+    ) {
 
-        if (!mission) {
+        const object =
+            STATE.selectedObject;
+
+        if (!object || object.locked) {
+            return;
+        }
+
+        object.rotation.z +=
+            dx * 0.01;
+
+        object.rotation.y +=
+            dy * 0.01;
+
+        updatePropertiesPanel();
+
+        STATE.dirty = true;
+    }
+
+
+    function getCanvasPoint(event) {
+
+        const rect =
+            DOM.canvas.getBoundingClientRect();
+
+        return {
+            x:
+                event.clientX -
+                rect.left,
+
+            y:
+                event.clientY -
+                rect.top
+        };
+    }
+
+
+    function screenToGround(
+        x,
+        y
+    ) {
+
+        const width =
+            DOM.canvas.clientWidth;
+
+        const height =
+            DOM.canvas.clientHeight;
+
+        const nx =
+            (
+                x -
+                width / 2
+            ) /
+            (
+                Math.min(
+                    width,
+                    height
+                ) * 0.45
+            );
+
+        const ny =
+            (
+                height / 2 -
+                y
+            ) /
+            (
+                Math.min(
+                    width,
+                    height
+                ) * 0.45
+            );
+
+        return {
+            x:
+                nx *
+                STATE.camera.distance *
+                0.65,
+
+            y: 0,
+
+            z:
+                ny *
+                STATE.camera.distance *
+                0.65
+        };
+    }
+
+
+    /* ============================================================
+       21 — CONNEXIONS
+    ============================================================ */
+
+    function connectObjects(a, b) {
+
+        if (
+            !a ||
+            !b ||
+            a === b
+        ) {
 
             notify(
-                "Mission non définie.",
+                "Connexion invalide.",
                 "warning"
             );
 
             return;
-
         }
 
-        const result =
-            mission.validate();
+        const exists =
+            STATE.connections.some(
+                function (connection) {
 
-        STATE.results.push({
-
-            id: mission.id,
-
-            name: mission.name,
-
-            success: result.success,
-
-            message: result.message,
-
-            timestamp:
-                new Date().toISOString()
-
-        });
-
-        renderResults();
-
-        notify(
-            result.message,
-            result.success
-                ? "success"
-                : "warning",
-            4500
-        );
-
-    }
-
-
-/* ================================================================
-   36 — RÉSULTATS
-================================================================ */
-
-    function bindResultsControls() {
-
-        const clearResults =
-            byId("clearResultsBtn");
-
-        if (clearResults) {
-
-            clearResults.addEventListener(
-                "click",
-                () => {
-
-                    STATE.results = [];
-
-                    renderResults();
+                    return (
+                        (
+                            connection.a === a.id &&
+                            connection.b === b.id
+                        ) ||
+                        (
+                            connection.a === b.id &&
+                            connection.b === a.id
+                        )
+                    );
 
                 }
             );
 
-        }
+        if (exists) {
 
-        const exportButton =
-            byId("exportResultsBtn");
-
-        if (exportButton) {
-
-            exportButton.addEventListener(
-                "click",
-                exportResults
+            notify(
+                "Ces deux composants sont déjà connectés.",
+                "warning"
             );
-
-        }
-
-    }
-
-    function renderResults() {
-
-        const content =
-            byId("resultsContent") ||
-            document.querySelector(
-                ".results-content"
-            );
-
-        if (!content) return;
-
-        if (!STATE.results.length) {
-
-            content.innerHTML = `
-                <div class="results-empty">
-                    Aucun résultat disponible.
-                </div>
-            `;
 
             return;
-
         }
 
-        content.innerHTML = `
-            <div class="results-table-wrapper">
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Expérience</th>
-                            <th>Résultat</th>
-                            <th>Message</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${STATE.results.map(
-                            result => `
-                            <tr>
-                                <td>
-                                    ${escapeHTML(
-                                        result.name
-                                    )}
-                                </td>
-                                <td>
-                                    ${
-                                        result.success
-                                            ? "✓ Réussi"
-                                            : "⚠ À corriger"
-                                    }
-                                </td>
-                                <td>
-                                    ${escapeHTML(
-                                        result.message
-                                    )}
-                                </td>
-                            </tr>
-                        `
-                        ).join("")}
-                    </tbody>
-                </table>
-            </div>
-        `;
+        STATE.connections.push({
 
+            id: uid("connection"),
+
+            a: a.id,
+
+            b: b.id,
+
+            createdAt: Date.now()
+
+        });
+
+        STATE.dirty = true;
+
+        notify(
+            a.name +
+            " connecté à " +
+            b.name +
+            ".",
+            "success"
+        );
+
+        saveStateSilently();
     }
 
-    function exportResults() {
+
+    function drawConnections() {
+
+        STATE.connections.forEach(
+            function (connection) {
+
+                const a =
+                    STATE.objects.find(
+                        function (object) {
+                            return (
+                                object.id ===
+                                connection.a
+                            );
+                        }
+                    );
+
+                const b =
+                    STATE.objects.find(
+                        function (object) {
+                            return (
+                                object.id ===
+                                connection.b
+                            );
+                        }
+                    );
+
+                if (!a || !b) {
+                    return;
+                }
+
+                draw3DLine(
+                    a.position,
+                    b.position,
+                    "rgba(70,210,255,0.72)",
+                    2,
+                    [6, 4]
+                );
+            }
+        );
+    }
+
+
+    /* ============================================================
+       22 — CAMÉRA
+    ============================================================ */
+
+    function setCameraMode(mode) {
+
+        if (
+            mode !== "orbit" &&
+            mode !== "pan"
+        ) {
+            return;
+        }
+
+        STATE.cameraMode =
+            mode;
+
+        if (DOM.btnCameraOrbit) {
+
+            DOM.btnCameraOrbit.classList.toggle(
+                "active",
+                mode === "orbit"
+            );
+        }
+
+        if (DOM.btnCameraPan) {
+
+            DOM.btnCameraPan.classList.toggle(
+                "active",
+                mode === "pan"
+            );
+        }
+    }
+
+
+    function cameraZoom(factor) {
+
+        STATE.camera.distance =
+            clamp(
+                STATE.camera.distance *
+                factor,
+                7,
+                60
+            );
+
+        STATE.dirty = true;
+    }
+
+
+    function resetCamera() {
+
+        STATE.camera.yaw =
+            STATE.cameraDefaults.yaw;
+
+        STATE.camera.pitch =
+            STATE.cameraDefaults.pitch;
+
+        STATE.camera.distance =
+            STATE.cameraDefaults.distance;
+
+        STATE.camera.target =
+            copyVector(
+                STATE.cameraDefaults.target
+            );
+
+        STATE.dirty = true;
+
+        notify(
+            "Caméra réinitialisée.",
+            "success"
+        );
+    }
+
+
+    /* ============================================================
+       23 — RENDU PRINCIPAL
+    ============================================================ */
+
+    function renderScene() {
+
+        clearScene();
+
+        drawOpticalBench();
+
+        drawConnections();
+
+        drawRays();
+
+        drawAllObjects();
+
+        updateHUD();
+
+        STATE.dirty = false;
+    }
+
+
+    function updateHUD() {
+
+        const selected =
+            STATE.selectedObject;
+
+        if (selected) {
+
+            if (DOM.coordinateX) {
+                DOM.coordinateX.textContent =
+                    "X: " +
+                    formatNumber(
+                        selected.position.x,
+                        2
+                    );
+            }
+
+            if (DOM.coordinateY) {
+                DOM.coordinateY.textContent =
+                    "Y: " +
+                    formatNumber(
+                        selected.position.y,
+                        2
+                    );
+            }
+
+            if (DOM.coordinateZ) {
+                DOM.coordinateZ.textContent =
+                    "Z: " +
+                    formatNumber(
+                        selected.position.z,
+                        2
+                    );
+            }
+
+        } else {
+
+            if (DOM.coordinateX) {
+                DOM.coordinateX.textContent =
+                    "X: 0.00";
+            }
+
+            if (DOM.coordinateY) {
+                DOM.coordinateY.textContent =
+                    "Y: 0.00";
+            }
+
+            if (DOM.coordinateZ) {
+                DOM.coordinateZ.textContent =
+                    "Z: 0.00";
+            }
+        }
+    }
+
+
+    /* ============================================================
+       24 — STATUS BAR
+    ============================================================ */
+
+    function updateStatusBar() {
+
+        if (DOM.selectedObjectName) {
+
+            DOM.selectedObjectName.textContent =
+                STATE.selectedObject
+                    ? STATE.selectedObject.name
+                    : "Aucun";
+        }
+
+        if (DOM.selectedObjectPosition) {
+
+            DOM.selectedObjectPosition.textContent =
+                STATE.selectedObject
+                    ? (
+                        formatNumber(
+                            STATE.selectedObject.position.x,
+                            2
+                        ) +
+                        " / " +
+                        formatNumber(
+                            STATE.selectedObject.position.y,
+                            2
+                        ) +
+                        " / " +
+                        formatNumber(
+                            STATE.selectedObject.position.z,
+                            2
+                        )
+                    )
+                    : "—";
+        }
+
+        if (DOM.objectCount) {
+
+            DOM.objectCount.textContent =
+                String(
+                    STATE.objects.length
+                );
+        }
+
+        if (DOM.fpsCounter) {
+
+            DOM.fpsCounter.textContent =
+                String(
+                    Math.round(STATE.fps)
+                );
+        }
+
+        updateLibraryButtons();
+    }
+
+
+    /* ============================================================
+       25 — PARAMÈTRES OPTIQUES
+    ============================================================ */
+
+    function applyOpticalProperties() {
+
+        const wavelength =
+            clamp(
+                Number(
+                    DOM.wavelengthInput.value
+                ) || 650,
+                100,
+                2000
+            );
+
+        const intensity =
+            clamp(
+                Number(
+                    DOM.intensityInput.value
+                ) || 75,
+                0,
+                100
+            );
+
+        const refractiveIndex =
+            clamp(
+                Number(
+                    DOM.refractiveIndexInput.value
+                ) || 1,
+                1,
+                5
+            );
+
+        STATE.optical.wavelength =
+            wavelength;
+
+        STATE.optical.intensity =
+            intensity;
+
+        STATE.optical.refractiveIndex =
+            refractiveIndex;
+
+        if (DOM.intensityValue) {
+
+            DOM.intensityValue.textContent =
+                String(intensity);
+        }
+
+        if (STATE.selectedObject) {
+
+            STATE.selectedObject.wavelength =
+                wavelength;
+
+            STATE.selectedObject.intensity =
+                intensity;
+
+            STATE.selectedObject.refractiveIndex =
+                refractiveIndex;
+        }
+
+        clearRays();
+
+        STATE.dirty = true;
+
+        saveStateSilently();
+
+        notify(
+            "Paramètres optiques appliqués.",
+            "success"
+        );
+    }
+
+
+    /* ============================================================
+       26 — SAUVEGARDE LOCALE
+    ============================================================ */
+
+    function serializeState() {
+
+        return {
+
+            version:
+                CONFIG.appVersion,
+
+            camera: {
+                yaw:
+                    STATE.camera.yaw,
+
+                pitch:
+                    STATE.camera.pitch,
+
+                distance:
+                    STATE.camera.distance,
+
+                target:
+                    copyVector(
+                        STATE.camera.target
+                    )
+            },
+
+            optical:
+                JSON.parse(
+                    JSON.stringify(
+                        STATE.optical
+                    )
+                ),
+
+            objects:
+                JSON.parse(
+                    JSON.stringify(
+                        STATE.objects
+                    )
+                ),
+
+            connections:
+                JSON.parse(
+                    JSON.stringify(
+                        STATE.connections
+                    )
+                ),
+
+            measurements:
+                JSON.parse(
+                    JSON.stringify(
+                        STATE.measurements
+                    )
+                ),
+
+            results:
+                JSON.parse(
+                    JSON.stringify(
+                        STATE.results
+                    )
+                ),
+
+            experiment:
+                STATE.experiment
+
+        };
+    }
+
+
+    function saveStateSilently() {
+
+        try {
+
+            localStorage.setItem(
+                CONFIG.storageKey,
+                JSON.stringify(
+                    serializeState()
+                )
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "FOBAS OPTIQUE : sauvegarde locale impossible.",
+                error
+            );
+        }
+    }
+
+
+    function saveExperiment() {
+
+        saveStateSilently();
 
         const data =
-            JSON.stringify(
-                STATE.results,
-                null,
-                2
-            );
+            serializeState();
 
         const blob =
             new Blob(
-                [data],
+                [
+                    JSON.stringify(
+                        data,
+                        null,
+                        2
+                    )
+                ],
                 {
                     type:
                         "application/json"
@@ -5996,332 +5440,41 @@
             );
 
         const url =
-            URL.createObjectURL(blob);
+            URL.createObjectURL(
+                blob
+            );
 
-        const link =
+        const anchor =
             document.createElement("a");
 
-        link.href = url;
+        anchor.href = url;
 
-        link.download =
-            "fobas-optique-resultats.json";
+        anchor.download =
+            "fobas-optique-experience.json";
 
-        link.click();
-
-        URL.revokeObjectURL(url);
-
-    }
-
-
-/* ================================================================
-   37 — HISTORIQUE UNDO / REDO
-================================================================ */
-
-    function serializeObjects() {
-
-        return STATE.objects.map(
-            object => ({
-
-                id:
-                    object.userData.id,
-
-                type:
-                    object.userData.type,
-
-                position: {
-
-                    x: object.position.x,
-
-                    y: object.position.y,
-
-                    z: object.position.z
-
-                },
-
-                rotation: {
-
-                    x: object.rotation.x,
-
-                    y: object.rotation.y,
-
-                    z: object.rotation.z
-
-                },
-
-                scale: {
-
-                    x: object.scale.x,
-
-                    y: object.scale.y,
-
-                    z: object.scale.z
-
-                },
-
-                focalLength:
-                    object.userData.focalLength,
-
-                refractiveIndex:
-                    object.userData.refractiveIndex
-
-            })
+        document.body.appendChild(
+            anchor
         );
 
-    }
+        anchor.click();
 
-    function registerHistory() {
+        anchor.remove();
 
-        const snapshot =
-            JSON.stringify(
-                serializeObjects()
-            );
-
-        if (
-            STATE.history[
-                STATE.historyIndex
-            ] === snapshot
-        ) {
-
-            return;
-
-        }
-
-        STATE.history =
-            STATE.history.slice(
-                0,
-                STATE.historyIndex + 1
-            );
-
-        STATE.history.push(
-            snapshot
-        );
-
-        STATE.historyIndex =
-            STATE.history.length - 1;
-
-        if (STATE.history.length > 50) {
-
-            STATE.history.shift();
-
-            STATE.historyIndex--;
-
-        }
-
-    }
-
-    function undo() {
-
-        if (
-            STATE.historyIndex <= 0
-        ) {
-
-            notify(
-                "Aucune action à annuler.",
-                "info"
-            );
-
-            return;
-
-        }
-
-        STATE.historyIndex--;
-
-        restoreSnapshot(
-            STATE.history[
-                STATE.historyIndex
-            ]
-        );
-
-    }
-
-    function redo() {
-
-        if (
-            STATE.historyIndex >=
-            STATE.history.length - 1
-        ) {
-
-            notify(
-                "Aucune action à rétablir.",
-                "info"
-            );
-
-            return;
-
-        }
-
-        STATE.historyIndex++;
-
-        restoreSnapshot(
-            STATE.history[
-                STATE.historyIndex
-            ]
-        );
-
-    }
-
-    function restoreSnapshot(snapshot) {
-
-        let data;
-
-        try {
-
-            data =
-                JSON.parse(snapshot);
-
-        } catch {
-
-            return;
-
-        }
-
-        [...STATE.objects].forEach(
-            object =>
-                removeObjectWithoutHistory(
-                    object
-                )
-        );
-
-        data.forEach(item => {
-
-            const object =
-                createOpticalObject(
-                    item.type,
-                    new THREE.Vector3(
-                        item.position.x,
-                        item.position.y,
-                        item.position.z
-                    )
-                );
-
-            if (!object) return;
-
-            object.rotation.set(
-                item.rotation.x,
-                item.rotation.y,
-                item.rotation.z
-            );
-
-            object.scale.set(
-                item.scale.x,
-                item.scale.y,
-                item.scale.z
-            );
-
-            object.userData.focalLength =
-                item.focalLength;
-
-            object.userData.refractiveIndex =
-                item.refractiveIndex;
-
-        });
-
-        clearSelection();
-
-        recalculatePhysics();
-
-    }
-
-    function removeObjectWithoutHistory(
-        object
-    ) {
-
-        const index =
-            STATE.objects.indexOf(object);
-
-        if (index >= 0) {
-
-            STATE.objects.splice(
-                index,
-                1
-            );
-
-        }
-
-        object.parent?.remove(object);
-
-        disposeObject(object);
-
-    }
-
-
-/* ================================================================
-   38 — SAUVEGARDE
-================================================================ */
-
-    function buildSaveData() {
-
-        return {
-
-            version:
-                FOBAS_OPTICS_VERSION,
-
-            timestamp:
-                new Date().toISOString(),
-
-            settings: {
-
-                rayTracingEnabled:
-                    STATE.rayTracingEnabled,
-
-                gridEnabled:
-                    STATE.gridEnabled,
-
-                shadowsEnabled:
-                    STATE.shadowsEnabled,
-
-                snapEnabled:
-                    STATE.snapEnabled,
-
-                intensity:
-                    STATE.intensity
-
+        setTimeout(
+            function () {
+                URL.revokeObjectURL(url);
             },
+            1000
+        );
 
-            objects:
-                serializeObjects(),
-
-            results:
-                STATE.results
-
-        };
-
+        notify(
+            "Expérience sauvegardée.",
+            "success"
+        );
     }
 
-    function saveState(showMessage = false) {
 
-        try {
-
-            localStorage.setItem(
-                CONFIG.storageKey,
-                JSON.stringify(
-                    buildSaveData()
-                )
-            );
-
-            if (showMessage) {
-
-                notify(
-                    "Laboratoire sauvegardé.",
-                    "success"
-                );
-
-            }
-
-        } catch (error) {
-
-            console.error(error);
-
-            notify(
-                "Impossible de sauvegarder le laboratoire.",
-                "error"
-            );
-
-        }
-
-    }
-
-    function restoreState(showMessage = false) {
+    function loadSavedState() {
 
         try {
 
@@ -6331,284 +5484,721 @@
                 );
 
             if (!raw) {
-
-                if (showMessage) {
-
-                    notify(
-                        "Aucune sauvegarde trouvée.",
-                        "info"
-                    );
-
-                }
-
                 return false;
-
             }
 
             const data =
                 JSON.parse(raw);
 
-            if (
-                !Array.isArray(
-                    data.objects
-                )
-            ) {
-
-                return false;
-
-            }
-
-            [...STATE.objects].forEach(
-                object =>
-                    removeObjectWithoutHistory(
-                        object
-                    )
-            );
-
-            data.objects.forEach(item => {
-
-                const object =
-                    createOpticalObject(
-                        item.type,
-                        new THREE.Vector3(
-                            safeNumber(
-                                item.position?.x
-                            ),
-                            safeNumber(
-                                item.position?.y,
-                                1.4
-                            ),
-                            safeNumber(
-                                item.position?.z
-                            )
-                        )
-                    );
-
-                if (!object) return;
-
-                object.rotation.set(
-                    safeNumber(
-                        item.rotation?.x
-                    ),
-                    safeNumber(
-                        item.rotation?.y
-                    ),
-                    safeNumber(
-                        item.rotation?.z
-                    )
-                );
-
-                object.scale.set(
-                    safeNumber(
-                        item.scale?.x,
-                        1
-                    ),
-                    safeNumber(
-                        item.scale?.y,
-                        1
-                    ),
-                    safeNumber(
-                        item.scale?.z,
-                        1
-                    )
-                );
-
-                object.userData.focalLength =
-                    safeNumber(
-                        item.focalLength
-                    );
-
-                object.userData.refractiveIndex =
-                    safeNumber(
-                        item.refractiveIndex,
-                        1.5
-                    );
-
-            });
-
-            if (data.settings) {
-
-                STATE.rayTracingEnabled =
-                    data.settings
-                        .rayTracingEnabled ??
-                    true;
-
-                STATE.gridEnabled =
-                    data.settings
-                        .gridEnabled ??
-                    true;
-
-                STATE.shadowsEnabled =
-                    data.settings
-                        .shadowsEnabled ??
-                    true;
-
-                STATE.snapEnabled =
-                    data.settings
-                        .snapEnabled ??
-                    true;
-
-                STATE.intensity =
-                    safeNumber(
-                        data.settings.intensity,
-                        1
-                    );
-
-            }
-
-            STATE.results =
-                Array.isArray(
-                    data.results
-                )
-                    ? data.results
-                    : [];
-
-            recalculatePhysics();
-
-            renderResults();
-
-            if (showMessage) {
-
-                notify(
-                    "Laboratoire restauré.",
-                    "success"
-                );
-
-            }
+            restoreState(data);
 
             return true;
 
         } catch (error) {
 
-            console.error(
-                "Restauration impossible :",
+            console.warn(
+                "FOBAS OPTIQUE : état local invalide.",
                 error
             );
 
-            if (showMessage) {
-
-                notify(
-                    "La sauvegarde est invalide.",
-                    "error"
-                );
-
-            }
-
             return false;
+        }
+    }
 
+
+    function restoreState(data) {
+
+        if (!data) {
+            return;
         }
 
-    }
+        if (data.camera) {
 
-    function scheduleAutoSave() {
+            STATE.camera.yaw =
+                Number(data.camera.yaw) ||
+                STATE.cameraDefaults.yaw;
 
-        if (!STATE.autoSave) return;
+            STATE.camera.pitch =
+                Number(data.camera.pitch) ||
+                STATE.cameraDefaults.pitch;
 
-        clearTimeout(
-            autoSaveTimer
-        );
+            STATE.camera.distance =
+                Number(data.camera.distance) ||
+                STATE.cameraDefaults.distance;
 
-        autoSaveTimer =
-            setTimeout(
-                () =>
-                    saveState(false),
-                CONFIG.autoSaveDelay
+            if (data.camera.target) {
+
+                STATE.camera.target =
+                    copyVector(
+                        data.camera.target
+                    );
+            }
+        }
+
+        if (data.optical) {
+
+            Object.assign(
+                STATE.optical,
+                data.optical
             );
+        }
 
-    }
+        if (Array.isArray(data.objects)) {
 
+            STATE.objects =
+                data.objects.map(
+                    function (object) {
 
-/* ================================================================
-   39 — IMPORT / EXPORT
-================================================================ */
-
-    function exportLaboratory() {
-
-        const data =
-            JSON.stringify(
-                buildSaveData(),
-                null,
-                2
-            );
-
-        downloadText(
-            data,
-            "fobas-optique-laboratoire.json"
-        );
-
-        notify(
-            "Laboratoire exporté.",
-            "success"
-        );
-
-    }
-
-    function importLaboratoryFile() {
-
-        const input =
-            document.createElement("input");
-
-        input.type = "file";
-
-        input.accept =
-            "application/json,.json";
-
-        input.addEventListener(
-            "change",
-            () => {
-
-                const file =
-                    input.files?.[0];
-
-                if (!file) return;
-
-                const reader =
-                    new FileReader();
-
-                reader.onload = () => {
-
-                    try {
-
-                        const data =
-                            JSON.parse(
-                                reader.result
-                            );
-
-                        localStorage.setItem(
-                            CONFIG.storageKey,
-                            JSON.stringify(data)
-                        );
-
-                        restoreState(true);
-
-                    } catch {
-
-                        notify(
-                            "Fichier laboratoire invalide.",
-                            "error"
+                        return normalizeLoadedObject(
+                            object
                         );
 
                     }
+                );
+        }
 
-                };
+        if (Array.isArray(data.connections)) {
 
-                reader.readAsText(file);
+            STATE.connections =
+                data.connections;
+        }
+
+        if (Array.isArray(data.measurements)) {
+
+            STATE.measurements =
+                data.measurements;
+        }
+
+        if (Array.isArray(data.results)) {
+
+            STATE.results =
+                data.results;
+        }
+
+        STATE.experiment =
+            data.experiment || "";
+
+        STATE.selectedObject =
+            null;
+
+        updatePropertiesPanel();
+
+        updateStatusBar();
+
+        updateResults();
+
+        updateRayStatus();
+
+        STATE.dirty = true;
+    }
+
+
+    function normalizeLoadedObject(object) {
+
+        return {
+
+            id:
+                object.id ||
+                uid("opt"),
+
+            numericId:
+                object.numericId ||
+                STATE.nextObjectId++,
+
+            type:
+                object.type ||
+                "point-source",
+
+            name:
+                object.name ||
+                "Objet optique",
+
+            description:
+                object.description ||
+                "",
+
+            icon:
+                object.icon ||
+                "◉",
+
+            position:
+                copyVector(
+                    object.position ||
+                    {
+                        x: 0,
+                        y: 0,
+                        z: 0
+                    }
+                ),
+
+            rotation:
+                copyVector(
+                    object.rotation ||
+                    {
+                        x: 0,
+                        y: 0,
+                        z: 0
+                    }
+                ),
+
+            scale:
+                copyVector(
+                    object.scale ||
+                    {
+                        x: 1,
+                        y: 1,
+                        z: 1
+                    }
+                ),
+
+            wavelength:
+                Number(object.wavelength) ||
+                650,
+
+            intensity:
+                Number(object.intensity) ||
+                75,
+
+            refractiveIndex:
+                Number(object.refractiveIndex) ||
+                1,
+
+            focalLength:
+                object.focalLength === null ||
+                object.focalLength === undefined
+                    ? null
+                    : Number(object.focalLength),
+
+            material:
+                object.material ||
+                "Composant optique",
+
+            visible:
+                object.visible !== false,
+
+            locked:
+                object.locked === true,
+
+            selected: false,
+
+            createdAt:
+                object.createdAt ||
+                Date.now(),
+
+            data:
+                object.data ||
+                {}
+
+        };
+    }
+
+
+    function importExperiment(file) {
+
+        if (!file) {
+            return;
+        }
+
+        const reader =
+            new FileReader();
+
+        reader.onload =
+            function () {
+
+                try {
+
+                    const data =
+                        JSON.parse(
+                            reader.result
+                        );
+
+                    restoreState(data);
+
+                    saveStateSilently();
+
+                    notify(
+                        "Expérience importée avec succès.",
+                        "success"
+                    );
+
+                } catch (error) {
+
+                    notify(
+                        "Le fichier JSON est invalide.",
+                        "error"
+                    );
+
+                    console.error(
+                        error
+                    );
+                }
+            };
+
+        reader.onerror =
+            function () {
+
+                notify(
+                    "Impossible de lire le fichier.",
+                    "error"
+                );
+            };
+
+        reader.readAsText(file);
+    }
+
+
+    /* ============================================================
+       27 — NOUVELLE EXPÉRIENCE
+    ============================================================ */
+
+    function newExperiment() {
+
+        confirmAction(
+            "Nouvelle expérience",
+            "Tous les objets et résultats actuels seront remplacés.",
+            function () {
+
+                clearExperiment();
+
+                addDefaultLaboratory();
+
+                notify(
+                    "Nouvelle expérience créée.",
+                    "success"
+                );
+            }
+        );
+    }
+
+
+    function resetExperiment() {
+
+        confirmAction(
+            "Réinitialiser",
+            "La configuration actuelle sera réinitialisée.",
+            function () {
+
+                clearExperiment();
+
+                addDefaultLaboratory();
+
+                resetCamera();
+
+                notify(
+                    "Laboratoire réinitialisé.",
+                    "success"
+                );
+            }
+        );
+    }
+
+
+    function clearExperiment() {
+
+        STATE.objects = [];
+
+        STATE.rays = [];
+
+        STATE.measurements = [];
+
+        STATE.results = [];
+
+        STATE.connections = [];
+
+        STATE.selectedObject = null;
+
+        STATE.selectedLibraryType = null;
+
+        STATE.experiment = "";
+
+        localStorage.removeItem(
+            CONFIG.storageKey
+        );
+
+        updatePropertiesPanel();
+
+        updateStatusBar();
+
+        updateResults();
+
+        updateRayStatus();
+
+        STATE.dirty = true;
+    }
+
+
+    function addDefaultLaboratory() {
+
+        const bench =
+            createObject(
+                "optical-bench"
+            );
+
+        if (bench) {
+
+            bench.position = {
+                x: 0,
+                y: 0,
+                z: 0
+            };
+
+            STATE.objects.push(
+                bench
+            );
+        }
+
+        const laser =
+            createObject(
+                "laser"
+            );
+
+        if (laser) {
+
+            laser.position = {
+                x: -7,
+                y: 0.4,
+                z: 0
+            };
+
+            STATE.objects.push(
+                laser
+            );
+        }
+
+        const lens =
+            createObject(
+                "convex-lens"
+            );
+
+        if (lens) {
+
+            lens.position = {
+                x: 0,
+                y: 0.5,
+                z: 0
+            };
+
+            STATE.objects.push(
+                lens
+            );
+        }
+
+        const screen =
+            createObject(
+                "screen"
+            );
+
+        if (screen) {
+
+            screen.position = {
+                x: 6,
+                y: 0.5,
+                z: 0
+            };
+
+            STATE.objects.push(
+                screen
+            );
+        }
+
+        updateStatusBar();
+
+        traceRays();
+    }
+
+
+    /* ============================================================
+       28 — MODALES
+    ============================================================ */
+
+    function openModal(modal) {
+
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.remove(
+            "hidden"
+        );
+    }
+
+
+    function closeModal(modal) {
+
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.add(
+            "hidden"
+        );
+    }
+
+
+    function confirmAction(
+        title,
+        message,
+        callback
+    ) {
+
+        STATE.pendingConfirmation =
+            callback;
+
+        if (DOM.confirmationTitle) {
+
+            DOM.confirmationTitle.textContent =
+                title;
+        }
+
+        if (DOM.confirmationMessage) {
+
+            DOM.confirmationMessage.textContent =
+                message;
+        }
+
+        openModal(
+            DOM.confirmationModal
+        );
+    }
+
+
+    function executeConfirmation() {
+
+        const callback =
+            STATE.pendingConfirmation;
+
+        STATE.pendingConfirmation =
+            null;
+
+        closeModal(
+            DOM.confirmationModal
+        );
+
+        if (
+            typeof callback ===
+            "function"
+        ) {
+            callback();
+        }
+    }
+
+
+    /* ============================================================
+       29 — INFORMATIONS OBJET
+    ============================================================ */
+
+    function openObjectInfo() {
+
+        const object =
+            STATE.selectedObject;
+
+        if (!object) {
+            return;
+        }
+
+        if (DOM.objectInfoTitle) {
+
+            DOM.objectInfoTitle.textContent =
+                object.name;
+        }
+
+        if (DOM.objectInfoSubtitle) {
+
+            DOM.objectInfoSubtitle.textContent =
+                "Informations scientifiques";
+        }
+
+        if (DOM.infoObjectType) {
+
+            DOM.infoObjectType.textContent =
+                object.type;
+        }
+
+        if (DOM.infoObjectMaterial) {
+
+            DOM.infoObjectMaterial.textContent =
+                object.material;
+        }
+
+        if (DOM.infoObjectIndex) {
+
+            DOM.infoObjectIndex.textContent =
+                Number.isFinite(
+                    object.refractiveIndex
+                )
+                    ? formatNumber(
+                        object.refractiveIndex,
+                        3
+                    )
+                    : "—";
+        }
+
+        if (DOM.infoObjectFocal) {
+
+            DOM.infoObjectFocal.textContent =
+                Number.isFinite(
+                    object.focalLength
+                )
+                    ? formatNumber(
+                        object.focalLength,
+                        2
+                    ) +
+                    " cm"
+                    : "—";
+        }
+
+        openModal(
+            DOM.objectInfoModal
+        );
+    }
+
+
+    /* ============================================================
+       30 — NOTIFICATIONS
+    ============================================================ */
+
+    function notify(
+        message,
+        type
+    ) {
+
+        if (!DOM.notificationContainer) {
+            return;
+        }
+
+        const notification =
+            document.createElement("div");
+
+        notification.className =
+            "fobas-notification " +
+            (
+                type ||
+                "info"
+            );
+
+        notification.textContent =
+            message;
+
+        DOM.notificationContainer.appendChild(
+            notification
+        );
+
+        requestAnimationFrame(
+            function () {
+
+                notification.classList.add(
+                    "show"
+                );
 
             }
         );
 
-        input.click();
+        setTimeout(
+            function () {
 
+                notification.classList.remove(
+                    "show"
+                );
+
+                setTimeout(
+                    function () {
+
+                        if (
+                            notification.parentNode
+                        ) {
+
+                            notification.parentNode.removeChild(
+                                notification
+                            );
+                        }
+
+                    },
+                    350
+                );
+
+            },
+            3200
+        );
     }
 
-    function downloadText(
-        text,
-        filename
-    ) {
+
+    /* ============================================================
+       31 — PANNEAUX
+    ============================================================ */
+
+    function toggleLeftPanel() {
+
+        if (!DOM.leftPanel) {
+            return;
+        }
+
+        DOM.leftPanel.classList.toggle(
+            "collapsed"
+        );
+    }
+
+
+    function toggleRightPanel() {
+
+        if (!DOM.rightPanel) {
+            return;
+        }
+
+        DOM.rightPanel.classList.toggle(
+            "collapsed"
+        );
+    }
+
+
+    function toggleResults() {
+
+        if (!DOM.resultsPanel) {
+            return;
+        }
+
+        DOM.resultsPanel.classList.toggle(
+            "collapsed"
+        );
+    }
+
+
+    /* ============================================================
+       32 — RÉSULTATS EXPORT
+    ============================================================ */
+
+    function exportResults() {
+
+        const payload = {
+
+            application:
+                CONFIG.appName,
+
+            version:
+                CONFIG.appVersion,
+
+            exportedAt:
+                new Date().toISOString(),
+
+            experiment:
+                STATE.experiment,
+
+            results:
+                STATE.results,
+
+            measurements:
+                STATE.measurements
+
+        };
 
         const blob =
             new Blob(
-                [text],
+                [
+                    JSON.stringify(
+                        payload,
+                        null,
+                        2
+                    )
+                ],
                 {
                     type:
                         "application/json"
@@ -6616,1235 +6206,1223 @@
             );
 
         const url =
-            URL.createObjectURL(blob);
+            URL.createObjectURL(
+                blob
+            );
 
-        const link =
+        const anchor =
             document.createElement("a");
 
-        link.href = url;
+        anchor.href =
+            url;
 
-        link.download =
-            filename;
+        anchor.download =
+            "fobas-optique-resultats.json";
 
-        document.body.appendChild(link);
+        document.body.appendChild(
+            anchor
+        );
 
-        link.click();
+        anchor.click();
 
-        link.remove();
+        anchor.remove();
 
-        URL.revokeObjectURL(url);
+        setTimeout(
+            function () {
+                URL.revokeObjectURL(url);
+            },
+            1000
+        );
 
+        notify(
+            "Résultats exportés.",
+            "success"
+        );
     }
 
 
-/* ================================================================
-   40 — RACCOURCIS CLAVIER
-================================================================ */
+    /* ============================================================
+       33 — ÉVÉNEMENTS
+    ============================================================ */
 
-    function bindKeyboard() {
+    function bindEvents() {
+
+        DOM.categoryButtons.forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        DOM.categoryButtons.forEach(
+                            function (item) {
+                                item.classList.remove(
+                                    "active"
+                                );
+                            }
+                        );
+
+                        button.classList.add(
+                            "active"
+                        );
+
+                        STATE.category =
+                            button.dataset.category;
+
+                        STATE.selectedLibraryType =
+                            null;
+
+                        renderLibrary();
+                    }
+                );
+            }
+        );
+
+
+        DOM.toolButtons.forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        setInteractionMode(
+                            button.dataset.tool
+                        );
+                    }
+                );
+            }
+        );
+
+
+        if (DOM.componentSearch) {
+
+            DOM.componentSearch.addEventListener(
+                "input",
+                renderLibrary
+            );
+        }
+
+
+        if (
+            DOM.btnClearComponentSearch
+        ) {
+
+            DOM.btnClearComponentSearch.addEventListener(
+                "click",
+                function () {
+
+                    DOM.componentSearch.value =
+                        "";
+
+                    renderLibrary();
+
+                    DOM.componentSearch.focus();
+                }
+            );
+        }
+
+
+        if (
+            DOM.btnAddSelectedComponent
+        ) {
+
+            DOM.btnAddSelectedComponent.addEventListener(
+                "click",
+                addSelectedComponent
+            );
+        }
+
+
+        if (
+            DOM.btnRemoveSelectedComponent
+        ) {
+
+            DOM.btnRemoveSelectedComponent.addEventListener(
+                "click",
+                removeSelectedComponent
+            );
+        }
+
+
+        if (DOM.btnDuplicateObject) {
+
+            DOM.btnDuplicateObject.addEventListener(
+                "click",
+                duplicateSelectedObject
+            );
+        }
+
+
+        if (DOM.btnDeleteObject) {
+
+            DOM.btnDeleteObject.addEventListener(
+                "click",
+                removeSelectedComponent
+            );
+        }
+
+
+        [
+            DOM.objectPositionX,
+            DOM.objectPositionY,
+            DOM.objectPositionZ,
+            DOM.objectRotationX,
+            DOM.objectRotationY,
+            DOM.objectRotationZ
+        ].forEach(
+            function (input) {
+
+                if (!input) {
+                    return;
+                }
+
+                input.addEventListener(
+                    "change",
+                    updateSelectedObjectFromInputs
+                );
+
+                input.addEventListener(
+                    "keydown",
+                    function (event) {
+
+                        if (
+                            event.key ===
+                            "Enter"
+                        ) {
+
+                            updateSelectedObjectFromInputs();
+                        }
+                    }
+                );
+            }
+        );
+
+
+        if (
+            DOM.btnApplyOpticalProperties
+        ) {
+
+            DOM.btnApplyOpticalProperties.addEventListener(
+                "click",
+                applyOpticalProperties
+            );
+        }
+
+
+        if (DOM.intensityInput) {
+
+            DOM.intensityInput.addEventListener(
+                "input",
+                function () {
+
+                    if (DOM.intensityValue) {
+
+                        DOM.intensityValue.textContent =
+                            DOM.intensityInput.value;
+                    }
+                }
+            );
+        }
+
+
+        if (DOM.showRaysToggle) {
+
+            DOM.showRaysToggle.addEventListener(
+                "change",
+                function () {
+
+                    STATE.optical.showRays =
+                        DOM.showRaysToggle.checked;
+
+                    updateRayStatus();
+
+                    STATE.dirty = true;
+                }
+            );
+        }
+
+
+        if (
+            DOM.showSecondaryRaysToggle
+        ) {
+
+            DOM.showSecondaryRaysToggle.addEventListener(
+                "change",
+                function () {
+
+                    STATE.optical.showSecondaryRays =
+                        DOM.showSecondaryRaysToggle.checked;
+
+                    STATE.dirty = true;
+                }
+            );
+        }
+
+
+        if (
+            DOM.showFocalPointsToggle
+        ) {
+
+            DOM.showFocalPointsToggle.addEventListener(
+                "change",
+                function () {
+
+                    STATE.optical.showFocalPoints =
+                        DOM.showFocalPointsToggle.checked;
+
+                    STATE.dirty = true;
+                }
+            );
+        }
+
+
+        if (DOM.btnTraceRays) {
+
+            DOM.btnTraceRays.addEventListener(
+                "click",
+                traceRays
+            );
+        }
+
+
+        if (
+            DOM.btnClearMeasurements
+        ) {
+
+            DOM.btnClearMeasurements.addEventListener(
+                "click",
+                function () {
+
+                    STATE.measurements = [];
+
+                    DOM.measurementDistance.textContent =
+                        "—";
+
+                    DOM.measurementAngle.textContent =
+                        "—";
+
+                    DOM.measurementFocal.textContent =
+                        "—";
+
+                    DOM.measurementMagnification.textContent =
+                        "—";
+
+                    notify(
+                        "Mesures effacées.",
+                        "success"
+                    );
+                }
+            );
+        }
+
+
+        if (DOM.btnLoadExperiment) {
+
+            DOM.btnLoadExperiment.addEventListener(
+                "click",
+                function () {
+
+                    loadExperiment(
+                        DOM.experimentSelector.value
+                    );
+                }
+            );
+        }
+
+
+        if (DOM.btnNewExperiment) {
+
+            DOM.btnNewExperiment.addEventListener(
+                "click",
+                newExperiment
+            );
+        }
+
+
+        if (DOM.btnSaveExperiment) {
+
+            DOM.btnSaveExperiment.addEventListener(
+                "click",
+                saveExperiment
+            );
+        }
+
+
+        if (DOM.btnResetExperiment) {
+
+            DOM.btnResetExperiment.addEventListener(
+                "click",
+                resetExperiment
+            );
+        }
+
+
+        if (
+            DOM.btnToggleLeftPanel
+        ) {
+
+            DOM.btnToggleLeftPanel.addEventListener(
+                "click",
+                toggleLeftPanel
+            );
+        }
+
+
+        if (
+            DOM.btnToggleRightPanel
+        ) {
+
+            DOM.btnToggleRightPanel.addEventListener(
+                "click",
+                toggleRightPanel
+            );
+        }
+
+
+        if (DOM.btnCameraOrbit) {
+
+            DOM.btnCameraOrbit.addEventListener(
+                "click",
+                function () {
+                    setCameraMode("orbit");
+                }
+            );
+        }
+
+
+        if (DOM.btnCameraPan) {
+
+            DOM.btnCameraPan.addEventListener(
+                "click",
+                function () {
+                    setCameraMode("pan");
+                }
+            );
+        }
+
+
+        if (DOM.btnCameraZoomIn) {
+
+            DOM.btnCameraZoomIn.addEventListener(
+                "click",
+                function () {
+                    cameraZoom(0.82);
+                }
+            );
+        }
+
+
+        if (DOM.btnCameraZoomOut) {
+
+            DOM.btnCameraZoomOut.addEventListener(
+                "click",
+                function () {
+                    cameraZoom(1.22);
+                }
+            );
+        }
+
+
+        if (DOM.btnCameraReset) {
+
+            DOM.btnCameraReset.addEventListener(
+                "click",
+                resetCamera
+            );
+        }
+
+
+        if (DOM.btnSceneHelp) {
+
+            DOM.btnSceneHelp.addEventListener(
+                "click",
+                function () {
+                    openModal(
+                        DOM.helpModal
+                    );
+                }
+            );
+        }
+
+
+        if (DOM.btnCloseHelpModal) {
+
+            DOM.btnCloseHelpModal.addEventListener(
+                "click",
+                function () {
+                    closeModal(
+                        DOM.helpModal
+                    );
+                }
+            );
+        }
+
+
+        if (
+            DOM.btnCancelConfirmation
+        ) {
+
+            DOM.btnCancelConfirmation.addEventListener(
+                "click",
+                function () {
+
+                    STATE.pendingConfirmation =
+                        null;
+
+                    closeModal(
+                        DOM.confirmationModal
+                    );
+                }
+            );
+        }
+
+
+        if (
+            DOM.btnConfirmConfirmation
+        ) {
+
+            DOM.btnConfirmConfirmation.addEventListener(
+                "click",
+                executeConfirmation
+            );
+        }
+
+
+        if (
+            DOM.btnCloseObjectInfo
+        ) {
+
+            DOM.btnCloseObjectInfo.addEventListener(
+                "click",
+                function () {
+
+                    closeModal(
+                        DOM.objectInfoModal
+                    );
+                }
+            );
+        }
+
+
+        if (
+            DOM.btnClearResults
+        ) {
+
+            DOM.btnClearResults.addEventListener(
+                "click",
+                function () {
+
+                    STATE.results = [];
+
+                    updateResults();
+
+                    notify(
+                        "Résultats effacés.",
+                        "success"
+                    );
+                }
+            );
+        }
+
+
+        if (
+            DOM.btnExportResults
+        ) {
+
+            DOM.btnExportResults.addEventListener(
+                "click",
+                exportResults
+            );
+        }
+
+
+        if (
+            DOM.btnToggleResults
+        ) {
+
+            DOM.btnToggleResults.addEventListener(
+                "click",
+                toggleResults
+            );
+        }
+
+
+        if (
+            DOM.experimentFileInput
+        ) {
+
+            DOM.experimentFileInput.addEventListener(
+                "change",
+                function () {
+
+                    const file =
+                        DOM.experimentFileInput.files &&
+                        DOM.experimentFileInput.files[0];
+
+                    if (file) {
+                        importExperiment(file);
+                    }
+
+                    DOM.experimentFileInput.value =
+                        "";
+                }
+            );
+        }
+
+
+        DOM.canvas.addEventListener(
+            "pointerdown",
+            handleCanvasPointerDown
+        );
+
+        DOM.canvas.addEventListener(
+            "pointermove",
+            handleCanvasPointerMove
+        );
+
+        DOM.canvas.addEventListener(
+            "pointerup",
+            handleCanvasPointerUp
+        );
+
+        DOM.canvas.addEventListener(
+            "pointercancel",
+            handleCanvasPointerUp
+        );
+
+
+        DOM.canvas.addEventListener(
+            "wheel",
+            function (event) {
+
+                event.preventDefault();
+
+                cameraZoom(
+                    event.deltaY > 0
+                        ? 1.08
+                        : 0.92
+                );
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        DOM.canvas.addEventListener(
+            "dblclick",
+            function (event) {
+
+                const point =
+                    getCanvasPoint(event);
+
+                const object =
+                    objectAtScreenPosition(
+                        point.x,
+                        point.y
+                    );
+
+                if (object) {
+
+                    selectObject(object);
+
+                    openObjectInfo();
+                }
+            }
+        );
+
+
+        DOM.canvas.addEventListener(
+            "contextmenu",
+            function (event) {
+                event.preventDefault();
+            }
+        );
+
 
         document.addEventListener(
             "keydown",
-            event => {
+            handleKeyboard
+        );
 
-                const target =
-                    event.target;
+
+        document.addEventListener(
+            "click",
+            function (event) {
 
                 if (
-                    target &&
-                    (
-                        target.tagName ===
-                        "INPUT" ||
-                        target.tagName ===
-                        "TEXTAREA" ||
-                        target.tagName ===
-                        "SELECT"
+                    event.target.classList &&
+                    event.target.classList.contains(
+                        "modal-overlay"
                     )
                 ) {
 
-                    return;
-
+                    closeModal(
+                        event.target
+                    );
                 }
+            }
+        );
 
-                if (
-                    event.ctrlKey &&
-                    event.key.toLowerCase() ===
-                    "z"
-                ) {
 
-                    event.preventDefault();
+        window.addEventListener(
+            "resize",
+            function () {
 
-                    undo();
-
-                    return;
-
-                }
-
-                if (
-                    event.ctrlKey &&
-                    event.key.toLowerCase() ===
-                    "y"
-                ) {
-
-                    event.preventDefault();
-
-                    redo();
-
-                    return;
-
-                }
-
-                if (
-                    event.ctrlKey &&
-                    event.key.toLowerCase() ===
-                    "s"
-                ) {
-
-                    event.preventDefault();
-
-                    saveState(true);
-
-                    return;
-
-                }
-
-                switch (
-                    event.key.toLowerCase()
-                ) {
-
-                    case "delete":
-
-                    case "backspace":
-
-                        deleteSelected();
-
-                        break;
-
-                    case "escape":
-
-                        clearSelection();
-
-                        break;
-
-                    case "v":
-
-                        setInteractionMode(
-                            "select"
-                        );
-
-                        break;
-
-                    case "g":
-
-                        setInteractionMode(
-                            "move"
-                        );
-
-                        break;
-
-                    case "r":
-
-                        setInteractionMode(
-                            "rotate"
-                        );
-
-                        break;
-
-                    case "s":
-
-                        if (!event.ctrlKey) {
-
-                            setInteractionMode(
-                                "scale"
-                            );
-
-                        }
-
-                        break;
-
-                    case "q":
-
-                        rotateSelected(
-                            -5
-                        );
-
-                        break;
-
-                    case "e":
-
-                        rotateSelected(
-                            5
-                        );
-
-                        break;
-
-                    case "f":
-
-                        focusObject(
-                            STATE.selectedObject
-                        );
-
-                        break;
-
-                    case "1":
-
-                        setCameraView(
-                            "front"
-                        );
-
-                        break;
-
-                    case "2":
-
-                        setCameraView(
-                            "side"
-                        );
-
-                        break;
-
-                    case "3":
-
-                        setCameraView(
-                            "top"
-                        );
-
-                        break;
-
-                    case "4":
-
-                        setCameraView(
-                            "isometric"
-                        );
-
-                        break;
-
-                }
+                resizeCanvas();
 
             }
         );
 
-    }
 
+        if (DOM.btnRetry3D) {
 
-/* ================================================================
-   41 — MODALE D'AIDE
-================================================================ */
-
-    function showHelpModal() {
-
-        let overlay =
-            document.querySelector(
-                ".modal-overlay.fobas-help-modal"
-            );
-
-        if (!overlay) {
-
-            overlay =
-                document.createElement("div");
-
-            overlay.className =
-                "modal-overlay fobas-help-modal";
-
-            overlay.innerHTML = `
-                <div class="modal-card">
-
-                    <div class="modal-header">
-
-                        <div>
-                            <div class="modal-title">
-                                FOBAS OPTIQUE — Aide
-                            </div>
-
-                            <div class="modal-subtitle">
-                                Laboratoire 3D interactif
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="modal-close-btn"
-                            data-close-help
-                        >
-                            ×
-                        </button>
-
-                    </div>
-
-                    <div class="modal-content">
-
-                        <div class="help-item">
-                            <strong>🖱 Sélection</strong>
-                            <span>
-                                Cliquez sur un composant 3D.
-                            </span>
-                        </div>
-
-                        <div class="help-item">
-                            <strong>↔ Déplacement</strong>
-                            <span>
-                                Activez Move puis déplacez un composant sur le banc.
-                            </span>
-                        </div>
-
-                        <div class="help-item">
-                            <strong>⟳ Rotation</strong>
-                            <span>
-                                Utilisez Q / E ou les propriétés de l'objet.
-                            </span>
-                        </div>
-
-                        <div class="help-item">
-                            <strong>🔍 Caméra</strong>
-                            <span>
-                                Utilisez la souris pour tourner autour du laboratoire.
-                            </span>
-                        </div>
-
-                        <div class="help-item">
-                            <strong>💡 Physique</strong>
-                            <span>
-                                Les sources lumineuses génèrent des rayons 3D.
-                            </span>
-                        </div>
-
-                        <div class="help-item">
-                            <strong>↩ Historique</strong>
-                            <span>
-                                Ctrl+Z annule et Ctrl+Y rétablit.
-                            </span>
-                        </div>
-
-                    </div>
-
-                </div>
-            `;
-
-            document.body.appendChild(
-                overlay
-            );
-
-            overlay
-                .querySelector(
-                    "[data-close-help]"
-                )
-                .addEventListener(
-                    "click",
-                    () =>
-                        overlay.remove()
-                );
-
-            overlay.addEventListener(
+            DOM.btnRetry3D.addEventListener(
                 "click",
-                event => {
+                function () {
 
-                    if (
-                        event.target ===
-                        overlay
-                    ) {
+                    hideRenderError();
 
-                        overlay.remove();
-
-                    }
+                    initializeRendering();
 
                 }
             );
-
         }
-
-        overlay.classList.add(
-            "visible"
-        );
-
     }
 
 
-/* ================================================================
-   42 — UI HELPERS
-================================================================ */
+    /* ============================================================
+       34 — CLAVIER
+    ============================================================ */
 
-    function setText(
-        id,
-        value
-    ) {
-
-        const element =
-            byId(id);
-
-        if (element) {
-
-            element.textContent =
-                value;
-
-        }
-
-    }
-
-    function setInputValue(
-        id,
-        value
-    ) {
-
-        const element =
-            byId(id);
-
-        if (element) {
-
-            element.value =
-                value;
-
-        }
-
-    }
-
-    function getInputValue(id) {
-
-        const element =
-            byId(id);
-
-        return element
-            ? element.value
-            : "";
-
-    }
-
-    function updateSelectionBox() {
+    function handleKeyboard(event) {
 
         if (
-            !selectionBox ||
-            !STATE.selectedObject
+            event.key === "Escape"
         ) {
 
+            STATE.pointer.dragging =
+                false;
+
+            STATE.measureStart =
+                null;
+
+            STATE.connectStart =
+                null;
+
+            closeModal(
+                DOM.helpModal
+            );
+
+            closeModal(
+                DOM.confirmationModal
+            );
+
+            closeModal(
+                DOM.objectInfoModal
+            );
+
+            setInteractionMode(
+                "select"
+            );
+
             return;
-
         }
 
-        selectionBox.box.setFromObject(
+        if (
+            event.target &&
+            (
+                event.target.tagName ===
+                "INPUT" ||
+                event.target.tagName ===
+                "TEXTAREA" ||
+                event.target.tagName ===
+                "SELECT"
+            )
+        ) {
+            return;
+        }
+
+        if (
+            event.key === "Delete" &&
             STATE.selectedObject
-        );
+        ) {
 
+            removeSelectedComponent();
+
+            return;
+        }
+
+        if (
+            event.key.toLowerCase() === "r"
+        ) {
+
+            setInteractionMode(
+                "rotate"
+            );
+
+            return;
+        }
+
+        if (
+            event.key.toLowerCase() === "m"
+        ) {
+
+            setInteractionMode(
+                "move"
+            );
+
+            return;
+        }
+
+        if (
+            event.key.toLowerCase() === "s"
+        ) {
+
+            setInteractionMode(
+                "select"
+            );
+
+            return;
+        }
+
+        if (
+            event.key.toLowerCase() === "t"
+        ) {
+
+            traceRays();
+
+            return;
+        }
     }
 
-    function updateAllUI() {
 
-        updatePropertiesPanel(
-            STATE.selectedObject
-        );
+    /* ============================================================
+       35 — INITIALISATION GRAPHIQUE
+    ============================================================ */
 
-        updateMeasurements();
+    function initializeRendering() {
 
-        renderResults();
+        try {
 
-        const intensity =
-            byId("intensityInput");
+            hideRenderError();
 
-        if (intensity) {
+            resizeCanvas();
 
-            intensity.value =
-                STATE.intensity;
+            setLoading(
+                15,
+                "Initialisation du canvas..."
+            );
 
+            setTimeout(
+                function () {
+
+                    setLoading(
+                        35,
+                        "Construction du laboratoire..."
+                    );
+
+                    setTimeout(
+                        function () {
+
+                            setLoading(
+                                60,
+                                "Initialisation de la physique..."
+                            );
+
+                            setTimeout(
+                                function () {
+
+                                    setLoading(
+                                        82,
+                                        "Préparation des composants..."
+                                    );
+
+                                    setTimeout(
+                                        function () {
+
+                                            setLoading(
+                                                100,
+                                                "Laboratoire prêt."
+                                            );
+
+                                            setTimeout(
+                                                function () {
+
+                                                    hideLoading();
+
+                                                    STATE.initialized =
+                                                        true;
+
+                                                    STATE.running =
+                                                        true;
+
+                                                    setEngineStatus(
+                                                        true
+                                                    );
+
+                                                    renderScene();
+
+                                                },
+                                                250
+                                            );
+
+                                        },
+                                        100
+                                    );
+
+                                },
+                                100
+                            );
+
+                        },
+                        100
+                    );
+
+                },
+                100
+            );
+
+        } catch (error) {
+
+            showRenderError(
+                error
+            );
         }
-
-        setText(
-            "intensityValue",
-            STATE.intensity
-        );
-
-        setText(
-            "objectCountValue",
-            STATE.objects.length
-        );
-
-        setText(
-            "rayCountValue",
-            STATE.rays.length
-        );
-
     }
 
 
-/* ================================================================
-   43 — CHARGEMENT / OVERLAY
-================================================================ */
-
-    function showLoading(
-        visible,
-        progress = 0,
-        message = ""
-    ) {
-
-        const overlay =
-            document.querySelector(
-                ".loading-overlay"
-            );
-
-        if (!overlay) return;
-
-        overlay.style.display =
-            visible
-                ? "flex"
-                : "none";
-
-        const bar =
-            overlay.querySelector(
-                ".loading-progress-bar"
-            );
-
-        const text =
-            overlay.querySelector(
-                ".loading-progress-text"
-            );
-
-        const subtitle =
-            overlay.querySelector(
-                ".loading-subtitle"
-            );
-
-        if (bar) {
-
-            bar.style.width =
-                `${clamp(
-                    progress,
-                    0,
-                    100
-                )}%`;
-
-        }
-
-        if (text) {
-
-            text.textContent =
-                `${Math.round(progress)}%`;
-
-        }
-
-        if (subtitle && message) {
-
-            subtitle.textContent =
-                message;
-
-        }
-
-    }
-
-    function showRenderError(
-        title,
+    function setLoading(
+        percent,
         message
     ) {
 
-        const existing =
-            document.querySelector(
-                ".render-error-overlay"
-            );
+        if (
+            DOM.loadingProgressBar
+        ) {
 
-        if (existing) {
-
-            existing.remove();
-
+            DOM.loadingProgressBar.style.width =
+                clamp(
+                    percent,
+                    0,
+                    100
+                ) +
+                "%";
         }
 
-        const overlay =
-            document.createElement("div");
+        if (
+            DOM.loadingProgressText
+        ) {
 
-        overlay.className =
-            "render-error-overlay";
-
-        overlay.innerHTML = `
-            <div class="error-card">
-
-                <div class="error-icon">
-                    ⚠
-                </div>
-
-                <div class="error-title">
-                    ${escapeHTML(title)}
-                </div>
-
-                <div class="error-message">
-                    ${escapeHTML(message)}
-                </div>
-
-                <button
-                    type="button"
-                    class="primary-action-btn"
-                    data-retry-render
-                >
-                    Réessayer
-                </button>
-
-            </div>
-        `;
-
-        document.body.appendChild(
-            overlay
-        );
-
-        overlay
-            .querySelector(
-                "[data-retry-render]"
-            )
-            .addEventListener(
-                "click",
-                () => {
-
-                    overlay.remove();
-
-                    initFOBASOptique();
-
-                }
-            );
-
+            DOM.loadingProgressText.textContent =
+                message;
+        }
     }
 
 
-/* ================================================================
-   44 — ANIMATION / RENDU
-================================================================ */
+    function hideLoading() {
 
-    function animate(now = performance.now()) {
+        if (
+            DOM.loadingOverlay
+        ) {
 
-        animationFrame =
-            requestAnimationFrame(
-                animate
+            DOM.loadingOverlay.classList.add(
+                "hidden"
             );
-
-        if (!renderer || !scene || !camera) {
-
-            return;
-
         }
-
-        const delta =
-            Math.min(
-                0.1,
-                (now - STATE.lastFrame) /
-                1000
-            );
-
-        STATE.lastFrame = now;
-
-        STATE.time +=
-            delta *
-            CONFIG.animationSpeed;
-
-        animateOpticalObjects(
-            delta
-        );
-
-        if (controls) {
-
-            controls.update();
-
-        }
-
-        updateSelectionBox();
-
-        updateHUD();
-
-        renderer.render(
-            scene,
-            camera
-        );
-
     }
 
-    function animateOpticalObjects(
-        delta
+
+    function showRenderError(
+        error
     ) {
 
-        STATE.objects.forEach(
-            object => {
+        STATE.running = false;
 
-                const type =
-                    object.userData.type;
+        STATE.renderError =
+            error;
 
-                if (type === "laser") {
+        if (
+            DOM.renderErrorOverlay
+        ) {
 
-                    const emitter =
-                        object.children.find(
-                            child =>
-                                child.isMesh &&
-                                child.material &&
-                                child.material.emissive
-                        );
-
-                    if (
-                        emitter &&
-                        emitter.material
-                            .emissiveIntensity !==
-                        undefined
-                    ) {
-
-                        emitter.material
-                            .emissiveIntensity =
-                            2.1 +
-                            Math.sin(
-                                STATE.time * 8
-                            ) * 0.7;
-
-                    }
-
-                }
-
-                if (type === "lamp") {
-
-                    const bulb =
-                        object.children.find(
-                            child =>
-                                child.isMesh &&
-                                child.material &&
-                                child.material
-                                    .emissiveIntensity !==
-                                undefined
-                        );
-
-                    if (bulb) {
-
-                        bulb.material
-                            .emissiveIntensity =
-                            2.4 +
-                            Math.sin(
-                                STATE.time * 2
-                            ) * 0.15;
-
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-
-/* ================================================================
-   45 — HUD
-================================================================ */
-
-    function updateHUD() {
-
-        setText(
-            "objectCountValue",
-            STATE.objects.length
-        );
-
-        setText(
-            "rayCountValue",
-            STATE.rays.length
-        );
-
-        setText(
-            "modeValue",
-            STATE.interactionMode
-        );
-
-        setText(
-            "interactionModeValue",
-            STATE.interactionMode
-        );
-
-        const rayStatus =
-            STATE.rayTracingEnabled
-                ? "ACTIF"
-                : "OFF";
-
-        setText(
-            "rayStatusValue",
-            rayStatus
-        );
-
-        const dot =
-            document.querySelector(
-                ".hud-status-dot"
+            DOM.renderErrorOverlay.classList.remove(
+                "hidden"
             );
-
-        if (dot) {
-
-            dot.classList.toggle(
-                "inactive",
-                !STATE.rayTracingEnabled
-            );
-
         }
 
-    }
+        if (
+            DOM.renderErrorMessage
+        ) {
 
+            DOM.renderErrorMessage.textContent =
+                error &&
+                error.message
+                    ? error.message
+                    : "Impossible d'initialiser le moteur graphique.";
+        }
 
-/* ================================================================
-   46 — RESPONSIVE
-================================================================ */
-
-    function resizeRenderer() {
-
-        if (!renderer || !camera) return;
-
-        const canvas =
-            renderer.domElement;
-
-        const parent =
-            canvas.parentElement;
-
-        if (!parent) return;
-
-        const width =
-            Math.max(
-                1,
-                parent.clientWidth
-            );
-
-        const height =
-            Math.max(
-                1,
-                parent.clientHeight
-            );
-
-        camera.aspect =
-            width / height;
-
-        camera.updateProjectionMatrix();
-
-        renderer.setSize(
-            width,
-            height,
+        setEngineStatus(
             false
         );
 
+        console.error(
+            "FOBAS OPTIQUE :",
+            error
+        );
     }
 
 
-/* ================================================================
-   47 — RESET COMPLET
-================================================================ */
-
-    function resetApplication() {
+    function hideRenderError() {
 
         if (
-            !window.confirm(
-                "Réinitialiser complètement FOBAS OPTIQUE ?"
-            )
+            DOM.renderErrorOverlay
         ) {
 
-            return;
+            DOM.renderErrorOverlay.classList.add(
+                "hidden"
+            );
+        }
+    }
 
+
+    function setEngineStatus(
+        active
+    ) {
+
+        if (
+            DOM.engineStatusText
+        ) {
+
+            DOM.engineStatusText.textContent =
+                active
+                    ? "MOTEUR ACTIF"
+                    : "ERREUR MOTEUR";
         }
 
-        localStorage.removeItem(
-            CONFIG.storageKey
+        if (
+            DOM.engineStatusIndicator
+        ) {
+
+            DOM.engineStatusIndicator.style.opacity =
+                active
+                    ? "1"
+                    : "0.35";
+        }
+    }
+
+
+    /* ============================================================
+       36 — BOUCLE D'ANIMATION
+    ============================================================ */
+
+    function animationLoop(now) {
+
+        requestAnimationFrame(
+            animationLoop
         );
 
-        STATE.history = [];
+        const delta =
+            now -
+            STATE.lastFrameTime;
 
-        STATE.historyIndex = -1;
+        STATE.lastFrameTime =
+            now;
 
-        STATE.results = [];
+        STATE.rayAnimation++;
 
-        clearLaboratory();
+        STATE.frames++;
 
-        resetCamera();
+        if (
+            now -
+            STATE.fpsTimer >=
+            1000
+        ) {
 
-        createDefaultScene();
-
-        notify(
-            "FOBAS OPTIQUE réinitialisé.",
-            "success"
-        );
-
-    }
-
-
-/* ================================================================
-   48 — CONNEXIONS HTML AUTOMATIQUES
-================================================================ */
-
-    function bindDataActionButtons() {
-
-        $$("[data-optics-action]")
-            .forEach(button => {
-
-                if (
-                    button.dataset
-                        .fobasBound === "1"
-                ) {
-
-                    return;
-
-                }
-
-                button.dataset
-                    .fobasBound = "1";
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        executeDataAction(
-                            button.dataset
-                                .opticsAction
-                        );
-
-                    }
+            STATE.fps =
+                STATE.frames *
+                1000 /
+                (
+                    now -
+                    STATE.fpsTimer
                 );
 
-            });
+            STATE.frames = 0;
 
-    }
+            STATE.fpsTimer =
+                now;
 
-    function executeDataAction(action) {
-
-        switch (action) {
-
-            case "add-laser":
-
-                addComponent("laser");
-
-                break;
-
-            case "add-lamp":
-
-                addComponent("lamp");
-
-                break;
-
-            case "add-convex-lens":
-
-                addComponent("lensConvex");
-
-                break;
-
-            case "add-concave-lens":
-
-                addComponent("lensConcave");
-
-                break;
-
-            case "add-plane-mirror":
-
-                addComponent("mirrorPlane");
-
-                break;
-
-            case "add-concave-mirror":
-
-                addComponent("mirrorConcave");
-
-                break;
-
-            case "add-convex-mirror":
-
-                addComponent("mirrorConvex");
-
-                break;
-
-            case "add-prism":
-
-                addComponent("prism");
-
-                break;
-
-            case "add-screen":
-
-                addComponent("screen");
-
-                break;
-
-            case "add-sensor":
-
-                addComponent("sensor");
-
-                break;
-
-            case "add-ruler":
-
-                addComponent("ruler");
-
-                break;
-
-            case "delete":
-
-                deleteSelected();
-
-                break;
-
-            case "duplicate":
-
-                duplicateSelected();
-
-                break;
-
-            case "rotate-left":
-
-                rotateSelected(-5);
-
-                break;
-
-            case "rotate-right":
-
-                rotateSelected(5);
-
-                break;
-
-            case "scale-up":
-
-                scaleSelected(1.1);
-
-                break;
-
-            case "scale-down":
-
-                scaleSelected(0.9);
-
-                break;
-
-            case "save":
-
-                saveState(true);
-
-                break;
-
-            case "load":
-
-                restoreState(true);
-
-                break;
-
-            case "export":
-
-                exportLaboratory();
-
-                break;
-
-            case "import":
-
-                importLaboratoryFile();
-
-                break;
-
-            case "undo":
-
-                undo();
-
-                break;
-
-            case "redo":
-
-                redo();
-
-                break;
-
-            case "run":
-
-                recalculatePhysics();
-
-                notify(
-                    "Simulation exécutée.",
-                    "success"
-                );
-
-                break;
-
-            case "help":
-
-                showHelpModal();
-
-                break;
-
-            case "reset":
-
-                resetApplication();
-
-                break;
-
-            default:
-
-                console.warn(
-                    "Action FOBAS inconnue :",
-                    action
-                );
-
+            updateStatusBar();
         }
 
+        if (
+            STATE.running
+        ) {
+
+            renderScene();
+        }
+
+        void delta;
     }
 
 
-/* ================================================================
-   49 — INITIALISATION DOM
-================================================================ */
+    /* ============================================================
+       37 — CONFIGURATION UI INITIALE
+    ============================================================ */
 
-    function initializeDOMFeatures() {
+    function synchronizeUI() {
 
-        bindDataActionButtons();
+        if (DOM.wavelengthInput) {
 
-        const closeButtons =
-            $$(
-                ".panel-collapse-btn"
-            );
+            DOM.wavelengthInput.value =
+                STATE.optical.wavelength;
+        }
 
-        closeButtons.forEach(
-            button => {
+        if (DOM.intensityInput) {
 
-                button.addEventListener(
-                    "click",
-                    () => {
+            DOM.intensityInput.value =
+                STATE.optical.intensity;
+        }
 
-                        const panel =
-                            button.closest(
-                                ".side-panel"
-                            );
+        if (DOM.intensityValue) {
 
-                        if (!panel) return;
+            DOM.intensityValue.textContent =
+                STATE.optical.intensity;
+        }
 
-                        panel.classList.toggle(
-                            "collapsed"
-                        );
+        if (
+            DOM.refractiveIndexInput
+        ) {
 
-                    }
+            DOM.refractiveIndexInput.value =
+                STATE.optical.refractiveIndex.toFixed(
+                    3
                 );
-
-            }
-        );
-
-        const mobileLibraryButton =
-            byId("openMaterialsBtn");
-
-        if (mobileLibraryButton) {
-
-            mobileLibraryButton.addEventListener(
-                "click",
-                () => {
-
-                    const panel =
-                        document.querySelector(
-                            ".left-panel"
-                        );
-
-                    panel?.classList.toggle(
-                        "mobile-open"
-                    );
-
-                }
-            );
-
         }
 
-        const backdrop =
-            byId("materialsBackdrop");
+        if (DOM.showRaysToggle) {
 
-        if (backdrop) {
-
-            backdrop.addEventListener(
-                "click",
-                () => {
-
-                    document
-                        .querySelector(
-                            ".left-panel"
-                        )
-                        ?.classList.remove(
-                            "mobile-open"
-                        );
-
-                }
-            );
-
+            DOM.showRaysToggle.checked =
+                STATE.optical.showRays;
         }
 
+        if (
+            DOM.showSecondaryRaysToggle
+        ) {
+
+            DOM.showSecondaryRaysToggle.checked =
+                STATE.optical.showSecondaryRays;
+        }
+
+        if (
+            DOM.showFocalPointsToggle
+        ) {
+
+            DOM.showFocalPointsToggle.checked =
+                STATE.optical.showFocalPoints;
+        }
+
+        updateRayStatus();
+
+        updateStatusBar();
+
+        updateResults();
     }
 
 
-/* ================================================================
-   50 — API PUBLIQUE FOBAS OPTIQUE
-================================================================ */
+    /* ============================================================
+       38 — API PUBLIQUE FOBAS
+    ============================================================ */
 
-    window.FOBAS_OPTIQUE = {
+    window.FOBAS_OPTICS_ENGINE = {
 
-        version:
-            FOBAS_OPTICS_VERSION,
+        state: STATE,
 
-        state:
-            STATE,
+        library: LIBRARY,
 
-        components:
-            COMPONENTS,
+        traceRays: traceRays,
 
-        experiments:
-            EXPERIMENTS,
+        addComponent:
+            function (type) {
 
-        missions:
-            MISSIONS,
+                STATE.selectedLibraryType =
+                    type;
 
-        addComponent,
+                addSelectedComponent();
 
-        removeObject,
+            },
 
-        selectObject,
+        selectObject:
+            selectObject,
 
-        clearSelection,
+        deleteObject:
+            deleteObject,
 
-        rotateSelected,
+        reset:
+            resetExperiment,
 
-        scaleSelected,
+        save:
+            saveExperiment,
 
-        deleteSelected,
+        loadExperiment:
+            loadExperiment,
 
-        duplicateSelected,
+        exportResults:
+            exportResults,
 
-        recalculatePhysics,
+        calculateLensImage:
+            calculateLensImage,
 
-        saveState,
+        reflect:
+            reflect,
 
-        restoreState,
-
-        exportLaboratory,
-
-        importLaboratoryFile,
-
-        undo,
-
-        redo,
-
-        resetCamera,
-
-        setCameraView,
-
-        focusObject,
-
-        clearLaboratory,
-
-        resetApplication,
-
-        setInteractionMode
+        refract:
+            refract
 
     };
 
 
-/* ================================================================
-   51 — DÉMARRAGE
-================================================================ */
+    /* ============================================================
+       39 — DÉMARRAGE
+    ============================================================ */
 
     function boot() {
 
         try {
 
-            initializeDOMFeatures();
+            cacheDOM();
 
-            if (
-                document.readyState ===
-                "loading"
-            ) {
+            bindEvents();
 
-                document.addEventListener(
-                    "DOMContentLoaded",
-                    () =>
-                        initFOBASOptique(),
-                    {
-                        once: true
-                    }
-                );
+            synchronizeUI();
 
-            } else {
+            renderLibrary();
 
-                initFOBASOptique();
+            const restored =
+                loadSavedState();
 
+            if (!restored) {
+                addDefaultLaboratory();
             }
+
+            resizeCanvas();
+
+            setEngineStatus(
+                false
+            );
+
+            setLoading(
+                5,
+                "Démarrage de FOBAS OPTIQUE..."
+            );
+
+            initializeRendering();
+
+            requestAnimationFrame(
+                animationLoop
+            );
 
         } catch (error) {
 
@@ -7853,17 +7431,73 @@
                 error
             );
 
-            showRenderError(
-                "Erreur de démarrage du laboratoire.",
-                error.message ||
-                    "Une erreur inattendue est survenue."
-            );
+            if (
+                DOM.renderErrorOverlay
+            ) {
 
+                showRenderError(
+                    error
+                );
+
+            } else {
+
+                document.body.innerHTML =
+                    "<div style=\"" +
+                    "font-family:Arial;" +
+                    "padding:30px;" +
+                    "background:#07111f;" +
+                    "color:white;" +
+                    "\">" +
+                    "<h2>FOBAS OPTIQUE</h2>" +
+                    "<p>Erreur d'initialisation.</p>" +
+                    "<pre>" +
+                    escapeHTML(
+                        error.message ||
+                        String(error)
+                    ) +
+                    "</pre>" +
+                    "</div>";
+            }
         }
-
     }
 
-    boot();
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            boot,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        boot();
+    }
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
