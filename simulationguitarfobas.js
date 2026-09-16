@@ -4469,6 +4469,10 @@ DOM.lessonMessage.textContent =
     "Objektif practice la rive 100%.";
 
 
+
+
+
+
                 }
             }
         },
