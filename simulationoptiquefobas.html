@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta
+        name="theme-color"
+        content="#07111f"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS Optique — Laboratoire virtuel 3D interactif de physique optique."
+    >
+
+    <meta
+        name="application-name"
+        content="FOBAS OPTIQUE"
+    >
+
+    <title>FOBAS OPTIQUE — Laboratoire Virtuel 3D</title>
+
+    <!-- ============================================================
+         POLICES
+    ============================================================ -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- ============================================================
+         FEUILLE DE STYLE PRINCIPALE
+    ============================================================ -->
+
+    <link
+        rel="stylesheet"
+        href="simulationoptiquefobas.css"
+    >
+</head>
+
+<body>
+
+<!-- ================================================================
+     APPLICATION PRINCIPALE
+================================================================ -->
+
+<div
+    id="fobasOptiqueApp"
+    class="fobas-optique-app"
+    data-engine="FOBAS_OPTICS_3D_ENGINE"
+    data-version="1.0.0"
+>
+
+    <!-- ============================================================
+         BARRE SUPÉRIEURE
+    ============================================================ -->
+
+    <header
+        id="topBar"
+        class="top-bar"
+    >
+
+        <!-- IDENTITÉ -->
+        <div
+            id="brandBlock"
+            class="brand-block"
+        >
+
+            <div
+                id="brandLogo"
+                class="brand-logo"
+                aria-label="FOBAS Optique"
+            >
+                <span class="brand-logo-symbol">◉</span>
+            </div>
+
+            <div class="brand-text">
+
+                <div
+                    id="brandTitle"
+                    class="brand-title"
+                >
+                    FOBAS OPTIQUE
+                </div>
+
+                <div
+                    id="brandSubtitle"
+                    class="brand-subtitle"
+                >
+                    LABORATOIRE VIRTUEL 3D
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- STATUT ENGINE -->
+        <div
+            id="engineStatus"
+            class="engine-status"
+            aria-live="polite"
+        >
+
+            <span
+                id="engineStatusIndicator"
+                class="status-indicator"
+            ></span>
+
+            <span
+                id="engineStatusText"
+            >
+                INITIALISATION
+            </span>
+
+        </div>
+
+
+        <!-- COMMANDES GLOBALES -->
+        <div
+            id="globalControls"
+            class="global-controls"
+        >
+
+            <button
+                id="btnNewExperiment"
+                class="top-control-btn"
+                type="button"
+                title="Nouvelle expérience"
+            >
+                <span>＋</span>
+                <span>Nouvelle</span>
+            </button>
+
+            <button
+                id="btnSaveExperiment"
+                class="top-control-btn"
+                type="button"
+                title="Sauvegarder l'expérience"
+            >
+                <span>💾</span>
+                <span>Sauvegarder</span>
+            </button>
+
+            <button
+                id="btnResetExperiment"
+                class="top-control-btn danger-control"
+                type="button"
+                title="Réinitialiser l'expérience"
+            >
+                <span>↻</span>
+                <span>Réinitialiser</span>
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ============================================================
+         STRUCTURE PRINCIPALE
+    ============================================================ -->
+
+    <main
+        id="mainWorkspace"
+        class="main-workspace"
+    >
+
+        <!-- ========================================================
+             PANNEAU GAUCHE — BIBLIOTHÈQUE
+        ========================================================= -->
+
+        <aside
+            id="leftPanel"
+            class="side-panel left-panel"
+            aria-label="Bibliothèque optique"
+        >
+
+            <div
+                id="leftPanelHeader"
+                class="panel-header"
+            >
+
+                <div>
+                    <div class="panel-title">
+                        LABORATOIRE
+                    </div>
+
+                    <div class="panel-subtitle">
+                        Composants & instruments
+                    </div>
+                </div>
+
+                <button
+                    id="btnToggleLeftPanel"
+                    class="panel-collapse-btn"
+                    type="button"
+                    title="Réduire le panneau"
+                    aria-label="Réduire le panneau gauche"
+                >
+                    ‹
+                </button>
+
+            </div>
+
+
+            <!-- RECHERCHE -->
+            <div
+                id="componentSearchWrapper"
+                class="component-search-wrapper"
+            >
+
+                <span class="search-icon">⌕</span>
+
+                <input
+                    id="componentSearch"
+                    type="search"
+                    placeholder="Rechercher un composant..."
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+
+                <button
+                    id="btnClearComponentSearch"
+                    class="clear-search-btn"
+                    type="button"
+                    title="Effacer"
+                    aria-label="Effacer la recherche"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <!-- CATÉGORIES -->
+            <nav
+                id="componentCategories"
+                class="component-categories"
+                aria-label="Catégories"
+            >
+
+                <button
+                    id="categorySources"
+                    class="category-btn active"
+                    type="button"
+                    data-category="sources"
+                >
+                    <span>🔦</span>
+                    <span>Sources</span>
+                </button>
+
+                <button
+                    id="categoryLenses"
+                    class="category-btn"
+                    type="button"
+                    data-category="lenses"
+                >
+                    <span>🔬</span>
+                    <span>Lentilles</span>
+                </button>
+
+                <button
+                    id="categoryMirrors"
+                    class="category-btn"
+                    type="button"
+                    data-category="mirrors"
+                >
+                    <span>🪞</span>
+                    <span>Miroirs</span>
+                </button>
+
+                <button
+                    id="categoryPrisms"
+                    class="category-btn"
+                    type="button"
+                    data-category="prisms"
+                >
+                    <span>💎</span>
+                    <span>Prismes</span>
+                </button>
+
+                <button
+                    id="categoryFilters"
+                    class="category-btn"
+                    type="button"
+                    data-category="filters"
+                >
+                    <span>◈</span>
+                    <span>Filtres</span>
+                </button>
+
+                <button
+                    id="categoryInstruments"
+                    class="category-btn"
+                    type="button"
+                    data-category="instruments"
+                >
+                    <span>📏</span>
+                    <span>Mesures</span>
+                </button>
+
+                <button
+                    id="categorySupports"
+                    class="category-btn"
+                    type="button"
+                    data-category="supports"
+                >
+                    <span>⚙</span>
+                    <span>Supports</span>
+                </button>
+
+            </nav>
+
+
+            <!-- LISTE DYNAMIQUE DES COMPOSANTS -->
+            <div
+                id="componentLibrary"
+                class="component-library"
+            >
+
+                <!--
+                    Le JavaScript remplira dynamiquement cette zone.
+                    Aucun composant physique définitif n'est imposé ici.
+                -->
+
+                <div
+                    id="componentLibraryEmpty"
+                    class="library-empty"
+                >
+                    <div class="library-empty-icon">
+                        🔬
+                    </div>
+
+                    <div class="library-empty-title">
+                        Bibliothèque prête
+                    </div>
+
+                    <div class="library-empty-text">
+                        Sélectionnez une catégorie.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- ACTIONS BIBLIOTHÈQUE -->
+            <div
+                id="libraryActions"
+                class="library-actions"
+            >
+
+                <button
+                    id="btnAddSelectedComponent"
+                    class="primary-action-btn"
+                    type="button"
+                    disabled
+                >
+                    <span>＋</span>
+                    Ajouter au laboratoire
+                </button>
+
+                <button
+                    id="btnRemoveSelectedComponent"
+                    class="secondary-action-btn"
+                    type="button"
+                    disabled
+                >
+                    <span>−</span>
+                    Retirer
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ========================================================
+             CENTRE — LABORATOIRE 3D
+        ========================================================= -->
+
+        <section
+            id="laboratoryViewport"
+            class="laboratory-viewport"
+            aria-label="Laboratoire optique 3D"
+        >
+
+            <!-- CANVAS / MOTEUR 3D -->
+            <div
+                id="sceneContainer"
+                class="scene-container"
+            >
+
+                <canvas
+                    id="optics3DCanvas"
+                    class="optics-3d-canvas"
+                    aria-label="Scène 3D du laboratoire optique"
+                ></canvas>
+
+
+                <!-- ÉCRAN DE CHARGEMENT -->
+                <div
+                    id="loadingOverlay"
+                    class="loading-overlay"
+                >
+
+                    <div class="loading-content">
+
+                        <div
+                            id="loadingLogo"
+                            class="loading-logo"
+                        >
+                            ◉
+                        </div>
+
+                        <div class="loading-title">
+                            FOBAS OPTIQUE
+                        </div>
+
+                        <div class="loading-subtitle">
+                            Initialisation du laboratoire 3D
+                        </div>
+
+                        <div
+                            id="loadingProgressTrack"
+                            class="loading-progress-track"
+                        >
+                            <div
+                                id="loadingProgressBar"
+                                class="loading-progress-bar"
+                            ></div>
+                        </div>
+
+                        <div
+                            id="loadingProgressText"
+                            class="loading-progress-text"
+                        >
+                            Préparation...
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MESSAGE D'ERREUR 3D -->
+                <div
+                    id="renderErrorOverlay"
+                    class="render-error-overlay hidden"
+                >
+
+                    <div class="error-card">
+
+                        <div class="error-icon">
+                            ⚠
+                        </div>
+
+                        <div class="error-title">
+                            Moteur 3D indisponible
+                        </div>
+
+                        <div
+                            id="renderErrorMessage"
+                            class="error-message"
+                        >
+                            Impossible d'initialiser le moteur graphique.
+                        </div>
+
+                        <button
+                            id="btnRetry3D"
+                            class="primary-action-btn"
+                            type="button"
+                        >
+                            Réessayer
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- HUD 3D -->
+                <div
+                    id="sceneHUD"
+                    class="scene-hud"
+                >
+
+                    <div
+                        id="sceneCoordinates"
+                        class="hud-card coordinates-card"
+                    >
+                        <span class="hud-label">POSITION</span>
+                        <span id="coordinateX">X: 0.00</span>
+                        <span id="coordinateY">Y: 0.00</span>
+                        <span id="coordinateZ">Z: 0.00</span>
+                    </div>
+
+
+                    <div
+                        id="sceneMode"
+                        class="hud-card mode-card"
+                    >
+                        <span class="hud-label">MODE</span>
+                        <strong id="currentInteractionMode">
+                            SÉLECTION
+                        </strong>
+                    </div>
+
+
+                    <div
+                        id="rayStatus"
+                        class="hud-card ray-status-card"
+                    >
+                        <span class="hud-label">RAYONS</span>
+
+                        <span
+                            id="rayStatusIndicator"
+                            class="hud-status-dot"
+                        ></span>
+
+                        <strong id="rayStatusText">
+                            INACTIFS
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <!-- CENTRE DE VISÉE -->
+                <div
+                    id="sceneCrosshair"
+                    class="scene-crosshair hidden"
+                    aria-hidden="true"
+                >
+                    <span></span>
+                </div>
+
+
+                <!-- INDICATEUR DE SÉLECTION -->
+                <div
+                    id="selectionIndicator"
+                    class="selection-indicator hidden"
+                    aria-hidden="true"
+                ></div>
+
+
+                <!-- CONTRÔLES CAMÉRA -->
+                <div
+                    id="cameraControls"
+                    class="camera-controls"
+                >
+
+                    <button
+                        id="btnCameraOrbit"
+                        class="camera-btn active"
+                        type="button"
+                        title="Orbiter autour de la scène"
+                    >
+                        ◉
+                    </button>
+
+                    <button
+                        id="btnCameraPan"
+                        class="camera-btn"
+                        type="button"
+                        title="Déplacer la caméra"
+                    >
+                        ✥
+                    </button>
+
+                    <button
+                        id="btnCameraZoomIn"
+                        class="camera-btn"
+                        type="button"
+                        title="Zoom avant"
+                    >
+                        ＋
+                    </button>
+
+                    <button
+                        id="btnCameraZoomOut"
+                        class="camera-btn"
+                        type="button"
+                        title="Zoom arrière"
+                    >
+                        −
+                    </button>
+
+                    <button
+                        id="btnCameraReset"
+                        class="camera-btn"
+                        type="button"
+                        title="Réinitialiser la caméra"
+                    >
+                        ⌂
+                    </button>
+
+                </div>
+
+
+                <!-- OUTILS D'INTERACTION -->
+                <div
+                    id="interactionToolbar"
+                    class="interaction-toolbar"
+                >
+
+                    <button
+                        id="toolSelect"
+                        class="interaction-tool active"
+                        type="button"
+                        data-tool="select"
+                        title="Sélectionner"
+                    >
+                        <span>⌖</span>
+                        <small>Sélect.</small>
+                    </button>
+
+                    <button
+                        id="toolMove"
+                        class="interaction-tool"
+                        type="button"
+                        data-tool="move"
+                        title="Déplacer"
+                    >
+                        <span>✥</span>
+                        <small>Déplacer</small>
+                    </button>
+
+                    <button
+                        id="toolRotate"
+                        class="interaction-tool"
+                        type="button"
+                        data-tool="rotate"
+                        title="Tourner"
+                    >
+                        <span>⟳</span>
+                        <small>Tourner</small>
+                    </button>
+
+                    <button
+                        id="toolMeasure"
+                        class="interaction-tool"
+                        type="button"
+                        data-tool="measure"
+                        title="Mesurer"
+                    >
+                        <span>📏</span>
+                        <small>Mesurer</small>
+                    </button>
+
+                    <button
+                        id="toolConnect"
+                        class="interaction-tool"
+                        type="button"
+                        data-tool="connect"
+                        title="Connecter"
+                    >
+                        <span>⌁</span>
+                        <small>Connecter</small>
+                    </button>
+
+                </div>
+
+
+                <!-- AIDE RAPIDE -->
+                <div
+                    id="sceneHelp"
+                    class="scene-help"
+                >
+
+                    <button
+                        id="btnSceneHelp"
+                        class="scene-help-btn"
+                        type="button"
+                        title="Afficher les commandes"
+                        aria-label="Afficher les commandes"
+                    >
+                        ?
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ====================================================
+                 BARRE D'ÉTAT INFÉRIEURE
+            ==================================================== -->
+
+            <footer
+                id="laboratoryStatusBar"
+                class="laboratory-status-bar"
+            >
+
+                <div
+                    id="statusSelection"
+                    class="status-item"
+                >
+                    <span class="status-label">
+                        Objet :
+                    </span>
+
+                    <strong id="selectedObjectName">
+                        Aucun
+                    </strong>
+                </div>
+
+
+                <div
+                    id="statusPosition"
+                    class="status-item"
+                >
+                    <span class="status-label">
+                        Position :
+                    </span>
+
+                    <strong id="selectedObjectPosition">
+                        —
+                    </strong>
+                </div>
+
+
+                <div
+                    id="statusCount"
+                    class="status-item"
+                >
+                    <span class="status-label">
+                        Objets :
+                    </span>
+
+                    <strong id="objectCount">
+                        0
+                    </strong>
+                </div>
+
+
+                <div
+                    id="statusFPS"
+                    class="status-item"
+                >
+                    <span class="status-label">
+                        FPS :
+                    </span>
+
+                    <strong id="fpsCounter">
+                        0
+                    </strong>
+                </div>
+
+            </footer>
+
+        </section>
+
+
+        <!-- ========================================================
+             PANNEAU DROIT — PROPRIÉTÉS
+        ========================================================= -->
+
+        <aside
+            id="rightPanel"
+            class="side-panel right-panel"
+            aria-label="Propriétés et mesures"
+        >
+
+            <div
+                id="rightPanelHeader"
+                class="panel-header"
+            >
+
+                <div>
+
+                    <div class="panel-title">
+                        LABORATOIRE
+                    </div>
+
+                    <div class="panel-subtitle">
+                        Propriétés & mesures
+                    </div>
+
+                </div>
+
+                <button
+                    id="btnToggleRightPanel"
+                    class="panel-collapse-btn"
+                    type="button"
+                    title="Réduire le panneau"
+                    aria-label="Réduire le panneau droit"
+                >
+                    ›
+                </button>
+
+            </div>
+
+
+            <!-- ====================================================
+                 OBJET SÉLECTIONNÉ
+            ==================================================== -->
+
+            <section
+                id="selectedObjectPanel"
+                class="properties-section"
+            >
+
+                <div class="section-heading">
+                    <span>◈</span>
+                    <span>OBJET SÉLECTIONNÉ</span>
+                </div>
+
+                <div
+                    id="selectedObjectEmpty"
+                    class="property-empty"
+                >
+                    Sélectionnez un objet dans le laboratoire.
+                </div>
+
+
+                <div
+                    id="selectedObjectProperties"
+                    class="property-content hidden"
+                >
+
+                    <div
+                        id="selectedObjectIcon"
+                        class="selected-object-icon"
+                    >
+                        ◉
+                    </div>
+
+                    <div
+                        id="selectedObjectTitle"
+                        class="selected-object-title"
+                    >
+                        —
+                    </div>
+
+                    <div
+                        id="selectedObjectDescription"
+                        class="selected-object-description"
+                    >
+                        —
+                    </div>
+
+
+                    <!-- POSITION -->
+                    <div class="property-group">
+
+                        <label>
+                            Position
+                        </label>
+
+                        <div class="vector-input">
+
+                            <div>
+                                <span>X</span>
+
+                                <input
+                                    id="objectPositionX"
+                                    type="number"
+                                    step="0.01"
+                                    value="0"
+                                >
+                            </div>
+
+                            <div>
+                                <span>Y</span>
+
+                                <input
+                                    id="objectPositionY"
+                                    type="number"
+                                    step="0.01"
+                                    value="0"
+                                >
+                            </div>
+
+                            <div>
+                                <span>Z</span>
+
+                                <input
+                                    id="objectPositionZ"
+                                    type="number"
+                                    step="0.01"
+                                    value="0"
+                                >
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ROTATION -->
+                    <div class="property-group">
+
+                        <label>
+                            Rotation
+                        </label>
+
+                        <div class="vector-input">
+
+                            <div>
+                                <span>X</span>
+
+                                <input
+                                    id="objectRotationX"
+                                    type="number"
+                                    step="1"
+                                    value="0"
+                                >
+                            </div>
+
+                            <div>
+                                <span>Y</span>
+
+                                <input
+                                    id="objectRotationY"
+                                    type="number"
+                                    step="1"
+                                    value="0"
+                                >
+                            </div>
+
+                            <div>
+                                <span>Z</span>
+
+                                <input
+                                    id="objectRotationZ"
+                                    type="number"
+                                    step="1"
+                                    value="0"
+                                >
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACTIONS OBJET -->
+                    <div class="object-actions">
+
+                        <button
+                            id="btnDuplicateObject"
+                            class="secondary-action-btn"
+                            type="button"
+                        >
+                            ⧉ Dupliquer
+                        </button>
+
+                        <button
+                            id="btnDeleteObject"
+                            class="danger-action-btn"
+                            type="button"
+                        >
+                            🗑 Supprimer
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PHYSIQUE OPTIQUE
+            ========================================================= -->
+
+            <section
+                id="opticalPropertiesPanel"
+                class="properties-section"
+            >
+
+                <div class="section-heading">
+                    <span>⚛</span>
+                    <span>PHYSIQUE OPTIQUE</span>
+                </div>
+
+
+                <div class="physics-control">
+
+                    <label for="wavelengthInput">
+                        Longueur d'onde
+                    </label>
+
+                    <div class="unit-input">
+
+                        <input
+                            id="wavelengthInput"
+                            type="number"
+                            min="100"
+                            max="2000"
+                            step="1"
+                            value="650"
+                        >
+
+                        <span>nm</span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="physics-control">
+
+                    <label for="intensityInput">
+                        Intensité lumineuse
+                    </label>
+
+                    <input
+                        id="intensityInput"
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value="75"
+                    >
+
+                    <div class="range-value">
+                        <span id="intensityValue">
+                            75
+                        </span>
+                        %
+                    </div>
+
+                </div>
+
+
+                <div class="physics-control">
+
+                    <label for="refractiveIndexInput">
+                        Indice de réfraction
+                    </label>
+
+                    <div class="unit-input">
+
+                        <input
+                            id="refractiveIndexInput"
+                            type="number"
+                            min="1"
+                            max="5"
+                            step="0.001"
+                            value="1.000"
+                        >
+
+                        <span>n</span>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="btnApplyOpticalProperties"
+                    class="primary-action-btn"
+                    type="button"
+                >
+                    Appliquer les paramètres
+                </button>
+
+            </section>
+
+
+            <!-- ====================================================
+                 MESURES
+            ========================================================= -->
+
+            <section
+                id="measurementsPanel"
+                class="properties-section"
+            >
+
+                <div class="section-heading">
+                    <span>📐</span>
+                    <span>MESURES</span>
+                </div>
+
+
+                <div class="measurement-grid">
+
+                    <div class="measurement-card">
+
+                        <span class="measurement-label">
+                            Distance
+                        </span>
+
+                        <strong id="measurementDistance">
+                            —
+                        </strong>
+
+                        <span class="measurement-unit">
+                            cm
+                        </span>
+
+                    </div>
+
+
+                    <div class="measurement-card">
+
+                        <span class="measurement-label">
+                            Angle
+                        </span>
+
+                        <strong id="measurementAngle">
+                            —
+                        </strong>
+
+                        <span class="measurement-unit">
+                            °
+                        </span>
+
+                    </div>
+
+
+                    <div class="measurement-card">
+
+                        <span class="measurement-label">
+                            Focale
+                        </span>
+
+                        <strong id="measurementFocal">
+                            —
+                        </strong>
+
+                        <span class="measurement-unit">
+                            cm
+                        </span>
+
+                    </div>
+
+
+                    <div class="measurement-card">
+
+                        <span class="measurement-label">
+                            Grossissement
+                        </span>
+
+                        <strong id="measurementMagnification">
+                            —
+                        </strong>
+
+                        <span class="measurement-unit">
+                            ×
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="btnClearMeasurements"
+                    class="secondary-action-btn"
+                    type="button"
+                >
+                    Effacer les mesures
+                </button>
+
+            </section>
+
+
+            <!-- ====================================================
+                 RAYONS LUMINEUX
+            ========================================================= -->
+
+            <section
+                id="rayControlsPanel"
+                class="properties-section"
+            >
+
+                <div class="section-heading">
+                    <span>✦</span>
+                    <span>RAYONS LUMINEUX</span>
+                </div>
+
+
+                <div class="toggle-control">
+
+                    <span>
+                        Afficher les rayons
+                    </span>
+
+                    <label class="switch">
+
+                        <input
+                            id="showRaysToggle"
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span class="switch-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="toggle-control">
+
+                    <span>
+                        Rayons secondaires
+                    </span>
+
+                    <label class="switch">
+
+                        <input
+                            id="showSecondaryRaysToggle"
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span class="switch-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="toggle-control">
+
+                    <span>
+                        Foyers
+                    </span>
+
+                    <label class="switch">
+
+                        <input
+                            id="showFocalPointsToggle"
+                            type="checkbox"
+                            checked
+                        >
+
+                        <span class="switch-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <button
+                    id="btnTraceRays"
+                    class="primary-action-btn ray-action-btn"
+                    type="button"
+                >
+                    <span>✦</span>
+                    Tracer les rayons
+                </button>
+
+            </section>
+
+
+            <!-- ====================================================
+                 EXPÉRIENCE
+            ========================================================= -->
+
+            <section
+                id="experimentPanel"
+                class="properties-section"
+            >
+
+                <div class="section-heading">
+                    <span>🧪</span>
+                    <span>EXPÉRIENCE</span>
+                </div>
+
+
+                <select
+                    id="experimentSelector"
+                    class="experiment-selector"
+                >
+
+                    <option
+                        value=""
+                    >
+                        Sélectionner une expérience
+                    </option>
+
+                    <option
+                        value="reflection"
+                    >
+                        Réflexion de la lumière
+                    </option>
+
+                    <option
+                        value="refraction"
+                    >
+                        Réfraction
+                    </option>
+
+                    <option
+                        value="converging-lens"
+                    >
+                        Lentille convergente
+                    </option>
+
+                    <option
+                        value="diverging-lens"
+                    >
+                        Lentille divergente
+                    </option>
+
+                    <option
+                        value="plane-mirror"
+                    >
+                        Miroir plan
+                    </option>
+
+                    <option
+                        value="concave-mirror"
+                    >
+                        Miroir concave
+                    </option>
+
+                    <option
+                        value="convex-mirror"
+                    >
+                        Miroir convexe
+                    </option>
+
+                    <option
+                        value="prism-dispersion"
+                    >
+                        Dispersion par prisme
+                    </option>
+
+                    <option
+                        value="optical-fiber"
+                    >
+                        Fibre optique
+                    </option>
+
+                </select>
+
+
+                <button
+                    id="btnLoadExperiment"
+                    class="secondary-action-btn"
+                    type="button"
+                >
+                    Charger l'expérience
+                </button>
+
+            </section>
+
+        </aside>
+
+    </main>
+
+
+    <!-- ================================================================
+         PANNEAU INFÉRIEUR — RÉSULTATS
+    ================================================================ -->
+
+    <section
+        id="resultsPanel"
+        class="results-panel"
+        aria-label="Résultats scientifiques"
+    >
+
+        <div
+            id="resultsHeader"
+            class="results-header"
+        >
+
+            <div>
+
+                <div class="panel-title">
+                    RÉSULTATS SCIENTIFIQUES
+                </div>
+
+                <div class="panel-subtitle">
+                    Mesures expérimentales en temps réel
+                </div>
+
+            </div>
+
+
+            <div class="results-actions">
+
+                <button
+                    id="btnClearResults"
+                    class="secondary-action-btn"
+                    type="button"
+                >
+                    Effacer
+                </button>
+
+                <button
+                    id="btnExportResults"
+                    class="secondary-action-btn"
+                    type="button"
+                >
+                    Exporter
+                </button>
+
+                <button
+                    id="btnToggleResults"
+                    class="panel-collapse-btn"
+                    type="button"
+                    title="Réduire les résultats"
+                    aria-label="Réduire les résultats"
+                >
+                    ↓
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="resultsContent"
+            class="results-content"
+        >
+
+            <!-- TABLEAU -->
+            <div
+                id="resultsTableWrapper"
+                class="results-table-wrapper"
+            >
+
+                <table
+                    id="resultsTable"
+                    class="results-table"
+                >
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Mesure
+                            </th>
+
+                            <th>
+                                Théorique
+                            </th>
+
+                            <th>
+                                Expérimentale
+                            </th>
+
+                            <th>
+                                Écart
+                            </th>
+
+                            <th>
+                                Erreur
+                            </th>
+
+                            <th>
+                                Unité
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody
+                        id="resultsTableBody"
+                    >
+
+                        <tr
+                            id="resultsEmptyRow"
+                        >
+
+                            <td
+                                colspan="6"
+                                class="results-empty"
+                            >
+                                Aucune mesure disponible.
+                                Lancez une expérience pour obtenir
+                                des résultats.
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- RÉSUMÉ -->
+            <div
+                id="resultsSummary"
+                class="results-summary"
+            >
+
+                <div class="summary-card">
+
+                    <span>
+                        Mesures
+                    </span>
+
+                    <strong id="summaryMeasurements">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span>
+                        Moyenne erreur
+                    </span>
+
+                    <strong id="summaryAverageError">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-card">
+
+                    <span>
+                        Précision
+                    </span>
+
+                    <strong id="summaryPrecision">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================================
+         NOTIFICATIONS
+    ================================================================ -->
+
+    <div
+        id="notificationContainer"
+        class="notification-container"
+        aria-live="polite"
+        aria-atomic="true"
+    ></div>
+
+
+    <!-- ================================================================
+         MODALE — AIDE
+    ================================================================ -->
+
+    <div
+        id="helpModal"
+        class="modal-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="helpModalTitle"
+    >
+
+        <div class="modal-card">
+
+            <div class="modal-header">
+
+                <div>
+                    <div
+                        id="helpModalTitle"
+                        class="modal-title"
+                    >
+                        Commandes du laboratoire
+                    </div>
+
+                    <div class="modal-subtitle">
+                        Interaction avec l'environnement 3D
+                    </div>
+                </div>
+
+                <button
+                    id="btnCloseHelpModal"
+                    class="modal-close-btn"
+                    type="button"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-content">
+
+                <div class="help-item">
+                    <strong>Clic gauche</strong>
+                    <span>Sélectionner un objet</span>
+                </div>
+
+                <div class="help-item">
+                    <strong>Glisser</strong>
+                    <span>Déplacer selon le mode actif</span>
+                </div>
+
+                <div class="help-item">
+                    <strong>Molette</strong>
+                    <span>Zoomer dans le laboratoire</span>
+                </div>
+
+                <div class="help-item">
+                    <strong>Clic droit</strong>
+                    <span>Contrôle de navigation 3D</span>
+                </div>
+
+                <div class="help-item">
+                    <strong>ESC</strong>
+                    <span>Annuler l'action active</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================================
+         MODALE — CONFIRMATION
+    ================================================================ -->
+
+    <div
+        id="confirmationModal"
+        class="modal-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+    >
+
+        <div class="modal-card confirmation-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <div
+                        id="confirmationTitle"
+                        class="modal-title"
+                    >
+                        Confirmation
+                    </div>
+
+                    <div
+                        id="confirmationMessage"
+                        class="modal-subtitle"
+                    >
+                        Confirmez cette action.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="confirmation-actions">
+
+                <button
+                    id="btnCancelConfirmation"
+                    class="secondary-action-btn"
+                    type="button"
+                >
+                    Annuler
+                </button>
+
+                <button
+                    id="btnConfirmConfirmation"
+                    class="danger-action-btn"
+                    type="button"
+                >
+                    Confirmer
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================================
+         MODALE — INFORMATIONS OBJET
+    ================================================================ -->
+
+    <div
+        id="objectInfoModal"
+        class="modal-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="objectInfoTitle"
+    >
+
+        <div class="modal-card">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <div
+                        id="objectInfoTitle"
+                        class="modal-title"
+                    >
+                        Objet optique
+                    </div>
+
+                    <div
+                        id="objectInfoSubtitle"
+                        class="modal-subtitle"
+                    >
+                        Informations scientifiques
+                    </div>
+
+                </div>
+
+                <button
+                    id="btnCloseObjectInfo"
+                    class="modal-close-btn"
+                    type="button"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="objectInfoContent"
+                class="modal-content"
+            >
+
+                <div class="info-row">
+
+                    <span>
+                        Type
+                    </span>
+
+                    <strong id="infoObjectType">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Matériau
+                    </span>
+
+                    <strong id="infoObjectMaterial">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Indice
+                    </span>
+
+                    <strong id="infoObjectIndex">
+                        —
+                    </strong>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span>
+                        Focale
+                    </span>
+
+                    <strong id="infoObjectFocal">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================================
+         INPUT FICHIER — IMPORT
+    ================================================================ -->
+
+    <input
+        id="experimentFileInput"
+        type="file"
+        accept=".json,application/json"
+        hidden
+    >
+
+
+    <!-- ================================================================
+         DONNÉES D'APPLICATION
+    ================================================================ -->
+
+    <script>
+        /*
+         * Configuration minimale globale.
+         *
+         * Le moteur complet sera chargé par
+         * simulationoptiquefobas.js.
+         *
+         * Aucun calcul scientifique n'est placé ici afin de conserver
+         * une séparation stricte entre structure HTML et moteur.
+         */
+
+        window.FOBAS_OPTICS_CONFIG = Object.freeze({
+
+            appName: "FOBAS OPTIQUE",
+
+            appVersion: "1.0.0",
+
+            engineName: "FOBAS_OPTICS_3D_ENGINE",
+
+            storageKey: "FOBAS_OPTICS_LAB_STATE",
+
+            units: Object.freeze({
+
+                length: "cm",
+
+                angle: "deg",
+
+                wavelength: "nm",
+
+                intensity: "%"
+
+            }),
+
+            defaults: Object.freeze({
+
+                wavelength: 650,
+
+                intensity: 75,
+
+                refractiveIndex: 1.000,
+
+                showRays: true,
+
+                showSecondaryRays: true,
+
+                showFocalPoints: true
+
+            })
+
+        });
+    </script>
+
+
+    <!-- ================================================================
+         MOTEUR PRINCIPAL
+    ================================================================ -->
+
+    <script
+        src="simulationoptiquefobas.js"
+        defer
+    ></script>
+
+</div>
+
+</body>
+</html>
