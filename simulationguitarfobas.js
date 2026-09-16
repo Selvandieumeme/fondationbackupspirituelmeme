@@ -4680,3 +4680,812 @@ DOM.lessonMessage.textContent =
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   SIMULATION GUITAR FOBAS
+   BLOK 8 — CONTROLS / INSTRUMENTS / INIT / PUBLIC API
+   ============================================================ */
+
+(() => {
+    "use strict";
+
+    const G = window.FOBASGuitarEngine;
+    const state = G.state;
+    const DOM = G.DOM;
+
+    /* ---------------------------------------------------------
+       INSTRUMENT IDENTIFICATION
+       --------------------------------------------------------- */
+
+    function detectInstrumentFromCard(
+        card
+    ) {
+
+        const id =
+            card.dataset.instrument ||
+            card.dataset.type ||
+            card.dataset.guitar;
+
+        if (id) {
+
+            const normalized =
+                id
+                    .toLowerCase()
+                    .replace(/[\s_-]+/g, "");
+
+            const aliases = {
+                acoustic: "acoustic",
+                acousticguitar: "acoustic",
+
+                classical: "classical",
+                classicalguitar: "classical",
+
+                electric: "electric",
+                electricguitar: "electric",
+
+                bass4: "bass4",
+                bass4string: "bass4",
+                "4stringbass": "bass4",
+
+                bass5: "bass5",
+                bass5string: "bass5",
+                "5stringbass": "bass5",
+
+                twelve: "twelve",
+                twelveString: "twelve",
+                "12string": "twelve",
+                guitar12: "twelve"
+            };
+
+            if (
+                aliases[normalized]
+            ) {
+                return aliases[
+                    normalized
+                ];
+            }
+        }
+
+        const text =
+            card.textContent
+                .toLowerCase();
+
+        if (
+            text.includes("12") ||
+            text.includes("twelve")
+        ) {
+            return "twelve";
+        }
+
+        if (
+            text.includes("bass") &&
+            text.includes("5")
+        ) {
+            return "bass5";
+        }
+
+        if (
+            text.includes("bass") &&
+            text.includes("4")
+        ) {
+            return "bass4";
+        }
+
+        if (
+            text.includes("electric")
+        ) {
+            return "electric";
+        }
+
+        if (
+            text.includes("classical")
+        ) {
+            return "classical";
+        }
+
+        return "acoustic";
+    }
+
+    /* ---------------------------------------------------------
+       SET INSTRUMENT
+       --------------------------------------------------------- */
+
+    function setInstrument(
+        instrumentId
+    ) {
+
+        if (
+            !G.instruments[
+                instrumentId
+            ]
+        ) {
+
+            instrumentId =
+                "acoustic";
+        }
+
+        if (
+            state.instrumentId ===
+            instrumentId &&
+            G.initialized
+        ) {
+
+            G.updateInstrumentUI();
+
+            return;
+        }
+
+        state.instrumentId =
+            instrumentId;
+
+        state.selectedChord =
+            null;
+
+        localStorage.setItem(
+            "fobas_guitar_instrument",
+            instrumentId
+        );
+
+        /*
+         * Clear previous finger positions.
+         */
+
+        state.frettedStrings.clear();
+
+        if (DOM.fingerLayer) {
+            DOM.fingerLayer.innerHTML = "";
+        }
+
+        /*
+         * Rebuild the physical guitar.
+         */
+
+        G.renderGuitar();
+
+        /*
+         * Remove old active fret states.
+         */
+
+        document
+            .querySelectorAll(
+                ".fret-touch.active"
+            )
+            .forEach(
+                element =>
+                    element.classList.remove(
+                        "active"
+                    )
+            );
+
+        const instrument =
+            G.getInstrument();
+
+        G.showMessage(
+            `${instrument.name} aktive — ${instrument.strings} strings`
+        );
+    }
+
+    G.setInstrument =
+        setInstrument;
+
+    /* ---------------------------------------------------------
+       INSTRUMENT BUTTONS
+       --------------------------------------------------------- */
+
+    function bindInstrumentButtons() {
+
+        document
+            .querySelectorAll(
+                ".instrument-card"
+            )
+            .forEach(
+                card => {
+
+                    card.addEventListener(
+                        "click",
+                        async () => {
+
+                            const id =
+                                detectInstrumentFromCard(
+                                    card
+                                );
+
+                            await G.Audio.init();
+
+                            setInstrument(
+                                id
+                            );
+                        }
+                    );
+                }
+            );
+    }
+
+    /* ---------------------------------------------------------
+       UNIVERSAL ACTION BUTTONS
+       --------------------------------------------------------- */
+
+    function bindUniversalButtons() {
+
+        /*
+         * Play / Start
+         */
+
+        document
+            .querySelectorAll(
+                "[data-action='play'], #play-guitar, .play-guitar"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        async () => {
+
+                            await G.Audio.init();
+
+                            G.strum(
+                                "down",
+                                0.9
+                            );
+                        }
+                    );
+                }
+            );
+
+        /*
+         * Stop
+         */
+
+        document
+            .querySelectorAll(
+                "[data-action='stop'], #stop-guitar"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => G.stopAll()
+                    );
+                }
+            );
+
+        /*
+         * Reset
+         */
+
+        document
+            .querySelectorAll(
+                "[data-action='reset'], #reset-guitar"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            G.stopAll();
+
+                            state.frettedStrings.clear();
+
+                            if (
+                                DOM.fingerLayer
+                            ) {
+                                DOM.fingerLayer.innerHTML =
+                                    "";
+                            }
+
+                            document
+                                .querySelectorAll(
+                                    ".fret-touch.active"
+                                )
+                                .forEach(
+                                    element =>
+                                        element.classList.remove(
+                                            "active"
+                                        )
+                                );
+
+                            G.showMessage(
+                                "Guitar reset."
+                            );
+                        }
+                    );
+                }
+            );
+    }
+
+    /* ---------------------------------------------------------
+       MOBILE AUDIO UNLOCK
+       --------------------------------------------------------- */
+
+    function bindAudioUnlock() {
+
+        const unlock =
+            async () => {
+
+                try {
+
+                    await G.Audio.init();
+
+                } catch (error) {
+
+                    console.warn(
+                        "FOBAS Audio unlock:",
+                        error
+                    );
+                }
+            };
+
+        document.addEventListener(
+            "touchstart",
+            unlock,
+            {
+                once: true,
+                passive: true
+            }
+        );
+
+        document.addEventListener(
+            "pointerdown",
+            unlock,
+            {
+                once: true,
+                passive: true
+            }
+        );
+
+        document.addEventListener(
+            "keydown",
+            unlock,
+            {
+                once: true
+            }
+        );
+    }
+
+    /* ---------------------------------------------------------
+       BOTTOM NAVIGATION
+       --------------------------------------------------------- */
+
+    function bindNavigation() {
+
+        document
+            .querySelectorAll(
+                ".nav-button"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            document
+                                .querySelectorAll(
+                                    ".nav-button"
+                                )
+                                .forEach(
+                                    item =>
+                                        item.classList.remove(
+                                            "active"
+                                        )
+                                );
+
+                            button.classList.add(
+                                "active"
+                            );
+
+                            const target =
+                                button.dataset.target ||
+                                button.dataset.section;
+
+                            if (!target) return;
+
+                            document
+                                .querySelectorAll(
+                                    ".guitar-main > section, .guitar-main .app-section"
+                                )
+                                .forEach(
+                                    section => {
+
+                                        const match =
+                                            section.id ===
+                                            target ||
+                                            section.dataset.section ===
+                                            target;
+
+                                        if (match) {
+
+                                            section.scrollIntoView({
+                                                behavior:
+                                                    "smooth",
+                                                block:
+                                                    "start"
+                                            });
+                                        }
+                                    }
+                                );
+                        }
+                    );
+                }
+            );
+    }
+
+    /* ---------------------------------------------------------
+       INITIAL CONTROL VALUES
+       --------------------------------------------------------- */
+
+    function initializeControls() {
+
+        if (DOM.volumeRange) {
+
+            DOM.volumeRange.value =
+                state.volume;
+        }
+
+        if (DOM.reverbRange) {
+
+            DOM.reverbRange.value =
+                state.reverb;
+        }
+
+        if (DOM.bpmRange) {
+
+            DOM.bpmRange.value =
+                state.bpm;
+        }
+
+        const volumeValue =
+            document.querySelector(
+                "#volume-value, .volume-value, [data-volume-value]"
+            );
+
+        if (volumeValue) {
+
+            volumeValue.textContent =
+                `${Math.round(
+                    state.volume * 100
+                )}%`;
+        }
+
+        const reverbValue =
+            document.querySelector(
+                "#reverb-value, .reverb-value, [data-reverb-value]"
+            );
+
+        if (reverbValue) {
+
+            reverbValue.textContent =
+                `${Math.round(
+                    state.reverb * 100
+                )}%`;
+        }
+
+        const bpmValue =
+            document.querySelector(
+                "#bpm-value, .bpm-value, [data-bpm-value]"
+            );
+
+        if (bpmValue) {
+
+            bpmValue.textContent =
+                state.bpm;
+        }
+    }
+
+    /* ---------------------------------------------------------
+       KEYBOARD SUPPORT
+       --------------------------------------------------------- */
+
+    function bindKeyboard() {
+
+        document.addEventListener(
+            "keydown",
+            async event => {
+
+                if (
+                    event.target.matches(
+                        "input, textarea, select"
+                    )
+                ) {
+                    return;
+                }
+
+                const key =
+                    event.key.toLowerCase();
+
+                if (key === " ") {
+
+                    event.preventDefault();
+
+                    await G.Audio.init();
+
+                    G.strum(
+                        "down",
+                        0.92
+                    );
+
+                    return;
+                }
+
+                if (key === "arrowup") {
+
+                    event.preventDefault();
+
+                    await G.Audio.init();
+
+                    G.strum(
+                        "up",
+                        0.92
+                    );
+
+                    return;
+                }
+
+                if (key === "m") {
+
+                    if (state.muted) {
+                        G.unmuteAll();
+                    } else {
+                        G.muteAll();
+                    }
+
+                    return;
+                }
+
+                /*
+                 * Number keys 1-9 select strings.
+                 */
+
+                const number =
+                    Number(key);
+
+                if (
+                    Number.isInteger(number) &&
+                    number >= 1 &&
+                    number <= 9
+                ) {
+
+                    const stringIndex =
+                        number - 1;
+
+                    if (
+                        stringIndex <
+                        G.getInstrument().strings
+                    ) {
+
+                        await G.Audio.init();
+
+                        G.playString(
+                            stringIndex,
+                            0.9
+                        );
+                    }
+                }
+            }
+        );
+    }
+
+    /* ---------------------------------------------------------
+       GLOBAL API
+       --------------------------------------------------------- */
+
+    G.selectInstrument =
+        setInstrument;
+
+    G.changeInstrument =
+        setInstrument;
+
+    G.playString =
+        G.playString;
+
+    G.playChord =
+        G.playChord;
+
+    G.strumDown =
+        () =>
+            G.strum(
+                "down",
+                0.92
+            );
+
+    G.strumUp =
+        () =>
+            G.strum(
+                "up",
+                0.92
+            );
+
+    G.toggleMute =
+        () => {
+
+            if (state.muted) {
+                G.unmuteAll();
+            } else {
+                G.muteAll();
+            }
+        };
+
+    G.toggleTuner =
+        () =>
+            G.Tuner.toggle();
+
+    G.toggleMetronome =
+        () =>
+            G.Metronome.toggle();
+
+    G.togglePractice =
+        () =>
+            G.Practice.toggle();
+
+    G.reset =
+        () => {
+
+            G.stopAll();
+
+            state.frettedStrings.clear();
+
+            if (DOM.fingerLayer) {
+                DOM.fingerLayer.innerHTML =
+                    "";
+            }
+
+            G.renderGuitar();
+        };
+
+    /* ---------------------------------------------------------
+       FINAL INITIALIZATION
+       --------------------------------------------------------- */
+
+    function initialize() {
+
+        if (
+            G.initialized
+        ) {
+            return;
+        }
+
+        try {
+
+            /*
+             * Build physical guitar.
+             */
+
+            G.renderGuitar();
+
+            /*
+             * Bind instrument cards.
+             */
+
+            bindInstrumentButtons();
+
+            /*
+             * Bind generic buttons.
+             */
+
+            bindUniversalButtons();
+
+            /*
+             * Mobile audio unlock.
+             */
+
+            bindAudioUnlock();
+
+            /*
+             * Navigation.
+             */
+
+            bindNavigation();
+
+            /*
+             * Keyboard.
+             */
+
+            bindKeyboard();
+
+            /*
+             * Controls.
+             */
+
+            initializeControls();
+
+            /*
+             * Make sure current instrument
+             * appears active.
+             */
+
+            G.updateInstrumentUI();
+
+            /*
+             * Practice UI initial state.
+             */
+
+            if (G.Practice) {
+                G.Practice.update();
+            }
+
+            G.initialized =
+                true;
+
+            FOBASGuitarReady();
+
+        } catch (error) {
+
+            console.error(
+                "FOBAS Guitar initialization error:",
+                error
+            );
+
+            if (G.showError) {
+
+                G.showError(
+                    "Gen yon pwoblèm pandan inisyalizasyon Simulation Guitar FOBAS."
+                );
+            }
+        }
+    }
+
+    /* ---------------------------------------------------------
+       READY EVENT
+       --------------------------------------------------------- */
+
+    function FOBASGuitarReady() {
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "fobas:guitar-ready",
+                {
+                    detail: {
+                        engine:
+                            G,
+                        instrument:
+                            G.getInstrument()
+                    }
+                }
+            )
+        );
+
+        console.log(
+            "🎸 Simulation Guitar FOBAS ready:",
+            G.getInstrument().name
+        );
+    }
+
+    /* ---------------------------------------------------------
+       DOM READY
+       --------------------------------------------------------- */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        initialize();
+    }
+
+})();
