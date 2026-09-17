@@ -1,0 +1,3818 @@
+/* ========================================================================
+   FOBAS — LABORATOIRE ÉLECTRONIQUE & ROBOTIQUE
+   ------------------------------------------------------------------------
+   FICHIER : simulationrobotiquefobas.css
+   VERSION : 1.0.0
+   ------------------------------------------------------------------------
+   Compatible avec :
+   simulationrobotiquefobas.html
+   simulationrobotiquefobas.js
+   simulationrobotiquefobas-data.js
+
+   ARCHITECTURE :
+   - CSS isolé sous #fobasRoboticsApp
+   - Interface desktop / tablette / Android
+   - Workspace tactile
+   - Préparation Pinch-Zoom / Pan JS
+   - Bibliothèques composants / outils / codes
+   - Éditeur de programmation
+   - Missions
+   - Mesures
+   - Diagnostic
+   - Projet
+   - Panneaux mobiles
+   - Dialogues / Toasts
+   - Objets workspace / pins / fils
+   - Design laboratoire professionnel
+   ======================================================================== */
+
+
+/* ========================================================================
+   01 — VARIABLES GLOBALES
+   ======================================================================== */
+
+#fobasRoboticsApp {
+
+    --fobas-bg-0: #040a12;
+    --fobas-bg-1: #07111f;
+    --fobas-bg-2: #0b1727;
+    --fobas-bg-3: #101f33;
+    --fobas-bg-4: #14263d;
+
+    --fobas-panel: rgba(10, 23, 39, 0.94);
+    --fobas-panel-strong: rgba(8, 18, 31, 0.98);
+    --fobas-panel-soft: rgba(20, 38, 61, 0.72);
+
+    --fobas-border: rgba(120, 180, 230, 0.18);
+    --fobas-border-strong: rgba(120, 190, 245, 0.34);
+
+    --fobas-text: #edf7ff;
+    --fobas-text-soft: #b7cadb;
+    --fobas-text-muted: #7890a6;
+
+    --fobas-blue: #38a9ff;
+    --fobas-blue-soft: #6fc8ff;
+    --fobas-cyan: #28d9e8;
+    --fobas-green: #42d98a;
+    --fobas-yellow: #ffd45c;
+    --fobas-orange: #ff9e57;
+    --fobas-red: #ff5d6c;
+    --fobas-purple: #a980ff;
+
+    --fobas-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.42);
+
+    --fobas-shadow-soft:
+        0 8px 24px rgba(0, 0, 0, 0.30);
+
+    --fobas-radius-xs: 6px;
+    --fobas-radius-sm: 9px;
+    --fobas-radius-md: 14px;
+    --fobas-radius-lg: 20px;
+    --fobas-radius-xl: 26px;
+
+    --fobas-header-height: 68px;
+    --fobas-toolbar-height: 82px;
+
+    --fobas-workspace-grid-size: 32px;
+
+    --fobas-ui-font:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    --fobas-code-font:
+        "JetBrains Mono",
+        "Fira Code",
+        Consolas,
+        "Courier New",
+        monospace;
+
+    box-sizing: border-box;
+
+    font-family: var(--fobas-ui-font);
+    color: var(--fobas-text);
+}
+
+
+/* ========================================================================
+   02 — RESET LOCAL
+   ======================================================================== */
+
+#fobasRoboticsApp *,
+#fobasRoboticsApp *::before,
+#fobasRoboticsApp *::after {
+
+    box-sizing: border-box;
+}
+
+
+#fobasRoboticsApp button,
+#fobasRoboticsApp input,
+#fobasRoboticsApp textarea,
+#fobasRoboticsApp select {
+
+    font: inherit;
+}
+
+
+#fobasRoboticsApp button {
+
+    border: 0;
+}
+
+
+#fobasRoboticsApp button:focus-visible,
+#fobasRoboticsApp input:focus-visible,
+#fobasRoboticsApp textarea:focus-visible {
+
+    outline: 2px solid var(--fobas-cyan);
+    outline-offset: 2px;
+}
+
+
+/* ========================================================================
+   03 — APPLICATION ROOT
+   ======================================================================== */
+
+#fobasRoboticsApp {
+
+    width: 100%;
+    min-height: 100dvh;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(38, 130, 205, 0.16),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(39, 217, 232, 0.08),
+            transparent 28%
+        ),
+        linear-gradient(
+            145deg,
+            var(--fobas-bg-0),
+            var(--fobas-bg-1) 48%,
+            #06101d
+        );
+
+    color: var(--fobas-text);
+
+    user-select: none;
+
+    -webkit-user-select: none;
+
+    -webkit-tap-highlight-color: transparent;
+
+    overscroll-behavior: none;
+}
+
+
+#fobasRoboticsApp .fobas-app {
+
+    width: 100%;
+    min-height: 100dvh;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+}
+
+
+/* ========================================================================
+   04 — HEADER
+   ======================================================================== */
+
+#fobasRoboticsApp .app-header {
+
+    flex: 0 0 var(--fobas-header-height);
+
+    height: var(--fobas-header-height);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 18px;
+
+    padding:
+        8px
+        clamp(12px, 2vw, 26px);
+
+    position: relative;
+    z-index: 50;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(10, 25, 43, 0.98),
+            rgba(5, 14, 25, 0.96)
+        );
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.28);
+}
+
+
+#fobasRoboticsApp .brand-area {
+
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+#fobasRoboticsApp .brand-logo {
+
+    width: 46px;
+    height: 46px;
+
+    flex: 0 0 46px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 13px;
+
+    font-size: 25px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(56, 169, 255, 0.25),
+            rgba(40, 217, 232, 0.08)
+        );
+
+    border: 1px solid rgba(83, 188, 255, 0.30);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        0 8px 24px rgba(0,0,0,0.25);
+}
+
+
+#fobasRoboticsApp .brand-text {
+
+    min-width: 0;
+}
+
+
+#fobasRoboticsApp .brand-title {
+
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+
+#fobasRoboticsApp .brand-subtitle {
+
+    margin-top: 2px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.11em;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+#fobasRoboticsApp .header-status {
+
+    display: flex;
+    align-items: center;
+
+    flex: 0 0 auto;
+}
+
+
+#fobasRoboticsApp .status-indicator {
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    min-height: 34px;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    color: var(--fobas-text-soft);
+
+    background: rgba(30, 60, 84, 0.42);
+
+    border: 1px solid var(--fobas-border);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+
+#fobasRoboticsApp .status-dot {
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: var(--fobas-green);
+
+    box-shadow:
+        0 0 0 4px rgba(66, 217, 138, 0.10),
+        0 0 14px rgba(66, 217, 138, 0.60);
+}
+
+
+/* ========================================================================
+   05 — MAIN TOOLBAR
+   ======================================================================== */
+
+#fobasRoboticsApp .main-toolbar {
+
+    flex: 0 0 auto;
+
+    min-height: var(--fobas-toolbar-height);
+
+    width: 100%;
+
+    display: flex;
+    align-items: stretch;
+
+    gap: 7px;
+
+    padding:
+        8px
+        clamp(8px, 1.5vw, 18px);
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-width: thin;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(8, 20, 34, 0.97),
+            rgba(6, 15, 27, 0.98)
+        );
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    overscroll-behavior-x: contain;
+}
+
+
+#fobasRoboticsApp .main-toolbar::-webkit-scrollbar {
+
+    height: 5px;
+}
+
+
+#fobasRoboticsApp .main-toolbar::-webkit-scrollbar-thumb {
+
+    background: rgba(105, 166, 205, 0.28);
+
+    border-radius: 99px;
+}
+
+
+#fobasRoboticsApp .main-tool-btn {
+
+    flex:
+        0 0
+        clamp(72px, 8vw, 108px);
+
+    min-height: 64px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 7px 8px;
+
+    position: relative;
+
+    cursor: pointer;
+
+    color: var(--fobas-text-soft);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(22, 42, 65, 0.90),
+            rgba(9, 22, 38, 0.95)
+        );
+
+    border: 1px solid var(--fobas-border);
+
+    border-radius: 11px;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.035),
+        0 4px 14px rgba(0,0,0,0.18);
+
+    transition:
+        transform 120ms ease,
+        border-color 120ms ease,
+        background 120ms ease,
+        color 120ms ease;
+}
+
+
+#fobasRoboticsApp .main-tool-btn:hover {
+
+    color: var(--fobas-text);
+
+    border-color: var(--fobas-border-strong);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 58, 88, 0.95),
+            rgba(11, 29, 48, 0.98)
+        );
+}
+
+
+#fobasRoboticsApp .main-tool-btn:active {
+
+    transform: translateY(1px) scale(0.98);
+}
+
+
+#fobasRoboticsApp .main-tool-btn.active {
+
+    color: #ffffff;
+
+    border-color: rgba(56, 169, 255, 0.55);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(25, 92, 139, 0.68),
+            rgba(8, 40, 67, 0.96)
+        );
+
+    box-shadow:
+        inset 0 0 22px rgba(56,169,255,0.08),
+        0 0 18px rgba(56,169,255,0.08);
+}
+
+
+#fobasRoboticsApp .main-tool-btn.active::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 15%;
+    right: 15%;
+    bottom: 3px;
+
+    height: 2px;
+
+    border-radius: 99px;
+
+    background: var(--fobas-blue);
+
+    box-shadow:
+        0 0 10px rgba(56,169,255,0.75);
+}
+
+
+#fobasRoboticsApp .tool-icon {
+
+    font-size: 21px;
+
+    line-height: 1;
+
+    pointer-events: none;
+}
+
+
+#fobasRoboticsApp .tool-label {
+
+    font-size: 10px;
+
+    line-height: 1.1;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+}
+
+
+#fobasRoboticsApp .primary-action {
+
+    border-color: rgba(66, 217, 138, 0.32);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 100, 73, 0.68),
+            rgba(9, 46, 35, 0.95)
+        );
+}
+
+
+#fobasRoboticsApp .danger-action {
+
+    border-color: rgba(255, 93, 108, 0.25);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(105, 33, 44, 0.48),
+            rgba(45, 12, 19, 0.92)
+        );
+}
+
+
+/* ========================================================================
+   06 — MAIN CONTENT
+   ======================================================================== */
+
+#fobasRoboticsApp .main-content {
+
+    position: relative;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow: hidden;
+}
+
+
+#fobasRoboticsApp .app-view {
+
+    width: 100%;
+    height: 100%;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+    position: relative;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(43, 117, 173, 0.05),
+            transparent 45%
+        );
+}
+
+
+#fobasRoboticsApp .app-view[hidden] {
+
+    display: none !important;
+}
+
+
+#fobasRoboticsApp .active-view {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+/* ========================================================================
+   07 — MODULE HEADERS
+   ======================================================================== */
+
+#fobasRoboticsApp .module-header {
+
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding:
+        18px
+        clamp(14px, 3vw, 32px);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(11, 29, 48, 0.88),
+            rgba(8, 19, 32, 0.60)
+        );
+
+    border-bottom: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .module-icon {
+
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 15px;
+
+    font-size: 26px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(56,169,255,0.18),
+            rgba(40,217,232,0.05)
+        );
+
+    border: 1px solid rgba(56,169,255,0.25);
+}
+
+
+#fobasRoboticsApp .module-header h2 {
+
+    margin: 0;
+
+    font-size: clamp(18px, 2.5vw, 25px);
+
+    font-weight: 900;
+}
+
+
+#fobasRoboticsApp .module-header p {
+
+    margin: 5px 0 0;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* ========================================================================
+   08 — WORKSPACE HEADER
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-header {
+
+    flex: 0 0 auto;
+
+    min-height: 66px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding:
+        9px
+        clamp(10px, 2vw, 22px);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(10, 27, 45, 0.94),
+            rgba(7, 17, 30, 0.88)
+        );
+
+    border-bottom: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .workspace-title-area {
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+}
+
+
+#fobasRoboticsApp .workspace-icon {
+
+    width: 40px;
+    height: 40px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 40px;
+
+    border-radius: 11px;
+
+    background: rgba(56,169,255,0.11);
+
+    border: 1px solid rgba(56,169,255,0.24);
+}
+
+
+#fobasRoboticsApp #workspaceTitle {
+
+    margin: 0;
+
+    font-size: 17px;
+    font-weight: 900;
+}
+
+
+#fobasRoboticsApp #workspaceSubtitle {
+
+    margin: 2px 0 0;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+}
+
+
+#fobasRoboticsApp .workspace-info {
+
+    max-width: 45%;
+
+    padding: 7px 11px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    border: 1px solid var(--fobas-border);
+
+    border-radius: 999px;
+
+    background: rgba(12, 28, 46, 0.70);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ========================================================================
+   09 — WORKSPACE SHELL
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-shell {
+
+    position: relative;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            #07111e,
+            #081525
+        );
+}
+
+
+/* ========================================================================
+   10 — WORKSPACE FLOATING TOOLBAR
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-floating-toolbar {
+
+    position: absolute;
+
+    top: 12px;
+    left: 12px;
+
+    z-index: 40;
+
+    display: flex;
+
+    gap: 6px;
+
+    padding: 6px;
+
+    border-radius: 13px;
+
+    background:
+        rgba(6, 17, 29, 0.86);
+
+    border: 1px solid rgba(130,190,225,0.20);
+
+    box-shadow:
+        0 12px 32px rgba(0,0,0,0.30);
+
+    backdrop-filter: blur(12px);
+
+    -webkit-backdrop-filter: blur(12px);
+}
+
+
+#fobasRoboticsApp .workspace-mini-btn {
+
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 9px;
+
+    color: var(--fobas-text-soft);
+
+    background:
+        rgba(24, 48, 70, 0.78);
+
+    border: 1px solid rgba(125,183,215,0.16);
+
+    cursor: pointer;
+
+    font-size: 17px;
+
+    transition:
+        background 120ms ease,
+        transform 120ms ease;
+}
+
+
+#fobasRoboticsApp .workspace-mini-btn:hover {
+
+    background: rgba(42, 83, 115, 0.92);
+
+    color: #ffffff;
+}
+
+
+#fobasRoboticsApp .workspace-mini-btn:active {
+
+    transform: scale(0.94);
+}
+
+
+#fobasRoboticsApp .primary-mini-btn {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 116, 77, 0.90),
+            rgba(10, 69, 47, 0.94)
+        );
+
+    border-color: rgba(66,217,138,0.30);
+}
+
+
+/* ========================================================================
+   11 — LABORATORY WORKSPACE
+   ------------------------------------------------------------------------
+   IMPORTANT POUR LE PINCH-ZOOM :
+
+   JavaScript pourra appliquer :
+       transform: translate3d(...) scale(...)
+
+   au workspace interne.
+
+   Le CSS ne gère PAS le pinch lui-même.
+   Il prépare simplement le plan tactile.
+
+   touch-action: none permet au JS de recevoir les gestes tactiles.
+   ======================================================================== */
+
+#fobasRoboticsApp .laboratory-workspace {
+
+    position: relative;
+
+    min-width: 0;
+    min-height: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    isolation: isolate;
+
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(33, 91, 131, 0.13),
+            transparent 48%
+        ),
+        linear-gradient(
+            145deg,
+            #07111d,
+            #0a1726
+        );
+
+    touch-action: none;
+
+    overscroll-behavior: none;
+
+    cursor: default;
+
+    perspective: 1200px;
+}
+
+
+/*
+   Surface interne de travail.
+
+   Le JS peut utiliser #workspaceBoard comme surface transformée.
+   Les couches SVG / connexions doivent suivre exactement le même
+   système de coordonnées.
+*/
+
+#fobasRoboticsApp .laboratory-workspace::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,0.015),
+            transparent 20%,
+            transparent 80%,
+            rgba(255,255,255,0.012)
+        );
+}
+
+
+/* ========================================================================
+   12 — WORKSPACE GRID
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-grid {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 1;
+
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(
+            rgba(93, 158, 195, 0.09) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(93, 158, 195, 0.09) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        var(--fobas-workspace-grid-size)
+        var(--fobas-workspace-grid-size);
+
+    opacity: 0.72;
+}
+
+
+/* ========================================================================
+   13 — WORKSPACE BOARD
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-board {
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 5;
+
+    transform-origin: 0 0;
+
+    /*
+       JS pourra remplacer cette valeur dynamiquement :
+       translate3d(X,Y,0) scale(Z)
+    */
+
+    transform:
+        translate3d(0, 0, 0)
+        scale(1);
+
+    will-change: transform;
+
+    pointer-events: none;
+}
+
+
+/* ========================================================================
+   14 — SVG WIRES
+   ======================================================================== */
+
+#fobasRoboticsApp .wire-layer {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 12;
+
+    overflow: visible;
+
+    pointer-events: none;
+
+    transform-origin: 0 0;
+
+    will-change: transform;
+}
+
+
+#fobasRoboticsApp .wire-layer path,
+#fobasRoboticsApp .wire-layer line,
+#fobasRoboticsApp .wire-layer polyline {
+
+    vector-effect: non-scaling-stroke;
+
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+#fobasRoboticsApp .wire-layer .wire-hit-area {
+
+    pointer-events: stroke;
+
+    stroke: transparent;
+
+    stroke-width: 18;
+
+    cursor: pointer;
+}
+
+
+/* ========================================================================
+   15 — CONNECTION LAYER
+   ======================================================================== */
+
+#fobasRoboticsApp .connection-layer {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 20;
+
+    pointer-events: none;
+
+    transform-origin: 0 0;
+
+    will-change: transform;
+}
+
+
+/* ========================================================================
+   16 — SELECTION LAYER
+   ======================================================================== */
+
+#fobasRoboticsApp .selection-layer {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 30;
+
+    pointer-events: none;
+
+    transform-origin: 0 0;
+
+    will-change: transform;
+}
+
+
+/* ========================================================================
+   17 — WORKSPACE OBJECTS
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-object {
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    min-width: 40px;
+    min-height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transform-origin: center center;
+
+    pointer-events: auto;
+
+    cursor: grab;
+
+    touch-action: none;
+
+    user-select: none;
+
+    -webkit-user-select: none;
+
+    border-radius: 10px;
+
+    transition:
+        box-shadow 100ms ease,
+        border-color 100ms ease;
+}
+
+
+#fobasRoboticsApp .workspace-object:active {
+
+    cursor: grabbing;
+}
+
+
+#fobasRoboticsApp .workspace-object.selected {
+
+    z-index: 100;
+
+    box-shadow:
+        0 0 0 2px rgba(56,169,255,0.95),
+        0 0 0 7px rgba(56,169,255,0.12),
+        0 15px 35px rgba(0,0,0,0.35);
+}
+
+
+#fobasRoboticsApp .workspace-object-visual {
+
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: visible;
+
+    border-radius: inherit;
+}
+
+
+#fobasRoboticsApp .workspace-object-label {
+
+    position: absolute;
+
+    left: 50%;
+    top: calc(100% + 5px);
+
+    transform: translateX(-50%);
+
+    max-width: 180px;
+
+    padding: 3px 7px;
+
+    border-radius: 5px;
+
+    background: rgba(4, 10, 17, 0.84);
+
+    border: 1px solid rgba(120,180,220,0.16);
+
+    color: var(--fobas-text-soft);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+}
+
+
+#fobasRoboticsApp .workspace-object-pins {
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+}
+
+
+/* ========================================================================
+   18 — RESIZE HANDLE
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-object-resize-handle {
+
+    position: absolute;
+
+    right: -7px;
+    bottom: -7px;
+
+    width: 16px;
+    height: 16px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #dff7ff 0 18%,
+            var(--fobas-blue) 20% 48%,
+            #0a2941 50%
+        );
+
+    border: 1px solid rgba(255,255,255,0.32);
+
+    box-shadow:
+        0 3px 10px rgba(0,0,0,0.45);
+
+    cursor: nwse-resize;
+
+    pointer-events: auto;
+
+    touch-action: none;
+}
+
+
+/* ========================================================================
+   19 — COMPONENT PINS
+   ======================================================================== */
+
+#fobasRoboticsApp .component-pin {
+
+    position: absolute;
+
+    width: 12px;
+    height: 12px;
+
+    margin: -6px 0 0 -6px;
+
+    padding: 0;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #ffffff,
+            #a9d9ef 28%,
+            #2787b8 60%,
+            #082538 100%
+        );
+
+    border: 1px solid rgba(255,255,255,0.50);
+
+    box-shadow:
+        0 0 0 2px rgba(30,150,210,0.15),
+        0 2px 8px rgba(0,0,0,0.45);
+
+    pointer-events: auto;
+
+    cursor: crosshair;
+
+    touch-action: none;
+
+    transition:
+        transform 100ms ease,
+        box-shadow 100ms ease;
+}
+
+
+#fobasRoboticsApp .component-pin:hover,
+#fobasRoboticsApp .component-pin.active {
+
+    transform: scale(1.45);
+
+    box-shadow:
+        0 0 0 4px rgba(56,169,255,0.16),
+        0 0 16px rgba(56,169,255,0.70);
+}
+
+
+#fobasRoboticsApp .component-pin.connected {
+
+    background:
+        radial-gradient(
+            circle,
+            #ffffff 0 16%,
+            var(--fobas-green) 20% 55%,
+            #164e35 100%
+        );
+}
+
+
+/* ========================================================================
+   20 — EMPTY WORKSPACE
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-empty-state {
+
+    position: absolute;
+
+    z-index: 15;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: min(470px, calc(100% - 40px));
+
+    padding: 30px 24px;
+
+    text-align: center;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 42, 65, 0.78),
+            rgba(7, 18, 31, 0.90)
+        );
+
+    border: 1px solid rgba(110,180,220,0.20);
+
+    box-shadow:
+        var(--fobas-shadow);
+
+    backdrop-filter: blur(12px);
+
+    -webkit-backdrop-filter: blur(12px);
+}
+
+
+#fobasRoboticsApp .empty-state-icon {
+
+    font-size: 46px;
+
+    margin-bottom: 10px;
+}
+
+
+#fobasRoboticsApp .workspace-empty-state h2 {
+
+    margin: 0 0 7px;
+
+    font-size: 21px;
+}
+
+
+#fobasRoboticsApp .workspace-empty-state p {
+
+    margin: 0 auto 18px;
+
+    max-width: 390px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 12px;
+
+    line-height: 1.65;
+}
+
+
+#fobasRoboticsApp .empty-state-button {
+
+    min-height: 42px;
+
+    padding: 9px 16px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            145deg,
+            #147dbd,
+            #0c4f7d
+        );
+
+    border: 1px solid rgba(110,205,255,0.35);
+
+    font-weight: 800;
+}
+
+
+/* ========================================================================
+   21 — WORKSPACE INSPECTOR
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-inspector {
+
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(10, 24, 40, 0.97),
+            rgba(6, 15, 26, 0.98)
+        );
+
+    border-left: 1px solid var(--fobas-border);
+
+    box-shadow:
+        -12px 0 35px rgba(0,0,0,0.18);
+
+    z-index: 35;
+}
+
+
+#fobasRoboticsApp .inspector-header {
+
+    flex: 0 0 auto;
+
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 13px;
+
+    color: var(--fobas-text);
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+
+#fobasRoboticsApp .inspector-content {
+
+    flex: 1 1 auto;
+
+    overflow-y: auto;
+
+    padding: 12px;
+}
+
+
+#fobasRoboticsApp .inspector-empty {
+
+    color: var(--fobas-text-muted);
+
+    font-size: 11px;
+
+    line-height: 1.6;
+
+    padding: 10px;
+}
+
+
+/* ========================================================================
+   22 — STATUS BAR
+   ======================================================================== */
+
+#fobasRoboticsApp .workspace-status-bar {
+
+    flex: 0 0 34px;
+
+    min-height: 34px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 4px 10px;
+
+    overflow-x: auto;
+
+    background:
+        rgba(4, 12, 21, 0.96);
+
+    border-top: 1px solid var(--fobas-border);
+
+    color: var(--fobas-text-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+
+#fobasRoboticsApp .workspace-status-bar > div {
+
+    padding: 5px 8px;
+
+    border-radius: 6px;
+
+    background: rgba(22, 43, 62, 0.48);
+
+    border: 1px solid rgba(115,170,205,0.10);
+}
+
+
+/* ========================================================================
+   23 — LIBRARIES
+   ======================================================================== */
+
+#fobasRoboticsApp .library-grid,
+#fobasRoboticsApp .missions-grid {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(190px, 1fr)
+        );
+
+    align-content: start;
+
+    gap: 14px;
+
+    padding:
+        18px
+        clamp(12px, 3vw, 28px);
+
+    scrollbar-width: thin;
+}
+
+
+#fobasRoboticsApp .library-grid::-webkit-scrollbar,
+#fobasRoboticsApp .missions-grid::-webkit-scrollbar {
+
+    width: 6px;
+}
+
+
+#fobasRoboticsApp .library-grid::-webkit-scrollbar-thumb,
+#fobasRoboticsApp .missions-grid::-webkit-scrollbar-thumb {
+
+    background: rgba(120,180,220,0.22);
+
+    border-radius: 99px;
+}
+
+
+/* ========================================================================
+   24 — CATEGORY BAR
+   ======================================================================== */
+
+#fobasRoboticsApp .category-bar {
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 9px 14px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    background: rgba(5,15,26,0.50);
+}
+
+
+#fobasRoboticsApp .category-bar::-webkit-scrollbar {
+
+    display: none;
+}
+
+
+#fobasRoboticsApp .category-bar button,
+#fobasRoboticsApp .category-button {
+
+    flex: 0 0 auto;
+
+    min-height: 32px;
+
+    padding: 6px 11px;
+
+    border-radius: 999px;
+
+    cursor: pointer;
+
+    color: var(--fobas-text-muted);
+
+    background: rgba(19,40,60,0.62);
+
+    border: 1px solid var(--fobas-border);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+#fobasRoboticsApp .category-bar button.active,
+#fobasRoboticsApp .category-button.active {
+
+    color: #ffffff;
+
+    background: rgba(24,104,157,0.60);
+
+    border-color: rgba(56,169,255,0.45);
+}
+
+
+/* ========================================================================
+   25 — COMPONENT CARDS
+   ======================================================================== */
+
+#fobasRoboticsApp .component-card,
+#fobasRoboticsApp .tool-card,
+#fobasRoboticsApp .mission-card {
+
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19, 40, 61, 0.90),
+            rgba(8, 19, 32, 0.97)
+        );
+
+    border: 1px solid var(--fobas-border);
+
+    box-shadow:
+        0 10px 28px rgba(0,0,0,0.20);
+
+    transition:
+        transform 130ms ease,
+        border-color 130ms ease,
+        box-shadow 130ms ease;
+}
+
+
+#fobasRoboticsApp .component-card:hover,
+#fobasRoboticsApp .tool-card:hover,
+#fobasRoboticsApp .mission-card:hover {
+
+    transform: translateY(-2px);
+
+    border-color: var(--fobas-border-strong);
+
+    box-shadow:
+        0 15px 34px rgba(0,0,0,0.30);
+}
+
+
+#fobasRoboticsApp .component-card-visual {
+
+    height: 130px;
+
+    display: grid;
+    place-items: center;
+
+    padding: 12px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(56,169,255,0.12),
+            transparent 62%
+        );
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    font-size: 52px;
+}
+
+
+#fobasRoboticsApp .component-card-content,
+#fobasRoboticsApp .tool-card-content {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+
+    padding: 12px;
+}
+
+
+#fobasRoboticsApp .component-card h3,
+#fobasRoboticsApp .tool-card h3,
+#fobasRoboticsApp .mission-card h3 {
+
+    margin: 0;
+
+    font-size: 13px;
+    font-weight: 900;
+}
+
+
+#fobasRoboticsApp .component-card p,
+#fobasRoboticsApp .tool-card p,
+#fobasRoboticsApp .mission-card p {
+
+    margin: 0;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+
+#fobasRoboticsApp .component-card-meta {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 5px;
+}
+
+
+#fobasRoboticsApp .component-card-meta span {
+
+    padding: 3px 6px;
+
+    border-radius: 5px;
+
+    background: rgba(42,78,106,0.40);
+
+    color: var(--fobas-text-muted);
+
+    font-size: 8px;
+    font-weight: 800;
+}
+
+
+#fobasRoboticsApp .component-add-btn,
+#fobasRoboticsApp .tool-add-btn,
+#fobasRoboticsApp .mission-start-btn {
+
+    min-height: 36px;
+
+    width: 100%;
+
+    padding: 7px 10px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(24,111,169,0.90),
+            rgba(11,65,101,0.95)
+        );
+
+    border: 1px solid rgba(77,187,240,0.24);
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+
+/* ========================================================================
+   26 — TOOL CARDS
+   ======================================================================== */
+
+#fobasRoboticsApp .tool-card-icon {
+
+    min-height: 100px;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 44px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,212,92,0.10),
+            transparent 65%
+        );
+
+    border-bottom: 1px solid var(--fobas-border);
+}
+
+
+/* ========================================================================
+   27 — CODE LIBRARY
+   ======================================================================== */
+
+#fobasRoboticsApp .code-library {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(300px, 1fr)
+        );
+
+    align-content: start;
+
+    gap: 14px;
+
+    padding:
+        18px
+        clamp(12px, 3vw, 28px);
+}
+
+
+#fobasRoboticsApp .library-controls {
+
+    flex: 0 0 auto;
+
+    border-bottom: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .library-search {
+
+    display: block;
+
+    width: calc(100% - 28px);
+
+    margin: 14px;
+
+    min-height: 42px;
+
+    padding: 9px 12px;
+
+    border-radius: 10px;
+
+    color: var(--fobas-text);
+
+    background: rgba(5,14,25,0.90);
+
+    border: 1px solid var(--fobas-border);
+
+    outline: none;
+}
+
+
+#fobasRoboticsApp .library-search::placeholder {
+
+    color: #627b91;
+}
+
+
+#fobasRoboticsApp .code-card {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,37,57,0.94),
+            rgba(6,16,27,0.98)
+        );
+
+    border: 1px solid var(--fobas-border);
+
+    box-shadow:
+        0 10px 28px rgba(0,0,0,0.20);
+}
+
+
+#fobasRoboticsApp .code-card-header {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 11px 12px;
+
+    border-bottom: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .code-card-header > div {
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    min-width: 0;
+}
+
+
+#fobasRoboticsApp .code-card-icon {
+
+    font-size: 20px;
+}
+
+
+#fobasRoboticsApp .code-card-header h3 {
+
+    margin: 0;
+
+    font-size: 12px;
+}
+
+
+#fobasRoboticsApp .code-level {
+
+    flex: 0 0 auto;
+
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    color: var(--fobas-cyan);
+
+    background: rgba(40,217,232,0.08);
+
+    border: 1px solid rgba(40,217,232,0.16);
+
+    font-size: 8px;
+    font-weight: 900;
+}
+
+
+#fobasRoboticsApp .code-card-body {
+
+    padding: 12px;
+}
+
+
+#fobasRoboticsApp .code-action-description {
+
+    margin: 0 0 9px;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+}
+
+
+#fobasRoboticsApp .code-required-components {
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin-bottom: 9px;
+}
+
+
+#fobasRoboticsApp .code-required-components span {
+
+    padding: 4px 6px;
+
+    border-radius: 5px;
+
+    background: rgba(32,61,86,0.55);
+
+    color: var(--fobas-text-muted);
+
+    font-size: 8px;
+}
+
+
+#fobasRoboticsApp .code-preview {
+
+    max-height: 190px;
+
+    margin: 0;
+
+    padding: 11px;
+
+    overflow: auto;
+
+    border-radius: 8px;
+
+    background: #030912;
+
+    border: 1px solid rgba(116,173,208,0.12);
+
+    color: #bfe9ff;
+
+    font-family: var(--fobas-code-font);
+
+    font-size: 10px;
+
+    line-height: 1.55;
+
+    white-space: pre;
+}
+
+
+#fobasRoboticsApp .code-card-footer {
+
+    display: flex;
+
+    gap: 7px;
+
+    padding: 10px 12px;
+
+    border-top: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .code-card-btn {
+
+    flex: 1;
+
+    min-height: 34px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    color: var(--fobas-text-soft);
+
+    background: rgba(24,46,67,0.72);
+
+    border: 1px solid var(--fobas-border);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+
+#fobasRoboticsApp .primary-code-card-btn {
+
+    color: #ffffff;
+
+    background: rgba(24,99,148,0.82);
+
+    border-color: rgba(56,169,255,0.25);
+}
+
+
+/* ========================================================================
+   28 — CODE EDITOR
+   ======================================================================== */
+
+#fobasRoboticsApp .code-editor-workspace {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    padding: 14px;
+
+    gap: 10px;
+}
+
+
+#fobasRoboticsApp .code-editor-toolbar {
+
+    flex: 0 0 auto;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+
+#fobasRoboticsApp .editor-btn {
+
+    min-height: 36px;
+
+    padding: 7px 11px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    color: var(--fobas-text-soft);
+
+    background: rgba(20,43,64,0.85);
+
+    border: 1px solid var(--fobas-border);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+#fobasRoboticsApp .primary-editor-btn {
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            145deg,
+            #187c55,
+            #0d5439
+        );
+
+    border-color: rgba(66,217,138,0.30);
+}
+
+
+#fobasRoboticsApp .danger-editor-btn {
+
+    background:
+        linear-gradient(
+            145deg,
+            #873d4b,
+            #51212c
+        );
+
+    border-color: rgba(255,93,108,0.28);
+}
+
+
+#fobasRoboticsApp .code-editor-container {
+
+    flex: 1 1 auto;
+
+    min-height: 180px;
+
+    display: flex;
+
+    overflow: hidden;
+
+    border-radius: 12px;
+
+    background: #02070d;
+
+    border: 1px solid rgba(100,165,205,0.20);
+
+    box-shadow:
+        inset 0 0 30px rgba(0,0,0,0.35),
+        0 10px 30px rgba(0,0,0,0.20);
+}
+
+
+#fobasRoboticsApp .code-line-numbers {
+
+    flex: 0 0 42px;
+
+    padding: 13px 8px;
+
+    overflow: hidden;
+
+    text-align: right;
+
+    color: #4e6a80;
+
+    background: #040b13;
+
+    border-right: 1px solid rgba(100,165,205,0.12);
+
+    font-family: var(--fobas-code-font);
+
+    font-size: 10px;
+
+    line-height: 1.55;
+}
+
+
+#fobasRoboticsApp .robotics-code-editor {
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+    min-height: 0;
+
+    resize: none;
+
+    padding: 13px;
+
+    border: 0;
+
+    outline: none;
+
+    color: #d9f5ff;
+
+    background: transparent;
+
+    caret-color: var(--fobas-cyan);
+
+    font-family: var(--fobas-code-font);
+
+    font-size: 12px;
+
+    line-height: 1.55;
+
+    tab-size: 4;
+
+    user-select: text;
+
+    -webkit-user-select: text;
+
+    touch-action: auto;
+}
+
+
+#fobasRoboticsApp .robotics-code-editor::placeholder {
+
+    color: #415a70;
+}
+
+
+#fobasRoboticsApp .code-validation-panel {
+
+    flex: 0 0 150px;
+
+    min-height: 120px;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: rgba(3,10,17,0.86);
+
+    border: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .code-status {
+
+    flex: 0 0 auto;
+
+    padding: 8px 10px;
+
+    color: var(--fobas-text-muted);
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+#fobasRoboticsApp .code-console {
+
+    flex: 1 1 auto;
+
+    margin: 0;
+
+    padding: 9px 10px;
+
+    overflow: auto;
+
+    color: #9edcff;
+
+    font-family: var(--fobas-code-font);
+
+    font-size: 9px;
+
+    line-height: 1.5;
+
+    white-space: pre-wrap;
+}
+
+
+/* ========================================================================
+   29 — MISSIONS
+   ======================================================================== */
+
+#fobasRoboticsApp .mission-card {
+
+    padding: 14px;
+}
+
+
+#fobasRoboticsApp .mission-card-header {
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 10px;
+}
+
+
+#fobasRoboticsApp .mission-card-header > span {
+
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 38px;
+
+    border-radius: 10px;
+
+    background: rgba(255,212,92,0.10);
+
+    font-size: 20px;
+}
+
+
+#fobasRoboticsApp .mission-card-header [data-mission-level] {
+
+    display: inline-block;
+
+    margin-top: 3px;
+
+    color: var(--fobas-yellow);
+
+    font-size: 8px;
+    font-weight: 800;
+}
+
+
+#fobasRoboticsApp .mission-objective {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    margin: 12px 0;
+
+    padding: 9px;
+
+    border-radius: 8px;
+
+    background: rgba(18,39,59,0.55);
+
+    border: 1px solid var(--fobas-border);
+
+    font-size: 9px;
+}
+
+
+#fobasRoboticsApp .mission-objective strong {
+
+    color: var(--fobas-yellow);
+}
+
+
+/* ========================================================================
+   30 — MEASUREMENTS
+   ======================================================================== */
+
+#fobasRoboticsApp .measurement-dashboard {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px, 1fr)
+        );
+
+    align-content: start;
+
+    gap: 14px;
+
+    padding: 18px;
+}
+
+
+#fobasRoboticsApp .measurement-card {
+
+    min-height: 130px;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    padding: 16px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20,45,67,0.88),
+            rgba(8,19,32,0.96)
+        );
+
+    border: 1px solid var(--fobas-border);
+
+    box-shadow:
+        var(--fobas-shadow-soft);
+}
+
+
+#fobasRoboticsApp .measurement-label {
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+    font-weight: 900;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.08em;
+}
+
+
+#fobasRoboticsApp .measurement-card strong {
+
+    font-family: var(--fobas-code-font);
+
+    font-size: 24px;
+
+    color: var(--fobas-cyan);
+}
+
+
+/* ========================================================================
+   31 — DIAGNOSTIC
+   ======================================================================== */
+
+#fobasRoboticsApp .diagnostic-dashboard {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 18px;
+}
+
+
+#fobasRoboticsApp .diagnostic-summary {
+
+    padding: 15px;
+
+    margin-bottom: 12px;
+
+    border-radius: 12px;
+
+    background: rgba(19,43,63,0.70);
+
+    border: 1px solid var(--fobas-border);
+
+    color: var(--fobas-text-soft);
+
+    font-size: 11px;
+}
+
+
+#fobasRoboticsApp .diagnostic-results {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+#fobasRoboticsApp .diagnostic-result {
+
+    padding: 11px;
+
+    border-radius: 9px;
+
+    border: 1px solid var(--fobas-border);
+
+    background: rgba(13,30,47,0.75);
+
+    font-size: 10px;
+}
+
+
+#fobasRoboticsApp .diagnostic-result.error {
+
+    border-color: rgba(255,93,108,0.28);
+
+    background: rgba(85,25,34,0.32);
+}
+
+
+#fobasRoboticsApp .diagnostic-result.warning {
+
+    border-color: rgba(255,212,92,0.25);
+
+    background: rgba(83,65,21,0.25);
+}
+
+
+#fobasRoboticsApp .diagnostic-result.success {
+
+    border-color: rgba(66,217,138,0.25);
+
+    background: rgba(18,74,49,0.25);
+}
+
+
+/* ========================================================================
+   32 — SETTINGS
+   ======================================================================== */
+
+#fobasRoboticsApp .settings-panel {
+
+    width: min(720px, calc(100% - 28px));
+
+    margin: 18px auto;
+
+    overflow: hidden;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,40,61,0.92),
+            rgba(7,18,30,0.97)
+        );
+
+    border: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .setting-row {
+
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 11px 14px;
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    color: var(--fobas-text-soft);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+#fobasRoboticsApp .setting-row:last-child {
+
+    border-bottom: 0;
+}
+
+
+#fobasRoboticsApp .setting-row input[type="checkbox"] {
+
+    width: 20px;
+    height: 20px;
+
+    accent-color: var(--fobas-blue);
+
+    cursor: pointer;
+}
+
+
+/* ========================================================================
+   33 — PROJECT PANEL
+   ======================================================================== */
+
+#fobasRoboticsApp .project-panel {
+
+    width: min(720px, calc(100% - 28px));
+
+    margin: 18px auto;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(170px, 1fr)
+        );
+
+    gap: 10px;
+
+    padding: 15px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,40,61,0.92),
+            rgba(7,18,30,0.97)
+        );
+
+    border: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .project-action {
+
+    min-height: 48px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    color: var(--fobas-text-soft);
+
+    background:
+        rgba(22,47,70,0.78);
+
+    border: 1px solid var(--fobas-border);
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+
+#fobasRoboticsApp .project-action:hover {
+
+    color: #ffffff;
+
+    border-color: var(--fobas-border-strong);
+}
+
+
+/* ========================================================================
+   34 — MOBILE PANEL SYSTEM
+   ======================================================================== */
+
+#fobasRoboticsApp .mobile-panel-system {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    pointer-events: none;
+
+    visibility: hidden;
+
+    opacity: 0;
+
+    transition:
+        opacity 160ms ease,
+        visibility 160ms ease;
+}
+
+
+#fobasRoboticsApp .mobile-panel-system.open,
+#fobasRoboticsApp .mobile-panel-system.active {
+
+    pointer-events: auto;
+
+    visibility: visible;
+
+    opacity: 1;
+}
+
+
+#fobasRoboticsApp .mobile-panel-backdrop {
+
+    position: absolute;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.62);
+
+    backdrop-filter: blur(3px);
+
+    -webkit-backdrop-filter: blur(3px);
+}
+
+
+#fobasRoboticsApp .mobile-panel {
+
+    position: absolute;
+
+    left: 50%;
+    bottom: 0;
+
+    width: min(720px, 100%);
+
+    height: min(82dvh, 760px);
+
+    transform:
+        translate(-50%, 105%);
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius:
+        22px
+        22px
+        0
+        0;
+
+    background:
+        linear-gradient(
+            180deg,
+            #0c1d30,
+            #07121f
+        );
+
+    border:
+        1px solid rgba(116,190,230,0.20);
+
+    border-bottom: 0;
+
+    box-shadow:
+        0 -25px 70px rgba(0,0,0,0.52);
+
+    transition:
+        transform 200ms ease;
+}
+
+
+#fobasRoboticsApp .mobile-panel-system.open .mobile-panel,
+#fobasRoboticsApp .mobile-panel-system.active .mobile-panel {
+
+    transform:
+        translate(-50%, 0);
+}
+
+
+#fobasRoboticsApp .mobile-panel-header {
+
+    flex: 0 0 58px;
+
+    min-height: 58px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 8px 12px;
+
+    position: relative;
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    background: rgba(9,24,40,0.96);
+}
+
+
+#fobasRoboticsApp .mobile-panel-drag-handle {
+
+    position: absolute;
+
+    top: 7px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 45px;
+    height: 4px;
+
+    border-radius: 99px;
+
+    background: rgba(180,215,235,0.30);
+}
+
+
+#fobasRoboticsApp .mobile-panel-title {
+
+    flex: 1;
+
+    padding-left: 3px;
+
+    font-size: 13px;
+    font-weight: 900;
+}
+
+
+#fobasRoboticsApp .mobile-panel-close {
+
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    color: var(--fobas-text-soft);
+
+    background: rgba(34,58,80,0.72);
+
+    border: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .mobile-panel-content {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 12px;
+
+    touch-action: pan-y;
+}
+
+
+/* ========================================================================
+   35 — TOAST
+   ======================================================================== */
+
+#fobasRoboticsApp .toast-container {
+
+    position: fixed;
+
+    right: 14px;
+    bottom: 14px;
+
+    z-index: 3000;
+
+    width: min(380px, calc(100% - 28px));
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    pointer-events: none;
+}
+
+
+#fobasRoboticsApp .toast {
+
+    padding: 11px 13px;
+
+    border-radius: 10px;
+
+    background:
+        rgba(9,23,38,0.96);
+
+    border: 1px solid var(--fobas-border);
+
+    box-shadow:
+        var(--fobas-shadow-soft);
+
+    color: var(--fobas-text);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    animation:
+        fobasToastIn
+        180ms ease
+        both;
+}
+
+
+#fobasRoboticsApp .toast.success {
+
+    border-color: rgba(66,217,138,0.30);
+}
+
+
+#fobasRoboticsApp .toast.error {
+
+    border-color: rgba(255,93,108,0.32);
+}
+
+
+#fobasRoboticsApp .toast.warning {
+
+    border-color: rgba(255,212,92,0.32);
+}
+
+
+@keyframes fobasToastIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ========================================================================
+   36 — DIALOG SYSTEM
+   ======================================================================== */
+
+#fobasRoboticsApp .dialog-system {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 4000;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+}
+
+
+#fobasRoboticsApp .dialog-system.open,
+#fobasRoboticsApp .dialog-system.active {
+
+    display: flex;
+}
+
+
+#fobasRoboticsApp .dialog-backdrop {
+
+    position: absolute;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.68);
+
+    backdrop-filter: blur(4px);
+
+    -webkit-backdrop-filter: blur(4px);
+}
+
+
+#fobasRoboticsApp .main-dialog {
+
+    position: relative;
+
+    z-index: 1;
+
+    width: min(600px, 100%);
+
+    max-height: min(760px, calc(100dvh - 36px));
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #10283f,
+            #071522
+        );
+
+    border: 1px solid rgba(120,190,230,0.22);
+
+    box-shadow:
+        0 30px 90px rgba(0,0,0,0.60);
+}
+
+
+#fobasRoboticsApp .dialog-header {
+
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 13px 15px;
+
+    border-bottom: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .dialog-header h2 {
+
+    margin: 0;
+
+    font-size: 14px;
+}
+
+
+#fobasRoboticsApp .dialog-close {
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    color: var(--fobas-text-soft);
+
+    background: rgba(34,58,80,0.72);
+
+    border: 1px solid var(--fobas-border);
+}
+
+
+#fobasRoboticsApp .dialog-content {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 15px;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 11px;
+
+    line-height: 1.6;
+}
+
+
+#fobasRoboticsApp .dialog-actions {
+
+    flex: 0 0 auto;
+
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    padding: 11px 15px;
+
+    border-top: 1px solid var(--fobas-border);
+}
+
+
+/* ========================================================================
+   37 — VISUALLY HIDDEN / ACCESSIBILITY
+   ======================================================================== */
+
+#fobasRoboticsApp .visually-hidden {
+
+    position: absolute !important;
+
+    width: 1px !important;
+    height: 1px !important;
+
+    padding: 0 !important;
+    margin: -1px !important;
+
+    overflow: hidden !important;
+
+    clip: rect(0, 0, 0, 0) !important;
+
+    white-space: nowrap !important;
+
+    border: 0 !important;
+}
+
+
+/* ========================================================================
+   38 — SCROLLBARS
+   ======================================================================== */
+
+#fobasRoboticsApp * {
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        rgba(105,165,205,0.28)
+        transparent;
+}
+
+
+#fobasRoboticsApp *::-webkit-scrollbar {
+
+    width: 6px;
+    height: 6px;
+}
+
+
+#fobasRoboticsApp *::-webkit-scrollbar-track {
+
+    background: transparent;
+}
+
+
+#fobasRoboticsApp *::-webkit-scrollbar-thumb {
+
+    background: rgba(105,165,205,0.25);
+
+    border-radius: 99px;
+}
+
+
+/* ========================================================================
+   39 — RESPONSIVE TABLET
+   ======================================================================== */
+
+@media (max-width: 1050px) {
+
+    #fobasRoboticsApp {
+
+        --fobas-toolbar-height: 76px;
+    }
+
+
+    #fobasRoboticsApp .main-tool-btn {
+
+        flex-basis: 82px;
+
+        min-height: 58px;
+    }
+
+
+    #fobasRoboticsApp .workspace-shell {
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(190px, 230px);
+    }
+
+
+    #fobasRoboticsApp .code-library {
+
+        grid-template-columns:
+            repeat(
+                auto-fill,
+                minmax(270px, 1fr)
+            );
+    }
+}
+
+
+/* ========================================================================
+   40 — RESPONSIVE ANDROID
+   ======================================================================== */
+
+@media (max-width: 760px) {
+
+    #fobasRoboticsApp {
+
+        --fobas-header-height: 58px;
+
+        --fobas-toolbar-height: 70px;
+    }
+
+
+    #fobasRoboticsApp .app-header {
+
+        padding: 6px 9px;
+    }
+
+
+    #fobasRoboticsApp .brand-logo {
+
+        width: 38px;
+        height: 38px;
+
+        flex-basis: 38px;
+
+        font-size: 21px;
+
+        border-radius: 10px;
+    }
+
+
+    #fobasRoboticsApp .brand-title {
+
+        font-size: 15px;
+    }
+
+
+    #fobasRoboticsApp .brand-subtitle {
+
+        max-width: 210px;
+
+        font-size: 8px;
+    }
+
+
+    #fobasRoboticsApp .status-indicator {
+
+        padding: 6px 8px;
+
+        font-size: 9px;
+    }
+
+
+    #fobasRoboticsApp .main-toolbar {
+
+        padding: 6px;
+
+        gap: 5px;
+    }
+
+
+    #fobasRoboticsApp .main-tool-btn {
+
+        flex-basis: 68px;
+
+        min-height: 56px;
+
+        padding: 5px 4px;
+
+        border-radius: 9px;
+    }
+
+
+    #fobasRoboticsApp .tool-icon {
+
+        font-size: 18px;
+    }
+
+
+    #fobasRoboticsApp .tool-label {
+
+        font-size: 8px;
+    }
+
+
+    #fobasRoboticsApp .workspace-header {
+
+        min-height: 56px;
+
+        padding: 7px 9px;
+    }
+
+
+    #fobasRoboticsApp .workspace-icon {
+
+        width: 34px;
+        height: 34px;
+
+        flex-basis: 34px;
+
+        font-size: 17px;
+    }
+
+
+    #fobasRoboticsApp #workspaceTitle {
+
+        font-size: 14px;
+    }
+
+
+    #fobasRoboticsApp #workspaceSubtitle {
+
+        font-size: 8px;
+    }
+
+
+    #fobasRoboticsApp .workspace-info {
+
+        max-width: 42%;
+
+        font-size: 8px;
+    }
+
+
+    #fobasRoboticsApp .workspace-shell {
+
+        display: block;
+    }
+
+
+    #fobasRoboticsApp .workspace-inspector {
+
+        position: absolute;
+
+        right: 8px;
+        bottom: 42px;
+
+        z-index: 100;
+
+        width: min(270px, calc(100% - 16px));
+
+        height: min(300px, 42%);
+
+        border: 1px solid var(--fobas-border);
+
+        border-radius: 14px;
+
+        box-shadow:
+            0 18px 40px rgba(0,0,0,0.38);
+
+        transform:
+            translateX(calc(100% + 20px));
+
+        transition:
+            transform 180ms ease;
+    }
+
+
+    #fobasRoboticsApp .workspace-inspector.open,
+    #fobasRoboticsApp .workspace-inspector.active {
+
+        transform:
+            translateX(0);
+    }
+
+
+    #fobasRoboticsApp .workspace-floating-toolbar {
+
+        top: 8px;
+        left: 8px;
+
+        padding: 5px;
+
+        gap: 4px;
+    }
+
+
+    #fobasRoboticsApp .workspace-mini-btn {
+
+        width: 34px;
+        height: 34px;
+
+        font-size: 15px;
+    }
+
+
+    #fobasRoboticsApp .workspace-empty-state {
+
+        width: min(360px, calc(100% - 28px));
+
+        padding: 22px 16px;
+    }
+
+
+    #fobasRoboticsApp .empty-state-icon {
+
+        font-size: 38px;
+    }
+
+
+    #fobasRoboticsApp .workspace-status-bar {
+
+        gap: 4px;
+
+        padding-left: 7px;
+    }
+
+
+    #fobasRoboticsApp .workspace-status-bar > div {
+
+        padding: 4px 6px;
+
+        font-size: 8px;
+    }
+
+
+    #fobasRoboticsApp .module-header {
+
+        padding: 12px;
+    }
+
+
+    #fobasRoboticsApp .module-icon {
+
+        width: 42px;
+        height: 42px;
+
+        flex-basis: 42px;
+
+        font-size: 21px;
+    }
+
+
+    #fobasRoboticsApp .module-header h2 {
+
+        font-size: 17px;
+    }
+
+
+    #fobasRoboticsApp .module-header p {
+
+        font-size: 9px;
+    }
+
+
+    #fobasRoboticsApp .library-grid,
+    #fobasRoboticsApp .missions-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 9px;
+
+        padding: 10px;
+    }
+
+
+    #fobasRoboticsApp .component-card-visual {
+
+        height: 95px;
+    }
+
+
+    #fobasRoboticsApp .component-card-content,
+    #fobasRoboticsApp .tool-card-content {
+
+        padding: 9px;
+    }
+
+
+    #fobasRoboticsApp .component-card h3,
+    #fobasRoboticsApp .tool-card h3,
+    #fobasRoboticsApp .mission-card h3 {
+
+        font-size: 10px;
+    }
+
+
+    #fobasRoboticsApp .component-card p,
+    #fobasRoboticsApp .tool-card p,
+    #fobasRoboticsApp .mission-card p {
+
+        font-size: 8px;
+    }
+
+
+    #fobasRoboticsApp .code-library {
+
+        grid-template-columns: 1fr;
+
+        padding: 10px;
+    }
+
+
+    #fobasRoboticsApp .measurement-dashboard {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap: 8px;
+
+        padding: 10px;
+    }
+
+
+    #fobasRoboticsApp .measurement-card {
+
+        min-height: 105px;
+
+        padding: 11px;
+    }
+
+
+    #fobasRoboticsApp .measurement-card strong {
+
+        font-size: 18px;
+    }
+
+
+    #fobasRoboticsApp .project-panel,
+    #fobasRoboticsApp .settings-panel {
+
+        width: calc(100% - 20px);
+
+        margin: 10px auto;
+    }
+}
+
+
+/* ========================================================================
+   41 — PETITS ÉCRANS ANDROID
+   ======================================================================== */
+
+@media (max-width: 420px) {
+
+    #fobasRoboticsApp .brand-subtitle {
+
+        display: none;
+    }
+
+
+    #fobasRoboticsApp .header-status {
+
+        display: none;
+    }
+
+
+    #fobasRoboticsApp .main-tool-btn {
+
+        flex-basis: 63px;
+    }
+
+
+    #fobasRoboticsApp .tool-icon {
+
+        font-size: 17px;
+    }
+
+
+    #fobasRoboticsApp .tool-label {
+
+        font-size: 7.5px;
+    }
+
+
+    #fobasRoboticsApp .library-grid,
+    #fobasRoboticsApp .missions-grid {
+
+        grid-template-columns: 1fr 1fr;
+    }
+
+
+    #fobasRoboticsApp .measurement-dashboard {
+
+        grid-template-columns: 1fr 1fr;
+    }
+
+
+    #fobasRoboticsApp .code-editor-workspace {
+
+        padding: 8px;
+    }
+
+
+    #fobasRoboticsApp .editor-btn {
+
+        flex: 1 1 auto;
+
+        min-width: 70px;
+
+        font-size: 9px;
+    }
+}
+
+
+/* ========================================================================
+   42 — TRÈS PETITS ÉCRANS
+   ======================================================================== */
+
+@media (max-width: 340px) {
+
+    #fobasRoboticsApp .main-tool-btn {
+
+        flex-basis: 59px;
+    }
+
+
+    #fobasRoboticsApp .tool-label {
+
+        font-size: 7px;
+    }
+
+
+    #fobasRoboticsApp .measurement-dashboard {
+
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ========================================================================
+   43 — ORIENTATION PAYSAGE ANDROID
+   ======================================================================== */
+
+@media (
+    max-width: 900px
+) and (
+    orientation: landscape
+) {
+
+    #fobasRoboticsApp .app-header {
+
+        --fobas-header-height: 50px;
+
+        height: 50px;
+    }
+
+
+    #fobasRoboticsApp .main-toolbar {
+
+        min-height: 62px;
+    }
+
+
+    #fobasRoboticsApp .main-tool-btn {
+
+        min-height: 48px;
+
+        flex-basis: 67px;
+    }
+
+
+    #fobasRoboticsApp .workspace-header {
+
+        min-height: 48px;
+    }
+
+
+    #fobasRoboticsApp .workspace-empty-state {
+
+        padding: 14px;
+
+        max-height: 80%;
+
+        overflow: auto;
+    }
+
+
+    #fobasRoboticsApp .mobile-panel {
+
+        height: min(92dvh, 620px);
+    }
+}
+
+
+/* ========================================================================
+   44 — MODE RÉDUCTION DES ANIMATIONS
+   ======================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    #fobasRoboticsApp *,
+    #fobasRoboticsApp *::before,
+    #fobasRoboticsApp *::after {
+
+        scroll-behavior: auto !important;
+
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.001ms !important;
+    }
+}
+
+
+/* ========================================================================
+   45 — ÉCRAN TACTILE
+   ------------------------------------------------------------------------
+   Ne désactive pas les gestes.
+   Le JS pourra exploiter pointer events / touch events.
+   ======================================================================== */
+
+@media (pointer: coarse) {
+
+    #fobasRoboticsApp .main-tool-btn {
+
+        min-height: 60px;
+    }
+
+
+    #fobasRoboticsApp .workspace-mini-btn {
+
+        width: 40px;
+        height: 40px;
+    }
+
+
+    #fobasRoboticsApp .component-pin {
+
+        width: 16px;
+        height: 16px;
+
+        margin: -8px 0 0 -8px;
+    }
+
+
+    #fobasRoboticsApp .workspace-object-resize-handle {
+
+        width: 20px;
+        height: 20px;
+
+        right: -9px;
+        bottom: -9px;
+    }
+}
+
+
+/* ========================================================================
+   46 — PRINT
+   ======================================================================== */
+
+@media print {
+
+    #fobasRoboticsApp {
+
+        background: #ffffff !important;
+
+        color: #000000 !important;
+
+        overflow: visible !important;
+    }
+
+
+    #fobasRoboticsApp .app-header,
+    #fobasRoboticsApp .main-toolbar,
+    #fobasRoboticsApp .workspace-floating-toolbar,
+    #fobasRoboticsApp .workspace-inspector,
+    #fobasRoboticsApp .mobile-panel-system,
+    #fobasRoboticsApp .toast-container,
+    #fobasRoboticsApp .dialog-system {
+
+        display: none !important;
+    }
+
+
+    #fobasRoboticsApp .main-content,
+    #fobasRoboticsApp .app-view {
+
+        height: auto !important;
+
+        overflow: visible !important;
+    }
+}
+
+
+/* ========================================================================
+   47 — FIN DU CSS FOBAS
+   ======================================================================== */
