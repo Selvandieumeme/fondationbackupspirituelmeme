@@ -6156,42 +6156,112 @@ void loop() {
        56 — BOUTONS TOP
     ============================================================ */
 
+function openLaboratory() {
 
-function openComponentLibrary() {
+        hide("codeLibraryPanel");
+        hide("codeEditorPanel");
+        hide("missionsPanel");
+        hide("diagnosticPanel");
+        hide("faultsPanel");
+        hide("measurementsPanel");
 
-    hide("codeLibraryPanel");
-    hide("codeEditorPanel");
-    hide("missionsPanel");
-    hide("diagnosticPanel");
-    hide("faultsPanel");
-    hide("measurementsPanel");
-
-    const library = $("componentLibraryPanel");
-
-    if (!library) {
         toast(
-            "Bibliothèque des composants introuvable.",
-            "error"
+            "Laboratoire ouvert.",
+            "info"
         );
-        return;
     }
 
-    show("componentLibraryPanel");
 
-    renderCategory(
-        state.selectedCategory || "resistors"
-    );
 
-    library.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
 
-    toast(
-        "Bibliothèque des composants ouverte.",
-        "info"
-    );
-}
+
+
+
+
+
+
+
+    function openCodeLibrary() {
+
+        renderCodeLibrary(
+            state.level
+        );
+
+        show(
+            "codeLibraryPanel"
+        );
+    }
+
+
+    function openCodeEditor() {
+
+        show(
+            "codeEditorPanel"
+        );
+
+        const editor =
+            $("electronicCodeEditor");
+
+        if (
+            editor &&
+            !editor.value &&
+            state.currentCode
+        ) {
+            editor.value =
+                state.currentCode;
+        }
+    }
+
+
+    function openMissions() {
+
+        renderMissions(
+            state.level
+        );
+
+        show(
+            "missionsPanel"
+        );
+    }
+
+
+    function openMeasurements() {
+
+        simulateCircuit();
+
+        show(
+            "measurementsPanel"
+        );
+    }
+
+
+    function openDiagnostic() {
+
+        diagnoseCircuit();
+
+        show(
+            "diagnosticPanel"
+        );
+    }
+
+
+    function openFaults() {
+
+        show(
+            "faultsPanel"
+        );
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6776,13 +6846,12 @@ function openComponentLibrary() {
 
 
 
-bind(
-    "libraryBtn",
-    "click",
-    () => {
-        openComponentLibrary();
-    }
-);
+
+
+
+
+
+
 
 
 
