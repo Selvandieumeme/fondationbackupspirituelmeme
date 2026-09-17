@@ -6172,6 +6172,51 @@ void loop() {
     }
 
 
+
+
+
+
+function openComponentLibrary() {
+
+    hide("codeLibraryPanel");
+    hide("codeEditorPanel");
+    hide("missionsPanel");
+    hide("diagnosticPanel");
+    hide("faultsPanel");
+    hide("measurementsPanel");
+
+    const library = $("componentLibraryPanel");
+
+    if (!library) {
+        toast(
+            "Bibliothèque des composants introuvable.",
+            "error"
+        );
+        return;
+    }
+
+    library.classList.remove("hidden");
+
+    renderCategory(
+        state.selectedCategory || "resistors"
+    );
+
+    library.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+    toast(
+        "Bibliothèque des composants ouverte.",
+        "info"
+    );
+}
+
+
+
+
+
+
     function openCodeLibrary() {
 
         renderCodeLibrary(
