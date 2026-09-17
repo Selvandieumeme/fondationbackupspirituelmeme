@@ -5442,6 +5442,1039 @@ body {
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =====================================================================
+   FOBAS — VISUAL LABORATORY ENGINE
+   ---------------------------------------------------------------------
+   VERSION : 1.0.0
+   TYPE    : CSS ADDON ISOLÉ / INDÉPENDANT
+
+   OBJECTIF :
+   - Rendre les matériaux réellement visibles dans le récipient.
+   - Visualiser ciment, sable, gravier et eau.
+   - Donner au récipient un rendu laboratoire professionnel.
+   - Ajouter profondeur, volume, lumière et animations.
+   - Compatible ordinateur / tablette / Android.
+
+   IMPORTANT :
+   - CE BLOC NE REMPLACE AUCUN CSS EXISTANT.
+   - CE BLOC NE MODIFIE PAS LES BOUTONS EXISTANTS.
+   - CE BLOC NE MODIFIE PAS LES PANELS EXISTANTS.
+   - CE BLOC NE MODIFIE PAS LE WORKSPACE EXISTANT.
+   - CE BLOC NE MODIFIE PAS LE DOSAGE.
+   - CE BLOC NE MODIFIE PAS LES RAPPORTS.
+   - CE BLOC NE MODIFIE PAS LE SYSTÈME DE ZOOM.
+   - CE BLOC EST UNIQUEMENT DESTINÉ AU VISUAL LABORATORY ENGINE.
+===================================================================== */
+
+
+/* =====================================================================
+   01 — CONTENEUR VISUEL DU RÉCIPIENT
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-visual-layer {
+
+    position: absolute;
+
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    bottom: 8px;
+
+    z-index: 20;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+
+    gap: 7px;
+
+    padding: 10px;
+
+    overflow: hidden;
+
+    pointer-events: none;
+
+    box-sizing: border-box;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.025),
+            rgba(0,0,0,0.035)
+        );
+
+    isolation: isolate;
+}
+
+
+/* =====================================================================
+   02 — PROFONDEUR INTERNE DU RÉCIPIENT
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-visual-layer::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -3;
+
+    pointer-events: none;
+
+    border-radius: 15px;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.08),
+        inset 0 10px 22px rgba(255,255,255,0.025),
+        inset 0 -18px 30px rgba(0,0,0,0.12);
+}
+
+
+/* =====================================================================
+   03 — REFLET DU RÉCIPIENT
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-visual-layer::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 5px;
+    left: 8px;
+
+    width: 22%;
+
+    height: calc(100% - 10px);
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            to right,
+            rgba(255,255,255,0.12),
+            rgba(255,255,255,0.035),
+            transparent
+        );
+
+    opacity: 0.55;
+
+    filter: blur(2px);
+
+    pointer-events: none;
+
+    z-index: 30;
+}
+
+
+/* =====================================================================
+   04 — CARTE VISUELLE D'UN MATÉRIAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    min-height: 42px;
+
+    width: 100%;
+
+    padding: 7px 10px;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.13),
+            rgba(255,255,255,0.035)
+        );
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.09);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    color: inherit;
+
+    transform: translateZ(0);
+
+    transition:
+        transform 0.25s ease,
+        opacity 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+/* =====================================================================
+   05 — REFLET SUR LES MATÉRIAUX
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: -30%;
+
+    top: 0;
+
+    width: 55%;
+
+    height: 100%;
+
+    transform: skewX(-20deg);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.08),
+            transparent
+        );
+
+    pointer-events: none;
+}
+
+
+/* =====================================================================
+   06 — ICÔNE / ZONE VISUELLE DU MATÉRIAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material .material-icon,
+#recipient01 .fobas-civil-recipient-material .fobas-material-icon {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 34px;
+
+    width: 34px;
+    height: 34px;
+
+    margin-right: 8px;
+
+    border-radius: 9px;
+
+    background:
+        rgba(255,255,255,0.08);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+        inset 0 1px 2px rgba(255,255,255,0.08),
+        0 2px 5px rgba(0,0,0,0.15);
+
+    font-size: 19px;
+
+    line-height: 1;
+
+    overflow: hidden;
+}
+
+
+/* =====================================================================
+   07 — NOM DU MATÉRIAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material .material-name,
+#recipient01 .fobas-civil-recipient-material .fobas-material-name {
+
+    flex: 1;
+
+    min-width: 0;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    letter-spacing: 0.15px;
+}
+
+
+/* =====================================================================
+   08 — QUANTITÉ DU MATÉRIAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material .material-quantity,
+#recipient01 .fobas-civil-recipient-material .fobas-material-quantity {
+
+    flex: 0 0 auto;
+
+    margin-left: 8px;
+
+    padding: 4px 7px;
+
+    border-radius: 7px;
+
+    background:
+        rgba(0,0,0,0.18);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* =====================================================================
+   09 — CIMENT
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-cement {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(150,150,150,0.27),
+            rgba(70,70,70,0.16)
+        );
+
+    border-color:
+        rgba(205,205,205,0.18);
+
+    box-shadow:
+        0 5px 12px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+
+/* =====================================================================
+   10 — SABLE
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-sand {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(210,170,95,0.30),
+            rgba(120,85,35,0.15)
+        );
+
+    border-color:
+        rgba(230,200,130,0.20);
+}
+
+
+/* =====================================================================
+   11 — GRAVIER
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-gravel {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(115,115,115,0.32),
+            rgba(45,45,45,0.17)
+        );
+
+    border-color:
+        rgba(190,190,190,0.18);
+}
+
+
+/* =====================================================================
+   12 — EAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-water {
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(40,150,220,0.30),
+            rgba(20,75,130,0.18)
+        );
+
+    border-color:
+        rgba(90,190,255,0.27);
+
+    box-shadow:
+        0 5px 14px rgba(0,90,160,0.22),
+        inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+
+/* =====================================================================
+   13 — COUCHE VISUELLE D'EAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-liquid {
+
+    position: absolute;
+
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+
+    min-height: 18px;
+
+    max-height: 62%;
+
+    z-index: -1;
+
+    overflow: hidden;
+
+    border-radius:
+        11px 11px 8px 8px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(105,205,255,0.52),
+            rgba(25,120,190,0.40)
+        );
+
+    border:
+        1px solid rgba(120,220,255,0.40);
+
+    box-shadow:
+        inset 0 2px 5px rgba(255,255,255,0.16),
+        inset 0 -8px 15px rgba(0,50,100,0.18),
+        0 2px 8px rgba(0,90,160,0.18);
+
+    opacity: 0.82;
+
+    transform-origin:
+        bottom center;
+
+    animation:
+        fobasCivilWaterAppear
+        0.65s
+        ease-out
+        both;
+}
+
+
+/* =====================================================================
+   14 — SURFACE DE L'EAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-liquid::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 3px;
+    left: 4%;
+    right: 4%;
+
+    height: 4px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.70),
+            rgba(255,255,255,0.25),
+            transparent
+        );
+
+    opacity: 0.75;
+
+    animation:
+        fobasCivilWaterShine
+        2.8s
+        ease-in-out
+        infinite;
+}
+
+
+/* =====================================================================
+   15 — PETITES ONDES DE L'EAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-liquid::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: -10%;
+    right: -10%;
+
+    top: 9px;
+
+    height: 12px;
+
+    border-top:
+        1px solid rgba(255,255,255,0.22);
+
+    border-radius: 50%;
+
+    transform: scaleX(1.08);
+
+    opacity: 0.55;
+
+    animation:
+        fobasCivilWaterWave
+        2.2s
+        ease-in-out
+        infinite;
+}
+
+
+/* =====================================================================
+   16 — ANIMATION D'ENTRÉE D'UN MATÉRIAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-material-entering {
+
+    animation:
+        fobasCivilMaterialEntering
+        0.72s
+        cubic-bezier(0.18,0.82,0.28,1.12)
+        both;
+}
+
+
+/* =====================================================================
+   17 — PULSATION APRÈS TRANSFERT
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-material-entering::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: inherit;
+
+    border:
+        1px solid rgba(255,255,255,0.30);
+
+    opacity: 0;
+
+    animation:
+        fobasCivilTransferPulse
+        0.8s
+        ease-out
+        both;
+
+    pointer-events: none;
+}
+
+
+/* =====================================================================
+   18 — APPARENCE GRANULAIRE DU SABLE
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-sand {
+
+    background-image:
+        radial-gradient(
+            circle at 15% 35%,
+            rgba(255,255,255,0.10) 0 1px,
+            transparent 1.5px
+        ),
+        radial-gradient(
+            circle at 70% 60%,
+            rgba(90,60,20,0.13) 0 1px,
+            transparent 1.5px
+        ),
+        linear-gradient(
+            145deg,
+            rgba(210,170,95,0.30),
+            rgba(120,85,35,0.15)
+        );
+
+    background-size:
+        13px 13px,
+        17px 17px,
+        auto;
+}
+
+
+/* =====================================================================
+   19 — APPARENCE GRANULAIRE DU GRAVIER
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-gravel {
+
+    background-image:
+        radial-gradient(
+            circle at 20% 35%,
+            rgba(255,255,255,0.13) 0 2px,
+            transparent 2.5px
+        ),
+        radial-gradient(
+            circle at 70% 70%,
+            rgba(0,0,0,0.15) 0 2px,
+            transparent 2.5px
+        ),
+        linear-gradient(
+            145deg,
+            rgba(115,115,115,0.32),
+            rgba(45,45,45,0.17)
+        );
+
+    background-size:
+        19px 17px,
+        23px 21px,
+        auto;
+}
+
+
+/* =====================================================================
+   20 — APPARENCE POUDRE DU CIMENT
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material.fobas-civil-cement {
+
+    background-image:
+        radial-gradient(
+            circle at 20% 40%,
+            rgba(255,255,255,0.10) 0 1px,
+            transparent 1.8px
+        ),
+        radial-gradient(
+            circle at 75% 65%,
+            rgba(0,0,0,0.10) 0 1px,
+            transparent 1.8px
+        ),
+        linear-gradient(
+            145deg,
+            rgba(150,150,150,0.27),
+            rgba(70,70,70,0.16)
+        );
+
+    background-size:
+        15px 15px,
+        18px 18px,
+        auto;
+}
+
+
+/* =====================================================================
+   21 — EFFET DE VOLUME POUR LE MATÉRIAU
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material {
+
+    transform:
+        perspective(500px)
+        translateZ(0);
+}
+
+
+/* =====================================================================
+   22 — EFFET VISUEL LORSQUE LE RÉCIPIENT EST REMPLI
+===================================================================== */
+
+#recipient01:has(
+    .fobas-civil-recipient-material
+) .fobas-civil-recipient-visual-layer {
+
+    box-shadow:
+        inset 0 0 25px rgba(255,255,255,0.025),
+        inset 0 -20px 35px rgba(0,0,0,0.08);
+}
+
+
+/* =====================================================================
+   23 — ANIMATION DE L'EAU
+===================================================================== */
+
+@keyframes fobasCivilWaterAppear {
+
+    0% {
+
+        opacity: 0;
+
+        transform:
+            translateY(35px)
+            scaleY(0.15);
+    }
+
+    65% {
+
+        opacity: 0.78;
+
+        transform:
+            translateY(-2px)
+            scaleY(1.04);
+    }
+
+    100% {
+
+        opacity: 0.82;
+
+        transform:
+            translateY(0)
+            scaleY(1);
+    }
+}
+
+
+/* =====================================================================
+   24 — ANIMATION DE SURFACE
+===================================================================== */
+
+@keyframes fobasCivilWaterShine {
+
+    0%,
+    100% {
+
+        transform:
+            translateX(-8%)
+            scaleX(0.92);
+
+        opacity: 0.35;
+    }
+
+    50% {
+
+        transform:
+            translateX(8%)
+            scaleX(1.05);
+
+        opacity: 0.78;
+    }
+}
+
+
+/* =====================================================================
+   25 — ANIMATION DES ONDES
+===================================================================== */
+
+@keyframes fobasCivilWaterWave {
+
+    0%,
+    100% {
+
+        transform:
+            translateX(-3%)
+            scaleX(0.98);
+    }
+
+    50% {
+
+        transform:
+            translateX(3%)
+            scaleX(1.04);
+    }
+}
+
+
+/* =====================================================================
+   26 — ANIMATION D'ENTRÉE DU MATÉRIAU
+===================================================================== */
+
+@keyframes fobasCivilMaterialEntering {
+
+    0% {
+
+        opacity: 0;
+
+        transform:
+            translateY(-45px)
+            scale(0.72)
+            rotateX(18deg);
+    }
+
+    55% {
+
+        opacity: 1;
+
+        transform:
+            translateY(7px)
+            scale(1.04)
+            rotateX(-3deg);
+    }
+
+    78% {
+
+        transform:
+            translateY(-3px)
+            scale(0.99)
+            rotateX(1deg);
+    }
+
+    100% {
+
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1)
+            rotateX(0deg);
+    }
+}
+
+
+/* =====================================================================
+   27 — PULSE APRÈS TRANSFERT
+===================================================================== */
+
+@keyframes fobasCivilTransferPulse {
+
+    0% {
+
+        opacity: 0.75;
+
+        transform: scale(0.92);
+    }
+
+    70% {
+
+        opacity: 0.18;
+
+        transform: scale(1.02);
+    }
+
+    100% {
+
+        opacity: 0;
+
+        transform: scale(1.08);
+    }
+}
+
+
+/* =====================================================================
+   28 — PETIT EFFET DE LUMIÈRE SUR LES CARTES
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-material:hover {
+
+    transform:
+        translateY(-1px)
+        scale(1.01);
+
+    box-shadow:
+        0 7px 16px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+
+/* =====================================================================
+   29 — RESPONSIVE TABLETTE
+===================================================================== */
+
+@media (max-width: 900px) {
+
+    #recipient01 .fobas-civil-recipient-visual-layer {
+
+        padding: 8px;
+
+        gap: 6px;
+    }
+
+    #recipient01 .fobas-civil-recipient-material {
+
+        min-height: 39px;
+
+        padding: 6px 8px;
+    }
+
+    #recipient01 .fobas-civil-recipient-material .material-name,
+    #recipient01 .fobas-civil-recipient-material .fobas-material-name {
+
+        font-size: 11px;
+    }
+
+    #recipient01 .fobas-civil-recipient-material .material-quantity,
+    #recipient01 .fobas-civil-recipient-material .fobas-material-quantity {
+
+        font-size: 10px;
+
+        padding: 3px 6px;
+    }
+}
+
+
+/* =====================================================================
+   30 — RESPONSIVE PETITS ÉCRANS ANDROID
+===================================================================== */
+
+@media (max-width: 600px) {
+
+    #recipient01 .fobas-civil-recipient-visual-layer {
+
+        left: 5px;
+        right: 5px;
+        top: 5px;
+        bottom: 5px;
+
+        padding: 6px;
+
+        gap: 5px;
+
+        border-radius: 12px;
+    }
+
+    #recipient01 .fobas-civil-recipient-material {
+
+        min-height: 36px;
+
+        padding: 5px 7px;
+
+        border-radius: 9px;
+    }
+
+    #recipient01 .fobas-civil-recipient-material .material-icon,
+    #recipient01 .fobas-civil-recipient-material .fobas-material-icon {
+
+        flex-basis: 29px;
+
+        width: 29px;
+        height: 29px;
+
+        margin-right: 6px;
+
+        font-size: 16px;
+    }
+
+    #recipient01 .fobas-civil-recipient-material .material-name,
+    #recipient01 .fobas-civil-recipient-material .fobas-material-name {
+
+        font-size: 10px;
+    }
+
+    #recipient01 .fobas-civil-recipient-material .material-quantity,
+    #recipient01 .fobas-civil-recipient-material .fobas-material-quantity {
+
+        font-size: 9px;
+
+        padding: 3px 5px;
+    }
+}
+
+
+/* =====================================================================
+   31 — ACCESSIBILITÉ : RÉDUCTION DES ANIMATIONS
+===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    #recipient01 .fobas-civil-recipient-material,
+    #recipient01 .fobas-civil-recipient-material.fobas-civil-material-entering,
+    #recipient01 .fobas-civil-recipient-liquid,
+    #recipient01 .fobas-civil-recipient-liquid::before,
+    #recipient01 .fobas-civil-recipient-liquid::after,
+    #recipient01 .fobas-civil-recipient-material.fobas-civil-material-entering::after {
+
+        animation: none !important;
+
+        transition: none !important;
+    }
+}
+
+
+/* =====================================================================
+   32 — PROTECTION CONTRE LE DÉBORDEMENT VISUEL
+===================================================================== */
+
+#recipient01 .fobas-civil-recipient-visual-layer,
+#recipient01 .fobas-civil-recipient-material {
+
+    max-width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================================
+   33 — COMPATIBILITÉ AVEC UN RÉCIPIENT SANS POSITIONNEMENT
+===================================================================== */
+
+#recipient01 {
+
+    position: relative;
+}
+
+
+/* =====================================================================
+   34 — FIN DU FOBAS VISUAL LABORATORY ENGINE
+===================================================================== */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ================================================================
 FIN DU FICHIER
 FOBAS — LABORATOIRE GÉNIE CIVIL
