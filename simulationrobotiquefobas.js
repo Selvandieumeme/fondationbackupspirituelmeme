@@ -7398,241 +7398,147 @@ void loop() {
     }
 
 
-    /* ============================================================
-       31 — ZOOM ANDROID À DEUX DOIGTS
-       ------------------------------------------------------------
-       Le CSS prépare le conteneur.
-       Le JS gère ici le vrai calcul du pinch-to-zoom.
-    ============================================================ */
-
-    function setupWorkspaceTouchZoom() {
-
-        const workspace =
-            byId(
-                "laboratoryWorkspace"
-            );
 
 
-        if (!workspace) {
-            return;
+
+
+/* ============================================================
+   31 — ZOOM ANDROID À DEUX DOIGTS — VERSION ROBUSTE
+   ------------------------------------------------------------
+   IMPORTANT :
+   - Utilise Pointer Events pour Android / tactile moderne.
+   - Le pinch fonctionne indépendamment du mode actif.
+   - Le zoom se fait autour du centre des deux doigts.
+   - Compatible avec le déplacement du workspace.
+   - Ne modifie pas les boutons, l'éditeur ou les autres vues.
+   - Aucun changement HTML nécessaire.
+============================================================ */
+
+function setupWorkspaceTouchZoom() {
+
+    const workspace =
+        byId(
+            "laboratoryWorkspace"
+        );
+
+
+    if (!workspace) {
+        return;
+    }
+
+
+    /*
+       Désactive la gestion tactile native du navigateur
+       uniquement à l'intérieur du laboratoire.
+       
+       Cela empêche Android de transformer le geste
+       en scroll / navigation au lieu d'un vrai pinch.
+    */
+
+    workspace.style.touchAction =
+        "none";
+
+
+    /*
+       Tableau des doigts actuellement actifs.
+
+       Structure :
+       pointerId -> {
+           x,
+           y
+       }
+    */
+
+    const activePointers =
+        new Map();
+
+
+    /*
+       État du pinch.
+    */
+
+    let pinchStartDistance =
+        null;
+
+    let pinchStartScale =
+        state.workspaceScale;
+
+    let pinchStartOffsetX =
+        state.workspaceOffsetX;
+
+    let pinchStartOffsetY =
+        state.workspaceOffsetY;
+
+    let pinchStartCenterX =
+        0;
+
+    let pinchStartCenterY =
+        0;
+
+    let pinchWorldX =
+        0;
+
+    let pinchWorldY =
+        0;
+
+
+    /*
+       État du déplacement à un doigt.
+    */
+
+    let panPointerId =
+        null;
+
+    let panStartX =
+        0;
+
+    let panStartY =
+        0;
+
+    let panStartOffsetX =
+        0;
+
+    let panStartOffsetY =
+        0;
+
+
+    /*
+       Vérifie si un élément appartient réellement
+       au laboratoire.
+    */
+
+    function isInsideWorkspace(
+        target
+    ) {
+
+        if (!target) {
+            return false;
         }
 
-
-        let pinchStartDistance =
-            null;
-
-        let pinchStartScale =
-            state.workspaceScale;
-
-
-        let panStart = null;
-
-
-        workspace.addEventListener(
-            "touchstart",
-            function (event) {
-
-                if (
-                    event.touches.length ===
-                    2
-                ) {
-
-                    event.preventDefault();
-
-
-                    pinchStartDistance =
-                        getTouchDistance(
-                            event.touches[0],
-                            event.touches[1]
-                        );
-
-
-                    pinchStartScale =
-                        state.workspaceScale;
-
-                    return;
-
-                }
-
-
-                if (
-                    event.touches.length ===
-                    1 &&
-                    state.activeAction ===
-                    "move"
-                ) {
-
-                    const touch =
-                        event.touches[0];
-
-
-                    panStart = {
-
-                        x:
-                            touch.clientX,
-
-                        y:
-                            touch.clientY,
-
-                        offsetX:
-                            state.workspaceOffsetX,
-
-                        offsetY:
-                            state.workspaceOffsetY
-
-                    };
-
-                }
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        workspace.addEventListener(
-            "touchmove",
-            function (event) {
-
-                if (
-                    event.touches.length ===
-                    2 &&
-                    pinchStartDistance !==
-                    null
-                ) {
-
-                    event.preventDefault();
-
-
-                    const distance =
-                        getTouchDistance(
-                            event.touches[0],
-                            event.touches[1]
-                        );
-
-
-                    if (
-                        pinchStartDistance <= 0
-                    ) {
-                        return;
-                    }
-
-
-                    const ratio =
-                        distance /
-                        pinchStartDistance;
-
-
-                    const newScale =
-                        Math.max(
-                            state.zoomMin,
-                            Math.min(
-                                state.zoomMax,
-                                pinchStartScale *
-                                ratio
-                            )
-                        );
-
-
-                    setWorkspaceZoom(
-                        newScale
-                    );
-
-
-                    return;
-
-                }
-
-
-                if (
-                    event.touches.length ===
-                    1 &&
-                    panStart &&
-                    state.activeAction ===
-                    "move"
-                ) {
-
-                    event.preventDefault();
-
-
-                    const touch =
-                        event.touches[0];
-
-
-                    state.workspaceOffsetX =
-                        panStart.offsetX +
-                        (
-                            touch.clientX -
-                            panStart.x
-                        );
-
-
-                    state.workspaceOffsetY =
-                        panStart.offsetY +
-                        (
-                            touch.clientY -
-                            panStart.y
-                        );
-
-
-                    applyWorkspaceTransform();
-
-                }
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        workspace.addEventListener(
-            "touchend",
-            function (event) {
-
-                if (
-                    event.touches.length <
-                    2
-                ) {
-
-                    pinchStartDistance =
-                        null;
-
-                }
-
-
-                if (
-                    event.touches.length ===
-                    0
-                ) {
-
-                    panStart =
-                        null;
-
-                }
-
-            },
-            {
-                passive: false
-            }
+        return (
+            target === workspace ||
+            workspace.contains(target)
         );
 
     }
 
 
-    function getTouchDistance(
+    /*
+       Distance entre deux pointeurs.
+    */
+
+    function getPointerDistance(
         first,
         second
     ) {
 
         const dx =
-            second.clientX -
-            first.clientX;
+            second.x -
+            first.x;
 
         const dy =
-            second.clientY -
-            first.clientY;
+            second.y -
+            first.y;
 
 
         return Math.sqrt(
@@ -7643,18 +7549,262 @@ void loop() {
     }
 
 
-    function setWorkspaceZoom(
-        scale
+    /*
+       Centre entre deux pointeurs.
+    */
+
+    function getPointerCenter(
+        first,
+        second
     ) {
 
-        state.workspaceScale =
+        return {
+
+            x:
+                (
+                    first.x +
+                    second.x
+                ) / 2,
+
+            y:
+                (
+                    first.y +
+                    second.y
+                ) / 2
+
+        };
+
+    }
+
+
+    /*
+       Récupère les deux pointeurs actifs.
+    */
+
+    function getTwoPointers() {
+
+        const values =
+            Array.from(
+                activePointers.values()
+            );
+
+
+        if (values.length < 2) {
+            return null;
+        }
+
+
+        return [
+            values[0],
+            values[1]
+        ];
+
+    }
+
+
+    /*
+       Démarre le pinch.
+    */
+
+    function startPinch() {
+
+        const pointers =
+            getTwoPointers();
+
+
+        if (!pointers) {
+            return;
+        }
+
+
+        const first =
+            pointers[0];
+
+        const second =
+            pointers[1];
+
+
+        pinchStartDistance =
+            getPointerDistance(
+                first,
+                second
+            );
+
+
+        if (
+            pinchStartDistance <= 0
+        ) {
+
+            pinchStartDistance =
+                null;
+
+            return;
+
+        }
+
+
+        pinchStartScale =
+            state.workspaceScale;
+
+
+        pinchStartOffsetX =
+            state.workspaceOffsetX;
+
+
+        pinchStartOffsetY =
+            state.workspaceOffsetY;
+
+
+        const center =
+            getPointerCenter(
+                first,
+                second
+            );
+
+
+        pinchStartCenterX =
+            center.x;
+
+
+        pinchStartCenterY =
+            center.y;
+
+
+        /*
+           Coordonnée virtuelle du point situé
+           sous le centre des doigts.
+
+           Cette formule permet de garder le contenu
+           sous les doigts pendant le zoom.
+        */
+
+        pinchWorldX =
+            (
+                pinchStartCenterX -
+                pinchStartOffsetX
+            ) /
+            pinchStartScale;
+
+
+        pinchWorldY =
+            (
+                pinchStartCenterY -
+                pinchStartOffsetY
+            ) /
+            pinchStartScale;
+
+
+        /*
+           Un pinch annule le déplacement
+           à un doigt en cours.
+        */
+
+        panPointerId =
+            null;
+
+    }
+
+
+    /*
+       Effectue le pinch.
+    */
+
+    function updatePinch() {
+
+        if (
+            pinchStartDistance ===
+            null
+        ) {
+            return;
+        }
+
+
+        const pointers =
+            getTwoPointers();
+
+
+        if (!pointers) {
+            return;
+        }
+
+
+        const first =
+            pointers[0];
+
+        const second =
+            pointers[1];
+
+
+        const distance =
+            getPointerDistance(
+                first,
+                second
+            );
+
+
+        if (
+            distance <= 0 ||
+            pinchStartDistance <= 0
+        ) {
+            return;
+        }
+
+
+        const ratio =
+            distance /
+            pinchStartDistance;
+
+
+        let newScale =
+            pinchStartScale *
+            ratio;
+
+
+        newScale =
             Math.max(
                 state.zoomMin,
                 Math.min(
                     state.zoomMax,
-                    scale
+                    newScale
                 )
             );
+
+
+        /*
+           Nouveau centre des deux doigts.
+        */
+
+        const center =
+            getPointerCenter(
+                first,
+                second
+            );
+
+
+        /*
+           Recalcule le déplacement pour que
+           le même point du laboratoire reste
+           sous les doigts.
+        */
+
+        state.workspaceOffsetX =
+            center.x -
+            (
+                pinchWorldX *
+                newScale
+            );
+
+
+        state.workspaceOffsetY =
+            center.y -
+            (
+                pinchWorldY *
+                newScale
+            );
+
+
+        state.workspaceScale =
+            newScale;
 
 
         applyWorkspaceTransform();
@@ -7662,66 +7812,605 @@ void loop() {
     }
 
 
-    function applyWorkspaceTransform() {
+    /*
+       Réinitialise complètement le pinch.
+    */
 
-        const board =
-            byId("workspaceBoard");
+    function resetPinch() {
 
-        const grid =
-            byId("workspaceGrid");
+        pinchStartDistance =
+            null;
 
-        const wire =
-            byId("wireLayer");
+        pinchStartScale =
+            state.workspaceScale;
 
-        const connection =
-            byId("connectionLayer");
+        pinchStartOffsetX =
+            state.workspaceOffsetX;
 
-        const selection =
-            byId("selectionLayer");
+        pinchStartOffsetY =
+            state.workspaceOffsetY;
 
-
-        const elements = [
-
-            board,
-            grid,
-            wire,
-            connection,
-            selection
-
-        ];
+    }
 
 
-        const transform =
-            "translate(" +
-            state.workspaceOffsetX +
-            "px, " +
-            state.workspaceOffsetY +
-            "px) " +
-            "scale(" +
-            state.workspaceScale +
-            ")";
+    /*
+       POINTER DOWN
+    */
+
+    document.addEventListener(
+        "pointerdown",
+        function (event) {
+
+            /*
+               Nous ne voulons traiter que
+               les vrais pointeurs tactiles.
+            */
+
+            if (
+                event.pointerType !==
+                "touch"
+            ) {
+                return;
+            }
 
 
-        elements.forEach(
-            function (element) {
+            /*
+               Ignore les touches qui commencent
+               en dehors du laboratoire.
+            */
 
-                if (element) {
+            if (
+                !isInsideWorkspace(
+                    event.target
+                )
+            ) {
+                return;
+            }
 
-                    element.style.transform =
-                        transform;
 
-                    element.style.transformOrigin =
-                        "0 0";
+            if (
+                !state.touchEnabled
+            ) {
+                return;
+            }
+
+
+            activePointers.set(
+                event.pointerId,
+                {
+                    x:
+                        event.clientX,
+
+                    y:
+                        event.clientY
+                }
+            );
+
+
+            /*
+               Dès qu'il y a deux doigts,
+               le pinch devient prioritaire.
+            */
+
+            if (
+                activePointers.size ===
+                2
+            ) {
+
+                event.preventDefault();
+
+                startPinch();
+
+                return;
+
+            }
+
+
+            /*
+               Un seul doigt :
+               déplacement uniquement en mode MOVE.
+
+               Le déplacement ne commence que sur
+               la surface du workspace et non sur
+               un objet interactif.
+            */
+
+            if (
+                activePointers.size ===
+                1 &&
+                state.activeAction ===
+                "move"
+            ) {
+
+                const target =
+                    event.target;
+
+
+                const objectElement =
+                    target.closest &&
+                    target.closest(
+                        ".workspace-object"
+                    );
+
+
+                if (
+                    objectElement
+                ) {
+
+                    /*
+                       L'objet gère lui-même
+                       son déplacement.
+                    */
+
+                    panPointerId =
+                        null;
+
+                    return;
 
                 }
 
+
+                panPointerId =
+                    event.pointerId;
+
+
+                panStartX =
+                    event.clientX;
+
+
+                panStartY =
+                    event.clientY;
+
+
+                panStartOffsetX =
+                    state.workspaceOffsetX;
+
+
+                panStartOffsetY =
+                    state.workspaceOffsetY;
+
             }
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /*
+       POINTER MOVE
+    */
+
+    document.addEventListener(
+        "pointermove",
+        function (event) {
+
+            if (
+                event.pointerType !==
+                "touch"
+            ) {
+                return;
+            }
+
+
+            /*
+               Si ce pointeur appartient déjà
+               au geste actif, on met sa position
+               à jour même si un objet a capturé
+               le pointeur.
+            */
+
+            if (
+                activePointers.has(
+                    event.pointerId
+                )
+            ) {
+
+                const pointer =
+                    activePointers.get(
+                        event.pointerId
+                    );
+
+
+                pointer.x =
+                    event.clientX;
+
+                pointer.y =
+                    event.clientY;
+
+            }
+
+
+            /*
+               DEUX DOIGTS
+            */
+
+            if (
+                activePointers.size >=
+                2
+            ) {
+
+                event.preventDefault();
+
+                updatePinch();
+
+                return;
+
+            }
+
+
+            /*
+               UN DOIGT — PAN
+            */
+
+            if (
+                activePointers.size ===
+                1 &&
+                panPointerId ===
+                event.pointerId &&
+                state.activeAction ===
+                "move"
+            ) {
+
+                event.preventDefault();
+
+
+                state.workspaceOffsetX =
+                    panStartOffsetX +
+                    (
+                        event.clientX -
+                        panStartX
+                    );
+
+
+                state.workspaceOffsetY =
+                    panStartOffsetY +
+                    (
+                        event.clientY -
+                        panStartY
+                    );
+
+
+                applyWorkspaceTransform();
+
+            }
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /*
+       POINTER UP
+    */
+
+    document.addEventListener(
+        "pointerup",
+        function (event) {
+
+            if (
+                event.pointerType !==
+                "touch"
+            ) {
+                return;
+            }
+
+
+            if (
+                activePointers.has(
+                    event.pointerId
+                )
+            ) {
+
+                activePointers.delete(
+                    event.pointerId
+                );
+
+            }
+
+
+            /*
+               Dès qu'il reste moins de deux doigts,
+               le pinch est terminé.
+            */
+
+            if (
+                activePointers.size <
+                2
+            ) {
+
+                resetPinch();
+
+            }
+
+
+            /*
+               Plus aucun doigt.
+            */
+
+            if (
+                activePointers.size ===
+                0
+            ) {
+
+                panPointerId =
+                    null;
+
+            }
+
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /*
+       POINTER CANCEL
+    */
+
+    document.addEventListener(
+        "pointercancel",
+        function (event) {
+
+            if (
+                event.pointerType !==
+                "touch"
+            ) {
+                return;
+            }
+
+
+            activePointers.delete(
+                event.pointerId
+            );
+
+
+            if (
+                activePointers.size <
+                2
+            ) {
+
+                resetPinch();
+
+            }
+
+
+            if (
+                activePointers.size ===
+                0
+            ) {
+
+                panPointerId =
+                    null;
+
+            }
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /*
+       POINTER LEAVE
+       
+       On ne supprime pas immédiatement
+       le pointeur ici car Android peut
+       temporairement sortir de la zone
+       tout en continuant le geste.
+    */
+
+
+    /*
+       Support supplémentaire pour les
+       anciens appareils utilisant encore
+       les événements tactiles classiques.
+
+       Cette partie ne remplace PAS Pointer Events.
+       Elle sert uniquement de secours.
+    */
+
+    workspace.addEventListener(
+        "touchstart",
+        function (event) {
+
+            if (
+                !state.touchEnabled
+            ) {
+                return;
+            }
+
+
+            if (
+                event.touches.length >=
+                2
+            ) {
+
+                event.preventDefault();
+
+            }
+
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    workspace.addEventListener(
+        "touchmove",
+        function (event) {
+
+            if (
+                !state.touchEnabled
+            ) {
+                return;
+            }
+
+
+            if (
+                event.touches.length >=
+                2
+            ) {
+
+                event.preventDefault();
+
+            }
+
+        },
+        {
+            passive: false
+        }
+    );
+
+}
+
+
+/* ============================================================
+   DISTANCE TACTILE — COMPATIBILITÉ
+   ------------------------------------------------------------
+   Conservée pour ne pas casser les éventuels appels
+   existants dans le reste du programme.
+============================================================ */
+
+function getTouchDistance(
+    first,
+    second
+) {
+
+    const dx =
+        second.clientX -
+        first.clientX;
+
+
+    const dy =
+        second.clientY -
+        first.clientY;
+
+
+    return Math.sqrt(
+        dx * dx +
+        dy * dy
+    );
+
+}
+
+
+/* ============================================================
+   ZOOM DU WORKSPACE
+============================================================ */
+
+function setWorkspaceZoom(
+    scale
+) {
+
+    state.workspaceScale =
+        Math.max(
+            state.zoomMin,
+            Math.min(
+                state.zoomMax,
+                scale
+            )
         );
 
 
-        redrawAllWires();
+    applyWorkspaceTransform();
 
-    }
+}
+
+
+/* ============================================================
+   TRANSFORMATION DU WORKSPACE
+============================================================ */
+
+function applyWorkspaceTransform() {
+
+    const board =
+        byId(
+            "workspaceBoard"
+        );
+
+
+    const grid =
+        byId(
+            "workspaceGrid"
+        );
+
+
+    const wire =
+        byId(
+            "wireLayer"
+        );
+
+
+    const connection =
+        byId(
+            "connectionLayer"
+        );
+
+
+    const selection =
+        byId(
+            "selectionLayer"
+        );
+
+
+    const elements = [
+
+        board,
+        grid,
+        wire,
+        connection,
+        selection
+
+    ];
+
+
+    const transform =
+        "translate(" +
+        state.workspaceOffsetX +
+        "px, " +
+        state.workspaceOffsetY +
+        "px) " +
+        "scale(" +
+        state.workspaceScale +
+        ")";
+
+
+    elements.forEach(
+        function (element) {
+
+            if (!element) {
+                return;
+            }
+
+
+            element.style.transform =
+                transform;
+
+
+            element.style.transformOrigin =
+                "0 0";
+
+        }
+    );
+
+
+    redrawAllWires();
+
+}
+
+
+
+
+
+
 
 
     /* ============================================================
