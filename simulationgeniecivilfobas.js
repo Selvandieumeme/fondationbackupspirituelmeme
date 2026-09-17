@@ -1,545 +1,510 @@
 /* ================================================================
    FOBAS — LABORATOIRE GÉNIE CIVIL
    ---------------------------------------------------------------
-   FICHIER : simulationgeniecivilfobas.js
-   VERSION : 1.0.0 — CIVIL ENGINEERING SIMULATION CORE
+   JAVASCRIPT PRINCIPAL
+   Compatible avec :
+   simulationgeniecivilfobas.html
 
-   OBJECTIFS :
-   - Connexion complète avec simulationgeniecivilfobas.html
-   - Gestion des matériaux
-   - Bibliothèque des matériaux
-   - Drag & Drop
-   - Transfert vers recipient01
-   - Mesures
-   - Dosage béton / mortier
-   - Mélange
-   - Validation des proportions
-   - Réaction
-   - Résultat
-   - Rapport
-   - Zoom
-   - Sauvegarde / restauration
-   - Reset
-   - Notifications
-   - Compatibilité mobile / tablette / ordinateur
+   VERSION : 2.0.0
+   ENGINE  : FOBAS_CIVIL_ENGINE
 
    IMPORTANT :
-   - Aucun Three.js
-   - Aucun framework externe
-   - Ne remplace pas le HTML
-   - Ne remplace pas le CSS
-   - Travaille uniquement avec les éléments existants
+   - 1 sac de ciment = 42 KG
+   - Aucun calcul basé sur 50 KG
+   - Utilise les vrais IDs/classes du HTML
+   - Aucun #materialsLibrary inventé
+   - Aucun data-add-material inventé
+   - Aucun bouton inexistant utilisé
+   - Les matériaux peuvent être sélectionnés, ajoutés,
+     déplacés et transférés dans le récipient
+   - Le mélange est distinct de la validation de réaction
+   - Mauvais dosage :
+       "Mauvaise Melange"
+   - Bon dosage :
+       "Reaction reussie"
 ================================================================ */
 
-
-/* ================================================================
-   01 — IDENTITÉ DU MOTEUR
-================================================================ */
-
-(() => {
+(function () {
 
     "use strict";
 
-    const ENGINE_NAME = "FOBAS Civil Engineering Simulation Engine";
-    const ENGINE_VERSION = "1.0.0";
+    /* ============================================================
+       01 — CONFIGURATION GÉNÉRALE
+    ============================================================ */
 
-    const STORAGE_KEY = "FOBAS_CIVIL_ENGINE_STATE";
+    const APP_ID = "FOBAS_CIVIL_ENGINE";
+    const STORAGE_KEY = "FOBAS_CIVIL_STATE";
 
-    window.FOBAS_CIVIL_ENGINE = {
-        name: ENGINE_NAME,
-        version: ENGINE_VERSION,
-        ready: false
-    };
+    /*
+       RÈGLE ABSOLUE :
+       1 SAC DE CIMENT = 42 KG
+    */
+    const CEMENT_BAG_KG = 42;
 
+    /*
+       Tolérance de validation :
+       5 %
+    */
+    const MIX_TOLERANCE = 0.05;
 
-/* ================================================================
-   02 — ÉTAT CENTRAL
-================================================================ */
 
-    const defaultState = {
+    /* ============================================================
+       02 — OUTILS DOM
+    ============================================================ */
 
-        version: ENGINE_VERSION,
+    function $(selector, root) {
 
-        zoom: 1,
+        return (root || document).querySelector(selector);
 
-        activeTool: "select",
-
-        selectedObjectId: null,
-
-        selectedMaterialId: null,
-
-        transferSource: null,
-
-        workspaceObjects: [],
-
-        inventory: {},
-
-        recipient: {
-
-            id: "recipient01",
-
-            name: "Récipient principal",
-
-            capacity: 100,
-
-            unit: "L",
-
-            contents: {},
-
-            totalMass: 0,
-
-            totalVolume: 0,
-
-            mixed: false,
-
-            heated: false,
-
-            reaction: null,
-
-            result: null
-
-        },
-
-        measurement: {
-
-            label: "Aucune mesure",
-
-            value: 0,
-
-            unit: "",
-
-            precision: "—"
-
-        },
-
-        dosage: {
-
-            mixType: "béton",
-
-            cementBags: 1,
-
-            cementKg: 50,
-
-            sandKg: 0,
-
-            gravelKg: 0,
-
-            waterL: 0,
-
-            ratio: null,
-
-            valid: false
-
-        },
-
-        reaction: {
-
-            state: "idle",
-
-            status: "Aucune réaction",
-
-            phase: "—",
-
-            gas: "Non",
-
-            precipitate: "Non",
-
-            color: "—"
-
-        },
-
-        result: {
-
-            state: "idle",
-
-            title: "Aucun résultat",
-
-            message: "Aucune expérience terminée.",
-
-            details: [],
-
-            mixState: "—",
-
-            dosageState: "—",
-
-            reactionState: "—",
-
-            finalState: "—"
-
-        },
-
-        report: {
-
-            generated: false,
-
-            content: ""
-
-        },
-
-        observations: [],
-
-        sessionName: "Laboratoire Génie Civil FOBAS",
-
-        timestamp: Date.now()
-
-    };
-
-
-    let state = loadState() || deepClone(defaultState);
-
-    window.FOBAS_CIVIL_STATE = state;
-
-
-/* ================================================================
-   03 — MATÉRIAUX GÉNIE CIVIL
-================================================================ */
-
-    const MATERIALS = [
-
-        {
-            id: "cement",
-            name: "Ciment",
-            category: "Liants",
-            unit: "kg",
-            density: 1440,
-            color: "#8d9298",
-            icon: "🧱",
-            description: "Liant hydraulique utilisé pour le béton et le mortier."
-        },
-
-        {
-            id: "sand",
-            name: "Sable",
-            category: "Granulats",
-            unit: "kg",
-            density: 1600,
-            color: "#d8b56b",
-            icon: "🏖️",
-            description: "Granulat fin utilisé dans les mortiers et bétons."
-        },
-
-        {
-            id: "fine-sand",
-            name: "Sable fin",
-            category: "Granulats",
-            unit: "kg",
-            density: 1500,
-            color: "#e2c17c",
-            icon: "🏖️",
-            description: "Sable à granulométrie fine."
-        },
-
-        {
-            id: "medium-sand",
-            name: "Sable moyen",
-            category: "Granulats",
-            unit: "kg",
-            density: 1550,
-            color: "#d4ad62",
-            icon: "🏖️",
-            description: "Sable à granulométrie moyenne."
-        },
-
-        {
-            id: "coarse-sand",
-            name: "Sable grossier",
-            category: "Granulats",
-            unit: "kg",
-            density: 1650,
-            color: "#bd954e",
-            icon: "🏖️",
-            description: "Sable à granulométrie grossière."
-        },
-
-        {
-            id: "gravel",
-            name: "Gravier",
-            category: "Granulats",
-            unit: "kg",
-            density: 1500,
-            color: "#747474",
-            icon: "🪨",
-            description: "Granulat grossier destiné principalement au béton."
-        },
-
-        {
-            id: "stone",
-            name: "Pierre",
-            category: "Granulats",
-            unit: "kg",
-            density: 1600,
-            color: "#686868",
-            icon: "🪨",
-            description: "Pierre concassée ou granulat rocheux."
-        },
-
-        {
-            id: "water",
-            name: "Eau",
-            category: "Liquides",
-            unit: "L",
-            density: 1000,
-            color: "#4da6ff",
-            icon: "💧",
-            description: "Eau utilisée pour l'hydratation du ciment."
-        },
-
-        {
-            id: "earth",
-            name: "Terre",
-            category: "Sols",
-            unit: "kg",
-            density: 1500,
-            color: "#8b6240",
-            icon: "🌍",
-            description: "Sol naturel destiné aux études géotechniques."
-        },
-
-        {
-            id: "clay",
-            name: "Argile",
-            category: "Sols",
-            unit: "kg",
-            density: 1700,
-            color: "#a66a4c",
-            icon: "🟤",
-            description: "Sol fin à forte plasticité."
-        },
-
-        {
-            id: "silt",
-            name: "Limon",
-            category: "Sols",
-            unit: "kg",
-            density: 1500,
-            color: "#aa8d68",
-            icon: "🟫",
-            description: "Sol fin intermédiaire entre sable et argile."
-        },
-
-        {
-            id: "steel-bar",
-            name: "Barre d'acier",
-            category: "Acier & Ferraillage",
-            unit: "kg",
-            density: 7850,
-            color: "#626970",
-            icon: "🔩",
-            description: "Acier utilisé pour le ferraillage du béton armé."
-        },
-
-        {
-            id: "steel-wire",
-            name: "Fil d'acier",
-            category: "Acier & Ferraillage",
-            unit: "kg",
-            density: 7850,
-            color: "#777e86",
-            icon: "〰️",
-            description: "Fil d'attache utilisé pour les armatures."
-        },
-
-        {
-            id: "brick",
-            name: "Brique",
-            category: "Maçonnerie",
-            unit: "kg",
-            density: 1800,
-            color: "#b85c42",
-            icon: "🧱",
-            description: "Élément de maçonnerie en terre cuite."
-        },
-
-        {
-            id: "concrete-block",
-            name: "Bloc de béton",
-            category: "Maçonnerie",
-            unit: "kg",
-            density: 1400,
-            color: "#9b9b9b",
-            icon: "▰",
-            description: "Bloc utilisé pour les murs et cloisons."
-        },
-
-        {
-            id: "wood",
-            name: "Bois",
-            category: "Charpente & Coffrage",
-            unit: "kg",
-            density: 600,
-            color: "#9b633c",
-            icon: "🪵",
-            description: "Matériau utilisé notamment pour coffrage et charpente."
-        },
-
-        {
-            id: "glass",
-            name: "Verre",
-            category: "Finition",
-            unit: "kg",
-            density: 2500,
-            color: "#9adcf5",
-            icon: "🪟",
-            description: "Matériau verrier pour applications de construction."
-        },
-
-        {
-            id: "bitumen",
-            name: "Bitume",
-            category: "Routes & Étanchéité",
-            unit: "kg",
-            density: 1050,
-            color: "#222222",
-            icon: "⬛",
-            description: "Liant bitumineux utilisé dans les travaux routiers."
-        }
-
-    ];
-
-    window.FOBAS_CIVIL_MATERIALS = MATERIALS;
-
-
-/* ================================================================
-   04 — ÉQUIPEMENTS
-================================================================ */
-
-    const EQUIPMENT = [
-
-        {
-            id: "balance",
-            name: "Balance",
-            category: "Mesure",
-            icon: "⚖️"
-        },
-
-        {
-            id: "graduated-cylinder",
-            name: "Éprouvette graduée",
-            category: "Mesure",
-            icon: "🧪"
-        },
-
-        {
-            id: "bucket",
-            name: "Seau",
-            category: "Manutention",
-            icon: "🪣"
-        },
-
-        {
-            id: "mixer",
-            name: "Bétonnière",
-            category: "Mélange",
-            icon: "🔄"
-        }
-
-    ];
-
-    window.FOBAS_CIVIL_EQUIPMENT = EQUIPMENT;
-
-
-/* ================================================================
-   05 — UTILITAIRES DOM
-================================================================ */
-
-    const $ = id => document.getElementById(id);
-
-    const $$ = selector =>
-        Array.from(document.querySelectorAll(selector));
-
-
-    function exists(id) {
-        return !!$(id);
     }
 
 
-    function setText(id, value) {
+    function $$(selector, root) {
 
-        const element = $(id);
-
-        if (!element) return;
-
-        element.textContent =
-            value === undefined ||
-            value === null
-                ? ""
-                : String(value);
-    }
-
-
-    function setHTML(id, value) {
-
-        const element = $(id);
-
-        if (!element) return;
-
-        element.innerHTML = value || "";
-    }
-
-
-    function show(id, display = "") {
-
-        const element = $(id);
-
-        if (!element) return;
-
-        element.hidden = false;
-        element.style.display = display;
-    }
-
-
-    function hide(id) {
-
-        const element = $(id);
-
-        if (!element) return;
-
-        element.hidden = true;
-        element.style.display = "none";
-    }
-
-
-    function toggle(id, force) {
-
-        const element = $(id);
-
-        if (!element) return;
-
-        const visible =
-            force !== undefined
-                ? force
-                : element.hidden;
-
-        if (visible) {
-            show(id);
-        } else {
-            hide(id);
-        }
-    }
-
-
-/* ================================================================
-   06 — CLONAGE ÉTAT
-================================================================ */
-
-    function deepClone(value) {
-
-        return JSON.parse(
-            JSON.stringify(value)
+        return Array.from(
+            (root || document).querySelectorAll(selector)
         );
 
     }
 
 
-/* ================================================================
-   07 — SAUVEGARDE
-================================================================ */
+    function byId(id) {
+
+        return document.getElementById(id);
+
+    }
+
+
+    function setText(id, value) {
+
+        const element = byId(id);
+
+        if (element) {
+
+            element.textContent = String(value);
+
+        }
+
+    }
+
+
+    function setHTML(id, value) {
+
+        const element = byId(id);
+
+        if (element) {
+
+            element.innerHTML = String(value);
+
+        }
+
+    }
+
+
+    function number(value, fallback) {
+
+        const n = Number(value);
+
+        return Number.isFinite(n)
+            ? n
+            : (fallback || 0);
+
+    }
+
+
+    function round(value, decimals) {
+
+        const d = Number.isFinite(Number(decimals))
+            ? Number(decimals)
+            : 2;
+
+        const factor = Math.pow(10, d);
+
+        return Math.round(
+            number(value) * factor
+        ) / factor;
+
+    }
+
+
+    function clamp(value, min, max) {
+
+        return Math.max(
+            min,
+            Math.min(max, value)
+        );
+
+    }
+
+
+    /* ============================================================
+       03 — ÉTAT INITIAL
+    ============================================================ */
+
+    const htmlInitialState =
+        window.FOBAS_CIVIL_INITIAL_STATE || {};
+
+    const state =
+        window.FOBAS_CIVIL_STATE ||
+        htmlInitialState;
+
+    window.FOBAS_CIVIL_STATE = state;
+
+
+    state.app = state.app || {};
+
+    state.app.id =
+        state.app.id || APP_ID;
+
+    state.app.zoom =
+        number(state.app.zoom, 1);
+
+
+    state.laboratory =
+        state.laboratory || {};
+
+
+    state.laboratory.selectedMaterial =
+        state.laboratory.selectedMaterial || null;
+
+
+    state.laboratory.selectedEquipment =
+        state.laboratory.selectedEquipment || null;
+
+
+    state.laboratory.workspaceObjects =
+        Array.isArray(
+            state.laboratory.workspaceObjects
+        )
+            ? state.laboratory.workspaceObjects
+            : [];
+
+
+    state.laboratory.recipients =
+        state.laboratory.recipients || {};
+
+
+    if (!state.laboratory.recipients.recipient01) {
+
+        state.laboratory.recipients.recipient01 = {
+
+            id: "recipient01",
+
+            type: "mixing-container",
+
+            state: "empty",
+
+            mixed: false,
+
+            reactionState: "pending",
+
+            components: [],
+
+            totalMassKg: 0,
+
+            totalVolumeL: 0,
+
+            lastAction: null
+
+        };
+
+    }
+
+
+    const recipient =
+        state.laboratory.recipients.recipient01;
+
+
+    recipient.components =
+        Array.isArray(recipient.components)
+            ? recipient.components
+            : [];
+
+
+    state.materials =
+        state.materials || {};
+
+
+    state.equipment =
+        state.equipment || {};
+
+
+    state.dosage =
+        state.dosage || {};
+
+
+    state.reaction =
+        state.reaction || {};
+
+
+    state.result =
+        state.result || {};
+
+
+    state.reports =
+        Array.isArray(state.reports)
+            ? state.reports
+            : [];
+
+
+    /* ============================================================
+       04 — MATÉRIAUX
+    ============================================================ */
+
+    const MATERIALS = {
+
+        cement: {
+            id: "cement",
+            name: "Ciment",
+            category: "beton",
+            unit: "kg",
+            available: 1000,
+            icon: "🧱"
+        },
+
+        sand: {
+            id: "sand",
+            name: "Sable",
+            category: "beton",
+            unit: "kg",
+            available: 1000,
+            icon: "🏖️"
+        },
+
+        gravel: {
+            id: "gravel",
+            name: "Gravier",
+            category: "beton",
+            unit: "kg",
+            available: 1000,
+            icon: "🪨"
+        },
+
+        water: {
+            id: "water",
+            name: "Eau",
+            category: "beton",
+            unit: "L",
+            available: 1000,
+            icon: "💧"
+        },
+
+        "fine-sand": {
+            id: "fine-sand",
+            name: "Sable fin",
+            category: "granulats",
+            unit: "kg",
+            available: 1000,
+            icon: "🏖️"
+        },
+
+        "medium-sand": {
+            id: "medium-sand",
+            name: "Sable moyen",
+            category: "granulats",
+            unit: "kg",
+            available: 1000,
+            icon: "🏖️"
+        },
+
+        "coarse-sand": {
+            id: "coarse-sand",
+            name: "Sable grossier",
+            category: "granulats",
+            unit: "kg",
+            available: 1000,
+            icon: "🪨"
+        },
+
+        stone: {
+            id: "stone",
+            name: "Pierre",
+            category: "granulats",
+            unit: "kg",
+            available: 1000,
+            icon: "🪨"
+        },
+
+        earth: {
+            id: "earth",
+            name: "Terre",
+            category: "sols",
+            unit: "kg",
+            available: 1000,
+            icon: "🌍"
+        },
+
+        clay: {
+            id: "clay",
+            name: "Argile",
+            category: "sols",
+            unit: "kg",
+            available: 1000,
+            icon: "🟤"
+        },
+
+        silt: {
+            id: "silt",
+            name: "Limon",
+            category: "sols",
+            unit: "kg",
+            available: 1000,
+            icon: "🟫"
+        },
+
+        "steel-bar": {
+            id: "steel-bar",
+            name: "Barre d'acier",
+            category: "acier",
+            unit: "kg",
+            available: 1000,
+            icon: "🔩"
+        },
+
+        "steel-wire": {
+            id: "steel-wire",
+            name: "Fil d'acier",
+            category: "acier",
+            unit: "kg",
+            available: 1000,
+            icon: "〰️"
+        },
+
+        brick: {
+            id: "brick",
+            name: "Brique",
+            category: "maconnerie",
+            unit: "unit",
+            available: 1000,
+            icon: "🧱"
+        },
+
+        "concrete-block": {
+            id: "concrete-block",
+            name: "Bloc béton",
+            category: "maconnerie",
+            unit: "unit",
+            available: 1000,
+            icon: "🧱"
+        },
+
+        wood: {
+            id: "wood",
+            name: "Bois",
+            category: "autres",
+            unit: "kg",
+            available: 1000,
+            icon: "🪵"
+        },
+
+        glass: {
+            id: "glass",
+            name: "Verre",
+            category: "autres",
+            unit: "kg",
+            available: 1000,
+            icon: "🪟"
+        },
+
+        bitumen: {
+            id: "bitumen",
+            name: "Bitume",
+            category: "autres",
+            unit: "kg",
+            available: 1000,
+            icon: "⬛"
+        }
+
+    };
+
+
+    Object.keys(MATERIALS).forEach(function (id) {
+
+        if (!state.materials[id]) {
+
+            state.materials[id] =
+                Object.assign({}, MATERIALS[id]);
+
+        }
+
+    });
+
+
+    function getMaterial(id) {
+
+        return (
+            state.materials[id] ||
+            MATERIALS[id] ||
+            null
+        );
+
+    }
+
+
+    /* ============================================================
+       05 — RECETTES DE DOSAGE
+       ------------------------------------------------------------
+       1 SAC = 42 KG
+    ============================================================ */
+
+    const DOSAGE = {
+
+        mortier: {
+
+            name: "Mortier",
+
+            cementPerBag: 42,
+
+            sandPerBag: 126,
+
+            gravelPerBag: 0,
+
+            waterPerBag: 21,
+
+            ratio: "1 : 3"
+
+        },
+
+        beton: {
+
+            name: "Béton",
+
+            cementPerBag: 42,
+
+            sandPerBag: 84,
+
+            gravelPerBag: 126,
+
+            waterPerBag: 21,
+
+            ratio: "1 : 2 : 3"
+
+        },
+
+        "beton-arme": {
+
+            name: "Béton armé",
+
+            cementPerBag: 42,
+
+            sandPerBag: 84,
+
+            gravelPerBag: 126,
+
+            waterPerBag: 21,
+
+            ratio: "1 : 2 : 3"
+
+        }
+
+    };
+
+
+    /* ============================================================
+       06 — SAUVEGARDE
+    ============================================================ */
 
     function saveState() {
-
-        state.timestamp = Date.now();
-
-        window.FOBAS_CIVIL_STATE = state;
 
         try {
 
@@ -551,13 +516,45 @@
         } catch (error) {
 
             console.warn(
-                "FOBAS Civil: sauvegarde impossible",
+                "FOBAS Civil : sauvegarde impossible",
                 error
             );
 
         }
 
-        updateFooterState();
+    }
+
+
+    function mergeObjects(target, source) {
+
+        Object.keys(source || {}).forEach(
+            function (key) {
+
+                const sourceValue =
+                    source[key];
+
+                if (
+                    sourceValue &&
+                    typeof sourceValue === "object" &&
+                    !Array.isArray(sourceValue) &&
+                    target[key] &&
+                    typeof target[key] === "object" &&
+                    !Array.isArray(target[key])
+                ) {
+
+                    mergeObjects(
+                        target[key],
+                        sourceValue
+                    );
+
+                } else {
+
+                    target[key] = sourceValue;
+
+                }
+
+            }
+        );
 
     }
 
@@ -571,338 +568,207 @@
                     STORAGE_KEY
                 );
 
-            if (!raw) return null;
+            if (!raw) return;
 
             const saved =
                 JSON.parse(raw);
 
-            return mergeState(
-                deepClone(defaultState),
+            if (
+                !saved ||
+                !saved.app ||
+                saved.app.id !== APP_ID
+            ) {
+
+                return;
+
+            }
+
+            mergeObjects(
+                state,
                 saved
             );
 
         } catch (error) {
 
             console.warn(
-                "FOBAS Civil: restauration impossible",
+                "FOBAS Civil : état sauvegardé invalide",
                 error
             );
 
-            return null;
         }
 
     }
 
 
-    function mergeState(base, source) {
-
-        if (!source || typeof source !== "object") {
-            return base;
-        }
-
-        Object.keys(source).forEach(key => {
-
-            if (
-                source[key] &&
-                typeof source[key] === "object" &&
-                !Array.isArray(source[key]) &&
-                base[key] &&
-                typeof base[key] === "object"
-            ) {
-
-                base[key] =
-                    mergeState(
-                        base[key],
-                        source[key]
-                    );
-
-            } else {
-
-                base[key] = source[key];
-
-            }
-
-        });
-
-        return base;
-
-    }
+    loadState();
 
 
-/* ================================================================
-   08 — NOTIFICATION
-================================================================ */
+    /* ============================================================
+       07 — CORRECTION AUTOMATIQUE DU DOSAGE
+       ------------------------------------------------------------
+       Si un ancien état contient encore 50 KG par sac,
+       le moteur remet automatiquement 42 KG.
+    ============================================================ */
 
-    function notify(
-        message,
-        type = "info"
+    if (
+        state.dosage &&
+        number(state.dosage.cementBagKg, 42) !==
+        CEMENT_BAG_KG
     ) {
 
-        const stack =
-            $("chemToastStack") ||
-            $("civilToastStack");
+        state.dosage.cementBagKg =
+            CEMENT_BAG_KG;
 
-        const live =
-            $("chemLiveRegion") ||
-            $("civilLiveRegion");
+    }
 
-        if (live) {
-            live.textContent = message;
+
+    /* ============================================================
+       08 — NOTIFICATION
+    ============================================================ */
+
+    function notify(message, type) {
+
+        const box =
+            byId("civilNotification");
+
+        const messageBox =
+            byId("civilNotificationMessage");
+
+        const icon =
+            byId("civilNotificationIcon");
+
+
+        if (messageBox) {
+
+            messageBox.textContent =
+                message;
+
         }
 
-        if (!stack) {
+
+        if (icon) {
+
+            icon.textContent =
+                type === "error"
+                    ? "⚠"
+                    : type === "warning"
+                        ? "!"
+                        : "✓";
+
+        }
+
+
+        if (!box) {
 
             console.log(
-                `[FOBAS CIVIL ${type}] ${message}`
+                "FOBAS Civil:",
+                message
             );
 
             return;
+
         }
 
-        const toast =
-            document.createElement("div");
 
-        toast.className =
-            `civil-toast civil-toast-${type}`;
+        box.hidden = false;
 
-        toast.textContent = message;
 
-        stack.appendChild(toast);
+        clearTimeout(
+            box.__fobasTimer
+        );
 
-        setTimeout(() => {
 
-            toast.classList.add(
-                "civil-toast-hide"
+        box.__fobasTimer =
+            setTimeout(
+                function () {
+
+                    box.hidden = true;
+
+                },
+                2800
             );
 
-            setTimeout(() => {
-                toast.remove();
-            }, 350);
-
-        }, 3000);
-
     }
 
 
-/* ================================================================
-   09 — OBSERVATIONS
-================================================================ */
+    /* ============================================================
+       09 — NAVIGATION DES PANNEAUX
+    ============================================================ */
 
-    function addObservation(message) {
+    function activatePanel(panelId) {
 
-        state.observations.push({
-            message,
-            time: new Date().toLocaleTimeString()
-        });
+        $$("[data-panel-content]")
+            .forEach(function (panel) {
 
-        if (
-            state.observations.length > 100
-        ) {
-            state.observations.shift();
-        }
+                const active =
+                    panel.id === panelId;
 
-        renderObservationLog();
+                panel.hidden =
+                    !active;
 
-    }
-
-
-    function renderObservationLog() {
-
-        const log =
-            $("observationLog");
-
-        if (!log) return;
-
-        if (!state.observations.length) {
-
-            log.innerHTML =
-                "<div>Aucune observation.</div>";
-
-            return;
-        }
-
-        log.innerHTML =
-            state.observations
-                .slice()
-                .reverse()
-                .map(item => `
-                    <div class="civil-observation">
-                        <span>${escapeHTML(item.time)}</span>
-                        <strong>${escapeHTML(item.message)}</strong>
-                    </div>
-                `)
-                .join("");
-
-    }
-
-
-/* ================================================================
-   10 — ÉCHAPPEMENT HTML
-================================================================ */
-
-    function escapeHTML(value) {
-
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-
-    }
-
-
-/* ================================================================
-   11 — BIBLIOTHÈQUE DES MATÉRIAUX
-================================================================ */
-
-    function renderMaterialLibrary() {
-
-        const container =
-            $("materialsLibrary");
-
-        if (!container) return;
-
-        const search =
-            (
-                $("materialSearch")?.value ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-        const category =
-            state.materialCategory ||
-            "all";
-
-        const materials =
-            MATERIALS.filter(material => {
-
-                const matchesSearch =
-                    !search ||
-                    material.name
-                        .toLowerCase()
-                        .includes(search) ||
-                    material.category
-                        .toLowerCase()
-                        .includes(search);
-
-                const matchesCategory =
-                    category === "all" ||
-                    material.category === category;
-
-                return (
-                    matchesSearch &&
-                    matchesCategory
+                panel.classList.toggle(
+                    "active",
+                    active
                 );
 
             });
 
-        container.innerHTML =
-            materials.map(material => `
 
-                <article
-                    class="civil-material-card"
-                    draggable="true"
-                    data-material-id="${material.id}"
-                    title="${escapeHTML(material.description)}"
-                >
+        $$("[data-panel]")
+            .forEach(function (button) {
 
-                    <div class="civil-material-icon">
-                        ${material.icon}
-                    </div>
+                button.classList.toggle(
+                    "active",
+                    button.getAttribute(
+                        "data-panel"
+                    ) === panelId
+                );
 
-                    <div class="civil-material-content">
+            });
 
-                        <strong>
-                            ${escapeHTML(material.name)}
-                        </strong>
 
-                        <span>
-                            ${escapeHTML(material.category)}
-                        </span>
+        state.activePanel =
+            panelId;
 
-                        <small>
-                            ${escapeHTML(material.unit)}
-                        </small>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        class="civil-material-add"
-                        data-add-material="${material.id}"
-                    >
-                        Ajouter
-                    </button>
-
-                </article>
-
-            `).join("");
-
-        bindMaterialCards();
-
-        updateMaterialCount(
-            materials.length
-        );
+        saveState();
 
     }
 
 
-    function renderMaterialCategories() {
+    function bindNavigation() {
 
-        const container =
-            $("materialCategories");
+        $$("[data-panel]")
+            .forEach(function (button) {
 
-        if (!container) return;
+                if (
+                    button.dataset.fobasCivilNavigation
+                ) {
 
-        const categories = [
-            "all",
-            ...new Set(
-                MATERIALS.map(
-                    material => material.category
-                )
-            )
-        ];
+                    return;
 
-        container.innerHTML =
-            categories.map(category => {
+                }
 
-                const label =
-                    category === "all"
-                        ? "Tous"
-                        : category;
 
-                const active =
-                    (
-                        state.materialCategory ||
-                        "all"
-                    ) === category;
+                button.dataset.fobasCivilNavigation =
+                    "1";
 
-                return `
-                    <button
-                        type="button"
-                        class="civil-category-button ${active ? "active" : ""}"
-                        data-material-category="${escapeHTML(category)}"
-                    >
-                        ${escapeHTML(label)}
-                    </button>
-                `;
-
-            }).join("");
-
-        $$("#materialCategories [data-material-category]")
-            .forEach(button => {
 
                 button.addEventListener(
                     "click",
-                    () => {
+                    function () {
 
-                        state.materialCategory =
-                            button.dataset.materialCategory;
+                        const panelId =
+                            button.getAttribute(
+                                "data-panel"
+                            );
 
-                        renderMaterialCategories();
-                        renderMaterialLibrary();
+                        if (panelId) {
+
+                            activatePanel(
+                                panelId
+                            );
+
+                        }
 
                     }
                 );
@@ -912,204 +778,174 @@
     }
 
 
-    function updateMaterialCount(count) {
+    /* ============================================================
+       10 — OBJETS MATÉRIAUX DANS LA SCÈNE
+    ============================================================ */
 
-        setText(
-            "materialCount",
-            `${count} matériau${count > 1 ? "x" : ""}`
+    function createObjectId(materialId) {
+
+        return (
+            "civil-object-" +
+            materialId +
+            "-" +
+            Date.now() +
+            "-" +
+            Math.floor(
+                Math.random() * 100000
+            )
         );
 
     }
 
 
-/* ================================================================
-   12 — AJOUT MATÉRIAU À L'INVENTAIRE
-================================================================ */
-
-    function addMaterial(materialId) {
+    function addWorkspaceMaterial(materialId) {
 
         const material =
             getMaterial(materialId);
 
-        if (!material) return;
+        if (!material) {
 
-        if (
-            !state.inventory[materialId]
-        ) {
-
-            state.inventory[materialId] = {
-                id: material.id,
-                name: material.name,
-                quantity: 1,
-                unit: material.unit
-            };
-
-        } else {
-
-            state.inventory[materialId].quantity += 1;
-
-        }
-
-        addWorkspaceMaterial(
-            materialId
-        );
-
-        addObservation(
-            `${material.name} ajouté au laboratoire.`
-        );
-
-        notify(
-            `${material.name} ajouté au laboratoire.`,
-            "success"
-        );
-
-        renderInventory();
-        saveState();
-
-    }
-
-
-/* ================================================================
-   13 — RECHERCHE MATÉRIAU
-================================================================ */
-
-    function getMaterial(id) {
-
-        return MATERIALS.find(
-            material =>
-                material.id === id
-        );
-
-    }
-
-
-/* ================================================================
-   14 — INVENTAIRE
-================================================================ */
-
-    function renderInventory() {
-
-        const list =
-            $("inventoryList");
-
-        if (!list) return;
-
-        const entries =
-            Object.values(
-                state.inventory
+            notify(
+                "Matériau introuvable.",
+                "error"
             );
 
-        setText(
-            "inventoryCount",
-            entries.length
-        );
+            return null;
 
-        if (!entries.length) {
-
-            list.innerHTML =
-                "<div>Aucun matériau ajouté.</div>";
-
-            return;
         }
 
-        list.innerHTML =
-            entries.map(item => `
 
-                <div
-                    class="civil-inventory-item"
-                    data-inventory-material="${item.id}"
-                >
+        const scene =
+            byId("civilLaboratoryScene");
 
-                    <strong>
-                        ${escapeHTML(item.name)}
-                    </strong>
+        if (!scene) {
 
-                    <span>
-                        ${formatNumber(item.quantity)}
-                        ${escapeHTML(item.unit)}
-                    </span>
+            notify(
+                "Scène du laboratoire introuvable.",
+                "error"
+            );
 
-                </div>
+            return null;
 
-            `).join("");
-
-    }
+        }
 
 
-/* ================================================================
-   15 — OBJET DU LABORATOIRE
-================================================================ */
+        const sceneWidth =
+            Math.max(
+                scene.clientWidth || 700,
+                300
+            );
 
-    function addWorkspaceMaterial(
-        materialId,
-        x = null,
-        y = null
-    ) {
 
-        const material =
-            getMaterial(materialId);
+        const sceneHeight =
+            Math.max(
+                scene.clientHeight || 450,
+                300
+            );
 
-        if (!material) return null;
-
-        const id =
-            `civil-${materialId}-${Date.now()}-${Math.random()
-                .toString(36)
-                .slice(2, 7)}`;
 
         const object = {
 
-            id,
+            id: createObjectId(
+                materialId
+            ),
 
-            type: "material",
-
-            materialId,
+            materialId: materialId,
 
             name: material.name,
 
-            quantity: 1,
-
             unit: material.unit,
 
-            x:
-                x ??
-                120 +
-                Math.random() * 350,
+            icon: material.icon || "📦",
 
-            y:
-                y ??
-                100 +
-                Math.random() * 250,
+            x: Math.round(
+                clamp(
+                    80 +
+                    Math.random() *
+                    Math.max(
+                        sceneWidth - 160,
+                        120
+                    ),
+                    50,
+                    Math.max(
+                        sceneWidth - 50,
+                        100
+                    )
+                )
+            ),
 
-            createdAt: Date.now()
+            y: Math.round(
+                clamp(
+                    100 +
+                    Math.random() *
+                    Math.max(
+                        sceneHeight - 180,
+                        120
+                    ),
+                    70,
+                    Math.max(
+                        sceneHeight - 60,
+                        100
+                    )
+                )
+            ),
+
+            createdAt:
+                new Date().toISOString()
 
         };
 
-        state.workspaceObjects.push(
-            object
-        );
+
+        state.laboratory
+            .workspaceObjects
+            .push(object);
+
+
+        state.laboratory
+            .selectedMaterial =
+            materialId;
+
 
         renderWorkspaceObjects();
+
+        saveState();
+
+
+        notify(
+            material.name +
+            " ajouté au laboratoire.",
+            "success"
+        );
+
 
         return object;
 
     }
 
 
-/* ================================================================
-   16 — RENDU WORKSPACE
-================================================================ */
+    /* ============================================================
+       11 — RENDU DES OBJETS
+    ============================================================ */
 
     function renderWorkspaceObjects() {
 
-        const workspace =
-            $("workspaceObjects");
+        const scene =
+            byId("civilLaboratoryScene");
 
-        if (!workspace) return;
+        if (!scene) return;
 
-        workspace.innerHTML = "";
 
-        state.workspaceObjects.forEach(
-            object => {
+        $$(".fobas-civil-workspace-material", scene)
+            .forEach(function (element) {
+
+                element.remove();
+
+            });
+
+
+        state.laboratory
+            .workspaceObjects
+            .forEach(function (object) {
 
                 const material =
                     getMaterial(
@@ -1118,258 +954,286 @@
 
                 if (!material) return;
 
+
                 const element =
-                    document.createElement("div");
+                    document.createElement(
+                        "button"
+                    );
+
+
+                element.type =
+                    "button";
+
 
                 element.className =
-                    "civil-workspace-material";
+                    "fobas-civil-workspace-material";
+
 
                 element.dataset.objectId =
                     object.id;
 
-                element.draggable = true;
+
+                element.dataset.materialId =
+                    object.materialId;
+
+
+                element.draggable =
+                    true;
+
+
+                element.style.position =
+                    "absolute";
+
 
                 element.style.left =
-                    `${object.x}px`;
+                    number(object.x, 100) +
+                    "px";
+
 
                 element.style.top =
-                    `${object.y}px`;
+                    number(object.y, 100) +
+                    "px";
 
-                element.innerHTML = `
 
-                    <div
-                        class="civil-object-icon"
-                        style="background:${material.color}"
-                    >
-                        ${material.icon}
-                    </div>
+                element.style.zIndex =
+                    "40";
 
-                    <div class="civil-object-label">
-                        ${escapeHTML(material.name)}
-                    </div>
 
-                    <small>
-                        ${formatNumber(object.quantity)}
-                        ${escapeHTML(object.unit)}
-                    </small>
+                element.innerHTML =
+                    `
+                    <span class="fobas-civil-object-icon">
+                        ${material.icon || "📦"}
+                    </span>
+                    <span class="fobas-civil-object-name">
+                        ${material.name}
+                    </span>
+                    `;
 
-                `;
 
                 element.addEventListener(
                     "click",
-                    event => {
+                    function (event) {
 
                         event.stopPropagation();
 
-                        selectObject(
+                        openTransferForObject(
                             object.id
                         );
 
                     }
                 );
+
 
                 element.addEventListener(
                     "dragstart",
-                    event => {
+                    function (event) {
 
                         event.dataTransfer.setData(
-                            "text/civil-object-id",
-                            object.id
+                            "text/plain",
+                            JSON.stringify({
+                                type: "workspace-material",
+                                objectId: object.id,
+                                materialId:
+                                    object.materialId
+                            })
                         );
 
-                        state.selectedObjectId =
-                            object.id;
+
+                        element.classList.add(
+                            "material-dragging"
+                        );
 
                     }
                 );
 
-                workspace.appendChild(
+
+                element.addEventListener(
+                    "dragend",
+                    function () {
+
+                        element.classList.remove(
+                            "material-dragging"
+                        );
+
+                    }
+                );
+
+
+                scene.appendChild(
                     element
                 );
 
+            });
+
+    }
+
+
+    /* ============================================================
+       12 — SÉLECTION DES CARTES MATÉRIAUX
+       ------------------------------------------------------------
+       VRAI HTML :
+       .civil-material-card[data-material-id]
+    ============================================================ */
+
+    function bindMaterialCards() {
+
+        $(
+            ".civil-material-card[data-material-id]"
+        );
+
+
+        $$(
+            ".civil-material-card[data-material-id]"
+        )
+        .forEach(function (card) {
+
+            if (
+                card.dataset.fobasCivilBound === "1"
+            ) {
+
+                return;
+
             }
-        );
+
+
+            card.dataset.fobasCivilBound =
+                "1";
+
+
+            card.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+
+                    const materialId =
+                        card.getAttribute(
+                            "data-material-id"
+                        );
+
+
+                    if (!materialId) {
+
+                        return;
+
+                    }
+
+
+                    const material =
+                        getMaterial(
+                            materialId
+                        );
+
+
+                    if (!material) {
+
+                        notify(
+                            "Matériau introuvable.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    state.laboratory
+                        .selectedMaterial =
+                        materialId;
+
+
+                    state.selectedMaterialId =
+                        materialId;
+
+
+                    /*
+                       Le clic crée réellement
+                       le matériau dans la scène.
+                    */
+                    addWorkspaceMaterial(
+                        materialId
+                    );
+
+
+                    $$(".civil-material-card")
+                        .forEach(function (item) {
+
+                            item.classList.remove(
+                                "material-selected"
+                            );
+
+                        });
+
+
+                    card.classList.add(
+                        "material-selected"
+                    );
+
+
+                    setText(
+                        "laboratoryDropMessage",
+                        material.name +
+                        " ajouté au laboratoire."
+                    );
+
+
+                    activatePanel(
+                        "laboratoryPanel"
+                    );
+
+
+                    saveState();
+
+                }
+            );
+
+
+            card.addEventListener(
+                "dragstart",
+                function (event) {
+
+                    const materialId =
+                        card.getAttribute(
+                            "data-material-id"
+                        );
+
+
+                    if (!materialId) return;
+
+
+                    event.dataTransfer.setData(
+                        "text/plain",
+                        JSON.stringify({
+
+                            type: "material",
+
+                            materialId:
+                                materialId
+
+                        })
+                    );
+
+
+                    event.dataTransfer.effectAllowed =
+                        "copy";
+
+                }
+            );
+
+        });
 
     }
 
 
-/* ================================================================
-   17 — SÉLECTION OBJET
-================================================================ */
-
-    function selectObject(id) {
-
-        state.selectedObjectId = id;
-
-        const object =
-            state.workspaceObjects.find(
-                item => item.id === id
-            );
-
-        if (!object) return;
-
-        const material =
-            getMaterial(
-                object.materialId
-            );
-
-        setText(
-            "selectedObjectType",
-            material?.name ||
-            object.name
-        );
-
-        setText(
-            "propName",
-            material?.name ||
-            object.name
-        );
-
-        setText(
-            "propState",
-            "Disponible"
-        );
-
-        setText(
-            "propTemperature",
-            "Ambiante"
-        );
-
-        setText(
-            "propMass",
-            `${formatNumber(object.quantity)} ${object.unit}`
-        );
-
-        setText(
-            "propVolume",
-            calculateObjectVolume(
-                object
-            ).toFixed(3) +
-            " m³"
-        );
-
-        setText(
-            "propDensity",
-            material?.density
-                ? `${material.density} kg/m³`
-                : "—"
-        );
-
-        setText(
-            "propPH",
-            material?.id === "water"
-                ? "7"
-                : "—"
-        );
-
-        setText(
-            "propColor",
-            material?.color ||
-            "—"
-        );
-
-        renderComposition();
-
-    }
-
-
-/* ================================================================
-   18 — VOLUME OBJET
-================================================================ */
-
-    function calculateObjectVolume(
-        object
-    ) {
-
-        const material =
-            getMaterial(
-                object.materialId
-            );
-
-        if (!material?.density) {
-            return 0;
-        }
-
-        return (
-            Number(object.quantity || 0) /
-            material.density
-        );
-
-    }
-
-
-/* ================================================================
-   19 — COMPOSITION DU RÉCIPIENT
-================================================================ */
-
-    function renderComposition() {
-
-        const recipient =
-            state.recipient;
-
-        const entries =
-            Object.values(
-                recipient.contents
-            );
-
-        const total =
-            entries.reduce(
-                (sum, item) =>
-                    sum +
-                    Number(item.quantity || 0),
-                0
-            );
-
-        setText(
-            "compositionTotal",
-            `${formatNumber(total)} unités`
-        );
-
-        const list =
-            $("compositionList");
-
-        if (!list) return;
-
-        if (!entries.length) {
-
-            list.innerHTML =
-                "<div>Récipient vide.</div>";
-
-            updateRecipientStatus();
-
-            return;
-        }
-
-        list.innerHTML =
-            entries.map(item => `
-
-                <div class="civil-composition-item">
-
-                    <strong>
-                        ${escapeHTML(item.name)}
-                    </strong>
-
-                    <span>
-                        ${formatNumber(item.quantity)}
-                        ${escapeHTML(item.unit)}
-                    </span>
-
-                </div>
-
-            `).join("");
-
-        updateRecipientStatus();
-
-    }
-
-
-/* ================================================================
-   20 — TRANSFERT MATÉRIAU
-================================================================ */
+    /* ============================================================
+       13 — MODAL DE TRANSFERT
+    ============================================================ */
 
     function openTransferModal(
         materialId,
-        sourceObject = null
+        objectId
     ) {
 
         const material =
@@ -1377,97 +1241,112 @@
 
         if (!material) return;
 
-        state.transferSource = {
-            materialId,
-            objectId:
-                sourceObject?.id ||
-                null,
-            available:
-                sourceObject
-                    ? Number(
-                        sourceObject.quantity
-                    )
-                    : Number(
-                        state.inventory[materialId]
-                            ?.quantity || 0
-                    )
-        };
 
-        setText(
-            "transferModalTitle",
-            "Transfert de matériau"
-        );
+        const modal =
+            byId("transferModal");
 
-        setText(
-            "transferMaterialName",
-            material.name
-        );
 
-        setText(
-            "transferSourceName",
-            material.name
-        );
+        if (!modal) {
 
-        setText(
-            "transferSourceAmount",
-            `${formatNumber(
-                state.transferSource.available
-            )} ${material.unit}`
-        );
+            transferMaterial(
+                materialId,
+                1,
+                material.unit,
+                objectId
+            );
 
-        setText(
-            "transferTarget",
-            state.recipient.name
-        );
+            return;
+
+        }
+
+
+        const name =
+            byId("transferMaterialName");
+
 
         const input =
-            $("transferAmount");
+            byId("transferQuantityInput");
 
-        const range =
-            $("transferRange");
 
-        const max =
-            Math.max(
-                0,
-                state.transferSource.available
-            );
+        const unit =
+            byId("transferUnitSelect");
+
+
+        if (name) {
+
+            name.textContent =
+                material.name;
+
+        }
+
 
         if (input) {
 
             input.value =
-                max > 0
-                    ? Math.min(
-                        1,
-                        max
-                    )
-                    : 0;
+                "1";
 
-            input.max = max;
+            input.min =
+                "0.01";
 
         }
 
-        if (range) {
 
-            range.min = 0;
-            range.max = max;
-            range.value =
-                max > 0
-                    ? Math.min(
-                        1,
-                        max
-                    )
-                    : 0;
+        if (unit) {
+
+            unit.innerHTML = "";
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                material.unit;
+
+            option.textContent =
+                material.unit;
+
+            unit.appendChild(
+                option
+            );
 
         }
 
-        setText(
-            "transferMaxLabel",
-            `Maximum : ${formatNumber(max)} ${material.unit}`
-        );
 
-        show(
-            "transferModal",
-            "flex"
+        modal.hidden =
+            false;
+
+
+        modal.dataset.materialId =
+            materialId;
+
+
+        modal.dataset.objectId =
+            objectId || "";
+
+    }
+
+
+    function openTransferForObject(
+        objectId
+    ) {
+
+        const object =
+            state.laboratory
+                .workspaceObjects
+                .find(function (item) {
+
+                    return item.id === objectId;
+
+                });
+
+
+        if (!object) return;
+
+
+        openTransferModal(
+            object.materialId,
+            object.id
         );
 
     }
@@ -1475,2256 +1354,2247 @@
 
     function closeTransferModal() {
 
-        hide("transferModal");
+        const modal =
+            byId("transferModal");
 
-        state.transferSource = null;
+        if (modal) {
+
+            modal.hidden =
+                true;
+
+        }
 
     }
 
 
-    function confirmTransfer() {
+    function setupTransferModal() {
 
-        const source =
-            state.transferSource;
+        const modal =
+            byId("transferModal");
 
-        if (!source) {
 
-            notify(
-                "Aucun matériau sélectionné.",
-                "warning"
-            );
+        if (!modal) return;
 
-            return;
-        }
 
-        const material =
-            getMaterial(
-                source.materialId
-            );
+        const confirm =
+            byId("confirmTransferBtn");
 
-        if (!material) return;
 
-        const input =
-            $("transferAmount");
+        if (
+            confirm &&
+            !confirm.dataset.fobasCivilBound
+        ) {
 
-        let amount =
-            Number(
-                input?.value || 0
-            );
+            confirm.dataset.fobasCivilBound =
+                "1";
 
-        amount =
-            Math.max(
-                0,
-                Math.min(
-                    amount,
-                    source.available
-                )
-            );
 
-        if (amount <= 0) {
+            confirm.addEventListener(
+                "click",
+                function () {
 
-            notify(
-                "La quantité doit être supérieure à zéro.",
-                "warning"
-            );
+                    const materialId =
+                        modal.dataset.materialId;
 
-            return;
-        }
 
-        transferMaterialToRecipient(
-            material.id,
-            amount
-        );
+                    const objectId =
+                        modal.dataset.objectId ||
+                        null;
 
-        if (source.objectId) {
 
-            const object =
-                state.workspaceObjects.find(
-                    item =>
-                        item.id ===
-                        source.objectId
-                );
-
-            if (object) {
-
-                object.quantity -= amount;
-
-                if (object.quantity <= 0) {
-
-                    state.workspaceObjects =
-                        state.workspaceObjects.filter(
-                            item =>
-                                item.id !==
-                                source.objectId
+                    const input =
+                        byId(
+                            "transferQuantityInput"
                         );
 
-                }
 
-            }
-
-        } else {
-
-            const inventory =
-                state.inventory[
-                    material.id
-                ];
-
-            if (inventory) {
-
-                inventory.quantity -= amount;
-
-                if (
-                    inventory.quantity <= 0
-                ) {
-
-                    delete state.inventory[
-                        material.id
-                    ];
-
-                }
-
-            }
-
-        }
-
-        closeTransferModal();
-
-        renderWorkspaceObjects();
-        renderInventory();
-        renderComposition();
-
-        addObservation(
-            `${formatNumber(amount)} ${material.unit} de ${material.name} transféré vers ${state.recipient.name}.`
-        );
-
-        notify(
-            `${material.name} transféré avec succès.`,
-            "success"
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   21 — TRANSFERT DIRECT
-================================================================ */
-
-    function transferMaterialToRecipient(
-        materialId,
-        amount
-    ) {
-
-        const material =
-            getMaterial(materialId);
-
-        if (!material) return false;
-
-        if (
-            !state.recipient.contents[
-                materialId
-            ]
-        ) {
-
-            state.recipient.contents[
-                materialId
-            ] = {
-
-                id: material.id,
-
-                name: material.name,
-
-                quantity: 0,
-
-                unit: material.unit,
-
-                density: material.density
-
-            };
-
-        }
-
-        state.recipient.contents[
-            materialId
-        ].quantity +=
-            Number(amount);
-
-        state.recipient.totalMass =
-            calculateRecipientMass();
-
-        state.recipient.totalVolume =
-            calculateRecipientVolume();
-
-        return true;
-
-    }
-
-
-/* ================================================================
-   22 — MASSE RÉCIPIENT
-================================================================ */
-
-    function calculateRecipientMass() {
-
-        return Object.values(
-            state.recipient.contents
-        ).reduce(
-            (sum, item) =>
-                sum +
-                Number(item.quantity || 0),
-            0
-        );
-
-    }
-
-
-/* ================================================================
-   23 — VOLUME RÉCIPIENT
-================================================================ */
-
-    function calculateRecipientVolume() {
-
-        return Object.values(
-            state.recipient.contents
-        ).reduce(
-            (sum, item) => {
-
-                const material =
-                    getMaterial(
-                        item.id
-                    );
-
-                if (!material?.density) {
-                    return sum;
-                }
-
-                return sum +
-                    (
-                        Number(item.quantity || 0) /
-                        material.density
-                    );
-
-            },
-            0
-        );
-
-    }
-
-
-/* ================================================================
-   24 — ÉTAT RÉCIPIENT
-================================================================ */
-
-    function updateRecipientStatus() {
-
-        const recipient =
-            state.recipient;
-
-        const entries =
-            Object.values(
-                recipient.contents
-            );
-
-        setText(
-            "statusObjects",
-            entries.length
-        );
-
-        setText(
-            "statusMass",
-            `${formatNumber(
-                recipient.totalMass
-            )} kg`
-        );
-
-        setText(
-            "statusVolume",
-            `${formatNumber(
-                recipient.totalVolume * 1000
-            )} L`
-        );
-
-        setText(
-            "statusTemperature",
-            recipient.heated
-                ? "Élevée"
-                : "Ambiante"
-        );
-
-        setText(
-            "statusPH",
-            calculateMixturePH()
-        );
-
-    }
-
-
-/* ================================================================
-   25 — PH SIMPLE
-================================================================ */
-
-    function calculateMixturePH() {
-
-        const contents =
-            state.recipient.contents;
-
-        const hasWater =
-            !!contents.water;
-
-        const hasCement =
-            !!contents.cement;
-
-        if (
-            !hasWater &&
-            !hasCement
-        ) {
-            return "—";
-        }
-
-        if (
-            hasWater &&
-            Object.keys(contents).length === 1
-        ) {
-            return "7";
-        }
-
-        if (hasCement) {
-            return "≈ 12–13";
-        }
-
-        return "≈ 7";
-
-    }
-
-
-/* ================================================================
-   26 — MESURE
-================================================================ */
-
-    function measureRecipient() {
-
-        const recipient =
-            state.recipient;
-
-        const mass =
-            calculateRecipientMass();
-
-        const volume =
-            calculateRecipientVolume();
-
-        state.measurement = {
-
-            label: "Masse du récipient",
-
-            value: mass,
-
-            unit: "kg",
-
-            precision: "± 0,01 kg"
-
-        };
-
-        if (mass <= 0) {
-
-            state.measurement = {
-
-                label: "Récipient vide",
-
-                value: 0,
-
-                unit: "kg",
-
-                precision: "—"
-
-            };
-
-        }
-
-        setText(
-            "measurementLabel",
-            state.measurement.label
-        );
-
-        setText(
-            "measurementValue",
-            formatNumber(
-                state.measurement.value
-            )
-        );
-
-        setText(
-            "measurementPrecision",
-            state.measurement.precision
-        );
-
-        show(
-            "measurementModal",
-            "flex"
-        );
-
-        setText(
-            "instrumentScreenLabel",
-            "Volume"
-        );
-
-        setText(
-            "instrumentScreenValue",
-            formatNumber(
-                volume * 1000
-            )
-        );
-
-        setText(
-            "instrumentScreenUnit",
-            "L"
-        );
-
-        addObservation(
-            `Mesure : ${formatNumber(mass)} kg ; ${formatNumber(volume * 1000)} L.`
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   27 — CALCUL DOSAGE
-================================================================ */
-
-    function calculateDosage() {
-
-        const bagsInput =
-            $("cementBagsInput");
-
-        const mixTypeSelect =
-            $("mixTypeSelect");
-
-        let bags =
-            Number(
-                bagsInput?.value || 1
-            );
-
-        bags =
-            Math.max(
-                1,
-                bags
-            );
-
-        const type =
-            (
-                mixTypeSelect?.value ||
-                "béton"
-            )
-            .toLowerCase();
-
-        const cementKg =
-            bags * 50;
-
-        let sandRatio;
-        let gravelRatio;
-        let waterRatio;
-
-        if (
-            type.includes("mortier")
-        ) {
-
-            /*
-             * Mortier courant :
-             * 1 volume ciment
-             * 3 volumes sable
-             *
-             * Pour une approximation pratique
-             * par masse :
-             * sable ≈ 150 kg / sac
-             * eau ≈ 25 L / sac
-             */
-
-            sandRatio = 150;
-            gravelRatio = 0;
-            waterRatio = 25;
-
-        } else {
-
-            /*
-             * Béton courant :
-             *
-             * 1 sac ciment de 50 kg
-             * ≈ 100 kg sable
-             * ≈ 150 kg gravier
-             * ≈ 25 L eau
-             *
-             * Les valeurs sont des valeurs
-             * pratiques de simulation.
-             */
-
-            sandRatio = 100;
-            gravelRatio = 150;
-            waterRatio = 25;
-
-        }
-
-        const sandKg =
-            bags * sandRatio;
-
-        const gravelKg =
-            bags * gravelRatio;
-
-        const waterL =
-            bags * waterRatio;
-
-        state.dosage = {
-
-            mixType:
-                type.includes("mortier")
-                    ? "mortier"
-                    : "béton",
-
-            cementBags:
-                bags,
-
-            cementKg,
-
-            sandKg,
-
-            gravelKg,
-
-            waterL,
-
-            ratio:
-                type.includes("mortier")
-                    ? "1 : 3"
-                    : "1 : 2 : 3",
-
-            valid: true
-
-        };
-
-        setText(
-            "dosageCement",
-            `${formatNumber(cementKg)} kg`
-        );
-
-        setText(
-            "dosageSand",
-            `${formatNumber(sandKg)} kg`
-        );
-
-        setText(
-            "dosageGravel",
-            gravelKg > 0
-                ? `${formatNumber(gravelKg)} kg`
-                : "—"
-        );
-
-        setText(
-            "dosageWater",
-            `${formatNumber(waterL)} L`
-        );
-
-        setText(
-            "dosageStatusBadge",
-            "Dosage calculé"
-        );
-
-        if ($("dosageResult")) {
-            show(
-                "dosageResult"
-            );
-        }
-
-        addObservation(
-            `Dosage ${state.dosage.mixType} calculé pour ${bags} sac(s) de ciment.`
-        );
-
-        notify(
-            `Dosage calculé pour ${bags} sac(s).`,
-            "success"
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   28 — VALIDATION DES PROPORTIONS
-================================================================ */
-
-    function validateConcreteMix() {
-
-        const contents =
-            state.recipient.contents;
-
-        const cement =
-            Number(
-                contents.cement?.quantity || 0
-            );
-
-        const sand =
-            Number(
-                contents.sand?.quantity || 0
-            );
-
-        const gravel =
-            Number(
-                contents.gravel?.quantity || 0
-            );
-
-        const water =
-            Number(
-                contents.water?.quantity || 0
-            );
-
-        if (cement <= 0) {
-
-            return {
-
-                valid: false,
-
-                reason:
-                    "Le mélange ne contient pas de ciment."
-
-            };
-
-        }
-
-        if (sand <= 0) {
-
-            return {
-
-                valid: false,
-
-                reason:
-                    "Le mélange ne contient pas suffisamment de sable."
-
-            };
-
-        }
-
-        const expectedSand =
-            cement * 2;
-
-        const expectedGravel =
-            cement * 3;
-
-        const expectedWater =
-            cement * 0.5;
-
-        const sandTolerance =
-            expectedSand * 0.25;
-
-        const gravelTolerance =
-            expectedGravel * 0.25;
-
-        const waterTolerance =
-            expectedWater * 0.30;
-
-        const sandOK =
-            Math.abs(
-                sand - expectedSand
-            ) <= sandTolerance;
-
-        const gravelOK =
-            Math.abs(
-                gravel - expectedGravel
-            ) <= gravelTolerance;
-
-        const waterOK =
-            Math.abs(
-                water - expectedWater
-            ) <= waterTolerance;
-
-        /*
-         * Cas mortier :
-         * ciment + sable + eau
-         */
-        const mortarExpectedSand =
-            cement * 3;
-
-        const mortarSandTolerance =
-            mortarExpectedSand * 0.25;
-
-        const mortarSandOK =
-            Math.abs(
-                sand -
-                mortarExpectedSand
-            ) <= mortarSandTolerance;
-
-        const noGravel =
-            gravel <= 0;
-
-        const mortarWaterExpected =
-            cement * 0.5;
-
-        const mortarWaterOK =
-            Math.abs(
-                water -
-                mortarWaterExpected
-            ) <=
-            mortarWaterExpected * 0.30;
-
-        if (
-            noGravel &&
-            mortarSandOK &&
-            mortarWaterOK
-        ) {
-
-            return {
-
-                valid: true,
-
-                type: "mortier",
-
-                reason:
-                    "Proportions compatibles avec un mortier courant."
-
-            };
-
-        }
-
-        if (
-            sandOK &&
-            gravelOK &&
-            waterOK
-        ) {
-
-            return {
-
-                valid: true,
-
-                type: "béton",
-
-                reason:
-                    "Proportions compatibles avec un béton courant."
-
-            };
-
-        }
-
-        return {
-
-            valid: false,
-
-            reason:
-                "Les proportions ciment/sable/gravier/eau ne correspondent pas au dosage attendu."
-
-        };
-
-    }
-
-
-/* ================================================================
-   29 — MÉLANGE
-================================================================ */
-
-    function mixRecipient() {
-
-        const entries =
-            Object.values(
-                state.recipient.contents
-            );
-
-        if (!entries.length) {
-
-            notify(
-                "Le récipient est vide.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        state.recipient.mixed = true;
-
-        const validation =
-            validateConcreteMix();
-
-        if (validation.valid) {
-
-            state.result.mixState =
-                "Mélange conforme";
-
-            notify(
-                "Mélange effectué : proportions compatibles.",
-                "success"
-            );
-
-            addObservation(
-                "Mélange effectué avec proportions compatibles."
-            );
-
-        } else {
-
-            state.result.mixState =
-                "Mauvaise Melange";
-
-            notify(
-                "Mauvaise Melange",
-                "error"
-            );
-
-            addObservation(
-                `Mauvaise Melange — ${validation.reason}`
-            );
-
-        }
-
-        renderReactionState();
-        renderResult();
-        saveState();
-
-    }
-
-
-/* ================================================================
-   30 — RÉACTION
-================================================================ */
-
-    function runReaction() {
-
-        if (
-            !state.recipient.mixed
-        ) {
-
-            notify(
-                "Vous devez d'abord effectuer le mélange.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        const validation =
-            validateConcreteMix();
-
-        if (!validation.valid) {
-
-            state.reaction = {
-
-                state: "failed",
-
-                status: "Mauvaise Melange",
-
-                phase: "—",
-
-                gas: "Non",
-
-                precipitate: "Non",
-
-                color: "Non déterminé"
-
-            };
-
-            state.result = {
-
-                state: "failed",
-
-                title: "Mauvaise Melange",
-
-                message:
-                    validation.reason,
-
-                details: [
-                    "Le dosage n'est pas conforme.",
-                    "La réaction ne peut pas être appliquée."
-                ],
-
-                mixState:
-                    "Mauvaise Melange",
-
-                dosageState:
-                    "Non conforme",
-
-                reactionState:
-                    "Refusée",
-
-                finalState:
-                    "Échec"
-
-            };
-
-            renderReactionState();
-            renderResult();
-
-            notify(
-                "Mauvaise Melange — réaction refusée.",
-                "error"
-            );
-
-            addObservation(
-                "Réaction refusée : dosage incorrect."
-            );
-
-            saveState();
-
-            return;
-
-        }
-
-        state.reaction = {
-
-            state: "success",
-
-            status: "Reaction reussie",
-
-            phase: "Solide / pâte / béton frais",
-
-            gas: "Non",
-
-            precipitate: "Non",
-
-            color: "Gris ciment"
-
-        };
-
-        state.recipient.reaction =
-            "Reaction reussie";
-
-        state.result = {
-
-            state: "success",
-
-            title: "Reaction reussie",
-
-            message:
-                `Le mélange ${validation.type} a été validé.`,
-
-            details: [
-
-                `Type : ${validation.type}`,
-
-                `Ciment : ${formatNumber(
-                    state.recipient.contents.cement?.quantity || 0
-                )} kg`,
-
-                `Sable : ${formatNumber(
-                    state.recipient.contents.sand?.quantity || 0
-                )} kg`,
-
-                `Gravier : ${formatNumber(
-                    state.recipient.contents.gravel?.quantity || 0
-                )} kg`,
-
-                `Eau : ${formatNumber(
-                    state.recipient.contents.water?.quantity || 0
-                )} L`,
-
-                "Mélange validé.",
-
-                "Réaction appliquée."
-
-            ],
-
-            mixState:
-                "Mélange conforme",
-
-            dosageState:
-                "Conforme",
-
-            reactionState:
-                "Reaction reussie",
-
-            finalState:
-                "Réussi"
-
-        };
-
-        notify(
-            "Reaction reussie",
-            "success"
-        );
-
-        addObservation(
-            "Reaction reussie : mélange validé."
-        );
-
-        renderReactionState();
-        renderResult();
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   31 — AFFICHAGE RÉACTION
-================================================================ */
-
-    function renderReactionState() {
-
-        setText(
-            "reactionState",
-            state.reaction.state
-        );
-
-        setText(
-            "reactionStatus",
-            state.reaction.status
-        );
-
-        setText(
-            "reactionPhase",
-            state.reaction.phase
-        );
-
-        setText(
-            "reactionGas",
-            state.reaction.gas
-        );
-
-        setText(
-            "reactionPrecipitate",
-            state.reaction.precipitate
-        );
-
-        setText(
-            "reactionColor",
-            state.reaction.color
-        );
-
-    }
-
-
-/* ================================================================
-   32 — RÉSULTAT
-================================================================ */
-
-    function renderResult() {
-
-        setText(
-            "resultState",
-            state.result.state
-        );
-
-        setText(
-            "resultTitle",
-            state.result.title
-        );
-
-        setText(
-            "resultMessage",
-            state.result.message
-        );
-
-        setHTML(
-            "resultDetails",
-            state.result.details
-                .map(
-                    item =>
-                        `<div>${escapeHTML(item)}</div>`
-                )
-                .join("")
-        );
-
-        setText(
-            "resultMixState",
-            state.result.mixState
-        );
-
-        setText(
-            "resultDosageState",
-            state.result.dosageState
-        );
-
-        setText(
-            "resultReactionState",
-            state.result.reactionState
-        );
-
-        setText(
-            "resultFinalState",
-            state.result.finalState
-        );
-
-    }
-
-
-/* ================================================================
-   33 — CHAUFFAGE
-================================================================ */
-
-    function heatRecipient() {
-
-        const contents =
-            Object.keys(
-                state.recipient.contents
-            );
-
-        if (!contents.length) {
-
-            notify(
-                "Aucun matériau à chauffer.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        state.recipient.heated = true;
-
-        const overlay =
-            $("temperatureOverlay");
-
-        if (overlay) {
-
-            overlay.classList.add(
-                "active"
-            );
-
-        }
-
-        setText(
-            "statusTemperature",
-            "Élevée"
-        );
-
-        addObservation(
-            "Le récipient a été chauffé."
-        );
-
-        notify(
-            "Chauffage appliqué au récipient.",
-            "success"
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   34 — SUPPRESSION OBJET
-================================================================ */
-
-    function removeSelectedObject() {
-
-        const id =
-            state.selectedObjectId;
-
-        if (!id) {
-
-            notify(
-                "Aucun objet sélectionné.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        state.workspaceObjects =
-            state.workspaceObjects.filter(
-                object =>
-                    object.id !== id
-            );
-
-        state.selectedObjectId =
-            null;
-
-        renderWorkspaceObjects();
-
-        addObservation(
-            "Objet retiré du laboratoire."
-        );
-
-        notify(
-            "Objet retiré.",
-            "success"
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   35 — NETTOYAGE WORKSPACE
-================================================================ */
-
-    function clearWorkspace() {
-
-        state.workspaceObjects = [];
-
-        state.selectedObjectId = null;
-
-        renderWorkspaceObjects();
-
-        addObservation(
-            "Espace de travail nettoyé."
-        );
-
-        notify(
-            "Espace de travail nettoyé.",
-            "success"
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   36 — RESET COMPLET
-================================================================ */
-
-    function resetSimulation() {
-
-        state =
-            deepClone(
-                defaultState
-            );
-
-        window.FOBAS_CIVIL_STATE =
-            state;
-
-        try {
-
-            localStorage.removeItem(
-                STORAGE_KEY
-            );
-
-        } catch (error) {
-
-            console.warn(error);
-
-        }
-
-        renderAll();
-
-        notify(
-            "Laboratoire réinitialisé.",
-            "success"
-        );
-
-    }
-
-
-/* ================================================================
-   37 — ZOOM
-================================================================ */
-
-    function applyZoom() {
-
-        const zoom =
-            Number(
-                state.zoom || 1
-            );
-
-        const app =
-            $("civilApp") ||
-            $("chemApp") ||
-            document.body;
-
-        if (app) {
-
-            app.style.setProperty(
-                "--civil-zoom",
-                zoom
-            );
-
-        }
-
-        setText(
-            "zoomValue",
-            `${Math.round(zoom * 100)}%`
-        );
-
-        setText(
-            "footerZoomState",
-            `${Math.round(zoom * 100)}%`
-        );
-
-        updateFooterState();
-
-    }
-
-
-    function zoomIn() {
-
-        state.zoom =
-            Math.min(
-                1.5,
-                Number(
-                    (
-                        state.zoom +
-                        0.1
-                    ).toFixed(2)
-                )
-            );
-
-        applyZoom();
-        saveState();
-
-    }
-
-
-    function zoomOut() {
-
-        state.zoom =
-            Math.max(
-                0.7,
-                Number(
-                    (
-                        state.zoom -
-                        0.1
-                    ).toFixed(2)
-                )
-            );
-
-        applyZoom();
-        saveState();
-
-    }
-
-
-    function fitWorkspace() {
-
-        state.zoom = 1;
-
-        applyZoom();
-
-        notify(
-            "Zoom réinitialisé à 100%.",
-            "info"
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   38 — NAVIGATION
-================================================================ */
-
-    function navigateTo(target) {
-
-        const map = {
-
-            laboratory:
-                "laboratoryWorkspace",
-
-            materials:
-                "materialsPanel",
-
-            tools:
-                "laboratoryWorkspace",
-
-            measure:
-                "measurementSection",
-
-            dosage:
-                "dosageControls",
-
-            reaction:
-                "reactionSection",
-
-            result:
-                "resultWorkspace",
-
-            report:
-                "reportPanel"
-
-        };
-
-        const id =
-            map[target];
-
-        if (!id) return;
-
-        const element =
-            $(id);
-
-        if (
-            element &&
-            typeof element.scrollIntoView ===
-            "function"
-        ) {
-
-            element.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
-            });
-
-        }
-
-        if (
-            target === "materials"
-        ) {
-
-            show(
-                "materialsPanel",
-                "flex"
-            );
-
-        }
-
-    }
-
-
-/* ================================================================
-   39 — RAPPORT
-================================================================ */
-
-    function generateReport() {
-
-        const recipient =
-            state.recipient;
-
-        const composition =
-            Object.values(
-                recipient.contents
-            );
-
-        const lines = [
-
-            "FOBAS — LABORATOIRE GÉNIE CIVIL",
-
-            `Session : ${state.sessionName}`,
-
-            `Date : ${new Date().toLocaleString()}`,
-
-            "",
-
-            "COMPOSITION",
-
-            ...(
-                composition.length
-                    ? composition.map(
-                        item =>
-                            `- ${item.name} : ${formatNumber(item.quantity)} ${item.unit}`
-                    )
-                    : [
-                        "- Récipient vide"
-                    ]
-            ),
-
-            "",
-
-            "DOSAGE",
-
-            `Type : ${state.dosage.mixType}`,
-
-            `Ciment : ${formatNumber(state.dosage.cementKg)} kg`,
-
-            `Sable : ${formatNumber(state.dosage.sandKg)} kg`,
-
-            `Gravier : ${formatNumber(state.dosage.gravelKg)} kg`,
-
-            `Eau : ${formatNumber(state.dosage.waterL)} L`,
-
-            "",
-
-            "RÉACTION",
-
-            `État : ${state.reaction.status}`,
-
-            `Phase : ${state.reaction.phase}`,
-
-            `Gaz : ${state.reaction.gas}`,
-
-            `Précipité : ${state.reaction.precipitate}`,
-
-            "",
-
-            "RÉSULTAT",
-
-            state.result.title,
-
-            state.result.message
-
-        ];
-
-        state.report = {
-
-            generated: true,
-
-            content:
-                lines.join("\n")
-
-        };
-
-        setText(
-            "reportContent",
-            state.report.content
-        );
-
-        show(
-            "reportPanel"
-        );
-
-        notify(
-            "Rapport généré.",
-            "success"
-        );
-
-        saveState();
-
-    }
-
-
-    function clearReport() {
-
-        state.report = {
-
-            generated: false,
-
-            content: ""
-
-        };
-
-        setText(
-            "reportContent",
-            ""
-        );
-
-        notify(
-            "Rapport supprimé.",
-            "info"
-        );
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   40 — DRAG & DROP WORKSPACE
-================================================================ */
-
-    function setupWorkspaceDrop() {
-
-        const dropZone =
-            $("workspaceDropZone");
-
-        if (!dropZone) return;
-
-        dropZone.addEventListener(
-            "dragover",
-            event => {
-
-                event.preventDefault();
-
-                dropZone.classList.add(
-                    "drag-over"
-                );
-
-            }
-        );
-
-        dropZone.addEventListener(
-            "dragleave",
-            () => {
-
-                dropZone.classList.remove(
-                    "drag-over"
-                );
-
-            }
-        );
-
-        dropZone.addEventListener(
-            "drop",
-            event => {
-
-                event.preventDefault();
-
-                dropZone.classList.remove(
-                    "drag-over"
-                );
-
-                const materialId =
-                    event.dataTransfer.getData(
-                        "text/material-id"
-                    );
-
-                const objectId =
-                    event.dataTransfer.getData(
-                        "text/civil-object-id"
-                    );
-
-                const rect =
-                    dropZone.getBoundingClientRect();
-
-                const x =
-                    event.clientX -
-                    rect.left;
-
-                const y =
-                    event.clientY -
-                    rect.top;
-
-                if (materialId) {
-
-                    addWorkspaceMaterial(
-                        materialId,
-                        x,
-                        y
-                    );
-
-                    notify(
-                        "Matériau placé dans le laboratoire.",
-                        "success"
-                    );
-
-                    return;
-
-                }
-
-                if (objectId) {
-
-                    const object =
-                        state.workspaceObjects.find(
-                            item =>
-                                item.id ===
-                                objectId
+                    const select =
+                        byId(
+                            "transferUnitSelect"
                         );
 
-                    if (object) {
 
-                        object.x = x;
-                        object.y = y;
-
-                        renderWorkspaceObjects();
-
-                        saveState();
-
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-
-/* ================================================================
-   41 — CARTES MATÉRIAUX DRAGGABLES
-================================================================ */
-
-    function bindMaterialCards() {
-
-        $$("#materialsLibrary [data-material-id]")
-            .forEach(card => {
-
-                card.addEventListener(
-                    "dragstart",
-                    event => {
-
-                        event.dataTransfer.setData(
-                            "text/material-id",
-                            card.dataset.materialId
+                    const quantity =
+                        number(
+                            input
+                                ? input.value
+                                : 0
                         );
 
-                    }
-                );
 
-            });
+                    const unit =
+                        select
+                            ? select.value
+                            : "";
 
-        $$("[data-add-material]")
-            .forEach(button => {
 
-                button.addEventListener(
-                    "click",
-                    event => {
-
-                        event.stopPropagation();
-
-                        addMaterial(
-                            button.dataset.addMaterial
-                        );
-
-                    }
-                );
-
-            });
-
-    }
-
-
-/* ================================================================
-   42 — OUTILS
-================================================================ */
-
-    function setTool(tool) {
-
-        state.activeTool =
-            tool;
-
-        $$(".tool-button[data-tool]")
-            .forEach(button => {
-
-                button.classList.toggle(
-                    "active",
-                    button.dataset.tool ===
-                    tool
-                );
-
-            });
-
-        switch (tool) {
-
-            case "transfer":
-
-                if (
-                    state.selectedObjectId
-                ) {
-
-                    const object =
-                        state.workspaceObjects.find(
-                            item =>
-                                item.id ===
-                                state.selectedObjectId
-                        );
-
-                    if (object) {
-
-                        openTransferModal(
-                            object.materialId,
-                            object
-                        );
-
-                    }
-
-                } else {
-
-                    notify(
-                        "Sélectionnez un matériau à transférer.",
-                        "warning"
-                    );
-
-                }
-
-                break;
-
-
-            case "mix":
-
-                mixRecipient();
-
-                break;
-
-
-            case "react":
-
-                runReaction();
-
-                break;
-
-
-            case "measure":
-
-                measureRecipient();
-
-                break;
-
-
-            case "heat":
-
-                heatRecipient();
-
-                break;
-
-
-            case "move":
-
-                notify(
-                    "Mode déplacement activé.",
-                    "info"
-                );
-
-                break;
-
-
-            case "select":
-
-            default:
-
-                notify(
-                    "Mode sélection activé.",
-                    "info"
-                );
-
-                break;
-
-        }
-
-        saveState();
-
-    }
-
-
-/* ================================================================
-   43 — ÉVÉNEMENTS PRINCIPAUX
-================================================================ */
-
-    function bindEvents() {
-
-        /* --------------------------------------------------------
-           MATÉRIAUX
-        -------------------------------------------------------- */
-
-        $("openMaterialsBtn")
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    show(
-                        "materialsPanel",
-                        "flex"
-                    );
-
-                    renderMaterialCategories();
-                    renderMaterialLibrary();
-
-                }
-            );
-
-
-        $("closeMaterialsBtn")
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    hide(
-                        "materialsPanel"
-                    );
-
-                }
-            );
-
-
-        $("materialsBackdrop")
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    hide(
-                        "materialsPanel"
-                    );
-
-                }
-            );
-
-
-        $("materialSearch")
-            ?.addEventListener(
-                "input",
-                renderMaterialLibrary
-            );
-
-
-        /* --------------------------------------------------------
-           ZOOM
-        -------------------------------------------------------- */
-
-        $("zoomInBtn")
-            ?.addEventListener(
-                "click",
-                zoomIn
-            );
-
-
-        $("zoomOutBtn")
-            ?.addEventListener(
-                "click",
-                zoomOut
-            );
-
-
-        $("fitWorkspaceBtn")
-            ?.addEventListener(
-                "click",
-                fitWorkspace
-            );
-
-
-        /* --------------------------------------------------------
-           NETTOYAGE
-        -------------------------------------------------------- */
-
-        $("clearWorkspaceBtn")
-            ?.addEventListener(
-                "click",
-                clearWorkspace
-            );
-
-
-        $("chemResetBtn")
-            ?.addEventListener(
-                "click",
-                resetSimulation
-            );
-
-
-        $("civilResetBtn")
-            ?.addEventListener(
-                "click",
-                resetSimulation
-            );
-
-
-        /* --------------------------------------------------------
-           DOSAGE
-        -------------------------------------------------------- */
-
-        $("calculateDosageBtn")
-            ?.addEventListener(
-                "click",
-                calculateDosage
-            );
-
-
-        $("cementBagsInput")
-            ?.addEventListener(
-                "change",
-                calculateDosage
-            );
-
-
-        $("mixTypeSelect")
-            ?.addEventListener(
-                "change",
-                calculateDosage
-            );
-
-
-        /* --------------------------------------------------------
-           ACTIONS OBJET
-        -------------------------------------------------------- */
-
-        $("actionTransferBtn")
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    const object =
-                        state.workspaceObjects.find(
-                            item =>
-                                item.id ===
-                                state.selectedObjectId
-                        );
-
-                    if (!object) {
+                    if (
+                        !materialId ||
+                        quantity <= 0
+                    ) {
 
                         notify(
-                            "Sélectionnez un matériau.",
-                            "warning"
+                            "Quantité invalide.",
+                            "error"
                         );
 
                         return;
 
                     }
 
-                    openTransferModal(
-                        object.materialId,
-                        object
+
+                    transferMaterial(
+                        materialId,
+                        quantity,
+                        unit,
+                        objectId
+                    );
+
+
+                    closeTransferModal();
+
+                }
+            );
+
+        }
+
+
+        $(
+            '[data-close-transfer]'
+        );
+
+
+        $$(
+            '[data-close-transfer]'
+        )
+        .forEach(function (button) {
+
+            if (
+                button.dataset.fobasCivilBound
+            ) return;
+
+
+            button.dataset.fobasCivilBound =
+                "1";
+
+
+            button.addEventListener(
+                "click",
+                closeTransferModal
+            );
+
+        });
+
+
+        modal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    closeTransferModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       14 — TRANSFERT VERS LE RÉCIPIENT
+    ============================================================ */
+
+    function transferMaterial(
+        materialId,
+        quantity,
+        unit,
+        objectId
+    ) {
+
+        const material =
+            getMaterial(materialId);
+
+
+        if (!material) {
+
+            notify(
+                "Matériau introuvable.",
+                "error"
+            );
+
+            return false;
+
+        }
+
+
+        const qty =
+            number(quantity);
+
+
+        if (qty <= 0) {
+
+            notify(
+                "La quantité doit être supérieure à zéro.",
+                "error"
+            );
+
+            return false;
+
+        }
+
+
+        const finalUnit =
+            unit ||
+            material.unit;
+
+
+        let component =
+            recipient.components.find(
+                function (item) {
+
+                    return (
+                        item.materialId ===
+                        materialId
                     );
 
                 }
             );
 
 
-        $("actionMixBtn")
-            ?.addEventListener(
-                "click",
-                mixRecipient
+        if (!component) {
+
+            component = {
+
+                materialId:
+                    materialId,
+
+                name:
+                    material.name,
+
+                quantity:
+                    0,
+
+                unit:
+                    finalUnit
+
+            };
+
+
+            recipient.components.push(
+                component
+            );
+
+        }
+
+
+        component.quantity +=
+            qty;
+
+
+        component.quantity =
+            round(
+                component.quantity,
+                3
             );
 
 
-        $("actionMeasureBtn")
-            ?.addEventListener(
-                "click",
-                measureRecipient
-            );
+        recipient.lastAction =
+            "Transfert de " +
+            material.name;
 
 
-        $("actionHeatBtn")
-            ?.addEventListener(
-                "click",
-                heatRecipient
-            );
+        recipient.state =
+            "filled";
 
 
-        $("actionRemoveBtn")
-            ?.addEventListener(
-                "click",
-                removeSelectedObject
-            );
+        recipient.mixed =
+            false;
 
 
-        /* --------------------------------------------------------
-           MODAL TRANSFERT
-        -------------------------------------------------------- */
-
-        $("closeTransferModal")
-            ?.addEventListener(
-                "click",
-                closeTransferModal
-            );
+        recipient.reactionState =
+            "pending";
 
 
-        $("cancelTransferBtn")
-            ?.addEventListener(
-                "click",
-                closeTransferModal
-            );
+        recalculateRecipient();
 
 
-        $("confirmTransferBtn")
-            ?.addEventListener(
-                "click",
-                confirmTransfer
-            );
+        if (objectId) {
+
+            state.laboratory
+                .workspaceObjects =
+                state.laboratory
+                    .workspaceObjects
+                    .filter(function (object) {
+
+                        return object.id !==
+                            objectId;
+
+                    });
+
+        }
 
 
-        $("transferRange")
-            ?.addEventListener(
-                "input",
-                event => {
+        state.laboratory
+            .selectedMaterial =
+            materialId;
 
-                    setText(
-                        "transferAmount",
-                        event.target.value
+
+        renderWorkspaceObjects();
+        renderRecipientStatus();
+        renderMeasurements();
+
+        saveState();
+
+
+        notify(
+            round(qty, 2) +
+            " " +
+            finalUnit +
+            " de " +
+            material.name +
+            " transféré dans le récipient.",
+            "success"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       15 — RECALCUL DU RÉCIPIENT
+    ============================================================ */
+
+    function recalculateRecipient() {
+
+        let mass =
+            0;
+
+        let volume =
+            0;
+
+
+        recipient.components
+            .forEach(function (component) {
+
+                const quantity =
+                    number(
+                        component.quantity
                     );
 
-                    const input =
-                        $("transferAmount");
 
-                    if (input) {
-                        input.value =
-                            event.target.value;
-                    }
-
-                }
-            );
+                const material =
+                    getMaterial(
+                        component.materialId
+                    );
 
 
-        $("transferAmount")
-            ?.addEventListener(
-                "input",
-                event => {
+                if (!material) return;
 
-                    const range =
-                        $("transferRange");
 
-                    if (range) {
+                if (
+                    material.unit === "kg"
+                ) {
 
-                        range.value =
-                            event.target.value;
-
-                    }
+                    mass +=
+                        quantity;
 
                 }
-            );
 
 
-        /* --------------------------------------------------------
-           MESURE MODAL
-        -------------------------------------------------------- */
+                if (
+                    material.unit === "L"
+                ) {
 
-        $("closeMeasurementModal")
-            ?.addEventListener(
-                "click",
-                () => hide(
-                    "measurementModal"
-                )
-            );
+                    volume +=
+                        quantity;
 
-
-        $("closeMeasurementBtn")
-            ?.addEventListener(
-                "click",
-                () => hide(
-                    "measurementModal"
-                )
-            );
-
-
-        /* --------------------------------------------------------
-           RAPPORT
-        -------------------------------------------------------- */
-
-        $("generateReportBtn")
-            ?.addEventListener(
-                "click",
-                generateReport
-            );
-
-
-        $("clearReportBtn")
-            ?.addEventListener(
-                "click",
-                clearReport
-            );
-
-
-        /* --------------------------------------------------------
-           OUTILS
-        -------------------------------------------------------- */
-
-        $$(".tool-button[data-tool]")
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        setTool(
-                            button.dataset.tool
-                        );
-
-                    }
-                );
+                }
 
             });
 
 
-        /* --------------------------------------------------------
-           NAVIGATION
-        -------------------------------------------------------- */
+        recipient.totalMassKg =
+            round(
+                mass,
+                3
+            );
 
-        const navigation = {
 
-            laboratoryNavBtn:
-                "laboratory",
+        recipient.totalVolumeL =
+            round(
+                volume,
+                3
+            );
 
-            materialsNavBtn:
-                "materials",
 
-            toolsNavBtn:
-                "tools",
+        recipient.state =
+            recipient.components.length
+                ? "filled"
+                : "empty";
 
-            measureNavBtn:
-                "measure",
+    }
 
-            dosageNavBtn:
-                "dosage",
 
-            reactionNavBtn:
-                "reaction",
+    /* ============================================================
+       16 — AFFICHAGE DU RÉCIPIENT
+    ============================================================ */
 
-            resultNavBtn:
-                "result",
+    function renderRecipientStatus() {
 
-            reportNavBtn:
-                "report"
+        recalculateRecipient();
+
+
+        setText(
+            "recipientTotalMass",
+            round(
+                recipient.totalMassKg,
+                2
+            ) +
+            " kg"
+        );
+
+
+        setText(
+            "recipientTotalVolume",
+            round(
+                recipient.totalVolumeL,
+                2
+            ) +
+            " L"
+        );
+
+
+        setText(
+            "recipientComponentCount",
+            String(
+                recipient.components.length
+            )
+        );
+
+
+        const badge =
+            byId(
+                "recipientStateBadge"
+            );
+
+
+        if (badge) {
+
+            let text =
+                "Vide";
+
+
+            if (
+                recipient.components.length
+            ) {
+
+                text =
+                    recipient.mixed
+                        ? "Mélangé"
+                        : "Contient des matériaux";
+
+            }
+
+
+            badge.textContent =
+                text;
+
+        }
+
+
+        const list =
+            byId(
+                "recipientContentList"
+            );
+
+
+        if (list) {
+
+            list.innerHTML = "";
+
+
+            if (
+                recipient.components.length ===
+                0
+            ) {
+
+                const empty =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                empty.className =
+                    "fobas-civil-recipient-item";
+
+
+                empty.textContent =
+                    "Aucun matériau dans le récipient.";
+
+
+                list.appendChild(
+                    empty
+                );
+
+            } else {
+
+                recipient.components
+                    .forEach(function (component) {
+
+                        const row =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        row.className =
+                            "fobas-civil-recipient-item";
+
+
+                        row.innerHTML =
+                            `
+                            <span>
+                                ${component.name}
+                            </span>
+                            <strong>
+                                ${round(component.quantity, 2)}
+                                ${component.unit}
+                            </strong>
+                            `;
+
+
+                        list.appendChild(
+                            row
+                        );
+
+                    });
+
+            }
+
+        }
+
+
+        const contents =
+            byId(
+                "recipient01Contents"
+            );
+
+
+        if (contents) {
+
+            contents.innerHTML = "";
+
+
+            recipient.components
+                .forEach(function (component) {
+
+                    const item =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    item.textContent =
+                        component.name +
+                        " " +
+                        round(
+                            component.quantity,
+                            2
+                        ) +
+                        component.unit;
+
+
+                    contents.appendChild(
+                        item
+                    );
+
+                });
+
+        }
+
+    }
+
+
+    /* ============================================================
+       17 — DRAG & DROP SUR LE RÉCIPIENT
+    ============================================================ */
+
+    function setupRecipientDrop() {
+
+        const target =
+            byId("recipient01");
+
+
+        if (!target) return;
+
+
+        if (
+            target.dataset.fobasCivilDropBound
+        ) {
+
+            return;
+
+        }
+
+
+        target.dataset.fobasCivilDropBound =
+            "1";
+
+
+        target.addEventListener(
+            "dragover",
+            function (event) {
+
+                event.preventDefault();
+
+                target.classList.add(
+                    "drop-ready"
+                );
+
+            }
+        );
+
+
+        target.addEventListener(
+            "dragleave",
+            function () {
+
+                target.classList.remove(
+                    "drop-ready"
+                );
+
+            }
+        );
+
+
+        target.addEventListener(
+            "drop",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                target.classList.remove(
+                    "drop-ready"
+                );
+
+
+                const raw =
+                    event.dataTransfer
+                        ? event.dataTransfer
+                            .getData(
+                                "text/plain"
+                            )
+                        : "";
+
+
+                if (!raw) return;
+
+
+                try {
+
+                    const data =
+                        JSON.parse(raw);
+
+
+                    if (
+                        data.type ===
+                            "material" &&
+                        data.materialId
+                    ) {
+
+                        /*
+                           Drag direct :
+                           1 unité de base.
+                        */
+                        transferMaterial(
+                            data.materialId,
+                            1,
+                            getMaterial(
+                                data.materialId
+                            ).unit,
+                            null
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        data.type ===
+                            "workspace-material" &&
+                        data.materialId
+                    ) {
+
+                        transferMaterial(
+                            data.materialId,
+                            1,
+                            getMaterial(
+                                data.materialId
+                            ).unit,
+                            data.objectId
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    console.warn(
+                        "FOBAS Civil drop récipient :",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       18 — DROP DANS LA ZONE DE LABORATOIRE
+    ============================================================ */
+
+    function setupLaboratoryDrop() {
+
+        const workspace =
+            byId(
+                "civilLaboratoryWorkspace"
+            );
+
+
+        if (!workspace) return;
+
+
+        if (
+            workspace.dataset
+                .fobasCivilDropBound
+        ) {
+
+            return;
+
+        }
+
+
+        workspace.dataset
+            .fobasCivilDropBound =
+            "1";
+
+
+        workspace.addEventListener(
+            "dragover",
+            function (event) {
+
+                event.preventDefault();
+
+            }
+        );
+
+
+        workspace.addEventListener(
+            "drop",
+            function (event) {
+
+                /*
+                   Le récipient gère lui-même
+                   son drop.
+                */
+                if (
+                    event.target.closest(
+                        "#recipient01"
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                const raw =
+                    event.dataTransfer
+                        ? event.dataTransfer
+                            .getData(
+                                "text/plain"
+                            )
+                        : "";
+
+
+                if (!raw) return;
+
+
+                try {
+
+                    const data =
+                        JSON.parse(raw);
+
+
+                    if (
+                        data.type ===
+                            "material" &&
+                        data.materialId
+                    ) {
+
+                        addWorkspaceMaterial(
+                            data.materialId
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    console.warn(
+                        "FOBAS Civil drop laboratoire :",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       19 — MÉLANGE
+    ============================================================ */
+
+    function mixRecipient() {
+
+        if (
+            recipient.components.length ===
+            0
+        ) {
+
+            notify(
+                "Ajoutez d'abord des matériaux dans le récipient.",
+                "warning"
+            );
+
+            return false;
+
+        }
+
+
+        recalculateRecipient();
+
+
+        recipient.mixed =
+            true;
+
+
+        recipient.state =
+            "mixed";
+
+
+        recipient.reactionState =
+            "pending";
+
+
+        recipient.lastAction =
+            "Mélange effectué";
+
+
+        saveState();
+
+
+        renderRecipientStatus();
+
+
+        setText(
+            "reactionStatusTitle",
+            "Mélange effectué"
+        );
+
+
+        setText(
+            "reactionStatusMessage",
+            "Le mélange est prêt pour la vérification du dosage."
+        );
+
+
+        notify(
+            "Mélange effectué avec succès.",
+            "success"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       20 — MESURES
+    ============================================================ */
+
+    function renderMeasurements() {
+
+        recalculateRecipient();
+
+
+        setText(
+            "measurementMass",
+            round(
+                recipient.totalMassKg,
+                2
+            ) +
+            " kg"
+        );
+
+
+        setText(
+            "measurementVolume",
+            round(
+                recipient.totalVolumeL,
+                2
+            ) +
+            " L"
+        );
+
+
+        setText(
+            "measurementMaterials",
+            String(
+                recipient.components.length
+            )
+        );
+
+
+        const balance =
+            byId(
+                "balanceDisplay"
+            );
+
+
+        if (balance) {
+
+            balance.textContent =
+                round(
+                    recipient.totalMassKg,
+                    2
+                ) +
+                " kg";
+
+        }
+
+
+        const cylinder =
+            byId(
+                "cylinderLiquid"
+            );
+
+
+        if (cylinder) {
+
+            const volume =
+                clamp(
+                    recipient.totalVolumeL,
+                    0,
+                    100
+                );
+
+
+            cylinder.style.height =
+                volume +
+                "%";
+
+        }
+
+    }
+
+
+    /* ============================================================
+       21 — TARE BALANCE
+    ============================================================ */
+
+    function tareBalance() {
+
+        state.balanceTare =
+            recipient.totalMassKg;
+
+
+        const display =
+            byId(
+                "balanceDisplay"
+            );
+
+
+        if (display) {
+
+            display.textContent =
+                "0.00 kg";
+
+        }
+
+
+        saveState();
+
+
+        notify(
+            "Balance mise à zéro.",
+            "success"
+        );
+
+    }
+
+
+    /* ============================================================
+       22 — DOSAGE
+       ------------------------------------------------------------
+       CALCULS :
+       
+       MORTIER :
+       1 sac = 42 kg ciment
+       sable = 126 kg
+       eau = 21 L
+
+       BÉTON :
+       1 sac = 42 kg ciment
+       sable = 84 kg
+       gravier = 126 kg
+       eau = 21 L
+    ============================================================ */
+
+    function calculateDosage() {
+
+        const select =
+            byId(
+                "mixTypeSelect"
+            );
+
+
+        const input =
+            byId(
+                "cementBagsInput"
+            );
+
+
+        const type =
+            select
+                ? select.value
+                : "mortier";
+
+
+        const bags =
+            Math.max(
+                number(
+                    input
+                        ? input.value
+                        : 1
+                ),
+                0
+            );
+
+
+        const recipe =
+            DOSAGE[type] ||
+            DOSAGE.mortier;
+
+
+        const cementKg =
+            bags *
+            CEMENT_BAG_KG;
+
+
+        const sandKg =
+            bags *
+            recipe.sandPerBag;
+
+
+        const gravelKg =
+            bags *
+            recipe.gravelPerBag;
+
+
+        const waterL =
+            bags *
+            recipe.waterPerBag;
+
+
+        state.dosage = {
+
+            type: type,
+
+            cementBags: bags,
+
+            cementBagKg:
+                CEMENT_BAG_KG,
+
+            cementKg:
+                round(cementKg, 2),
+
+            sandKg:
+                round(sandKg, 2),
+
+            gravelKg:
+                round(gravelKg, 2),
+
+            waterL:
+                round(waterL, 2),
+
+            status:
+                "calculated"
 
         };
 
 
-        Object.entries(
-            navigation
-        ).forEach(
-            ([id, target]) => {
-
-                $(id)?.addEventListener(
-                    "click",
-                    () => navigateTo(target)
-                );
-
-            }
+        setText(
+            "dosageCement",
+            round(cementKg, 2) +
+            " kg"
         );
 
 
-        /* --------------------------------------------------------
-           REACTION
-        -------------------------------------------------------- */
-
-        $("actionReactionBtn")
-            ?.addEventListener(
-                "click",
-                runReaction
-            );
+        setText(
+            "dosageSand",
+            round(sandKg, 2) +
+            " kg"
+        );
 
 
-        $("reactionBtn")
-            ?.addEventListener(
-                "click",
-                runReaction
-            );
+        setText(
+            "dosageGravel",
+            round(gravelKg, 2) +
+            " kg"
+        );
 
 
-        /* --------------------------------------------------------
-           RÉSULTAT
-        -------------------------------------------------------- */
-
-        $("resultBtn")
-            ?.addEventListener(
-                "click",
-                renderResult
-            );
+        setText(
+            "dosageWater",
+            round(waterL, 2) +
+            " L"
+        );
 
 
-        /* --------------------------------------------------------
-           ESCAPE POUR FERMER LES MODALS
-        -------------------------------------------------------- */
+        setText(
+            "dosageStatusBadge",
+            "1 sac = 42 kg • Ratio " +
+            recipe.ratio
+        );
 
-        document.addEventListener(
-            "keydown",
-            event => {
 
-                if (
-                    event.key !==
-                    "Escape"
-                ) {
-                    return;
+        saveState();
+
+
+        notify(
+            recipe.name +
+            " calculé pour " +
+            bags +
+            " sac(s) de 42 kg.",
+            "success"
+        );
+
+
+        return state.dosage;
+
+    }
+
+
+    /* ============================================================
+       23 — UTILITAIRE COMPOSANT
+    ============================================================ */
+
+    function componentQuantity(
+        materialId
+    ) {
+
+        const component =
+            recipient.components.find(
+                function (item) {
+
+                    return (
+                        item.materialId ===
+                        materialId
+                    );
+
                 }
+            );
 
-                hide(
-                    "transferModal"
-                );
 
-                hide(
-                    "measurementModal"
-                );
+        return component
+            ? number(
+                component.quantity
+            )
+            : 0;
 
-                hide(
-                    "materialsPanel"
-                );
+    }
+
+
+    /* ============================================================
+       24 — TOLÉRANCE
+    ============================================================ */
+
+    function withinTolerance(
+        actual,
+        expected
+    ) {
+
+        if (
+            expected === 0
+        ) {
+
+            return (
+                Math.abs(actual) <
+                0.001
+            );
+
+        }
+
+
+        const difference =
+            Math.abs(
+                actual -
+                expected
+            );
+
+
+        return (
+            difference /
+            Math.abs(expected)
+        ) <= MIX_TOLERANCE;
+
+    }
+
+
+    /* ============================================================
+       25 — VALIDATION DU MÉLANGE
+    ============================================================ */
+
+    function validateMix() {
+
+        const type =
+            state.dosage.type ||
+            "mortier";
+
+
+        const bags =
+            number(
+                state.dosage.cementBags,
+                1
+            );
+
+
+        if (bags <= 0) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "Le nombre de sacs de ciment est invalide."
+
+            };
+
+        }
+
+
+        const recipe =
+            DOSAGE[type] ||
+            DOSAGE.mortier;
+
+
+        /*
+           IMPORTANT :
+           le ciment attendu est TOUJOURS
+           42 KG par sac.
+        */
+
+        const expectedCement =
+            bags *
+            CEMENT_BAG_KG;
+
+
+        const expectedSand =
+            bags *
+            recipe.sandPerBag;
+
+
+        const expectedGravel =
+            bags *
+            recipe.gravelPerBag;
+
+
+        const expectedWater =
+            bags *
+            recipe.waterPerBag;
+
+
+        const actualCement =
+            componentQuantity(
+                "cement"
+            );
+
+
+        const actualSand =
+            componentQuantity(
+                "sand"
+            );
+
+
+        const actualGravel =
+            componentQuantity(
+                "gravel"
+            );
+
+
+        const actualWater =
+            componentQuantity(
+                "water"
+            );
+
+
+        const cementOK =
+            withinTolerance(
+                actualCement,
+                expectedCement
+            );
+
+
+        const sandOK =
+            withinTolerance(
+                actualSand,
+                expectedSand
+            );
+
+
+        const gravelOK =
+            withinTolerance(
+                actualGravel,
+                expectedGravel
+            );
+
+
+        const waterOK =
+            withinTolerance(
+                actualWater,
+                expectedWater
+            );
+
+
+        const valid =
+            cementOK &&
+            sandOK &&
+            gravelOK &&
+            waterOK;
+
+
+        return {
+
+            valid: valid,
+
+            type: type,
+
+            bags: bags,
+
+            expected: {
+
+                cement:
+                    expectedCement,
+
+                sand:
+                    expectedSand,
+
+                gravel:
+                    expectedGravel,
+
+                water:
+                    expectedWater
+
+            },
+
+            actual: {
+
+                cement:
+                    actualCement,
+
+                sand:
+                    actualSand,
+
+                gravel:
+                    actualGravel,
+
+                water:
+                    actualWater
+
+            },
+
+            checks: {
+
+                cement:
+                    cementOK,
+
+                sand:
+                    sandOK,
+
+                gravel:
+                    gravelOK,
+
+                water:
+                    waterOK
 
             }
+
+        };
+
+    }
+
+
+    /* ============================================================
+       26 — AFFICHAGE RÉSULTATS
+    ============================================================ */
+
+    function updateResult(
+        mixState,
+        dosageState,
+        reactionState,
+        finalState
+    ) {
+
+        setText(
+            "resultMixState",
+            mixState
+        );
+
+
+        setText(
+            "resultDosageState",
+            dosageState
+        );
+
+
+        setText(
+            "resultReactionState",
+            reactionState
+        );
+
+
+        setText(
+            "resultFinalState",
+            finalState
         );
 
     }
 
 
-/* ================================================================
-   44 — ÉTAT FOOTER
-================================================================ */
+    /* ============================================================
+       27 — EXÉCUTION DE LA RÉACTION
+    ============================================================ */
 
-    function updateFooterState() {
+    function executeReaction() {
+
+        /*
+           Il faut d'abord mélanger.
+        */
+
+        if (!recipient.mixed) {
+
+            const message =
+                "Effectuez d'abord le mélange avant d'exécuter la réaction.";
+
+
+            recipient.reactionState =
+                "pending";
+
+
+            setText(
+                "reactionStatusTitle",
+                "Mélange requis"
+            );
+
+
+            setText(
+                "reactionStatusMessage",
+                message
+            );
+
+
+            setText(
+                "reactionStatusIcon",
+                "⚠"
+            );
+
+
+            notify(
+                message,
+                "warning"
+            );
+
+
+            return {
+
+                valid: false,
+
+                status:
+                    "pending"
+
+            };
+
+        }
+
+
+        const validation =
+            validateMix();
+
+
+        if (!validation.valid) {
+
+            /*
+               TEXTE DEMANDÉ EXACTEMENT :
+               Mauvaise Melange
+            */
+
+            recipient.reactionState =
+                "failed";
+
+
+            recipient.lastAction =
+                "Mauvaise Melange";
+
+
+            state.reaction = {
+
+                status:
+                    "failed",
+
+                message:
+                    "Mauvaise Melange",
+
+                timestamp:
+                    new Date().toISOString()
+
+            };
+
+
+            state.result = {
+
+                available:
+                    true,
+
+                title:
+                    "Mauvaise Melange",
+
+                message:
+                    "Les proportions des matériaux ne correspondent pas au dosage demandé.",
+
+                mixState:
+                    "Mélange effectué",
+
+                dosageState:
+                    "Dosage non conforme",
+
+                reactionState:
+                    "Mauvaise Melange",
+
+                finalState:
+                    "Échec"
+
+            };
+
+
+            setText(
+                "reactionStatusIcon",
+                "⚠"
+            );
+
+
+            setText(
+                "reactionStatusTitle",
+                "Mauvaise Melange"
+            );
+
+
+            setText(
+                "reactionStatusMessage",
+                "Les proportions sont incorrectes. Vérifiez le ciment, le sable, le gravier et l'eau."
+            );
+
+
+            updateResult(
+
+                "Mélange effectué",
+
+                "Dosage non conforme",
+
+                "Mauvaise Melange",
+
+                "Échec"
+
+            );
+
+
+            saveState();
+
+
+            notify(
+                "Mauvaise Melange",
+                "error"
+            );
+
+
+            return validation;
+
+        }
+
+
+        /*
+           BON DOSAGE
+        */
+
+        recipient.reactionState =
+            "success";
+
+
+        recipient.lastAction =
+            "Reaction reussie";
+
+
+        state.reaction = {
+
+            status:
+                "success",
+
+            message:
+                "Reaction reussie",
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+
+        state.result = {
+
+            available:
+                true,
+
+            title:
+                "Reaction reussie",
+
+            message:
+                "Les proportions du mélange sont conformes au dosage sélectionné.",
+
+            mixState:
+                "Mélange effectué",
+
+            dosageState:
+                "Dosage conforme",
+
+            reactionState:
+                "Reaction reussie",
+
+            finalState:
+                "Réaction réussie"
+
+        };
+
 
         setText(
-            "footerEngineState",
-            `FOBAS Civil Engine ${ENGINE_VERSION}`
+            "reactionStatusIcon",
+            "✓"
         );
+
+
+        setText(
+            "reactionStatusTitle",
+            "Reaction reussie"
+        );
+
+
+        setText(
+            "reactionStatusMessage",
+            "Le dosage des matériaux est conforme. Le mélange peut être considéré comme réussi."
+        );
+
+
+        updateResult(
+
+            "Mélange effectué",
+
+            "Dosage conforme",
+
+            "Reaction reussie",
+
+            "Réaction réussie"
+
+        );
+
+
+        saveState();
+
+
+        notify(
+            "Reaction reussie",
+            "success"
+        );
+
+
+        return validation;
+
+    }
+
+
+    /* ============================================================
+       28 — VIDER LE RÉCIPIENT
+    ============================================================ */
+
+    function clearRecipient() {
+
+        recipient.components =
+            [];
+
+
+        recipient.state =
+            "empty";
+
+
+        recipient.mixed =
+            false;
+
+
+        recipient.reactionState =
+            "pending";
+
+
+        recipient.totalMassKg =
+            0;
+
+
+        recipient.totalVolumeL =
+            0;
+
+
+        recipient.lastAction =
+            "Récipient vidé";
+
+
+        state.reaction = {
+
+            status:
+                "pending",
+
+            message:
+                "Préparez et mélangez les matériaux avant d'exécuter la réaction.",
+
+            timestamp:
+                null
+
+        };
+
+
+        state.result = {
+
+            available:
+                false,
+
+            title:
+                "Aucun résultat",
+
+            message:
+                "Exécutez une réaction pour obtenir un résultat.",
+
+            mixState:
+                "—",
+
+            dosageState:
+                "—",
+
+            reactionState:
+                "—",
+
+            finalState:
+                "—"
+
+        };
+
+
+        renderRecipientStatus();
+        renderMeasurements();
+
+
+        setText(
+            "reactionStatusTitle",
+            "Prêt"
+        );
+
+
+        setText(
+            "reactionStatusMessage",
+            "Ajoutez les matériaux puis mélangez-les."
+        );
+
+
+        setText(
+            "reactionStatusIcon",
+            "●"
+        );
+
+
+        updateResult(
+            "—",
+            "—",
+            "—",
+            "—"
+        );
+
+
+        saveState();
+
+
+        notify(
+            "Le récipient a été vidé.",
+            "success"
+        );
+
+    }
+
+
+    /* ============================================================
+       29 — RAPPORT
+    ============================================================ */
+
+    function generateReport() {
+
+        const validation =
+            validateMix();
+
+
+        const report = {
+
+            date:
+                new Date().toLocaleString(),
+
+            type:
+                state.dosage.type ||
+                "mortier",
+
+            bags:
+                number(
+                    state.dosage.cementBags,
+                    0
+                ),
+
+            cementKg:
+                componentQuantity(
+                    "cement"
+                ),
+
+            sandKg:
+                componentQuantity(
+                    "sand"
+                ),
+
+            gravelKg:
+                componentQuantity(
+                    "gravel"
+                ),
+
+            waterL:
+                componentQuantity(
+                    "water"
+                ),
+
+            result:
+                validation.valid
+                    ? "Reaction reussie"
+                    : "Mauvaise Melange"
+
+        };
+
+
+        state.reports.push(
+            report
+        );
+
+
+        renderReports();
+
+        saveState();
+
+
+        notify(
+            "Rapport généré.",
+            "success"
+        );
+
+
+        return report;
+
+    }
+
+
+    function renderReports() {
+
+        const container =
+            byId(
+                "reportContent"
+            );
+
+
+        if (!container) return;
+
+
+        container.innerHTML = "";
+
+
+        if (
+            state.reports.length ===
+            0
+        ) {
+
+            container.textContent =
+                "Aucun rapport disponible.";
+
+            return;
+
+        }
+
+
+        state.reports
+            .slice()
+            .reverse()
+            .forEach(
+                function (report) {
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    card.className =
+                        "fobas-civil-report-card";
+
+
+                    card.innerHTML =
+                        `
+                        <strong>
+                            Rapport Génie Civil FOBAS
+                        </strong>
+
+                        <span>
+                            Date : ${report.date}
+                        </span>
+
+                        <span>
+                            Type : ${report.type}
+                        </span>
+
+                        <span>
+                            Sacs : ${report.bags}
+                        </span>
+
+                        <span>
+                            Ciment : ${round(report.cementKg, 2)} kg
+                        </span>
+
+                        <span>
+                            Sable : ${round(report.sandKg, 2)} kg
+                        </span>
+
+                        <span>
+                            Gravier : ${round(report.gravelKg, 2)} kg
+                        </span>
+
+                        <span>
+                            Eau : ${round(report.waterL, 2)} L
+                        </span>
+
+                        <strong>
+                            ${report.result}
+                        </strong>
+                        `;
+
+
+                    container.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+    }
+
+
+    function clearReports() {
+
+        state.reports =
+            [];
+
+
+        renderReports();
+
+        saveState();
+
+
+        notify(
+            "Rapports supprimés.",
+            "success"
+        );
+
+    }
+
+
+    /* ============================================================
+       30 — ÉQUIPEMENTS
+    ============================================================ */
+
+    function bindEquipment() {
+
+        $(
+            '[data-equipment-id]'
+        );
+
+
+        $$(
+            '[data-equipment-id]'
+        )
+        .forEach(function (card) {
+
+            if (
+                card.dataset.fobasCivilEquipment
+            ) {
+
+                return;
+
+            }
+
+
+            card.dataset.fobasCivilEquipment =
+                "1";
+
+
+            card.addEventListener(
+                "click",
+                function () {
+
+                    const id =
+                        card.getAttribute(
+                            "data-equipment-id"
+                        );
+
+
+                    if (!id) return;
+
+
+                    state.laboratory
+                        .selectedEquipment =
+                        id;
+
+
+                    saveState();
+
+
+                    const equipment =
+                        state.equipment[id];
+
+
+                    notify(
+                        equipment &&
+                        equipment.name
+                            ? equipment.name +
+                              " sélectionné."
+                            : "Équipement sélectionné.",
+                        "success"
+                    );
+
+                }
+            );
+
+
+            card.addEventListener(
+                "dragstart",
+                function (event) {
+
+                    const id =
+                        card.getAttribute(
+                            "data-equipment-id"
+                        );
+
+
+                    event.dataTransfer.setData(
+                        "text/plain",
+                        JSON.stringify({
+
+                            type:
+                                "equipment",
+
+                            equipmentId:
+                                id
+
+                        })
+                    );
+
+                }
+            );
+
+        });
+
+    }
+
+
+    /* ============================================================
+       31 — ZOOM GLOBAL
+    ============================================================ */
+
+    function applyZoom(value) {
+
+        const zoom =
+            clamp(
+                number(value, 1),
+                0.70,
+                1.50
+            );
+
+
+        state.app.zoom =
+            round(
+                zoom,
+                2
+            );
+
+
+        const app =
+            byId(
+                "fobasCivilApp"
+            );
+
+
+        if (app) {
+
+            app.style.setProperty(
+                "--fobas-civil-zoom",
+                String(zoom)
+            );
+
+
+            app.style.zoom =
+                String(zoom);
+
+        }
+
+
+        setText(
+            "zoomValue",
+            Math.round(
+                zoom * 100
+            ) +
+            "%"
+        );
+
 
         setText(
             "footerZoomState",
-            `${Math.round(
-                state.zoom * 100
-            )}%`
+            Math.round(
+                zoom * 100
+            ) +
+            "%"
         );
 
-        setText(
-            "laboratoryStateText",
-            "Laboratoire actif"
-        );
 
-        const dot =
-            $("laboratoryStateDot");
+        saveState();
 
-        if (dot) {
+    }
 
-            dot.classList.add(
-                "active"
+
+    function bindZoom() {
+
+        const zoomIn =
+            byId(
+                "zoomInBtn"
+            );
+
+
+        const zoomOut =
+            byId(
+                "zoomOutBtn"
+            );
+
+
+        const zoomReset =
+            byId(
+                "zoomResetBtn"
+            );
+
+
+        if (
+            zoomIn &&
+            !zoomIn.dataset.fobasCivilZoom
+        ) {
+
+            zoomIn.dataset.fobasCivilZoom =
+                "1";
+
+
+            zoomIn.addEventListener(
+                "click",
+                function () {
+
+                    applyZoom(
+                        state.app.zoom +
+                        0.10
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (
+            zoomOut &&
+            !zoomOut.dataset.fobasCivilZoom
+        ) {
+
+            zoomOut.dataset.fobasCivilZoom =
+                "1";
+
+
+            zoomOut.addEventListener(
+                "click",
+                function () {
+
+                    applyZoom(
+                        state.app.zoom -
+                        0.10
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (
+            zoomReset &&
+            !zoomReset.dataset.fobasCivilZoom
+        ) {
+
+            zoomReset.dataset.fobasCivilZoom =
+                "1";
+
+
+            zoomReset.addEventListener(
+                "click",
+                function () {
+
+                    applyZoom(
+                        1
+                    );
+
+                }
             );
 
         }
@@ -3732,177 +3602,655 @@
     }
 
 
-/* ================================================================
-   45 — FORMAT NOMBRE
-================================================================ */
+    /* ============================================================
+       32 — CONTRÔLES PRINCIPAUX
+    ============================================================ */
 
-    function formatNumber(
-        value,
-        decimals = 2
-    ) {
+    function bindControls() {
 
-        const number =
-            Number(value || 0);
+        const mix =
+            byId(
+                "mixRecipientBtn"
+            );
 
-        return number.toLocaleString(
-            "fr-FR",
-            {
-                minimumFractionDigits:
-                    number % 1 === 0
-                        ? 0
-                        : decimals,
 
-                maximumFractionDigits:
-                    decimals
+        if (
+            mix &&
+            !mix.dataset.fobasCivilBound
+        ) {
+
+            mix.dataset.fobasCivilBound =
+                "1";
+
+            mix.addEventListener(
+                "click",
+                mixRecipient
+            );
+
+        }
+
+
+        const clear =
+            byId(
+                "clearRecipientBtn"
+            );
+
+
+        if (
+            clear &&
+            !clear.dataset.fobasCivilBound
+        ) {
+
+            clear.dataset.fobasCivilBound =
+                "1";
+
+            clear.addEventListener(
+                "click",
+                clearRecipient
+            );
+
+        }
+
+
+        const measure =
+            byId(
+                "measureRecipientBtn"
+            );
+
+
+        if (
+            measure &&
+            !measure.dataset.fobasCivilBound
+        ) {
+
+            measure.dataset.fobasCivilBound =
+                "1";
+
+
+            measure.addEventListener(
+                "click",
+                function () {
+
+                    renderMeasurements();
+
+
+                    const panel =
+                        measure.closest(
+                            "[data-panel-content]"
+                        );
+
+
+                    if (panel) {
+
+                        activatePanel(
+                            panel.id
+                        );
+
+                    }
+
+
+                    notify(
+                        "Mesures actualisées.",
+                        "success"
+                    );
+
+                }
+            );
+
+        }
+
+
+        const tare =
+            byId(
+                "balanceTareBtn"
+            );
+
+
+        if (
+            tare &&
+            !tare.dataset.fobasCivilBound
+        ) {
+
+            tare.dataset.fobasCivilBound =
+                "1";
+
+            tare.addEventListener(
+                "click",
+                tareBalance
+            );
+
+        }
+
+
+        const dosage =
+            byId(
+                "calculateDosageBtn"
+            );
+
+
+        if (
+            dosage &&
+            !dosage.dataset.fobasCivilBound
+        ) {
+
+            dosage.dataset.fobasCivilBound =
+                "1";
+
+            dosage.addEventListener(
+                "click",
+                calculateDosage
+            );
+
+        }
+
+
+        const reaction =
+            byId(
+                "executeReactionBtn"
+            );
+
+
+        if (
+            reaction &&
+            !reaction.dataset.fobasCivilBound
+        ) {
+
+            reaction.dataset.fobasCivilBound =
+                "1";
+
+            reaction.addEventListener(
+                "click",
+                executeReaction
+            );
+
+        }
+
+
+        const report =
+            byId(
+                "generateReportBtn"
+            );
+
+
+        if (
+            report &&
+            !report.dataset.fobasCivilBound
+        ) {
+
+            report.dataset.fobasCivilBound =
+                "1";
+
+            report.addEventListener(
+                "click",
+                generateReport
+            );
+
+        }
+
+
+        const clearReport =
+            byId(
+                "clearReportBtn"
+            );
+
+
+        if (
+            clearReport &&
+            !clearReport.dataset.fobasCivilBound
+        ) {
+
+            clearReport.dataset.fobasCivilBound =
+                "1";
+
+            clearReport.addEventListener(
+                "click",
+                clearReports
+            );
+
+        }
+
+    }
+
+
+    /* ============================================================
+       33 — STYLE DYNAMIQUE DES MATÉRIAUX
+    ============================================================ */
+
+    function installDynamicStyles() {
+
+        if (
+            byId(
+                "fobasCivilDynamicStyles"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "fobasCivilDynamicStyles";
+
+
+        style.textContent = `
+
+            #civilLaboratoryScene {
+                position: relative;
             }
+
+            .fobas-civil-workspace-material {
+                position: absolute;
+                transform: translate(-50%, -50%);
+                min-width: 76px;
+                min-height: 60px;
+                padding: 8px;
+                border: 1px solid rgba(255,255,255,.22);
+                border-radius: 14px;
+                background:
+                    linear-gradient(
+                        145deg,
+                        rgba(12,27,50,.98),
+                        rgba(30,55,88,.96)
+                    );
+                color: #fff;
+                box-shadow:
+                    0 12px 30px rgba(0,0,0,.30),
+                    inset 0 1px 0 rgba(255,255,255,.15);
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                font: inherit;
+                transition:
+                    transform .18s ease,
+                    box-shadow .18s ease;
+            }
+
+            .fobas-civil-workspace-material:hover {
+                transform:
+                    translate(-50%, -50%)
+                    scale(1.07);
+                box-shadow:
+                    0 16px 34px rgba(0,0,0,.38),
+                    0 0 0 2px rgba(50,140,255,.30);
+            }
+
+            .fobas-civil-object-icon {
+                font-size: 26px;
+                line-height: 1;
+            }
+
+            .fobas-civil-object-name {
+                font-size: 11px;
+                font-weight: 800;
+                white-space: nowrap;
+            }
+
+            .fobas-civil-recipient-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 9px 10px;
+                margin-bottom: 7px;
+                border-radius: 10px;
+                background: rgba(30,50,80,.08);
+            }
+
+            .fobas-civil-report-card {
+                display: grid;
+                gap: 6px;
+                padding: 14px;
+                margin-bottom: 10px;
+                border-radius: 12px;
+                background: rgba(30,50,80,.08);
+            }
+
+            .material-selected {
+                outline:
+                    3px solid rgba(40,150,255,.55);
+                outline-offset: 2px;
+            }
+
+            .material-dragging {
+                opacity: .45;
+            }
+
+            .drop-ready {
+                outline:
+                    3px dashed rgba(40,150,255,.75);
+                outline-offset: 5px;
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
         );
 
     }
 
 
-/* ================================================================
-   46 — RESTAURATION AFFICHAGE
-================================================================ */
+    /* ============================================================
+       34 — RENDU DU DOSAGE SAUVEGARDÉ
+    ============================================================ */
 
-    function renderAll() {
+    function renderDosage() {
 
-        renderMaterialCategories();
+        const dosage =
+            state.dosage || {};
 
-        renderMaterialLibrary();
 
-        renderInventory();
+        if (
+            !number(
+                dosage.cementBags,
+                0
+            )
+        ) {
 
-        renderWorkspaceObjects();
+            return;
 
-        renderComposition();
+        }
 
-        renderReactionState();
 
-        renderResult();
+        const type =
+            dosage.type ||
+            "mortier";
 
-        renderObservationLog();
 
-        calculateDosage();
+        const recipe =
+            DOSAGE[type] ||
+            DOSAGE.mortier;
 
-        updateRecipientStatus();
 
-        applyZoom();
+        /*
+           Recalcul automatique avec 42 KG
+           pour éviter qu'un ancien 50 KG
+           reste affiché.
+        */
 
-        updateFooterState();
+        const bags =
+            number(
+                dosage.cementBags,
+                1
+            );
+
+
+        const cement =
+            bags *
+            CEMENT_BAG_KG;
+
+
+        const sand =
+            bags *
+            recipe.sandPerBag;
+
+
+        const gravel =
+            bags *
+            recipe.gravelPerBag;
+
+
+        const water =
+            bags *
+            recipe.waterPerBag;
+
+
+        state.dosage.cementBagKg =
+            CEMENT_BAG_KG;
+
+
+        state.dosage.cementKg =
+            cement;
+
+
+        state.dosage.sandKg =
+            sand;
+
+
+        state.dosage.gravelKg =
+            gravel;
+
+
+        state.dosage.waterL =
+            water;
+
+
+        setText(
+            "dosageCement",
+            round(cement, 2) +
+            " kg"
+        );
+
+
+        setText(
+            "dosageSand",
+            round(sand, 2) +
+            " kg"
+        );
+
+
+        setText(
+            "dosageGravel",
+            round(gravel, 2) +
+            " kg"
+        );
+
+
+        setText(
+            "dosageWater",
+            round(water, 2) +
+            " L"
+        );
+
+
+        setText(
+            "dosageStatusBadge",
+            "1 sac = 42 kg • Ratio " +
+            recipe.ratio
+        );
 
     }
 
 
-/* ================================================================
-   47 — EXPOSITION API PUBLIQUE
-================================================================ */
+    /* ============================================================
+       35 — RENDU INITIAL
+    ============================================================ */
+
+    function renderAll() {
+
+        renderWorkspaceObjects();
+
+        renderRecipientStatus();
+
+        renderMeasurements();
+
+        renderReports();
+
+        renderDosage();
+
+
+        if (
+            state.result &&
+            state.result.available
+        ) {
+
+            updateResult(
+
+                state.result.mixState ||
+                    "—",
+
+                state.result.dosageState ||
+                    "—",
+
+                state.result.reactionState ||
+                    "—",
+
+                state.result.finalState ||
+                    "—"
+
+            );
+
+        }
+
+    }
+
+
+    /* ============================================================
+       36 — API PUBLIQUE
+    ============================================================ */
 
     window.FOBAS_CIVIL_API = {
 
-        state,
+        addMaterial:
+            addWorkspaceMaterial,
 
-        materials: MATERIALS,
+        addWorkspaceMaterial:
+            addWorkspaceMaterial,
 
-        equipment: EQUIPMENT,
+        transferMaterial:
+            transferMaterial,
 
-        addMaterial,
+        mixRecipient:
+            mixRecipient,
 
-        addWorkspaceMaterial,
+        clearRecipient:
+            clearRecipient,
 
-        transferMaterialToRecipient,
+        calculateDosage:
+            calculateDosage,
 
-        openTransferModal,
+        validateMix:
+            validateMix,
 
-        closeTransferModal,
+        executeReaction:
+            executeReaction,
 
-        confirmTransfer,
+        generateReport:
+            generateReport,
 
-        measureRecipient,
+        clearReports:
+            clearReports,
 
-        calculateDosage,
+        renderWorkspaceObjects:
+            renderWorkspaceObjects,
 
-        mixRecipient,
+        renderRecipientStatus:
+            renderRecipientStatus,
 
-        runReaction,
+        saveState:
+            saveState,
 
-        heatRecipient,
+        getMaterial:
+            getMaterial,
 
-        removeSelectedObject,
+        getState:
+            function () {
 
-        clearWorkspace,
+                return state;
 
-        resetSimulation,
+            },
 
-        zoomIn,
+        constants: {
 
-        zoomOut,
+            CEMENT_BAG_KG:
+                CEMENT_BAG_KG,
 
-        fitWorkspace,
+            MIX_TOLERANCE:
+                MIX_TOLERANCE
 
-        generateReport,
-
-        clearReport,
-
-        navigateTo,
-
-        notify,
-
-        saveState,
-
-        renderAll
+        }
 
     };
 
 
-/* ================================================================
-   48 — INITIALISATION
-================================================================ */
+    /* ============================================================
+       37 — INITIALISATION
+    ============================================================ */
 
     function init() {
 
-        try {
+        installDynamicStyles();
 
-            setupWorkspaceDrop();
+        bindNavigation();
 
-            bindEvents();
+        bindControls();
 
-            renderAll();
+        bindZoom();
 
-            state.timestamp =
-                Date.now();
+        bindMaterialCards();
 
-            window.FOBAS_CIVIL_STATE =
-                state;
+        bindEquipment();
 
-            window.FOBAS_CIVIL_ENGINE.ready =
-                true;
+        setupRecipientDrop();
 
-            addObservation(
-                "Moteur FOBAS Génie Civil initialisé."
-            );
+        setupTransferModal();
 
-            updateFooterState();
+        setupLaboratoryDrop();
 
-            console.log(
-                `${ENGINE_NAME} ${ENGINE_VERSION} — READY`
-            );
+        renderAll();
 
-        } catch (error) {
 
-            console.error(
-                "FOBAS Civil Engine initialization error:",
-                error
-            );
+        applyZoom(
+            number(
+                state.app.zoom,
+                1
+            )
+        );
 
-            notify(
-                "Erreur d'initialisation du laboratoire.",
-                "error"
-            );
 
-        }
+        activatePanel(
+            state.activePanel ||
+            "laboratoryPanel"
+        );
+
+
+        setText(
+            "engineStatusText",
+            "Système prêt"
+        );
+
+
+        setText(
+            "engineStateText",
+            "Opérationnel"
+        );
+
+
+        setText(
+            "footerEngineState",
+            APP_ID
+        );
+
+
+        saveState();
+
+
+        console.info(
+            "FOBAS Civil Engine initialisé."
+        );
+
+
+        console.info(
+            "RÈGLE DOSAGE : 1 sac de ciment = 42 kg."
+        );
 
     }
 
+
+    /* ============================================================
+       38 — DÉMARRAGE
+    ============================================================ */
 
     if (
         document.readyState ===
@@ -3925,3 +4273,24 @@
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
