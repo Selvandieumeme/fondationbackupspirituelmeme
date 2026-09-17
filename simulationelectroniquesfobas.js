@@ -6848,7 +6848,17 @@ function openLaboratory() {
 
 
 
-
+bind(
+    "libraryBtn",
+    "click",
+    () => {
+        openLaboratory();
+        toast(
+            "Bibliothèque des composants active.",
+            "info"
+        );
+    }
+);
 
 
 
