@@ -6818,23 +6818,21 @@ void loop() {
 
         /* TOP */
 
-        bind(
-            "laboratoryBtn",
-            "click",
-            openLaboratory
-        );
 
-        bind(
-            "libraryBtn",
-            "click",
-            () => {
-                openLaboratory();
-                toast(
-                    "Bibliothèque des composants active.",
-                    "info"
-                );
-            }
-        );
+
+
+bind(
+    "libraryBtn",
+    "click",
+    () => {
+        openComponentLibrary();
+    }
+);
+
+
+
+
+
 
         bind(
             "codeLibraryBtn",
