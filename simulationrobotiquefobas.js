@@ -9130,3 +9130,800 @@ function applyWorkspaceTransform() {
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================================================================
+   FOBAS — ISOLATED ADD BUTTON PATCH
+   ---------------------------------------------------------------
+   TOTALMAN IZOLÉ
+   - PA redeklare renderToolsLibrary()
+   - PA redeklare fillComponentCard()
+   - PA redeklare addLibraryItem()
+   - PA modifye state
+   - PA modifye simulation engine
+   - PA modifye HTML source
+   - Sèl objektif: garanti bouton ➕ Ajouter sou cards
+================================================================ */
+
+(function FOBAS_IsolatedAddButtonPatch() {
+
+    "use strict";
+
+    /* ------------------------------------------------------------
+       PROTECTION CONTRE DOUBLE INSTALLATION
+    ------------------------------------------------------------ */
+
+    if (
+        window.__FOBAS_ISOLATED_ADD_BUTTON_PATCH__
+    ) {
+        return;
+    }
+
+    window.__FOBAS_ISOLATED_ADD_BUTTON_PATCH__ = true;
+
+
+    /* ------------------------------------------------------------
+       HELPERS IZOLÉ
+    ------------------------------------------------------------ */
+
+    function getById(id) {
+
+        return document.getElementById(id);
+
+    }
+
+
+    function getEngine() {
+
+        return (
+            window.FOBASRoboticsEngine ||
+            window.FOBASRobotics ||
+            window.FOBAS_ROBOTICS ||
+            null
+        );
+
+    }
+
+
+    function getItemId(card) {
+
+        return (
+            card.dataset.itemId ||
+            card.dataset.componentId ||
+            card.dataset.toolId ||
+            card.dataset.id ||
+            null
+        );
+
+    }
+
+
+    function getItemName(card) {
+
+        const name =
+            card.querySelector(
+                "[data-component-name], " +
+                "[data-tool-name], " +
+                "[data-name]"
+            );
+
+        return name
+            ? name.textContent.trim()
+            : "";
+
+    }
+
+
+    function detectItemType(card) {
+
+        if (
+            card.matches(".tool-card") ||
+            card.querySelector(
+                "[data-tool-name], [data-tool-icon], [data-tool-description]"
+            )
+        ) {
+
+            return "tool";
+
+        }
+
+        if (
+            card.matches(".component-card") ||
+            card.querySelector(
+                "[data-component-name], [data-component-visual], [data-component-type]"
+            )
+        ) {
+
+            return "component";
+
+        }
+
+        return null;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       RECUPERER L'OBJET ORIGINAL DANS LE DATASET FOBAS
+       ------------------------------------------------------------ */
+
+    function findOriginalItem(
+        card,
+        itemType
+    ) {
+
+        const id =
+            getItemId(card);
+
+        const name =
+            getItemName(card);
+
+        const engine =
+            getEngine();
+
+        let datasets = [];
+
+
+        if (engine) {
+
+            try {
+
+                if (
+                    typeof engine.getToolsData ===
+                    "function"
+                ) {
+
+                    datasets.push(
+                        engine.getToolsData()
+                    );
+
+                }
+
+            } catch (error) {}
+
+
+            try {
+
+                if (
+                    typeof engine.getComponentsData ===
+                    "function"
+                ) {
+
+                    datasets.push(
+                        engine.getComponentsData()
+                    );
+
+                }
+
+            } catch (error) {}
+
+        }
+
+
+        /*
+           Cherche également dans les sources globales
+           déjà utilisées par le moteur.
+        */
+
+        const globalData =
+            window.FOBAS_ROBOTICS_DATA ||
+            window.FOBAS_ROBOTICS_DATASET ||
+            window.FOBAS_DATA ||
+            window.FOBAS_ELECTRONIQUE_ROBOTIQUE_DATA ||
+            window.ROBOTICS_DATA ||
+            null;
+
+
+        if (globalData) {
+
+            if (
+                itemType === "tool" &&
+                Array.isArray(globalData.tools)
+            ) {
+
+                datasets.push(
+                    globalData.tools
+                );
+
+            }
+
+            if (
+                itemType === "component" &&
+                Array.isArray(globalData.components)
+            ) {
+
+                datasets.push(
+                    globalData.components
+                );
+
+            }
+
+        }
+
+
+        for (
+            let i = 0;
+            i < datasets.length;
+            i++
+        ) {
+
+            const list =
+                Array.isArray(datasets[i])
+                    ? datasets[i]
+                    : [];
+
+            for (
+                let j = 0;
+                j < list.length;
+                j++
+            ) {
+
+                const item =
+                    list[j];
+
+                if (!item) {
+                    continue;
+                }
+
+                const itemId =
+                    String(
+                        item.id ||
+                        ""
+                    );
+
+                const itemName =
+                    String(
+                        item.name ||
+                        item.nom ||
+                        item.title ||
+                        ""
+                    );
+
+                if (
+                    id &&
+                    itemId === String(id)
+                ) {
+
+                    return item;
+
+                }
+
+                if (
+                    name &&
+                    itemName === name
+                ) {
+
+                    return item;
+
+                }
+
+            }
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       APPEL DU VRAI MOTEUR D'AJOUT
+       ------------------------------------------------------------ */
+
+    function addItem(
+        item,
+        itemType
+    ) {
+
+        const engine =
+            getEngine();
+
+
+        /*
+           Première priorité:
+           API publique du moteur.
+        */
+
+        if (
+            engine &&
+            itemType === "tool" &&
+            typeof engine.addTool ===
+            "function"
+        ) {
+
+            try {
+
+                return engine.addTool(
+                    item
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[FOBAS] addTool error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        if (
+            engine &&
+            itemType === "component" &&
+            typeof engine.addComponent ===
+            "function"
+        ) {
+
+            try {
+
+                return engine.addComponent(
+                    item
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[FOBAS] addComponent error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+           Deuxième priorité:
+           utiliser addLibraryItem()
+           déjà présent dans l'ancien moteur.
+
+           IMPORTANT:
+           On ne le redéfinit PAS.
+        */
+
+        try {
+
+            if (
+                typeof window.addLibraryItem ===
+                "function"
+            ) {
+
+                return window.addLibraryItem(
+                    item,
+                    itemType
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "[FOBAS] addLibraryItem error:",
+                error
+            );
+
+        }
+
+
+        /*
+           Si addLibraryItem n'est pas global,
+           on tente l'API du moteur.
+        */
+
+        if (
+            engine &&
+            typeof engine.addLibraryItem ===
+            "function"
+        ) {
+
+            try {
+
+                return engine.addLibraryItem(
+                    item,
+                    itemType
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[FOBAS] engine.addLibraryItem error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        console.warn(
+            "[FOBAS] Aucun moteur d'ajout disponible."
+        );
+
+        return null;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       CREATION DU BOUTON
+       ------------------------------------------------------------ */
+
+    function ensureButton(
+        card,
+        itemType
+    ) {
+
+        if (!card) {
+            return;
+        }
+
+
+        /*
+           Cherche un bouton déjà existant.
+        */
+
+        let button =
+            card.querySelector(
+                "[data-fobas-isolated-add]"
+            );
+
+
+        /*
+           Si le template possède déjà son bouton,
+           on l'utilise également.
+        */
+
+        if (!button) {
+
+            button =
+                card.querySelector(
+                    itemType === "tool"
+                        ? "[data-tool-add]"
+                        : "[data-component-add]"
+                );
+
+        }
+
+
+        /*
+           Si aucun bouton n'existe,
+           on le crée.
+        */
+
+        if (!button) {
+
+            button =
+                document.createElement(
+                    "button"
+                );
+
+            button.type =
+                "button";
+
+            button.className =
+                itemType === "tool"
+                    ? "tool-add-btn"
+                    : "component-add-btn";
+
+            button.textContent =
+                "➕ Ajouter";
+
+            button.setAttribute(
+                "data-fobas-isolated-add",
+                "true"
+            );
+
+
+            /*
+               On essaye de placer le bouton
+               dans la zone content de la card.
+            */
+
+            const content =
+                card.querySelector(
+                    ".tool-card-content, " +
+                    ".component-card-content, " +
+                    "[data-card-content]"
+                );
+
+
+            if (content) {
+
+                content.appendChild(
+                    button
+                );
+
+            } else {
+
+                card.appendChild(
+                    button
+                );
+
+            }
+
+        }
+
+
+        /*
+           Toujours afficher le texte demandé.
+        */
+
+        button.textContent =
+            "➕ Ajouter";
+
+
+        button.type =
+            "button";
+
+
+        /*
+           Protection contre double listener.
+        */
+
+        if (
+            button.dataset.fobasIsolatedBound ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        button.dataset.fobasIsolatedBound =
+            "true";
+
+
+        button.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                event.stopImmediatePropagation();
+
+
+                const originalItem =
+                    findOriginalItem(
+                        card,
+                        itemType
+                    );
+
+
+                /*
+                   Si data original la pa jwenn,
+                   kreye yon objet minimal apati card la.
+                */
+
+                const item =
+                    originalItem ||
+                    {
+                        id:
+                            getItemId(card) ||
+                            getItemName(card)
+                                .toLowerCase()
+                                .replace(
+                                    /\s+/g,
+                                    "-"
+                                ),
+
+                        name:
+                            getItemName(card),
+
+                        type:
+                            itemType
+                    };
+
+
+                addItem(
+                    item,
+                    itemType
+                );
+
+            },
+            true
+        );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SCAN TOOLS
+       ------------------------------------------------------------ */
+
+    function scanTools() {
+
+        const container =
+            getById(
+                "toolsLibrary"
+            );
+
+        if (!container) {
+            return;
+        }
+
+
+        const cards =
+            container.querySelectorAll(
+                ".tool-card, " +
+                "[data-tool-card], " +
+                "[data-tool-id]"
+            );
+
+
+        cards.forEach(
+            function (card) {
+
+                ensureButton(
+                    card,
+                    "tool"
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SCAN COMPONENTS
+       ------------------------------------------------------------ */
+
+    function scanComponents() {
+
+        const container =
+            getById(
+                "componentsLibrary"
+            );
+
+        if (!container) {
+            return;
+        }
+
+
+        const cards =
+            container.querySelectorAll(
+                ".component-card, " +
+                "[data-component-card], " +
+                "[data-component-id]"
+            );
+
+
+        cards.forEach(
+            function (card) {
+
+                ensureButton(
+                    card,
+                    "component"
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SCAN GLOBAL
+       ------------------------------------------------------------ */
+
+    function scanAll() {
+
+        scanTools();
+
+        scanComponents();
+
+    }
+
+
+    /* ------------------------------------------------------------
+       OBSERVER
+       ------------------------------------------------------------ */
+
+    function installObserver() {
+
+        if (
+            !document.body
+        ) {
+
+            return;
+
+        }
+
+
+        const observer =
+            new MutationObserver(
+                function () {
+
+                    scanAll();
+
+                }
+            );
+
+
+        observer.observe(
+            document.body,
+            {
+                childList: true,
+                subtree: true
+            }
+        );
+
+    }
+
+
+    /* ------------------------------------------------------------
+       INITIALISATION
+       ------------------------------------------------------------ */
+
+    function initialize() {
+
+        scanAll();
+
+        installObserver();
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+    /*
+       API trè limite pou debug sèlman.
+       Pa ekspoze okenn ansyen function.
+    */
+
+    window.FOBASIsolatedAddButtonPatch = {
+
+        refresh:
+            scanAll,
+
+        version:
+            "1.0.0-isolated"
+
+    };
+
+})();
