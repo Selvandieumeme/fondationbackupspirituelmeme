@@ -7401,17 +7401,18 @@ void loop() {
 
 
 
-
 /* ============================================================
-   31 — ZOOM ANDROID À DEUX DOIGTS — VERSION ROBUSTE
+   31 — ZOOM ANDROID À DEUX DOIGTS
    ------------------------------------------------------------
-   IMPORTANT :
-   - Utilise Pointer Events pour Android / tactile moderne.
-   - Le pinch fonctionne indépendamment du mode actif.
-   - Le zoom se fait autour du centre des deux doigts.
-   - Compatible avec le déplacement du workspace.
-   - Ne modifie pas les boutons, l'éditeur ou les autres vues.
-   - Aucun changement HTML nécessaire.
+   VERSION CORRIGÉE — SCROLL ANDROID CONSERVÉ
+   ------------------------------------------------------------
+   RÈG :
+   - 1 doigt  = scroll Android normal
+   - 2 doigts = pinch-to-zoom du laboratoire
+   - Aucun blocage du scroll avec un seul doigt
+   - Aucun touch-action:none
+   - Aucun pan JavaScript à un doigt
+   - Le zoom reste centré autour des deux doigts
 ============================================================ */
 
 function setupWorkspaceTouchZoom() {
@@ -7428,21 +7429,30 @@ function setupWorkspaceTouchZoom() {
 
 
     /*
-       Désactive la gestion tactile native du navigateur
-       uniquement à l'intérieur du laboratoire.
-       
-       Cela empêche Android de transformer le geste
-       en scroll / navigation au lieu d'un vrai pinch.
+       IMPORTANT :
+
+       On NE met PAS :
+
+           touchAction = "none"
+
+       car cela peut empêcher Android de faire
+       défiler naturellement la page.
+
+       On autorise le déplacement horizontal
+       et vertical natif du navigateur.
+
+       Le pinch personnalisé sera intercepté
+       uniquement lorsqu'il y a deux doigts.
     */
 
     workspace.style.touchAction =
-        "none";
+        "pan-x pan-y";
 
 
     /*
-       Tableau des doigts actuellement actifs.
+       Pointeurs tactiles actuellement actifs.
 
-       Structure :
+       Map :
        pointerId -> {
            x,
            y
@@ -7454,57 +7464,37 @@ function setupWorkspaceTouchZoom() {
 
 
     /*
-       État du pinch.
+       État initial du pinch.
     */
 
     let pinchStartDistance =
         null;
 
+
     let pinchStartScale =
         state.workspaceScale;
 
-    let pinchStartOffsetX =
-        state.workspaceOffsetX;
-
-    let pinchStartOffsetY =
-        state.workspaceOffsetY;
-
-    let pinchStartCenterX =
-        0;
-
-    let pinchStartCenterY =
-        0;
 
     let pinchWorldX =
         0;
+
 
     let pinchWorldY =
         0;
 
 
     /*
-       État du déplacement à un doigt.
+       Indique si le geste actuel est
+       réellement un pinch à deux doigts.
     */
 
-    let panPointerId =
-        null;
-
-    let panStartX =
-        0;
-
-    let panStartY =
-        0;
-
-    let panStartOffsetX =
-        0;
-
-    let panStartOffsetY =
-        0;
+    let pinchActive =
+        false;
 
 
     /*
-       Vérifie si un élément appartient réellement
-       au laboratoire.
+       Vérifie si l'événement vient du
+       workspace ou d'un de ses enfants.
     */
 
     function isInsideWorkspace(
@@ -7515,6 +7505,7 @@ function setupWorkspaceTouchZoom() {
             return false;
         }
 
+
         return (
             target === workspace ||
             workspace.contains(target)
@@ -7524,7 +7515,7 @@ function setupWorkspaceTouchZoom() {
 
 
     /*
-       Distance entre deux pointeurs.
+       Calcule la distance entre deux doigts.
     */
 
     function getPointerDistance(
@@ -7535,6 +7526,7 @@ function setupWorkspaceTouchZoom() {
         const dx =
             second.x -
             first.x;
+
 
         const dy =
             second.y -
@@ -7550,7 +7542,7 @@ function setupWorkspaceTouchZoom() {
 
 
     /*
-       Centre entre deux pointeurs.
+       Calcule le centre des deux doigts.
     */
 
     function getPointerCenter(
@@ -7578,7 +7570,7 @@ function setupWorkspaceTouchZoom() {
 
 
     /*
-       Récupère les deux pointeurs actifs.
+       Retourne les deux premiers pointeurs.
     */
 
     function getTwoPointers() {
@@ -7589,8 +7581,13 @@ function setupWorkspaceTouchZoom() {
             );
 
 
-        if (values.length < 2) {
+        if (
+            values.length <
+            2
+        ) {
+
             return null;
+
         }
 
 
@@ -7603,10 +7600,10 @@ function setupWorkspaceTouchZoom() {
 
 
     /*
-       Démarre le pinch.
+       DÉBUT DU PINCH
     */
 
-    function startPinch() {
+    function beginPinch() {
 
         const pointers =
             getTwoPointers();
@@ -7620,116 +7617,6 @@ function setupWorkspaceTouchZoom() {
         const first =
             pointers[0];
 
-        const second =
-            pointers[1];
-
-
-        pinchStartDistance =
-            getPointerDistance(
-                first,
-                second
-            );
-
-
-        if (
-            pinchStartDistance <= 0
-        ) {
-
-            pinchStartDistance =
-                null;
-
-            return;
-
-        }
-
-
-        pinchStartScale =
-            state.workspaceScale;
-
-
-        pinchStartOffsetX =
-            state.workspaceOffsetX;
-
-
-        pinchStartOffsetY =
-            state.workspaceOffsetY;
-
-
-        const center =
-            getPointerCenter(
-                first,
-                second
-            );
-
-
-        pinchStartCenterX =
-            center.x;
-
-
-        pinchStartCenterY =
-            center.y;
-
-
-        /*
-           Coordonnée virtuelle du point situé
-           sous le centre des doigts.
-
-           Cette formule permet de garder le contenu
-           sous les doigts pendant le zoom.
-        */
-
-        pinchWorldX =
-            (
-                pinchStartCenterX -
-                pinchStartOffsetX
-            ) /
-            pinchStartScale;
-
-
-        pinchWorldY =
-            (
-                pinchStartCenterY -
-                pinchStartOffsetY
-            ) /
-            pinchStartScale;
-
-
-        /*
-           Un pinch annule le déplacement
-           à un doigt en cours.
-        */
-
-        panPointerId =
-            null;
-
-    }
-
-
-    /*
-       Effectue le pinch.
-    */
-
-    function updatePinch() {
-
-        if (
-            pinchStartDistance ===
-            null
-        ) {
-            return;
-        }
-
-
-        const pointers =
-            getTwoPointers();
-
-
-        if (!pointers) {
-            return;
-        }
-
-
-        const first =
-            pointers[0];
 
         const second =
             pointers[1];
@@ -7743,12 +7630,115 @@ function setupWorkspaceTouchZoom() {
 
 
         if (
-            distance <= 0 ||
-            pinchStartDistance <= 0
+            distance <= 0
         ) {
+
+            pinchStartDistance =
+                null;
+
+            return;
+
+        }
+
+
+        pinchStartDistance =
+            distance;
+
+
+        pinchStartScale =
+            state.workspaceScale;
+
+
+        const center =
+            getPointerCenter(
+                first,
+                second
+            );
+
+
+        /*
+           Mémorise le point virtuel du laboratoire
+           qui se trouve sous le centre des doigts.
+
+           Ainsi le zoom reste centré naturellement.
+        */
+
+        pinchWorldX =
+            (
+                center.x -
+                state.workspaceOffsetX
+            ) /
+            pinchStartScale;
+
+
+        pinchWorldY =
+            (
+                center.y -
+                state.workspaceOffsetY
+            ) /
+            pinchStartScale;
+
+
+        pinchActive =
+            true;
+
+    }
+
+
+    /*
+       MISE À JOUR DU PINCH
+    */
+
+    function updatePinch() {
+
+        if (
+            !pinchActive ||
+            pinchStartDistance ===
+            null
+        ) {
+
+            return;
+
+        }
+
+
+        const pointers =
+            getTwoPointers();
+
+
+        if (!pointers) {
             return;
         }
 
+
+        const first =
+            pointers[0];
+
+
+        const second =
+            pointers[1];
+
+
+        const distance =
+            getPointerDistance(
+                first,
+                second
+            );
+
+
+        if (
+            distance <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+           Rapport entre la nouvelle distance
+           et la distance de départ.
+        */
 
         const ratio =
             distance /
@@ -7759,6 +7749,11 @@ function setupWorkspaceTouchZoom() {
             pinchStartScale *
             ratio;
 
+
+        /*
+           Respect des limites déjà définies
+           dans state.
+        */
 
         newScale =
             Math.max(
@@ -7771,7 +7766,7 @@ function setupWorkspaceTouchZoom() {
 
 
         /*
-           Nouveau centre des deux doigts.
+           Nouveau centre des doigts.
         */
 
         const center =
@@ -7782,9 +7777,8 @@ function setupWorkspaceTouchZoom() {
 
 
         /*
-           Recalcule le déplacement pour que
-           le même point du laboratoire reste
-           sous les doigts.
+           Garde le même point du laboratoire
+           sous le centre des doigts.
         */
 
         state.workspaceOffsetX =
@@ -7813,28 +7807,29 @@ function setupWorkspaceTouchZoom() {
 
 
     /*
-       Réinitialise complètement le pinch.
+       FIN DU PINCH
     */
 
-    function resetPinch() {
+    function endPinch() {
 
         pinchStartDistance =
             null;
 
+
+        pinchActive =
+            false;
+
+
         pinchStartScale =
             state.workspaceScale;
-
-        pinchStartOffsetX =
-            state.workspaceOffsetX;
-
-        pinchStartOffsetY =
-            state.workspaceOffsetY;
 
     }
 
 
     /*
+       ---------------------------------------------------------
        POINTER DOWN
+       ---------------------------------------------------------
     */
 
     document.addEventListener(
@@ -7842,21 +7837,25 @@ function setupWorkspaceTouchZoom() {
         function (event) {
 
             /*
-               Nous ne voulons traiter que
-               les vrais pointeurs tactiles.
+               Seulement les doigts.
+               Souris et stylet ne sont pas concernés.
             */
 
             if (
                 event.pointerType !==
                 "touch"
             ) {
+
                 return;
+
             }
 
 
             /*
-               Ignore les touches qui commencent
-               en dehors du laboratoire.
+               Si le toucher commence hors du laboratoire,
+               on ne fait absolument rien.
+
+               Android garde donc son comportement normal.
             */
 
             if (
@@ -7864,32 +7863,50 @@ function setupWorkspaceTouchZoom() {
                     event.target
                 )
             ) {
+
                 return;
+
             }
 
+
+            /*
+               Si le tactile est désactivé
+               dans les paramètres.
+            */
 
             if (
                 !state.touchEnabled
             ) {
+
                 return;
+
             }
 
+
+            /*
+               Enregistre le doigt.
+            */
 
             activePointers.set(
                 event.pointerId,
                 {
+
                     x:
                         event.clientX,
 
                     y:
                         event.clientY
+
                 }
             );
 
 
             /*
-               Dès qu'il y a deux doigts,
-               le pinch devient prioritaire.
+               Dès que le deuxième doigt arrive,
+               on démarre le pinch.
+
+               C'est le SEUL moment où le JS
+               prend le contrôle du geste.
             */
 
             if (
@@ -7897,89 +7914,22 @@ function setupWorkspaceTouchZoom() {
                 2
             ) {
 
-                event.preventDefault();
-
-                startPinch();
-
-                return;
-
-            }
-
-
-            /*
-               Un seul doigt :
-               déplacement uniquement en mode MOVE.
-
-               Le déplacement ne commence que sur
-               la surface du workspace et non sur
-               un objet interactif.
-            */
-
-            if (
-                activePointers.size ===
-                1 &&
-                state.activeAction ===
-                "move"
-            ) {
-
-                const target =
-                    event.target;
-
-
-                const objectElement =
-                    target.closest &&
-                    target.closest(
-                        ".workspace-object"
-                    );
-
-
-                if (
-                    objectElement
-                ) {
-
-                    /*
-                       L'objet gère lui-même
-                       son déplacement.
-                    */
-
-                    panPointerId =
-                        null;
-
-                    return;
-
-                }
-
-
-                panPointerId =
-                    event.pointerId;
-
-
-                panStartX =
-                    event.clientX;
-
-
-                panStartY =
-                    event.clientY;
-
-
-                panStartOffsetX =
-                    state.workspaceOffsetX;
-
-
-                panStartOffsetY =
-                    state.workspaceOffsetY;
+                beginPinch();
 
             }
 
         },
         {
-            passive: false
+            passive: true,
+            capture: true
         }
     );
 
 
     /*
+       ---------------------------------------------------------
        POINTER MOVE
+       ---------------------------------------------------------
     */
 
     document.addEventListener(
@@ -7990,15 +7940,15 @@ function setupWorkspaceTouchZoom() {
                 event.pointerType !==
                 "touch"
             ) {
+
                 return;
+
             }
 
 
             /*
-               Si ce pointeur appartient déjà
-               au geste actif, on met sa position
-               à jour même si un objet a capturé
-               le pointeur.
+               Met à jour uniquement les pointeurs
+               déjà enregistrés.
             */
 
             if (
@@ -8016,6 +7966,7 @@ function setupWorkspaceTouchZoom() {
                 pointer.x =
                     event.clientX;
 
+
                 pointer.y =
                     event.clientY;
 
@@ -8023,17 +7974,22 @@ function setupWorkspaceTouchZoom() {
 
 
             /*
-               DEUX DOIGTS
+               IMPORTANT :
+
+               Avec UN SEUL doigt :
+
+               - aucun preventDefault()
+               - aucune transformation
+               - aucun pan JS
+
+               Android peut donc faire défiler
+               normalement toute la page.
             */
 
             if (
-                activePointers.size >=
+                activePointers.size !==
                 2
             ) {
-
-                event.preventDefault();
-
-                updatePinch();
 
                 return;
 
@@ -8041,50 +7997,37 @@ function setupWorkspaceTouchZoom() {
 
 
             /*
-               UN DOIGT — PAN
+               DEUX DOIGTS :
+
+               Maintenant seulement, on bloque
+               le comportement natif afin que le
+               navigateur ne transforme pas le
+               geste en scroll pendant le pinch.
             */
 
             if (
-                activePointers.size ===
-                1 &&
-                panPointerId ===
-                event.pointerId &&
-                state.activeAction ===
-                "move"
+                pinchActive
             ) {
 
                 event.preventDefault();
 
 
-                state.workspaceOffsetX =
-                    panStartOffsetX +
-                    (
-                        event.clientX -
-                        panStartX
-                    );
-
-
-                state.workspaceOffsetY =
-                    panStartOffsetY +
-                    (
-                        event.clientY -
-                        panStartY
-                    );
-
-
-                applyWorkspaceTransform();
+                updatePinch();
 
             }
 
         },
         {
-            passive: false
+            passive: false,
+            capture: true
         }
     );
 
 
     /*
+       ---------------------------------------------------------
        POINTER UP
+       ---------------------------------------------------------
     */
 
     document.addEventListener(
@@ -8095,25 +8038,19 @@ function setupWorkspaceTouchZoom() {
                 event.pointerType !==
                 "touch"
             ) {
+
                 return;
-            }
-
-
-            if (
-                activePointers.has(
-                    event.pointerId
-                )
-            ) {
-
-                activePointers.delete(
-                    event.pointerId
-                );
 
             }
+
+
+            activePointers.delete(
+                event.pointerId
+            );
 
 
             /*
-               Dès qu'il reste moins de deux doigts,
+               Si on repasse sous deux doigts,
                le pinch est terminé.
             */
 
@@ -8122,35 +8059,22 @@ function setupWorkspaceTouchZoom() {
                 2
             ) {
 
-                resetPinch();
+                endPinch();
 
             }
-
-
-            /*
-               Plus aucun doigt.
-            */
-
-            if (
-                activePointers.size ===
-                0
-            ) {
-
-                panPointerId =
-                    null;
-
-            }
-
 
         },
         {
-            passive: false
+            passive: true,
+            capture: true
         }
     );
 
 
     /*
+       ---------------------------------------------------------
        POINTER CANCEL
+       ---------------------------------------------------------
     */
 
     document.addEventListener(
@@ -8161,7 +8085,9 @@ function setupWorkspaceTouchZoom() {
                 event.pointerType !==
                 "touch"
             ) {
+
                 return;
+
             }
 
 
@@ -8175,97 +8101,57 @@ function setupWorkspaceTouchZoom() {
                 2
             ) {
 
-                resetPinch();
-
-            }
-
-
-            if (
-                activePointers.size ===
-                0
-            ) {
-
-                panPointerId =
-                    null;
+                endPinch();
 
             }
 
         },
         {
-            passive: false
+            passive: true,
+            capture: true
         }
     );
 
 
     /*
-       POINTER LEAVE
-       
-       On ne supprime pas immédiatement
-       le pointeur ici car Android peut
-       temporairement sortir de la zone
-       tout en continuant le geste.
+       ---------------------------------------------------------
+       POINTER LOST
+       ---------------------------------------------------------
+       Sécurité supplémentaire pour Android.
     */
 
-
-    /*
-       Support supplémentaire pour les
-       anciens appareils utilisant encore
-       les événements tactiles classiques.
-
-       Cette partie ne remplace PAS Pointer Events.
-       Elle sert uniquement de secours.
-    */
-
-    workspace.addEventListener(
-        "touchstart",
+    document.addEventListener(
+        "lostpointercapture",
         function (event) {
 
             if (
-                !state.touchEnabled
+                event.pointerType !==
+                "touch"
             ) {
+
                 return;
+
             }
 
 
+            activePointers.delete(
+                event.pointerId
+            );
+
+
             if (
-                event.touches.length >=
+                activePointers.size <
                 2
             ) {
 
-                event.preventDefault();
+                endPinch();
 
             }
 
         },
         {
-            passive: false
-        }
-    );
-
-
-    workspace.addEventListener(
-        "touchmove",
-        function (event) {
-
-            if (
-                !state.touchEnabled
-            ) {
-                return;
-            }
-
-
-            if (
-                event.touches.length >=
-                2
-            ) {
-
-                event.preventDefault();
-
-            }
-
-        },
-        {
-            passive: false
+            passive: true,
+            capture: true
         }
     );
 
@@ -8275,8 +8161,8 @@ function setupWorkspaceTouchZoom() {
 /* ============================================================
    DISTANCE TACTILE — COMPATIBILITÉ
    ------------------------------------------------------------
-   Conservée pour ne pas casser les éventuels appels
-   existants dans le reste du programme.
+   Cette fonction reste disponible afin de ne pas provoquer
+   d'erreur si une autre partie du programme l'utilise.
 ============================================================ */
 
 function getTouchDistance(
@@ -8405,6 +8291,9 @@ function applyWorkspaceTransform() {
     redrawAllWires();
 
 }
+
+
+
 
 
 
