@@ -1,0 +1,5448 @@
+/* ================================================================
+FOBAS — LABORATOIRE GÉNIE CIVIL
+
+FICHIER : simulationgeniecivilfobas.css
+
+Compatible avec :
+simulationgeniecivilfobas.html
+
+Architecture :
+
+- Interface professionnelle Génie Civil
+- Design 3D visuel sans Three.js
+- Responsive ordinateur / tablette / Android
+- Laboratoire virtuel
+- Matériaux
+- Équipements
+- Récipients
+- Mesures
+- Dosages
+- Réactions
+- Résultats
+- Rapports
+- Drag & Drop
+- Zoom applicatif
+- Panneaux mobiles
+
+IMPORTANT :
+
+- Aucun framework externe
+- Aucun Three.js
+- Aucun canvas obligatoire
+- Compatible avec le HTML FOBAS fourni
+  ================================================================ */
+
+/* ================================================================
+01 — VARIABLES GLOBALES
+================================================================ */
+
+:root {
+
+--fobas-app-zoom: 1;
+
+--fobas-bg:
+    #07111f;
+
+--fobas-bg-deep:
+    #040a13;
+
+--fobas-panel:
+    #0c1828;
+
+--fobas-panel-2:
+    #101f32;
+
+--fobas-panel-3:
+    #14263d;
+
+--fobas-border:
+    rgba(148, 163, 184, 0.18);
+
+--fobas-border-strong:
+    rgba(96, 165, 250, 0.38);
+
+--fobas-blue:
+    #2196f3;
+
+--fobas-blue-light:
+    #60a5fa;
+
+--fobas-blue-deep:
+    #0f5fae;
+
+--fobas-cyan:
+    #22d3ee;
+
+--fobas-green:
+    #22c55e;
+
+--fobas-green-light:
+    #4ade80;
+
+--fobas-yellow:
+    #facc15;
+
+--fobas-orange:
+    #fb923c;
+
+--fobas-red:
+    #ef4444;
+
+--fobas-purple:
+    #a78bfa;
+
+--fobas-white:
+    #f8fafc;
+
+--fobas-text:
+    #e2e8f0;
+
+--fobas-muted:
+    #94a3b8;
+
+--fobas-dark-text:
+    #0f172a;
+
+--fobas-radius:
+    16px;
+
+--fobas-radius-small:
+    10px;
+
+--fobas-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.38);
+
+--fobas-shadow-small:
+    0 8px 25px rgba(0, 0, 0, 0.28);
+
+--fobas-transition:
+    180ms ease;
+
+--fobas-sidebar-width:
+    245px;
+
+--fobas-top-height:
+    72px;
+
+--fobas-footer-height:
+    34px;
+
+}
+
+/* ================================================================
+02 — RESET
+================================================================ */
+
+*,
+*::before,
+*::after {
+
+box-sizing:
+    border-box;
+
+}
+
+html {
+
+width:
+    100%;
+
+height:
+    100%;
+
+margin:
+    0;
+
+padding:
+    0;
+
+font-family:
+    Inter,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+background:
+    var(--fobas-bg-deep);
+
+color:
+    var(--fobas-text);
+
+}
+
+body {
+
+width:
+    100%;
+
+min-height:
+    100%;
+
+margin:
+    0;
+
+padding:
+    0;
+
+overflow:
+    hidden;
+
+background:
+    var(--fobas-bg-deep);
+
+color:
+    var(--fobas-text);
+
+}
+
+button,
+input,
+select,
+textarea {
+
+font:
+    inherit;
+
+}
+
+button {
+
+cursor:
+    pointer;
+
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+
+outline:
+    2px solid var(--fobas-cyan);
+
+outline-offset:
+    2px;
+
+}
+
+[hidden] {
+
+display:
+    none !important;
+
+}
+
+/* ================================================================
+03 — APPLICATION PRINCIPALE
+================================================================ */
+
+.fobas-civil-app {
+
+--local-zoom:
+    var(--fobas-app-zoom);
+
+position:
+    relative;
+
+width:
+    100%;
+
+height:
+    100vh;
+
+min-height:
+    620px;
+
+overflow:
+    hidden;
+
+background:
+    radial-gradient(
+        circle at 15% 10%,
+        rgba(33, 150, 243, 0.12),
+        transparent 34%
+    ),
+    radial-gradient(
+        circle at 85% 15%,
+        rgba(34, 211, 238, 0.08),
+        transparent 30%
+    ),
+    linear-gradient(
+        135deg,
+        #040a13 0%,
+        #07111f 45%,
+        #091728 100%
+    );
+
+}
+
+/* ================================================================
+04 — BARRE SUPÉRIEURE
+================================================================ */
+
+.civil-top-bar {
+
+position:
+    relative;
+
+z-index:
+    100;
+
+display:
+    flex;
+
+align-items:
+    center;
+
+justify-content:
+    space-between;
+
+width:
+    100%;
+
+height:
+    var(--fobas-top-height);
+
+padding:
+    0 18px;
+
+border-bottom:
+    1px solid var(--fobas-border);
+
+background:
+    linear-gradient(
+        180deg,
+        rgba(15, 31, 51, 0.98),
+        rgba(7, 17, 31, 0.98)
+    );
+
+box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.30);
+
+backdrop-filter:
+    blur(16px);
+
+}
+
+.civil-brand {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    12px;
+
+min-width:
+    230px;
+
+}
+
+.civil-brand-mark {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    46px;
+
+height:
+    46px;
+
+border:
+    1px solid rgba(96, 165, 250, 0.45);
+
+border-radius:
+    13px;
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(33, 150, 243, 0.28),
+        rgba(34, 211, 238, 0.08)
+    );
+
+box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 8px 25px rgba(0, 0, 0, 0.30);
+
+font-size:
+    24px;
+
+}
+
+.civil-brand-name {
+
+font-size:
+    20px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    2px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-brand-subtitle {
+
+margin-top:
+    2px;
+
+font-size:
+    9px;
+
+font-weight:
+    700;
+
+letter-spacing:
+    1.7px;
+
+color:
+    var(--fobas-blue-light);
+
+}
+
+.civil-top-status {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    8px;
+
+padding:
+    7px 12px;
+
+border:
+    1px solid rgba(34, 197, 94, 0.20);
+
+border-radius:
+    999px;
+
+background:
+    rgba(34, 197, 94, 0.07);
+
+color:
+    #bbf7d0;
+
+font-size:
+    12px;
+
+font-weight:
+    700;
+
+}
+
+.status-indicator {
+
+width:
+    8px;
+
+height:
+    8px;
+
+border-radius:
+    50%;
+
+}
+
+.status-online {
+
+background:
+    var(--fobas-green);
+
+box-shadow:
+    0 0 12px rgba(34, 197, 94, 0.9);
+
+}
+
+.civil-top-actions {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    6px;
+
+}
+
+.civil-top-button {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+min-width:
+    36px;
+
+height:
+    36px;
+
+padding:
+    0 8px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    9px;
+
+background:
+    rgba(255, 255, 255, 0.045);
+
+color:
+    var(--fobas-white);
+
+font-size:
+    18px;
+
+font-weight:
+    800;
+
+transition:
+    transform var(--fobas-transition),
+    background var(--fobas-transition),
+    border-color var(--fobas-transition);
+
+}
+
+.civil-top-button:hover {
+
+transform:
+    translateY(-1px);
+
+border-color:
+    var(--fobas-border-strong);
+
+background:
+    rgba(33, 150, 243, 0.15);
+
+}
+
+.civil-reset-button {
+
+min-width:
+    52px;
+
+font-size:
+    10px;
+
+}
+
+.civil-zoom-value {
+
+min-width:
+    48px;
+
+text-align:
+    center;
+
+font-size:
+    11px;
+
+font-weight:
+    800;
+
+color:
+    var(--fobas-cyan);
+
+}
+
+/* ================================================================
+05 — LAYOUT PRINCIPAL
+================================================================ */
+
+.civil-main-layout {
+
+display:
+    flex;
+
+width:
+    100%;
+
+height:
+    calc(
+        100vh -
+        var(--fobas-top-height) -
+        var(--fobas-footer-height)
+    );
+
+}
+
+.civil-sidebar {
+
+position:
+    relative;
+
+z-index:
+    50;
+
+flex:
+    0 0 var(--fobas-sidebar-width);
+
+width:
+    var(--fobas-sidebar-width);
+
+height:
+    100%;
+
+padding:
+    16px 12px;
+
+border-right:
+    1px solid var(--fobas-border);
+
+background:
+    linear-gradient(
+        180deg,
+        rgba(10, 26, 44, 0.98),
+        rgba(5, 13, 24, 0.98)
+    );
+
+overflow-y:
+    auto;
+
+}
+
+.civil-sidebar::-webkit-scrollbar,
+.civil-content-area::-webkit-scrollbar,
+.civil-drawer-content::-webkit-scrollbar {
+
+width:
+    7px;
+
+}
+
+.civil-sidebar::-webkit-scrollbar-thumb,
+.civil-content-area::-webkit-scrollbar-thumb,
+.civil-drawer-content::-webkit-scrollbar-thumb {
+
+background:
+    rgba(148, 163, 184, 0.20);
+
+border-radius:
+    999px;
+
+}
+
+.civil-sidebar-header {
+
+padding:
+    4px 8px 12px;
+
+}
+
+.civil-sidebar-title {
+
+font-size:
+    10px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    2px;
+
+color:
+    var(--fobas-muted);
+
+}
+
+/* ================================================================
+06 — NAVIGATION
+================================================================ */
+
+.civil-main-navigation {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    6px;
+
+}
+
+.civil-nav-button {
+
+position:
+    relative;
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    12px;
+
+width:
+    100%;
+
+min-height:
+    48px;
+
+padding:
+    9px 12px;
+
+border:
+    1px solid transparent;
+
+border-radius:
+    11px;
+
+background:
+    transparent;
+
+color:
+    var(--fobas-muted);
+
+text-align:
+    left;
+
+transition:
+    all var(--fobas-transition);
+
+}
+
+.civil-nav-button:hover {
+
+color:
+    var(--fobas-white);
+
+background:
+    rgba(96, 165, 250, 0.08);
+
+border-color:
+    rgba(96, 165, 250, 0.12);
+
+}
+
+.civil-nav-button.active {
+
+color:
+    var(--fobas-white);
+
+background:
+    linear-gradient(
+        90deg,
+        rgba(33, 150, 243, 0.20),
+        rgba(34, 211, 238, 0.05)
+    );
+
+border-color:
+    rgba(96, 165, 250, 0.25);
+
+box-shadow:
+    inset 3px 0 0 var(--fobas-blue);
+
+}
+
+.civil-nav-icon {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+flex:
+    0 0 30px;
+
+width:
+    30px;
+
+height:
+    30px;
+
+border-radius:
+    8px;
+
+background:
+    rgba(255,255,255,0.045);
+
+font-size:
+    16px;
+
+}
+
+.civil-nav-button.active
+.civil-nav-icon {
+
+background:
+    rgba(33, 150, 243, 0.18);
+
+}
+
+.civil-nav-label {
+
+font-size:
+    12px;
+
+font-weight:
+    750;
+
+}
+
+/* ================================================================
+07 — CARTE MOTEUR
+================================================================ */
+
+.civil-engine-card {
+
+margin:
+    18px 2px 4px;
+
+padding:
+    13px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    13px;
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(33, 150, 243, 0.09),
+        rgba(255,255,255,0.025)
+    );
+
+}
+
+.civil-engine-card-title {
+
+font-size:
+    9px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    1.5px;
+
+color:
+    var(--fobas-cyan);
+
+}
+
+.civil-engine-version {
+
+margin-top:
+    5px;
+
+font-family:
+    monospace;
+
+font-size:
+    8px;
+
+color:
+    var(--fobas-muted);
+
+word-break:
+    break-word;
+
+}
+
+.civil-engine-state {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    7px;
+
+margin-top:
+    11px;
+
+font-size:
+    10px;
+
+font-weight:
+    700;
+
+}
+
+.engine-state-dot {
+
+width:
+    7px;
+
+height:
+    7px;
+
+border-radius:
+    50%;
+
+background:
+    var(--fobas-green);
+
+box-shadow:
+    0 0 9px rgba(34,197,94,0.75);
+
+}
+
+/* ================================================================
+08 — ZONE CONTENU
+================================================================ */
+
+.civil-content-area {
+
+position:
+    relative;
+
+flex:
+    1;
+
+width:
+    calc(
+        100% -
+        var(--fobas-sidebar-width)
+    );
+
+height:
+    100%;
+
+padding:
+    22px;
+
+overflow:
+    auto;
+
+background:
+    radial-gradient(
+        circle at 70% 20%,
+        rgba(33, 150, 243, 0.06),
+        transparent 32%
+    );
+
+}
+
+.civil-panel {
+
+width:
+    100%;
+
+max-width:
+    1700px;
+
+margin:
+    0 auto;
+
+}
+
+.civil-panel[hidden] {
+
+display:
+    none !important;
+
+}
+
+/* ================================================================
+09 — EN-TÊTE DES PAGES
+================================================================ */
+
+.civil-page-header {
+
+display:
+    flex;
+
+align-items:
+    flex-start;
+
+justify-content:
+    space-between;
+
+gap:
+    20px;
+
+margin-bottom:
+    20px;
+
+}
+
+.civil-page-kicker {
+
+margin-bottom:
+    6px;
+
+font-size:
+    10px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    2px;
+
+color:
+    var(--fobas-cyan);
+
+}
+
+.civil-page-title {
+
+margin:
+    0;
+
+font-size:
+    clamp(24px, 3vw, 38px);
+
+line-height:
+    1.1;
+
+font-weight:
+    900;
+
+letter-spacing:
+    -0.8px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-page-description {
+
+max-width:
+    750px;
+
+margin:
+    9px 0 0;
+
+font-size:
+    13px;
+
+line-height:
+    1.65;
+
+color:
+    var(--fobas-muted);
+
+}
+
+.civil-live-badge {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    8px;
+
+padding:
+    8px 12px;
+
+border:
+    1px solid rgba(34, 197, 94, 0.25);
+
+border-radius:
+    999px;
+
+background:
+    rgba(34, 197, 94, 0.07);
+
+color:
+    #bbf7d0;
+
+font-size:
+    9px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    1px;
+
+white-space:
+    nowrap;
+
+}
+
+.civil-live-dot {
+
+width:
+    7px;
+
+height:
+    7px;
+
+border-radius:
+    50%;
+
+background:
+    var(--fobas-green);
+
+box-shadow:
+    0 0 10px rgba(34,197,94,0.9);
+
+}
+
+/* ================================================================
+10 — LABORATOIRE
+================================================================ */
+
+.civil-laboratory-workspace {
+
+display:
+    grid;
+
+grid-template-columns:
+    minmax(0, 1fr)
+    330px;
+
+min-height:
+    590px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(7, 17, 31, 0.80);
+
+box-shadow:
+    var(--fobas-shadow);
+
+overflow:
+    hidden;
+
+}
+
+/* ================================================================
+11 — SCÈNE VISUELLE
+================================================================ */
+
+.civil-laboratory-scene {
+
+position:
+    relative;
+
+min-height:
+    590px;
+
+overflow:
+    hidden;
+
+isolation:
+    isolate;
+
+background:
+    radial-gradient(
+        ellipse at 50% 25%,
+        rgba(33,150,243,0.13),
+        transparent 45%
+    ),
+    linear-gradient(
+        180deg,
+        #0b1b2d 0%,
+        #091525 52%,
+        #06101d 100%
+    );
+
+}
+
+/* Grille perspective */
+
+.civil-scene-grid {
+
+position:
+    absolute;
+
+left:
+    -15%;
+
+right:
+    -15%;
+
+bottom:
+    -16%;
+
+height:
+    58%;
+
+z-index:
+    -1;
+
+opacity:
+    0.32;
+
+transform:
+    perspective(600px)
+    rotateX(58deg);
+
+transform-origin:
+    center bottom;
+
+background-image:
+    linear-gradient(
+        rgba(96,165,250,0.18) 1px,
+        transparent 1px
+    ),
+    linear-gradient(
+        90deg,
+        rgba(96,165,250,0.18) 1px,
+        transparent 1px
+    );
+
+background-size:
+    42px 42px;
+
+mask-image:
+    linear-gradient(
+        to top,
+        black,
+        transparent
+    );
+
+}
+
+.civil-scene-label {
+
+position:
+    absolute;
+
+top:
+    18px;
+
+left:
+    18px;
+
+padding:
+    7px 10px;
+
+border:
+    1px solid rgba(96,165,250,0.22);
+
+border-radius:
+    8px;
+
+background:
+    rgba(4,10,19,0.62);
+
+color:
+    rgba(191,219,254,0.80);
+
+font-size:
+    8px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    1.5px;
+
+}
+
+/* ================================================================
+12 — TABLE DE LABORATOIRE
+================================================================ */
+
+.civil-lab-table {
+
+position:
+    absolute;
+
+left:
+    8%;
+
+right:
+    8%;
+
+bottom:
+    9%;
+
+height:
+    175px;
+
+perspective:
+    500px;
+
+}
+
+.civil-lab-table-top {
+
+position:
+    absolute;
+
+top:
+    0;
+
+left:
+    0;
+
+width:
+    100%;
+
+height:
+    58px;
+
+border:
+    1px solid rgba(255,255,255,0.10);
+
+border-radius:
+    9px;
+
+background:
+    linear-gradient(
+        135deg,
+        #263b50,
+        #122438
+    );
+
+box-shadow:
+    0 18px 25px rgba(0,0,0,0.38);
+
+transform:
+    perspective(500px)
+    rotateX(52deg);
+
+transform-origin:
+    center bottom;
+
+}
+
+.civil-lab-table-front {
+
+position:
+    absolute;
+
+top:
+    35px;
+
+left:
+    0;
+
+width:
+    100%;
+
+height:
+    92px;
+
+border:
+    1px solid rgba(255,255,255,0.07);
+
+border-radius:
+    5px 5px 12px 12px;
+
+background:
+    linear-gradient(
+        90deg,
+        #0e2034,
+        #18304a 50%,
+        #0e2034
+    );
+
+box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 22px 30px rgba(0,0,0,0.40);
+
+}
+
+.civil-lab-table-leg {
+
+position:
+    absolute;
+
+top:
+    112px;
+
+width:
+    25px;
+
+height:
+    60px;
+
+border-radius:
+    0 0 5px 5px;
+
+background:
+    linear-gradient(
+        90deg,
+        #091421,
+        #21384e,
+        #091421
+    );
+
+}
+
+.civil-lab-table-leg.left {
+
+left:
+    9%;
+
+}
+
+.civil-lab-table-leg.right {
+
+right:
+    9%;
+
+}
+
+/* ================================================================
+13 — RÉCIPIENT 3D
+================================================================ */
+
+.civil-recipient {
+
+position:
+    absolute;
+
+z-index:
+    10;
+
+left:
+    43%;
+
+top:
+    31%;
+
+width:
+    150px;
+
+height:
+    190px;
+
+cursor:
+    pointer;
+
+filter:
+    drop-shadow(
+        0 18px 16px rgba(0,0,0,0.45)
+    );
+
+transition:
+    transform 180ms ease,
+    filter 180ms ease;
+
+}
+
+.civil-recipient:hover {
+
+transform:
+    translateY(-4px);
+
+filter:
+    drop-shadow(
+        0 24px 18px rgba(0,0,0,0.50)
+    );
+
+}
+
+.civil-recipient-rim {
+
+position:
+    absolute;
+
+z-index:
+    4;
+
+top:
+    0;
+
+left:
+    8px;
+
+width:
+    134px;
+
+height:
+    35px;
+
+border:
+    3px solid rgba(186,230,253,0.42);
+
+border-radius:
+    50%;
+
+background:
+    linear-gradient(
+        180deg,
+        rgba(219,242,255,0.18),
+        rgba(255,255,255,0.03)
+    );
+
+box-shadow:
+    inset 0 4px 7px rgba(255,255,255,0.10),
+    0 2px 4px rgba(0,0,0,0.28);
+
+}
+
+.civil-recipient-body {
+
+position:
+    absolute;
+
+z-index:
+    2;
+
+top:
+    14px;
+
+left:
+    14px;
+
+width:
+    122px;
+
+height:
+    154px;
+
+border:
+    2px solid rgba(186,230,253,0.27);
+
+border-top:
+    0;
+
+border-radius:
+    8px 8px 25px 25px;
+
+background:
+    linear-gradient(
+        90deg,
+        rgba(255,255,255,0.03),
+        rgba(186,230,253,0.13),
+        rgba(255,255,255,0.025)
+    );
+
+clip-path:
+    polygon(
+        0 0,
+        100% 0,
+        91% 90%,
+        76% 100%,
+        24% 100%,
+        9% 90%
+    );
+
+}
+
+.civil-recipient-highlight {
+
+position:
+    absolute;
+
+z-index:
+    5;
+
+top:
+    35px;
+
+left:
+    30px;
+
+width:
+    9px;
+
+height:
+    105px;
+
+border-radius:
+    999px;
+
+background:
+    linear-gradient(
+        180deg,
+        rgba(255,255,255,0.40),
+        rgba(255,255,255,0)
+    );
+
+opacity:
+    0.55;
+
+}
+
+.civil-recipient-contents {
+
+position:
+    absolute;
+
+z-index:
+    3;
+
+left:
+    20px;
+
+right:
+    20px;
+
+bottom:
+    28px;
+
+height:
+    60px;
+
+border-radius:
+    50% 50% 35% 35%;
+
+background:
+    linear-gradient(
+        180deg,
+        rgba(245, 210, 130, 0.72),
+        rgba(132, 85, 38, 0.88)
+    );
+
+opacity:
+    0;
+
+transform:
+    scaleY(0.65);
+
+transform-origin:
+    bottom;
+
+transition:
+    all 300ms ease;
+
+}
+
+.civil-recipient-label {
+
+position:
+    absolute;
+
+z-index:
+    8;
+
+left:
+    50%;
+
+bottom:
+    -23px;
+
+transform:
+    translateX(-50%);
+
+padding:
+    4px 7px;
+
+border:
+    1px solid rgba(148,163,184,0.18);
+
+border-radius:
+    5px;
+
+background:
+    rgba(4,10,19,0.78);
+
+color:
+    #bfdbfe;
+
+font-size:
+    7px;
+
+font-weight:
+    900;
+
+white-space:
+    nowrap;
+
+letter-spacing:
+    1px;
+
+}
+
+.civil-recipient.drop-ready {
+
+transform:
+    translateY(-7px)
+    scale(1.04);
+
+}
+
+.civil-recipient.drop-ready
+.civil-recipient-rim {
+
+border-color:
+    var(--fobas-cyan);
+
+box-shadow:
+    0 0 25px rgba(34,211,238,0.45);
+
+}
+
+/* ================================================================
+14 — BALANCE
+================================================================ */
+
+.civil-balance {
+
+position:
+    absolute;
+
+z-index:
+    12;
+
+left:
+    10%;
+
+bottom:
+    27%;
+
+width:
+    145px;
+
+height:
+    105px;
+
+}
+
+.civil-balance-platform {
+
+position:
+    absolute;
+
+top:
+    0;
+
+left:
+    12px;
+
+width:
+    121px;
+
+height:
+    32px;
+
+border:
+    1px solid rgba(255,255,255,0.15);
+
+border-radius:
+    50%;
+
+background:
+    linear-gradient(
+        180deg,
+        #a7b8c8,
+        #47596a
+    );
+
+box-shadow:
+    0 6px 12px rgba(0,0,0,0.35);
+
+}
+
+.civil-balance-body {
+
+position:
+    absolute;
+
+left:
+    22px;
+
+top:
+    25px;
+
+width:
+    102px;
+
+height:
+    74px;
+
+border:
+    1px solid rgba(255,255,255,0.10);
+
+border-radius:
+    12px;
+
+background:
+    linear-gradient(
+        145deg,
+        #253a4f,
+        #0e1d2e
+    );
+
+box-shadow:
+    0 15px 25px rgba(0,0,0,0.40);
+
+}
+
+.civil-balance-display {
+
+position:
+    absolute;
+
+top:
+    12px;
+
+left:
+    12px;
+
+right:
+    12px;
+
+height:
+    25px;
+
+display:
+    grid;
+
+place-items:
+    center;
+
+border:
+    1px solid rgba(34,211,238,0.16);
+
+border-radius:
+    5px;
+
+background:
+    #06131d;
+
+color:
+    var(--fobas-cyan);
+
+font-family:
+    monospace;
+
+font-size:
+    10px;
+
+font-weight:
+    800;
+
+}
+
+.civil-balance-controls {
+
+position:
+    absolute;
+
+right:
+    7px;
+
+bottom:
+    6px;
+
+}
+
+.civil-small-control {
+
+border:
+    1px solid rgba(255,255,255,0.10);
+
+border-radius:
+    4px;
+
+background:
+    rgba(255,255,255,0.06);
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    7px;
+
+font-weight:
+    900;
+
+}
+
+/* ================================================================
+15 — ÉPROUVETTE
+================================================================ */
+
+.civil-graduated-cylinder {
+
+position:
+    absolute;
+
+z-index:
+    11;
+
+right:
+    15%;
+
+bottom:
+    25%;
+
+width:
+    68px;
+
+height:
+    170px;
+
+border:
+    2px solid rgba(186,230,253,0.25);
+
+border-radius:
+    9px 9px 16px 16px;
+
+background:
+    linear-gradient(
+        90deg,
+        rgba(255,255,255,0.03),
+        rgba(186,230,253,0.10),
+        rgba(255,255,255,0.02)
+    );
+
+overflow:
+    hidden;
+
+box-shadow:
+    0 16px 20px rgba(0,0,0,0.35);
+
+}
+
+.civil-cylinder-liquid {
+
+position:
+    absolute;
+
+left:
+    5px;
+
+right:
+    5px;
+
+bottom:
+    5px;
+
+height:
+    42%;
+
+border-radius:
+    0 0 10px 10px;
+
+background:
+    linear-gradient(
+        180deg,
+        rgba(56,189,248,0.50),
+        rgba(14,116,144,0.70)
+    );
+
+}
+
+.civil-cylinder-scale {
+
+position:
+    absolute;
+
+z-index:
+    4;
+
+top:
+    12px;
+
+right:
+    4px;
+
+bottom:
+    12px;
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+justify-content:
+    space-between;
+
+color:
+    rgba(255,255,255,0.65);
+
+font-size:
+    7px;
+
+}
+
+/* ================================================================
+16 — MESSAGE DROP
+================================================================ */
+
+.civil-drop-message {
+
+position:
+    absolute;
+
+left:
+    50%;
+
+bottom:
+    18px;
+
+transform:
+    translateX(-50%);
+
+max-width:
+    80%;
+
+padding:
+    8px 12px;
+
+border:
+    1px solid rgba(96,165,250,0.18);
+
+border-radius:
+    999px;
+
+background:
+    rgba(4,10,19,0.62);
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    10px;
+
+text-align:
+    center;
+
+backdrop-filter:
+    blur(8px);
+
+}
+
+/* ================================================================
+17 — STATUT RÉCIPIENT
+================================================================ */
+
+.civil-recipient-status-panel {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+min-width:
+    0;
+
+padding:
+    18px;
+
+border-left:
+    1px solid var(--fobas-border);
+
+background:
+    linear-gradient(
+        180deg,
+        rgba(13,29,48,0.95),
+        rgba(7,17,31,0.98)
+    );
+
+}
+
+.civil-status-header {
+
+display:
+    flex;
+
+align-items:
+    flex-start;
+
+justify-content:
+    space-between;
+
+gap:
+    10px;
+
+padding-bottom:
+    14px;
+
+border-bottom:
+    1px solid var(--fobas-border);
+
+}
+
+.civil-status-kicker {
+
+font-size:
+    8px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    1.5px;
+
+color:
+    var(--fobas-muted);
+
+}
+
+.civil-status-title {
+
+margin:
+    4px 0 0;
+
+font-size:
+    17px;
+
+font-weight:
+    900;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-state-badge {
+
+padding:
+    5px 8px;
+
+border:
+    1px solid;
+
+border-radius:
+    999px;
+
+font-size:
+    8px;
+
+font-weight:
+    900;
+
+white-space:
+    nowrap;
+
+}
+
+.civil-state-badge.empty {
+
+color:
+    #cbd5e1;
+
+border-color:
+    rgba(148,163,184,0.25);
+
+background:
+    rgba(148,163,184,0.07);
+
+}
+
+.civil-state-badge.mixed {
+
+color:
+    #fde68a;
+
+border-color:
+    rgba(250,204,21,0.30);
+
+background:
+    rgba(250,204,21,0.08);
+
+}
+
+.civil-content-list {
+
+flex:
+    1;
+
+min-height:
+    120px;
+
+max-height:
+    300px;
+
+padding:
+    12px 0;
+
+overflow-y:
+    auto;
+
+}
+
+.civil-empty-state {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+align-items:
+    center;
+
+justify-content:
+    center;
+
+min-height:
+    170px;
+
+padding:
+    20px;
+
+text-align:
+    center;
+
+color:
+    var(--fobas-muted);
+
+}
+
+.civil-empty-icon {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    55px;
+
+height:
+    55px;
+
+margin-bottom:
+    12px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    50%;
+
+background:
+    rgba(255,255,255,0.03);
+
+font-size:
+    22px;
+
+}
+
+.civil-empty-state strong {
+
+margin-bottom:
+    5px;
+
+color:
+    var(--fobas-text);
+
+font-size:
+    12px;
+
+}
+
+.civil-empty-state span {
+
+font-size:
+    10px;
+
+line-height:
+    1.5;
+
+}
+
+/* ================================================================
+18 — RÉSUMÉ RÉCIPIENT
+================================================================ */
+
+.civil-status-summary {
+
+padding:
+    12px 0;
+
+border-top:
+    1px solid var(--fobas-border);
+
+border-bottom:
+    1px solid var(--fobas-border);
+
+}
+
+.civil-summary-row {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+justify-content:
+    space-between;
+
+gap:
+    10px;
+
+padding:
+    7px 0;
+
+}
+
+.civil-summary-row span {
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    10px;
+
+}
+
+.civil-summary-row strong {
+
+color:
+    var(--fobas-white);
+
+font-size:
+    11px;
+
+font-family:
+    monospace;
+
+}
+
+/* ================================================================
+19 — ACTIONS
+================================================================ */
+
+.civil-recipient-actions {
+
+display:
+    grid;
+
+grid-template-columns:
+    1fr;
+
+gap:
+    7px;
+
+padding-top:
+    13px;
+
+}
+
+.civil-action-button {
+
+min-height:
+    40px;
+
+padding:
+    9px 13px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    9px;
+
+background:
+    rgba(255,255,255,0.045);
+
+color:
+    var(--fobas-text);
+
+font-size:
+    11px;
+
+font-weight:
+    800;
+
+transition:
+    all var(--fobas-transition);
+
+}
+
+.civil-action-button:hover {
+
+transform:
+    translateY(-1px);
+
+border-color:
+    var(--fobas-border-strong);
+
+background:
+    rgba(96,165,250,0.10);
+
+}
+
+.civil-action-button.primary {
+
+border-color:
+    rgba(33,150,243,0.42);
+
+background:
+    linear-gradient(
+        135deg,
+        rgba(33,150,243,0.22),
+        rgba(14,116,144,0.15)
+    );
+
+color:
+    #dbeafe;
+
+}
+
+.civil-action-button.danger {
+
+border-color:
+    rgba(239,68,68,0.25);
+
+color:
+    #fecaca;
+
+}
+
+.civil-action-button.danger:hover {
+
+background:
+    rgba(239,68,68,0.10);
+
+}
+
+/* ================================================================
+20 — ACTIONS RAPIDES
+================================================================ */
+
+.civil-quick-actions {
+
+display:
+    grid;
+
+grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+gap:
+    10px;
+
+margin-top:
+    14px;
+
+}
+
+.civil-large-action {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    10px;
+
+min-height:
+    76px;
+
+padding:
+    12px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    13px;
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(255,255,255,0.055),
+        rgba(255,255,255,0.018)
+    );
+
+color:
+    var(--fobas-text);
+
+text-align:
+    left;
+
+box-shadow:
+    var(--fobas-shadow-small);
+
+transition:
+    transform var(--fobas-transition),
+    border-color var(--fobas-transition),
+    background var(--fobas-transition);
+
+}
+
+.civil-large-action:hover {
+
+transform:
+    translateY(-3px);
+
+border-color:
+    rgba(96,165,250,0.35);
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(33,150,243,0.12),
+        rgba(255,255,255,0.025)
+    );
+
+}
+
+.civil-action-icon {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+flex:
+    0 0 39px;
+
+width:
+    39px;
+
+height:
+    39px;
+
+border-radius:
+    10px;
+
+background:
+    rgba(255,255,255,0.055);
+
+font-size:
+    19px;
+
+}
+
+.civil-large-action strong {
+
+display:
+    block;
+
+margin-bottom:
+    4px;
+
+font-size:
+    11px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-large-action small {
+
+display:
+    block;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    8px;
+
+line-height:
+    1.35;
+
+}
+
+/* ================================================================
+21 — MATÉRIAUX
+================================================================ */
+
+.civil-materials-categories {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    16px;
+
+}
+
+.civil-material-category {
+
+padding:
+    17px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(12,24,40,0.82);
+
+box-shadow:
+    var(--fobas-shadow-small);
+
+}
+
+.civil-category-header {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    12px;
+
+margin-bottom:
+    14px;
+
+}
+
+.civil-category-icon {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    42px;
+
+height:
+    42px;
+
+border:
+    1px solid rgba(96,165,250,0.18);
+
+border-radius:
+    11px;
+
+background:
+    rgba(33,150,243,0.08);
+
+font-size:
+    20px;
+
+}
+
+.civil-category-header h2 {
+
+margin:
+    0;
+
+font-size:
+    16px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-category-header span:not(.civil-category-icon) {
+
+display:
+    block;
+
+margin-top:
+    3px;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    9px;
+
+}
+
+.civil-material-grid {
+
+display:
+    grid;
+
+grid-template-columns:
+    repeat(
+        auto-fill,
+        minmax(145px, 1fr)
+    );
+
+gap:
+    10px;
+
+}
+
+.civil-material-card {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+align-items:
+    center;
+
+justify-content:
+    center;
+
+min-height:
+    135px;
+
+padding:
+    13px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    12px;
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(255,255,255,0.055),
+        rgba(255,255,255,0.018)
+    );
+
+color:
+    var(--fobas-text);
+
+transition:
+    all var(--fobas-transition);
+
+}
+
+.civil-material-card:hover {
+
+transform:
+    translateY(-3px);
+
+border-color:
+    rgba(96,165,250,0.38);
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(33,150,243,0.13),
+        rgba(255,255,255,0.025)
+    );
+
+}
+
+.civil-material-card.dragging {
+
+opacity:
+    0.48;
+
+transform:
+    scale(0.96);
+
+}
+
+.material-visual {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    55px;
+
+height:
+    55px;
+
+margin-bottom:
+    10px;
+
+border:
+    1px solid rgba(255,255,255,0.10);
+
+border-radius:
+    14px;
+
+background:
+    rgba(255,255,255,0.045);
+
+box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 8px 18px rgba(0,0,0,0.22);
+
+font-size:
+    25px;
+
+}
+
+.material-visual.cement {
+
+background:
+    radial-gradient(
+        circle,
+        #e5e7eb,
+        #6b7280
+    );
+
+}
+
+.material-visual.sand {
+
+background:
+    radial-gradient(
+        circle,
+        #fde68a,
+        #a16207
+    );
+
+}
+
+.material-visual.gravel {
+
+background:
+    radial-gradient(
+        circle,
+        #cbd5e1,
+        #334155
+    );
+
+}
+
+.material-visual.water {
+
+background:
+    radial-gradient(
+        circle,
+        #67e8f9,
+        #0369a1
+    );
+
+}
+
+.material-visual.stone {
+
+background:
+    radial-gradient(
+        circle,
+        #94a3b8,
+        #1e293b
+    );
+
+}
+
+.material-visual.earth {
+
+background:
+    radial-gradient(
+        circle,
+        #92400e,
+        #422006
+    );
+
+}
+
+.material-visual.clay {
+
+background:
+    radial-gradient(
+        circle,
+        #b45309,
+        #451a03
+    );
+
+}
+
+.material-visual.silt {
+
+background:
+    radial-gradient(
+        circle,
+        #a8a29e,
+        #44403c
+    );
+
+}
+
+.material-visual.steel {
+
+background:
+    linear-gradient(
+        135deg,
+        #e2e8f0,
+        #475569
+    );
+
+}
+
+.material-visual.brick {
+
+background:
+    linear-gradient(
+        135deg,
+        #fb7185,
+        #7f1d1d
+    );
+
+}
+
+.material-visual.block {
+
+background:
+    linear-gradient(
+        135deg,
+        #d1d5db,
+        #4b5563
+    );
+
+}
+
+.material-visual.wood {
+
+background:
+    linear-gradient(
+        135deg,
+        #d97706,
+        #451a03
+    );
+
+}
+
+.material-visual.glass {
+
+background:
+    linear-gradient(
+        135deg,
+        rgba(125,211,252,0.8),
+        rgba(30,64,175,0.4)
+    );
+
+}
+
+.material-visual.bitumen {
+
+background:
+    radial-gradient(
+        circle,
+        #475569,
+        #020617
+    );
+
+}
+
+.material-name {
+
+font-size:
+    11px;
+
+font-weight:
+    850;
+
+color:
+    var(--fobas-white);
+
+}
+
+.material-unit {
+
+margin-top:
+    4px;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    8px;
+
+}
+
+/* ================================================================
+22 — ÉQUIPEMENTS
+================================================================ */
+
+.civil-equipment-grid {
+
+display:
+    grid;
+
+grid-template-columns:
+    repeat(
+        auto-fill,
+        minmax(180px, 1fr)
+    );
+
+gap:
+    13px;
+
+}
+
+.civil-equipment-card {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+align-items:
+    center;
+
+justify-content:
+    center;
+
+min-height:
+    165px;
+
+padding:
+    18px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    15px;
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(255,255,255,0.055),
+        rgba(255,255,255,0.018)
+    );
+
+color:
+    var(--fobas-text);
+
+transition:
+    all var(--fobas-transition);
+
+}
+
+.civil-equipment-card:hover {
+
+transform:
+    translateY(-4px);
+
+border-color:
+    rgba(34,211,238,0.30);
+
+}
+
+.civil-equipment-card > span {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    62px;
+
+height:
+    62px;
+
+margin-bottom:
+    12px;
+
+border:
+    1px solid rgba(96,165,250,0.18);
+
+border-radius:
+    15px;
+
+background:
+    rgba(33,150,243,0.08);
+
+font-size:
+    29px;
+
+}
+
+.civil-equipment-card strong {
+
+font-size:
+    12px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-equipment-card small {
+
+margin-top:
+    4px;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    9px;
+
+}
+
+/* ================================================================
+23 — MESURES
+================================================================ */
+
+.civil-measurement-workspace {
+
+display:
+    grid;
+
+grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+gap:
+    15px;
+
+}
+
+.civil-measure-card {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+align-items:
+    flex-start;
+
+min-height:
+    170px;
+
+padding:
+    22px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    linear-gradient(
+        145deg,
+        rgba(33,150,243,0.09),
+        rgba(255,255,255,0.025)
+    );
+
+}
+
+.civil-measure-icon {
+
+font-size:
+    28px;
+
+}
+
+.civil-measure-label {
+
+margin-top:
+    20px;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    10px;
+
+font-weight:
+    700;
+
+}
+
+.civil-measure-card strong {
+
+margin-top:
+    7px;
+
+font-size:
+    24px;
+
+color:
+    var(--fobas-white);
+
+}
+
+/* ================================================================
+24 — DOSAGE
+================================================================ */
+
+.civil-dosage-controls {
+
+display:
+    grid;
+
+grid-template-columns:
+    minmax(200px, 1fr)
+    minmax(160px, 220px)
+    auto;
+
+align-items:
+    end;
+
+gap:
+    12px;
+
+padding:
+    17px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(12,24,40,0.80);
+
+}
+
+.civil-field {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    6px;
+
+}
+
+.civil-field > span {
+
+font-size:
+    9px;
+
+font-weight:
+    800;
+
+color:
+    var(--fobas-muted);
+
+}
+
+.civil-field input,
+.civil-field select {
+
+width:
+    100%;
+
+min-height:
+    42px;
+
+padding:
+    8px 11px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    9px;
+
+outline:
+    none;
+
+background:
+    #091522;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-field input:focus,
+.civil-field select:focus {
+
+border-color:
+    rgba(34,211,238,0.45);
+
+box-shadow:
+    0 0 0 3px rgba(34,211,238,0.07);
+
+}
+
+.civil-dosage-result {
+
+margin-top:
+    15px;
+
+padding:
+    18px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(12,24,40,0.80);
+
+}
+
+.civil-dosage-result-header {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+justify-content:
+    space-between;
+
+gap:
+    12px;
+
+padding-bottom:
+    13px;
+
+border-bottom:
+    1px solid var(--fobas-border);
+
+}
+
+.civil-dosage-result-header strong {
+
+font-size:
+    14px;
+
+color:
+    var(--fobas-white);
+
+}
+
+#dosageStatusBadge {
+
+padding:
+    5px 8px;
+
+border:
+    1px solid rgba(250,204,21,0.22);
+
+border-radius:
+    999px;
+
+background:
+    rgba(250,204,21,0.06);
+
+color:
+    #fde68a;
+
+font-size:
+    8px;
+
+font-weight:
+    900;
+
+}
+
+.civil-quantity-grid {
+
+display:
+    grid;
+
+grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+gap:
+    10px;
+
+margin-top:
+    14px;
+
+}
+
+.civil-quantity-item {
+
+padding:
+    14px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    10px;
+
+background:
+    rgba(255,255,255,0.025);
+
+}
+
+.civil-quantity-item span {
+
+display:
+    block;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    9px;
+
+}
+
+.civil-quantity-item strong {
+
+display:
+    block;
+
+margin-top:
+    8px;
+
+color:
+    var(--fobas-white);
+
+font-size:
+    15px;
+
+}
+
+/* ================================================================
+25 — RÉACTION
+================================================================ */
+
+.civil-reaction-workspace {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    15px;
+
+}
+
+.civil-reaction-status {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    15px;
+
+min-height:
+    120px;
+
+padding:
+    20px;
+
+border:
+    1px solid rgba(250,204,21,0.20);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(250,204,21,0.045);
+
+}
+
+.civil-reaction-status.success {
+
+border-color:
+    rgba(34,197,94,0.30);
+
+background:
+    rgba(34,197,94,0.07);
+
+}
+
+.civil-reaction-status.error {
+
+border-color:
+    rgba(239,68,68,0.30);
+
+background:
+    rgba(239,68,68,0.07);
+
+}
+
+.civil-reaction-status-icon {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+flex:
+    0 0 56px;
+
+width:
+    56px;
+
+height:
+    56px;
+
+border:
+    1px solid rgba(250,204,21,0.22);
+
+border-radius:
+    15px;
+
+background:
+    rgba(250,204,21,0.08);
+
+font-size:
+    25px;
+
+}
+
+.civil-reaction-status strong {
+
+display:
+    block;
+
+font-size:
+    15px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-reaction-status p {
+
+margin:
+    6px 0 0;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    11px;
+
+line-height:
+    1.55;
+
+}
+
+.civil-reaction-button {
+
+align-self:
+    flex-start;
+
+min-height:
+    50px;
+
+padding:
+    0 22px;
+
+border:
+    1px solid rgba(34,211,238,0.35);
+
+border-radius:
+    11px;
+
+background:
+    linear-gradient(
+        135deg,
+        rgba(33,150,243,0.25),
+        rgba(34,211,238,0.10)
+    );
+
+color:
+    #e0f2fe;
+
+font-size:
+    11px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    0.7px;
+
+box-shadow:
+    0 10px 25px rgba(0,0,0,0.25);
+
+transition:
+    all var(--fobas-transition);
+
+}
+
+.civil-reaction-button:hover {
+
+transform:
+    translateY(-2px);
+
+box-shadow:
+    0 15px 30px rgba(0,0,0,0.35);
+
+}
+
+/* ================================================================
+26 — RÉSULTATS
+================================================================ */
+
+.civil-result-workspace {
+
+display:
+    grid;
+
+grid-template-columns:
+    minmax(0, 1fr)
+    minmax(300px, 430px);
+
+gap:
+    15px;
+
+}
+
+.civil-result-state {
+
+min-height:
+    280px;
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+align-items:
+    center;
+
+justify-content:
+    center;
+
+padding:
+    25px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(12,24,40,0.82);
+
+text-align:
+    center;
+
+}
+
+.civil-result-icon {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    70px;
+
+height:
+    70px;
+
+margin-bottom:
+    15px;
+
+border:
+    1px solid rgba(96,165,250,0.20);
+
+border-radius:
+    20px;
+
+background:
+    rgba(33,150,243,0.08);
+
+font-size:
+    32px;
+
+}
+
+.civil-result-state strong {
+
+font-size:
+    17px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-result-state p {
+
+max-width:
+    500px;
+
+margin:
+    8px 0 0;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    11px;
+
+line-height:
+    1.6;
+
+}
+
+.civil-result-details {
+
+padding:
+    18px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(12,24,40,0.82);
+
+}
+
+.civil-result-row {
+
+display:
+    flex;
+
+justify-content:
+    space-between;
+
+gap:
+    15px;
+
+padding:
+    14px 0;
+
+border-bottom:
+    1px solid var(--fobas-border);
+
+}
+
+.civil-result-row:last-child {
+
+border-bottom:
+    0;
+
+}
+
+.civil-result-row span {
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    10px;
+
+}
+
+.civil-result-row strong {
+
+max-width:
+    58%;
+
+text-align:
+    right;
+
+color:
+    var(--fobas-white);
+
+font-size:
+    10px;
+
+}
+
+/* ================================================================
+27 — RAPPORT
+================================================================ */
+
+.civil-report-workspace {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    14px;
+
+}
+
+.civil-report-content {
+
+min-height:
+    360px;
+
+padding:
+    20px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    var(--fobas-radius);
+
+background:
+    rgba(12,24,40,0.82);
+
+}
+
+.civil-report-empty {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+align-items:
+    center;
+
+justify-content:
+    center;
+
+min-height:
+    300px;
+
+text-align:
+    center;
+
+color:
+    var(--fobas-muted);
+
+}
+
+.civil-report-empty > span {
+
+font-size:
+    40px;
+
+margin-bottom:
+    12px;
+
+}
+
+.civil-report-empty strong {
+
+color:
+    var(--fobas-white);
+
+font-size:
+    14px;
+
+}
+
+.civil-report-empty p {
+
+margin:
+    7px 0 0;
+
+font-size:
+    10px;
+
+}
+
+.civil-report-actions {
+
+display:
+    flex;
+
+gap:
+    8px;
+
+}
+
+/* ================================================================
+28 — OVERLAY MOBILE
+================================================================ */
+
+.civil-overlay {
+
+position:
+    fixed;
+
+z-index:
+    500;
+
+inset:
+    0;
+
+background:
+    rgba(0,0,0,0.65);
+
+backdrop-filter:
+    blur(4px);
+
+}
+
+/* ================================================================
+29 — DRAWER MATÉRIAUX
+================================================================ */
+
+.civil-materials-drawer {
+
+position:
+    fixed;
+
+z-index:
+    600;
+
+top:
+    0;
+
+right:
+    0;
+
+width:
+    min(
+        420px,
+        92vw
+    );
+
+height:
+    100vh;
+
+border-left:
+    1px solid var(--fobas-border);
+
+background:
+    linear-gradient(
+        180deg,
+        #0c1b2d,
+        #050d18
+    );
+
+box-shadow:
+    -25px 0 60px rgba(0,0,0,0.50);
+
+}
+
+.civil-drawer-header {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+justify-content:
+    space-between;
+
+min-height:
+    75px;
+
+padding:
+    15px 18px;
+
+border-bottom:
+    1px solid var(--fobas-border);
+
+}
+
+.civil-drawer-kicker {
+
+font-size:
+    8px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    1.5px;
+
+color:
+    var(--fobas-cyan);
+
+}
+
+.civil-drawer-header h2 {
+
+margin:
+    4px 0 0;
+
+font-size:
+    20px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-close-button {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    36px;
+
+height:
+    36px;
+
+border:
+    1px solid var(--fobas-border);
+
+border-radius:
+    9px;
+
+background:
+    rgba(255,255,255,0.04);
+
+color:
+    var(--fobas-white);
+
+font-size:
+    22px;
+
+line-height:
+    1;
+
+}
+
+.civil-close-button:hover {
+
+background:
+    rgba(239,68,68,0.10);
+
+border-color:
+    rgba(239,68,68,0.28);
+
+}
+
+.civil-drawer-content {
+
+height:
+    calc(
+        100vh -
+        75px
+    );
+
+padding:
+    16px;
+
+overflow:
+    auto;
+
+}
+
+/* ================================================================
+30 — MODAL
+================================================================ */
+
+.civil-modal {
+
+position:
+    fixed;
+
+z-index:
+    700;
+
+inset:
+    0;
+
+display:
+    grid;
+
+place-items:
+    center;
+
+padding:
+    20px;
+
+}
+
+.civil-modal-backdrop {
+
+position:
+    absolute;
+
+inset:
+    0;
+
+background:
+    rgba(0,0,0,0.72);
+
+backdrop-filter:
+    blur(5px);
+
+}
+
+.civil-modal-card {
+
+position:
+    relative;
+
+z-index:
+    2;
+
+width:
+    min(
+        480px,
+        100%
+    );
+
+border:
+    1px solid var(--fobas-border-strong);
+
+border-radius:
+    17px;
+
+background:
+    linear-gradient(
+        145deg,
+        #102238,
+        #07121f
+    );
+
+box-shadow:
+    0 30px 80px rgba(0,0,0,0.60);
+
+overflow:
+    hidden;
+
+}
+
+.civil-modal-header {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+justify-content:
+    space-between;
+
+gap:
+    15px;
+
+padding:
+    17px;
+
+border-bottom:
+    1px solid var(--fobas-border);
+
+}
+
+.civil-modal-kicker {
+
+font-size:
+    8px;
+
+font-weight:
+    900;
+
+letter-spacing:
+    1.5px;
+
+color:
+    var(--fobas-cyan);
+
+}
+
+.civil-modal-header h2 {
+
+margin:
+    4px 0 0;
+
+font-size:
+    17px;
+
+color:
+    var(--fobas-white);
+
+}
+
+.civil-modal-body {
+
+display:
+    flex;
+
+flex-direction:
+    column;
+
+gap:
+    14px;
+
+padding:
+    18px;
+
+}
+
+.civil-transfer-material {
+
+padding:
+    13px;
+
+border:
+    1px solid rgba(96,165,250,0.18);
+
+border-radius:
+    10px;
+
+background:
+    rgba(33,150,243,0.06);
+
+color:
+    #dbeafe;
+
+font-size:
+    12px;
+
+font-weight:
+    800;
+
+}
+
+.civil-modal-footer {
+
+display:
+    flex;
+
+justify-content:
+    flex-end;
+
+gap:
+    8px;
+
+padding:
+    15px 18px;
+
+border-top:
+    1px solid var(--fobas-border);
+
+}
+
+/* ================================================================
+31 — NOTIFICATION
+================================================================ */
+
+.civil-notification {
+
+position:
+    fixed;
+
+z-index:
+    900;
+
+right:
+    20px;
+
+bottom:
+    52px;
+
+display:
+    flex;
+
+align-items:
+    center;
+
+gap:
+    9px;
+
+max-width:
+    min(
+        380px,
+        calc(100vw - 40px)
+    );
+
+padding:
+    11px 14px;
+
+border:
+    1px solid rgba(34,211,238,0.24);
+
+border-radius:
+    11px;
+
+background:
+    rgba(8,22,36,0.96);
+
+box-shadow:
+    0 18px 45px rgba(0,0,0,0.42);
+
+color:
+    var(--fobas-text);
+
+font-size:
+    10px;
+
+font-weight:
+    750;
+
+backdrop-filter:
+    blur(12px);
+
+}
+
+.civil-notification-icon {
+
+display:
+    grid;
+
+place-items:
+    center;
+
+width:
+    23px;
+
+height:
+    23px;
+
+border-radius:
+    7px;
+
+background:
+    rgba(34,197,94,0.12);
+
+color:
+    var(--fobas-green-light);
+
+}
+
+/* ================================================================
+32 — FOOTER
+================================================================ */
+
+.civil-footer {
+
+display:
+    flex;
+
+align-items:
+    center;
+
+justify-content:
+    space-between;
+
+gap:
+    15px;
+
+width:
+    100%;
+
+height:
+    var(--fobas-footer-height);
+
+padding:
+    0 14px;
+
+border-top:
+    1px solid var(--fobas-border);
+
+background:
+    #050d18;
+
+color:
+    var(--fobas-muted);
+
+font-size:
+    8px;
+
+font-weight:
+    700;
+
+}
+
+#footerEngineState {
+
+color:
+    rgba(96,165,250,0.75);
+
+font-family:
+    monospace;
+
+}
+
+/* ================================================================
+33 — ANIMATIONS
+================================================================ */
+
+@keyframes civilPulse {
+
+0% {
+    opacity: 0.55;
+}
+
+50% {
+    opacity: 1;
+}
+
+100% {
+    opacity: 0.55;
+}
+
+}
+
+@keyframes civilFloat {
+
+0% {
+    transform:
+        translateY(0);
+}
+
+50% {
+    transform:
+        translateY(-4px);
+}
+
+100% {
+    transform:
+        translateY(0);
+}
+
+}
+
+.status-online {
+
+animation:
+    civilPulse 2s infinite;
+
+}
+
+.civil-recipient {
+
+animation:
+    civilFloat 5s ease-in-out infinite;
+
+}
+
+/* ================================================================
+34 — TABLETTE
+================================================================ */
+
+@media (max-width: 1180px) {
+
+:root {
+
+    --fobas-sidebar-width:
+        205px;
+
+}
+
+
+.civil-laboratory-workspace {
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        285px;
+
+}
+
+
+.civil-quick-actions {
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+}
+
+
+.civil-quick-actions
+.civil-large-action:nth-child(4),
+.civil-quick-actions
+.civil-large-action:nth-child(5) {
+
+    grid-column:
+        span 1;
+
+}
+
+
+.civil-measurement-workspace {
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+}
+
+
+.civil-quantity-grid {
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+}
+
+}
+
+/* ================================================================
+35 — PETITE TABLETTE / GRAND ANDROID
+================================================================ */
+
+@media (max-width: 900px) {
+
+:root {
+
+    --fobas-sidebar-width:
+        76px;
+
+}
+
+
+.civil-sidebar {
+
+    padding:
+        12px 8px;
+
+}
+
+
+.civil-sidebar-title,
+.civil-nav-label,
+.civil-engine-card {
+
+    display:
+        none;
+
+}
+
+
+.civil-nav-button {
+
+    justify-content:
+        center;
+
+    padding:
+        8px;
+
+}
+
+
+.civil-nav-icon {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+}
+
+
+.civil-brand {
+
+    min-width:
+        auto;
+
+}
+
+
+.civil-brand-text {
+
+    display:
+        none;
+
+}
+
+
+.civil-top-status {
+
+    display:
+        none;
+
+}
+
+
+.civil-laboratory-workspace {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.civil-recipient-status-panel {
+
+    border-top:
+        1px solid var(--fobas-border);
+
+    border-left:
+        0;
+
+}
+
+
+.civil-content-list {
+
+    max-height:
+        220px;
+
+}
+
+
+.civil-quick-actions {
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+}
+
+
+.civil-result-workspace {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.civil-dosage-controls {
+
+    grid-template-columns:
+        1fr 1fr;
+
+}
+
+
+.civil-dosage-controls
+.civil-action-button {
+
+    grid-column:
+        1 / -1;
+
+}
+
+}
+
+/* ================================================================
+36 — ANDROID / MOBILE
+================================================================ */
+
+@media (max-width: 640px) {
+
+body {
+
+    overflow:
+        hidden;
+
+}
+
+
+.fobas-civil-app {
+
+    min-height:
+        100vh;
+
+}
+
+
+.civil-top-bar {
+
+    height:
+        62px;
+
+    padding:
+        0 10px;
+
+}
+
+
+.civil-brand-mark {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    font-size:
+        19px;
+
+}
+
+
+.civil-brand-name {
+
+    font-size:
+        16px;
+
+}
+
+
+.civil-brand-subtitle {
+
+    display:
+        none;
+
+}
+
+
+.civil-top-actions {
+
+    gap:
+        3px;
+
+}
+
+
+.civil-top-button {
+
+    min-width:
+        31px;
+
+    height:
+        31px;
+
+}
+
+
+.civil-zoom-value {
+
+    min-width:
+        38px;
+
+    font-size:
+        9px;
+
+}
+
+
+.civil-main-layout {
+
+    height:
+        calc(
+            100vh -
+            62px -
+            var(--fobas-footer-height)
+        );
+
+}
+
+
+.civil-sidebar {
+
+    flex:
+        0 0 58px;
+
+    width:
+        58px;
+
+    padding:
+        8px 5px;
+
+}
+
+
+.civil-nav-button {
+
+    min-height:
+        45px;
+
+    padding:
+        4px;
+
+    border-radius:
+        9px;
+
+}
+
+
+.civil-nav-icon {
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    font-size:
+        15px;
+
+}
+
+
+.civil-content-area {
+
+    width:
+        calc(
+            100% -
+            58px
+        );
+
+    padding:
+        14px 10px;
+
+}
+
+
+.civil-page-header {
+
+    flex-direction:
+        column;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        14px;
+
+}
+
+
+.civil-page-title {
+
+    font-size:
+        24px;
+
+}
+
+
+.civil-page-description {
+
+    font-size:
+        11px;
+
+}
+
+
+.civil-live-badge {
+
+    align-self:
+        flex-start;
+
+}
+
+
+.civil-laboratory-workspace {
+
+    min-height:
+        auto;
+
+    border-radius:
+        13px;
+
+}
+
+
+.civil-laboratory-scene {
+
+    min-height:
+        460px;
+
+}
+
+
+.civil-lab-table {
+
+    left:
+        4%;
+
+    right:
+        4%;
+
+    bottom:
+        12%;
+
+}
+
+
+.civil-recipient {
+
+    left:
+        50%;
+
+    top:
+        30%;
+
+    transform:
+        translateX(-50%);
+
+}
+
+
+.civil-recipient:hover {
+
+    transform:
+        translateX(-50%)
+        translateY(-4px);
+
+}
+
+
+.civil-recipient.drop-ready {
+
+    transform:
+        translateX(-50%)
+        translateY(-7px)
+        scale(1.04);
+
+}
+
+
+.civil-balance {
+
+    left:
+        3%;
+
+    bottom:
+        28%;
+
+    transform:
+        scale(0.82);
+
+    transform-origin:
+        left bottom;
+
+}
+
+
+.civil-graduated-cylinder {
+
+    right:
+        4%;
+
+    bottom:
+        28%;
+
+    transform:
+        scale(0.82);
+
+    transform-origin:
+        right bottom;
+
+}
+
+
+.civil-drop-message {
+
+    bottom:
+        12px;
+
+    max-width:
+        90%;
+
+    font-size:
+        8px;
+
+}
+
+
+.civil-recipient-status-panel {
+
+    padding:
+        14px;
+
+}
+
+
+.civil-content-list {
+
+    min-height:
+        100px;
+
+    max-height:
+        210px;
+
+}
+
+
+.civil-quick-actions {
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        7px;
+
+}
+
+
+.civil-large-action {
+
+    min-height:
+        65px;
+
+    padding:
+        9px;
+
+}
+
+
+.civil-action-icon {
+
+    flex-basis:
+        32px;
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    font-size:
+        16px;
+
+}
+
+
+.civil-large-action strong {
+
+    font-size:
+        9px;
+
+}
+
+
+.civil-large-action small {
+
+    font-size:
+        7px;
+
+}
+
+
+.civil-material-category {
+
+    padding:
+        12px;
+
+}
+
+
+.civil-material-grid {
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        7px;
+
+}
+
+
+.civil-material-card {
+
+    min-height:
+        115px;
+
+    padding:
+        8px;
+
+}
+
+
+.material-visual {
+
+    width:
+        45px;
+
+    height:
+        45px;
+
+    margin-bottom:
+        7px;
+
+    font-size:
+        20px;
+
+}
+
+
+.material-name {
+
+    font-size:
+        9px;
+
+}
+
+
+.civil-equipment-grid {
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap:
+        8px;
+
+}
+
+
+.civil-equipment-card {
+
+    min-height:
+        135px;
+
+}
+
+
+.civil-equipment-card > span {
+
+    width:
+        50px;
+
+    height:
+        50px;
+
+    font-size:
+        22px;
+
+}
+
+
+.civil-measurement-workspace {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.civil-measure-card {
+
+    min-height:
+        130px;
+
+}
+
+
+.civil-dosage-controls {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.civil-dosage-controls
+.civil-action-button {
+
+    grid-column:
+        auto;
+
+}
+
+
+.civil-quantity-grid {
+
+    grid-template-columns:
+        1fr 1fr;
+
+}
+
+
+.civil-reaction-status {
+
+    align-items:
+        flex-start;
+
+}
+
+
+.civil-reaction-button {
+
+    width:
+        100%;
+
+}
+
+
+.civil-report-actions {
+
+    flex-direction:
+        column;
+
+}
+
+
+.civil-footer {
+
+    font-size:
+        7px;
+
+    padding:
+        0 8px;
+
+}
+
+
+#footerEngineState {
+
+    display:
+        none;
+
+}
+
+
+.civil-notification {
+
+    right:
+        10px;
+
+    bottom:
+        42px;
+
+}
+
+}
+
+/* ================================================================
+37 — PETITS TÉLÉPHONES
+================================================================ */
+
+@media (max-width: 390px) {
+
+.civil-top-status {
+
+    display:
+        none;
+
+}
+
+
+.civil-top-button:nth-of-type(4) {
+
+    display:
+        none;
+
+}
+
+
+.civil-page-title {
+
+    font-size:
+        21px;
+
+}
+
+
+.civil-laboratory-scene {
+
+    min-height:
+        410px;
+
+}
+
+
+.civil-recipient {
+
+    transform:
+        translateX(-50%)
+        scale(0.88);
+
+}
+
+
+.civil-recipient:hover {
+
+    transform:
+        translateX(-50%)
+        translateY(-4px)
+        scale(0.88);
+
+}
+
+
+.civil-recipient.drop-ready {
+
+    transform:
+        translateX(-50%)
+        translateY(-7px)
+        scale(0.93);
+
+}
+
+
+.civil-quick-actions {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.civil-material-grid {
+
+    grid-template-columns:
+        1fr 1fr;
+
+}
+
+
+.civil-quantity-grid {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+.civil-result-state {
+
+    min-height:
+        230px;
+
+}
+
+}
+
+/* ================================================================
+38 — MODE PAYSAGE ANDROID
+================================================================ */
+
+@media
+(max-width: 900px)
+and (orientation: landscape) {
+
+.civil-top-bar {
+
+    height:
+        56px;
+
+}
+
+
+.civil-main-layout {
+
+    height:
+        calc(
+            100vh -
+            56px -
+            var(--fobas-footer-height)
+        );
+
+}
+
+
+.civil-laboratory-scene {
+
+    min-height:
+        390px;
+
+}
+
+
+.civil-recipient-status-panel {
+
+    max-height:
+        300px;
+
+}
+
+
+.civil-content-area {
+
+    padding:
+        12px;
+
+}
+
+}
+
+/* ================================================================
+39 — ACCESSIBILITÉ / RÉDUCTION ANIMATION
+================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+*,
+*::before,
+*::after {
+
+    scroll-behavior:
+        auto !important;
+
+    animation-duration:
+        0.001ms !important;
+
+    animation-iteration-count:
+        1 !important;
+
+    transition-duration:
+        0.001ms !important;
+
+}
+
+}
+
+/* ================================================================
+40 — IMPRESSION
+================================================================ */
+
+@media print {
+
+body {
+
+    overflow:
+        visible;
+
+    background:
+        white;
+
+}
+
+
+.civil-top-bar,
+.civil-sidebar,
+.civil-footer,
+.civil-quick-actions,
+.civil-recipient-actions {
+
+    display:
+        none !important;
+
+}
+
+
+.civil-main-layout {
+
+    height:
+        auto;
+
+}
+
+
+.civil-content-area {
+
+    width:
+        100%;
+
+    overflow:
+        visible;
+
+    padding:
+        0;
+
+    color:
+        black;
+
+}
+
+
+.civil-panel {
+
+    max-width:
+        none;
+
+}
+
+}
+
+/* ================================================================
+FIN DU FICHIER
+FOBAS — LABORATOIRE GÉNIE CIVIL
+================================================================ */
