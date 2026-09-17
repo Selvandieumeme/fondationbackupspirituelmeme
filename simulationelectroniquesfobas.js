@@ -6156,25 +6156,6 @@ void loop() {
        56 — BOUTONS TOP
     ============================================================ */
 
-    function openLaboratory() {
-
-        hide("codeLibraryPanel");
-        hide("codeEditorPanel");
-        hide("missionsPanel");
-        hide("diagnosticPanel");
-        hide("faultsPanel");
-        hide("measurementsPanel");
-
-        toast(
-            "Laboratoire ouvert.",
-            "info"
-        );
-    }
-
-
-
-
-
 
 function openComponentLibrary() {
 
@@ -6195,7 +6176,7 @@ function openComponentLibrary() {
         return;
     }
 
-    library.classList.remove("hidden");
+    show("componentLibraryPanel");
 
     renderCategory(
         state.selectedCategory || "resistors"
@@ -6216,78 +6197,7 @@ function openComponentLibrary() {
 
 
 
-
-    function openCodeLibrary() {
-
-        renderCodeLibrary(
-            state.level
-        );
-
-        show(
-            "codeLibraryPanel"
-        );
-    }
-
-
-    function openCodeEditor() {
-
-        show(
-            "codeEditorPanel"
-        );
-
-        const editor =
-            $("electronicCodeEditor");
-
-        if (
-            editor &&
-            !editor.value &&
-            state.currentCode
-        ) {
-            editor.value =
-                state.currentCode;
-        }
-    }
-
-
-    function openMissions() {
-
-        renderMissions(
-            state.level
-        );
-
-        show(
-            "missionsPanel"
-        );
-    }
-
-
-    function openMeasurements() {
-
-        simulateCircuit();
-
-        show(
-            "measurementsPanel"
-        );
-    }
-
-
-    function openDiagnostic() {
-
-        diagnoseCircuit();
-
-        show(
-            "diagnosticPanel"
-        );
-    }
-
-
-    function openFaults() {
-
-        show(
-            "faultsPanel"
-        );
-    }
-
+    
 
     /* ============================================================
        57 — SAUVEGARDE
