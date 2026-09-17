@@ -1,0 +1,3846 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS — Laboratoire de Génie Civil et Construction"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0b1220"
+    >
+
+    <meta
+        name="mobile-web-app-capable"
+        content="yes"
+    >
+
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    >
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+    >
+
+    <title>
+        FOBAS — Laboratoire Génie Civil
+    </title>
+
+    <!-- ============================================================
+         FICHIER CSS PRINCIPAL
+         ============================================================ -->
+
+    <link
+        rel="stylesheet"
+        href="simulationgeniecivilfobas.css"
+    >
+
+</head>
+
+<body>
+
+<!-- ================================================================
+     APPLICATION PRINCIPALE
+     ================================================================ -->
+
+<div
+    id="fobasCivilApp"
+    class="fobas-civil-app"
+    data-app="FOBAS_CIVIL_ENGINE"
+    data-version="1.0.0"
+>
+
+    <!-- ============================================================
+         BARRE SUPÉRIEURE
+         ============================================================ -->
+
+    <header
+        id="civilTopBar"
+        class="civil-top-bar"
+    >
+
+        <div
+            class="civil-brand"
+            id="civilBrand"
+        >
+
+            <div
+                class="civil-brand-mark"
+                aria-hidden="true"
+            >
+                🏗️
+            </div>
+
+            <div class="civil-brand-text">
+
+                <div class="civil-brand-name">
+                    FOBAS
+                </div>
+
+                <div class="civil-brand-subtitle">
+                    LABORATOIRE GÉNIE CIVIL
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="civilTopStatus"
+            class="civil-top-status"
+        >
+
+            <span
+                id="engineStatusIndicator"
+                class="status-indicator status-online"
+            ></span>
+
+            <span id="engineStatusText">
+                Système prêt
+            </span>
+
+        </div>
+
+
+        <div
+            class="civil-top-actions"
+            id="civilTopActions"
+        >
+
+            <button
+                type="button"
+                id="zoomOutBtn"
+                class="civil-top-button"
+                title="Réduire l'affichage"
+                aria-label="Réduire l'affichage"
+            >
+                −
+            </button>
+
+            <span
+                id="zoomValue"
+                class="civil-zoom-value"
+            >
+                100%
+            </span>
+
+            <button
+                type="button"
+                id="zoomInBtn"
+                class="civil-top-button"
+                title="Agrandir l'affichage"
+                aria-label="Agrandir l'affichage"
+            >
+                +
+            </button>
+
+            <button
+                type="button"
+                id="zoomResetBtn"
+                class="civil-top-button civil-reset-button"
+                title="Réinitialiser le zoom"
+                aria-label="Réinitialiser le zoom"
+            >
+                100%
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ============================================================
+         STRUCTURE PRINCIPALE
+         ============================================================ -->
+
+    <div
+        id="civilMainLayout"
+        class="civil-main-layout"
+    >
+
+        <!-- ========================================================
+             BARRE LATÉRALE
+             ======================================================== -->
+
+        <aside
+            id="civilSidebar"
+            class="civil-sidebar"
+            aria-label="Navigation principale"
+        >
+
+            <div
+                class="civil-sidebar-header"
+            >
+
+                <span class="civil-sidebar-title">
+                    LABORATOIRE
+                </span>
+
+            </div>
+
+
+            <nav
+                id="civilMainNavigation"
+                class="civil-main-navigation"
+            >
+
+                <button
+                    type="button"
+                    class="civil-nav-button active"
+                    id="laboratoryNavBtn"
+                    data-panel="laboratoryPanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        🏗️
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Laboratoire
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="civil-nav-button"
+                    id="materialsNavBtn"
+                    data-panel="materialsPanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        🧱
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Matériaux
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="civil-nav-button"
+                    id="toolsNavBtn"
+                    data-panel="toolsPanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        🧰
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Équipements
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="civil-nav-button"
+                    id="measureNavBtn"
+                    data-panel="measurePanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        ⚖️
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Mesures
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="civil-nav-button"
+                    id="dosageNavBtn"
+                    data-panel="dosagePanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        📐
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Dosages
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="civil-nav-button"
+                    id="reactionNavBtn"
+                    data-panel="reactionPanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        🔬
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Réaction
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="civil-nav-button"
+                    id="resultNavBtn"
+                    data-panel="resultPanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        📊
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Résultat
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="civil-nav-button"
+                    id="reportNavBtn"
+                    data-panel="reportPanel"
+                >
+
+                    <span class="civil-nav-icon">
+                        📄
+                    </span>
+
+                    <span class="civil-nav-label">
+                        Rapports
+                    </span>
+
+                </button>
+
+            </nav>
+
+
+            <!-- ====================================================
+                 INFORMATIONS MOTEUR
+                 ==================================================== -->
+
+            <div
+                class="civil-engine-card"
+                id="civilEngineCard"
+            >
+
+                <div class="civil-engine-card-title">
+                    MOTEUR CIVIL
+                </div>
+
+                <div class="civil-engine-version">
+                    FOBAS_CIVIL_ENGINE
+                </div>
+
+                <div class="civil-engine-state">
+                    <span
+                        id="engineStateDot"
+                        class="engine-state-dot"
+                    ></span>
+
+                    <span id="engineStateText">
+                        Opérationnel
+                    </span>
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ========================================================
+             CONTENU
+             ======================================================== -->
+
+        <main
+            id="civilContentArea"
+            class="civil-content-area"
+        >
+
+            <!-- ====================================================
+                 EN-TÊTE DU LABORATOIRE
+                 ==================================================== -->
+
+            <section
+                id="laboratoryPanel"
+                class="civil-panel active"
+                data-panel-content="laboratoryPanel"
+            >
+
+                <div
+                    class="civil-page-header"
+                >
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            GÉNIE CIVIL • CONSTRUCTION
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Laboratoire de Construction
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Espace de simulation pour matériaux,
+                            mesures, transferts, mélanges et contrôles
+                            de construction.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        class="civil-live-badge"
+                    >
+
+                        <span
+                            class="civil-live-dot"
+                        ></span>
+
+                        LABORATOIRE ACTIF
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     ESPACE DE TRAVAIL
+                     ================================================== -->
+
+                <div
+                    id="civilLaboratoryWorkspace"
+                    class="civil-laboratory-workspace"
+                    data-drop-zone="laboratory"
+                >
+
+                    <!-- ==============================================
+                         ZONE VISUELLE 3D
+                         ============================================== -->
+
+                    <div
+                        id="civilLaboratoryScene"
+                        class="civil-laboratory-scene"
+                    >
+
+                        <div
+                            class="civil-scene-grid"
+                            aria-hidden="true"
+                        ></div>
+
+
+                        <div
+                            class="civil-scene-label"
+                        >
+                            ESPACE LABORATOIRE
+                        </div>
+
+
+                        <!-- ==========================================
+                             TABLE DE LABORATOIRE
+                             ========================================== -->
+
+                        <div
+                            id="civilLabTable"
+                            class="civil-lab-table"
+                        >
+
+                            <div
+                                class="civil-lab-table-top"
+                            ></div>
+
+                            <div
+                                class="civil-lab-table-front"
+                            ></div>
+
+                            <div
+                                class="civil-lab-table-leg left"
+                            ></div>
+
+                            <div
+                                class="civil-lab-table-leg right"
+                            ></div>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             RÉCIPIENT PRINCIPAL
+                             ========================================== -->
+
+                        <div
+                            id="recipient01"
+                            class="civil-recipient"
+                            data-recipient-id="recipient01"
+                            data-recipient-type="mixing-container"
+                            data-drop-target="recipient"
+                            tabindex="0"
+                            aria-label="Récipient principal"
+                        >
+
+                            <div
+                                class="civil-recipient-rim"
+                            ></div>
+
+                            <div
+                                id="recipient01Contents"
+                                class="civil-recipient-contents"
+                            ></div>
+
+                            <div
+                                class="civil-recipient-body"
+                            ></div>
+
+                            <div
+                                class="civil-recipient-highlight"
+                            ></div>
+
+                            <div
+                                class="civil-recipient-label"
+                            >
+                                RÉCIPIENT #01
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             BALANCE
+                             ========================================== -->
+
+                        <div
+                            id="civilBalance"
+                            class="civil-balance"
+                            data-equipment="balance"
+                        >
+
+                            <div class="civil-balance-platform">
+                            </div>
+
+                            <div class="civil-balance-body">
+
+                                <div
+                                    id="balanceDisplay"
+                                    class="civil-balance-display"
+                                >
+                                    0.00 kg
+                                </div>
+
+                                <div class="civil-balance-controls">
+
+                                    <button
+                                        type="button"
+                                        id="balanceTareBtn"
+                                        class="civil-small-control"
+                                    >
+                                        TARE
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             ÉPROUVETTE / MESURE D'EAU
+                             ========================================== -->
+
+                        <div
+                            id="civilGraduatedCylinder"
+                            class="civil-graduated-cylinder"
+                            data-equipment="graduated-cylinder"
+                        >
+
+                            <div
+                                class="civil-cylinder-liquid"
+                                id="cylinderLiquid"
+                            ></div>
+
+                            <div
+                                class="civil-cylinder-scale"
+                            >
+
+                                <span>1000</span>
+                                <span>750</span>
+                                <span>500</span>
+                                <span>250</span>
+                                <span>0</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             MESSAGE DE DROP
+                             ========================================== -->
+
+                        <div
+                            id="laboratoryDropMessage"
+                            class="civil-drop-message"
+                            aria-live="polite"
+                        >
+                            Déposez un matériau ou un équipement ici
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         PANNEAU STATUT RÉCIPIENT
+                         ============================================== -->
+
+                    <aside
+                        id="recipientStatusPanel"
+                        class="civil-recipient-status-panel"
+                    >
+
+                        <div
+                            class="civil-status-header"
+                        >
+
+                            <div>
+
+                                <div class="civil-status-kicker">
+                                    CONTENU DU RÉCIPIENT
+                                </div>
+
+                                <h2 class="civil-status-title">
+                                    Récipient #01
+                                </h2>
+
+                            </div>
+
+                            <span
+                                id="recipientStateBadge"
+                                class="civil-state-badge empty"
+                            >
+                                VIDE
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            id="recipientContentList"
+                            class="civil-content-list"
+                        >
+
+                            <div
+                                id="recipientEmptyState"
+                                class="civil-empty-state"
+                            >
+
+                                <div
+                                    class="civil-empty-icon"
+                                >
+                                    🧪
+                                </div>
+
+                                <strong>
+                                    Aucun matériau
+                                </strong>
+
+                                <span>
+                                    Ajoutez un matériau au laboratoire.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="civil-status-summary"
+                        >
+
+                            <div class="civil-summary-row">
+
+                                <span>
+                                    Masse totale
+                                </span>
+
+                                <strong id="recipientTotalMass">
+                                    0.00 kg
+                                </strong>
+
+                            </div>
+
+
+                            <div class="civil-summary-row">
+
+                                <span>
+                                    Volume total
+                                </span>
+
+                                <strong id="recipientTotalVolume">
+                                    0.00 L
+                                </strong>
+
+                            </div>
+
+
+                            <div class="civil-summary-row">
+
+                                <span>
+                                    Composants
+                                </span>
+
+                                <strong id="recipientComponentCount">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             ACTIONS DU RÉCIPIENT
+                             ========================================== -->
+
+                        <div
+                            class="civil-recipient-actions"
+                        >
+
+                            <button
+                                type="button"
+                                id="measureRecipientBtn"
+                                class="civil-action-button"
+                            >
+                                ⚖️ Mesurer
+                            </button>
+
+                            <button
+                                type="button"
+                                id="mixRecipientBtn"
+                                class="civil-action-button primary"
+                            >
+                                🔄 Mélanger
+                            </button>
+
+                            <button
+                                type="button"
+                                id="clearRecipientBtn"
+                                class="civil-action-button danger"
+                            >
+                                🗑️ Vider
+                            </button>
+
+                        </div>
+
+                    </aside>
+
+                </div>
+
+
+                <!-- ==================================================
+                     ACTIONS PRINCIPALES
+                     ================================================== -->
+
+                <div
+                    id="laboratoryQuickActions"
+                    class="civil-quick-actions"
+                >
+
+                    <button
+                        type="button"
+                        id="openMaterialsBtn"
+                        class="civil-large-action materials-action"
+                    >
+
+                        <span class="civil-action-icon">
+                            🧱
+                        </span>
+
+                        <span>
+                            <strong>Matériaux</strong>
+                            <small>
+                                Génie Civil
+                            </small>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="openToolsBtn"
+                        class="civil-large-action equipment-action"
+                    >
+
+                        <span class="civil-action-icon">
+                            🧰
+                        </span>
+
+                        <span>
+                            <strong>Équipements</strong>
+                            <small>
+                                Laboratoire
+                            </small>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="openDosageBtn"
+                        class="civil-large-action dosage-action"
+                    >
+
+                        <span class="civil-action-icon">
+                            📐
+                        </span>
+
+                        <span>
+                            <strong>Dosages</strong>
+                            <small>
+                                Calculer les quantités
+                            </small>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="openReactionBtn"
+                        class="civil-large-action reaction-action"
+                    >
+
+                        <span class="civil-action-icon">
+                            🔬
+                        </span>
+
+                        <span>
+                            <strong>Réaction</strong>
+                            <small>
+                                Vérifier et exécuter
+                            </small>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="openResultBtn"
+                        class="civil-large-action result-action"
+                    >
+
+                        <span class="civil-action-icon">
+                            📊
+                        </span>
+
+                        <span>
+                            <strong>Résultat</strong>
+                            <small>
+                                Consulter le résultat
+                            </small>
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PANNEAU MATÉRIAUX
+                 ==================================================== -->
+
+            <section
+                id="materialsPanel"
+                class="civil-panel"
+                data-panel-content="materialsPanel"
+                hidden
+            >
+
+                <div class="civil-page-header">
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            BIBLIOTHÈQUE TECHNIQUE
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Matériaux — Génie Civil
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Sélectionnez un matériau pour l'ajouter
+                            au laboratoire ou faites-le glisser dans
+                            l'espace de travail.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="materialsCategories"
+                    class="civil-materials-categories"
+                >
+
+                    <!-- =================================================
+                         BÉTON
+                         ================================================= -->
+
+                    <section
+                        class="civil-material-category"
+                        data-category="beton"
+                    >
+
+                        <div class="civil-category-header">
+
+                            <span class="civil-category-icon">
+                                🧱
+                            </span>
+
+                            <div>
+
+                                <h2>
+                                    Béton
+                                </h2>
+
+                                <span>
+                                    Constituants principaux
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="civil-material-grid"
+                            id="betonMaterialsGrid"
+                        >
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="cement"
+                                data-material-category="beton"
+                                data-material-name="Ciment"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual cement">
+                                    ⚪
+                                </span>
+
+                                <span class="material-name">
+                                    Ciment
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="sand"
+                                data-material-category="beton"
+                                data-material-name="Sable"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual sand">
+                                    🟨
+                                </span>
+
+                                <span class="material-name">
+                                    Sable
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="gravel"
+                                data-material-category="beton"
+                                data-material-name="Gravier"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual gravel">
+                                    🪨
+                                </span>
+
+                                <span class="material-name">
+                                    Gravier
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="water"
+                                data-material-category="beton"
+                                data-material-name="Eau"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual water">
+                                    💧
+                                </span>
+
+                                <span class="material-name">
+                                    Eau
+                                </span>
+
+                                <span class="material-unit">
+                                    L
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         GRANULATS
+                         ================================================= -->
+
+                    <section
+                        class="civil-material-category"
+                        data-category="granulats"
+                    >
+
+                        <div class="civil-category-header">
+
+                            <span class="civil-category-icon">
+                                🪨
+                            </span>
+
+                            <div>
+
+                                <h2>
+                                    Granulats
+                                </h2>
+
+                                <span>
+                                    Granulats naturels
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="civil-material-grid"
+                            id="granulatsMaterialsGrid"
+                        >
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="fine-sand"
+                                data-material-category="granulats"
+                                data-material-name="Sable fin"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual sand">
+                                    🟨
+                                </span>
+
+                                <span class="material-name">
+                                    Sable fin
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="medium-sand"
+                                data-material-category="granulats"
+                                data-material-name="Sable moyen"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual sand">
+                                    🟨
+                                </span>
+
+                                <span class="material-name">
+                                    Sable moyen
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="coarse-sand"
+                                data-material-category="granulats"
+                                data-material-name="Sable grossier"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual sand">
+                                    🟨
+                                </span>
+
+                                <span class="material-name">
+                                    Sable grossier
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="stone"
+                                data-material-category="granulats"
+                                data-material-name="Pierre"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual stone">
+                                    🪨
+                                </span>
+
+                                <span class="material-name">
+                                    Pierre
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         SOLS
+                         ================================================= -->
+
+                    <section
+                        class="civil-material-category"
+                        data-category="sols"
+                    >
+
+                        <div class="civil-category-header">
+
+                            <span class="civil-category-icon">
+                                🌍
+                            </span>
+
+                            <div>
+
+                                <h2>
+                                    Sols
+                                </h2>
+
+                                <span>
+                                    Matériaux géotechniques
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="civil-material-grid"
+                            id="solsMaterialsGrid"
+                        >
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="earth"
+                                data-material-category="sols"
+                                data-material-name="Terre"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual earth">
+                                    🟫
+                                </span>
+
+                                <span class="material-name">
+                                    Terre
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="clay"
+                                data-material-category="sols"
+                                data-material-name="Argile"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual clay">
+                                    🟤
+                                </span>
+
+                                <span class="material-name">
+                                    Argile
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="silt"
+                                data-material-category="sols"
+                                data-material-name="Limon"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual silt">
+                                    🟫
+                                </span>
+
+                                <span class="material-name">
+                                    Limon
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         ACIER
+                         ================================================= -->
+
+                    <section
+                        class="civil-material-category"
+                        data-category="acier"
+                    >
+
+                        <div class="civil-category-header">
+
+                            <span class="civil-category-icon">
+                                🔩
+                            </span>
+
+                            <div>
+
+                                <h2>
+                                    Acier
+                                </h2>
+
+                                <span>
+                                    Armatures et éléments métalliques
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="civil-material-grid"
+                            id="acierMaterialsGrid"
+                        >
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="steel-bar"
+                                data-material-category="acier"
+                                data-material-name="Barre d'acier"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual steel">
+                                    🔩
+                                </span>
+
+                                <span class="material-name">
+                                    Barre d'acier
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="steel-wire"
+                                data-material-category="acier"
+                                data-material-name="Fil d'acier"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual steel">
+                                    🧵
+                                </span>
+
+                                <span class="material-name">
+                                    Fil d'acier
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         MAÇONNERIE
+                         ================================================= -->
+
+                    <section
+                        class="civil-material-category"
+                        data-category="maconnerie"
+                    >
+
+                        <div class="civil-category-header">
+
+                            <span class="civil-category-icon">
+                                🧱
+                            </span>
+
+                            <div>
+
+                                <h2>
+                                    Maçonnerie
+                                </h2>
+
+                                <span>
+                                    Éléments de construction
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="civil-material-grid"
+                            id="maconnerieMaterialsGrid"
+                        >
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="brick"
+                                data-material-category="maconnerie"
+                                data-material-name="Brique"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual brick">
+                                    🧱
+                                </span>
+
+                                <span class="material-name">
+                                    Brique
+                                </span>
+
+                                <span class="material-unit">
+                                    unité
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="concrete-block"
+                                data-material-category="maconnerie"
+                                data-material-name="Bloc béton"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual block">
+                                    ▰
+                                </span>
+
+                                <span class="material-name">
+                                    Bloc béton
+                                </span>
+
+                                <span class="material-unit">
+                                    unité
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =================================================
+                         AUTRES
+                         ================================================= -->
+
+                    <section
+                        class="civil-material-category"
+                        data-category="autres"
+                    >
+
+                        <div class="civil-category-header">
+
+                            <span class="civil-category-icon">
+                                🧰
+                            </span>
+
+                            <div>
+
+                                <h2>
+                                    Autres matériaux
+                                </h2>
+
+                                <span>
+                                    Construction et finition
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="civil-material-grid"
+                            id="otherMaterialsGrid"
+                        >
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="wood"
+                                data-material-category="autres"
+                                data-material-name="Bois"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual wood">
+                                    🪵
+                                </span>
+
+                                <span class="material-name">
+                                    Bois
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="glass"
+                                data-material-category="autres"
+                                data-material-name="Verre"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual glass">
+                                    ◇
+                                </span>
+
+                                <span class="material-name">
+                                    Verre
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="civil-material-card"
+                                data-material-id="bitumen"
+                                data-material-category="autres"
+                                data-material-name="Bitume"
+                                draggable="true"
+                            >
+
+                                <span class="material-visual bitumen">
+                                    ⚫
+                                </span>
+
+                                <span class="material-name">
+                                    Bitume
+                                </span>
+
+                                <span class="material-unit">
+                                    kg
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PANNEAU ÉQUIPEMENTS
+                 ==================================================== -->
+
+            <section
+                id="toolsPanel"
+                class="civil-panel"
+                data-panel-content="toolsPanel"
+                hidden
+            >
+
+                <div class="civil-page-header">
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            INSTRUMENTATION
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Équipements de laboratoire
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Instruments destinés aux opérations de
+                            mesure, transfert, mélange et contrôle.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="equipmentGrid"
+                    class="civil-equipment-grid"
+                >
+
+                    <button
+                        type="button"
+                        class="civil-equipment-card"
+                        data-equipment-id="balance"
+                        draggable="true"
+                    >
+
+                        <span>
+                            ⚖️
+                        </span>
+
+                        <strong>
+                            Balance
+                        </strong>
+
+                        <small>
+                            Masse
+                        </small>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="civil-equipment-card"
+                        data-equipment-id="graduated-cylinder"
+                        draggable="true"
+                    >
+
+                        <span>
+                            🧪
+                        </span>
+
+                        <strong>
+                            Éprouvette graduée
+                        </strong>
+
+                        <small>
+                            Volume
+                        </small>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="civil-equipment-card"
+                        data-equipment-id="bucket"
+                        draggable="true"
+                    >
+
+                        <span>
+                            🪣
+                        </span>
+
+                        <strong>
+                            Seau
+                        </strong>
+
+                        <small>
+                            Transfert
+                        </small>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="civil-equipment-card"
+                        data-equipment-id="mixer"
+                        draggable="true"
+                    >
+
+                        <span>
+                            🔄
+                        </span>
+
+                        <strong>
+                            Malaxeur
+                        </strong>
+
+                        <small>
+                            Mélange
+                        </small>
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PANNEAU MESURES
+                 ==================================================== -->
+
+            <section
+                id="measurePanel"
+                class="civil-panel"
+                data-panel-content="measurePanel"
+                hidden
+            >
+
+                <div class="civil-page-header">
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            CONTRÔLE QUANTITATIF
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Mesures
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Contrôle des masses, volumes et quantités
+                            utilisées dans le laboratoire.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="measurementWorkspace"
+                    class="civil-measurement-workspace"
+                >
+
+                    <div class="civil-measure-card">
+
+                        <span class="civil-measure-icon">
+                            ⚖️
+                        </span>
+
+                        <span class="civil-measure-label">
+                            Masse
+                        </span>
+
+                        <strong id="measurementMass">
+                            0.00 kg
+                        </strong>
+
+                    </div>
+
+
+                    <div class="civil-measure-card">
+
+                        <span class="civil-measure-icon">
+                            🧪
+                        </span>
+
+                        <span class="civil-measure-label">
+                            Volume
+                        </span>
+
+                        <strong id="measurementVolume">
+                            0.00 L
+                        </strong>
+
+                    </div>
+
+
+                    <div class="civil-measure-card">
+
+                        <span class="civil-measure-icon">
+                            🧱
+                        </span>
+
+                        <span class="civil-measure-label">
+                            Matériaux
+                        </span>
+
+                        <strong id="measurementMaterials">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PANNEAU DOSAGES
+                 ==================================================== -->
+
+            <section
+                id="dosagePanel"
+                class="civil-panel"
+                data-panel-content="dosagePanel"
+                hidden
+            >
+
+                <div class="civil-page-header">
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            DOSAGE DES MATÉRIAUX
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Dosages & Quantités
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Calcul dynamique des quantités selon le
+                            type de mélange et la quantité de ciment.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="dosageControls"
+                    class="civil-dosage-controls"
+                >
+
+                    <label class="civil-field">
+
+                        <span>
+                            Type de mélange
+                        </span>
+
+                        <select
+                            id="mixTypeSelect"
+                            name="mixType"
+                        >
+
+                            <option value="mortier">
+                                Mortier
+                            </option>
+
+                            <option value="beton">
+                                Béton
+                            </option>
+
+                            <option value="beton-arme">
+                                Béton armé
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label class="civil-field">
+
+                        <span>
+                            Nombre de sacs de ciment
+                        </span>
+
+                        <input
+                            id="cementBagsInput"
+                            type="number"
+                            min="1"
+                            max="1000"
+                            step="1"
+                            value="3"
+                            inputmode="numeric"
+                        >
+
+                    </label>
+
+
+                    <button
+                        type="button"
+                        id="calculateDosageBtn"
+                        class="civil-action-button primary"
+                    >
+                        📐 Calculer
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="dosageResult"
+                    class="civil-dosage-result"
+                >
+
+                    <div class="civil-dosage-result-header">
+
+                        <strong>
+                            Quantités recommandées
+                        </strong>
+
+                        <span id="dosageStatusBadge">
+                            EN ATTENTE
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="dosageQuantityGrid"
+                        class="civil-quantity-grid"
+                    >
+
+                        <div class="civil-quantity-item">
+
+                            <span>
+                                Ciment
+                            </span>
+
+                            <strong id="dosageCement">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="civil-quantity-item">
+
+                            <span>
+                                Sable
+                            </span>
+
+                            <strong id="dosageSand">
+                                0 kg
+                            </strong>
+
+                        </div>
+
+
+                        <div class="civil-quantity-item">
+
+                            <span>
+                                Gravier
+                            </span>
+
+                            <strong id="dosageGravel">
+                                0 kg
+                            </strong>
+
+                        </div>
+
+
+                        <div class="civil-quantity-item">
+
+                            <span>
+                                Eau
+                            </span>
+
+                            <strong id="dosageWater">
+                                0 L
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PANNEAU RÉACTION
+                 ==================================================== -->
+
+            <section
+                id="reactionPanel"
+                class="civil-panel"
+                data-panel-content="reactionPanel"
+                hidden
+            >
+
+                <div class="civil-page-header">
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            CONTRÔLE DU MÉLANGE
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Réaction
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Vérification du dosage et exécution de la
+                            réaction du mélange.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="reactionWorkspace"
+                    class="civil-reaction-workspace"
+                >
+
+                    <div
+                        id="reactionStatusCard"
+                        class="civil-reaction-status pending"
+                    >
+
+                        <div
+                            id="reactionStatusIcon"
+                            class="civil-reaction-status-icon"
+                        >
+                            ⏳
+                        </div>
+
+                        <div>
+
+                            <strong
+                                id="reactionStatusTitle"
+                            >
+                                Réaction en attente
+                            </strong>
+
+                            <p
+                                id="reactionStatusMessage"
+                            >
+                                Préparez et mélangez les matériaux
+                                avant d'exécuter la réaction.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="executeReactionBtn"
+                        class="civil-reaction-button"
+                    >
+                        🔬 EXÉCUTER LA RÉACTION
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PANNEAU RÉSULTAT
+                 ==================================================== -->
+
+            <section
+                id="resultPanel"
+                class="civil-panel"
+                data-panel-content="resultPanel"
+                hidden
+            >
+
+                <div class="civil-page-header">
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            ANALYSE
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Résultat
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Résultat produit par le moteur du
+                            laboratoire.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="resultWorkspace"
+                    class="civil-result-workspace"
+                >
+
+                    <div
+                        id="resultState"
+                        class="civil-result-state"
+                    >
+
+                        <span class="civil-result-icon">
+                            📊
+                        </span>
+
+                        <strong id="resultTitle">
+                            Aucun résultat
+                        </strong>
+
+                        <p id="resultMessage">
+                            Exécutez une réaction pour obtenir
+                            un résultat.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="resultDetails"
+                        class="civil-result-details"
+                    >
+
+                        <div class="civil-result-row">
+
+                            <span>
+                                État du mélange
+                            </span>
+
+                            <strong id="resultMixState">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="civil-result-row">
+
+                            <span>
+                                Dosage
+                            </span>
+
+                            <strong id="resultDosageState">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="civil-result-row">
+
+                            <span>
+                                Réaction
+                            </span>
+
+                            <strong id="resultReactionState">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="civil-result-row">
+
+                            <span>
+                                Résultat final
+                            </span>
+
+                            <strong id="resultFinalState">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 PANNEAU RAPPORT
+                 ==================================================== -->
+
+            <section
+                id="reportPanel"
+                class="civil-panel"
+                data-panel-content="reportPanel"
+                hidden
+            >
+
+                <div class="civil-page-header">
+
+                    <div>
+
+                        <div class="civil-page-kicker">
+                            DOCUMENTATION
+                        </div>
+
+                        <h1 class="civil-page-title">
+                            Rapports
+                        </h1>
+
+                        <p class="civil-page-description">
+                            Synthèse des opérations effectuées dans
+                            le laboratoire.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="reportWorkspace"
+                    class="civil-report-workspace"
+                >
+
+                    <div
+                        id="reportContent"
+                        class="civil-report-content"
+                    >
+
+                        <div class="civil-report-empty">
+
+                            <span>
+                                📄
+                            </span>
+
+                            <strong>
+                                Aucun rapport disponible
+                            </strong>
+
+                            <p>
+                                Les opérations réalisées seront
+                                enregistrées ici.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="civil-report-actions"
+                    >
+
+                        <button
+                            type="button"
+                            id="generateReportBtn"
+                            class="civil-action-button primary"
+                        >
+                            📄 Générer le rapport
+                        </button>
+
+                        <button
+                            type="button"
+                            id="clearReportBtn"
+                            class="civil-action-button danger"
+                        >
+                            🗑️ Effacer
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- ============================================================
+         PANNEAU MOBILE MATÉRIAUX
+         ============================================================ -->
+
+    <div
+        id="materialsOverlay"
+        class="civil-overlay"
+        hidden
+    ></div>
+
+
+    <aside
+        id="materialsDrawer"
+        class="civil-materials-drawer"
+        aria-label="Bibliothèque des matériaux"
+        hidden
+    >
+
+        <div class="civil-drawer-header">
+
+            <div>
+
+                <span class="civil-drawer-kicker">
+                    GÉNIE CIVIL
+                </span>
+
+                <h2>
+                    Matériaux
+                </h2>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="closeMaterialsBtn"
+                class="civil-close-button"
+                aria-label="Fermer les matériaux"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="mobileMaterialsPanel"
+            class="civil-drawer-content"
+        >
+
+            <!-- Le JS pourra générer ici une version mobile
+                 de la bibliothèque complète. -->
+
+        </div>
+
+    </aside>
+
+
+    <!-- ============================================================
+         BOÎTE DE MESURE / TRANSFERT
+         ============================================================ -->
+
+    <div
+        id="transferModal"
+        class="civil-modal"
+        hidden
+    >
+
+        <div
+            class="civil-modal-backdrop"
+            data-close-modal="transferModal"
+        ></div>
+
+
+        <div
+            class="civil-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="transferModalTitle"
+        >
+
+            <div class="civil-modal-header">
+
+                <div>
+
+                    <span class="civil-modal-kicker">
+                        TRANSFERT
+                    </span>
+
+                    <h2 id="transferModalTitle">
+                        Transférer un matériau
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="civil-close-button"
+                    data-close-modal="transferModal"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                class="civil-modal-body"
+            >
+
+                <div
+                    id="transferMaterialName"
+                    class="civil-transfer-material"
+                >
+                    Aucun matériau sélectionné
+                </div>
+
+
+                <label class="civil-field">
+
+                    <span>
+                        Quantité
+                    </span>
+
+                    <input
+                        id="transferQuantityInput"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value="0"
+                    >
+
+                </label>
+
+
+                <label class="civil-field">
+
+                    <span>
+                        Unité
+                    </span>
+
+                    <select
+                        id="transferUnitSelect"
+                    >
+
+                        <option value="kg">
+                            kg
+                        </option>
+
+                        <option value="g">
+                            g
+                        </option>
+
+                        <option value="L">
+                            L
+                        </option>
+
+                        <option value="mL">
+                            mL
+                        </option>
+
+                        <option value="unit">
+                            unité
+                        </option>
+
+                    </select>
+
+                </label>
+
+            </div>
+
+
+            <div
+                class="civil-modal-footer"
+            >
+
+                <button
+                    type="button"
+                    class="civil-action-button"
+                    data-close-modal="transferModal"
+                >
+                    Annuler
+                </button>
+
+
+                <button
+                    type="button"
+                    id="confirmTransferBtn"
+                    class="civil-action-button primary"
+                >
+                    Transférer
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================================
+         NOTIFICATION SYSTÈME
+         ============================================================ -->
+
+    <div
+        id="civilNotification"
+        class="civil-notification"
+        role="status"
+        aria-live="polite"
+        hidden
+    >
+
+        <span
+            id="civilNotificationIcon"
+            class="civil-notification-icon"
+        >
+            ✓
+        </span>
+
+        <span
+            id="civilNotificationMessage"
+        >
+            Opération effectuée.
+        </span>
+
+    </div>
+
+
+    <!-- ============================================================
+         BARRE DE STATUT INFÉRIEURE
+         ============================================================ -->
+
+    <footer
+        id="civilFooter"
+        class="civil-footer"
+    >
+
+        <div>
+            FOBAS • Laboratoire Génie Civil
+        </div>
+
+        <div
+            id="footerEngineState"
+        >
+            FOBAS_CIVIL_ENGINE
+        </div>
+
+        <div
+            id="footerZoomState"
+        >
+            Zoom 100%
+        </div>
+
+    </footer>
+
+</div>
+
+
+<!-- ================================================================
+     ÉTAT CENTRAL INITIAL
+     ---------------------------------------------------------------
+     Ces données servent de point de connexion au moteur JavaScript.
+     Le moteur principal pourra les enrichir sans modifier le HTML.
+     ================================================================ -->
+
+<script>
+
+(function () {
+
+    "use strict";
+
+    /*
+     * =============================================================
+     * FOBAS CIVIL — ÉTAT INITIAL
+     * =============================================================
+     */
+
+    window.FOBAS_CIVIL_INITIAL_STATE = {
+
+        version: "1.0.0",
+
+        app: {
+            id: "FOBAS_CIVIL_ENGINE",
+            name: "Laboratoire Génie Civil FOBAS",
+            zoom: 1
+        },
+
+        activePanel: "laboratoryPanel",
+
+        laboratory: {
+
+            selectedMaterial: null,
+
+            selectedEquipment: null,
+
+            workspaceObjects: [],
+
+            recipients: {
+
+                recipient01: {
+
+                    id: "recipient01",
+
+                    type: "mixing-container",
+
+                    state: "empty",
+
+                    mixed: false,
+
+                    reactionState: "pending",
+
+                    components: [],
+
+                    totalMassKg: 0,
+
+                    totalVolumeL: 0,
+
+                    lastAction: null
+
+                }
+
+            }
+
+        },
+
+        materials: {
+
+            cement: {
+                id: "cement",
+                name: "Ciment",
+                category: "beton",
+                unit: "kg",
+                available: 1000
+            },
+
+            sand: {
+                id: "sand",
+                name: "Sable",
+                category: "beton",
+                unit: "kg",
+                available: 1000
+            },
+
+            gravel: {
+                id: "gravel",
+                name: "Gravier",
+                category: "beton",
+                unit: "kg",
+                available: 1000
+            },
+
+            water: {
+                id: "water",
+                name: "Eau",
+                category: "beton",
+                unit: "L",
+                available: 1000
+            },
+
+            "fine-sand": {
+                id: "fine-sand",
+                name: "Sable fin",
+                category: "granulats",
+                unit: "kg",
+                available: 1000
+            },
+
+            "medium-sand": {
+                id: "medium-sand",
+                name: "Sable moyen",
+                category: "granulats",
+                unit: "kg",
+                available: 1000
+            },
+
+            "coarse-sand": {
+                id: "coarse-sand",
+                name: "Sable grossier",
+                category: "granulats",
+                unit: "kg",
+                available: 1000
+            },
+
+            stone: {
+                id: "stone",
+                name: "Pierre",
+                category: "granulats",
+                unit: "kg",
+                available: 1000
+            },
+
+            earth: {
+                id: "earth",
+                name: "Terre",
+                category: "sols",
+                unit: "kg",
+                available: 1000
+            },
+
+            clay: {
+                id: "clay",
+                name: "Argile",
+                category: "sols",
+                unit: "kg",
+                available: 1000
+            },
+
+            silt: {
+                id: "silt",
+                name: "Limon",
+                category: "sols",
+                unit: "kg",
+                available: 1000
+            },
+
+            "steel-bar": {
+                id: "steel-bar",
+                name: "Barre d'acier",
+                category: "acier",
+                unit: "kg",
+                available: 1000
+            },
+
+            "steel-wire": {
+                id: "steel-wire",
+                name: "Fil d'acier",
+                category: "acier",
+                unit: "kg",
+                available: 1000
+            },
+
+            brick: {
+                id: "brick",
+                name: "Brique",
+                category: "maconnerie",
+                unit: "unit",
+                available: 1000
+            },
+
+            "concrete-block": {
+                id: "concrete-block",
+                name: "Bloc béton",
+                category: "maconnerie",
+                unit: "unit",
+                available: 1000
+            },
+
+            wood: {
+                id: "wood",
+                name: "Bois",
+                category: "autres",
+                unit: "kg",
+                available: 1000
+            },
+
+            glass: {
+                id: "glass",
+                name: "Verre",
+                category: "autres",
+                unit: "kg",
+                available: 1000
+            },
+
+            bitumen: {
+                id: "bitumen",
+                name: "Bitume",
+                category: "autres",
+                unit: "kg",
+                available: 1000
+            }
+
+        },
+
+        equipment: {
+
+            balance: {
+                id: "balance",
+                name: "Balance",
+                state: "ready"
+            },
+
+            "graduated-cylinder": {
+                id: "graduated-cylinder",
+                name: "Éprouvette graduée",
+                state: "ready"
+            },
+
+            bucket: {
+                id: "bucket",
+                name: "Seau",
+                state: "ready"
+            },
+
+            mixer: {
+                id: "mixer",
+                name: "Malaxeur",
+                state: "ready"
+            }
+
+        },
+
+        dosage: {
+
+            type: "mortier",
+
+            cementBags: 3,
+
+            cementKg: 0,
+
+            sandKg: 0,
+
+            gravelKg: 0,
+
+            waterL: 0,
+
+            status: "pending"
+
+        },
+
+        reaction: {
+
+            status: "pending",
+
+            message:
+                "Préparez et mélangez les matériaux avant d'exécuter la réaction.",
+
+            timestamp: null
+
+        },
+
+        result: {
+
+            available: false,
+
+            title: "Aucun résultat",
+
+            message:
+                "Exécutez une réaction pour obtenir un résultat.",
+
+            mixState: "—",
+
+            dosageState: "—",
+
+            reactionState: "—",
+
+            finalState: "—"
+
+        },
+
+        reports: []
+
+    };
+
+
+    /*
+     * =============================================================
+     * EXPOSER L'ÉTAT
+     * =============================================================
+     */
+
+    window.FOBAS_CIVIL_STATE =
+        window.FOBAS_CIVIL_INITIAL_STATE;
+
+
+    /*
+     * =============================================================
+     * PETITE INTERFACE DE BASE
+     * -------------------------------------------------------------
+     * Cette partie permet au HTML de rester utilisable avant
+     * l'arrivée du moteur JavaScript principal.
+     * Le fichier simulationgeniecivilfobas.js pourra reprendre
+     * les mêmes éléments et enrichir leur comportement.
+     * =============================================================
+     */
+
+    function getElement(id) {
+
+        return document.getElementById(id);
+
+    }
+
+
+    function setActivePanel(panelId) {
+
+        var panels =
+            document.querySelectorAll(
+                "[data-panel-content]"
+            );
+
+        var buttons =
+            document.querySelectorAll(
+                "[data-panel]"
+            );
+
+        panels.forEach(function (panel) {
+
+            var active =
+                panel.id === panelId;
+
+            panel.hidden = !active;
+
+            panel.classList.toggle(
+                "active",
+                active
+            );
+
+        });
+
+
+        buttons.forEach(function (button) {
+
+            button.classList.toggle(
+                "active",
+                button.getAttribute("data-panel") === panelId
+            );
+
+        });
+
+
+        window.FOBAS_CIVIL_STATE.activePanel =
+            panelId;
+
+    }
+
+
+    /*
+     * Navigation principale
+     */
+
+    document
+        .querySelectorAll("[data-panel]")
+        .forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    var panelId =
+                        button.getAttribute("data-panel");
+
+                    if (panelId) {
+
+                        setActivePanel(panelId);
+
+                    }
+
+                }
+            );
+
+        });
+
+
+    /*
+     * Boutons d'accès rapides
+     */
+
+    var quickPanelMap = {
+
+        openMaterialsBtn: "materialsPanel",
+        openToolsBtn: "toolsPanel",
+        openDosageBtn: "dosagePanel",
+        openReactionBtn: "reactionPanel",
+        openResultBtn: "resultPanel"
+
+    };
+
+
+    Object.keys(quickPanelMap)
+        .forEach(function (buttonId) {
+
+            var button =
+                getElement(buttonId);
+
+            if (!button) {
+                return;
+            }
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    setActivePanel(
+                        quickPanelMap[buttonId]
+                    );
+
+                }
+            );
+
+        });
+
+
+    /*
+     * =============================================================
+     * ZOOM DE L'APPLICATION
+     * =============================================================
+     */
+
+    var zoom =
+        1;
+
+    var minZoom =
+        0.70;
+
+    var maxZoom =
+        1.50;
+
+    var zoomStep =
+        0.10;
+
+
+    function applyCivilZoom(value) {
+
+        value =
+            Math.max(
+                minZoom,
+                Math.min(
+                    maxZoom,
+                    value
+                )
+            );
+
+        zoom =
+            Math.round(
+                value * 100
+            ) / 100;
+
+        window.FOBAS_CIVIL_STATE.app.zoom =
+            zoom;
+
+
+        var app =
+            getElement("fobasCivilApp");
+
+        if (app) {
+
+            app.style.setProperty(
+                "--fobas-app-zoom",
+                String(zoom)
+            );
+
+        }
+
+
+        var valueElement =
+            getElement("zoomValue");
+
+        if (valueElement) {
+
+            valueElement.textContent =
+                Math.round(zoom * 100) + "%";
+
+        }
+
+
+        var footerZoom =
+            getElement("footerZoomState");
+
+        if (footerZoom) {
+
+            footerZoom.textContent =
+                "Zoom " +
+                Math.round(zoom * 100) +
+                "%";
+
+        }
+
+    }
+
+
+    var zoomInBtn =
+        getElement("zoomInBtn");
+
+    var zoomOutBtn =
+        getElement("zoomOutBtn");
+
+    var zoomResetBtn =
+        getElement("zoomResetBtn");
+
+
+    if (zoomInBtn) {
+
+        zoomInBtn.addEventListener(
+            "click",
+            function () {
+
+                applyCivilZoom(
+                    zoom + zoomStep
+                );
+
+            }
+        );
+
+    }
+
+
+    if (zoomOutBtn) {
+
+        zoomOutBtn.addEventListener(
+            "click",
+            function () {
+
+                applyCivilZoom(
+                    zoom - zoomStep
+                );
+
+            }
+        );
+
+    }
+
+
+    if (zoomResetBtn) {
+
+        zoomResetBtn.addEventListener(
+            "click",
+            function () {
+
+                applyCivilZoom(1);
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =============================================================
+     * DRAG & DROP DES MATÉRIAUX
+     * =============================================================
+     */
+
+    document
+        .querySelectorAll(
+            ".civil-material-card"
+        )
+        .forEach(function (material) {
+
+            material.addEventListener(
+                "dragstart",
+                function (event) {
+
+                    var materialId =
+                        material.getAttribute(
+                            "data-material-id"
+                        );
+
+                    if (
+                        event.dataTransfer &&
+                        materialId
+                    ) {
+
+                        event.dataTransfer.setData(
+                            "text/plain",
+                            JSON.stringify({
+                                type: "material",
+                                materialId: materialId
+                            })
+                        );
+
+                    }
+
+                    material.classList.add(
+                        "dragging"
+                    );
+
+                }
+            );
+
+
+            material.addEventListener(
+                "dragend",
+                function () {
+
+                    material.classList.remove(
+                        "dragging"
+                    );
+
+                }
+            );
+
+
+            material.addEventListener(
+                "click",
+                function () {
+
+                    var materialId =
+                        material.getAttribute(
+                            "data-material-id"
+                        );
+
+                    var materialData =
+                        window.FOBAS_CIVIL_STATE.materials[
+                            materialId
+                        ];
+
+                    if (!materialData) {
+                        return;
+                    }
+
+
+                    window.FOBAS_CIVIL_STATE.laboratory
+                        .selectedMaterial =
+                        materialId;
+
+
+                    var message =
+                        getElement(
+                            "laboratoryDropMessage"
+                        );
+
+                    if (message) {
+
+                        message.textContent =
+                            materialData.name +
+                            " sélectionné — " +
+                            "déposez-le dans le laboratoire.";
+
+                    }
+
+
+                    setActivePanel(
+                        "laboratoryPanel"
+                    );
+
+                }
+            );
+
+        });
+
+
+    /*
+     * =============================================================
+     * RÉCIPIENT : ZONE DE DROP
+     * =============================================================
+     */
+
+    var recipient =
+        getElement("recipient01");
+
+
+    if (recipient) {
+
+        recipient.addEventListener(
+            "dragover",
+            function (event) {
+
+                event.preventDefault();
+
+                recipient.classList.add(
+                    "drop-ready"
+                );
+
+            }
+        );
+
+
+        recipient.addEventListener(
+            "dragleave",
+            function () {
+
+                recipient.classList.remove(
+                    "drop-ready"
+                );
+
+            }
+        );
+
+
+        recipient.addEventListener(
+            "drop",
+            function (event) {
+
+                event.preventDefault();
+
+                recipient.classList.remove(
+                    "drop-ready"
+                );
+
+
+                var rawData = "";
+
+                if (event.dataTransfer) {
+
+                    rawData =
+                        event.dataTransfer.getData(
+                            "text/plain"
+                        );
+
+                }
+
+
+                if (!rawData) {
+                    return;
+                }
+
+
+                try {
+
+                    var data =
+                        JSON.parse(rawData);
+
+
+                    if (
+                        data.type === "material" &&
+                        data.materialId
+                    ) {
+
+                        window.FOBAS_CIVIL_STATE
+                            .laboratory
+                            .selectedMaterial =
+                            data.materialId;
+
+
+                        var materialData =
+                            window.FOBAS_CIVIL_STATE
+                                .materials[
+                                    data.materialId
+                                ];
+
+
+                        if (materialData) {
+
+                            showCivilNotification(
+                                materialData.name +
+                                " prêt pour transfert."
+                            );
+
+                        }
+
+                    }
+
+                } catch (error) {
+
+                    console.warn(
+                        "FOBAS Civil Drop:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =============================================================
+     * NOTIFICATION
+     * =============================================================
+     */
+
+    function showCivilNotification(
+        message,
+        icon
+    ) {
+
+        var notification =
+            getElement(
+                "civilNotification"
+            );
+
+        var messageElement =
+            getElement(
+                "civilNotificationMessage"
+            );
+
+        var iconElement =
+            getElement(
+                "civilNotificationIcon"
+            );
+
+
+        if (!notification) {
+            return;
+        }
+
+
+        if (messageElement) {
+
+            messageElement.textContent =
+                message;
+
+        }
+
+
+        if (iconElement) {
+
+            iconElement.textContent =
+                icon || "✓";
+
+        }
+
+
+        notification.hidden =
+            false;
+
+
+        window.setTimeout(
+            function () {
+
+                notification.hidden =
+                    true;
+
+            },
+            2200
+        );
+
+    }
+
+
+    window.FOBAS_CIVIL_NOTIFY =
+        showCivilNotification;
+
+
+    /*
+     * =============================================================
+     * MÉLANGE — POINT DE CONNEXION
+     * -------------------------------------------------------------
+     * Le moteur principal remplacera cette logique par la validation
+     * complète des quantités, composants et normes.
+     * =============================================================
+     */
+
+    var mixButton =
+        getElement("mixRecipientBtn");
+
+
+    if (mixButton) {
+
+        mixButton.addEventListener(
+            "click",
+            function () {
+
+                var currentRecipient =
+                    window.FOBAS_CIVIL_STATE
+                        .laboratory
+                        .recipients
+                        .recipient01;
+
+
+                if (
+                    !currentRecipient.components ||
+                    currentRecipient.components.length === 0
+                ) {
+
+                    showCivilNotification(
+                        "Le récipient est vide.",
+                        "⚠"
+                    );
+
+                    return;
+
+                }
+
+
+                currentRecipient.mixed =
+                    true;
+
+                currentRecipient.state =
+                    "mixed";
+
+                currentRecipient.lastAction =
+                    "mix";
+
+
+                var badge =
+                    getElement(
+                        "recipientStateBadge"
+                    );
+
+
+                if (badge) {
+
+                    badge.textContent =
+                        "MÉLANGÉ";
+
+                    badge.className =
+                        "civil-state-badge mixed";
+
+                }
+
+
+                showCivilNotification(
+                    "Mélange effectué.",
+                    "✓"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =============================================================
+     * VIDER LE RÉCIPIENT
+     * =============================================================
+     */
+
+    var clearRecipientBtn =
+        getElement(
+            "clearRecipientBtn"
+        );
+
+
+    if (clearRecipientBtn) {
+
+        clearRecipientBtn.addEventListener(
+            "click",
+            function () {
+
+                var currentRecipient =
+                    window.FOBAS_CIVIL_STATE
+                        .laboratory
+                        .recipients
+                        .recipient01;
+
+
+                currentRecipient.components =
+                    [];
+
+                currentRecipient.totalMassKg =
+                    0;
+
+                currentRecipient.totalVolumeL =
+                    0;
+
+                currentRecipient.state =
+                    "empty";
+
+                currentRecipient.mixed =
+                    false;
+
+                currentRecipient.reactionState =
+                    "pending";
+
+                currentRecipient.lastAction =
+                    "clear";
+
+
+                var list =
+                    getElement(
+                        "recipientContentList"
+                    );
+
+
+                if (list) {
+
+                    list.innerHTML = "";
+
+                    var empty =
+                        document.createElement(
+                            "div"
+                        );
+
+                    empty.id =
+                        "recipientEmptyState";
+
+                    empty.className =
+                        "civil-empty-state";
+
+                    empty.innerHTML =
+                        "<div class=\"civil-empty-icon\">🧪</div>" +
+                        "<strong>Aucun matériau</strong>" +
+                        "<span>Ajoutez un matériau au laboratoire.</span>";
+
+                    list.appendChild(
+                        empty
+                    );
+
+                }
+
+
+                var badge =
+                    getElement(
+                        "recipientStateBadge"
+                    );
+
+
+                if (badge) {
+
+                    badge.textContent =
+                        "VIDE";
+
+                    badge.className =
+                        "civil-state-badge empty";
+
+                }
+
+
+                getElement(
+                    "recipientTotalMass"
+                ).textContent =
+                    "0.00 kg";
+
+
+                getElement(
+                    "recipientTotalVolume"
+                ).textContent =
+                    "0.00 L";
+
+
+                getElement(
+                    "recipientComponentCount"
+                ).textContent =
+                    "0";
+
+
+                showCivilNotification(
+                    "Récipient vidé.",
+                    "✓"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =============================================================
+     * TARE
+     * =============================================================
+     */
+
+    var tareButton =
+        getElement(
+            "balanceTareBtn"
+        );
+
+
+    if (tareButton) {
+
+        tareButton.addEventListener(
+            "click",
+            function () {
+
+                var display =
+                    getElement(
+                        "balanceDisplay"
+                    );
+
+                if (display) {
+
+                    display.textContent =
+                        "0.00 kg";
+
+                }
+
+
+                showCivilNotification(
+                    "Balance tarée.",
+                    "⚖"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =============================================================
+     * CALCUL DOSAGE — POINT DE BASE
+     * -------------------------------------------------------------
+     * Les valeurs normatives détaillées seront gérées par le moteur
+     * civil principal. Ici nous ne prétendons pas définir une norme
+     * internationale arbitraire.
+     * =============================================================
+     */
+
+    var calculateDosageBtn =
+        getElement(
+            "calculateDosageBtn"
+        );
+
+
+    if (calculateDosageBtn) {
+
+        calculateDosageBtn.addEventListener(
+            "click",
+            function () {
+
+                var bagsInput =
+                    getElement(
+                        "cementBagsInput"
+                    );
+
+                var bags =
+                    Number(
+                        bagsInput
+                            ? bagsInput.value
+                            : 0
+                    );
+
+
+                if (
+                    !Number.isFinite(bags) ||
+                    bags <= 0
+                ) {
+
+                    showCivilNotification(
+                        "Nombre de sacs invalide.",
+                        "⚠"
+                    );
+
+                    return;
+
+                }
+
+
+                window.FOBAS_CIVIL_STATE
+                    .dosage
+                    .cementBags =
+                    bags;
+
+
+                getElement(
+                    "dosageCement"
+                ).textContent =
+                    bags +
+                    " sacs";
+
+
+                getElement(
+                    "dosageStatusBadge"
+                ).textContent =
+                    "À CONFIGURER SELON LE RÉFÉRENTIEL";
+
+
+                showCivilNotification(
+                    "Quantité de ciment enregistrée.",
+                    "✓"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =============================================================
+     * MODAL TRANSFERT
+     * =============================================================
+     */
+
+    document
+        .querySelectorAll(
+            "[data-close-modal]"
+        )
+        .forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    var modalId =
+                        button.getAttribute(
+                            "data-close-modal"
+                        );
+
+                    var modal =
+                        getElement(
+                            modalId
+                        );
+
+                    if (modal) {
+
+                        modal.hidden =
+                            true;
+
+                    }
+
+                }
+            );
+
+        });
+
+
+    /*
+     * =============================================================
+     * INITIALISATION
+     * =============================================================
+     */
+
+    applyCivilZoom(1);
+
+    setActivePanel(
+        "laboratoryPanel"
+    );
+
+
+    /*
+     * =============================================================
+     * API PUBLIQUE MINIMALE
+     * -------------------------------------------------------------
+     * Le fichier JS principal pourra réutiliser ces fonctions.
+     * =============================================================
+     */
+
+    window.FOBAS_CIVIL_UI = {
+
+        setActivePanel:
+            setActivePanel,
+
+        applyZoom:
+            applyCivilZoom,
+
+        notify:
+            showCivilNotification
+
+    };
+
+
+    /*
+     * =============================================================
+     * ÉTAT PRÊT
+     * =============================================================
+     */
+
+    var statusText =
+        getElement(
+            "engineStatusText"
+        );
+
+
+    if (statusText) {
+
+        statusText.textContent =
+            "Système prêt";
+
+    }
+
+
+    console.info(
+        "FOBAS Civil HTML initialisé."
+    );
+
+})();
+
+</script>
+
+
+<!-- ================================================================
+     MOTEUR JAVASCRIPT PRINCIPAL
+     ================================================================ -->
+
+<script
+    src="simulationgeniecivilfobas.js"
+    defer
+></script>
+
+
+</body>
+</html>
