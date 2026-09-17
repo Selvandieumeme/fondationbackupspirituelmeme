@@ -5,35 +5,59 @@
    Compatible avec :
    simulationgeniecivilfobas.html
 
-   VERSION : 2.0.0
+   VERSION : 2.1.0
    ENGINE  : FOBAS_CIVIL_ENGINE
 
-   IMPORTANT :
+   RÈGLES DE DOSAGE :
    - 1 sac de ciment = 42 KG
-   - Aucun calcul basé sur 50 KG
-   - Utilise les vrais IDs/classes du HTML
-   - Aucun #materialsLibrary inventé
-   - Aucun data-add-material inventé
-   - Aucun bouton inexistant utilisé
-   - Les matériaux peuvent être sélectionnés, ajoutés,
-     déplacés et transférés dans le récipient
-   - Le mélange est distinct de la validation de réaction
-   - Mauvais dosage :
-       "Mauvaise Melange"
-   - Bon dosage :
-       "Reaction reussie"
+   - Le ciment réellement transféré dans le récipient
+     est la SOURCE DE VÉRITÉ du dosage.
+   - Nombre de sacs = ciment réel / 42
+   - Mortier      : 1 : 3
+   - Béton        : 1 : 2 : 3
+   - Béton armé   : 1 : 2 : 3
+
+   DOSAGES POUR 1 SAC DE 42 KG :
+
+   MORTIER :
+   - Ciment  : 42 kg
+   - Sable   : 126 kg
+   - Gravier : 0 kg
+   - Eau     : 21 L
+
+   BÉTON :
+   - Ciment  : 42 kg
+   - Sable   : 84 kg
+   - Gravier : 126 kg
+   - Eau     : 21 L
+
+   BÉTON ARMÉ :
+   - Ciment  : 42 kg
+   - Sable   : 84 kg
+   - Gravier : 126 kg
+   - Eau     : 21 L
+
+   IMPORTANT :
+   - Aucun calcul basé sur 50 KG.
+   - L'utilisateur n'a pas besoin de saisir le nombre de sacs.
+   - Le nombre de sacs est calculé automatiquement.
+   - Le dosage attendu est calculé à partir du ciment réellement présent.
+   - "Mauvaise Melange" et "Reaction reussie" sont conservés exactement.
 ================================================================ */
 
 (function () {
 
     "use strict";
 
+
     /* ============================================================
        01 — CONFIGURATION GÉNÉRALE
     ============================================================ */
 
     const APP_ID = "FOBAS_CIVIL_ENGINE";
-    const STORAGE_KEY = "FOBAS_CIVIL_STATE";
+
+    const STORAGE_KEY =
+        "FOBAS_CIVIL_STATE";
 
     /*
        RÈGLE ABSOLUE :
@@ -54,7 +78,8 @@
 
     function $(selector, root) {
 
-        return (root || document).querySelector(selector);
+        return (root || document)
+            .querySelector(selector);
 
     }
 
@@ -62,7 +87,8 @@
     function $$(selector, root) {
 
         return Array.from(
-            (root || document).querySelectorAll(selector)
+            (root || document)
+                .querySelectorAll(selector)
         );
 
     }
@@ -81,7 +107,8 @@
 
         if (element) {
 
-            element.textContent = String(value);
+            element.textContent =
+                String(value);
 
         }
 
@@ -94,7 +121,8 @@
 
         if (element) {
 
-            element.innerHTML = String(value);
+            element.innerHTML =
+                String(value);
 
         }
 
@@ -107,18 +135,26 @@
 
         return Number.isFinite(n)
             ? n
-            : (fallback || 0);
+            : (
+                fallback !== undefined
+                    ? fallback
+                    : 0
+            );
 
     }
 
 
     function round(value, decimals) {
 
-        const d = Number.isFinite(Number(decimals))
-            ? Number(decimals)
-            : 2;
+        const d =
+            Number.isFinite(
+                Number(decimals)
+            )
+                ? Number(decimals)
+                : 2;
 
-        const factor = Math.pow(10, d);
+        const factor =
+            Math.pow(10, d);
 
         return Math.round(
             number(value) * factor
@@ -137,27 +173,47 @@
     }
 
 
+    function formatNumber(value, decimals) {
+
+        return String(
+            round(
+                number(value),
+                decimals === undefined
+                    ? 2
+                    : decimals
+            )
+        );
+
+    }
+
+
     /* ============================================================
        03 — ÉTAT INITIAL
     ============================================================ */
 
     const htmlInitialState =
-        window.FOBAS_CIVIL_INITIAL_STATE || {};
+        window.FOBAS_CIVIL_INITIAL_STATE ||
+        {};
 
     const state =
         window.FOBAS_CIVIL_STATE ||
         htmlInitialState;
 
-    window.FOBAS_CIVIL_STATE = state;
+    window.FOBAS_CIVIL_STATE =
+        state;
 
 
-    state.app = state.app || {};
+    state.app =
+        state.app || {};
 
     state.app.id =
         state.app.id || APP_ID;
 
     state.app.zoom =
-        number(state.app.zoom, 1);
+        number(
+            state.app.zoom,
+            1
+        );
 
 
     state.laboratory =
@@ -165,11 +221,13 @@
 
 
     state.laboratory.selectedMaterial =
-        state.laboratory.selectedMaterial || null;
+        state.laboratory.selectedMaterial ||
+        null;
 
 
     state.laboratory.selectedEquipment =
-        state.laboratory.selectedEquipment || null;
+        state.laboratory.selectedEquipment ||
+        null;
 
 
     state.laboratory.workspaceObjects =
@@ -181,42 +239,62 @@
 
 
     state.laboratory.recipients =
-        state.laboratory.recipients || {};
+        state.laboratory.recipients ||
+        {};
 
 
-    if (!state.laboratory.recipients.recipient01) {
+    if (
+        !state.laboratory
+            .recipients
+            .recipient01
+    ) {
 
-        state.laboratory.recipients.recipient01 = {
+        state.laboratory
+            .recipients
+            .recipient01 = {
 
-            id: "recipient01",
+                id:
+                    "recipient01",
 
-            type: "mixing-container",
+                type:
+                    "mixing-container",
 
-            state: "empty",
+                state:
+                    "empty",
 
-            mixed: false,
+                mixed:
+                    false,
 
-            reactionState: "pending",
+                reactionState:
+                    "pending",
 
-            components: [],
+                components:
+                    [],
 
-            totalMassKg: 0,
+                totalMassKg:
+                    0,
 
-            totalVolumeL: 0,
+                totalVolumeL:
+                    0,
 
-            lastAction: null
+                lastAction:
+                    null
 
-        };
+            };
 
     }
 
 
     const recipient =
-        state.laboratory.recipients.recipient01;
+        state.laboratory
+            .recipients
+            .recipient01;
 
 
     recipient.components =
-        Array.isArray(recipient.components)
+        Array.isArray(
+            recipient.components
+        )
             ? recipient.components
             : [];
 
@@ -242,7 +320,9 @@
 
 
     state.reports =
-        Array.isArray(state.reports)
+        Array.isArray(
+            state.reports
+        )
             ? state.reports
             : [];
 
@@ -418,16 +498,20 @@
     };
 
 
-    Object.keys(MATERIALS).forEach(function (id) {
+    Object.keys(MATERIALS)
+        .forEach(function (id) {
 
-        if (!state.materials[id]) {
+            if (!state.materials[id]) {
 
-            state.materials[id] =
-                Object.assign({}, MATERIALS[id]);
+                state.materials[id] =
+                    Object.assign(
+                        {},
+                        MATERIALS[id]
+                    );
 
-        }
+            }
 
-    });
+        });
 
 
     function getMaterial(id) {
@@ -444,56 +528,117 @@
     /* ============================================================
        05 — RECETTES DE DOSAGE
        ------------------------------------------------------------
-       1 SAC = 42 KG
+       SOURCE SCIENTIFIQUE DU MOTEUR :
+
+       1 sac = 42 kg ciment
+
+       MORTIER :
+       42 kg ciment
+       126 kg sable
+       0 kg gravier
+       21 L eau
+
+       BÉTON :
+       42 kg ciment
+       84 kg sable
+       126 kg gravier
+       21 L eau
+
+       Les ratios sont exprimés par KG de ciment.
     ============================================================ */
 
     const DOSAGE = {
 
         mortier: {
 
-            name: "Mortier",
+            name:
+                "Mortier",
 
-            cementPerBag: 42,
+            cementPerBag:
+                42,
 
-            sandPerBag: 126,
+            sandPerBag:
+                126,
 
-            gravelPerBag: 0,
+            gravelPerBag:
+                0,
 
-            waterPerBag: 21,
+            waterPerBag:
+                21,
 
-            ratio: "1 : 3"
+            sandRatio:
+                3,
+
+            gravelRatio:
+                0,
+
+            waterRatio:
+                0.5,
+
+            ratio:
+                "1 : 3"
 
         },
 
         beton: {
 
-            name: "Béton",
+            name:
+                "Béton",
 
-            cementPerBag: 42,
+            cementPerBag:
+                42,
 
-            sandPerBag: 84,
+            sandPerBag:
+                84,
 
-            gravelPerBag: 126,
+            gravelPerBag:
+                126,
 
-            waterPerBag: 21,
+            waterPerBag:
+                21,
 
-            ratio: "1 : 2 : 3"
+            sandRatio:
+                2,
+
+            gravelRatio:
+                3,
+
+            waterRatio:
+                0.5,
+
+            ratio:
+                "1 : 2 : 3"
 
         },
 
         "beton-arme": {
 
-            name: "Béton armé",
+            name:
+                "Béton armé",
 
-            cementPerBag: 42,
+            cementPerBag:
+                42,
 
-            sandPerBag: 84,
+            sandPerBag:
+                84,
 
-            gravelPerBag: 126,
+            gravelPerBag:
+                126,
 
-            waterPerBag: 21,
+            waterPerBag:
+                21,
 
-            ratio: "1 : 2 : 3"
+            sandRatio:
+                2,
+
+            gravelRatio:
+                3,
+
+            waterRatio:
+                0.5,
+
+            ratio:
+                "1 : 2 : 3"
 
         }
 
@@ -525,36 +670,47 @@
     }
 
 
-    function mergeObjects(target, source) {
+    function mergeObjects(
+        target,
+        source
+    ) {
 
-        Object.keys(source || {}).forEach(
-            function (key) {
+        Object.keys(
+            source || {}
+        ).forEach(function (key) {
 
-                const sourceValue =
-                    source[key];
+            const sourceValue =
+                source[key];
 
-                if (
-                    sourceValue &&
-                    typeof sourceValue === "object" &&
-                    !Array.isArray(sourceValue) &&
-                    target[key] &&
-                    typeof target[key] === "object" &&
-                    !Array.isArray(target[key])
-                ) {
 
-                    mergeObjects(
-                        target[key],
-                        sourceValue
-                    );
+            if (
+                sourceValue &&
+                typeof sourceValue ===
+                    "object" &&
+                !Array.isArray(
+                    sourceValue
+                ) &&
+                target[key] &&
+                typeof target[key] ===
+                    "object" &&
+                !Array.isArray(
+                    target[key]
+                )
+            ) {
 
-                } else {
+                mergeObjects(
+                    target[key],
+                    sourceValue
+                );
 
-                    target[key] = sourceValue;
+            } else {
 
-                }
+                target[key] =
+                    sourceValue;
 
             }
-        );
+
+        });
 
     }
 
@@ -568,10 +724,13 @@
                     STORAGE_KEY
                 );
 
+
             if (!raw) return;
+
 
             const saved =
                 JSON.parse(raw);
+
 
             if (
                 !saved ||
@@ -582,6 +741,7 @@
                 return;
 
             }
+
 
             mergeObjects(
                 state,
@@ -604,38 +764,52 @@
 
 
     /* ============================================================
-       07 — CORRECTION AUTOMATIQUE DU DOSAGE
-       ------------------------------------------------------------
-       Si un ancien état contient encore 50 KG par sac,
-       le moteur remet automatiquement 42 KG.
+       07 — NORMALISATION AUTOMATIQUE
     ============================================================ */
 
-    if (
-        state.dosage &&
-        number(state.dosage.cementBagKg, 42) !==
-        CEMENT_BAG_KG
-    ) {
+    state.dosage =
+        state.dosage || {};
 
-        state.dosage.cementBagKg =
-            CEMENT_BAG_KG;
 
-    }
+    state.dosage.cementBagKg =
+        CEMENT_BAG_KG;
+
+
+    /*
+       On ne fait volontairement PAS confiance à
+       state.dosage.cementBags.
+
+       Le nombre de sacs est maintenant toujours
+       recalculé depuis le ciment réellement présent
+       dans le récipient.
+    */
 
 
     /* ============================================================
        08 — NOTIFICATION
     ============================================================ */
 
-    function notify(message, type) {
+    function notify(
+        message,
+        type
+    ) {
 
         const box =
-            byId("civilNotification");
+            byId(
+                "civilNotification"
+            );
+
 
         const messageBox =
-            byId("civilNotificationMessage");
+            byId(
+                "civilNotificationMessage"
+            );
+
 
         const icon =
-            byId("civilNotificationIcon");
+            byId(
+                "civilNotificationIcon"
+            );
 
 
         if (messageBox) {
@@ -670,7 +844,8 @@
         }
 
 
-        box.hidden = false;
+        box.hidden =
+            false;
 
 
         clearTimeout(
@@ -682,7 +857,8 @@
             setTimeout(
                 function () {
 
-                    box.hidden = true;
+                    box.hidden =
+                        true;
 
                 },
                 2800
@@ -692,19 +868,24 @@
 
 
     /* ============================================================
-       09 — NAVIGATION DES PANNEAUX
+       09 — NAVIGATION
     ============================================================ */
 
-    function activatePanel(panelId) {
+    function activatePanel(
+        panelId
+    ) {
 
         $$("[data-panel-content]")
             .forEach(function (panel) {
 
                 const active =
-                    panel.id === panelId;
+                    panel.id ===
+                    panelId;
+
 
                 panel.hidden =
                     !active;
+
 
                 panel.classList.toggle(
                     "active",
@@ -730,6 +911,7 @@
         state.activePanel =
             panelId;
 
+
         saveState();
 
     }
@@ -741,7 +923,8 @@
             .forEach(function (button) {
 
                 if (
-                    button.dataset.fobasCivilNavigation
+                    button.dataset
+                        .fobasCivilNavigation
                 ) {
 
                     return;
@@ -749,7 +932,8 @@
                 }
 
 
-                button.dataset.fobasCivilNavigation =
+                button.dataset
+                    .fobasCivilNavigation =
                     "1";
 
 
@@ -761,6 +945,7 @@
                             button.getAttribute(
                                 "data-panel"
                             );
+
 
                         if (panelId) {
 
@@ -779,10 +964,12 @@
 
 
     /* ============================================================
-       10 — OBJETS MATÉRIAUX DANS LA SCÈNE
+       10 — OBJETS MATÉRIAUX
     ============================================================ */
 
-    function createObjectId(materialId) {
+    function createObjectId(
+        materialId
+    ) {
 
         return (
             "civil-object-" +
@@ -798,10 +985,15 @@
     }
 
 
-    function addWorkspaceMaterial(materialId) {
+    function addWorkspaceMaterial(
+        materialId
+    ) {
 
         const material =
-            getMaterial(materialId);
+            getMaterial(
+                materialId
+            );
+
 
         if (!material) {
 
@@ -816,7 +1008,10 @@
 
 
         const scene =
-            byId("civilLaboratoryScene");
+            byId(
+                "civilLaboratoryScene"
+            );
+
 
         if (!scene) {
 
@@ -846,49 +1041,57 @@
 
         const object = {
 
-            id: createObjectId(
-                materialId
-            ),
+            id:
+                createObjectId(
+                    materialId
+                ),
 
-            materialId: materialId,
+            materialId:
+                materialId,
 
-            name: material.name,
+            name:
+                material.name,
 
-            unit: material.unit,
+            unit:
+                material.unit,
 
-            icon: material.icon || "📦",
+            icon:
+                material.icon ||
+                "📦",
 
-            x: Math.round(
-                clamp(
-                    80 +
-                    Math.random() *
-                    Math.max(
-                        sceneWidth - 160,
-                        120
-                    ),
-                    50,
-                    Math.max(
-                        sceneWidth - 50,
-                        100
+            x:
+                Math.round(
+                    clamp(
+                        80 +
+                        Math.random() *
+                        Math.max(
+                            sceneWidth - 160,
+                            120
+                        ),
+                        50,
+                        Math.max(
+                            sceneWidth - 50,
+                            100
+                        )
                     )
-                )
-            ),
+                ),
 
-            y: Math.round(
-                clamp(
-                    100 +
-                    Math.random() *
-                    Math.max(
-                        sceneHeight - 180,
-                        120
-                    ),
-                    70,
-                    Math.max(
-                        sceneHeight - 60,
-                        100
+            y:
+                Math.round(
+                    clamp(
+                        100 +
+                        Math.random() *
+                        Math.max(
+                            sceneHeight - 180,
+                            120
+                        ),
+                        70,
+                        Math.max(
+                            sceneHeight - 60,
+                            100
+                        )
                     )
-                )
-            ),
+                ),
 
             createdAt:
                 new Date().toISOString()
@@ -907,6 +1110,7 @@
 
 
         renderWorkspaceObjects();
+
 
         saveState();
 
@@ -930,7 +1134,10 @@
     function renderWorkspaceObjects() {
 
         const scene =
-            byId("civilLaboratoryScene");
+            byId(
+                "civilLaboratoryScene"
+            );
+
 
         if (!scene) return;
 
@@ -951,6 +1158,7 @@
                     getMaterial(
                         object.materialId
                     );
+
 
                 if (!material) return;
 
@@ -986,12 +1194,18 @@
 
 
                 element.style.left =
-                    number(object.x, 100) +
+                    number(
+                        object.x,
+                        100
+                    ) +
                     "px";
 
 
                 element.style.top =
-                    number(object.y, 100) +
+                    number(
+                        object.y,
+                        100
+                    ) +
                     "px";
 
 
@@ -1016,6 +1230,7 @@
 
                         event.stopPropagation();
 
+
                         openTransferForObject(
                             object.id
                         );
@@ -1031,8 +1246,12 @@
                         event.dataTransfer.setData(
                             "text/plain",
                             JSON.stringify({
-                                type: "workspace-material",
-                                objectId: object.id,
+                                type:
+                                    "workspace-material",
+
+                                objectId:
+                                    object.id,
+
                                 materialId:
                                     object.materialId
                             })
@@ -1069,18 +1288,10 @@
 
 
     /* ============================================================
-       12 — SÉLECTION DES CARTES MATÉRIAUX
-       ------------------------------------------------------------
-       VRAI HTML :
-       .civil-material-card[data-material-id]
+       12 — CARTES MATÉRIAUX
     ============================================================ */
 
     function bindMaterialCards() {
-
-        $(
-            ".civil-material-card[data-material-id]"
-        );
-
 
         $$(
             ".civil-material-card[data-material-id]"
@@ -1088,7 +1299,8 @@
         .forEach(function (card) {
 
             if (
-                card.dataset.fobasCivilBound === "1"
+                card.dataset
+                    .fobasCivilBound === "1"
             ) {
 
                 return;
@@ -1096,7 +1308,8 @@
             }
 
 
-            card.dataset.fobasCivilBound =
+            card.dataset
+                .fobasCivilBound =
                 "1";
 
 
@@ -1148,23 +1361,21 @@
                         materialId;
 
 
-                    /*
-                       Le clic crée réellement
-                       le matériau dans la scène.
-                    */
                     addWorkspaceMaterial(
                         materialId
                     );
 
 
                     $$(".civil-material-card")
-                        .forEach(function (item) {
+                        .forEach(
+                            function (item) {
 
-                            item.classList.remove(
-                                "material-selected"
-                            );
+                                item.classList.remove(
+                                    "material-selected"
+                                );
 
-                        });
+                            }
+                        );
 
 
                     card.classList.add(
@@ -1207,7 +1418,8 @@
                         "text/plain",
                         JSON.stringify({
 
-                            type: "material",
+                            type:
+                                "material",
 
                             materialId:
                                 materialId
@@ -1228,7 +1440,7 @@
 
 
     /* ============================================================
-       13 — MODAL DE TRANSFERT
+       13 — MODAL TRANSFERT
     ============================================================ */
 
     function openTransferModal(
@@ -1237,13 +1449,18 @@
     ) {
 
         const material =
-            getMaterial(materialId);
+            getMaterial(
+                materialId
+            );
+
 
         if (!material) return;
 
 
         const modal =
-            byId("transferModal");
+            byId(
+                "transferModal"
+            );
 
 
         if (!modal) {
@@ -1261,15 +1478,21 @@
 
 
         const name =
-            byId("transferMaterialName");
+            byId(
+                "transferMaterialName"
+            );
 
 
         const input =
-            byId("transferQuantityInput");
+            byId(
+                "transferQuantityInput"
+            );
 
 
         const unit =
-            byId("transferUnitSelect");
+            byId(
+                "transferUnitSelect"
+            );
 
 
         if (name) {
@@ -1293,18 +1516,23 @@
 
         if (unit) {
 
-            unit.innerHTML = "";
+            unit.innerHTML =
+                "";
+
 
             const option =
                 document.createElement(
                     "option"
                 );
 
+
             option.value =
                 material.unit;
 
+
             option.textContent =
                 material.unit;
+
 
             unit.appendChild(
                 option
@@ -1336,7 +1564,10 @@
                 .workspaceObjects
                 .find(function (item) {
 
-                    return item.id === objectId;
+                    return (
+                        item.id ===
+                        objectId
+                    );
 
                 });
 
@@ -1355,7 +1586,10 @@
     function closeTransferModal() {
 
         const modal =
-            byId("transferModal");
+            byId(
+                "transferModal"
+            );
+
 
         if (modal) {
 
@@ -1370,22 +1604,28 @@
     function setupTransferModal() {
 
         const modal =
-            byId("transferModal");
+            byId(
+                "transferModal"
+            );
 
 
         if (!modal) return;
 
 
         const confirm =
-            byId("confirmTransferBtn");
+            byId(
+                "confirmTransferBtn"
+            );
 
 
         if (
             confirm &&
-            !confirm.dataset.fobasCivilBound
+            !confirm.dataset
+                .fobasCivilBound
         ) {
 
-            confirm.dataset.fobasCivilBound =
+            confirm.dataset
+                .fobasCivilBound =
                 "1";
 
 
@@ -1394,11 +1634,13 @@
                 function () {
 
                     const materialId =
-                        modal.dataset.materialId;
+                        modal.dataset
+                            .materialId;
 
 
                     const objectId =
-                        modal.dataset.objectId ||
+                        modal.dataset
+                            .objectId ||
                         null;
 
 
@@ -1459,22 +1701,23 @@
         }
 
 
-        $(
-            '[data-close-transfer]'
-        );
-
-
         $$(
-            '[data-close-transfer]'
+            "[data-close-transfer]"
         )
         .forEach(function (button) {
 
             if (
-                button.dataset.fobasCivilBound
-            ) return;
+                button.dataset
+                    .fobasCivilBound
+            ) {
+
+                return;
+
+            }
 
 
-            button.dataset.fobasCivilBound =
+            button.dataset
+                .fobasCivilBound =
                 "1";
 
 
@@ -1491,7 +1734,8 @@
             function (event) {
 
                 if (
-                    event.target === modal
+                    event.target ===
+                    modal
                 ) {
 
                     closeTransferModal();
@@ -1505,7 +1749,267 @@
 
 
     /* ============================================================
-       14 — TRANSFERT VERS LE RÉCIPIENT
+       14 — UTILITAIRE COMPOSANT
+    ============================================================ */
+
+    function componentQuantity(
+        materialId
+    ) {
+
+        const component =
+            recipient.components.find(
+                function (item) {
+
+                    return (
+                        item.materialId ===
+                        materialId
+                    );
+
+                }
+            );
+
+
+        return component
+            ? number(
+                component.quantity
+            )
+            : 0;
+
+    }
+
+
+    /* ============================================================
+       15 — CALCUL DYNAMIQUE DU DOSAGE
+       ------------------------------------------------------------
+       IMPORTANT :
+
+       LE CIMENT RÉEL DANS LE RÉCIPIENT
+       EST LA SOURCE DE VÉRITÉ.
+
+       Exemple :
+
+       84 kg ciment / 42
+       = 2 sacs
+
+       Béton :
+
+       84 × 2 = 168 kg sable
+       84 × 3 = 252 kg gravier
+       84 × 0.5 = 42 L eau
+    ============================================================ */
+
+    function updateDynamicDosageFromRecipient(
+        silent
+    ) {
+
+        const select =
+            byId(
+                "mixTypeSelect"
+            );
+
+
+        const type =
+            select &&
+            DOSAGE[select.value]
+                ? select.value
+                : (
+                    DOSAGE[
+                        state.dosage.type
+                    ]
+                        ? state.dosage.type
+                        : "mortier"
+                );
+
+
+        const recipe =
+            DOSAGE[type] ||
+            DOSAGE.mortier;
+
+
+        const cementKg =
+            round(
+                componentQuantity(
+                    "cement"
+                ),
+                3
+            );
+
+
+        const cementBags =
+            cementKg > 0
+                ? cementKg /
+                    CEMENT_BAG_KG
+                : 0;
+
+
+        const sandKg =
+            cementKg *
+            recipe.sandRatio;
+
+
+        const gravelKg =
+            cementKg *
+            recipe.gravelRatio;
+
+
+        const waterL =
+            cementKg *
+            recipe.waterRatio;
+
+
+        state.dosage = {
+
+            type:
+                type,
+
+            cementBags:
+                round(
+                    cementBags,
+                    3
+                ),
+
+            cementBagKg:
+                CEMENT_BAG_KG,
+
+            cementKg:
+                round(
+                    cementKg,
+                    3
+                ),
+
+            sandKg:
+                round(
+                    sandKg,
+                    3
+                ),
+
+            gravelKg:
+                round(
+                    gravelKg,
+                    3
+                ),
+
+            waterL:
+                round(
+                    waterL,
+                    3
+                ),
+
+            status:
+                cementKg > 0
+                    ? "calculated"
+                    : "pending"
+
+        };
+
+
+        /*
+           Si l'ancien HTML possède encore
+           cementBagsInput, il devient un affichage
+           automatique et non une source de données.
+        */
+
+        const bagsInput =
+            byId(
+                "cementBagsInput"
+            );
+
+
+        if (bagsInput) {
+
+            bagsInput.value =
+                cementBags > 0
+                    ? formatNumber(
+                        cementBags,
+                        3
+                    )
+                    : "0";
+
+
+            bagsInput.readOnly =
+                true;
+
+
+            bagsInput.setAttribute(
+                "readonly",
+                "readonly"
+            );
+
+
+            bagsInput.title =
+                "Calculé automatiquement à partir du ciment réellement ajouté au récipient.";
+
+        }
+
+
+        setText(
+            "dosageCement",
+            formatNumber(
+                cementKg,
+                2
+            ) +
+            " kg"
+        );
+
+
+        setText(
+            "dosageSand",
+            formatNumber(
+                sandKg,
+                2
+            ) +
+            " kg"
+        );
+
+
+        setText(
+            "dosageGravel",
+            formatNumber(
+                gravelKg,
+                2
+            ) +
+            " kg"
+        );
+
+
+        setText(
+            "dosageWater",
+            formatNumber(
+                waterL,
+                2
+            ) +
+            " L"
+        );
+
+
+        setText(
+            "dosageStatusBadge",
+            "1 sac = 42 kg • " +
+            "Ratio " +
+            recipe.ratio +
+            " • Gravier = " +
+            formatNumber(
+                recipe.gravelRatio,
+                2
+            ) +
+            " kg/kg ciment"
+        );
+
+
+        if (!silent) {
+
+            saveState();
+
+        }
+
+
+        return state.dosage;
+
+    }
+
+
+    /* ============================================================
+       16 — TRANSFERT VERS LE RÉCIPIENT
     ============================================================ */
 
     function transferMaterial(
@@ -1516,7 +2020,9 @@
     ) {
 
         const material =
-            getMaterial(materialId);
+            getMaterial(
+                materialId
+            );
 
 
         if (!material) {
@@ -1532,7 +2038,9 @@
 
 
         const qty =
-            number(quantity);
+            number(
+                quantity
+            );
 
 
         if (qty <= 0) {
@@ -1622,18 +2130,35 @@
         recalculateRecipient();
 
 
+        /*
+           NOUVEAU POINT ESSENTIEL :
+
+           Dès qu'un matériau est transféré,
+           le dosage est recalculé à partir
+           du ciment réellement présent.
+        */
+
+        updateDynamicDosageFromRecipient(
+            true
+        );
+
+
         if (objectId) {
 
             state.laboratory
                 .workspaceObjects =
                 state.laboratory
                     .workspaceObjects
-                    .filter(function (object) {
+                    .filter(
+                        function (object) {
 
-                        return object.id !==
-                            objectId;
+                            return (
+                                object.id !==
+                                objectId
+                            );
 
-                    });
+                        }
+                    );
 
         }
 
@@ -1644,14 +2169,20 @@
 
 
         renderWorkspaceObjects();
+
         renderRecipientStatus();
+
         renderMeasurements();
+
 
         saveState();
 
 
         notify(
-            round(qty, 2) +
+            formatNumber(
+                qty,
+                2
+            ) +
             " " +
             finalUnit +
             " de " +
@@ -1667,7 +2198,7 @@
 
 
     /* ============================================================
-       15 — RECALCUL DU RÉCIPIENT
+       17 — RECALCUL DU RÉCIPIENT
     ============================================================ */
 
     function recalculateRecipient() {
@@ -1675,48 +2206,53 @@
         let mass =
             0;
 
+
         let volume =
             0;
 
 
         recipient.components
-            .forEach(function (component) {
+            .forEach(
+                function (component) {
 
-                const quantity =
-                    number(
-                        component.quantity
-                    );
-
-
-                const material =
-                    getMaterial(
-                        component.materialId
-                    );
+                    const quantity =
+                        number(
+                            component.quantity
+                        );
 
 
-                if (!material) return;
+                    const material =
+                        getMaterial(
+                            component.materialId
+                        );
 
 
-                if (
-                    material.unit === "kg"
-                ) {
+                    if (!material) return;
 
-                    mass +=
-                        quantity;
+
+                    if (
+                        material.unit ===
+                        "kg"
+                    ) {
+
+                        mass +=
+                            quantity;
+
+                    }
+
+
+                    if (
+                        material.unit ===
+                        "L"
+                    ) {
+
+                        volume +=
+                            quantity;
+
+                    }
 
                 }
-
-
-                if (
-                    material.unit === "L"
-                ) {
-
-                    volume +=
-                        quantity;
-
-                }
-
-            });
+            );
 
 
         recipient.totalMassKg =
@@ -1742,7 +2278,7 @@
 
 
     /* ============================================================
-       16 — AFFICHAGE DU RÉCIPIENT
+       18 — AFFICHAGE DU RÉCIPIENT
     ============================================================ */
 
     function renderRecipientStatus() {
@@ -1752,7 +2288,7 @@
 
         setText(
             "recipientTotalMass",
-            round(
+            formatNumber(
                 recipient.totalMassKg,
                 2
             ) +
@@ -1762,7 +2298,7 @@
 
         setText(
             "recipientTotalVolume",
-            round(
+            formatNumber(
                 recipient.totalVolumeL,
                 2
             ) +
@@ -1816,7 +2352,8 @@
 
         if (list) {
 
-            list.innerHTML = "";
+            list.innerHTML =
+                "";
 
 
             if (
@@ -1845,35 +2382,37 @@
             } else {
 
                 recipient.components
-                    .forEach(function (component) {
+                    .forEach(
+                        function (component) {
 
-                        const row =
-                            document.createElement(
-                                "div"
+                            const row =
+                                document.createElement(
+                                    "div"
+                                );
+
+
+                            row.className =
+                                "fobas-civil-recipient-item";
+
+
+                            row.innerHTML =
+                                `
+                                <span>
+                                    ${component.name}
+                                </span>
+                                <strong>
+                                    ${formatNumber(component.quantity, 2)}
+                                    ${component.unit}
+                                </strong>
+                                `;
+
+
+                            list.appendChild(
+                                row
                             );
 
-
-                        row.className =
-                            "fobas-civil-recipient-item";
-
-
-                        row.innerHTML =
-                            `
-                            <span>
-                                ${component.name}
-                            </span>
-                            <strong>
-                                ${round(component.quantity, 2)}
-                                ${component.unit}
-                            </strong>
-                            `;
-
-
-                        list.appendChild(
-                            row
-                        );
-
-                    });
+                        }
+                    );
 
             }
 
@@ -1888,33 +2427,37 @@
 
         if (contents) {
 
-            contents.innerHTML = "";
+            contents.innerHTML =
+                "";
 
 
             recipient.components
-                .forEach(function (component) {
+                .forEach(
+                    function (component) {
 
-                    const item =
-                        document.createElement(
-                            "span"
+                        const item =
+                            document.createElement(
+                                "span"
+                            );
+
+
+                        item.textContent =
+                            component.name +
+                            " " +
+                            formatNumber(
+                                component.quantity,
+                                2
+                            ) +
+                            " " +
+                            component.unit;
+
+
+                        contents.appendChild(
+                            item
                         );
 
-
-                    item.textContent =
-                        component.name +
-                        " " +
-                        round(
-                            component.quantity,
-                            2
-                        ) +
-                        component.unit;
-
-
-                    contents.appendChild(
-                        item
-                    );
-
-                });
+                    }
+                );
 
         }
 
@@ -1922,20 +2465,23 @@
 
 
     /* ============================================================
-       17 — DRAG & DROP SUR LE RÉCIPIENT
+       19 — DRAG & DROP RÉCIPIENT
     ============================================================ */
 
     function setupRecipientDrop() {
 
         const target =
-            byId("recipient01");
+            byId(
+                "recipient01"
+            );
 
 
         if (!target) return;
 
 
         if (
-            target.dataset.fobasCivilDropBound
+            target.dataset
+                .fobasCivilDropBound
         ) {
 
             return;
@@ -1943,7 +2489,8 @@
         }
 
 
-        target.dataset.fobasCivilDropBound =
+        target.dataset
+            .fobasCivilDropBound =
             "1";
 
 
@@ -1952,6 +2499,7 @@
             function (event) {
 
                 event.preventDefault();
+
 
                 target.classList.add(
                     "drop-ready"
@@ -2001,7 +2549,9 @@
                 try {
 
                     const data =
-                        JSON.parse(raw);
+                        JSON.parse(
+                            raw
+                        );
 
 
                     if (
@@ -2010,18 +2560,26 @@
                         data.materialId
                     ) {
 
-                        /*
-                           Drag direct :
-                           1 unité de base.
-                        */
+                        const material =
+                            getMaterial(
+                                data.materialId
+                            );
+
+
+                        if (!material) {
+
+                            return;
+
+                        }
+
+
                         transferMaterial(
                             data.materialId,
                             1,
-                            getMaterial(
-                                data.materialId
-                            ).unit,
+                            material.unit,
                             null
                         );
+
 
                         return;
 
@@ -2034,12 +2592,23 @@
                         data.materialId
                     ) {
 
+                        const material =
+                            getMaterial(
+                                data.materialId
+                            );
+
+
+                        if (!material) {
+
+                            return;
+
+                        }
+
+
                         transferMaterial(
                             data.materialId,
                             1,
-                            getMaterial(
-                                data.materialId
-                            ).unit,
+                            material.unit,
                             data.objectId
                         );
 
@@ -2061,7 +2630,7 @@
 
 
     /* ============================================================
-       18 — DROP DANS LA ZONE DE LABORATOIRE
+       20 — DROP LABORATOIRE
     ============================================================ */
 
     function setupLaboratoryDrop() {
@@ -2104,10 +2673,6 @@
             "drop",
             function (event) {
 
-                /*
-                   Le récipient gère lui-même
-                   son drop.
-                */
                 if (
                     event.target.closest(
                         "#recipient01"
@@ -2137,7 +2702,9 @@
                 try {
 
                     const data =
-                        JSON.parse(raw);
+                        JSON.parse(
+                            raw
+                        );
 
 
                     if (
@@ -2168,7 +2735,7 @@
 
 
     /* ============================================================
-       19 — MÉLANGE
+       21 — MÉLANGE
     ============================================================ */
 
     function mixRecipient() {
@@ -2183,12 +2750,24 @@
                 "warning"
             );
 
+
             return false;
 
         }
 
 
         recalculateRecipient();
+
+
+        /*
+           Le dosage est recalculé avant mélange
+           afin que le ciment réel soit toujours
+           pris comme référence.
+        */
+
+        updateDynamicDosageFromRecipient(
+            true
+        );
 
 
         recipient.mixed =
@@ -2237,7 +2816,7 @@
 
 
     /* ============================================================
-       20 — MESURES
+       22 — MESURES
     ============================================================ */
 
     function renderMeasurements() {
@@ -2247,7 +2826,7 @@
 
         setText(
             "measurementMass",
-            round(
+            formatNumber(
                 recipient.totalMassKg,
                 2
             ) +
@@ -2257,7 +2836,7 @@
 
         setText(
             "measurementVolume",
-            round(
+            formatNumber(
                 recipient.totalVolumeL,
                 2
             ) +
@@ -2282,8 +2861,11 @@
         if (balance) {
 
             balance.textContent =
-                round(
-                    recipient.totalMassKg,
+                formatNumber(
+                    recipient.totalMassKg -
+                    number(
+                        state.balanceTare
+                    ),
                     2
                 ) +
                 " kg";
@@ -2317,7 +2899,7 @@
 
 
     /* ============================================================
-       21 — TARE BALANCE
+       23 — TARE BALANCE
     ============================================================ */
 
     function tareBalance() {
@@ -2352,195 +2934,81 @@
 
 
     /* ============================================================
-       22 — DOSAGE
+       24 — DOSAGE
        ------------------------------------------------------------
-       CALCULS :
-       
-       MORTIER :
-       1 sac = 42 kg ciment
-       sable = 126 kg
-       eau = 21 L
+       IMPORTANT :
 
-       BÉTON :
-       1 sac = 42 kg ciment
-       sable = 84 kg
-       gravier = 126 kg
-       eau = 21 L
+       Le bouton de calcul ne demande plus
+       de nombre de sacs.
+
+       Il actualise simplement le dosage
+       à partir du ciment présent dans
+       le récipient.
     ============================================================ */
 
     function calculateDosage() {
 
-        const select =
-            byId(
-                "mixTypeSelect"
-            );
-
-
-        const input =
-            byId(
-                "cementBagsInput"
-            );
-
-
-        const type =
-            select
-                ? select.value
-                : "mortier";
-
-
-        const bags =
-            Math.max(
-                number(
-                    input
-                        ? input.value
-                        : 1
-                ),
-                0
+        const dosage =
+            updateDynamicDosageFromRecipient(
+                false
             );
 
 
         const recipe =
-            DOSAGE[type] ||
+            DOSAGE[
+                dosage.type
+            ] ||
             DOSAGE.mortier;
 
 
-        const cementKg =
-            bags *
-            CEMENT_BAG_KG;
+        if (
+            dosage.cementKg <= 0
+        ) {
+
+            notify(
+                "Ajoutez d'abord du ciment dans le récipient.",
+                "warning"
+            );
 
 
-        const sandKg =
-            bags *
-            recipe.sandPerBag;
+            return dosage;
 
-
-        const gravelKg =
-            bags *
-            recipe.gravelPerBag;
-
-
-        const waterL =
-            bags *
-            recipe.waterPerBag;
-
-
-        state.dosage = {
-
-            type: type,
-
-            cementBags: bags,
-
-            cementBagKg:
-                CEMENT_BAG_KG,
-
-            cementKg:
-                round(cementKg, 2),
-
-            sandKg:
-                round(sandKg, 2),
-
-            gravelKg:
-                round(gravelKg, 2),
-
-            waterL:
-                round(waterL, 2),
-
-            status:
-                "calculated"
-
-        };
-
-
-        setText(
-            "dosageCement",
-            round(cementKg, 2) +
-            " kg"
-        );
-
-
-        setText(
-            "dosageSand",
-            round(sandKg, 2) +
-            " kg"
-        );
-
-
-        setText(
-            "dosageGravel",
-            round(gravelKg, 2) +
-            " kg"
-        );
-
-
-        setText(
-            "dosageWater",
-            round(waterL, 2) +
-            " L"
-        );
-
-
-        setText(
-            "dosageStatusBadge",
-            "1 sac = 42 kg • Ratio " +
-            recipe.ratio
-        );
-
-
-        saveState();
+        }
 
 
         notify(
             recipe.name +
-            " calculé pour " +
-            bags +
-            " sac(s) de 42 kg.",
+            " calculé automatiquement pour " +
+            formatNumber(
+                dosage.cementBags,
+                3
+            ) +
+            " sac(s) équivalent(s) de 42 kg.",
             "success"
         );
 
 
-        return state.dosage;
+        return dosage;
 
     }
 
 
     /* ============================================================
-       23 — UTILITAIRE COMPOSANT
-    ============================================================ */
-
-    function componentQuantity(
-        materialId
-    ) {
-
-        const component =
-            recipient.components.find(
-                function (item) {
-
-                    return (
-                        item.materialId ===
-                        materialId
-                    );
-
-                }
-            );
-
-
-        return component
-            ? number(
-                component.quantity
-            )
-            : 0;
-
-    }
-
-
-    /* ============================================================
-       24 — TOLÉRANCE
+       25 — TOLÉRANCE
     ============================================================ */
 
     function withinTolerance(
         actual,
         expected
     ) {
+
+        actual =
+            number(actual);
+
+
+        expected =
+            number(expected);
+
 
         if (
             expected === 0
@@ -2570,35 +3038,47 @@
 
 
     /* ============================================================
-       25 — VALIDATION DU MÉLANGE
+       26 — VALIDATION DU MÉLANGE
+       ------------------------------------------------------------
+       C'EST ICI QUE LE GRAVIER EST MAINTENANT
+       OBLIGATOIRE POUR LE BÉTON.
+
+       Exemple :
+
+       Ciment = 84 kg
+
+       Béton :
+       Sable   = 84 × 2 = 168 kg
+       Gravier = 84 × 3 = 252 kg
+       Eau     = 84 × 0.5 = 42 L
+       Sacs    = 84 / 42 = 2
     ============================================================ */
 
     function validateMix() {
 
-        const type =
-            state.dosage.type ||
-            "mortier";
+        /*
+           On récupère le type sélectionné,
+           sans utiliser le nombre de sacs
+           comme source de vérité.
+        */
 
-
-        const bags =
-            number(
-                state.dosage.cementBags,
-                1
+        const select =
+            byId(
+                "mixTypeSelect"
             );
 
 
-        if (bags <= 0) {
-
-            return {
-
-                valid: false,
-
-                reason:
-                    "Le nombre de sacs de ciment est invalide."
-
-            };
-
-        }
+        const type =
+            select &&
+            DOSAGE[select.value]
+                ? select.value
+                : (
+                    DOSAGE[
+                        state.dosage.type
+                    ]
+                        ? state.dosage.type
+                        : "mortier"
+                );
 
 
         const recipe =
@@ -2607,35 +3087,123 @@
 
 
         /*
-           IMPORTANT :
-           le ciment attendu est TOUJOURS
-           42 KG par sac.
+           QUANTITÉ RÉELLE DE CIMENT.
         */
-
-        const expectedCement =
-            bags *
-            CEMENT_BAG_KG;
-
-
-        const expectedSand =
-            bags *
-            recipe.sandPerBag;
-
-
-        const expectedGravel =
-            bags *
-            recipe.gravelPerBag;
-
-
-        const expectedWater =
-            bags *
-            recipe.waterPerBag;
-
 
         const actualCement =
             componentQuantity(
                 "cement"
             );
+
+
+        if (
+            actualCement <= 0
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                type:
+                    type,
+
+                bags:
+                    0,
+
+                reason:
+                    "Aucun ciment n'est présent dans le récipient.",
+
+                expected: {
+
+                    cement:
+                        0,
+
+                    sand:
+                        0,
+
+                    gravel:
+                        0,
+
+                    water:
+                        0
+
+                },
+
+                actual: {
+
+                    cement:
+                        0,
+
+                    sand:
+                        componentQuantity(
+                            "sand"
+                        ),
+
+                    gravel:
+                        componentQuantity(
+                            "gravel"
+                        ),
+
+                    water:
+                        componentQuantity(
+                            "water"
+                        )
+
+                },
+
+                checks: {
+
+                    cement:
+                        false,
+
+                    sand:
+                        false,
+
+                    gravel:
+                        false,
+
+                    water:
+                        false
+
+                }
+
+            };
+
+        }
+
+
+        /*
+           CALCUL AUTOMATIQUE DU NOMBRE DE SACS.
+        */
+
+        const bags =
+            actualCement /
+            CEMENT_BAG_KG;
+
+
+        /*
+           CALCUL DES PROPORTIONS
+           À PARTIR DU CIMENT RÉEL.
+        */
+
+        const expectedCement =
+            actualCement;
+
+
+        const expectedSand =
+            actualCement *
+            recipe.sandRatio;
+
+
+        const expectedGravel =
+            actualCement *
+            recipe.gravelRatio;
+
+
+        const expectedWater =
+            actualCement *
+            recipe.waterRatio;
 
 
         const actualSand =
@@ -2656,11 +3224,15 @@
             );
 
 
+        /*
+           Le ciment est la référence :
+           il est donc toujours conforme
+           puisqu'il sert lui-même à construire
+           les quantités attendues.
+        */
+
         const cementOK =
-            withinTolerance(
-                actualCement,
-                expectedCement
-            );
+            actualCement > 0;
 
 
         const sandOK =
@@ -2693,41 +3265,77 @@
 
         return {
 
-            valid: valid,
+            valid:
+                valid,
 
-            type: type,
+            type:
+                type,
 
-            bags: bags,
+            bags:
+                round(
+                    bags,
+                    3
+                ),
+
+            cementKg:
+                round(
+                    actualCement,
+                    3
+                ),
 
             expected: {
 
                 cement:
-                    expectedCement,
+                    round(
+                        expectedCement,
+                        3
+                    ),
 
                 sand:
-                    expectedSand,
+                    round(
+                        expectedSand,
+                        3
+                    ),
 
                 gravel:
-                    expectedGravel,
+                    round(
+                        expectedGravel,
+                        3
+                    ),
 
                 water:
-                    expectedWater
+                    round(
+                        expectedWater,
+                        3
+                    )
 
             },
 
             actual: {
 
                 cement:
-                    actualCement,
+                    round(
+                        actualCement,
+                        3
+                    ),
 
                 sand:
-                    actualSand,
+                    round(
+                        actualSand,
+                        3
+                    ),
 
                 gravel:
-                    actualGravel,
+                    round(
+                        actualGravel,
+                        3
+                    ),
 
                 water:
-                    actualWater
+                    round(
+                        actualWater,
+                        3
+                    )
 
             },
 
@@ -2753,7 +3361,7 @@
 
 
     /* ============================================================
-       26 — AFFICHAGE RÉSULTATS
+       27 — AFFICHAGE DES RÉSULTATS
     ============================================================ */
 
     function updateResult(
@@ -2790,16 +3398,14 @@
 
 
     /* ============================================================
-       27 — EXÉCUTION DE LA RÉACTION
+       28 — EXÉCUTION DE LA RÉACTION
     ============================================================ */
 
     function executeReaction() {
 
-        /*
-           Il faut d'abord mélanger.
-        */
-
-        if (!recipient.mixed) {
+        if (
+            !recipient.mixed
+        ) {
 
             const message =
                 "Effectuez d'abord le mélange avant d'exécuter la réaction.";
@@ -2835,7 +3441,8 @@
 
             return {
 
-                valid: false,
+                valid:
+                    false,
 
                 status:
                     "pending"
@@ -2845,16 +3452,23 @@
         }
 
 
+        /*
+           Recalcul final du dosage
+           avant validation.
+        */
+
+        updateDynamicDosageFromRecipient(
+            true
+        );
+
+
         const validation =
             validateMix();
 
 
-        if (!validation.valid) {
-
-            /*
-               TEXTE DEMANDÉ EXACTEMENT :
-               Mauvaise Melange
-            */
+        if (
+            !validation.valid
+        ) {
 
             recipient.reactionState =
                 "failed";
@@ -2923,15 +3537,10 @@
 
 
             updateResult(
-
                 "Mélange effectué",
-
                 "Dosage non conforme",
-
                 "Mauvaise Melange",
-
                 "Échec"
-
             );
 
 
@@ -2950,7 +3559,7 @@
 
 
         /*
-           BON DOSAGE
+           BON DOSAGE.
         */
 
         recipient.reactionState =
@@ -3020,15 +3629,10 @@
 
 
         updateResult(
-
             "Mélange effectué",
-
             "Dosage conforme",
-
             "Reaction reussie",
-
             "Réaction réussie"
-
         );
 
 
@@ -3047,7 +3651,7 @@
 
 
     /* ============================================================
-       28 — VIDER LE RÉCIPIENT
+       29 — VIDER LE RÉCIPIENT
     ============================================================ */
 
     function clearRecipient() {
@@ -3120,7 +3724,18 @@
         };
 
 
+        /*
+           Réinitialisation complète du dosage
+           calculé automatiquement.
+        */
+
+        updateDynamicDosageFromRecipient(
+            true
+        );
+
+
         renderRecipientStatus();
+
         renderMeasurements();
 
 
@@ -3162,48 +3777,109 @@
 
 
     /* ============================================================
-       29 — RAPPORT
+       30 — RAPPORT
+       ------------------------------------------------------------
+       Le rapport ne lit PLUS jamais un nombre de sacs
+       saisi manuellement.
+
+       Il calcule :
+
+       sacs = ciment réel / 42
     ============================================================ */
 
     function generateReport() {
+
+        updateDynamicDosageFromRecipient(
+            true
+        );
+
 
         const validation =
             validateMix();
 
 
+        const actualCement =
+            componentQuantity(
+                "cement"
+            );
+
+
+        const automaticBags =
+            actualCement > 0
+                ? actualCement /
+                    CEMENT_BAG_KG
+                : 0;
+
+
         const report = {
 
             date:
-                new Date().toLocaleString(),
+                new Date()
+                    .toLocaleString(),
 
             type:
+                validation.type ||
                 state.dosage.type ||
                 "mortier",
 
             bags:
-                number(
-                    state.dosage.cementBags,
-                    0
+                round(
+                    automaticBags,
+                    3
                 ),
 
             cementKg:
-                componentQuantity(
-                    "cement"
+                round(
+                    actualCement,
+                    3
                 ),
 
             sandKg:
-                componentQuantity(
-                    "sand"
+                round(
+                    componentQuantity(
+                        "sand"
+                    ),
+                    3
                 ),
 
             gravelKg:
-                componentQuantity(
-                    "gravel"
+                round(
+                    componentQuantity(
+                        "gravel"
+                    ),
+                    3
                 ),
 
             waterL:
-                componentQuantity(
-                    "water"
+                round(
+                    componentQuantity(
+                        "water"
+                    ),
+                    3
+                ),
+
+            expectedSandKg:
+                round(
+                    validation.expected
+                        ? validation.expected.sand
+                        : 0,
+                    3
+                ),
+
+            expectedGravelKg:
+                round(
+                    validation.expected
+                        ? validation.expected.gravel
+                        : 0,
+                    3
+                ),
+
+            expectedWaterL:
+                round(
+                    validation.expected
+                        ? validation.expected.water
+                        : 0,
+                    3
                 ),
 
             result:
@@ -3220,6 +3896,7 @@
 
 
         renderReports();
+
 
         saveState();
 
@@ -3246,7 +3923,8 @@
         if (!container) return;
 
 
-        container.innerHTML = "";
+        container.innerHTML =
+            "";
 
 
         if (
@@ -3293,23 +3971,23 @@
                         </span>
 
                         <span>
-                            Sacs : ${report.bags}
+                            Sacs : ${formatNumber(report.bags, 3)}
                         </span>
 
                         <span>
-                            Ciment : ${round(report.cementKg, 2)} kg
+                            Ciment : ${formatNumber(report.cementKg, 2)} kg
                         </span>
 
                         <span>
-                            Sable : ${round(report.sandKg, 2)} kg
+                            Sable : ${formatNumber(report.sandKg, 2)} kg
                         </span>
 
                         <span>
-                            Gravier : ${round(report.gravelKg, 2)} kg
+                            Gravier : ${formatNumber(report.gravelKg, 2)} kg
                         </span>
 
                         <span>
-                            Eau : ${round(report.waterL, 2)} L
+                            Eau : ${formatNumber(report.waterL, 2)} L
                         </span>
 
                         <strong>
@@ -3336,6 +4014,7 @@
 
         renderReports();
 
+
         saveState();
 
 
@@ -3348,23 +4027,19 @@
 
 
     /* ============================================================
-       30 — ÉQUIPEMENTS
+       31 — ÉQUIPEMENTS
     ============================================================ */
 
     function bindEquipment() {
 
-        $(
-            '[data-equipment-id]'
-        );
-
-
         $$(
-            '[data-equipment-id]'
+            "[data-equipment-id]"
         )
         .forEach(function (card) {
 
             if (
-                card.dataset.fobasCivilEquipment
+                card.dataset
+                    .fobasCivilEquipment
             ) {
 
                 return;
@@ -3372,7 +4047,8 @@
             }
 
 
-            card.dataset.fobasCivilEquipment =
+            card.dataset
+                .fobasCivilEquipment =
                 "1";
 
 
@@ -3446,14 +4122,17 @@
 
 
     /* ============================================================
-       31 — ZOOM GLOBAL
+       32 — ZOOM GLOBAL
     ============================================================ */
 
     function applyZoom(value) {
 
         const zoom =
             clamp(
-                number(value, 1),
+                number(
+                    value,
+                    1
+                ),
                 0.70,
                 1.50
             );
@@ -3531,10 +4210,12 @@
 
         if (
             zoomIn &&
-            !zoomIn.dataset.fobasCivilZoom
+            !zoomIn.dataset
+                .fobasCivilZoom
         ) {
 
-            zoomIn.dataset.fobasCivilZoom =
+            zoomIn.dataset
+                .fobasCivilZoom =
                 "1";
 
 
@@ -3555,10 +4236,12 @@
 
         if (
             zoomOut &&
-            !zoomOut.dataset.fobasCivilZoom
+            !zoomOut.dataset
+                .fobasCivilZoom
         ) {
 
-            zoomOut.dataset.fobasCivilZoom =
+            zoomOut.dataset
+                .fobasCivilZoom =
                 "1";
 
 
@@ -3579,10 +4262,12 @@
 
         if (
             zoomReset &&
-            !zoomReset.dataset.fobasCivilZoom
+            !zoomReset.dataset
+                .fobasCivilZoom
         ) {
 
-            zoomReset.dataset.fobasCivilZoom =
+            zoomReset.dataset
+                .fobasCivilZoom =
                 "1";
 
 
@@ -3603,7 +4288,7 @@
 
 
     /* ============================================================
-       32 — CONTRÔLES PRINCIPAUX
+       33 — CONTRÔLES PRINCIPAUX
     ============================================================ */
 
     function bindControls() {
@@ -3616,11 +4301,14 @@
 
         if (
             mix &&
-            !mix.dataset.fobasCivilBound
+            !mix.dataset
+                .fobasCivilBound
         ) {
 
-            mix.dataset.fobasCivilBound =
+            mix.dataset
+                .fobasCivilBound =
                 "1";
+
 
             mix.addEventListener(
                 "click",
@@ -3638,11 +4326,14 @@
 
         if (
             clear &&
-            !clear.dataset.fobasCivilBound
+            !clear.dataset
+                .fobasCivilBound
         ) {
 
-            clear.dataset.fobasCivilBound =
+            clear.dataset
+                .fobasCivilBound =
                 "1";
+
 
             clear.addEventListener(
                 "click",
@@ -3660,10 +4351,12 @@
 
         if (
             measure &&
-            !measure.dataset.fobasCivilBound
+            !measure.dataset
+                .fobasCivilBound
         ) {
 
-            measure.dataset.fobasCivilBound =
+            measure.dataset
+                .fobasCivilBound =
                 "1";
 
 
@@ -3708,11 +4401,14 @@
 
         if (
             tare &&
-            !tare.dataset.fobasCivilBound
+            !tare.dataset
+                .fobasCivilBound
         ) {
 
-            tare.dataset.fobasCivilBound =
+            tare.dataset
+                .fobasCivilBound =
                 "1";
+
 
             tare.addEventListener(
                 "click",
@@ -3730,11 +4426,14 @@
 
         if (
             dosage &&
-            !dosage.dataset.fobasCivilBound
+            !dosage.dataset
+                .fobasCivilBound
         ) {
 
-            dosage.dataset.fobasCivilBound =
+            dosage.dataset
+                .fobasCivilBound =
                 "1";
+
 
             dosage.addEventListener(
                 "click",
@@ -3752,11 +4451,14 @@
 
         if (
             reaction &&
-            !reaction.dataset.fobasCivilBound
+            !reaction.dataset
+                .fobasCivilBound
         ) {
 
-            reaction.dataset.fobasCivilBound =
+            reaction.dataset
+                .fobasCivilBound =
                 "1";
+
 
             reaction.addEventListener(
                 "click",
@@ -3774,11 +4476,14 @@
 
         if (
             report &&
-            !report.dataset.fobasCivilBound
+            !report.dataset
+                .fobasCivilBound
         ) {
 
-            report.dataset.fobasCivilBound =
+            report.dataset
+                .fobasCivilBound =
                 "1";
+
 
             report.addEventListener(
                 "click",
@@ -3796,11 +4501,14 @@
 
         if (
             clearReport &&
-            !clearReport.dataset.fobasCivilBound
+            !clearReport.dataset
+                .fobasCivilBound
         ) {
 
-            clearReport.dataset.fobasCivilBound =
+            clearReport.dataset
+                .fobasCivilBound =
                 "1";
+
 
             clearReport.addEventListener(
                 "click",
@@ -3813,7 +4521,7 @@
 
 
     /* ============================================================
-       33 — STYLE DYNAMIQUE DES MATÉRIAUX
+       34 — STYLES DYNAMIQUES
     ============================================================ */
 
     function installDynamicStyles() {
@@ -3942,129 +4650,32 @@
 
 
     /* ============================================================
-       34 — RENDU DU DOSAGE SAUVEGARDÉ
+       35 — RENDU DOSAGE
+       ------------------------------------------------------------
+       Le rendu est lui aussi entièrement dynamique.
+
+       Il ne lit plus :
+
+           state.dosage.cementBags
+
+       comme une valeur saisie.
+
+       Il lit :
+
+           componentQuantity("cement")
     ============================================================ */
 
     function renderDosage() {
 
-        const dosage =
-            state.dosage || {};
-
-
-        if (
-            !number(
-                dosage.cementBags,
-                0
-            )
-        ) {
-
-            return;
-
-        }
-
-
-        const type =
-            dosage.type ||
-            "mortier";
-
-
-        const recipe =
-            DOSAGE[type] ||
-            DOSAGE.mortier;
-
-
-        /*
-           Recalcul automatique avec 42 KG
-           pour éviter qu'un ancien 50 KG
-           reste affiché.
-        */
-
-        const bags =
-            number(
-                dosage.cementBags,
-                1
-            );
-
-
-        const cement =
-            bags *
-            CEMENT_BAG_KG;
-
-
-        const sand =
-            bags *
-            recipe.sandPerBag;
-
-
-        const gravel =
-            bags *
-            recipe.gravelPerBag;
-
-
-        const water =
-            bags *
-            recipe.waterPerBag;
-
-
-        state.dosage.cementBagKg =
-            CEMENT_BAG_KG;
-
-
-        state.dosage.cementKg =
-            cement;
-
-
-        state.dosage.sandKg =
-            sand;
-
-
-        state.dosage.gravelKg =
-            gravel;
-
-
-        state.dosage.waterL =
-            water;
-
-
-        setText(
-            "dosageCement",
-            round(cement, 2) +
-            " kg"
-        );
-
-
-        setText(
-            "dosageSand",
-            round(sand, 2) +
-            " kg"
-        );
-
-
-        setText(
-            "dosageGravel",
-            round(gravel, 2) +
-            " kg"
-        );
-
-
-        setText(
-            "dosageWater",
-            round(water, 2) +
-            " L"
-        );
-
-
-        setText(
-            "dosageStatusBadge",
-            "1 sac = 42 kg • Ratio " +
-            recipe.ratio
+        updateDynamicDosageFromRecipient(
+            true
         );
 
     }
 
 
     /* ============================================================
-       35 — RENDU INITIAL
+       36 — RENDU INITIAL
     ============================================================ */
 
     function renderAll() {
@@ -4107,7 +4718,7 @@
 
 
     /* ============================================================
-       36 — API PUBLIQUE
+       37 — API PUBLIQUE
     ============================================================ */
 
     window.FOBAS_CIVIL_API = {
@@ -4130,6 +4741,9 @@
         calculateDosage:
             calculateDosage,
 
+        updateDynamicDosage:
+            updateDynamicDosageFromRecipient,
+
         validateMix:
             validateMix,
 
@@ -4147,6 +4761,9 @@
 
         renderRecipientStatus:
             renderRecipientStatus,
+
+        renderDosage:
+            renderDosage,
 
         saveState:
             saveState,
@@ -4175,7 +4792,7 @@
 
 
     /* ============================================================
-       37 — INITIALISATION
+       38 — INITIALISATION
     ============================================================ */
 
     function init() {
@@ -4197,6 +4814,19 @@
         setupTransferModal();
 
         setupLaboratoryDrop();
+
+
+        /*
+           Important :
+           le dosage est synchronisé avec
+           le contenu réel du récipient dès
+           le lancement.
+        */
+
+        updateDynamicDosageFromRecipient(
+            true
+        );
+
 
         renderAll();
 
@@ -4242,14 +4872,19 @@
 
 
         console.info(
-            "RÈGLE DOSAGE : 1 sac de ciment = 42 kg."
+            "RÈGLE : 1 sac de ciment = 42 kg."
+        );
+
+
+        console.info(
+            "DOSAGE BÉTON : 42 kg ciment = 84 kg sable + 126 kg gravier + 21 L eau."
         );
 
     }
 
 
     /* ============================================================
-       38 — DÉMARRAGE
+       39 — DÉMARRAGE
     ============================================================ */
 
     if (
@@ -4273,24 +4908,5 @@
 
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
