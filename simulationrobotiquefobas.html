@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta
+        name="theme-color"
+        content="#07111f"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS — Laboratoire Électronique & Robotique"
+    >
+
+    <meta
+        name="application-name"
+        content="FOBAS Électronique & Robotique"
+    >
+
+    <meta
+        name="mobile-web-app-capable"
+        content="yes"
+    >
+
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    >
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+    >
+
+    <title>
+        FOBAS — Laboratoire Électronique & Robotique
+    </title>
+
+    <!-- ============================================================
+         FOBAS — FEUILLE DE STYLE PRINCIPALE
+         ============================================================ -->
+    <link
+        rel="stylesheet"
+        href="./simulationrobotiquefobas.css"
+    >
+
+    <!-- ============================================================
+         DONNÉES DYNAMIQUES
+         ------------------------------------------------------------
+         Contiendra :
+         - composants
+         - outils
+         - boards
+         - pins
+         - fils
+         - codes réels
+         - missions
+         - paramètres
+         ============================================================ -->
+    <script
+        src="./simulationrobotiquefobas-data.js"
+        defer
+    ></script>
+
+    <!-- ============================================================
+         MOTEUR PRINCIPAL
+         ============================================================ -->
+    <script
+        src="./simulationrobotiquefobas.js"
+        defer
+    ></script>
+</head>
+
+<body
+    id="fobasRoboticsApp"
+    data-app="fobas-robotics"
+    data-version="1.0.0"
+>
+
+<!-- ================================================================
+     APPLICATION ROOT
+     ================================================================ -->
+<div
+    id="appRoot"
+    class="fobas-app"
+>
+
+    <!-- ============================================================
+         HEADER PRINCIPAL
+         ============================================================ -->
+    <header
+        id="appHeader"
+        class="app-header"
+    >
+
+        <div
+            id="brandArea"
+            class="brand-area"
+        >
+
+            <div
+                id="brandLogo"
+                class="brand-logo"
+                aria-hidden="true"
+            >
+                🤖
+            </div>
+
+            <div
+                id="brandText"
+                class="brand-text"
+            >
+                <div
+                    id="brandTitle"
+                    class="brand-title"
+                >
+                    FOBAS
+                </div>
+
+                <div
+                    id="brandSubtitle"
+                    class="brand-subtitle"
+                >
+                    LABORATOIRE ÉLECTRONIQUE & ROBOTIQUE
+                </div>
+            </div>
+
+        </div>
+
+        <div
+            id="headerStatus"
+            class="header-status"
+        >
+
+            <div
+                id="simulationStatus"
+                class="status-indicator"
+                data-status="ready"
+            >
+                <span
+                    id="simulationStatusDot"
+                    class="status-dot"
+                ></span>
+
+                <span
+                    id="simulationStatusText"
+                >
+                    Système prêt
+                </span>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- ============================================================
+         NAVIGATION PRINCIPALE
+         ------------------------------------------------------------
+         20 MODULES OFFICIELS
+         ------------------------------------------------------------
+         01 Laboratoire
+         02 Outils
+         03 Composants
+         04 Codes
+         05 Programmation
+         06 Missions
+         07 Mesures
+         08 Diagnostic
+         09 Paramètres
+         10 Ajouter
+         11 Sélectionner
+         12 Déplacer
+         13 Connecter
+         14 Déconnecter
+         15 Tester
+         16 Exécuter
+         17 Undo
+         18 Redo
+         19 Supprimer
+         20 Sauvegarder / Projet
+         ============================================================ -->
+
+    <nav
+        id="mainToolbar"
+        class="main-toolbar"
+        aria-label="Navigation du laboratoire"
+    >
+
+        <!-- 01 -->
+        <button
+            type="button"
+            id="btnLaboratoire"
+            class="main-tool-btn active"
+            data-module="laboratoire"
+            aria-label="Ouvrir le laboratoire"
+        >
+            <span class="tool-icon">🧪</span>
+            <span class="tool-label">Laboratoire</span>
+        </button>
+
+        <!-- 02 -->
+        <button
+            type="button"
+            id="btnOutils"
+            class="main-tool-btn"
+            data-module="outils"
+            aria-label="Ouvrir la bibliothèque des outils"
+        >
+            <span class="tool-icon">🧰</span>
+            <span class="tool-label">Outils</span>
+        </button>
+
+        <!-- 03 -->
+        <button
+            type="button"
+            id="btnComposants"
+            class="main-tool-btn"
+            data-module="composants"
+            aria-label="Ouvrir la bibliothèque des composants"
+        >
+            <span class="tool-icon">🔌</span>
+            <span class="tool-label">Composants</span>
+        </button>
+
+        <!-- 04 -->
+        <button
+            type="button"
+            id="btnCodes"
+            class="main-tool-btn"
+            data-module="codes"
+            aria-label="Ouvrir la bibliothèque de codes"
+        >
+            <span class="tool-icon">📚</span>
+            <span class="tool-label">Codes</span>
+        </button>
+
+        <!-- 05 -->
+        <button
+            type="button"
+            id="btnProgrammation"
+            class="main-tool-btn"
+            data-module="programmation"
+            aria-label="Ouvrir l'éditeur de code"
+        >
+            <span class="tool-icon">💻</span>
+            <span class="tool-label">Programmation</span>
+        </button>
+
+        <!-- 06 -->
+        <button
+            type="button"
+            id="btnMissions"
+            class="main-tool-btn"
+            data-module="missions"
+            aria-label="Ouvrir les missions"
+        >
+            <span class="tool-icon">🎯</span>
+            <span class="tool-label">Missions</span>
+        </button>
+
+        <!-- 07 -->
+        <button
+            type="button"
+            id="btnMesures"
+            class="main-tool-btn"
+            data-module="mesures"
+            aria-label="Ouvrir les instruments de mesure"
+        >
+            <span class="tool-icon">📏</span>
+            <span class="tool-label">Mesures</span>
+        </button>
+
+        <!-- 08 -->
+        <button
+            type="button"
+            id="btnDiagnostic"
+            class="main-tool-btn"
+            data-module="diagnostic"
+            aria-label="Ouvrir le diagnostic"
+        >
+            <span class="tool-icon">🔎</span>
+            <span class="tool-label">Diagnostic</span>
+        </button>
+
+        <!-- 09 -->
+        <button
+            type="button"
+            id="btnParametres"
+            class="main-tool-btn"
+            data-module="parametres"
+            aria-label="Ouvrir les paramètres"
+        >
+            <span class="tool-icon">⚙️</span>
+            <span class="tool-label">Paramètres</span>
+        </button>
+
+        <!-- 10 -->
+        <button
+            type="button"
+            id="btnAjouter"
+            class="main-tool-btn action-tool-btn"
+            data-action="add"
+            aria-label="Ajouter un élément au laboratoire"
+        >
+            <span class="tool-icon">➕</span>
+            <span class="tool-label">Ajouter</span>
+        </button>
+
+        <!-- 11 -->
+        <button
+            type="button"
+            id="btnSelectionner"
+            class="main-tool-btn action-tool-btn"
+            data-action="select"
+            aria-label="Sélectionner un élément"
+        >
+            <span class="tool-icon">🖐️</span>
+            <span class="tool-label">Sélectionner</span>
+        </button>
+
+        <!-- 12 -->
+        <button
+            type="button"
+            id="btnDeplacer"
+            class="main-tool-btn action-tool-btn"
+            data-action="move"
+            aria-label="Déplacer un élément"
+        >
+            <span class="tool-icon">↔️</span>
+            <span class="tool-label">Déplacer</span>
+        </button>
+
+        <!-- 13 -->
+        <button
+            type="button"
+            id="btnConnecter"
+            class="main-tool-btn action-tool-btn"
+            data-action="connect"
+            aria-label="Connecter des composants"
+        >
+            <span class="tool-icon">🔗</span>
+            <span class="tool-label">Connecter</span>
+        </button>
+
+        <!-- 14 -->
+        <button
+            type="button"
+            id="btnDeconnecter"
+            class="main-tool-btn action-tool-btn"
+            data-action="disconnect"
+            aria-label="Déconnecter des composants"
+        >
+            <span class="tool-icon">✂️</span>
+            <span class="tool-label">Déconnecter</span>
+        </button>
+
+        <!-- 15 -->
+        <button
+            type="button"
+            id="btnTester"
+            class="main-tool-btn action-tool-btn"
+            data-action="test"
+            aria-label="Tester le montage"
+        >
+            <span class="tool-icon">🧪</span>
+            <span class="tool-label">Tester</span>
+        </button>
+
+        <!-- 16 -->
+        <button
+            type="button"
+            id="btnExecuter"
+            class="main-tool-btn action-tool-btn primary-action"
+            data-action="run"
+            aria-label="Exécuter la simulation"
+        >
+            <span class="tool-icon">▶️</span>
+            <span class="tool-label">Exécuter</span>
+        </button>
+
+        <!-- 17 -->
+        <button
+            type="button"
+            id="btnUndo"
+            class="main-tool-btn action-tool-btn"
+            data-action="undo"
+            aria-label="Annuler"
+        >
+            <span class="tool-icon">↶</span>
+            <span class="tool-label">Undo</span>
+        </button>
+
+        <!-- 18 -->
+        <button
+            type="button"
+            id="btnRedo"
+            class="main-tool-btn action-tool-btn"
+            data-action="redo"
+            aria-label="Rétablir"
+        >
+            <span class="tool-icon">↷</span>
+            <span class="tool-label">Redo</span>
+        </button>
+
+        <!-- 19 -->
+        <button
+            type="button"
+            id="btnSupprimer"
+            class="main-tool-btn action-tool-btn danger-action"
+            data-action="delete"
+            aria-label="Supprimer un élément"
+        >
+            <span class="tool-icon">🗑️</span>
+            <span class="tool-label">Supprimer</span>
+        </button>
+
+        <!-- 20 -->
+        <button
+            type="button"
+            id="btnProjet"
+            class="main-tool-btn action-tool-btn"
+            data-module="projet"
+            aria-label="Gérer le projet et sauvegarder"
+        >
+            <span class="tool-icon">💾</span>
+            <span class="tool-label">Projet</span>
+        </button>
+
+    </nav>
+
+
+    <!-- ============================================================
+         ZONE PRINCIPALE
+         ============================================================ -->
+    <main
+        id="mainContent"
+        class="main-content"
+    >
+
+        <!-- ========================================================
+             ESPACE LABORATOIRE
+             ======================================================== -->
+        <section
+            id="laboratoireView"
+            class="app-view active-view"
+            data-view="laboratoire"
+            aria-label="Espace de travail du laboratoire"
+        >
+
+            <!-- ----------------------------------------------------
+                 BARRE DE CONTEXTE DU LABORATOIRE
+                 ---------------------------------------------------- -->
+            <div
+                id="laboratoireHeader"
+                class="workspace-header"
+            >
+
+                <div
+                    class="workspace-title-area"
+                >
+
+                    <div
+                        class="workspace-icon"
+                    >
+                        🧪
+                    </div>
+
+                    <div>
+                        <h1
+                            id="workspaceTitle"
+                        >
+                            Laboratoire
+                        </h1>
+
+                        <p
+                            id="workspaceSubtitle"
+                        >
+                            Espace de montage électronique & robotique
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="workspaceInfo"
+                    class="workspace-info"
+                >
+
+                    <span
+                        id="selectedObjectInfo"
+                    >
+                        Aucun élément sélectionné
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ----------------------------------------------------
+                 ESPACE DE TRAVAIL
+                 ----------------------------------------------------
+                 Le JS transformera cette zone en workspace interactif.
+
+                 Les objets ajoutés depuis la bibliothèque seront
+                 créés dynamiquement ici.
+
+                 Chaque objet pourra posséder :
+                 - position X/Y
+                 - profondeur
+                 - rotation
+                 - dimensions
+                 - pins
+                 - connexions
+                 - état
+                 ---------------------------------------------------- -->
+            <div
+                id="workspaceShell"
+                class="workspace-shell"
+            >
+
+                <div
+                    id="workspaceToolbar"
+                    class="workspace-floating-toolbar"
+                    aria-label="Outils rapides du laboratoire"
+                >
+
+                    <button
+                        type="button"
+                        id="workspaceAddBtn"
+                        class="workspace-mini-btn"
+                        data-action="add"
+                        title="Ajouter"
+                    >
+                        ➕
+                    </button>
+
+                    <button
+                        type="button"
+                        id="workspaceConnectBtn"
+                        class="workspace-mini-btn"
+                        data-action="connect"
+                        title="Connecter"
+                    >
+                        🔗
+                    </button>
+
+                    <button
+                        type="button"
+                        id="workspaceMeasureBtn"
+                        class="workspace-mini-btn"
+                        data-action="measure"
+                        title="Mesurer"
+                    >
+                        📏
+                    </button>
+
+                    <button
+                        type="button"
+                        id="workspaceTestBtn"
+                        class="workspace-mini-btn"
+                        data-action="test"
+                        title="Tester"
+                    >
+                        🧪
+                    </button>
+
+                    <button
+                        type="button"
+                        id="workspaceRunBtn"
+                        class="workspace-mini-btn primary-mini-btn"
+                        data-action="run"
+                        title="Exécuter"
+                    >
+                        ▶
+                    </button>
+
+                </div>
+
+
+                <!-- ==================================================
+                     PLAN / TABLE DU LABORATOIRE
+                     ================================================== -->
+                <div
+                    id="laboratoryWorkspace"
+                    class="laboratory-workspace"
+                    data-workspace="true"
+                    data-workspace-mode="design"
+                    tabindex="0"
+                    aria-label="Espace de montage"
+                >
+
+                    <!-- ------------------------------------------------
+                         GRILLE
+                         ------------------------------------------------ -->
+                    <div
+                        id="workspaceGrid"
+                        class="workspace-grid"
+                        aria-hidden="true"
+                    ></div>
+
+
+                    <!-- ------------------------------------------------
+                         PLAN DE TRAVAIL
+                         ------------------------------------------------ -->
+                    <div
+                        id="workspaceBoard"
+                        class="workspace-board"
+                        data-board-layer="true"
+                    >
+
+                        <!--
+                            Les composants seront injectés ici
+                            dynamiquement par JavaScript.
+
+                            Exemple d'instance :
+
+                            <div
+                                class="workspace-object"
+                                data-object-id="led-red-001-instance-1"
+                                data-component-id="led-red-001"
+                                data-object-type="led"
+                            ></div>
+                        -->
+
+                    </div>
+
+
+                    <!-- ------------------------------------------------
+                         COUCHE DES FILS
+                         ------------------------------------------------
+                         Le moteur pourra utiliser SVG pour permettre :
+                         - fils rouges
+                         - fils noirs
+                         - fils bleus
+                         - fils verts
+                         - déplacement des extrémités
+                         - redimensionnement tactile
+                         - connexion aux pins
+                         ------------------------------------------------ -->
+                    <svg
+                        id="wireLayer"
+                        class="wire-layer"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                    >
+                        <g
+                            id="wireObjects"
+                        ></g>
+                    </svg>
+
+
+                    <!-- ------------------------------------------------
+                         COUCHE DES CONNEXIONS / PINS
+                         ------------------------------------------------ -->
+                    <div
+                        id="connectionLayer"
+                        class="connection-layer"
+                    ></div>
+
+
+                    <!-- ------------------------------------------------
+                         INDICATEUR DE SÉLECTION
+                         ------------------------------------------------ -->
+                    <div
+                        id="selectionLayer"
+                        class="selection-layer"
+                        aria-hidden="true"
+                    ></div>
+
+
+                    <!-- ------------------------------------------------
+                         MESSAGE INITIAL
+                         ------------------------------------------------ -->
+                    <div
+                        id="workspaceEmptyState"
+                        class="workspace-empty-state"
+                    >
+
+                        <div
+                            class="empty-state-icon"
+                        >
+                            🤖
+                        </div>
+
+                        <h2>
+                            Laboratoire prêt
+                        </h2>
+
+                        <p>
+                            Ajoutez une carte, un composant, un outil
+                            ou un élément robotique pour commencer
+                            votre montage.
+                        </p>
+
+                        <button
+                            type="button"
+                            id="emptyAddBtn"
+                            class="empty-state-button"
+                            data-action="add"
+                        >
+                            ➕ Ajouter un élément
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     PANNEAU D'ÉTAT DU MONTAGE
+                     ================================================== -->
+                <aside
+                    id="workspaceInspector"
+                    class="workspace-inspector"
+                    aria-label="Informations sur l'élément sélectionné"
+                >
+
+                    <div
+                        class="inspector-header"
+                    >
+                        <span>
+                            🔎
+                        </span>
+
+                        <span>
+                            Propriétés
+                        </span>
+                    </div>
+
+                    <div
+                        id="inspectorContent"
+                        class="inspector-content"
+                    >
+
+                        <div
+                            class="inspector-empty"
+                        >
+                            Sélectionnez un élément
+                            pour afficher ses propriétés.
+                        </div>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+
+            <!-- ----------------------------------------------------
+                 BARRE D'ÉTAT DU LABORATOIRE
+                 ---------------------------------------------------- -->
+            <footer
+                id="workspaceStatusBar"
+                class="workspace-status-bar"
+            >
+
+                <div
+                    id="componentCountStatus"
+                >
+                    Composants : 0
+                </div>
+
+                <div
+                    id="connectionCountStatus"
+                >
+                    Connexions : 0
+                </div>
+
+                <div
+                    id="wireCountStatus"
+                >
+                    Fils : 0
+                </div>
+
+                <div
+                    id="workspaceModeStatus"
+                >
+                    Mode : Montage
+                </div>
+
+            </footer>
+
+        </section>
+
+
+        <!-- ========================================================
+             02 — OUTILS
+             ======================================================== -->
+        <section
+            id="outilsView"
+            class="app-view"
+            data-view="outils"
+            hidden
+        >
+
+            <div class="module-header">
+                <div class="module-icon">🧰</div>
+
+                <div>
+                    <h2>Bibliothèque des outils</h2>
+                    <p>
+                        Instruments et outils du laboratoire.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                id="toolsLibrary"
+                class="library-grid"
+                data-library="tools"
+            ></div>
+
+        </section>
+
+
+        <!-- ========================================================
+             03 — COMPOSANTS
+             ======================================================== -->
+        <section
+            id="composantsView"
+            class="app-view"
+            data-view="composants"
+            hidden
+        >
+
+            <div class="module-header">
+                <div class="module-icon">🔌</div>
+
+                <div>
+                    <h2>Bibliothèque des composants</h2>
+                    <p>
+                        Composants électroniques, robotique,
+                        cartes, boards, capteurs et accessoires.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                id="componentCategories"
+                class="category-bar"
+            ></div>
+
+            <div
+                id="componentsLibrary"
+                class="library-grid"
+                data-library="components"
+            ></div>
+
+        </section>
+
+
+        <!-- ========================================================
+             04 — BIBLIOTHÈQUE DE CODES
+             --------------------------------------------------------
+             IMPORTANT :
+             Cette zone est volontairement séparée de l'éditeur.
+             ======================================================== -->
+        <section
+            id="codesView"
+            class="app-view"
+            data-view="codes"
+            hidden
+        >
+
+            <div class="module-header">
+
+                <div class="module-icon">
+                    📚
+                </div>
+
+                <div>
+                    <h2>
+                        Bibliothèque de Codes Réels
+                    </h2>
+
+                    <p>
+                        Codes réels organisés par action,
+                        composant, niveau et application.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="codeLibraryControls"
+                class="library-controls"
+            >
+
+                <label
+                    for="codeSearchInput"
+                    class="visually-hidden"
+                >
+                    Rechercher un code
+                </label>
+
+                <input
+                    type="search"
+                    id="codeSearchInput"
+                    class="library-search"
+                    placeholder="Rechercher une action ou un code..."
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+
+                <div
+                    id="codeCategoryBar"
+                    class="category-bar"
+                ></div>
+
+            </div>
+
+
+            <div
+                id="codeLibrary"
+                class="code-library"
+                data-library="codes"
+            ></div>
+
+        </section>
+
+
+        <!-- ========================================================
+             05 — PROGRAMMATION / ÉDITEUR
+             --------------------------------------------------------
+             Séparé de la bibliothèque.
+             ======================================================== -->
+        <section
+            id="programmationView"
+            class="app-view"
+            data-view="programmation"
+            hidden
+        >
+
+            <div class="module-header">
+
+                <div class="module-icon">
+                    💻
+                </div>
+
+                <div>
+                    <h2>
+                        Éditeur de Code
+                    </h2>
+
+                    <p>
+                        Écrivez, collez, vérifiez et exécutez
+                        votre programme sur le montage.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="codeEditorWorkspace"
+                class="code-editor-workspace"
+            >
+
+                <div
+                    id="codeEditorToolbar"
+                    class="code-editor-toolbar"
+                >
+
+                    <button
+                        type="button"
+                        id="editorPasteBtn"
+                        class="editor-btn"
+                        data-editor-action="paste"
+                    >
+                        📋 Coller
+                    </button>
+
+                    <button
+                        type="button"
+                        id="editorClearBtn"
+                        class="editor-btn"
+                        data-editor-action="clear"
+                    >
+                        🗑 Effacer
+                    </button>
+
+                    <button
+                        type="button"
+                        id="editorVerifyBtn"
+                        class="editor-btn"
+                        data-editor-action="verify"
+                    >
+                        ✓ Vérifier
+                    </button>
+
+                    <button
+                        type="button"
+                        id="editorRunBtn"
+                        class="editor-btn primary-editor-btn"
+                        data-editor-action="run"
+                    >
+                        ▶ RUN
+                    </button>
+
+                    <button
+                        type="button"
+                        id="editorStopBtn"
+                        class="editor-btn danger-editor-btn"
+                        data-editor-action="stop"
+                    >
+                        ■ STOP
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="codeEditorContainer"
+                    class="code-editor-container"
+                >
+
+                    <div
+                        id="codeLineNumbers"
+                        class="code-line-numbers"
+                        aria-hidden="true"
+                    >
+                        1
+                    </div>
+
+                    <textarea
+                        id="roboticsCodeEditor"
+                        class="robotics-code-editor"
+                        spellcheck="false"
+                        autocapitalize="off"
+                        autocomplete="off"
+                        autocorrect="off"
+                        wrap="off"
+                        placeholder="// Collez ou écrivez votre code réel ici..."
+                        aria-label="Éditeur de code robotique"
+                    ></textarea>
+
+                </div>
+
+
+                <div
+                    id="codeValidationPanel"
+                    class="code-validation-panel"
+                >
+
+                    <div
+                        id="codeValidationStatus"
+                        class="code-status"
+                    >
+                        En attente de code.
+                    </div>
+
+                    <pre
+                        id="codeConsole"
+                        class="code-console"
+                    ></pre>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================
+             06 — MISSIONS
+             ======================================================== -->
+        <section
+            id="missionsView"
+            class="app-view"
+            data-view="missions"
+            hidden
+        >
+
+            <div class="module-header">
+
+                <div class="module-icon">
+                    🎯
+                </div>
+
+                <div>
+                    <h2>
+                        Missions
+                    </h2>
+
+                    <p>
+                        Défis pratiques de montage,
+                        programmation et robotique.
+                    </p>
+                </div>
+
+            </div>
+
+            <div
+                id="missionsLibrary"
+                class="missions-grid"
+                data-library="missions"
+            ></div>
+
+        </section>
+
+
+        <!-- ========================================================
+             07 — MESURES
+             ======================================================== -->
+        <section
+            id="mesuresView"
+            class="app-view"
+            data-view="mesures"
+            hidden
+        >
+
+            <div class="module-header">
+
+                <div class="module-icon">
+                    📏
+                </div>
+
+                <div>
+                    <h2>
+                        Mesures
+                    </h2>
+
+                    <p>
+                        Instruments de mesure et valeurs en temps réel.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="measurementDashboard"
+                class="measurement-dashboard"
+            >
+
+                <div
+                    class="measurement-card"
+                    data-measurement="voltage"
+                >
+                    <span class="measurement-label">
+                        Voltage
+                    </span>
+
+                    <strong
+                        id="voltageValue"
+                    >
+                        0.00 V
+                    </strong>
+                </div>
+
+                <div
+                    class="measurement-card"
+                    data-measurement="current"
+                >
+                    <span class="measurement-label">
+                        Courant
+                    </span>
+
+                    <strong
+                        id="currentValue"
+                    >
+                        0.00 A
+                    </strong>
+                </div>
+
+                <div
+                    class="measurement-card"
+                    data-measurement="resistance"
+                >
+                    <span class="measurement-label">
+                        Résistance
+                    </span>
+
+                    <strong
+                        id="resistanceValue"
+                    >
+                        0.00 Ω
+                    </strong>
+                </div>
+
+                <div
+                    class="measurement-card"
+                    data-measurement="frequency"
+                >
+                    <span class="measurement-label">
+                        Fréquence
+                    </span>
+
+                    <strong
+                        id="frequencyValue"
+                    >
+                        0.00 Hz
+                    </strong>
+                </div>
+
+                <div
+                    class="measurement-card"
+                    data-measurement="pwm"
+                >
+                    <span class="measurement-label">
+                        PWM
+                    </span>
+
+                    <strong
+                        id="pwmValue"
+                    >
+                        0 %
+                    </strong>
+                </div>
+
+                <div
+                    class="measurement-card"
+                    data-measurement="temperature"
+                >
+                    <span class="measurement-label">
+                        Température
+                    </span>
+
+                    <strong
+                        id="temperatureValue"
+                    >
+                        25.0 °C
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================
+             08 — DIAGNOSTIC
+             ======================================================== -->
+        <section
+            id="diagnosticView"
+            class="app-view"
+            data-view="diagnostic"
+            hidden
+        >
+
+            <div class="module-header">
+
+                <div class="module-icon">
+                    🔎
+                </div>
+
+                <div>
+                    <h2>
+                        Diagnostic
+                    </h2>
+
+                    <p>
+                        Analyse du montage et détection des erreurs.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="diagnosticDashboard"
+                class="diagnostic-dashboard"
+            >
+
+                <div
+                    id="diagnosticSummary"
+                    class="diagnostic-summary"
+                >
+                    Aucun diagnostic exécuté.
+                </div>
+
+                <div
+                    id="diagnosticResults"
+                    class="diagnostic-results"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================
+             09 — PARAMÈTRES
+             ======================================================== -->
+        <section
+            id="parametresView"
+            class="app-view"
+            data-view="parametres"
+            hidden
+        >
+
+            <div class="module-header">
+
+                <div class="module-icon">
+                    ⚙️
+                </div>
+
+                <div>
+                    <h2>
+                        Paramètres
+                    </h2>
+
+                    <p>
+                        Configuration du laboratoire.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="settingsPanel"
+                class="settings-panel"
+            >
+
+                <div class="setting-row">
+
+                    <label
+                        for="settingGrid"
+                    >
+                        Grille du laboratoire
+                    </label>
+
+                    <input
+                        type="checkbox"
+                        id="settingGrid"
+                        checked
+                    >
+
+                </div>
+
+
+                <div class="setting-row">
+
+                    <label
+                        for="settingSnap"
+                    >
+                        Alignement automatique
+                    </label>
+
+                    <input
+                        type="checkbox"
+                        id="settingSnap"
+                        checked
+                    >
+
+                </div>
+
+
+                <div class="setting-row">
+
+                    <label
+                        for="settingSound"
+                    >
+                        Feedback sonore
+                    </label>
+
+                    <input
+                        type="checkbox"
+                        id="settingSound"
+                        checked
+                    >
+
+                </div>
+
+
+                <div class="setting-row">
+
+                    <label
+                        for="settingTouch"
+                    >
+                        Mode tactile Android
+                    </label>
+
+                    <input
+                        type="checkbox"
+                        id="settingTouch"
+                        checked
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================
+             20 — PROJET
+             ======================================================== -->
+        <section
+            id="projetView"
+            class="app-view"
+            data-view="projet"
+            hidden
+        >
+
+            <div class="module-header">
+
+                <div class="module-icon">
+                    💾
+                </div>
+
+                <div>
+                    <h2>
+                        Projet
+                    </h2>
+
+                    <p>
+                        Gestion et sauvegarde du laboratoire.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="projectPanel"
+                class="project-panel"
+            >
+
+                <button
+                    type="button"
+                    id="newProjectBtn"
+                    class="project-action"
+                    data-project-action="new"
+                >
+                    🆕 Nouveau projet
+                </button>
+
+                <button
+                    type="button"
+                    id="saveProjectBtn"
+                    class="project-action"
+                    data-project-action="save"
+                >
+                    💾 Sauvegarder
+                </button>
+
+                <button
+                    type="button"
+                    id="loadProjectBtn"
+                    class="project-action"
+                    data-project-action="load"
+                >
+                    📂 Charger
+                </button>
+
+                <button
+                    type="button"
+                    id="exportProjectBtn"
+                    class="project-action"
+                    data-project-action="export"
+                >
+                    📤 Exporter
+                </button>
+
+                <button
+                    type="button"
+                    id="importProjectBtn"
+                    class="project-action"
+                    data-project-action="import"
+                >
+                    📥 Importer
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ============================================================
+         PANNEAU MOBILE / BIBLIOTHÈQUE
+         ------------------------------------------------------------
+         Le JS l'utilisera comme fenêtre dynamique sur Android.
+         ============================================================ -->
+    <div
+        id="mobilePanelSystem"
+        class="mobile-panel-system"
+        aria-hidden="true"
+    >
+
+        <div
+            id="mobilePanelBackdrop"
+            class="mobile-panel-backdrop"
+        ></div>
+
+
+        <section
+            id="mobilePanel"
+            class="mobile-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobilePanelTitle"
+        >
+
+            <header
+                id="mobilePanelHeader"
+                class="mobile-panel-header"
+            >
+
+                <div
+                    id="mobilePanelDragHandle"
+                    class="mobile-panel-drag-handle"
+                    aria-hidden="true"
+                ></div>
+
+                <div
+                    id="mobilePanelTitle"
+                    class="mobile-panel-title"
+                >
+                    FOBAS
+                </div>
+
+                <button
+                    type="button"
+                    id="mobilePanelCloseBtn"
+                    class="mobile-panel-close"
+                    aria-label="Fermer"
+                >
+                    ✕
+                </button>
+
+            </header>
+
+
+            <div
+                id="mobilePanelContent"
+                class="mobile-panel-content"
+            ></div>
+
+        </section>
+
+    </div>
+
+
+    <!-- ============================================================
+         NOTIFICATION / TOAST
+         ============================================================ -->
+    <div
+        id="toastContainer"
+        class="toast-container"
+        aria-live="polite"
+        aria-atomic="true"
+    ></div>
+
+
+    <!-- ============================================================
+         CONFIRMATION / DIALOGUE
+         ============================================================ -->
+    <div
+        id="dialogSystem"
+        class="dialog-system"
+        aria-hidden="true"
+    >
+
+        <div
+            id="dialogBackdrop"
+            class="dialog-backdrop"
+        ></div>
+
+        <section
+            id="mainDialog"
+            class="main-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dialogTitle"
+        >
+
+            <header
+                class="dialog-header"
+            >
+
+                <h2
+                    id="dialogTitle"
+                >
+                    FOBAS
+                </h2>
+
+                <button
+                    type="button"
+                    id="dialogCloseBtn"
+                    class="dialog-close"
+                    aria-label="Fermer"
+                >
+                    ✕
+                </button>
+
+            </header>
+
+            <div
+                id="dialogContent"
+                class="dialog-content"
+            ></div>
+
+            <footer
+                id="dialogActions"
+                class="dialog-actions"
+            ></footer>
+
+        </section>
+
+    </div>
+
+
+    <!-- ============================================================
+         ÉLÉMENT INPUT CACHÉ POUR IMPORT DE PROJET
+         ============================================================ -->
+    <input
+        type="file"
+        id="projectFileInput"
+        accept=".json,application/json"
+        hidden
+    >
+
+
+    <!-- ============================================================
+         TEMPLATES HTML
+         ------------------------------------------------------------
+         Ces templates ne sont pas affichés directement.
+         JavaScript peut les cloner dynamiquement.
+         ============================================================ -->
+
+    <!-- TEMPLATE : COMPOSANT -->
+    <template
+        id="componentCardTemplate"
+    >
+
+        <article
+            class="component-card"
+            data-component-card="true"
+        >
+
+            <div
+                class="component-card-visual"
+                data-component-visual
+            ></div>
+
+            <div
+                class="component-card-content"
+            >
+
+                <h3
+                    data-component-name
+                >
+                    Composant
+                </h3>
+
+                <p
+                    data-component-description
+                ></p>
+
+                <div
+                    class="component-card-meta"
+                >
+                    <span
+                        data-component-category
+                    ></span>
+
+                    <span
+                        data-component-type
+                    ></span>
+                </div>
+
+                <button
+                    type="button"
+                    class="component-add-btn"
+                    data-component-add
+                >
+                    ➕ Ajouter
+                </button>
+
+            </div>
+
+        </article>
+
+    </template>
+
+
+    <!-- TEMPLATE : OUTIL -->
+    <template
+        id="toolCardTemplate"
+    >
+
+        <article
+            class="tool-card"
+            data-tool-card="true"
+        >
+
+            <div
+                class="tool-card-icon"
+                data-tool-icon
+            >
+                🧰
+            </div>
+
+            <div
+                class="tool-card-content"
+            >
+
+                <h3
+                    data-tool-name
+                >
+                    Outil
+                </h3>
+
+                <p
+                    data-tool-description
+                ></p>
+
+                <button
+                    type="button"
+                    class="tool-add-btn"
+                    data-tool-add
+                >
+                    ➕ Ajouter
+                </button>
+
+            </div>
+
+        </article>
+
+    </template>
+
+
+    <!-- TEMPLATE : CODE -->
+    <template
+        id="codeCardTemplate"
+    >
+
+        <article
+            class="code-card"
+            data-code-card="true"
+        >
+
+            <header
+                class="code-card-header"
+            >
+
+                <div>
+                    <span
+                        class="code-card-icon"
+                        data-code-icon
+                    >
+                        💻
+                    </span>
+
+                    <h3
+                        data-code-title
+                    >
+                        Action
+                    </h3>
+                </div>
+
+                <span
+                    class="code-level"
+                    data-code-level
+                >
+                    Débutant
+                </span>
+
+            </header>
+
+
+            <div
+                class="code-card-body"
+            >
+
+                <p
+                    class="code-action-description"
+                    data-code-description
+                ></p>
+
+                <div
+                    class="code-required-components"
+                    data-code-components
+                ></div>
+
+                <pre
+                    class="code-preview"
+                    data-code-preview
+                ></pre>
+
+            </div>
+
+
+            <footer
+                class="code-card-footer"
+            >
+
+                <button
+                    type="button"
+                    class="code-card-btn"
+                    data-code-copy
+                >
+                    📋 Copier
+                </button>
+
+                <button
+                    type="button"
+                    class="code-card-btn primary-code-card-btn"
+                    data-code-editor
+                >
+                    💻 Éditeur
+                </button>
+
+            </footer>
+
+        </article>
+
+    </template>
+
+
+    <!-- TEMPLATE : MISSION -->
+    <template
+        id="missionCardTemplate"
+    >
+
+        <article
+            class="mission-card"
+            data-mission-card="true"
+        >
+
+            <div
+                class="mission-card-header"
+            >
+
+                <span
+                    data-mission-icon
+                >
+                    🎯
+                </span>
+
+                <div>
+
+                    <h3
+                        data-mission-title
+                    >
+                        Mission
+                    </h3>
+
+                    <span
+                        data-mission-level
+                    >
+                        Niveau
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <p
+                data-mission-description
+            ></p>
+
+
+            <div
+                class="mission-objective"
+            >
+
+                <strong>
+                    Objectif
+                </strong>
+
+                <span
+                    data-mission-objective
+                ></span>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="mission-start-btn"
+                data-mission-start
+            >
+                ▶ Commencer
+            </button>
+
+        </article>
+
+    </template>
+
+
+    <!-- TEMPLATE : WORKSPACE OBJECT -->
+    <template
+        id="workspaceObjectTemplate"
+    >
+
+        <div
+            class="workspace-object"
+            data-workspace-object="true"
+            data-object-id=""
+            data-component-id=""
+            data-object-type=""
+            tabindex="0"
+        >
+
+            <div
+                class="workspace-object-visual"
+                data-object-visual
+            ></div>
+
+            <div
+                class="workspace-object-label"
+                data-object-label
+            ></div>
+
+            <div
+                class="workspace-object-pins"
+                data-object-pins
+            ></div>
+
+            <div
+                class="workspace-object-resize-handle"
+                data-resize-handle
+                aria-hidden="true"
+            ></div>
+
+        </div>
+
+    </template>
+
+
+    <!-- TEMPLATE : PIN -->
+    <template
+        id="pinTemplate"
+    >
+
+        <button
+            type="button"
+            class="component-pin"
+            data-pin="true"
+            data-pin-id=""
+            data-pin-type=""
+            aria-label="Pin"
+        ></button>
+
+    </template>
+
+
+    <!-- ============================================================
+         ACCESSIBILITÉ
+         ============================================================ -->
+    <div
+        id="ariaLiveRegion"
+        class="visually-hidden"
+        aria-live="polite"
+        aria-atomic="true"
+    ></div>
+
+</div>
+
+
+<!-- ================================================================
+     STRUCTURE HTML TERMINÉE
+     ---------------------------------------------------------------
+     AUCUNE logique de simulation n'est volontairement exécutée ici.
+     Le moteur principal est chargé par simulationrobotiquefobas.js.
+     ================================================================ -->
+
+</body>
+</html>
