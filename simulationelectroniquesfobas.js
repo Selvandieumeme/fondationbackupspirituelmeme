@@ -1574,99 +1574,313 @@ void loop() {
     }
 
 
-    /* ============================================================
-       16 — RENDU DES COMPOSANTS
-    ============================================================ */
 
-    function renderAllComponents() {
 
-        const layer = $("componentLayer");
 
-        if (!layer) return;
 
-        layer.innerHTML = "";
 
-        state.components.forEach(
-            component => renderComponent(component)
+
+
+/* ============================================================
+   16 — RENDU DES COMPOSANTS
+   ------------------------------------------------------------
+   CORRECTION:
+   - Le JavaScript utilise .electronic-component
+   - Rendu forcé dans #componentLayer
+   - Position, taille et visibilité garanties
+   - Ne modifie pas createComponent()
+   - Ne modifie pas addComponent()
+   - Ne modifie pas le système de fils
+============================================================ */
+
+function renderAllComponents() {
+
+    const layer = $("componentLayer");
+
+    if (!layer) return;
+
+    layer.innerHTML = "";
+
+    state.components.forEach(component => {
+
+        renderComponent(component);
+
+    });
+
+    renderWires();
+}
+
+
+function renderComponent(component) {
+
+    const layer = $("componentLayer");
+
+    if (!layer || !component) return;
+
+
+    /* --------------------------------------------------------
+       RECHERCHE DE L'ÉLÉMENT EXISTANT
+    -------------------------------------------------------- */
+
+    let el = layer.querySelector(
+        `[data-component-id="${CSS.escape(component.id)}"]`
+    );
+
+
+    /* --------------------------------------------------------
+       CRÉATION DU CONTENEUR
+    -------------------------------------------------------- */
+
+    if (!el) {
+
+        el = document.createElement("div");
+
+        el.className =
+            "electronic-component";
+
+        el.dataset.componentId =
+            component.id;
+
+        el.tabIndex = 0;
+
+        layer.appendChild(el);
+
+        attachComponentEvents(
+            el,
+            component
         );
     }
 
 
-    function renderComponent(component) {
+    /* --------------------------------------------------------
+       POSITION ET DIMENSIONS
+    -------------------------------------------------------- */
 
-        const layer = $("componentLayer");
+    const safeX =
+        Number.isFinite(Number(component.x))
+            ? Number(component.x)
+            : 120;
 
-        if (!layer) return;
+    const safeY =
+        Number.isFinite(Number(component.y))
+            ? Number(component.y)
+            : 120;
 
-        let el =
-            document.querySelector(
-                `[data-component-id="${component.id}"]`
-            );
+    const safeRotation =
+        Number.isFinite(Number(component.rotation))
+            ? Number(component.rotation)
+            : 0;
 
-        if (!el) {
 
-            el = document.createElement("div");
+    el.style.position = "absolute";
 
-            el.className = "electronic-component";
+    el.style.left =
+        `${safeX}px`;
 
-            el.dataset.componentId =
-                component.id;
+    el.style.top =
+        `${safeY}px`;
 
-            el.tabIndex = 0;
+    el.style.width =
+        `${COMPONENT_WIDTH}px`;
 
-            layer.appendChild(el);
+    el.style.minWidth =
+        `${COMPONENT_WIDTH}px`;
 
-            attachComponentEvents(
-                el,
-                component
-            );
-        }
+    el.style.height =
+        `${COMPONENT_HEIGHT}px`;
 
-        el.style.position = "absolute";
+    el.style.minHeight =
+        `${COMPONENT_HEIGHT}px`;
 
-        el.style.left =
-            `${component.x}px`;
+    el.style.display =
+        "flex";
 
-        el.style.top =
-            `${component.y}px`;
+    el.style.visibility =
+        "visible";
 
-        el.style.width =
-            `${COMPONENT_WIDTH}px`;
+    el.style.opacity =
+        "1";
 
-        el.style.minHeight =
-            `${COMPONENT_HEIGHT}px`;
+    el.style.pointerEvents =
+        "auto";
 
-        el.style.transform =
-            `rotate(${component.rotation}deg)`;
+    el.style.zIndex =
+        "31";
 
-        el.style.touchAction = "none";
+    el.style.transform =
+        `rotate(${safeRotation}deg)`;
 
-        el.classList.toggle(
-            "selected",
-            state.selectedComponentId === component.id
+    el.style.transformOrigin =
+        "center center";
+
+    el.style.touchAction =
+        "none";
+
+    el.style.boxSizing =
+        "border-box";
+
+
+    /* --------------------------------------------------------
+       ÉTAT VISUEL
+    -------------------------------------------------------- */
+
+    el.classList.toggle(
+        "selected",
+        state.selectedComponentId === component.id
+    );
+
+    el.classList.toggle(
+        "component-active",
+        !!component.active
+    );
+
+    el.classList.toggle(
+        "component-fault",
+        !!component.fault
+    );
+
+
+    /* --------------------------------------------------------
+       CONTENU DU COMPOSANT
+    -------------------------------------------------------- */
+
+    el.innerHTML =
+        componentMarkup(component);
+
+
+    /* --------------------------------------------------------
+       GARANTIE DU RENDU INTERNE
+    -------------------------------------------------------- */
+
+    const header =
+        el.querySelector(
+            ".component-header"
         );
 
-        el.classList.toggle(
-            "component-active",
-            !!component.active
-        );
+    if (header) {
 
-        el.classList.toggle(
-            "component-fault",
-            !!component.fault
-        );
+        header.style.display =
+            "block";
 
-        el.innerHTML = componentMarkup(component);
+        header.style.visibility =
+            "visible";
 
-        attachPinEvents(el, component);
+        header.style.opacity =
+            "1";
 
-        if (component.active) {
-            el.style.boxShadow =
-                "0 0 24px rgba(0,220,255,.75)";
-        } else {
-            el.style.boxShadow = "";
-        }
+        header.style.width =
+            "100%";
+
+        header.style.textAlign =
+            "center";
+
+        header.style.pointerEvents =
+            "none";
     }
+
+
+    const body =
+        el.querySelector(
+            ".component-body"
+        );
+
+    if (body) {
+
+        body.style.display =
+            "flex";
+
+        body.style.visibility =
+            "visible";
+
+        body.style.opacity =
+            "1";
+
+        body.style.width =
+            "100%";
+
+        body.style.minHeight =
+            "30px";
+
+        body.style.alignItems =
+            "center";
+
+        body.style.justifyContent =
+            "center";
+
+        body.style.position =
+            "relative";
+
+        body.style.pointerEvents =
+            "none";
+    }
+
+
+    const pinsContainer =
+        el.querySelector(
+            ".component-pins"
+        );
+
+    if (pinsContainer) {
+
+        pinsContainer.style.position =
+            "absolute";
+
+        pinsContainer.style.inset =
+            "0";
+
+        pinsContainer.style.width =
+            "100%";
+
+        pinsContainer.style.height =
+            "100%";
+
+        pinsContainer.style.pointerEvents =
+            "none";
+
+        pinsContainer.style.zIndex =
+            "45";
+    }
+
+
+    /* --------------------------------------------------------
+       REBRANCHEMENT DES BORNES
+    -------------------------------------------------------- */
+
+    attachPinEvents(
+        el,
+        component
+    );
+
+
+    /* --------------------------------------------------------
+       EFFET COMPOSANT ACTIF
+    -------------------------------------------------------- */
+
+    if (component.active) {
+
+        el.style.boxShadow =
+            "0 0 24px rgba(0,220,255,.75)";
+
+    } else if (
+        state.selectedComponentId === component.id
+    ) {
+
+        el.style.boxShadow =
+            "0 0 0 2px rgba(255,210,31,.25), " +
+            "0 8px 20px rgba(0,0,0,.40)";
+
+    } else {
+
+        el.style.boxShadow =
+            "0 7px 18px rgba(0,0,0,.35)";
+    }
+}
+
+
+
+
+
+
 
 
     /* ============================================================
