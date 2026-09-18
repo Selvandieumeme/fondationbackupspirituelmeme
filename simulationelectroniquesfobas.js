@@ -9082,33 +9082,28 @@ bind(
 
 
 
+
+
+
+
+
+
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — SAFE / ISOLATED
+   COMPONENT VISIBILITY BRIDGE — POSITION SAFE
    ---------------------------------------------------------------
-   RESPONSABILITÉ UNIQUE :
-   Fè component ki deja kreye a vizib nan workspace la.
+   - Kenbe components vizib
+   - Kenbe pozisyon inisyal anlè-gòch la
+   - Pa remete pozisyon an apre Déplacer
+   - Pa modifye component.x / component.y
+================================================================ */
 
-   PA MODIFYE :
-   - createComponent()
-   - addComponent()
-   - renderComponent()
-   - componentMarkup()
-   - wires
-   - simulation
-   - zoom
-   - measurements
-   ================================================================ */
-
-(function FOBAS_ComponentVisibilityBridge() {
+(function FOBAS_ComponentVisibilityBridge_PositionSafe() {
 
     function forceVisibleComponent(el, index) {
 
         if (!el) return;
-
-        /* --------------------------------------------------------
-           LAYER PARENT
-        -------------------------------------------------------- */
 
         const layer = el.parentElement;
 
@@ -9123,30 +9118,56 @@ bind(
             layer.style.zIndex = "30";
         }
 
+
         /* --------------------------------------------------------
            COMPONENT
         -------------------------------------------------------- */
 
         el.style.position = "absolute";
 
-        /*
-         * Pozisyon garanti nan zòn anlè-gòch.
-         * Chak nouvo component pran yon ti decalage.
-         */
-        const offset = Math.min(index * 18, 180);
 
-        el.style.left = `${30 + offset}px`;
-        el.style.top = `${30 + offset}px`;
+        /*
+         * POZISYON INISYAL
+         * ------------------------------------------------------
+         * Sa fèt yon sèl fwa pou chak component.
+         *
+         * Apre sa, Déplacer ka modifye left/top san bridge la
+         * pa remete l nan kwen gòch.
+         */
+
+        if (
+            el.dataset.fobasInitialPosition !== "true"
+        ) {
+
+            const offset =
+                Math.min(
+                    index * 18,
+                    180
+                );
+
+            el.style.left =
+                `${30 + offset}px`;
+
+            el.style.top =
+                `${30 + offset}px`;
+
+            el.dataset.fobasInitialPosition =
+                "true";
+        }
+
 
         el.style.width = "118px";
         el.style.height = "72px";
+
         el.style.minWidth = "118px";
         el.style.minHeight = "72px";
 
         el.style.display = "flex";
         el.style.flexDirection = "column";
+
         el.style.alignItems = "center";
         el.style.justifyContent = "center";
+
         el.style.gap = "3px";
 
         el.style.boxSizing = "border-box";
@@ -9173,68 +9194,97 @@ bind(
 
         el.style.overflow = "visible";
 
-        el.style.transformOrigin = "center center";
+        el.style.transformOrigin =
+            "center center";
+
+        el.style.touchAction =
+            "none";
+
 
         /* --------------------------------------------------------
            HEADER
         -------------------------------------------------------- */
 
         const header =
-            el.querySelector(".component-header");
+            el.querySelector(
+                ".component-header"
+            );
 
         if (header) {
 
             header.style.display = "block";
             header.style.visibility = "visible";
             header.style.opacity = "1";
+
             header.style.width = "100%";
             header.style.height = "20px";
+
             header.style.textAlign = "center";
+
             header.style.fontSize = "11px";
             header.style.fontWeight = "700";
+
             header.style.color = "#ffffff";
+
             header.style.overflow = "visible";
         }
+
 
         /* --------------------------------------------------------
            BODY
         -------------------------------------------------------- */
 
         const body =
-            el.querySelector(".component-body");
+            el.querySelector(
+                ".component-body"
+            );
 
         if (body) {
 
             body.style.display = "flex";
+
             body.style.visibility = "visible";
             body.style.opacity = "1";
+
             body.style.width = "100%";
+
             body.style.height = "35px";
             body.style.minHeight = "35px";
+
             body.style.alignItems = "center";
             body.style.justifyContent = "center";
+
             body.style.position = "relative";
         }
+
 
         /* --------------------------------------------------------
            PINS
         -------------------------------------------------------- */
 
         const pins =
-            el.querySelector(".component-pins");
+            el.querySelector(
+                ".component-pins"
+            );
 
         if (pins) {
 
             pins.style.position = "absolute";
             pins.style.inset = "0";
+
             pins.style.width = "100%";
             pins.style.height = "100%";
+
             pins.style.pointerEvents = "none";
+
             pins.style.zIndex = "45";
         }
 
-        el.querySelectorAll(".component-pin")
-            .forEach((pin, pinIndex) => {
+
+        el.querySelectorAll(
+            ".component-pin"
+        ).forEach(
+            (pin, pinIndex) => {
 
                 pin.style.position = "absolute";
 
@@ -9254,7 +9304,8 @@ bind(
                 pin.style.border =
                     "2px solid #ffffff";
 
-                pin.style.borderRadius = "50%";
+                pin.style.borderRadius =
+                    "50%";
 
                 pin.style.background =
                     "#f2c300";
@@ -9266,21 +9317,28 @@ bind(
 
                 pin.style.zIndex = "46";
 
-                /*
-                 * Premye pin agoch / dezyèm pin adwat.
-                 * Si gen plis pin, yo distribye otomatikman.
-                 */
-                if (el.querySelectorAll(".component-pin").length === 1) {
+
+                const totalPins =
+                    el.querySelectorAll(
+                        ".component-pin"
+                    ).length;
+
+
+                if (totalPins === 1) {
 
                     pin.style.left = "50%";
                     pin.style.bottom = "-7px";
 
-                } else if (pinIndex === 0) {
+                } else if (
+                    pinIndex === 0
+                ) {
 
                     pin.style.left = "-7px";
                     pin.style.top = "50%";
 
-                } else if (pinIndex === 1) {
+                } else if (
+                    pinIndex === 1
+                ) {
 
                     pin.style.right = "-7px";
                     pin.style.top = "50%";
@@ -9290,102 +9348,143 @@ bind(
                     pin.style.left =
                         `${20 + (pinIndex * 20)}px`;
 
-                    pin.style.bottom = "-7px";
+                    pin.style.bottom =
+                        "-7px";
                 }
-            });
+            }
+        );
+
 
         /* --------------------------------------------------------
-           VISUAL INTERNE
+           VISUELS INTERNES
         -------------------------------------------------------- */
 
         el.querySelectorAll(
             ".generic-symbol,.led-visual,.bulb-visual," +
-            ".battery-visual,.resistor-visual,.capacitor-visual," +
-            ".controller-visual"
-        ).forEach(visual => {
+            ".battery-visual,.resistor-visual," +
+            ".capacitor-visual,.controller-visual"
+        ).forEach(
+            visual => {
 
-            visual.style.visibility = "visible";
-            visual.style.opacity = "1";
-            visual.style.display = "flex";
+                visual.style.visibility =
+                    "visible";
 
-            visual.style.alignItems = "center";
-            visual.style.justifyContent = "center";
+                visual.style.opacity =
+                    "1";
 
-            visual.style.maxWidth = "100%";
-            visual.style.maxHeight = "100%";
-        });
+                visual.style.display =
+                    "flex";
+
+                visual.style.alignItems =
+                    "center";
+
+                visual.style.justifyContent =
+                    "center";
+
+                visual.style.maxWidth =
+                    "100%";
+
+                visual.style.maxHeight =
+                    "100%";
+            }
+        );
     }
 
 
     function scanComponents() {
 
         const layer =
-            document.getElementById("componentLayer");
+            document.getElementById(
+                "componentLayer"
+            );
 
         if (!layer) return;
 
         const components =
-            layer.querySelectorAll(".electronic-component");
+            layer.querySelectorAll(
+                ".electronic-component"
+            );
 
-        components.forEach((el, index) => {
+        components.forEach(
+            (el, index) => {
 
-            forceVisibleComponent(el, index);
+                forceVisibleComponent(
+                    el,
+                    index
+                );
 
-        });
+            }
+        );
     }
 
 
     function startBridge() {
 
         const layer =
-            document.getElementById("componentLayer");
+            document.getElementById(
+                "componentLayer"
+            );
 
         if (!layer) {
 
-            setTimeout(startBridge, 100);
+            setTimeout(
+                startBridge,
+                100
+            );
 
             return;
         }
 
-        /*
-         * Rendre immédiatement visibles les composants
-         * déjà présents.
-         */
         scanComponents();
 
-        /*
-         * Surveille uniquement l'apparition de nouveaux
-         * composants dans componentLayer.
-         */
+
         const observer =
-            new MutationObserver(() => {
+            new MutationObserver(
+                () => {
 
-                scanComponents();
+                    scanComponents();
 
-            });
+                }
+            );
 
-        observer.observe(layer, {
 
-            childList: true,
-            subtree: true
+        observer.observe(
+            layer,
+            {
+                childList: true,
+                subtree: true
+            }
+        );
 
-        });
 
-        /*
-         * Sécurité pour le premier composant ajouté.
-         */
-        setTimeout(scanComponents, 50);
-        setTimeout(scanComponents, 150);
-        setTimeout(scanComponents, 300);
+        setTimeout(
+            scanComponents,
+            50
+        );
+
+        setTimeout(
+            scanComponents,
+            150
+        );
+
+        setTimeout(
+            scanComponents,
+            300
+        );
     }
 
 
-    if (document.readyState === "loading") {
+    if (
+        document.readyState ===
+        "loading"
+    ) {
 
         document.addEventListener(
             "DOMContentLoaded",
             startBridge,
-            { once: true }
+            {
+                once: true
+            }
         );
 
     } else {
@@ -9395,6 +9494,3 @@ bind(
     }
 
 })();
-
-
-
