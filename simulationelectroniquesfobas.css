@@ -4894,6 +4894,555 @@ select:focus-visible {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================================================================
+   47 — FOBAS ELECTRONIQUE
+   CORRECTION RENDU DES COMPOSANTS DANS LE WORKSPACE
+   ---------------------------------------------------------------
+   OBJECTIF :
+   - Rendre visibles les composants créés par le JavaScript
+   - Corriger la couche componentLayer
+   - Supporter .electronic-component
+   - Garantir positionnement, visibilité et interaction
+   - Ne modifie aucun HTML
+   - Ne modifie aucun JavaScript
+   - Ne supprime aucune règle CSS existante
+   - Bloc totalement isolé
+================================================================ */
+
+
+/* ================================================================
+   47.1 — COUCHE DES COMPOSANTS
+================================================================ */
+
+#componentLayer.component-layer {
+    position: absolute !important;
+
+    left: 0 !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    display: block !important;
+
+    overflow: visible !important;
+
+    z-index: 30 !important;
+
+    pointer-events: auto !important;
+
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
+/* ================================================================
+   47.2 — COMPOSANT CRÉÉ PAR LE JAVASCRIPT
+================================================================ */
+
+#componentLayer .electronic-component {
+    position: absolute !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    min-width: 90px !important;
+    min-height: 70px !important;
+
+    width: auto;
+    height: auto;
+
+    padding: 8px !important;
+
+    box-sizing: border-box !important;
+
+    border: 1px solid rgba(125, 205, 255, 0.35) !important;
+    border-radius: 10px !important;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(23, 65, 94, 0.98),
+            rgba(4, 23, 40, 0.99)
+        ) !important;
+
+    color: var(--fobas-text) !important;
+
+    box-shadow:
+        0 7px 18px rgba(0, 0, 0, 0.38) !important;
+
+    opacity: 1 !important;
+
+    visibility: visible !important;
+
+    overflow: visible !important;
+
+    pointer-events: auto !important;
+
+    cursor: grab !important;
+
+    user-select: none !important;
+
+    -webkit-user-select: none !important;
+
+    touch-action: none !important;
+
+    z-index: 31 !important;
+
+    transform-origin: center center !important;
+}
+
+
+/* ================================================================
+   47.3 — ÉTAT SÉLECTIONNÉ
+================================================================ */
+
+#componentLayer .electronic-component.selected {
+    border-color: var(--fobas-yellow) !important;
+
+    box-shadow:
+        0 0 0 2px rgba(255, 210, 31, 0.18),
+        0 9px 25px rgba(0, 0, 0, 0.48) !important;
+
+    opacity: 1 !important;
+
+    visibility: visible !important;
+}
+
+
+/* ================================================================
+   47.4 — CONTENU INTERNE
+================================================================ */
+
+#componentLayer .electronic-component > * {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
+#componentLayer .electronic-component .component-body {
+    position: relative !important;
+
+    display: grid !important;
+
+    place-items: center !important;
+
+    width: 58px !important;
+    height: 34px !important;
+
+    min-width: 20px !important;
+    min-height: 20px !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+#componentLayer .electronic-component .component-label {
+    display: block !important;
+
+    max-width: 150px !important;
+
+    margin: 2px 0 0 0 !important;
+
+    color: var(--fobas-white) !important;
+
+    font-size: 9px !important;
+    font-weight: 900 !important;
+
+    line-height: 1.15 !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+
+    overflow: visible !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+#componentLayer .electronic-component .component-value {
+    display: block !important;
+
+    max-width: 150px !important;
+
+    margin: 1px 0 0 0 !important;
+
+    color: var(--fobas-muted) !important;
+
+    font-size: 8px !important;
+    font-weight: 700 !important;
+
+    line-height: 1.15 !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+/* ================================================================
+   47.5 — PINS ÉLECTRONIQUES
+================================================================ */
+
+#componentLayer .electronic-component .component-pin {
+    position: absolute !important;
+
+    display: block !important;
+
+    width: 12px !important;
+    height: 12px !important;
+
+    min-width: 12px !important;
+    min-height: 12px !important;
+
+    margin: -6px 0 0 -6px !important;
+
+    border-radius: 50% !important;
+
+    z-index: 45 !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    pointer-events: auto !important;
+}
+
+
+/* ================================================================
+   47.6 — LED
+================================================================ */
+
+#componentLayer .electronic-component .simulated-led {
+    position: relative !important;
+
+    display: block !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    flex-shrink: 0 !important;
+}
+
+
+#componentLayer .electronic-component .simulated-led.on {
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+/* ================================================================
+   47.7 — AMPOULE
+================================================================ */
+
+#componentLayer .electronic-component .simulated-bulb {
+    position: relative !important;
+
+    display: block !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    flex-shrink: 0 !important;
+}
+
+
+#componentLayer .electronic-component .simulated-bulb.on {
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+/* ================================================================
+   47.8 — ÉLÉMENTS SVG / CONNEXIONS
+================================================================ */
+
+#wireLayer.wire-layer {
+    position: absolute !important;
+
+    left: 0 !important;
+    top: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    overflow: visible !important;
+
+    z-index: 20 !important;
+
+    pointer-events: none !important;
+}
+
+
+#connectionLayer.connection-layer {
+    position: absolute !important;
+
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    overflow: visible !important;
+
+    z-index: 22 !important;
+
+    pointer-events: none !important;
+}
+
+
+#measurementLayer.measurement-layer {
+    position: absolute !important;
+
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    overflow: visible !important;
+
+    z-index: 24 !important;
+
+    pointer-events: none !important;
+}
+
+
+#simulationEffectsLayer.simulation-effects-layer {
+    position: absolute !important;
+
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    overflow: visible !important;
+
+    z-index: 26 !important;
+
+    pointer-events: none !important;
+}
+
+
+/* ================================================================
+   47.9 — GRILLE
+================================================================ */
+
+#laboratoryGrid.laboratory-grid {
+    position: absolute !important;
+
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    z-index: 1 !important;
+
+    pointer-events: none !important;
+
+    visibility: visible !important;
+}
+
+
+/* ================================================================
+   47.10 — CANVAS DU LABORATOIRE
+================================================================ */
+
+#laboratoryCanvas.laboratory-canvas {
+    position: absolute !important;
+
+    left: 0 !important;
+    top: 0 !important;
+
+    width: 2400px !important;
+    height: 1800px !important;
+
+    min-width: 2400px !important;
+    min-height: 1800px !important;
+
+    overflow: visible !important;
+
+    transform-origin: 0 0 !important;
+
+    isolation: isolate !important;
+}
+
+
+/* ================================================================
+   47.11 — VIEWPORT
+================================================================ */
+
+#laboratoryViewport.laboratory-viewport {
+    position: relative !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    overflow: hidden !important;
+
+    isolation: isolate !important;
+}
+
+
+/* ================================================================
+   47.12 — GARANTIE DE VISIBILITÉ DES OBJETS
+================================================================ */
+
+#componentLayer [data-component-id] {
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    overflow: visible !important;
+}
+
+
+/* ================================================================
+   47.13 — ÉVITER QUE LES COUCHES D'EFFETS CACHENT LES COMPOSANTS
+================================================================ */
+
+#wireLayer,
+#connectionLayer,
+#measurementLayer,
+#simulationEffectsLayer {
+    pointer-events: none !important;
+}
+
+
+/* ================================================================
+   47.14 — PRIORITÉ VISUELLE DU WORKSPACE
+================================================================ */
+
+#componentLayer {
+    z-index: 30 !important;
+}
+
+
+#componentLayer .electronic-component {
+    z-index: 31 !important;
+}
+
+
+/* ================================================================
+   47.15 — MOBILE / ANDROID
+================================================================ */
+
+@media (max-width: 700px) {
+
+    #componentLayer.component-layer {
+        overflow: visible !important;
+    }
+
+    #componentLayer .electronic-component {
+        min-width: 86px !important;
+        min-height: 66px !important;
+
+        padding: 7px !important;
+    }
+
+    #componentLayer .electronic-component .component-body {
+        width: 56px !important;
+        height: 32px !important;
+    }
+
+    #componentLayer .electronic-component .component-label {
+        font-size: 9px !important;
+    }
+
+    #componentLayer .electronic-component .component-value {
+        font-size: 8px !important;
+    }
+}
+
+
+/* ================================================================
+   47.16 — PETITS ÉCRANS
+================================================================ */
+
+@media (max-width: 430px) {
+
+    #componentLayer .electronic-component {
+        min-width: 80px !important;
+        min-height: 62px !important;
+
+        padding: 6px !important;
+    }
+
+    #componentLayer .electronic-component .component-body {
+        width: 52px !important;
+        height: 30px !important;
+    }
+
+    #componentLayer .electronic-component .component-label {
+        max-width: 120px !important;
+
+        font-size: 8px !important;
+    }
+
+    #componentLayer .electronic-component .component-value {
+        max-width: 120px !important;
+
+        font-size: 7px !important;
+    }
+}
+
+
+/* ================================================================
+   FIN — 47 CORRECTION RENDU WORKSPACE
+================================================================ */
+
+
+
+
+
+
+
+
+
+
 /* ================================================================
    FIN DU CSS
 ================================================================ */
