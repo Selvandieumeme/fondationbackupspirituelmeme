@@ -6164,6 +6164,7 @@ void loop() {
 
 
 
+
 function openLaboratory() {
 
         hide("codeLibraryPanel");
@@ -6184,6 +6185,33 @@ function openLaboratory() {
 
 
 
+
+function openComponentLibrary() {
+
+    hide("codeLibraryPanel");
+    hide("codeEditorPanel");
+    hide("missionsPanel");
+    hide("diagnosticPanel");
+    hide("faultsPanel");
+    hide("measurementsPanel");
+
+    show("componentLibraryPanel");
+
+    const button =
+        $("libraryBtn");
+
+    if (button) {
+        button.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+    }
+
+    toast(
+        "Bibliothèque des composants active.",
+        "info"
+    );
+}
 
 
 
