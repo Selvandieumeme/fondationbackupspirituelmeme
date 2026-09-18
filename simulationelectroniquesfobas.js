@@ -6968,17 +6968,57 @@ function openFaults() {
 
 
 
+
 bind(
     "libraryBtn",
     "click",
     () => {
-        openLaboratory();
+
+        hide("codeLibraryPanel");
+        hide("codeEditorPanel");
+        hide("missionsPanel");
+        hide("diagnosticPanel");
+        hide("faultsPanel");
+        hide("measurementsPanel");
+
+        const libraryPanel =
+            $("componentLibraryPanel");
+
+        const powerSourcesPanel =
+            $("powerSourcesPanel");
+
+        const instrumentsPanel =
+            $("instrumentsPanel");
+
+        if (libraryPanel) {
+            libraryPanel.style.display = "";
+        }
+
+        if (powerSourcesPanel) {
+            powerSourcesPanel.style.display = "";
+        }
+
+        if (instrumentsPanel) {
+            instrumentsPanel.style.display = "";
+        }
+
+        renderCategory(
+            "resistors"
+        );
+
         toast(
             "Bibliothèque des composants active.",
             "info"
         );
     }
 );
+
+
+
+
+
+
+
 
 
 
