@@ -8995,6 +8995,136 @@ bind(
 
 
 
+
+
+
+
+
+
+
+
+
+/* ================================================================
+   FOBAS ELECTRONIQUE
+   AUTO SAFE POSITION — TOP LEFT OF LABORATORY
+   ---------------------------------------------------------------
+   ONE-BLOCK EXTENSION
+   - Pa modifye createComponent()
+   - Pa modifye addComponent()
+   - Pa modifye renderComponent()
+   - Pa modifye CSS
+   - Mete nouvo composants yo nan zòn anlè-gòch workspace la
+   - Evite pozisyon ki depase ekran vizib laboratwa a
+   ================================================================ */
+
+(function FOBAS_SafeComponentPosition() {
+
+    const SAFE_MARGIN = 30;
+
+    function placeNewComponentSafely(component) {
+
+        if (!component || !component.id) return;
+
+        const canvas = document.getElementById("laboratoryCanvas");
+        const viewport = document.getElementById("laboratoryViewport");
+
+        if (!canvas || !viewport) return;
+
+        /*
+         * Tout nouvo composants kòmanse nan anlè-gòch
+         * workspace la.
+         */
+        component.x = SAFE_MARGIN;
+        component.y = SAFE_MARGIN;
+
+        /*
+         * Si gen plizyè composants, nou fè yo desann
+         * piti piti pou yo pa tout kouvri menm plas la.
+         */
+        const components = Array.isArray(state.components)
+            ? state.components
+            : [];
+
+        const index = components.findIndex(item => item && item.id === component.id);
+
+        if (index > 0) {
+            const offset = Math.min(index * 20, 220);
+
+            component.x = SAFE_MARGIN + offset;
+            component.y = SAFE_MARGIN + offset;
+        }
+
+        /*
+         * Pa janm kite component la ale twò lwen deyò
+         * canvas laboratwa a.
+         */
+        const canvasWidth = Number(canvas.clientWidth) || 2400;
+        const canvasHeight = Number(canvas.clientHeight) || 1800;
+
+        const componentWidth =
+            Number(window.COMPONENT_WIDTH) ||
+            118;
+
+        const componentHeight =
+            Number(window.COMPONENT_HEIGHT) ||
+            72;
+
+        component.x = Math.max(
+            SAFE_MARGIN,
+            Math.min(
+                Number(component.x) || SAFE_MARGIN,
+                canvasWidth - componentWidth - SAFE_MARGIN
+            )
+        );
+
+        component.y = Math.max(
+            SAFE_MARGIN,
+            Math.min(
+                Number(component.y) || SAFE_MARGIN,
+                canvasHeight - componentHeight - SAFE_MARGIN
+            )
+        );
+    }
+
+    /*
+     * Obsève state.components san nou pa ranplase
+     * okenn fonksyon ki deja egziste.
+     */
+    let previousLength = Array.isArray(state.components)
+        ? state.components.length
+        : 0;
+
+    setInterval(() => {
+
+        if (!Array.isArray(state.components)) return;
+
+        if (state.components.length > previousLength) {
+
+            const newComponents =
+                state.components.slice(previousLength);
+
+            newComponents.forEach(placeNewComponentSafely);
+
+            previousLength = state.components.length;
+
+        } else if (state.components.length < previousLength) {
+
+            previousLength = state.components.length;
+        }
+
+    }, 80);
+
+})();
+
+
+
+
+
+
+
+
+
+
 })();
 
 
