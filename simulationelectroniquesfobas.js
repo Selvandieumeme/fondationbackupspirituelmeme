@@ -5764,6 +5764,1876 @@ function applyComponentVisualState(
 
 
 
+
+
+
+
+
+
+/* ================================================================
+   FOBAS ELECTRONIQUE & ROBOTIQUE
+   WIRE & CABLE INTERACTION ENGINE — V1.0.0
+   ---------------------------------------------------------------
+   BLOC ISOLÉ / INDÉPENDANT
+
+   FONCTIONS :
+   - Création visuelle des fils
+   - Fils rouge / noir / jaune / bleu / vert / orange / blanc / violet
+   - Sélection du fil
+   - Déplacement du fil entier
+   - Poignée A interactive
+   - Poignée B interactive
+   - Redimensionnement libre
+   - Détection des broches des composants
+   - Connexion PIN → WIRE → PIN
+   - Suivi des composants connectés
+   - Superposition des fils autorisée
+   - Aucun Three.js
+   - Aucune image externe
+================================================================ */
+
+(function FOBASWireCableInteractionEngine() {
+
+    "use strict";
+
+    /* ============================================================
+       01. ENGINE STATE
+    ============================================================ */
+
+    const ENGINE_NAME = "FOBAS_WIRE_CABLE_INTERACTION_ENGINE";
+    const ENGINE_VERSION = "1.0.0";
+
+    const state = {
+        activeWire: null,
+        action: null,
+        startX: 0,
+        startY: 0,
+        originalA: null,
+        originalB: null,
+        wireCounter: 0,
+        initialized: false
+    };
+
+    const wireRegistry = new Map();
+
+    const COLORS = {
+        red: "#d32f2f",
+        black: "#212121",
+        yellow: "#f9a825",
+        blue: "#1565c0",
+        green: "#2e7d32",
+        orange: "#ef6c00",
+        white: "#f5f5f5",
+        violet: "#7b1fa2"
+    };
+
+
+    /* ============================================================
+       02. SAFE DOM HELPERS
+    ============================================================ */
+
+    function getWorkspace() {
+
+        const selectors = [
+            "#electronicLaboratoryWorkspace",
+            "#electronicsLaboratoryWorkspace",
+            "#roboticsLaboratoryWorkspace",
+            "#laboratoryWorkspace",
+            "#labWorkspace",
+            "#workspace",
+            "#simulationWorkspace",
+            ".electronic-laboratory-workspace",
+            ".electronics-laboratory-workspace"
+        ];
+
+        for (const selector of selectors) {
+
+            const element = document.querySelector(selector);
+
+            if (element) {
+                return element;
+            }
+        }
+
+        return null;
+    }
+
+
+    function createSVGElement(tag, attributes = {}) {
+
+        const element = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            tag
+        );
+
+        Object.keys(attributes).forEach(key => {
+            element.setAttribute(key, attributes[key]);
+        });
+
+        return element;
+    }
+
+
+    function getPointFromEvent(event, workspace) {
+
+        const rect = workspace.getBoundingClientRect();
+
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    }
+
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+
+    /* ============================================================
+       03. WIRE COLOR
+    ============================================================ */
+
+    function normalizeWireColor(definition) {
+
+        if (!definition) {
+            return COLORS.black;
+        }
+
+        if (definition.wireColor) {
+            return definition.wireColor;
+        }
+
+        const id = String(definition.id || "").toLowerCase();
+
+        if (id.includes("red")) {
+            return COLORS.red;
+        }
+
+        if (id.includes("black")) {
+            return COLORS.black;
+        }
+
+        if (id.includes("yellow")) {
+            return COLORS.yellow;
+        }
+
+        if (id.includes("blue")) {
+            return COLORS.blue;
+        }
+
+        if (id.includes("green")) {
+            return COLORS.green;
+        }
+
+        if (id.includes("orange")) {
+            return COLORS.orange;
+        }
+
+        if (id.includes("white")) {
+            return COLORS.white;
+        }
+
+        if (id.includes("violet") || id.includes("purple")) {
+            return COLORS.violet;
+        }
+
+        return COLORS.black;
+    }
+
+
+    /* ============================================================
+       04. WIRE DEFINITION
+    ============================================================ */
+
+    function getWireDefinition(type = "wire") {
+
+        if (
+            typeof getComponentDefinition === "function"
+        ) {
+
+            const definition =
+                getComponentDefinition(type);
+
+            if (definition) {
+                return definition;
+            }
+        }
+
+        if (
+            typeof COMPONENTS !== "undefined" &&
+            Array.isArray(COMPONENTS)
+        ) {
+
+            const definition =
+                COMPONENTS.find(item => item.id === type);
+
+            if (definition) {
+                return definition;
+            }
+        }
+
+        return {
+            id: type,
+            name: "Fil de connexion",
+            category: "wires",
+            color: COLORS.black,
+            wireColor: COLORS.black,
+            width: 130,
+            height: 45,
+            pins: [
+                {
+                    id: "A",
+                    name: "A",
+                    side: "left"
+                },
+                {
+                    id: "B",
+                    name: "B",
+                    side: "right"
+                }
+            ]
+        };
+    }
+
+
+    /* ============================================================
+       05. WIRE SVG LAYER
+    ============================================================ */
+
+    function ensureWireLayer(workspace) {
+
+        let layer =
+            workspace.querySelector(
+                '[data-fobas-wire-layer="true"]'
+            );
+
+        if (layer) {
+            return layer;
+        }
+
+        layer = createSVGElement("svg", {
+            "data-fobas-wire-layer": "true",
+            class: "fobas-wire-cable-layer",
+            width: "100%",
+            height: "100%",
+            viewBox:
+                `0 0 ${workspace.clientWidth || 1200} ${workspace.clientHeight || 700}`,
+            preserveAspectRatio: "none"
+        });
+
+        layer.style.position = "absolute";
+        layer.style.left = "0";
+        layer.style.top = "0";
+        layer.style.width = "100%";
+        layer.style.height = "100%";
+        layer.style.pointerEvents = "none";
+        layer.style.overflow = "visible";
+        layer.style.zIndex = "20";
+
+        workspace.style.position =
+            workspace.style.position || "relative";
+
+        workspace.insertBefore(
+            layer,
+            workspace.firstChild
+        );
+
+        return layer;
+    }
+
+
+    /* ============================================================
+       06. CREATE WIRE OBJECT
+    ============================================================ */
+
+    function createWire(type = "wire", options = {}) {
+
+        const workspace = getWorkspace();
+
+        if (!workspace) {
+            console.warn(
+                `[${ENGINE_NAME}] Workspace introuvable.`
+            );
+
+            return null;
+        }
+
+        const definition =
+            getWireDefinition(type);
+
+        state.wireCounter++;
+
+        const id =
+            options.id ||
+            `fobas-wire-${Date.now()}-${state.wireCounter}`;
+
+        const width =
+            Number(options.width) ||
+            Number(definition.width) ||
+            130;
+
+        const height =
+            Number(options.height) ||
+            Number(definition.height) ||
+            45;
+
+        const x =
+            Number.isFinite(options.x)
+                ? options.x
+                : Math.max(
+                    20,
+                    (workspace.clientWidth / 2) - width / 2
+                );
+
+        const y =
+            Number.isFinite(options.y)
+                ? options.y
+                : Math.max(
+                    20,
+                    (workspace.clientHeight / 2) - 25
+                );
+
+        const wire = {
+            id,
+            type,
+            definition,
+
+            color:
+                options.color ||
+                normalizeWireColor(definition),
+
+            a: {
+                x: x,
+                y: y
+            },
+
+            b: {
+                x: x + width,
+                y: y
+            },
+
+            connections: {
+                A: null,
+                B: null
+            },
+
+            selected: false,
+
+            group: null,
+
+            element: null,
+            path: null,
+            shadow: null,
+            handleA: null,
+            handleB: null,
+
+            createdAt: Date.now()
+        };
+
+        wireRegistry.set(id, wire);
+
+        renderWire(wire);
+
+        return wire;
+    }
+
+
+    /* ============================================================
+       07. RENDER WIRE
+    ============================================================ */
+
+    function renderWire(wire) {
+
+        if (!wire) {
+            return;
+        }
+
+        const workspace = getWorkspace();
+
+        if (!workspace) {
+            return;
+        }
+
+        const layer =
+            ensureWireLayer(workspace);
+
+        let group = wire.element;
+
+        if (!group) {
+
+            group =
+                createSVGElement("g", {
+                    "data-fobas-wire-id": wire.id,
+                    class: "fobas-wire-object"
+                });
+
+            group.style.pointerEvents = "all";
+            group.style.cursor = "move";
+
+            const shadow =
+                createSVGElement("path", {
+                    fill: "none",
+                    stroke: "#000000",
+                    "stroke-width": "12",
+                    "stroke-linecap": "round",
+                    opacity: "0.18"
+                });
+
+            const path =
+                createSVGElement("path", {
+                    fill: "none",
+                    "stroke-width": "7",
+                    "stroke-linecap": "round"
+                });
+
+            const highlight =
+                createSVGElement("path", {
+                    fill: "none",
+                    stroke: "#ffffff",
+                    "stroke-width": "2",
+                    "stroke-linecap": "round",
+                    opacity: "0.45"
+                });
+
+            const handleA =
+                createSVGElement("circle", {
+                    r: "8",
+                    cx: "0",
+                    cy: "0"
+                });
+
+            const handleB =
+                createSVGElement("circle", {
+                    r: "8",
+                    cx: "0",
+                    cy: "0"
+                });
+
+            handleA.setAttribute(
+                "data-fobas-wire-handle",
+                "A"
+            );
+
+            handleB.setAttribute(
+                "data-fobas-wire-handle",
+                "B"
+            );
+
+            handleA.style.cursor = "crosshair";
+            handleB.style.cursor = "crosshair";
+
+            handleA.style.display = "none";
+            handleB.style.display = "none";
+
+            group.appendChild(shadow);
+            group.appendChild(path);
+            group.appendChild(highlight);
+            group.appendChild(handleA);
+            group.appendChild(handleB);
+
+            layer.appendChild(group);
+
+            wire.element = group;
+            wire.shadow = shadow;
+            wire.path = path;
+            wire.highlight = highlight;
+            wire.handleA = handleA;
+            wire.handleB = handleB;
+
+            attachWireEvents(wire);
+        }
+
+        const pathData =
+            createWirePath(
+                wire.a,
+                wire.b
+            );
+
+        wire.shadow.setAttribute(
+            "d",
+            pathData
+        );
+
+        wire.path.setAttribute(
+            "d",
+            pathData
+        );
+
+        wire.highlight.setAttribute(
+            "d",
+            pathData
+        );
+
+        wire.path.setAttribute(
+            "stroke",
+            wire.color
+        );
+
+        wire.handleA.setAttribute(
+            "cx",
+            wire.a.x
+        );
+
+        wire.handleA.setAttribute(
+            "cy",
+            wire.a.y
+        );
+
+        wire.handleB.setAttribute(
+            "cx",
+            wire.b.x
+        );
+
+        wire.handleB.setAttribute(
+            "cy",
+            wire.b.y
+        );
+
+        updateWireSelectionVisual(wire);
+    }
+
+
+    /* ============================================================
+       08. WIRE PATH
+    ============================================================ */
+
+    function createWirePath(a, b) {
+
+        const dx =
+            Math.abs(b.x - a.x);
+
+        const curve =
+            Math.max(
+                25,
+                Math.min(
+                    100,
+                    dx * 0.35
+                )
+            );
+
+        return [
+            `M ${a.x} ${a.y}`,
+            `C ${a.x + curve} ${a.y}`,
+            `${b.x - curve} ${b.y}`,
+            `${b.x} ${b.y}`
+        ].join(" ");
+    }
+
+
+    /* ============================================================
+       09. SELECTION VISUAL
+    ============================================================ */
+
+    function updateWireSelectionVisual(wire) {
+
+        if (!wire) {
+            return;
+        }
+
+        if (wire.selected) {
+
+            wire.path.setAttribute(
+                "stroke-width",
+                "9"
+            );
+
+            wire.highlight.setAttribute(
+                "opacity",
+                "0.75"
+            );
+
+            wire.handleA.style.display =
+                "block";
+
+            wire.handleB.style.display =
+                "block";
+
+            wire.handleA.setAttribute(
+                "fill",
+                "#ffffff"
+            );
+
+            wire.handleB.setAttribute(
+                "fill",
+                "#ffffff"
+            );
+
+            wire.handleA.setAttribute(
+                "stroke",
+                wire.color
+            );
+
+            wire.handleB.setAttribute(
+                "stroke",
+                wire.color
+            );
+
+            wire.handleA.setAttribute(
+                "stroke-width",
+                "3"
+            );
+
+            wire.handleB.setAttribute(
+                "stroke-width",
+                "3"
+            );
+
+        } else {
+
+            wire.path.setAttribute(
+                "stroke-width",
+                "7"
+            );
+
+            wire.highlight.setAttribute(
+                "opacity",
+                "0.45"
+            );
+
+            wire.handleA.style.display =
+                "none";
+
+            wire.handleB.style.display =
+                "none";
+        }
+    }
+
+
+    /* ============================================================
+       10. WIRE EVENTS
+    ============================================================ */
+
+    function attachWireEvents(wire) {
+
+        const group =
+            wire.element;
+
+        group.addEventListener(
+            "pointerdown",
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const target =
+                    event.target;
+
+                const handle =
+                    target.closest
+                        ? target.closest(
+                            "[data-fobas-wire-handle]"
+                        )
+                        : null;
+
+                if (handle) {
+
+                    const side =
+                        handle.getAttribute(
+                            "data-fobas-wire-handle"
+                        );
+
+                    beginWireResize(
+                        wire,
+                        side,
+                        event
+                    );
+
+                    return;
+                }
+
+                selectWire(wire);
+
+                beginWireMove(
+                    wire,
+                    event
+                );
+            }
+        );
+    }
+
+
+    /* ============================================================
+       11. SELECT WIRE
+    ============================================================ */
+
+    function selectWire(wire) {
+
+        wireRegistry.forEach(item => {
+
+            if (item !== wire) {
+                item.selected = false;
+
+                if (item.element) {
+                    updateWireSelectionVisual(
+                        item
+                    );
+                }
+            }
+        });
+
+        wire.selected = true;
+
+        updateWireSelectionVisual(wire);
+
+        state.activeWire =
+            wire;
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:wire-selected",
+                {
+                    detail: {
+                        wire
+                    }
+                }
+            )
+        );
+    }
+
+
+    /* ============================================================
+       12. BEGIN MOVE
+    ============================================================ */
+
+    function beginWireMove(wire, event) {
+
+        const workspace =
+            getWorkspace();
+
+        if (!workspace) {
+            return;
+        }
+
+        state.action = "move";
+        state.activeWire = wire;
+
+        const point =
+            getPointFromEvent(
+                event,
+                workspace
+            );
+
+        state.startX =
+            point.x;
+
+        state.startY =
+            point.y;
+
+        state.originalA = {
+            x: wire.a.x,
+            y: wire.a.y
+        };
+
+        state.originalB = {
+            x: wire.b.x,
+            y: wire.b.y
+        };
+
+        window.addEventListener(
+            "pointermove",
+            handlePointerMove,
+            true
+        );
+
+        window.addEventListener(
+            "pointerup",
+            finishPointerAction,
+            true
+        );
+    }
+
+
+    /* ============================================================
+       13. BEGIN RESIZE
+    ============================================================ */
+
+    function beginWireResize(
+        wire,
+        side,
+        event
+    ) {
+
+        const workspace =
+            getWorkspace();
+
+        if (!workspace) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        selectWire(wire);
+
+        state.action =
+            side === "A"
+                ? "resizeA"
+                : "resizeB";
+
+        state.activeWire =
+            wire;
+
+        const point =
+            getPointFromEvent(
+                event,
+                workspace
+            );
+
+        state.startX =
+            point.x;
+
+        state.startY =
+            point.y;
+
+        state.originalA = {
+            x: wire.a.x,
+            y: wire.a.y
+        };
+
+        state.originalB = {
+            x: wire.b.x,
+            y: wire.b.y
+        };
+
+        window.addEventListener(
+            "pointermove",
+            handlePointerMove,
+            true
+        );
+
+        window.addEventListener(
+            "pointerup",
+            finishPointerAction,
+            true
+        );
+    }
+
+
+    /* ============================================================
+       14. POINTER MOVE
+    ============================================================ */
+
+    function handlePointerMove(event) {
+
+        const wire =
+            state.activeWire;
+
+        const workspace =
+            getWorkspace();
+
+        if (
+            !wire ||
+            !workspace ||
+            !state.action
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const point =
+            getPointFromEvent(
+                event,
+                workspace
+            );
+
+        const dx =
+            point.x - state.startX;
+
+        const dy =
+            point.y - state.startY;
+
+        if (state.action === "move") {
+
+            const newA = {
+                x: state.originalA.x + dx,
+                y: state.originalA.y + dy
+            };
+
+            const newB = {
+                x: state.originalB.x + dx,
+                y: state.originalB.y + dy
+            };
+
+            wire.a =
+                constrainPoint(
+                    newA,
+                    workspace
+                );
+
+            wire.b =
+                constrainPoint(
+                    newB,
+                    workspace
+                );
+
+        }
+
+        else if (
+            state.action === "resizeA"
+        ) {
+
+            wire.a =
+                constrainPoint(
+                    {
+                        x: state.originalA.x + dx,
+                        y: state.originalA.y + dy
+                    },
+                    workspace
+                );
+
+        }
+
+        else if (
+            state.action === "resizeB"
+        ) {
+
+            wire.b =
+                constrainPoint(
+                    {
+                        x: state.originalB.x + dx,
+                        y: state.originalB.y + dy
+                    },
+                    workspace
+                );
+        }
+
+        renderWire(wire);
+
+        updateWireConnections(wire);
+    }
+
+
+    /* ============================================================
+       15. CONSTRAIN POINT
+    ============================================================ */
+
+    function constrainPoint(
+        point,
+        workspace
+    ) {
+
+        const padding = 5;
+
+        return {
+            x: clamp(
+                point.x,
+                padding,
+                Math.max(
+                    padding,
+                    workspace.clientWidth - padding
+                )
+            ),
+
+            y: clamp(
+                point.y,
+                padding,
+                Math.max(
+                    padding,
+                    workspace.clientHeight - padding
+                )
+            )
+        };
+    }
+
+
+    /* ============================================================
+       16. FINISH POINTER ACTION
+    ============================================================ */
+
+    function finishPointerAction() {
+
+        const wire =
+            state.activeWire;
+
+        if (wire) {
+
+            detectEndpointConnections(
+                wire,
+                "A"
+            );
+
+            detectEndpointConnections(
+                wire,
+                "B"
+            );
+
+            updateWireConnections(
+                wire
+            );
+        }
+
+        window.removeEventListener(
+            "pointermove",
+            handlePointerMove,
+            true
+        );
+
+        window.removeEventListener(
+            "pointerup",
+            finishPointerAction,
+            true
+        );
+
+        state.action =
+            null;
+    }
+
+
+    /* ============================================================
+       17. COMPONENT ELEMENT DETECTION
+    ============================================================ */
+
+    function getComponentElements() {
+
+        const selectors = [
+            "[data-component-id]",
+            "[data-component-type]",
+            ".fobas-electronic-component",
+            ".fobas-component",
+            ".electronic-component"
+        ];
+
+        const elements = [];
+
+        selectors.forEach(selector => {
+
+            document
+                .querySelectorAll(selector)
+                .forEach(element => {
+
+                    if (
+                        !elements.includes(
+                            element
+                        )
+                    ) {
+                        elements.push(
+                            element
+                        );
+                    }
+                });
+        });
+
+        return elements;
+    }
+
+
+    /* ============================================================
+       18. GET COMPONENT ID
+    ============================================================ */
+
+    function getComponentId(element) {
+
+        if (!element) {
+            return null;
+        }
+
+        return (
+            element.dataset.componentId ||
+            element.dataset.componentInstanceId ||
+            element.getAttribute(
+                "data-component-id"
+            ) ||
+            element.id ||
+            null
+        );
+    }
+
+
+    /* ============================================================
+       19. GET COMPONENT TYPE
+    ============================================================ */
+
+    function getComponentType(element) {
+
+        if (!element) {
+            return null;
+        }
+
+        return (
+            element.dataset.componentType ||
+            element.dataset.type ||
+            element.getAttribute(
+                "data-component-type"
+            ) ||
+            element.getAttribute(
+                "data-type"
+            ) ||
+            null
+        );
+    }
+
+
+    /* ============================================================
+       20. COMPONENT PIN DETECTION
+    ============================================================ */
+
+    function getComponentPins(element) {
+
+        if (!element) {
+            return [];
+        }
+
+        const selectors = [
+            "[data-pin-id]",
+            "[data-pin]",
+            ".fobas-pin",
+            ".component-pin",
+            ".electronic-pin"
+        ];
+
+        const pins = [];
+
+        selectors.forEach(selector => {
+
+            element
+                .querySelectorAll(selector)
+                .forEach(pin => {
+
+                    if (
+                        !pins.includes(pin)
+                    ) {
+                        pins.push(pin);
+                    }
+                });
+        });
+
+        return pins;
+    }
+
+
+    /* ============================================================
+       21. PIN CENTER
+    ============================================================ */
+
+    function getElementCenter(
+        element,
+        workspace
+    ) {
+
+        const rect =
+            element.getBoundingClientRect();
+
+        const workspaceRect =
+            workspace.getBoundingClientRect();
+
+        return {
+            x:
+                rect.left +
+                rect.width / 2 -
+                workspaceRect.left,
+
+            y:
+                rect.top +
+                rect.height / 2 -
+                workspaceRect.top
+        };
+    }
+
+
+    /* ============================================================
+       22. FIND NEAREST PIN
+    ============================================================ */
+
+    function findNearestPin(
+        point,
+        maxDistance = 28
+    ) {
+
+        const workspace =
+            getWorkspace();
+
+        if (!workspace) {
+            return null;
+        }
+
+        const components =
+            getComponentElements();
+
+        let nearest = null;
+        let nearestDistance =
+            maxDistance;
+
+        components.forEach(
+            component => {
+
+                const pins =
+                    getComponentPins(
+                        component
+                    );
+
+                pins.forEach(pin => {
+
+                    const center =
+                        getElementCenter(
+                            pin,
+                            workspace
+                        );
+
+                    const distance =
+                        Math.hypot(
+                            center.x -
+                            point.x,
+
+                            center.y -
+                            point.y
+                        );
+
+                    if (
+                        distance <
+                        nearestDistance
+                    ) {
+
+                        nearestDistance =
+                            distance;
+
+                        nearest = {
+                            element:
+                                pin,
+
+                            component:
+                                component,
+
+                            componentId:
+                                getComponentId(
+                                    component
+                                ),
+
+                            componentType:
+                                getComponentType(
+                                    component
+                                ),
+
+                            pinId:
+                                pin.dataset.pinId ||
+                                pin.dataset.pin ||
+                                pin.getAttribute(
+                                    "data-pin-id"
+                                ) ||
+                                pin.getAttribute(
+                                    "data-pin"
+                                ),
+
+                            point:
+                                center
+                        };
+                    }
+                });
+            }
+        );
+
+        return nearest;
+    }
+
+
+    /* ============================================================
+       23. CONNECT ENDPOINT TO PIN
+    ============================================================ */
+
+    function connectEndpoint(
+        wire,
+        side,
+        pinInfo
+    ) {
+
+        if (
+            !wire ||
+            !pinInfo
+        ) {
+            return false;
+        }
+
+        wire.connections[side] = {
+            component:
+                pinInfo.component,
+
+            componentId:
+                pinInfo.componentId,
+
+            componentType:
+                pinInfo.componentType,
+
+            pin:
+                pinInfo.element,
+
+            pinId:
+                pinInfo.pinId
+        };
+
+        wire[side.toLowerCase()] = {
+            x: pinInfo.point.x,
+            y: pinInfo.point.y
+        };
+
+        markPinConnected(
+            pinInfo.element,
+            wire,
+            side
+        );
+
+        renderWire(wire);
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:wire-connected",
+                {
+                    detail: {
+                        wire,
+                        side,
+                        connection:
+                            wire.connections[
+                                side
+                            ]
+                    }
+                }
+            )
+        );
+
+        return true;
+    }
+
+
+    /* ============================================================
+       24. DISCONNECT ENDPOINT
+    ============================================================ */
+
+    function disconnectEndpoint(
+        wire,
+        side
+    ) {
+
+        if (
+            !wire ||
+            !wire.connections[side]
+        ) {
+            return;
+        }
+
+        const connection =
+            wire.connections[side];
+
+        if (connection.pin) {
+
+            connection.pin.removeAttribute(
+                "data-fobas-connected"
+            );
+
+            connection.pin.removeAttribute(
+                "data-fobas-wire-id"
+            );
+        }
+
+        wire.connections[side] =
+            null;
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:wire-disconnected",
+                {
+                    detail: {
+                        wire,
+                        side
+                    }
+                }
+            )
+        );
+    }
+
+
+    /* ============================================================
+       25. DETECT ENDPOINT CONNECTION
+    ============================================================ */
+
+    function detectEndpointConnections(
+        wire,
+        side
+    ) {
+
+        if (!wire) {
+            return;
+        }
+
+        const point =
+            side === "A"
+                ? wire.a
+                : wire.b;
+
+        const nearest =
+            findNearestPin(
+                point,
+                30
+            );
+
+        if (nearest) {
+
+            connectEndpoint(
+                wire,
+                side,
+                nearest
+            );
+
+        } else {
+
+            if (
+                wire.connections[side]
+            ) {
+                disconnectEndpoint(
+                    wire,
+                    side
+                );
+            }
+        }
+    }
+
+
+    /* ============================================================
+       26. MARK PIN CONNECTED
+    ============================================================ */
+
+    function markPinConnected(
+        pin,
+        wire,
+        side
+    ) {
+
+        if (!pin) {
+            return;
+        }
+
+        pin.setAttribute(
+            "data-fobas-connected",
+            "true"
+        );
+
+        pin.setAttribute(
+            "data-fobas-wire-id",
+            wire.id
+        );
+
+        pin.setAttribute(
+            "data-fobas-wire-side",
+            side
+        );
+    }
+
+
+    /* ============================================================
+       27. UPDATE CONNECTED WIRES
+    ============================================================ */
+
+    function updateWireConnections(wire) {
+
+        if (!wire) {
+            return;
+        }
+
+        ["A", "B"].forEach(side => {
+
+            const connection =
+                wire.connections[side];
+
+            if (
+                !connection ||
+                !connection.pin
+            ) {
+                return;
+            }
+
+            const workspace =
+                getWorkspace();
+
+            if (!workspace) {
+                return;
+            }
+
+            const point =
+                getElementCenter(
+                    connection.pin,
+                    workspace
+                );
+
+            if (side === "A") {
+                wire.a = point;
+            } else {
+                wire.b = point;
+            }
+        });
+
+        renderWire(wire);
+    }
+
+
+    /* ============================================================
+       28. UPDATE ALL CONNECTED WIRES
+    ============================================================ */
+
+    function updateAllConnectedWires() {
+
+        wireRegistry.forEach(
+            wire => {
+
+                updateWireConnections(
+                    wire
+                );
+            }
+        );
+    }
+
+
+    /* ============================================================
+       29. COMPONENT MOVE OBSERVER
+    ============================================================ */
+
+    function installComponentObserver() {
+
+        if (
+            typeof MutationObserver ===
+            "undefined"
+        ) {
+            return;
+        }
+
+        const workspace =
+            getWorkspace();
+
+        if (!workspace) {
+            return;
+        }
+
+        const observer =
+            new MutationObserver(
+                function() {
+
+                    updateAllConnectedWires();
+                }
+            );
+
+        observer.observe(
+            workspace,
+            {
+                attributes: true,
+                childList: true,
+                subtree: true
+            }
+        );
+    }
+
+
+    /* ============================================================
+       30. CREATE WIRE FROM DEFINITION
+    ============================================================ */
+
+    function addWire(type = "wire", options = {}) {
+
+        return createWire(
+            type,
+            options
+        );
+    }
+
+
+    /* ============================================================
+       31. QUICK COLOR FUNCTIONS
+    ============================================================ */
+
+    function addRedWire(options = {}) {
+
+        return addWire(
+            "wire-red",
+            {
+                ...options,
+                color:
+                    COLORS.red
+            }
+        );
+    }
+
+
+    function addBlackWire(options = {}) {
+
+        return addWire(
+            "wire-black",
+            {
+                ...options,
+                color:
+                    COLORS.black
+            }
+        );
+    }
+
+
+    function addGreenWire(options = {}) {
+
+        return addWire(
+            "wire-green",
+            {
+                ...options,
+                color:
+                    COLORS.green
+            }
+        );
+    }
+
+
+    function addColoredWire(
+        color,
+        options = {}
+    ) {
+
+        const normalized =
+            String(
+                color || "black"
+            ).toLowerCase();
+
+        const selectedColor =
+            COLORS[normalized] ||
+            COLORS.black;
+
+        return addWire(
+            "wire",
+            {
+                ...options,
+                color:
+                    selectedColor
+            }
+        );
+    }
+
+
+    /* ============================================================
+       32. DELETE WIRE
+    ============================================================ */
+
+    function deleteWire(wireOrId) {
+
+        const wire =
+            typeof wireOrId === "string"
+                ? wireRegistry.get(
+                    wireOrId
+                )
+                : wireOrId;
+
+        if (!wire) {
+            return false;
+        }
+
+        disconnectEndpoint(
+            wire,
+            "A"
+        );
+
+        disconnectEndpoint(
+            wire,
+            "B"
+        );
+
+        if (
+            wire.element &&
+            wire.element.parentNode
+        ) {
+
+            wire.element.parentNode.removeChild(
+                wire.element
+            );
+        }
+
+        wireRegistry.delete(
+            wire.id
+        );
+
+        if (
+            state.activeWire === wire
+        ) {
+            state.activeWire =
+                null;
+        }
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:wire-deleted",
+                {
+                    detail: {
+                        wire
+                    }
+                }
+            )
+        );
+
+        return true;
+    }
+
+
+    /* ============================================================
+       33. GET WIRE
+    ============================================================ */
+
+    function getWire(id) {
+
+        return wireRegistry.get(
+            id
+        ) || null;
+    }
+
+
+    /* ============================================================
+       34. GET ALL WIRES
+    ============================================================ */
+
+    function getAllWires() {
+
+        return Array.from(
+            wireRegistry.values()
+        );
+    }
+
+
+    /* ============================================================
+       35. CLEAR WIRES
+    ============================================================ */
+
+    function clearAllWires() {
+
+        getAllWires().forEach(
+            wire => {
+                deleteWire(wire);
+            }
+        );
+    }
+
+
+    /* ============================================================
+       36. PUBLIC API
+    ============================================================ */
+
+    window.FOBASWireCableEngine = {
+
+        name:
+            ENGINE_NAME,
+
+        version:
+            ENGINE_VERSION,
+
+        state,
+
+        colors:
+            COLORS,
+
+        addWire,
+
+        addRedWire,
+
+        addBlackWire,
+
+        addGreenWire,
+
+        addColoredWire,
+
+        createWire,
+
+        selectWire,
+
+        deleteWire,
+
+        getWire,
+
+        getAllWires,
+
+        clearAllWires,
+
+        updateAllConnectedWires,
+
+        connectEndpoint,
+
+        disconnectEndpoint,
+
+        detectEndpointConnections,
+
+        renderWire
+    };
+
+
+    /* ============================================================
+       37. INITIALIZATION
+    ============================================================ */
+
+    function initialize() {
+
+        if (
+            state.initialized
+        ) {
+            return;
+        }
+
+        const workspace =
+            getWorkspace();
+
+        if (!workspace) {
+
+            setTimeout(
+                initialize,
+                500
+            );
+
+            return;
+        }
+
+        ensureWireLayer(
+            workspace
+        );
+
+        installComponentObserver();
+
+        state.initialized =
+            true;
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:wire-engine-ready",
+                {
+                    detail: {
+                        engine:
+                            ENGINE_NAME,
+
+                        version:
+                            ENGINE_VERSION
+                    }
+                }
+            )
+        );
+    }
+
+
+    /* ============================================================
+       38. SAFE START
+    ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        initialize();
+    }
+
+})();
+
+
+
+
+
+
+
     /* ============================================================
        10. COMPONENT EVENTS
     ============================================================ */
