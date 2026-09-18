@@ -8995,6 +8995,22 @@ bind(
 
 
 
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -9324,7 +9340,73 @@ bind(
 
 
 
+/* ================================================================
+   FOBAS ELECTRONIQUE
+   DRAG POINTER BRIDGE
+   ---------------------------------------------------------------
+   RESPONSABILITÉ UNIQUE :
+   - Fè pointermove rele moveComponent()
+   - Fè pointerup rele endComponentDrag()
+   - Fè pointercancel fini déplacement la
+   - Pa modifye createComponent()
+   - Pa modifye renderComponent()
+   - Pa modifye CSS
+   ================================================================ */
+
+(function FOBAS_DragPointerBridge() {
+
+    function handlePointerMove(event) {
+
+        if (!state || !state.drag || !state.drag.active) {
+            return;
+        }
+
+        event.preventDefault();
+
+        moveComponent(event);
+    }
+
+
+    function handlePointerUp(event) {
+
+        if (!state || !state.drag || !state.drag.active) {
+            return;
+        }
+
+        event.preventDefault();
+
+        endComponentDrag();
+    }
+
+
+    document.addEventListener(
+        "pointermove",
+        handlePointerMove,
+        { passive: false }
+    );
+
+
+    document.addEventListener(
+        "pointerup",
+        handlePointerUp,
+        { passive: false }
+    );
+
+
+    document.addEventListener(
+        "pointercancel",
+        handlePointerUp,
+        { passive: false }
+    );
+
 })();
+
+
+
+
+
+
+
 
 
 
