@@ -5767,91 +5767,220 @@ function applyComponentVisualState(
 
 
 
-
-
-
 /* ================================================================
-   FOBAS ELECTRONIQUE & ROBOTIQUE
-   WIRE & CABLE INTERACTION ENGINE — V1.0.0
+   10. WIRE & CABLE INTERACTION ENGINE
    ---------------------------------------------------------------
-   BLOC ISOLÉ / INDÉPENDANT
+   FOBAS ELECTRONIQUE & ROBOTIQUE
+   ---------------------------------------------------------------
+   BLOC ISOLÉ — V1.0.0
+
+   S'APPUIE SUR :
+   - COMPONENTS
+   - getComponentDefinition()
+   - state.components
+   - dom.viewport
+   - dom.componentLayer
+   - renderComponent()
+   - .electronic-pin
+
+   NE MODIFIE PAS :
+   - Block 05
+   - Block 08
+   - Block 09
 
    FONCTIONS :
-   - Création visuelle des fils
-   - Fils rouge / noir / jaune / bleu / vert / orange / blanc / violet
-   - Sélection du fil
-   - Déplacement du fil entier
-   - Poignée A interactive
-   - Poignée B interactive
-   - Redimensionnement libre
-   - Détection des broches des composants
+   - Fil de connexion
+   - Fil Rouge
+   - Fil Noir
+   - Fil Vert
+   - Fil Jaune
+   - Fil Bleu
+   - Fil Orange
+   - Fil Blanc
+   - Fil Violet
+   - Sélection
+   - Déplacement
+   - Redimensionnement par poignée A
+   - Redimensionnement par poignée B
    - Connexion PIN → WIRE → PIN
-   - Suivi des composants connectés
-   - Superposition des fils autorisée
+   - Suivi automatique des composants connectés
+   - Support souris + tactile
    - Aucun Three.js
    - Aucune image externe
 ================================================================ */
 
-(function FOBASWireCableInteractionEngine() {
+(function () {
 
     "use strict";
 
+
     /* ============================================================
-       01. ENGINE STATE
+       10.1 — ENGINE STATE
     ============================================================ */
 
-    const ENGINE_NAME = "FOBAS_WIRE_CABLE_INTERACTION_ENGINE";
-    const ENGINE_VERSION = "1.0.0";
+    const FOBAS_WIRE_ENGINE = {
 
-    const state = {
-        activeWire: null,
-        action: null,
-        startX: 0,
-        startY: 0,
-        originalA: null,
-        originalB: null,
-        wireCounter: 0,
-        initialized: false
+        version: "1.0.0",
+
+        wires: new Map(),
+
+        selectedWireId: null,
+
+        interaction: {
+            active: false,
+            mode: null,
+            wireId: null,
+            side: null,
+
+            pointerId: null,
+
+            startPointerX: 0,
+            startPointerY: 0,
+
+            startA: null,
+            startB: null
+        },
+
+        counter: 0,
+
+        initialized: false,
+
+        observer: null
     };
 
-    const wireRegistry = new Map();
 
-    const COLORS = {
+    /* ============================================================
+       10.2 — WIRE COLORS
+    ============================================================ */
+
+    const FOBAS_WIRE_COLORS = {
+
         red: "#d32f2f",
+
         black: "#212121",
+
         yellow: "#f9a825",
+
         blue: "#1565c0",
+
         green: "#2e7d32",
+
         orange: "#ef6c00",
+
         white: "#f5f5f5",
+
         violet: "#7b1fa2"
     };
 
 
     /* ============================================================
-       02. SAFE DOM HELPERS
+       10.3 — SAFE HELPERS
     ============================================================ */
 
-    function getWorkspace() {
+    function wireClamp(value, min, max) {
 
-        const selectors = [
-            "#electronicLaboratoryWorkspace",
-            "#electronicsLaboratoryWorkspace",
-            "#roboticsLaboratoryWorkspace",
-            "#laboratoryWorkspace",
-            "#labWorkspace",
-            "#workspace",
-            "#simulationWorkspace",
-            ".electronic-laboratory-workspace",
-            ".electronics-laboratory-workspace"
-        ];
+        return Math.max(
+            min,
+            Math.min(max, value)
+        );
+    }
 
-        for (const selector of selectors) {
 
-            const element = document.querySelector(selector);
+    function wireNumber(value, fallback = 0) {
 
-            if (element) {
-                return element;
+        const number = Number(value);
+
+        return Number.isFinite(number)
+            ? number
+            : fallback;
+    }
+
+
+    function getWireViewport() {
+
+        if (
+            typeof dom !== "undefined" &&
+            dom.viewport
+        ) {
+            return dom.viewport;
+        }
+
+        return null;
+    }
+
+
+    function getWireComponentLayer() {
+
+        if (
+            typeof dom !== "undefined" &&
+            dom.componentLayer
+        ) {
+            return dom.componentLayer;
+        }
+
+        return null;
+    }
+
+
+    function createWireSVGElement(
+        tag,
+        attributes = {}
+    ) {
+
+        const element =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                tag
+            );
+
+        Object.keys(attributes)
+            .forEach(key => {
+
+                element.setAttribute(
+                    key,
+                    attributes[key]
+                );
+            });
+
+        return element;
+    }
+
+
+    /* ============================================================
+       10.4 — FIND WIRE DEFINITION
+    ============================================================ */
+
+    function getFOBASWireDefinition(type) {
+
+        if (
+            typeof getComponentDefinition ===
+            "function"
+        ) {
+
+            const definition =
+                getComponentDefinition(
+                    type
+                );
+
+            if (definition) {
+                return definition;
+            }
+        }
+
+        if (
+            typeof COMPONENTS !==
+            "undefined" &&
+            Array.isArray(COMPONENTS)
+        ) {
+
+            const definition =
+                COMPONENTS.find(
+                    component =>
+                        component.id === type
+                );
+
+            if (definition) {
+                return definition;
             }
         }
 
@@ -5859,184 +5988,161 @@ function applyComponentVisualState(
     }
 
 
-    function createSVGElement(tag, attributes = {}) {
+    /* ============================================================
+       10.5 — DETECT WIRE TYPE
+    ============================================================ */
 
-        const element = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            tag
+    function isFOBASWireType(type) {
+
+        const value =
+            String(type || "")
+                .toLowerCase();
+
+        return (
+            value === "wire" ||
+            value === "wire-red" ||
+            value === "wire-black" ||
+            value === "wire-yellow" ||
+            value === "wire-blue" ||
+            value === "wire-green" ||
+            value === "wire-orange" ||
+            value === "wire-white" ||
+            value === "wire-violet"
         );
-
-        Object.keys(attributes).forEach(key => {
-            element.setAttribute(key, attributes[key]);
-        });
-
-        return element;
-    }
-
-
-    function getPointFromEvent(event, workspace) {
-
-        const rect = workspace.getBoundingClientRect();
-
-        return {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-    }
-
-
-    function clamp(value, min, max) {
-        return Math.max(min, Math.min(max, value));
     }
 
 
     /* ============================================================
-       03. WIRE COLOR
+       10.6 — GET WIRE COLOR
     ============================================================ */
 
-    function normalizeWireColor(definition) {
+    function getFOBASWireColor(
+        type,
+        customColor
+    ) {
 
-        if (!definition) {
-            return COLORS.black;
+        if (customColor) {
+            return customColor;
         }
 
-        if (definition.wireColor) {
+        const value =
+            String(type || "")
+                .toLowerCase();
+
+        if (value === "wire-red") {
+            return FOBAS_WIRE_COLORS.red;
+        }
+
+        if (value === "wire-black") {
+            return FOBAS_WIRE_COLORS.black;
+        }
+
+        if (value === "wire-yellow") {
+            return FOBAS_WIRE_COLORS.yellow;
+        }
+
+        if (value === "wire-blue") {
+            return FOBAS_WIRE_COLORS.blue;
+        }
+
+        if (value === "wire-green") {
+            return FOBAS_WIRE_COLORS.green;
+        }
+
+        if (value === "wire-orange") {
+            return FOBAS_WIRE_COLORS.orange;
+        }
+
+        if (value === "wire-white") {
+            return FOBAS_WIRE_COLORS.white;
+        }
+
+        if (value === "wire-violet") {
+            return FOBAS_WIRE_COLORS.violet;
+        }
+
+        const definition =
+            getFOBASWireDefinition(
+                type
+            );
+
+        if (
+            definition &&
+            definition.wireColor
+        ) {
+
             return definition.wireColor;
         }
 
-        const id = String(definition.id || "").toLowerCase();
-
-        if (id.includes("red")) {
-            return COLORS.red;
-        }
-
-        if (id.includes("black")) {
-            return COLORS.black;
-        }
-
-        if (id.includes("yellow")) {
-            return COLORS.yellow;
-        }
-
-        if (id.includes("blue")) {
-            return COLORS.blue;
-        }
-
-        if (id.includes("green")) {
-            return COLORS.green;
-        }
-
-        if (id.includes("orange")) {
-            return COLORS.orange;
-        }
-
-        if (id.includes("white")) {
-            return COLORS.white;
-        }
-
-        if (id.includes("violet") || id.includes("purple")) {
-            return COLORS.violet;
-        }
-
-        return COLORS.black;
+        return FOBAS_WIRE_COLORS.black;
     }
 
 
     /* ============================================================
-       04. WIRE DEFINITION
+       10.7 — ENSURE WIRE LAYER
     ============================================================ */
 
-    function getWireDefinition(type = "wire") {
+    function ensureFOBASWireLayer() {
 
-        if (
-            typeof getComponentDefinition === "function"
-        ) {
+        const viewport =
+            getWireViewport();
 
-            const definition =
-                getComponentDefinition(type);
-
-            if (definition) {
-                return definition;
-            }
+        if (!viewport) {
+            return null;
         }
-
-        if (
-            typeof COMPONENTS !== "undefined" &&
-            Array.isArray(COMPONENTS)
-        ) {
-
-            const definition =
-                COMPONENTS.find(item => item.id === type);
-
-            if (definition) {
-                return definition;
-            }
-        }
-
-        return {
-            id: type,
-            name: "Fil de connexion",
-            category: "wires",
-            color: COLORS.black,
-            wireColor: COLORS.black,
-            width: 130,
-            height: 45,
-            pins: [
-                {
-                    id: "A",
-                    name: "A",
-                    side: "left"
-                },
-                {
-                    id: "B",
-                    name: "B",
-                    side: "right"
-                }
-            ]
-        };
-    }
-
-
-    /* ============================================================
-       05. WIRE SVG LAYER
-    ============================================================ */
-
-    function ensureWireLayer(workspace) {
 
         let layer =
-            workspace.querySelector(
-                '[data-fobas-wire-layer="true"]'
+            viewport.querySelector(
+                ":scope > .fobas-wire-engine-layer"
             );
 
         if (layer) {
             return layer;
         }
 
-        layer = createSVGElement("svg", {
-            "data-fobas-wire-layer": "true",
-            class: "fobas-wire-cable-layer",
-            width: "100%",
-            height: "100%",
-            viewBox:
-                `0 0 ${workspace.clientWidth || 1200} ${workspace.clientHeight || 700}`,
-            preserveAspectRatio: "none"
-        });
+        layer =
+            createWireSVGElement(
+                "svg",
+                {
+                    class:
+                        "fobas-wire-engine-layer",
 
-        layer.style.position = "absolute";
-        layer.style.left = "0";
-        layer.style.top = "0";
-        layer.style.width = "100%";
-        layer.style.height = "100%";
-        layer.style.pointerEvents = "none";
-        layer.style.overflow = "visible";
-        layer.style.zIndex = "20";
+                    "aria-hidden":
+                        "true"
+                }
+            );
 
-        workspace.style.position =
-            workspace.style.position || "relative";
+        layer.style.position =
+            "absolute";
 
-        workspace.insertBefore(
+        layer.style.left =
+            "0";
+
+        layer.style.top =
+            "0";
+
+        layer.style.width =
+            "100%";
+
+        layer.style.height =
+            "100%";
+
+        layer.style.overflow =
+            "visible";
+
+        layer.style.pointerEvents =
+            "none";
+
+        layer.style.zIndex =
+            "5";
+
+        viewport.style.position =
+            viewport.style.position ||
+            "relative";
+
+        viewport.insertBefore(
             layer,
-            workspace.firstChild
+            viewport.firstChild
         );
 
         return layer;
@@ -6044,231 +6150,438 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       06. CREATE WIRE OBJECT
+       10.8 — GET POINTER POSITION
     ============================================================ */
 
-    function createWire(type = "wire", options = {}) {
+    function getFOBASWirePointerPosition(
+        event
+    ) {
 
-        const workspace = getWorkspace();
+        const viewport =
+            getWireViewport();
 
-        if (!workspace) {
-            console.warn(
-                `[${ENGINE_NAME}] Workspace introuvable.`
+        if (!viewport) {
+            return {
+                x: 0,
+                y: 0
+            };
+        }
+
+        const rect =
+            viewport.getBoundingClientRect();
+
+        return {
+
+            x:
+                event.clientX -
+                rect.left,
+
+            y:
+                event.clientY -
+                rect.top
+        };
+    }
+
+
+    /* ============================================================
+       10.9 — WIRE PATH
+    ============================================================ */
+
+    function createFOBASWirePath(
+        a,
+        b
+    ) {
+
+        const distance =
+            Math.abs(
+                b.x - a.x
             );
 
+        const curve =
+            Math.max(
+                25,
+                Math.min(
+                    110,
+                    distance * 0.35
+                )
+            );
+
+        return `
+            M ${a.x} ${a.y}
+            C
+            ${a.x + curve} ${a.y},
+            ${b.x - curve} ${b.y},
+            ${b.x} ${b.y}
+        `;
+    }
+
+
+    /* ============================================================
+       10.10 — CREATE WIRE
+    ============================================================ */
+
+    function createFOBASWire(
+        type = "wire",
+        options = {}
+    ) {
+
+        const viewport =
+            getWireViewport();
+
+        if (!viewport) {
             return null;
         }
 
         const definition =
-            getWireDefinition(type);
+            getFOBASWireDefinition(
+                type
+            );
 
-        state.wireCounter++;
+        FOBAS_WIRE_ENGINE.counter++;
 
-        const id =
+        const wireId =
             options.id ||
-            `fobas-wire-${Date.now()}-${state.wireCounter}`;
+            `fobas-wire-${Date.now()}-${FOBAS_WIRE_ENGINE.counter}`;
 
-        const width =
-            Number(options.width) ||
-            Number(definition.width) ||
-            130;
 
-        const height =
-            Number(options.height) ||
-            Number(definition.height) ||
-            45;
+        const viewportWidth =
+            viewport.clientWidth ||
+            800;
 
-        const x =
-            Number.isFinite(options.x)
-                ? options.x
-                : Math.max(
-                    20,
-                    (workspace.clientWidth / 2) - width / 2
-                );
+        const viewportHeight =
+            viewport.clientHeight ||
+            500;
 
-        const y =
-            Number.isFinite(options.y)
-                ? options.y
-                : Math.max(
-                    20,
-                    (workspace.clientHeight / 2) - 25
-                );
+
+        const defaultWidth =
+            wireNumber(
+                definition?.width,
+                150
+            );
+
+
+        const centerX =
+            viewportWidth / 2;
+
+
+        const centerY =
+            viewportHeight / 2;
+
+
+        const initialX =
+            Number.isFinite(
+                Number(options.x)
+            )
+                ? Number(options.x)
+                : centerX -
+                  defaultWidth / 2;
+
+
+        const initialY =
+            Number.isFinite(
+                Number(options.y)
+            )
+                ? Number(options.y)
+                : centerY;
+
 
         const wire = {
-            id,
+
+            id: wireId,
+
             type,
-            definition,
+
+            name:
+                definition?.name ||
+                "Fil de connexion",
 
             color:
-                options.color ||
-                normalizeWireColor(definition),
+                getFOBASWireColor(
+                    type,
+                    options.color
+                ),
 
             a: {
-                x: x,
-                y: y
+
+                x: initialX,
+
+                y: initialY
             },
 
             b: {
-                x: x + width,
-                y: y
+
+                x:
+                    initialX +
+                    defaultWidth,
+
+                y: initialY
             },
 
             connections: {
+
                 A: null,
+
                 B: null
             },
 
             selected: false,
 
-            group: null,
+            svg: null,
 
-            element: null,
-            path: null,
-            shadow: null,
+            hitPath: null,
+
+            visualPath: null,
+
+            highlightPath: null,
+
             handleA: null,
-            handleB: null,
 
-            createdAt: Date.now()
+            handleB: null
         };
 
-        wireRegistry.set(id, wire);
 
-        renderWire(wire);
+        FOBAS_WIRE_ENGINE.wires.set(
+            wireId,
+            wire
+        );
+
+
+        renderFOBASWire(
+            wire
+        );
+
+
+        selectFOBASWire(
+            wire
+        );
+
 
         return wire;
     }
 
 
     /* ============================================================
-       07. RENDER WIRE
+       10.11 — RENDER WIRE
     ============================================================ */
 
-    function renderWire(wire) {
+    function renderFOBASWire(
+        wire
+    ) {
 
         if (!wire) {
             return;
         }
 
-        const workspace = getWorkspace();
+        const layer =
+            ensureFOBASWireLayer();
 
-        if (!workspace) {
+        if (!layer) {
             return;
         }
 
-        const layer =
-            ensureWireLayer(workspace);
 
-        let group = wire.element;
+        if (!wire.svg) {
 
-        if (!group) {
+            const group =
+                createWireSVGElement(
+                    "g",
+                    {
+                        class:
+                            "fobas-wire-object",
 
-            group =
-                createSVGElement("g", {
-                    "data-fobas-wire-id": wire.id,
-                    class: "fobas-wire-object"
-                });
+                        "data-fobas-wire-id":
+                            wire.id
+                    }
+                );
 
-            group.style.pointerEvents = "all";
-            group.style.cursor = "move";
+            group.style.pointerEvents =
+                "all";
 
-            const shadow =
-                createSVGElement("path", {
-                    fill: "none",
-                    stroke: "#000000",
-                    "stroke-width": "12",
-                    "stroke-linecap": "round",
-                    opacity: "0.18"
-                });
+            group.style.cursor =
+                "move";
 
-            const path =
-                createSVGElement("path", {
-                    fill: "none",
-                    "stroke-width": "7",
-                    "stroke-linecap": "round"
-                });
 
-            const highlight =
-                createSVGElement("path", {
-                    fill: "none",
-                    stroke: "#ffffff",
-                    "stroke-width": "2",
-                    "stroke-linecap": "round",
-                    opacity: "0.45"
-                });
+            /* HIT AREA */
+
+            const hitPath =
+                createWireSVGElement(
+                    "path",
+                    {
+                        fill: "none",
+                        stroke: "transparent",
+                        "stroke-width": "22",
+                        "stroke-linecap": "round"
+                    }
+                );
+
+
+            /* SHADOW */
+
+            const shadowPath =
+                createWireSVGElement(
+                    "path",
+                    {
+                        fill: "none",
+                        stroke: "#000000",
+                        "stroke-width": "10",
+                        "stroke-linecap": "round",
+                        opacity: "0.25"
+                    }
+                );
+
+
+            /* MAIN CABLE */
+
+            const visualPath =
+                createWireSVGElement(
+                    "path",
+                    {
+                        fill: "none",
+                        "stroke-width": "6",
+                        "stroke-linecap": "round"
+                    }
+                );
+
+
+            /* CABLE HIGHLIGHT */
+
+            const highlightPath =
+                createWireSVGElement(
+                    "path",
+                    {
+                        fill: "none",
+                        stroke: "#ffffff",
+                        "stroke-width": "1.8",
+                        "stroke-linecap": "round",
+                        opacity: "0.45"
+                    }
+                );
+
+
+            /* HANDLE A */
 
             const handleA =
-                createSVGElement("circle", {
-                    r: "8",
-                    cx: "0",
-                    cy: "0"
-                });
+                createWireSVGElement(
+                    "circle",
+                    {
+                        r: "8",
+                        "data-fobas-wire-handle":
+                            "A"
+                    }
+                );
+
+
+            /* HANDLE B */
 
             const handleB =
-                createSVGElement("circle", {
-                    r: "8",
-                    cx: "0",
-                    cy: "0"
-                });
+                createWireSVGElement(
+                    "circle",
+                    {
+                        r: "8",
+                        "data-fobas-wire-handle":
+                            "B"
+                    }
+                );
 
-            handleA.setAttribute(
-                "data-fobas-wire-handle",
-                "A"
+
+            handleA.style.cursor =
+                "crosshair";
+
+            handleB.style.cursor =
+                "crosshair";
+
+
+            group.appendChild(
+                hitPath
             );
 
-            handleB.setAttribute(
-                "data-fobas-wire-handle",
-                "B"
+            group.appendChild(
+                shadowPath
             );
 
-            handleA.style.cursor = "crosshair";
-            handleB.style.cursor = "crosshair";
+            group.appendChild(
+                visualPath
+            );
 
-            handleA.style.display = "none";
-            handleB.style.display = "none";
+            group.appendChild(
+                highlightPath
+            );
 
-            group.appendChild(shadow);
-            group.appendChild(path);
-            group.appendChild(highlight);
-            group.appendChild(handleA);
-            group.appendChild(handleB);
+            group.appendChild(
+                handleA
+            );
 
-            layer.appendChild(group);
+            group.appendChild(
+                handleB
+            );
 
-            wire.element = group;
-            wire.shadow = shadow;
-            wire.path = path;
-            wire.highlight = highlight;
-            wire.handleA = handleA;
-            wire.handleB = handleB;
 
-            attachWireEvents(wire);
+            layer.appendChild(
+                group
+            );
+
+
+            wire.svg =
+                group;
+
+            wire.hitPath =
+                hitPath;
+
+            wire.shadowPath =
+                shadowPath;
+
+            wire.visualPath =
+                visualPath;
+
+            wire.highlightPath =
+                highlightPath;
+
+            wire.handleA =
+                handleA;
+
+            wire.handleB =
+                handleB;
+
+
+            attachFOBASWireEvents(
+                wire
+            );
         }
 
-        const pathData =
-            createWirePath(
+
+        const path =
+            createFOBASWirePath(
                 wire.a,
                 wire.b
             );
 
-        wire.shadow.setAttribute(
+
+        wire.hitPath.setAttribute(
             "d",
-            pathData
+            path
         );
 
-        wire.path.setAttribute(
+        wire.shadowPath.setAttribute(
             "d",
-            pathData
+            path
         );
 
-        wire.highlight.setAttribute(
+        wire.visualPath.setAttribute(
             "d",
-            pathData
+            path
         );
 
-        wire.path.setAttribute(
+        wire.highlightPath.setAttribute(
+            "d",
+            path
+        );
+
+
+        wire.visualPath.setAttribute(
             "stroke",
             wire.color
         );
+
 
         wire.handleA.setAttribute(
             "cx",
@@ -6280,6 +6593,7 @@ function applyComponentVisualState(
             wire.a.y
         );
 
+
         wire.handleB.setAttribute(
             "cx",
             wire.b.x
@@ -6290,55 +6604,34 @@ function applyComponentVisualState(
             wire.b.y
         );
 
-        updateWireSelectionVisual(wire);
+
+        updateFOBASWireVisual(
+            wire
+        );
     }
 
 
     /* ============================================================
-       08. WIRE PATH
+       10.12 — VISUAL SELECTION
     ============================================================ */
 
-    function createWirePath(a, b) {
-
-        const dx =
-            Math.abs(b.x - a.x);
-
-        const curve =
-            Math.max(
-                25,
-                Math.min(
-                    100,
-                    dx * 0.35
-                )
-            );
-
-        return [
-            `M ${a.x} ${a.y}`,
-            `C ${a.x + curve} ${a.y}`,
-            `${b.x - curve} ${b.y}`,
-            `${b.x} ${b.y}`
-        ].join(" ");
-    }
-
-
-    /* ============================================================
-       09. SELECTION VISUAL
-    ============================================================ */
-
-    function updateWireSelectionVisual(wire) {
+    function updateFOBASWireVisual(
+        wire
+    ) {
 
         if (!wire) {
             return;
         }
 
+
         if (wire.selected) {
 
-            wire.path.setAttribute(
+            wire.visualPath.setAttribute(
                 "stroke-width",
-                "9"
+                "7"
             );
 
-            wire.highlight.setAttribute(
+            wire.highlightPath.setAttribute(
                 "opacity",
                 "0.75"
             );
@@ -6349,6 +6642,7 @@ function applyComponentVisualState(
             wire.handleB.style.display =
                 "block";
 
+
             wire.handleA.setAttribute(
                 "fill",
                 "#ffffff"
@@ -6359,6 +6653,7 @@ function applyComponentVisualState(
                 "#ffffff"
             );
 
+
             wire.handleA.setAttribute(
                 "stroke",
                 wire.color
@@ -6368,6 +6663,7 @@ function applyComponentVisualState(
                 "stroke",
                 wire.color
             );
+
 
             wire.handleA.setAttribute(
                 "stroke-width",
@@ -6381,12 +6677,12 @@ function applyComponentVisualState(
 
         } else {
 
-            wire.path.setAttribute(
+            wire.visualPath.setAttribute(
                 "stroke-width",
-                "7"
+                "6"
             );
 
-            wire.highlight.setAttribute(
+            wire.highlightPath.setAttribute(
                 "opacity",
                 "0.45"
             );
@@ -6401,83 +6697,50 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10. WIRE EVENTS
+       10.13 — SELECT WIRE
     ============================================================ */
 
-    function attachWireEvents(wire) {
+    function selectFOBASWire(
+        wire
+    ) {
 
-        const group =
-            wire.element;
+        if (!wire) {
+            return;
+        }
 
-        group.addEventListener(
-            "pointerdown",
-            function(event) {
 
-                event.preventDefault();
-                event.stopPropagation();
+        FOBAS_WIRE_ENGINE.wires
+            .forEach(
+                otherWire => {
 
-                const target =
-                    event.target;
+                    if (
+                        otherWire !== wire
+                    ) {
 
-                const handle =
-                    target.closest
-                        ? target.closest(
-                            "[data-fobas-wire-handle]"
-                        )
-                        : null;
+                        otherWire.selected =
+                            false;
 
-                if (handle) {
-
-                    const side =
-                        handle.getAttribute(
-                            "data-fobas-wire-handle"
+                        updateFOBASWireVisual(
+                            otherWire
                         );
-
-                    beginWireResize(
-                        wire,
-                        side,
-                        event
-                    );
-
-                    return;
+                    }
                 }
+            );
 
-                selectWire(wire);
 
-                beginWireMove(
-                    wire,
-                    event
-                );
-            }
+        wire.selected =
+            true;
+
+
+        FOBAS_WIRE_ENGINE
+            .selectedWireId =
+            wire.id;
+
+
+        updateFOBASWireVisual(
+            wire
         );
-    }
 
-
-    /* ============================================================
-       11. SELECT WIRE
-    ============================================================ */
-
-    function selectWire(wire) {
-
-        wireRegistry.forEach(item => {
-
-            if (item !== wire) {
-                item.selected = false;
-
-                if (item.element) {
-                    updateWireSelectionVisual(
-                        item
-                    );
-                }
-            }
-        });
-
-        wire.selected = true;
-
-        updateWireSelectionVisual(wire);
-
-        state.activeWire =
-            wire;
 
         document.dispatchEvent(
             new CustomEvent(
@@ -6493,545 +6756,783 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       12. BEGIN MOVE
+       10.14 — WIRE POINTER DOWN
     ============================================================ */
 
-    function beginWireMove(wire, event) {
+    function attachFOBASWireEvents(
+        wire
+    ) {
 
-        const workspace =
-            getWorkspace();
+        wire.svg.addEventListener(
+            "pointerdown",
+            function (event) {
 
-        if (!workspace) {
-            return;
-        }
+                event.preventDefault();
+                event.stopPropagation();
 
-        state.action = "move";
-        state.activeWire = wire;
 
-        const point =
-            getPointFromEvent(
-                event,
-                workspace
+                const handle =
+                    event.target.closest
+                        ? event.target.closest(
+                            "[data-fobas-wire-handle]"
+                        )
+                        : null;
+
+
+                if (handle) {
+
+                    const side =
+                        handle.getAttribute(
+                            "data-fobas-wire-handle"
+                        );
+
+                    beginFOBASWireResize(
+                        wire,
+                        side,
+                        event
+                    );
+
+                    return;
+                }
+
+
+                selectFOBASWire(
+                    wire
+                );
+
+
+                beginFOBASWireMove(
+                    wire,
+                    event
+                );
+            }
+        );
+    }
+
+
+    /* ============================================================
+       10.15 — BEGIN MOVE
+    ============================================================ */
+
+    function beginFOBASWireMove(
+        wire,
+        event
+    ) {
+
+        const position =
+            getFOBASWirePointerPosition(
+                event
             );
 
-        state.startX =
-            point.x;
 
-        state.startY =
-            point.y;
+        FOBAS_WIRE_ENGINE
+            .interaction = {
 
-        state.originalA = {
-            x: wire.a.x,
-            y: wire.a.y
-        };
+                active: true,
 
-        state.originalB = {
-            x: wire.b.x,
-            y: wire.b.y
-        };
+                mode: "move",
+
+                wireId: wire.id,
+
+                side: null,
+
+                pointerId:
+                    event.pointerId,
+
+                startPointerX:
+                    position.x,
+
+                startPointerY:
+                    position.y,
+
+                startA: {
+                    x: wire.a.x,
+                    y: wire.a.y
+                },
+
+                startB: {
+                    x: wire.b.x,
+                    y: wire.b.y
+                }
+            };
+
+
+        try {
+
+            wire.svg.setPointerCapture(
+                event.pointerId
+            );
+
+        } catch (error) {
+            /* Capture non disponible */
+        }
+
 
         window.addEventListener(
             "pointermove",
-            handlePointerMove,
+            handleFOBASWirePointerMove,
             true
         );
 
         window.addEventListener(
             "pointerup",
-            finishPointerAction,
+            finishFOBASWireInteraction,
+            true
+        );
+
+        window.addEventListener(
+            "pointercancel",
+            finishFOBASWireInteraction,
             true
         );
     }
 
 
     /* ============================================================
-       13. BEGIN RESIZE
+       10.16 — BEGIN RESIZE
     ============================================================ */
 
-    function beginWireResize(
+    function beginFOBASWireResize(
         wire,
         side,
         event
     ) {
 
-        const workspace =
-            getWorkspace();
-
-        if (!workspace) {
-            return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        selectWire(wire);
-
-        state.action =
-            side === "A"
-                ? "resizeA"
-                : "resizeB";
-
-        state.activeWire =
-            wire;
-
-        const point =
-            getPointFromEvent(
-                event,
-                workspace
+        const position =
+            getFOBASWirePointerPosition(
+                event
             );
 
-        state.startX =
-            point.x;
 
-        state.startY =
-            point.y;
+        selectFOBASWire(
+            wire
+        );
 
-        state.originalA = {
-            x: wire.a.x,
-            y: wire.a.y
-        };
 
-        state.originalB = {
-            x: wire.b.x,
-            y: wire.b.y
-        };
+        FOBAS_WIRE_ENGINE
+            .interaction = {
+
+                active: true,
+
+                mode:
+                    side === "A"
+                        ? "resizeA"
+                        : "resizeB",
+
+                wireId: wire.id,
+
+                side,
+
+                pointerId:
+                    event.pointerId,
+
+                startPointerX:
+                    position.x,
+
+                startPointerY:
+                    position.y,
+
+                startA: {
+                    x: wire.a.x,
+                    y: wire.a.y
+                },
+
+                startB: {
+                    x: wire.b.x,
+                    y: wire.b.y
+                }
+            };
+
+
+        try {
+
+            wire.svg.setPointerCapture(
+                event.pointerId
+            );
+
+        } catch (error) {
+            /* Capture non disponible */
+        }
+
 
         window.addEventListener(
             "pointermove",
-            handlePointerMove,
+            handleFOBASWirePointerMove,
             true
         );
 
         window.addEventListener(
             "pointerup",
-            finishPointerAction,
+            finishFOBASWireInteraction,
+            true
+        );
+
+        window.addEventListener(
+            "pointercancel",
+            finishFOBASWireInteraction,
             true
         );
     }
 
 
     /* ============================================================
-       14. POINTER MOVE
+       10.17 — POINTER MOVE
     ============================================================ */
 
-    function handlePointerMove(event) {
+    function handleFOBASWirePointerMove(
+        event
+    ) {
 
-        const wire =
-            state.activeWire;
+        const interaction =
+            FOBAS_WIRE_ENGINE
+                .interaction;
 
-        const workspace =
-            getWorkspace();
 
         if (
-            !wire ||
-            !workspace ||
-            !state.action
+            !interaction.active
         ) {
             return;
         }
 
-        event.preventDefault();
 
-        const point =
-            getPointFromEvent(
-                event,
-                workspace
+        if (
+            interaction.pointerId !==
+            event.pointerId
+        ) {
+            return;
+        }
+
+
+        const wire =
+            FOBAS_WIRE_ENGINE.wires
+                .get(
+                    interaction.wireId
+                );
+
+
+        if (!wire) {
+            return;
+        }
+
+
+        const position =
+            getFOBASWirePointerPosition(
+                event
             );
 
+
         const dx =
-            point.x - state.startX;
+            position.x -
+            interaction.startPointerX;
+
 
         const dy =
-            point.y - state.startY;
+            position.y -
+            interaction.startPointerY;
 
-        if (state.action === "move") {
 
-            const newA = {
-                x: state.originalA.x + dx,
-                y: state.originalA.y + dy
+        const viewport =
+            getWireViewport();
+
+
+        if (!viewport) {
+            return;
+        }
+
+
+        event.preventDefault();
+
+
+        /* ========================================================
+           MOVE WHOLE WIRE
+        ======================================================== */
+
+        if (
+            interaction.mode ===
+            "move"
+        ) {
+
+            wire.a = {
+
+                x:
+                    interaction.startA.x +
+                    dx,
+
+                y:
+                    interaction.startA.y +
+                    dy
             };
 
-            const newB = {
-                x: state.originalB.x + dx,
-                y: state.originalB.y + dy
+
+            wire.b = {
+
+                x:
+                    interaction.startB.x +
+                    dx,
+
+                y:
+                    interaction.startB.y +
+                    dy
             };
+
 
             wire.a =
-                constrainPoint(
-                    newA,
-                    workspace
+                constrainFOBASWirePoint(
+                    wire.a
                 );
 
             wire.b =
-                constrainPoint(
-                    newB,
-                    workspace
+                constrainFOBASWirePoint(
+                    wire.b
                 );
-
         }
 
-        else if (
-            state.action === "resizeA"
+
+        /* ========================================================
+           RESIZE A
+        ======================================================== */
+
+        if (
+            interaction.mode ===
+            "resizeA"
         ) {
+
+            wire.a = {
+
+                x:
+                    interaction.startA.x +
+                    dx,
+
+                y:
+                    interaction.startA.y +
+                    dy
+            };
+
 
             wire.a =
-                constrainPoint(
-                    {
-                        x: state.originalA.x + dx,
-                        y: state.originalA.y + dy
-                    },
-                    workspace
+                constrainFOBASWirePoint(
+                    wire.a
                 );
-
         }
 
-        else if (
-            state.action === "resizeB"
+
+        /* ========================================================
+           RESIZE B
+        ======================================================== */
+
+        if (
+            interaction.mode ===
+            "resizeB"
         ) {
 
+            wire.b = {
+
+                x:
+                    interaction.startB.x +
+                    dx,
+
+                y:
+                    interaction.startB.y +
+                    dy
+            };
+
+
             wire.b =
-                constrainPoint(
-                    {
-                        x: state.originalB.x + dx,
-                        y: state.originalB.y + dy
-                    },
-                    workspace
+                constrainFOBASWirePoint(
+                    wire.b
                 );
         }
 
-        renderWire(wire);
 
-        updateWireConnections(wire);
+        renderFOBASWire(
+            wire
+        );
+
+
+        /* ========================================================
+           TEST CONNECTION
+        ======================================================== */
+
+        if (
+            interaction.mode ===
+            "resizeA"
+        ) {
+
+            updateFOBASWireEndpointConnection(
+                wire,
+                "A",
+                false
+            );
+        }
+
+
+        if (
+            interaction.mode ===
+            "resizeB"
+        ) {
+
+            updateFOBASWireEndpointConnection(
+                wire,
+                "B",
+                false
+            );
+        }
+
+
+        if (
+            interaction.mode ===
+            "move"
+        ) {
+
+            updateFOBASWireConnectedPositions(
+                wire
+            );
+        }
     }
 
 
     /* ============================================================
-       15. CONSTRAIN POINT
+       10.18 — CONSTRAIN POINT
     ============================================================ */
 
-    function constrainPoint(
-        point,
-        workspace
+    function constrainFOBASWirePoint(
+        point
     ) {
 
-        const padding = 5;
+        const viewport =
+            getWireViewport();
+
+        if (!viewport) {
+            return point;
+        }
+
+
+        const margin = 4;
+
 
         return {
-            x: clamp(
-                point.x,
-                padding,
-                Math.max(
-                    padding,
-                    workspace.clientWidth - padding
-                )
-            ),
 
-            y: clamp(
-                point.y,
-                padding,
-                Math.max(
-                    padding,
-                    workspace.clientHeight - padding
+            x:
+                wireClamp(
+                    point.x,
+                    margin,
+                    Math.max(
+                        margin,
+                        viewport.clientWidth -
+                        margin
+                    )
+                ),
+
+            y:
+                wireClamp(
+                    point.y,
+                    margin,
+                    Math.max(
+                        margin,
+                        viewport.clientHeight -
+                        margin
+                    )
                 )
-            )
         };
     }
 
 
     /* ============================================================
-       16. FINISH POINTER ACTION
+       10.19 — FINISH INTERACTION
     ============================================================ */
 
-    function finishPointerAction() {
+    function finishFOBASWireInteraction(
+        event
+    ) {
+
+        const interaction =
+            FOBAS_WIRE_ENGINE
+                .interaction;
+
+
+        if (
+            !interaction.active
+        ) {
+            return;
+        }
+
+
+        if (
+            event &&
+            interaction.pointerId !==
+            event.pointerId
+        ) {
+            return;
+        }
+
 
         const wire =
-            state.activeWire;
+            FOBAS_WIRE_ENGINE.wires
+                .get(
+                    interaction.wireId
+                );
+
 
         if (wire) {
 
-            detectEndpointConnections(
+            updateFOBASWireEndpointConnection(
                 wire,
-                "A"
+                "A",
+                true
             );
 
-            detectEndpointConnections(
+            updateFOBASWireEndpointConnection(
                 wire,
-                "B"
+                "B",
+                true
             );
 
-            updateWireConnections(
+            updateFOBASWireConnectedPositions(
+                wire
+            );
+
+            renderFOBASWire(
                 wire
             );
         }
 
+
+        FOBAS_WIRE_ENGINE
+            .interaction = {
+
+                active: false,
+
+                mode: null,
+
+                wireId: null,
+
+                side: null,
+
+                pointerId: null,
+
+                startPointerX: 0,
+
+                startPointerY: 0,
+
+                startA: null,
+
+                startB: null
+            };
+
+
         window.removeEventListener(
             "pointermove",
-            handlePointerMove,
+            handleFOBASWirePointerMove,
             true
         );
 
         window.removeEventListener(
             "pointerup",
-            finishPointerAction,
+            finishFOBASWireInteraction,
             true
         );
 
-        state.action =
-            null;
-    }
-
-
-    /* ============================================================
-       17. COMPONENT ELEMENT DETECTION
-    ============================================================ */
-
-    function getComponentElements() {
-
-        const selectors = [
-            "[data-component-id]",
-            "[data-component-type]",
-            ".fobas-electronic-component",
-            ".fobas-component",
-            ".electronic-component"
-        ];
-
-        const elements = [];
-
-        selectors.forEach(selector => {
-
-            document
-                .querySelectorAll(selector)
-                .forEach(element => {
-
-                    if (
-                        !elements.includes(
-                            element
-                        )
-                    ) {
-                        elements.push(
-                            element
-                        );
-                    }
-                });
-        });
-
-        return elements;
-    }
-
-
-    /* ============================================================
-       18. GET COMPONENT ID
-    ============================================================ */
-
-    function getComponentId(element) {
-
-        if (!element) {
-            return null;
-        }
-
-        return (
-            element.dataset.componentId ||
-            element.dataset.componentInstanceId ||
-            element.getAttribute(
-                "data-component-id"
-            ) ||
-            element.id ||
-            null
+        window.removeEventListener(
+            "pointercancel",
+            finishFOBASWireInteraction,
+            true
         );
     }
 
 
     /* ============================================================
-       19. GET COMPONENT TYPE
+       10.20 — GET COMPONENT ELEMENTS
     ============================================================ */
 
-    function getComponentType(element) {
+    function getFOBASComponentElements() {
 
-        if (!element) {
-            return null;
-        }
+        const layer =
+            getWireComponentLayer();
 
-        return (
-            element.dataset.componentType ||
-            element.dataset.type ||
-            element.getAttribute(
-                "data-component-type"
-            ) ||
-            element.getAttribute(
-                "data-type"
-            ) ||
-            null
-        );
-    }
-
-
-    /* ============================================================
-       20. COMPONENT PIN DETECTION
-    ============================================================ */
-
-    function getComponentPins(element) {
-
-        if (!element) {
+        if (!layer) {
             return [];
         }
 
-        const selectors = [
-            "[data-pin-id]",
-            "[data-pin]",
-            ".fobas-pin",
-            ".component-pin",
-            ".electronic-pin"
-        ];
+
+        return Array.from(
+            layer.querySelectorAll(
+                ".electronic-component[data-component-id]"
+            )
+        );
+    }
+
+
+    /* ============================================================
+       10.21 — GET PIN ELEMENTS
+    ============================================================ */
+
+    function getFOBASPinElements() {
+
+        const components =
+            getFOBASComponentElements();
+
 
         const pins = [];
 
-        selectors.forEach(selector => {
 
-            element
-                .querySelectorAll(selector)
-                .forEach(pin => {
+        components.forEach(
+            component => {
 
-                    if (
-                        !pins.includes(pin)
-                    ) {
-                        pins.push(pin);
-                    }
-                });
-        });
+                component
+                    .querySelectorAll(
+                        ".electronic-pin[data-pin-id]"
+                    )
+                    .forEach(
+                        pin => {
+
+                            pins.push({
+                                pin,
+                                component
+                            });
+                        }
+                    );
+            }
+        );
+
 
         return pins;
     }
 
 
     /* ============================================================
-       21. PIN CENTER
+       10.22 — GET PIN POSITION
     ============================================================ */
 
-    function getElementCenter(
-        element,
-        workspace
+    function getFOBASPinPosition(
+        pin
     ) {
 
-        const rect =
-            element.getBoundingClientRect();
+        const viewport =
+            getWireViewport();
 
-        const workspaceRect =
-            workspace.getBoundingClientRect();
+        if (
+            !viewport ||
+            !pin
+        ) {
+            return null;
+        }
+
+
+        const pinRect =
+            pin.getBoundingClientRect();
+
+
+        const viewportRect =
+            viewport.getBoundingClientRect();
+
 
         return {
+
             x:
-                rect.left +
-                rect.width / 2 -
-                workspaceRect.left,
+                pinRect.left +
+                pinRect.width / 2 -
+                viewportRect.left,
 
             y:
-                rect.top +
-                rect.height / 2 -
-                workspaceRect.top
+                pinRect.top +
+                pinRect.height / 2 -
+                viewportRect.top
         };
     }
 
 
     /* ============================================================
-       22. FIND NEAREST PIN
+       10.23 — FIND NEAREST PIN
     ============================================================ */
 
-    function findNearestPin(
+    function findFOBASNearestPin(
         point,
-        maxDistance = 28
+        maximumDistance = 28
     ) {
 
-        const workspace =
-            getWorkspace();
+        const pins =
+            getFOBASPinElements();
 
-        if (!workspace) {
-            return null;
-        }
-
-        const components =
-            getComponentElements();
 
         let nearest = null;
+
         let nearestDistance =
-            maxDistance;
+            maximumDistance;
 
-        components.forEach(
-            component => {
 
-                const pins =
-                    getComponentPins(
-                        component
+        pins.forEach(
+            item => {
+
+                const position =
+                    getFOBASPinPosition(
+                        item.pin
                     );
 
-                pins.forEach(pin => {
 
-                    const center =
-                        getElementCenter(
-                            pin,
-                            workspace
-                        );
+                if (!position) {
+                    return;
+                }
 
-                    const distance =
-                        Math.hypot(
-                            center.x -
-                            point.x,
 
-                            center.y -
-                            point.y
-                        );
+                const distance =
+                    Math.hypot(
 
-                    if (
-                        distance <
-                        nearestDistance
-                    ) {
+                        position.x -
+                        point.x,
 
-                        nearestDistance =
-                            distance;
+                        position.y -
+                        point.y
+                    );
 
-                        nearest = {
-                            element:
-                                pin,
 
-                            component:
-                                component,
+                if (
+                    distance <
+                    nearestDistance
+                ) {
 
-                            componentId:
-                                getComponentId(
-                                    component
-                                ),
+                    nearestDistance =
+                        distance;
 
-                            componentType:
-                                getComponentType(
-                                    component
-                                ),
 
-                            pinId:
-                                pin.dataset.pinId ||
-                                pin.dataset.pin ||
-                                pin.getAttribute(
-                                    "data-pin-id"
-                                ) ||
-                                pin.getAttribute(
-                                    "data-pin"
-                                ),
+                    nearest = {
 
-                            point:
-                                center
-                        };
-                    }
-                });
+                        pin:
+                            item.pin,
+
+                        component:
+                            item.component,
+
+                        position,
+
+                        componentId:
+                            item.component
+                                .dataset
+                                .componentId,
+
+                        componentType:
+                            item.component
+                                .dataset
+                                .componentType,
+
+                        pinId:
+                            item.pin
+                                .dataset
+                                .pinId
+                    };
+                }
             }
         );
+
 
         return nearest;
     }
 
 
     /* ============================================================
-       23. CONNECT ENDPOINT TO PIN
+       10.24 — CONNECT ENDPOINT
     ============================================================ */
 
-    function connectEndpoint(
+    function connectFOBASWireEndpoint(
         wire,
         side,
         pinInfo
@@ -7044,7 +7545,30 @@ function applyComponentVisualState(
             return false;
         }
 
+
+        if (
+            wire.connections[side]
+        ) {
+
+            const previous =
+                wire.connections[side];
+
+
+            if (
+                previous.pin !==
+                pinInfo.pin
+            ) {
+
+                disconnectFOBASWireEndpoint(
+                    wire,
+                    side
+                );
+            }
+        }
+
+
         wire.connections[side] = {
+
             component:
                 pinInfo.component,
 
@@ -7055,24 +7579,51 @@ function applyComponentVisualState(
                 pinInfo.componentType,
 
             pin:
-                pinInfo.element,
+                pinInfo.pin,
 
             pinId:
                 pinInfo.pinId
         };
 
-        wire[side.toLowerCase()] = {
-            x: pinInfo.point.x,
-            y: pinInfo.point.y
+
+        wire[
+            side === "A"
+                ? "a"
+                : "b"
+        ] = {
+
+            x:
+                pinInfo.position.x,
+
+            y:
+                pinInfo.position.y
         };
 
-        markPinConnected(
-            pinInfo.element,
-            wire,
-            side
+
+        pinInfo.pin.dataset
+            .fobasWireConnected =
+            "true";
+
+
+        pinInfo.pin.dataset
+            .fobasWireId =
+            wire.id;
+
+
+        pinInfo.pin.dataset
+            .fobasWireSide =
+            side;
+
+
+        pinInfo.pin.classList.add(
+            "fobas-wire-connected-pin"
         );
 
-        renderWire(wire);
+
+        renderFOBASWire(
+            wire
+        );
+
 
         document.dispatchEvent(
             new CustomEvent(
@@ -7090,42 +7641,59 @@ function applyComponentVisualState(
             )
         );
 
+
         return true;
     }
 
 
     /* ============================================================
-       24. DISCONNECT ENDPOINT
+       10.25 — DISCONNECT ENDPOINT
     ============================================================ */
 
-    function disconnectEndpoint(
+    function disconnectFOBASWireEndpoint(
         wire,
         side
     ) {
 
-        if (
-            !wire ||
-            !wire.connections[side]
-        ) {
+        if (!wire) {
             return;
         }
+
 
         const connection =
             wire.connections[side];
 
-        if (connection.pin) {
 
-            connection.pin.removeAttribute(
-                "data-fobas-connected"
-            );
+        if (
+            connection &&
+            connection.pin
+        ) {
 
-            connection.pin.removeAttribute(
-                "data-fobas-wire-id"
-            );
+            connection.pin.classList
+                .remove(
+                    "fobas-wire-connected-pin"
+                );
+
+
+            delete connection.pin
+                .dataset
+                .fobasWireConnected;
+
+
+            delete connection.pin
+                .dataset
+                .fobasWireId;
+
+
+            delete connection.pin
+                .dataset
+                .fobasWireSide;
         }
+
 
         wire.connections[side] =
             null;
+
 
         document.dispatchEvent(
             new CustomEvent(
@@ -7142,312 +7710,208 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       25. DETECT ENDPOINT CONNECTION
+       10.26 — UPDATE ENDPOINT CONNECTION
     ============================================================ */
 
-    function detectEndpointConnections(
+    function updateFOBASWireEndpointConnection(
         wire,
-        side
+        side,
+        allowDisconnect = true
     ) {
-
-        if (!wire) {
-            return;
-        }
 
         const point =
             side === "A"
                 ? wire.a
                 : wire.b;
 
+
         const nearest =
-            findNearestPin(
+            findFOBASNearestPin(
                 point,
-                30
+                26
             );
+
 
         if (nearest) {
 
-            connectEndpoint(
+            connectFOBASWireEndpoint(
                 wire,
                 side,
                 nearest
             );
 
-        } else {
-
-            if (
-                wire.connections[side]
-            ) {
-                disconnectEndpoint(
-                    wire,
-                    side
-                );
-            }
+            return true;
         }
+
+
+        if (
+            allowDisconnect &&
+            wire.connections[side]
+        ) {
+
+            disconnectFOBASWireEndpoint(
+                wire,
+                side
+            );
+        }
+
+
+        return false;
     }
 
 
     /* ============================================================
-       26. MARK PIN CONNECTED
+       10.27 — UPDATE CONNECTED POSITIONS
     ============================================================ */
 
-    function markPinConnected(
-        pin,
-        wire,
-        side
+    function updateFOBASWireConnectedPositions(
+        wire
     ) {
-
-        if (!pin) {
-            return;
-        }
-
-        pin.setAttribute(
-            "data-fobas-connected",
-            "true"
-        );
-
-        pin.setAttribute(
-            "data-fobas-wire-id",
-            wire.id
-        );
-
-        pin.setAttribute(
-            "data-fobas-wire-side",
-            side
-        );
-    }
-
-
-    /* ============================================================
-       27. UPDATE CONNECTED WIRES
-    ============================================================ */
-
-    function updateWireConnections(wire) {
 
         if (!wire) {
             return;
         }
 
-        ["A", "B"].forEach(side => {
 
-            const connection =
-                wire.connections[side];
+        ["A", "B"]
+            .forEach(
+                side => {
 
-            if (
-                !connection ||
-                !connection.pin
-            ) {
-                return;
-            }
-
-            const workspace =
-                getWorkspace();
-
-            if (!workspace) {
-                return;
-            }
-
-            const point =
-                getElementCenter(
-                    connection.pin,
-                    workspace
-                );
-
-            if (side === "A") {
-                wire.a = point;
-            } else {
-                wire.b = point;
-            }
-        });
-
-        renderWire(wire);
-    }
+                    const connection =
+                        wire.connections[
+                            side
+                        ];
 
 
-    /* ============================================================
-       28. UPDATE ALL CONNECTED WIRES
-    ============================================================ */
-
-    function updateAllConnectedWires() {
-
-        wireRegistry.forEach(
-            wire => {
-
-                updateWireConnections(
-                    wire
-                );
-            }
-        );
-    }
+                    if (
+                        !connection ||
+                        !connection.pin
+                    ) {
+                        return;
+                    }
 
 
-    /* ============================================================
-       29. COMPONENT MOVE OBSERVER
-    ============================================================ */
+                    const position =
+                        getFOBASPinPosition(
+                            connection.pin
+                        );
 
-    function installComponentObserver() {
 
-        if (
-            typeof MutationObserver ===
-            "undefined"
-        ) {
-            return;
-        }
+                    if (!position) {
+                        return;
+                    }
 
-        const workspace =
-            getWorkspace();
 
-        if (!workspace) {
-            return;
-        }
+                    if (side === "A") {
 
-        const observer =
-            new MutationObserver(
-                function() {
+                        wire.a = {
 
-                    updateAllConnectedWires();
+                            x:
+                                position.x,
+
+                            y:
+                                position.y
+                        };
+
+                    } else {
+
+                        wire.b = {
+
+                            x:
+                                position.x,
+
+                            y:
+                                position.y
+                        };
+                    }
                 }
             );
 
-        observer.observe(
-            workspace,
-            {
-                attributes: true,
-                childList: true,
-                subtree: true
-            }
+
+        renderFOBASWire(
+            wire
         );
     }
 
 
     /* ============================================================
-       30. CREATE WIRE FROM DEFINITION
+       10.28 — UPDATE ALL WIRES
     ============================================================ */
 
-    function addWire(type = "wire", options = {}) {
+    function updateAllFOBASWires() {
 
-        return createWire(
-            type,
-            options
-        );
+        FOBAS_WIRE_ENGINE.wires
+            .forEach(
+                wire => {
+
+                    updateFOBASWireConnectedPositions(
+                        wire
+                    );
+                }
+            );
     }
 
 
     /* ============================================================
-       31. QUICK COLOR FUNCTIONS
+       10.29 — REMOVE WIRE
     ============================================================ */
 
-    function addRedWire(options = {}) {
-
-        return addWire(
-            "wire-red",
-            {
-                ...options,
-                color:
-                    COLORS.red
-            }
-        );
-    }
-
-
-    function addBlackWire(options = {}) {
-
-        return addWire(
-            "wire-black",
-            {
-                ...options,
-                color:
-                    COLORS.black
-            }
-        );
-    }
-
-
-    function addGreenWire(options = {}) {
-
-        return addWire(
-            "wire-green",
-            {
-                ...options,
-                color:
-                    COLORS.green
-            }
-        );
-    }
-
-
-    function addColoredWire(
-        color,
-        options = {}
+    function removeFOBASWire(
+        wireOrId
     ) {
-
-        const normalized =
-            String(
-                color || "black"
-            ).toLowerCase();
-
-        const selectedColor =
-            COLORS[normalized] ||
-            COLORS.black;
-
-        return addWire(
-            "wire",
-            {
-                ...options,
-                color:
-                    selectedColor
-            }
-        );
-    }
-
-
-    /* ============================================================
-       32. DELETE WIRE
-    ============================================================ */
-
-    function deleteWire(wireOrId) {
 
         const wire =
             typeof wireOrId === "string"
-                ? wireRegistry.get(
-                    wireOrId
-                )
+                ? FOBAS_WIRE_ENGINE.wires
+                    .get(wireOrId)
                 : wireOrId;
+
 
         if (!wire) {
             return false;
         }
 
-        disconnectEndpoint(
+
+        disconnectFOBASWireEndpoint(
             wire,
             "A"
         );
 
-        disconnectEndpoint(
+        disconnectFOBASWireEndpoint(
             wire,
             "B"
         );
 
+
         if (
-            wire.element &&
-            wire.element.parentNode
+            wire.svg &&
+            wire.svg.parentNode
         ) {
 
-            wire.element.parentNode.removeChild(
-                wire.element
-            );
+            wire.svg.parentNode
+                .removeChild(
+                    wire.svg
+                );
         }
 
-        wireRegistry.delete(
-            wire.id
-        );
+
+        FOBAS_WIRE_ENGINE.wires
+            .delete(
+                wire.id
+            );
+
 
         if (
-            state.activeWire === wire
+            FOBAS_WIRE_ENGINE
+                .selectedWireId ===
+            wire.id
         ) {
-            state.activeWire =
+
+            FOBAS_WIRE_ENGINE
+                .selectedWireId =
                 null;
         }
+
 
         document.dispatchEvent(
             new CustomEvent(
@@ -7460,143 +7924,253 @@ function applyComponentVisualState(
             )
         );
 
+
         return true;
     }
 
 
     /* ============================================================
-       33. GET WIRE
+       10.30 — CLEAR WIRES
     ============================================================ */
 
-    function getWire(id) {
+    function clearAllFOBASWires() {
 
-        return wireRegistry.get(
-            id
-        ) || null;
+        Array.from(
+            FOBAS_WIRE_ENGINE.wires
+                .values()
+        )
+            .forEach(
+                wire => {
+
+                    removeFOBASWire(
+                        wire
+                    );
+                }
+            );
     }
 
 
     /* ============================================================
-       34. GET ALL WIRES
+       10.31 — INTERCEPT WIRE ADD BUTTON
+       ------------------------------------------------------------
+       IMPORTANT :
+       Le bouton ＋ AJOUTER existant de Block 08 reste utilisé.
+       Pour les wires, cette interception crée le vrai câble SVG
+       au lieu de créer un composant électronique rectangulaire.
     ============================================================ */
 
-    function getAllWires() {
+    function installFOBASWireAddInterceptor() {
 
-        return Array.from(
-            wireRegistry.values()
+        document.addEventListener(
+            "click",
+            function (event) {
+
+                const button =
+                    event.target.closest
+                        ? event.target.closest(
+                            "[data-add-component]"
+                        )
+                        : null;
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const type =
+                    button.getAttribute(
+                        "data-add-component"
+                    );
+
+
+                if (
+                    !isFOBASWireType(
+                        type
+                    )
+                ) {
+                    return;
+                }
+
+
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+
+                const wire =
+                    createFOBASWire(
+                        type
+                    );
+
+
+                if (wire) {
+
+                    document.dispatchEvent(
+                        new CustomEvent(
+                            "fobas:wire-added",
+                            {
+                                detail: {
+                                    wire
+                                }
+                            }
+                        )
+                    );
+                }
+
+            },
+            true
         );
     }
 
 
     /* ============================================================
-       35. CLEAR WIRES
+       10.32 — COMPONENT MOVE OBSERVER
     ============================================================ */
 
-    function clearAllWires() {
+    function installFOBASWireObserver() {
 
-        getAllWires().forEach(
-            wire => {
-                deleteWire(wire);
-            }
-        );
-    }
+        const layer =
+            getWireComponentLayer();
 
 
-    /* ============================================================
-       36. PUBLIC API
-    ============================================================ */
+        if (!layer) {
+            return false;
+        }
 
-    window.FOBASWireCableEngine = {
-
-        name:
-            ENGINE_NAME,
-
-        version:
-            ENGINE_VERSION,
-
-        state,
-
-        colors:
-            COLORS,
-
-        addWire,
-
-        addRedWire,
-
-        addBlackWire,
-
-        addGreenWire,
-
-        addColoredWire,
-
-        createWire,
-
-        selectWire,
-
-        deleteWire,
-
-        getWire,
-
-        getAllWires,
-
-        clearAllWires,
-
-        updateAllConnectedWires,
-
-        connectEndpoint,
-
-        disconnectEndpoint,
-
-        detectEndpointConnections,
-
-        renderWire
-    };
-
-
-    /* ============================================================
-       37. INITIALIZATION
-    ============================================================ */
-
-    function initialize() {
 
         if (
-            state.initialized
+            FOBAS_WIRE_ENGINE.observer
+        ) {
+            return true;
+        }
+
+
+        if (
+            typeof MutationObserver ===
+            "undefined"
+        ) {
+            return false;
+        }
+
+
+        FOBAS_WIRE_ENGINE.observer =
+            new MutationObserver(
+                function (
+                    mutations
+                ) {
+
+                    let componentChanged =
+                        false;
+
+
+                    for (
+                        const mutation
+                        of mutations
+                    ) {
+
+                        if (
+                            mutation.type ===
+                            "attributes" &&
+                            (
+                                mutation.attributeName ===
+                                "style" ||
+
+                                mutation.attributeName ===
+                                "class"
+                            )
+                        ) {
+
+                            componentChanged =
+                                true;
+
+                            break;
+                        }
+                    }
+
+
+                    if (
+                        componentChanged
+                    ) {
+
+                        updateAllFOBASWires();
+                    }
+                }
+            );
+
+
+        FOBAS_WIRE_ENGINE.observer
+            .observe(
+                layer,
+                {
+                    subtree: true,
+                    attributes: true
+                }
+            );
+
+
+        return true;
+    }
+
+
+    /* ============================================================
+       10.33 — AUTO INITIALIZATION
+    ============================================================ */
+
+    function initializeFOBASWireEngine() {
+
+        if (
+            FOBAS_WIRE_ENGINE
+                .initialized
         ) {
             return;
         }
 
-        const workspace =
-            getWorkspace();
 
-        if (!workspace) {
+        const viewport =
+            getWireViewport();
+
+
+        const layer =
+            getWireComponentLayer();
+
+
+        if (
+            !viewport ||
+            !layer
+        ) {
 
             setTimeout(
-                initialize,
-                500
+                initializeFOBASWireEngine,
+                400
             );
 
             return;
         }
 
-        ensureWireLayer(
-            workspace
-        );
 
-        installComponentObserver();
+        ensureFOBASWireLayer();
 
-        state.initialized =
+
+        installFOBASWireAddInterceptor();
+
+
+        installFOBASWireObserver();
+
+
+        FOBAS_WIRE_ENGINE
+            .initialized =
             true;
+
 
         document.dispatchEvent(
             new CustomEvent(
                 "fobas:wire-engine-ready",
                 {
                     detail: {
-                        engine:
-                            ENGINE_NAME,
-
                         version:
-                            ENGINE_VERSION
+                            FOBAS_WIRE_ENGINE
+                                .version
                     }
                 }
             )
@@ -7605,7 +8179,69 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       38. SAFE START
+       10.34 — PUBLIC API
+    ============================================================ */
+
+    window.FOBASWireCableEngine = {
+
+        version:
+            FOBAS_WIRE_ENGINE.version,
+
+        colors:
+            FOBAS_WIRE_COLORS,
+
+        state:
+            FOBAS_WIRE_ENGINE,
+
+        createWire:
+            createFOBASWire,
+
+        addWire:
+            createFOBASWire,
+
+        selectWire:
+            selectFOBASWire,
+
+        removeWire:
+            removeFOBASWire,
+
+        deleteWire:
+            removeFOBASWire,
+
+        clearWires:
+            clearAllFOBASWires,
+
+        getWire:
+            function (id) {
+
+                return FOBAS_WIRE_ENGINE
+                    .wires
+                    .get(id) || null;
+            },
+
+        getAllWires:
+            function () {
+
+                return Array.from(
+                    FOBAS_WIRE_ENGINE
+                        .wires
+                        .values()
+                );
+            },
+
+        update:
+            updateAllFOBASWires,
+
+        connect:
+            connectFOBASWireEndpoint,
+
+        disconnect:
+            disconnectFOBASWireEndpoint
+    };
+
+
+    /* ============================================================
+       10.35 — START
     ============================================================ */
 
     if (
@@ -7615,7 +8251,7 @@ function applyComponentVisualState(
 
         document.addEventListener(
             "DOMContentLoaded",
-            initialize,
+            initializeFOBASWireEngine,
             {
                 once: true
             }
@@ -7623,10 +8259,31 @@ function applyComponentVisualState(
 
     } else {
 
-        initialize();
+        initializeFOBASWireEngine();
     }
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
