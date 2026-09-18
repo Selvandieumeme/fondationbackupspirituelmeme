@@ -1,6 +1,3 @@
-
-
-
 /* ================================================================
    FOBAS — LABORATOIRE ÉLECTRONIQUE & ROBOTIQUE
    SIMULATION ELECTRONIQUE ENGINE
@@ -5756,6 +5753,1332 @@ function applyComponentVisualState(
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================================================================
+   10. FOBAS AUTO SAVE & AUTO RESTORE ENGINE
+   ---------------------------------------------------------------
+   VERSION : 1.0.0
+   ---------------------------------------------------------------
+   OBJECTIF :
+   - Sauvegarde automatique toutes les 5 minutes
+   - Restauration automatique au retour dans le laboratoire
+   - Utilisation de localStorage
+   - Aucun bouton "Save" obligatoire
+   - Fonctionnement autonome
+   - Protection contre les erreurs localStorage
+   - Protection contre les doublons
+   - Ne modifie PAS les Blocks 01 à 09
+   - Ne modifie PAS les fonctions existantes
+   - Compatible avec les composants, fils et états futurs
+   ================================================================ */
+
+(function () {
+
+    "use strict";
+
+    /* ============================================================
+       10.1 — PROTECTION DU MOTEUR
+    ============================================================ */
+
+    if (window.__FOBAS_AUTO_SAVE_ENGINE_V1__) {
+        return;
+    }
+
+    window.__FOBAS_AUTO_SAVE_ENGINE_V1__ = true;
+
+
+    /* ============================================================
+       10.2 — CONFIGURATION
+    ============================================================ */
+
+    const FOBAS_AUTOSAVE_CONFIG = {
+
+        /* Clé principale du laboratoire */
+        storageKey:
+            "FOBAS_ELECTRONIQUE_ROBOTIQUE_AUTOSAVE_V1",
+
+        /* Version des données */
+        dataVersion:
+            1,
+
+        /* 5 minutes */
+        interval:
+            5 * 60 * 1000,
+
+        /* Détection des changements */
+        changeCheckInterval:
+            3000,
+
+        /* Nombre maximum de sauvegardes locales */
+        maxStorageSize:
+            4 * 1024 * 1024,
+
+        /* Délai avant restauration automatique */
+        restoreDelay:
+            250,
+
+        /* Nombre maximum de tentatives d'initialisation */
+        maxInitAttempts:
+            40,
+
+        /* Intervalle entre tentatives */
+        initRetryDelay:
+            250
+    };
+
+
+    /* ============================================================
+       10.3 — ÉTAT INTERNE DU MOTEUR
+    ============================================================ */
+
+    const FOBAS_AUTOSAVE_STATE = {
+
+        initialized:
+            false,
+
+        restoring:
+            false,
+
+        saving:
+            false,
+
+        restored:
+            false,
+
+        lastSaveTime:
+            0,
+
+        lastRestoreTime:
+            0,
+
+        lastHash:
+            "",
+
+        saveTimer:
+            null,
+
+        changeTimer:
+            null,
+
+        initAttempts:
+            0
+    };
+
+
+    /* ============================================================
+       10.4 — OUTILS SÉCURISÉS
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_getStorage() {
+
+        try {
+
+            const testKey =
+                "__FOBAS_AUTOSAVE_TEST__";
+
+            localStorage.setItem(
+                testKey,
+                "1"
+            );
+
+            localStorage.removeItem(
+                testKey
+            );
+
+            return localStorage;
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] localStorage indisponible.",
+                error
+            );
+
+            return null;
+        }
+    }
+
+
+    function FOBAS_AUTOSAVE_safeStringify(data) {
+
+        try {
+
+            return JSON.stringify(
+                data,
+                function (key, value) {
+
+                    /*
+                     * Évite les références circulaires.
+                     */
+                    if (
+                        typeof value === "object" &&
+                        value !== null
+                    ) {
+
+                        if (
+                            key === "element" ||
+                            key === "dom" ||
+                            key === "parentNode" ||
+                            key === "ownerDocument"
+                        ) {
+                            return undefined;
+                        }
+                    }
+
+                    /*
+                     * Les fonctions ne doivent jamais
+                     * être enregistrées dans localStorage.
+                     */
+                    if (
+                        typeof value === "function"
+                    ) {
+                        return undefined;
+                    }
+
+                    return value;
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Impossible de convertir les données.",
+                error
+            );
+
+            return null;
+        }
+    }
+
+
+    function FOBAS_AUTOSAVE_safeParse(value) {
+
+        if (!value) {
+            return null;
+        }
+
+        try {
+
+            return JSON.parse(value);
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Données sauvegardées invalides.",
+                error
+            );
+
+            return null;
+        }
+    }
+
+
+    /* ============================================================
+       10.5 — EXTRACTION DES DONNÉES DU LABORATOIRE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_buildSnapshot() {
+
+        if (
+            typeof state === "undefined" ||
+            !state
+        ) {
+
+            return null;
+        }
+
+        const snapshot = {
+
+            version:
+                FOBAS_AUTOSAVE_CONFIG.dataVersion,
+
+            savedAt:
+                new Date().toISOString(),
+
+            application:
+                "FOBAS ELECTRONIQUE & ROBOTIQUE",
+
+            components:
+                Array.isArray(state.components)
+                    ? state.components
+                    : [],
+
+            /*
+             * Le moteur de fils peut ajouter state.wires
+             * ultérieurement sans modifier ce système.
+             */
+            wires:
+                Array.isArray(state.wires)
+                    ? state.wires
+                    : [],
+
+            connections:
+                Array.isArray(state.connections)
+                    ? state.connections
+                    : [],
+
+            /*
+             * États généraux utiles au laboratoire.
+             */
+            circuitRunning:
+                state.circuitRunning ?? false,
+
+            selectedComponentId:
+                state.selectedComponentId ?? null,
+
+            selectedComponentType:
+                state.selectedComponentType ?? null,
+
+            currentLibraryCategory:
+                state.currentLibraryCategory ?? "all",
+
+            selectedTool:
+                state.selectedTool ?? null,
+
+            selectedPanel:
+                state.selectedPanel ?? null,
+
+            mode:
+                state.mode ?? null,
+
+            /*
+             * Valeurs supplémentaires si elles existent.
+             */
+            measurements:
+                state.measurements ?? null,
+
+            simulation:
+                state.simulation ?? null,
+
+            laboratory:
+                state.laboratory ?? null
+        };
+
+        return snapshot;
+    }
+
+
+    /* ============================================================
+       10.6 — SIGNATURE DES DONNÉES
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_createHash(snapshot) {
+
+        const serialized =
+            FOBAS_AUTOSAVE_safeStringify(snapshot);
+
+        if (!serialized) {
+            return "";
+        }
+
+        /*
+         * Hash léger interne.
+         * Il sert uniquement à détecter les changements.
+         */
+        let hash = 0;
+
+        for (
+            let i = 0;
+            i < serialized.length;
+            i++
+        ) {
+
+            hash =
+                (
+                    (hash << 5) -
+                    hash +
+                    serialized.charCodeAt(i)
+                ) |
+                0;
+        }
+
+        return String(hash);
+    }
+
+
+    /* ============================================================
+       10.7 — SAUVEGARDE LOCALE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_save(reason = "automatic") {
+
+        if (
+            FOBAS_AUTOSAVE_STATE.saving
+        ) {
+            return false;
+        }
+
+        const storage =
+            FOBAS_AUTOSAVE_getStorage();
+
+        if (!storage) {
+            return false;
+        }
+
+        const snapshot =
+            FOBAS_AUTOSAVE_buildSnapshot();
+
+        if (!snapshot) {
+            return false;
+        }
+
+        const serialized =
+            FOBAS_AUTOSAVE_safeStringify(
+                snapshot
+            );
+
+        if (!serialized) {
+            return false;
+        }
+
+        /*
+         * Protection contre une taille excessive.
+         */
+        if (
+            serialized.length >
+            FOBAS_AUTOSAVE_CONFIG.maxStorageSize
+        ) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Sauvegarde trop volumineuse."
+            );
+
+            return false;
+        }
+
+        FOBAS_AUTOSAVE_STATE.saving =
+            true;
+
+        try {
+
+            storage.setItem(
+                FOBAS_AUTOSAVE_CONFIG.storageKey,
+                serialized
+            );
+
+            FOBAS_AUTOSAVE_STATE.lastSaveTime =
+                Date.now();
+
+            FOBAS_AUTOSAVE_STATE.lastHash =
+                FOBAS_AUTOSAVE_createHash(
+                    snapshot
+                );
+
+            /*
+             * Petit registre technique.
+             */
+            storage.setItem(
+                FOBAS_AUTOSAVE_CONFIG.storageKey +
+                "_META",
+                JSON.stringify({
+                    version:
+                        FOBAS_AUTOSAVE_CONFIG.dataVersion,
+
+                    savedAt:
+                        snapshot.savedAt,
+
+                    reason:
+                        reason
+                })
+            );
+
+            FOBAS_AUTOSAVE_STATE.saving =
+                false;
+
+            return true;
+
+        } catch (error) {
+
+            FOBAS_AUTOSAVE_STATE.saving =
+                false;
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Échec de sauvegarde.",
+                error
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ============================================================
+       10.8 — LECTURE DE LA SAUVEGARDE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_loadSnapshot() {
+
+        const storage =
+            FOBAS_AUTOSAVE_getStorage();
+
+        if (!storage) {
+            return null;
+        }
+
+        try {
+
+            const raw =
+                storage.getItem(
+                    FOBAS_AUTOSAVE_CONFIG.storageKey
+                );
+
+            if (!raw) {
+                return null;
+            }
+
+            const snapshot =
+                FOBAS_AUTOSAVE_safeParse(raw);
+
+            if (!snapshot) {
+                return null;
+            }
+
+            /*
+             * Vérification minimale de sécurité.
+             */
+            if (
+                snapshot.application !==
+                "FOBAS ELECTRONIQUE & ROBOTIQUE"
+            ) {
+                return null;
+            }
+
+            if (
+                Number(snapshot.version) !==
+                FOBAS_AUTOSAVE_CONFIG.dataVersion
+            ) {
+
+                console.warn(
+                    "[FOBAS AUTO SAVE] Version de sauvegarde incompatible."
+                );
+
+                return null;
+            }
+
+            return snapshot;
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Lecture impossible.",
+                error
+            );
+
+            return null;
+        }
+    }
+
+
+    /* ============================================================
+       10.9 — RESTAURATION DE L'ÉTAT
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_restore(snapshot) {
+
+        if (
+            !snapshot ||
+            typeof state === "undefined" ||
+            !state
+        ) {
+            return false;
+        }
+
+        if (
+            FOBAS_AUTOSAVE_STATE.restoring
+        ) {
+            return false;
+        }
+
+        FOBAS_AUTOSAVE_STATE.restoring =
+            true;
+
+        try {
+
+            /*
+             * Les tableaux principaux sont restaurés
+             * sans remplacer l'objet global "state".
+             */
+
+            if (
+                Array.isArray(snapshot.components)
+            ) {
+
+                state.components =
+                    snapshot.components.map(
+                        component => ({
+                            ...component
+                        })
+                    );
+            }
+
+            if (
+                Array.isArray(snapshot.wires)
+            ) {
+
+                state.wires =
+                    snapshot.wires.map(
+                        wire => ({
+                            ...wire
+                        })
+                    );
+            }
+
+            if (
+                Array.isArray(snapshot.connections)
+            ) {
+
+                state.connections =
+                    snapshot.connections.map(
+                        connection => ({
+                            ...connection
+                        })
+                    );
+            }
+
+            /*
+             * États généraux.
+             */
+
+            if (
+                snapshot.circuitRunning !== undefined
+            ) {
+
+                state.circuitRunning =
+                    snapshot.circuitRunning;
+            }
+
+            if (
+                snapshot.selectedComponentId !== undefined
+            ) {
+
+                state.selectedComponentId =
+                    snapshot.selectedComponentId;
+            }
+
+            if (
+                snapshot.selectedComponentType !== undefined
+            ) {
+
+                state.selectedComponentType =
+                    snapshot.selectedComponentType;
+            }
+
+            if (
+                snapshot.currentLibraryCategory !== undefined
+            ) {
+
+                state.currentLibraryCategory =
+                    snapshot.currentLibraryCategory;
+            }
+
+            if (
+                snapshot.selectedTool !== undefined
+            ) {
+
+                state.selectedTool =
+                    snapshot.selectedTool;
+            }
+
+            if (
+                snapshot.selectedPanel !== undefined
+            ) {
+
+                state.selectedPanel =
+                    snapshot.selectedPanel;
+            }
+
+            if (
+                snapshot.mode !== undefined
+            ) {
+
+                state.mode =
+                    snapshot.mode;
+            }
+
+            if (
+                snapshot.measurements !== undefined
+            ) {
+
+                state.measurements =
+                    snapshot.measurements;
+            }
+
+            if (
+                snapshot.simulation !== undefined
+            ) {
+
+                state.simulation =
+                    snapshot.simulation;
+            }
+
+            if (
+                snapshot.laboratory !== undefined
+            ) {
+
+                state.laboratory =
+                    snapshot.laboratory;
+            }
+
+
+            /* ----------------------------------------------------
+               RECONSTRUCTION VISUELLE
+            ---------------------------------------------------- */
+
+            /*
+             * Si la fonction existante existe,
+             * elle est appelée sans la modifier.
+             */
+            if (
+                typeof renderComponent === "function"
+            ) {
+
+                if (
+                    Array.isArray(state.components)
+                ) {
+
+                    state.components.forEach(
+                        component => {
+
+                            try {
+
+                                renderComponent(
+                                    component
+                                );
+
+                            } catch (error) {
+
+                                console.warn(
+                                    "[FOBAS AUTO SAVE] Erreur rendu composant.",
+                                    error
+                                );
+                            }
+                        }
+                    );
+                }
+            }
+
+
+            /*
+             * Si le moteur des fils existe déjà,
+             * on lui demande de reconstruire ses fils.
+             *
+             * Aucun moteur n'est exigé pour que
+             * l'Auto Save fonctionne.
+             */
+
+            if (
+                typeof window.FOBAS_WIRE_restore ===
+                "function"
+            ) {
+
+                try {
+
+                    window.FOBAS_WIRE_restore();
+
+                } catch (error) {
+
+                    console.warn(
+                        "[FOBAS AUTO SAVE] Erreur restauration des fils.",
+                        error
+                    );
+                }
+            }
+
+
+            /*
+             * Mise à jour éventuelle du workspace.
+             */
+            if (
+                typeof updateWorkspaceState ===
+                "function"
+            ) {
+
+                try {
+
+                    updateWorkspaceState();
+
+                } catch (error) {
+
+                    console.warn(
+                        "[FOBAS AUTO SAVE] updateWorkspaceState() a échoué.",
+                        error
+                    );
+                }
+            }
+
+
+            FOBAS_AUTOSAVE_STATE.lastRestoreTime =
+                Date.now();
+
+            FOBAS_AUTOSAVE_STATE.lastHash =
+                FOBAS_AUTOSAVE_createHash(
+                    snapshot
+                );
+
+            FOBAS_AUTOSAVE_STATE.restored =
+                true;
+
+            FOBAS_AUTOSAVE_STATE.restoring =
+                false;
+
+            return true;
+
+        } catch (error) {
+
+            FOBAS_AUTOSAVE_STATE.restoring =
+                false;
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Restauration échouée.",
+                error
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ============================================================
+       10.10 — RESTAURATION AUTOMATIQUE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_autoRestore() {
+
+        if (
+            FOBAS_AUTOSAVE_STATE.restored
+        ) {
+            return;
+        }
+
+        const snapshot =
+            FOBAS_AUTOSAVE_loadSnapshot();
+
+        if (!snapshot) {
+
+            FOBAS_AUTOSAVE_STATE.restored =
+                true;
+
+            return;
+        }
+
+        /*
+         * On attend que le workspace existe.
+         */
+        setTimeout(
+            function () {
+
+                FOBAS_AUTOSAVE_restore(
+                    snapshot
+                );
+
+            },
+            FOBAS_AUTOSAVE_CONFIG.restoreDelay
+        );
+    }
+
+
+    /* ============================================================
+       10.11 — DÉTECTION DES MODIFICATIONS
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_checkForChanges() {
+
+        if (
+            FOBAS_AUTOSAVE_STATE.restoring
+        ) {
+            return;
+        }
+
+        const snapshot =
+            FOBAS_AUTOSAVE_buildSnapshot();
+
+        if (!snapshot) {
+            return;
+        }
+
+        const currentHash =
+            FOBAS_AUTOSAVE_createHash(
+                snapshot
+            );
+
+        if (!currentHash) {
+            return;
+        }
+
+        /*
+         * Première signature.
+         */
+        if (
+            !FOBAS_AUTOSAVE_STATE.lastHash
+        ) {
+
+            FOBAS_AUTOSAVE_STATE.lastHash =
+                currentHash;
+
+            return;
+        }
+
+        /*
+         * Si le travail a changé,
+         * la sauvegarde sera faite automatiquement.
+         *
+         * On ne sauvegarde pas à chaque milliseconde :
+         * le timer principal reste responsable
+         * de la sauvegarde toutes les 5 minutes.
+         */
+        if (
+            currentHash !==
+            FOBAS_AUTOSAVE_STATE.lastHash
+        ) {
+
+            FOBAS_AUTOSAVE_STATE.hasChanges =
+                true;
+        }
+    }
+
+
+    /* ============================================================
+       10.12 — SAUVEGARDE AUTOMATIQUE TOUTES LES 5 MINUTES
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_startTimer() {
+
+        if (
+            FOBAS_AUTOSAVE_STATE.saveTimer
+        ) {
+
+            clearInterval(
+                FOBAS_AUTOSAVE_STATE.saveTimer
+            );
+        }
+
+        FOBAS_AUTOSAVE_STATE.saveTimer =
+            setInterval(
+                function () {
+
+                    const snapshot =
+                        FOBAS_AUTOSAVE_buildSnapshot();
+
+                    if (!snapshot) {
+                        return;
+                    }
+
+                    const currentHash =
+                        FOBAS_AUTOSAVE_createHash(
+                            snapshot
+                        );
+
+                    /*
+                     * On sauvegarde même si aucune
+                     * modification importante n'a été
+                     * détectée : cela garantit une
+                     * sauvegarde périodique robuste.
+                     */
+
+                    if (
+                        currentHash !==
+                        FOBAS_AUTOSAVE_STATE.lastHash ||
+                        Date.now() -
+                        FOBAS_AUTOSAVE_STATE.lastSaveTime >=
+                        FOBAS_AUTOSAVE_CONFIG.interval
+                    ) {
+
+                        FOBAS_AUTOSAVE_save(
+                            "automatic-5-minutes"
+                        );
+                    }
+
+                },
+                FOBAS_AUTOSAVE_CONFIG.interval
+            );
+    }
+
+
+    /* ============================================================
+       10.13 — SAUVEGARDE AVANT QUITTER / MASQUER LA PAGE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_saveBeforeLeave() {
+
+        /*
+         * Attention :
+         * les navigateurs modernes limitent les opérations
+         * pendant beforeunload/pagehide.
+         *
+         * localStorage reste cependant synchrone.
+         */
+
+        try {
+
+            FOBAS_AUTOSAVE_save(
+                "page-leave"
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Sauvegarde de sortie échouée.",
+                error
+            );
+        }
+    }
+
+
+    /* ============================================================
+       10.14 — VISIBILITÉ DE LA PAGE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_handleVisibility() {
+
+        if (
+            document.visibilityState ===
+            "hidden"
+        ) {
+
+            FOBAS_AUTOSAVE_save(
+                "page-hidden"
+            );
+
+        } else if (
+            document.visibilityState ===
+            "visible"
+        ) {
+
+            /*
+             * Lorsque l'utilisateur revient,
+             * on prend immédiatement un snapshot
+             * pour détecter un éventuel changement.
+             */
+
+            const snapshot =
+                FOBAS_AUTOSAVE_buildSnapshot();
+
+            if (snapshot) {
+
+                FOBAS_AUTOSAVE_STATE.lastHash =
+                    FOBAS_AUTOSAVE_createHash(
+                        snapshot
+                    );
+            }
+        }
+    }
+
+
+    /* ============================================================
+       10.15 — INITIALISATION
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_init() {
+
+        if (
+            FOBAS_AUTOSAVE_STATE.initialized
+        ) {
+            return;
+        }
+
+        FOBAS_AUTOSAVE_STATE.initAttempts++;
+
+        /*
+         * Le moteur attend que state existe.
+         */
+        if (
+            typeof state === "undefined" ||
+            !state
+        ) {
+
+            if (
+                FOBAS_AUTOSAVE_STATE.initAttempts <
+                FOBAS_AUTOSAVE_CONFIG.maxInitAttempts
+            ) {
+
+                setTimeout(
+                    FOBAS_AUTOSAVE_init,
+                    FOBAS_AUTOSAVE_CONFIG.initRetryDelay
+                );
+            }
+
+            return;
+        }
+
+
+        /*
+         * Préparation de state.wires.
+         * Cela permet au futur Wire Engine
+         * de fonctionner avec Auto Save.
+         */
+        if (
+            !Array.isArray(state.wires)
+        ) {
+
+            state.wires = [];
+        }
+
+
+        /*
+         * Préparation de state.connections.
+         */
+        if (
+            !Array.isArray(state.connections)
+        ) {
+
+            state.connections = [];
+        }
+
+
+        FOBAS_AUTOSAVE_STATE.initialized =
+            true;
+
+
+        /* --------------------------------------------------------
+           Initialisation de la signature
+        -------------------------------------------------------- */
+
+        const currentSnapshot =
+            FOBAS_AUTOSAVE_buildSnapshot();
+
+        if (currentSnapshot) {
+
+            FOBAS_AUTOSAVE_STATE.lastHash =
+                FOBAS_AUTOSAVE_createHash(
+                    currentSnapshot
+                );
+        }
+
+
+        /* --------------------------------------------------------
+           RESTAURATION AUTOMATIQUE
+        -------------------------------------------------------- */
+
+        FOBAS_AUTOSAVE_autoRestore();
+
+
+        /* --------------------------------------------------------
+           TIMER 5 MINUTES
+        -------------------------------------------------------- */
+
+        FOBAS_AUTOSAVE_startTimer();
+
+
+        /* --------------------------------------------------------
+           DÉTECTION DES CHANGEMENTS
+        -------------------------------------------------------- */
+
+        if (
+            FOBAS_AUTOSAVE_STATE.changeTimer
+        ) {
+
+            clearInterval(
+                FOBAS_AUTOSAVE_STATE.changeTimer
+            );
+        }
+
+        FOBAS_AUTOSAVE_STATE.changeTimer =
+            setInterval(
+                FOBAS_AUTOSAVE_checkForChanges,
+                FOBAS_AUTOSAVE_CONFIG.changeCheckInterval
+            );
+
+
+        /* --------------------------------------------------------
+           SAUVEGARDE AVANT SORTIE
+        -------------------------------------------------------- */
+
+        window.addEventListener(
+            "beforeunload",
+            FOBAS_AUTOSAVE_saveBeforeLeave,
+            {
+                capture: true
+            }
+        );
+
+
+        window.addEventListener(
+            "pagehide",
+            FOBAS_AUTOSAVE_saveBeforeLeave,
+            {
+                capture: true
+            }
+        );
+
+
+        document.addEventListener(
+            "visibilitychange",
+            FOBAS_AUTOSAVE_handleVisibility,
+            {
+                passive: true
+            }
+        );
+
+
+        /*
+         * Sauvegarde initiale silencieuse.
+         */
+        setTimeout(
+            function () {
+
+                FOBAS_AUTOSAVE_save(
+                    "initial-state"
+                );
+
+            },
+            1000
+        );
+
+    }
+
+
+    /* ============================================================
+       10.16 — API PUBLIQUE
+       ------------------------------------------------------------
+       Ces fonctions sont disponibles uniquement si un autre
+       moteur FOBAS doit communiquer avec Auto Save.
+    ============================================================ */
+
+    window.FOBAS_AUTOSAVE = {
+
+        save:
+            function () {
+
+                return FOBAS_AUTOSAVE_save(
+                    "manual-api"
+                );
+            },
+
+        restore:
+            function () {
+
+                const snapshot =
+                    FOBAS_AUTOSAVE_loadSnapshot();
+
+                if (!snapshot) {
+                    return false;
+                }
+
+                return FOBAS_AUTOSAVE_restore(
+                    snapshot
+                );
+            },
+
+        hasBackup:
+            function () {
+
+                return !!FOBAS_AUTOSAVE_loadSnapshot();
+            },
+
+        clear:
+            function () {
+
+                const storage =
+                    FOBAS_AUTOSAVE_getStorage();
+
+                if (!storage) {
+                    return false;
+                }
+
+                try {
+
+                    storage.removeItem(
+                        FOBAS_AUTOSAVE_CONFIG.storageKey
+                    );
+
+                    storage.removeItem(
+                        FOBAS_AUTOSAVE_CONFIG.storageKey +
+                        "_META"
+                    );
+
+                    FOBAS_AUTOSAVE_STATE.lastHash =
+                        "";
+
+                    FOBAS_AUTOSAVE_STATE.lastSaveTime =
+                        0;
+
+                    return true;
+
+                } catch (error) {
+
+                    console.warn(
+                        "[FOBAS AUTO SAVE] Suppression impossible.",
+                        error
+                    );
+
+                    return false;
+                }
+            },
+
+        getLastSaveTime:
+            function () {
+
+                return FOBAS_AUTOSAVE_STATE.lastSaveTime;
+            },
+
+        getStorageKey:
+            function () {
+
+                return FOBAS_AUTOSAVE_CONFIG.storageKey;
+            },
+
+        getConfig:
+            function () {
+
+                return {
+                    ...FOBAS_AUTOSAVE_CONFIG
+                };
+            }
+
+    };
+
+
+    /* ============================================================
+       10.17 — DÉMARRAGE
+    ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            FOBAS_AUTOSAVE_init,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        FOBAS_AUTOSAVE_init();
+    }
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
