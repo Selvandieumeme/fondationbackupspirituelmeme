@@ -6156,20 +6156,140 @@ void loop() {
        56 — BOUTONS TOP
     ============================================================ */
 
+/* ============================================================
+   56 — BOUTONS TOP
+============================================================= */
+
 function openLaboratory() {
 
-        hide("codeLibraryPanel");
-        hide("codeEditorPanel");
-        hide("missionsPanel");
-        hide("diagnosticPanel");
-        hide("faultsPanel");
-        hide("measurementsPanel");
+    hide("codeLibraryPanel");
+    hide("codeEditorPanel");
+    hide("missionsPanel");
+    hide("diagnosticPanel");
+    hide("faultsPanel");
+    hide("measurementsPanel");
 
-        toast(
-            "Laboratoire ouvert.",
-            "info"
-        );
+    const libraryPanel =
+        $("componentLibraryPanel");
+
+    const powerSourcesPanel =
+        $("powerSourcesPanel");
+
+    const instrumentsPanel =
+        $("instrumentsPanel");
+
+    const workspaceArea =
+        $("laboratoryWorkspaceArea");
+
+    if (libraryPanel) {
+        libraryPanel.style.display = "";
     }
+
+    if (powerSourcesPanel) {
+        powerSourcesPanel.style.display = "";
+    }
+
+    if (instrumentsPanel) {
+        instrumentsPanel.style.display = "";
+    }
+
+    if (workspaceArea) {
+        workspaceArea.style.display = "";
+    }
+
+    renderCategory(
+        "resistors"
+    );
+
+    toast(
+        "Laboratoire ouvert.",
+        "info"
+    );
+}
+
+
+function openCodeLibrary() {
+
+    renderCodeLibrary(
+        state.level
+    );
+
+    show(
+        "codeLibraryPanel"
+    );
+}
+
+
+function openCodeEditor() {
+
+    show(
+        "codeEditorPanel"
+    );
+
+    const editor =
+        $("electronicCodeEditor");
+
+    if (
+        editor &&
+        !editor.value &&
+        state.currentCode
+    ) {
+        editor.value =
+            state.currentCode;
+    }
+}
+
+
+function openMissions() {
+
+    renderMissions(
+        state.level
+    );
+
+    show(
+        "missionsPanel"
+    );
+}
+
+
+function openMeasurements() {
+
+    simulateCircuit();
+
+    show(
+        "measurementsPanel"
+    );
+}
+
+
+function openDiagnostic() {
+
+    diagnoseCircuit();
+
+    show(
+        "diagnosticPanel"
+    );
+}
+
+
+function openFaults() {
+
+    show(
+        "faultsPanel"
+    );
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
