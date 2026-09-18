@@ -11774,37 +11774,42 @@ bind(
 
 
 
-
-
-
-
-
-
-
-
 /* ================================================================
    FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — SAFE / ISOLATED
+   COMPONENT VISIBILITY BRIDGE — DRAG SAFE / ISOLATED
    ---------------------------------------------------------------
    RESPONSABILITÉ UNIQUE :
-   Fè component ki deja kreye a vizib nan workspace la.
+   - Rendre les composants visibles
+   - NE JAMAIS modifier leur position pendant le fonctionnement
 
-   PA MODIFYE :
-   - createComponent()
-   - addComponent()
-   - renderComponent()
-   - componentMarkup()
-   - wires
-   - simulation
-   - zoom
-   - measurements
-   ================================================================ */
+   IMPORTANT :
+   - Ne touche pas à createComponent()
+   - Ne touche pas à addComponent()
+   - Ne touche pas à renderComponent()
+   - Ne touche pas au drag system
+   - Ne touche pas aux wires
+   - Ne touche pas au zoom
+   - Ne réécrit JAMAIS component.x / component.y
+   - Ne réécrit JAMAIS left / top après création
+================================================================ */
 
 (function FOBAS_ComponentVisibilityBridge() {
 
-    function forceVisibleComponent(el, index) {
+    "use strict";
+
+
+    /* ============================================================
+       01 — RENDRE UN COMPONENT VISIBLE
+       ------------------------------------------------------------
+       IMPORTANT :
+       Aucune position n'est imposée ici.
+       La position appartient exclusivement au moteur principal.
+    ============================================================ */
+
+    function forceVisibleComponent(el) {
 
         if (!el) return;
+
 
         /* --------------------------------------------------------
            LAYER PARENT
@@ -11812,16 +11817,26 @@ bind(
 
         const layer = el.parentElement;
 
-        if (layer && layer.id === "componentLayer") {
+        if (
+            layer &&
+            layer.id === "componentLayer"
+        ) {
 
             layer.style.position = "absolute";
             layer.style.inset = "0";
             layer.style.display = "block";
             layer.style.visibility = "visible";
             layer.style.opacity = "1";
+
+            /*
+             * Le layer ne doit pas bloquer les interactions
+             * avec les components.
+             */
             layer.style.pointerEvents = "none";
+
             layer.style.zIndex = "30";
         }
+
 
         /* --------------------------------------------------------
            COMPONENT
@@ -11830,131 +11845,270 @@ bind(
         el.style.position = "absolute";
 
         /*
-         * Pozisyon garanti nan zòn anlè-gòch.
-         * Chak nouvo component pran yon ti decalage.
+         * IMPORTANT :
+         *
+         * NE PAS faire :
+         *
+         * el.style.left = ...
+         * el.style.top = ...
+         *
+         * La position est contrôlée par :
+         *
+         * component.x
+         * component.y
+         *
+         * puis par renderComponent().
          */
-        const offset = Math.min(index * 18, 180);
 
-        el.style.left = `${30 + offset}px`;
-        el.style.top = `${30 + offset}px`;
-
-        el.style.width = "118px";
-        el.style.height = "72px";
-        el.style.minWidth = "118px";
-        el.style.minHeight = "72px";
 
         el.style.display = "flex";
-        el.style.flexDirection = "column";
-        el.style.alignItems = "center";
-        el.style.justifyContent = "center";
+
+        el.style.flexDirection =
+            "column";
+
+        el.style.alignItems =
+            "center";
+
+        el.style.justifyContent =
+            "center";
+
         el.style.gap = "3px";
 
-        el.style.boxSizing = "border-box";
+        el.style.boxSizing =
+            "border-box";
 
-        el.style.visibility = "visible";
-        el.style.opacity = "1";
+
+        el.style.visibility =
+            "visible";
+
+        el.style.opacity =
+            "1";
+
+
+        el.style.width =
+            "118px";
+
+        el.style.height =
+            "72px";
+
+        el.style.minWidth =
+            "118px";
+
+        el.style.minHeight =
+            "72px";
+
 
         el.style.background =
             "linear-gradient(145deg,#17365f,#0a1d36)";
 
+
         el.style.border =
             "2px solid rgba(255,210,31,.85)";
 
-        el.style.borderRadius = "10px";
 
-        el.style.color = "#ffffff";
+        el.style.borderRadius =
+            "10px";
+
+
+        el.style.color =
+            "#ffffff";
+
 
         el.style.boxShadow =
             "0 7px 18px rgba(0,0,0,.55)";
 
-        el.style.zIndex = "31";
 
-        el.style.pointerEvents = "auto";
+        el.style.zIndex =
+            "31";
 
-        el.style.overflow = "visible";
 
-        el.style.transformOrigin = "center center";
+        /*
+         * CRITIQUE POUR ANDROID / TOUCH :
+         */
+        el.style.pointerEvents =
+            "auto";
+
+        el.style.touchAction =
+            "none";
+
+
+        el.style.overflow =
+            "visible";
+
+
+        el.style.transformOrigin =
+            "center center";
+
 
         /* --------------------------------------------------------
            HEADER
         -------------------------------------------------------- */
 
         const header =
-            el.querySelector(".component-header");
+            el.querySelector(
+                ".component-header"
+            );
 
         if (header) {
 
-            header.style.display = "block";
-            header.style.visibility = "visible";
-            header.style.opacity = "1";
-            header.style.width = "100%";
-            header.style.height = "20px";
-            header.style.textAlign = "center";
-            header.style.fontSize = "11px";
-            header.style.fontWeight = "700";
-            header.style.color = "#ffffff";
-            header.style.overflow = "visible";
+            header.style.display =
+                "block";
+
+            header.style.visibility =
+                "visible";
+
+            header.style.opacity =
+                "1";
+
+            header.style.width =
+                "100%";
+
+            header.style.height =
+                "20px";
+
+            header.style.textAlign =
+                "center";
+
+            header.style.fontSize =
+                "11px";
+
+            header.style.fontWeight =
+                "700";
+
+            header.style.color =
+                "#ffffff";
+
+            header.style.overflow =
+                "visible";
+
+            /*
+             * Le header ne capture pas le pointer.
+             * Le component parent reçoit le pointerdown.
+             */
+            header.style.pointerEvents =
+                "none";
         }
+
 
         /* --------------------------------------------------------
            BODY
         -------------------------------------------------------- */
 
         const body =
-            el.querySelector(".component-body");
+            el.querySelector(
+                ".component-body"
+            );
 
         if (body) {
 
-            body.style.display = "flex";
-            body.style.visibility = "visible";
-            body.style.opacity = "1";
-            body.style.width = "100%";
-            body.style.height = "35px";
-            body.style.minHeight = "35px";
-            body.style.alignItems = "center";
-            body.style.justifyContent = "center";
-            body.style.position = "relative";
+            body.style.display =
+                "flex";
+
+            body.style.visibility =
+                "visible";
+
+            body.style.opacity =
+                "1";
+
+            body.style.width =
+                "100%";
+
+            body.style.height =
+                "35px";
+
+            body.style.minHeight =
+                "35px";
+
+            body.style.alignItems =
+                "center";
+
+            body.style.justifyContent =
+                "center";
+
+            body.style.position =
+                "relative";
+
+            body.style.pointerEvents =
+                "none";
         }
+
+
+        /* --------------------------------------------------------
+           PINS CONTAINER
+        -------------------------------------------------------- */
+
+        const pins =
+            el.querySelector(
+                ".component-pins"
+            );
+
+        if (pins) {
+
+            pins.style.position =
+                "absolute";
+
+            pins.style.inset =
+                "0";
+
+            pins.style.width =
+                "100%";
+
+            pins.style.height =
+                "100%";
+
+            pins.style.pointerEvents =
+                "none";
+
+            pins.style.zIndex =
+                "45";
+        }
+
 
         /* --------------------------------------------------------
            PINS
         -------------------------------------------------------- */
 
-        const pins =
-            el.querySelector(".component-pins");
+        const pinList =
+            el.querySelectorAll(
+                ".component-pin"
+            );
 
-        if (pins) {
 
-            pins.style.position = "absolute";
-            pins.style.inset = "0";
-            pins.style.width = "100%";
-            pins.style.height = "100%";
-            pins.style.pointerEvents = "none";
-            pins.style.zIndex = "45";
-        }
+        pinList.forEach(
+            (pin, pinIndex) => {
 
-        el.querySelectorAll(".component-pin")
-            .forEach((pin, pinIndex) => {
+                pin.style.position =
+                    "absolute";
 
-                pin.style.position = "absolute";
+                pin.style.display =
+                    "flex";
 
-                pin.style.display = "flex";
+                pin.style.width =
+                    "14px";
 
-                pin.style.width = "14px";
-                pin.style.height = "14px";
+                pin.style.height =
+                    "14px";
 
-                pin.style.minWidth = "14px";
-                pin.style.minHeight = "14px";
+                pin.style.minWidth =
+                    "14px";
 
-                pin.style.padding = "0";
+                pin.style.minHeight =
+                    "14px";
 
-                pin.style.alignItems = "center";
-                pin.style.justifyContent = "center";
+                pin.style.padding =
+                    "0";
+
+                pin.style.alignItems =
+                    "center";
+
+                pin.style.justifyContent =
+                    "center";
 
                 pin.style.border =
                     "2px solid #ffffff";
 
-                pin.style.borderRadius = "50%";
+                pin.style.borderRadius =
+                    "50%";
 
                 pin.style.background =
                     "#f2c300";
@@ -11962,149 +12116,269 @@ bind(
                 pin.style.color =
                     "#071a33";
 
-                pin.style.fontSize = "7px";
+                pin.style.fontSize =
+                    "7px";
 
-                pin.style.zIndex = "46";
+                pin.style.zIndex =
+                    "46";
+
 
                 /*
-                 * Premye pin agoch / dezyèm pin adwat.
-                 * Si gen plis pin, yo distribye otomatikman.
+                 * Les pins restent interactifs pour le câblage.
                  */
-                if (el.querySelectorAll(".component-pin").length === 1) {
 
-                    pin.style.left = "50%";
-                    pin.style.bottom = "-7px";
+                pin.style.pointerEvents =
+                    "auto";
 
-                } else if (pinIndex === 0) {
 
-                    pin.style.left = "-7px";
-                    pin.style.top = "50%";
+                if (
+                    pinList.length === 1
+                ) {
 
-                } else if (pinIndex === 1) {
+                    pin.style.left =
+                        "50%";
 
-                    pin.style.right = "-7px";
-                    pin.style.top = "50%";
+                    pin.style.bottom =
+                        "-7px";
+
+                } else if (
+                    pinIndex === 0
+                ) {
+
+                    pin.style.left =
+                        "-7px";
+
+                    pin.style.top =
+                        "50%";
+
+                } else if (
+                    pinIndex === 1
+                ) {
+
+                    pin.style.right =
+                        "-7px";
+
+                    pin.style.top =
+                        "50%";
 
                 } else {
 
                     pin.style.left =
                         `${20 + (pinIndex * 20)}px`;
 
-                    pin.style.bottom = "-7px";
+                    pin.style.bottom =
+                        "-7px";
                 }
-            });
+            }
+        );
+
 
         /* --------------------------------------------------------
-           VISUAL INTERNE
+           VISUELS INTERNES
         -------------------------------------------------------- */
 
         el.querySelectorAll(
-            ".generic-symbol,.led-visual,.bulb-visual," +
-            ".battery-visual,.resistor-visual,.capacitor-visual," +
+            ".generic-symbol," +
+            ".led-visual," +
+            ".bulb-visual," +
+            ".battery-visual," +
+            ".resistor-visual," +
+            ".capacitor-visual," +
             ".controller-visual"
-        ).forEach(visual => {
+        ).forEach(
+            visual => {
 
-            visual.style.visibility = "visible";
-            visual.style.opacity = "1";
-            visual.style.display = "flex";
+                visual.style.visibility =
+                    "visible";
 
-            visual.style.alignItems = "center";
-            visual.style.justifyContent = "center";
+                visual.style.opacity =
+                    "1";
 
-            visual.style.maxWidth = "100%";
-            visual.style.maxHeight = "100%";
-        });
+                visual.style.display =
+                    "flex";
+
+                visual.style.alignItems =
+                    "center";
+
+                visual.style.justifyContent =
+                    "center";
+
+                visual.style.maxWidth =
+                    "100%";
+
+                visual.style.maxHeight =
+                    "100%";
+
+                visual.style.pointerEvents =
+                    "none";
+            }
+        );
     }
 
+
+    /* ============================================================
+       02 — SCAN COMPONENTS
+       ------------------------------------------------------------
+       Cette fonction ne modifie plus leur position.
+    ============================================================ */
 
     function scanComponents() {
 
         const layer =
-            document.getElementById("componentLayer");
+            document.getElementById(
+                "componentLayer"
+            );
 
-        if (!layer) return;
+        if (!layer) {
+            return;
+        }
+
 
         const components =
-            layer.querySelectorAll(".electronic-component");
+            layer.querySelectorAll(
+                ".electronic-component"
+            );
 
-        components.forEach((el, index) => {
 
-            forceVisibleComponent(el, index);
+        components.forEach(
+            el => {
 
-        });
+                forceVisibleComponent(
+                    el
+                );
+            }
+        );
     }
 
+
+    /* ============================================================
+       03 — OBSERVATION DU LAYER
+       ------------------------------------------------------------
+       Le bridge peut toujours détecter les nouveaux components,
+       mais il ne peut plus les replacer arbitrairement.
+    ============================================================ */
 
     function startBridge() {
 
         const layer =
-            document.getElementById("componentLayer");
+            document.getElementById(
+                "componentLayer"
+            );
+
 
         if (!layer) {
 
-            setTimeout(startBridge, 100);
+            setTimeout(
+                startBridge,
+                100
+            );
 
             return;
         }
 
+
         /*
-         * Rendre immédiatement visibles les composants
-         * déjà présents.
+         * Premier scan.
          */
         scanComponents();
 
+
         /*
-         * Surveille uniquement l'apparition de nouveaux
-         * composants dans componentLayer.
+         * Observe uniquement l'apparition / disparition
+         * de nodes.
+         *
+         * IMPORTANT :
+         * Le bridge ne touche jamais à la position.
          */
         const observer =
-            new MutationObserver(() => {
+            new MutationObserver(
+                mutations => {
 
-                scanComponents();
+                    let relevantChange =
+                        false;
 
-            });
 
-        observer.observe(layer, {
+                    for (
+                        const mutation
+                        of mutations
+                    ) {
 
-            childList: true,
-            subtree: true
+                        if (
+                            mutation.type ===
+                            "childList"
+                        ) {
 
-        });
+                            relevantChange =
+                                true;
+
+                            break;
+                        }
+                    }
+
+
+                    if (
+                        relevantChange
+                    ) {
+
+                        scanComponents();
+                    }
+                }
+            );
+
+
+        observer.observe(
+            layer,
+            {
+                childList: true,
+                subtree: true
+            }
+        );
+
 
         /*
-         * Sécurité pour le premier composant ajouté.
+         * Sécurités initiales.
          */
-        setTimeout(scanComponents, 50);
-        setTimeout(scanComponents, 150);
-        setTimeout(scanComponents, 300);
+        setTimeout(
+            scanComponents,
+            50
+        );
+
+        setTimeout(
+            scanComponents,
+            150
+        );
+
+        setTimeout(
+            scanComponents,
+            300
+        );
     }
 
 
-    if (document.readyState === "loading") {
+    /* ============================================================
+       04 — INITIALISATION
+    ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
 
         document.addEventListener(
             "DOMContentLoaded",
             startBridge,
-            { once: true }
+            {
+                once: true
+            }
         );
 
     } else {
 
         startBridge();
-
     }
 
+
 })();
-
-
-
-
-
-
-
-
-
-
 
 
 
