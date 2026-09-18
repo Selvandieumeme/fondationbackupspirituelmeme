@@ -9080,123 +9080,78 @@ bind(
 
 
 
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — V4
+   COMPONENT VISIBILITY BRIDGE — SAFE / ISOLATED
    ---------------------------------------------------------------
    RESPONSABILITÉ UNIQUE :
-   - Fè component yo vizib
-   - PA kontwole left
-   - PA kontwole top
-   - PA kontwole x / y
-   - PA repositionner component yo
-   - PA entèfere ak drag
-   - PA modifye renderComponent()
-   - PA modifye createComponent()
-   - PA modifye addComponent()
+   Fè component ki deja kreye a vizib nan workspace la.
+
+   PA MODIFYE :
+   - createComponent()
+   - addComponent()
+   - renderComponent()
+   - componentMarkup()
+   - wires
+   - simulation
+   - zoom
+   - measurements
    ================================================================ */
 
-(function FOBAS_ComponentVisibilityBridge_V4() {
+(function FOBAS_ComponentVisibilityBridge() {
 
-    "use strict";
-
-
-    /* ============================================================
-       RENDRE COMPONENT VIZIB
-    ============================================================ */
-
-    function forceVisibleComponent(el) {
+    function forceVisibleComponent(el, index) {
 
         if (!el) return;
 
-
-        const layer =
-            el.parentElement;
-
-
         /* --------------------------------------------------------
-           COMPONENT LAYER
+           LAYER PARENT
         -------------------------------------------------------- */
 
-        if (
-            layer &&
-            layer.id === "componentLayer"
-        ) {
+        const layer = el.parentElement;
 
-            layer.style.position =
-                "absolute";
+        if (layer && layer.id === "componentLayer") {
 
-            layer.style.inset =
-                "0";
-
-            layer.style.display =
-                "block";
-
-            layer.style.visibility =
-                "visible";
-
-            layer.style.opacity =
-                "1";
-
-            layer.style.pointerEvents =
-                "none";
-
-            layer.style.zIndex =
-                "30";
+            layer.style.position = "absolute";
+            layer.style.inset = "0";
+            layer.style.display = "block";
+            layer.style.visibility = "visible";
+            layer.style.opacity = "1";
+            layer.style.pointerEvents = "none";
+            layer.style.zIndex = "30";
         }
-
 
         /* --------------------------------------------------------
            COMPONENT
-           --------------------------------------------------------
-           PA GEN left/top ISIT LA.
-           PA GEN transform ISIT LA.
         -------------------------------------------------------- */
 
-        el.style.position =
-            "absolute";
+        el.style.position = "absolute";
 
-        el.style.width =
-            "118px";
+        /*
+         * Pozisyon garanti nan zòn anlè-gòch.
+         * Chak nouvo component pran yon ti decalage.
+         */
+        const offset = Math.min(index * 18, 180);
 
-        el.style.height =
-            "72px";
+        el.style.left = `${30 + offset}px`;
+        el.style.top = `${30 + offset}px`;
 
-        el.style.minWidth =
-            "118px";
+        el.style.width = "118px";
+        el.style.height = "72px";
+        el.style.minWidth = "118px";
+        el.style.minHeight = "72px";
 
-        el.style.minHeight =
-            "72px";
+        el.style.display = "flex";
+        el.style.flexDirection = "column";
+        el.style.alignItems = "center";
+        el.style.justifyContent = "center";
+        el.style.gap = "3px";
 
-        el.style.display =
-            "flex";
+        el.style.boxSizing = "border-box";
 
-        el.style.flexDirection =
-            "column";
-
-        el.style.alignItems =
-            "center";
-
-        el.style.justifyContent =
-            "center";
-
-        el.style.gap =
-            "3px";
-
-        el.style.boxSizing =
-            "border-box";
-
-        el.style.visibility =
-            "visible";
-
-        el.style.opacity =
-            "1";
-
-        el.style.pointerEvents =
-            "auto";
-
-        el.style.overflow =
-            "visible";
+        el.style.visibility = "visible";
+        el.style.opacity = "1";
 
         el.style.background =
             "linear-gradient(145deg,#17365f,#0a1d36)";
@@ -9204,180 +9159,101 @@ bind(
         el.style.border =
             "2px solid rgba(255,210,31,.85)";
 
-        el.style.borderRadius =
-            "10px";
+        el.style.borderRadius = "10px";
 
-        el.style.color =
-            "#ffffff";
+        el.style.color = "#ffffff";
 
         el.style.boxShadow =
             "0 7px 18px rgba(0,0,0,.55)";
 
-        el.style.zIndex =
-            "31";
+        el.style.zIndex = "31";
 
-        el.style.touchAction =
-            "none";
+        el.style.pointerEvents = "auto";
 
-        el.style.transformOrigin =
-            "center center";
+        el.style.overflow = "visible";
 
+        el.style.transformOrigin = "center center";
 
-        /* ========================================================
+        /* --------------------------------------------------------
            HEADER
-        ======================================================== */
+        -------------------------------------------------------- */
 
         const header =
-            el.querySelector(
-                ".component-header"
-            );
+            el.querySelector(".component-header");
 
         if (header) {
 
-            header.style.display =
-                "block";
-
-            header.style.visibility =
-                "visible";
-
-            header.style.opacity =
-                "1";
-
-            header.style.width =
-                "100%";
-
-            header.style.height =
-                "20px";
-
-            header.style.textAlign =
-                "center";
-
-            header.style.fontSize =
-                "11px";
-
-            header.style.fontWeight =
-                "700";
-
-            header.style.color =
-                "#ffffff";
-
-            header.style.overflow =
-                "visible";
+            header.style.display = "block";
+            header.style.visibility = "visible";
+            header.style.opacity = "1";
+            header.style.width = "100%";
+            header.style.height = "20px";
+            header.style.textAlign = "center";
+            header.style.fontSize = "11px";
+            header.style.fontWeight = "700";
+            header.style.color = "#ffffff";
+            header.style.overflow = "visible";
         }
 
-
-        /* ========================================================
+        /* --------------------------------------------------------
            BODY
-        ======================================================== */
+        -------------------------------------------------------- */
 
         const body =
-            el.querySelector(
-                ".component-body"
-            );
+            el.querySelector(".component-body");
 
         if (body) {
 
-            body.style.display =
-                "flex";
-
-            body.style.visibility =
-                "visible";
-
-            body.style.opacity =
-                "1";
-
-            body.style.width =
-                "100%";
-
-            body.style.height =
-                "35px";
-
-            body.style.minHeight =
-                "35px";
-
-            body.style.alignItems =
-                "center";
-
-            body.style.justifyContent =
-                "center";
-
-            body.style.position =
-                "relative";
+            body.style.display = "flex";
+            body.style.visibility = "visible";
+            body.style.opacity = "1";
+            body.style.width = "100%";
+            body.style.height = "35px";
+            body.style.minHeight = "35px";
+            body.style.alignItems = "center";
+            body.style.justifyContent = "center";
+            body.style.position = "relative";
         }
 
-
-        /* ========================================================
+        /* --------------------------------------------------------
            PINS
-        ======================================================== */
+        -------------------------------------------------------- */
 
         const pins =
-            el.querySelector(
-                ".component-pins"
-            );
+            el.querySelector(".component-pins");
 
         if (pins) {
 
-            pins.style.position =
-                "absolute";
-
-            pins.style.inset =
-                "0";
-
-            pins.style.width =
-                "100%";
-
-            pins.style.height =
-                "100%";
-
-            pins.style.pointerEvents =
-                "none";
-
-            pins.style.zIndex =
-                "45";
+            pins.style.position = "absolute";
+            pins.style.inset = "0";
+            pins.style.width = "100%";
+            pins.style.height = "100%";
+            pins.style.pointerEvents = "none";
+            pins.style.zIndex = "45";
         }
 
+        el.querySelectorAll(".component-pin")
+            .forEach((pin, pinIndex) => {
 
-        const componentPins =
-            el.querySelectorAll(
-                ".component-pin"
-            );
+                pin.style.position = "absolute";
 
+                pin.style.display = "flex";
 
-        componentPins.forEach(
-            (pin, pinIndex) => {
+                pin.style.width = "14px";
+                pin.style.height = "14px";
 
-                pin.style.position =
-                    "absolute";
+                pin.style.minWidth = "14px";
+                pin.style.minHeight = "14px";
 
-                pin.style.display =
-                    "flex";
+                pin.style.padding = "0";
 
-                pin.style.width =
-                    "14px";
-
-                pin.style.height =
-                    "14px";
-
-                pin.style.minWidth =
-                    "14px";
-
-                pin.style.minHeight =
-                    "14px";
-
-                pin.style.padding =
-                    "0";
-
-                pin.style.alignItems =
-                    "center";
-
-                pin.style.justifyContent =
-                    "center";
+                pin.style.alignItems = "center";
+                pin.style.justifyContent = "center";
 
                 pin.style.border =
                     "2px solid #ffffff";
 
-                pin.style.borderRadius =
-                    "50%";
+                pin.style.borderRadius = "50%";
 
                 pin.style.background =
                     "#f2c300";
@@ -9385,216 +9261,136 @@ bind(
                 pin.style.color =
                     "#071a33";
 
-                pin.style.fontSize =
-                    "7px";
+                pin.style.fontSize = "7px";
 
-                pin.style.zIndex =
-                    "46";
+                pin.style.zIndex = "46";
 
+                /*
+                 * Premye pin agoch / dezyèm pin adwat.
+                 * Si gen plis pin, yo distribye otomatikman.
+                 */
+                if (el.querySelectorAll(".component-pin").length === 1) {
 
-                if (
-                    componentPins.length === 1
-                ) {
+                    pin.style.left = "50%";
+                    pin.style.bottom = "-7px";
 
-                    pin.style.left =
-                        "50%";
+                } else if (pinIndex === 0) {
 
-                    pin.style.bottom =
-                        "-7px";
+                    pin.style.left = "-7px";
+                    pin.style.top = "50%";
 
-                } else if (
-                    pinIndex === 0
-                ) {
+                } else if (pinIndex === 1) {
 
-                    pin.style.left =
-                        "-7px";
-
-                    pin.style.top =
-                        "50%";
-
-                } else if (
-                    pinIndex === 1
-                ) {
-
-                    pin.style.right =
-                        "-7px";
-
-                    pin.style.top =
-                        "50%";
+                    pin.style.right = "-7px";
+                    pin.style.top = "50%";
 
                 } else {
 
                     pin.style.left =
                         `${20 + (pinIndex * 20)}px`;
 
-                    pin.style.bottom =
-                        "-7px";
+                    pin.style.bottom = "-7px";
                 }
-            }
-        );
+            });
 
-
-        /* ========================================================
-           VISUELS INTERNES
-        ======================================================== */
+        /* --------------------------------------------------------
+           VISUAL INTERNE
+        -------------------------------------------------------- */
 
         el.querySelectorAll(
-            ".generic-symbol," +
-            ".led-visual," +
-            ".bulb-visual," +
-            ".battery-visual," +
-            ".resistor-visual," +
-            ".capacitor-visual," +
+            ".generic-symbol,.led-visual,.bulb-visual," +
+            ".battery-visual,.resistor-visual,.capacitor-visual," +
             ".controller-visual"
-        ).forEach(
-            visual => {
+        ).forEach(visual => {
 
-                visual.style.visibility =
-                    "visible";
+            visual.style.visibility = "visible";
+            visual.style.opacity = "1";
+            visual.style.display = "flex";
 
-                visual.style.opacity =
-                    "1";
+            visual.style.alignItems = "center";
+            visual.style.justifyContent = "center";
 
-                visual.style.display =
-                    "flex";
-
-                visual.style.alignItems =
-                    "center";
-
-                visual.style.justifyContent =
-                    "center";
-
-                visual.style.maxWidth =
-                    "100%";
-
-                visual.style.maxHeight =
-                    "100%";
-            }
-        );
+            visual.style.maxWidth = "100%";
+            visual.style.maxHeight = "100%";
+        });
     }
 
-
-    /* ============================================================
-       SCAN
-       ============================================================ */
 
     function scanComponents() {
 
         const layer =
-            document.getElementById(
-                "componentLayer"
-            );
+            document.getElementById("componentLayer");
 
         if (!layer) return;
 
-
         const components =
-            layer.querySelectorAll(
-                ".electronic-component"
-            );
+            layer.querySelectorAll(".electronic-component");
 
+        components.forEach((el, index) => {
 
-        components.forEach(
-            el => {
+            forceVisibleComponent(el, index);
 
-                forceVisibleComponent(
-                    el
-                );
-            }
-        );
+        });
     }
 
-
-    /* ============================================================
-       OBSERVER
-       ------------------------------------------------------------
-       Sèlman nouvo nodes.
-       Bridge la pa touche pozisyon.
-       ============================================================ */
 
     function startBridge() {
 
         const layer =
-            document.getElementById(
-                "componentLayer"
-            );
+            document.getElementById("componentLayer");
 
         if (!layer) {
 
-            setTimeout(
-                startBridge,
-                100
-            );
+            setTimeout(startBridge, 100);
 
             return;
         }
 
-
+        /*
+         * Rendre immédiatement visibles les composants
+         * déjà présents.
+         */
         scanComponents();
 
-
+        /*
+         * Surveille uniquement l'apparition de nouveaux
+         * composants dans componentLayer.
+         */
         const observer =
-            new MutationObserver(
-                mutations => {
+            new MutationObserver(() => {
 
-                    let added =
-                        false;
+                scanComponents();
 
+            });
 
-                    mutations.forEach(
-                        mutation => {
+        observer.observe(layer, {
 
-                            if (
-                                mutation.type ===
-                                "childList" &&
-                                mutation.addedNodes.length
-                            ) {
+            childList: true,
+            subtree: true
 
-                                added =
-                                    true;
-                            }
-                        }
-                    );
+        });
 
-
-                    if (added) {
-
-                        scanComponents();
-                    }
-                }
-            );
-
-
-        observer.observe(
-            layer,
-            {
-                childList: true,
-                subtree: true
-            }
-        );
+        /*
+         * Sécurité pour le premier composant ajouté.
+         */
+        setTimeout(scanComponents, 50);
+        setTimeout(scanComponents, 150);
+        setTimeout(scanComponents, 300);
     }
 
 
-    /* ============================================================
-       START
-    ============================================================ */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
+    if (document.readyState === "loading") {
 
         document.addEventListener(
             "DOMContentLoaded",
             startBridge,
-            {
-                once: true
-            }
+            { once: true }
         );
 
     } else {
 
         startBridge();
+
     }
 
 })();
@@ -9610,3 +9406,537 @@ bind(
 
 
 
+
+
+
+/* ================================================================
+   FOBAS ELECTRONIQUE
+   ANDROID TOUCH COMPONENT DRAG — ISOLATED
+   ---------------------------------------------------------------
+   RESPONSABILITÉ UNIQUE :
+   - Fòse component yo deplase ak dwèt sou Android
+   - Itilize pozisyon VISIB DOM component lan kòm pwen depa
+   - Pa depann de component.x / component.y pou kòmanse drag
+   - Pa modifye Visibility Bridge la
+   - Pa modifye renderComponent()
+   - Pa modifye createComponent()
+   - Pa modifye addComponent()
+   - Pa modifye CSS
+   - Pa ajoute okenn lòt Drag Bridge
+   ================================================================ */
+
+(function FOBAS_AndroidTouchComponentDrag() {
+
+    "use strict";
+
+
+    let active = false;
+
+    let activeElement = null;
+
+    let activeComponent = null;
+
+    let pointerId = null;
+
+    let offsetX = 0;
+
+    let offsetY = 0;
+
+
+    /* ============================================================
+       Jwenn pozisyon layer la
+    ============================================================ */
+
+    function getLayer() {
+
+        return document.getElementById(
+            "componentLayer"
+        );
+    }
+
+
+    /* ============================================================
+       Kòmanse drag TOUCH
+    ============================================================ */
+
+    function startTouchDrag(event) {
+
+        /*
+         * Sèlman Android / touch.
+         * Souris pa antre nan blok sa a.
+         */
+
+        if (
+            event.pointerType !== "touch"
+        ) {
+            return;
+        }
+
+
+        const element =
+            event.target.closest(
+                ".electronic-component"
+            );
+
+
+        if (!element) {
+            return;
+        }
+
+
+        /*
+         * Pa kòmanse drag si dwèt la sou yon pin.
+         */
+
+        if (
+            event.target.closest(
+                ".component-pin"
+            )
+        ) {
+            return;
+        }
+
+
+        const layer =
+            getLayer();
+
+        if (!layer) {
+            return;
+        }
+
+
+        /*
+         * Chèche component ki koresponn ak DOM element lan.
+         */
+
+        const componentId =
+            element.dataset.componentId;
+
+
+        if (!componentId) {
+            return;
+        }
+
+
+        if (
+            typeof getComponent !==
+            "function"
+        ) {
+            return;
+        }
+
+
+        const component =
+            getComponent(
+                componentId
+            );
+
+
+        if (!component) {
+            return;
+        }
+
+
+        /*
+         * Anpeche lòt pointerdown handler yo
+         * pran menm touch sa a.
+         */
+
+        event.preventDefault();
+
+        event.stopImmediatePropagation();
+
+
+        const layerRect =
+            layer.getBoundingClientRect();
+
+
+        /*
+         * Zoom aktyèl aplikasyon an.
+         */
+
+        const zoom =
+            (
+                typeof state !== "undefined" &&
+                Number.isFinite(
+                    Number(state.zoom)
+                ) &&
+                Number(state.zoom) > 0
+            )
+                ? Number(state.zoom)
+                : 1;
+
+
+        /*
+         * Pozisyon aktyèl COMPONENT LAN
+         * jan itilizatè a wè li sou ekran an.
+         *
+         * Nou pa itilize component.x/y isit la.
+         */
+
+        const currentLeft =
+            parseFloat(
+                element.style.left
+            );
+
+
+        const currentTop =
+            parseFloat(
+                element.style.top
+            );
+
+
+        const safeLeft =
+            Number.isFinite(
+                currentLeft
+            )
+                ? currentLeft
+                : 0;
+
+
+        const safeTop =
+            Number.isFinite(
+                currentTop
+            )
+                ? currentTop
+                : 0;
+
+
+        /*
+         * Pozisyon dwèt la anndan component lan.
+         */
+
+        const pointerX =
+            (
+                event.clientX -
+                layerRect.left
+            ) / zoom;
+
+
+        const pointerY =
+            (
+                event.clientY -
+                layerRect.top
+            ) / zoom;
+
+
+        offsetX =
+            pointerX -
+            safeLeft;
+
+
+        offsetY =
+            pointerY -
+            safeTop;
+
+
+        active =
+            true;
+
+        activeElement =
+            element;
+
+        activeComponent =
+            component;
+
+        pointerId =
+            event.pointerId;
+
+
+        /*
+         * Mete pozisyon entèn lan sou pozisyon
+         * Bridge / DOM la te deja bay component lan.
+         */
+
+        component.x =
+            safeLeft;
+
+        component.y =
+            safeTop;
+
+
+        /*
+         * Kenbe touch la sou component lan.
+         */
+
+        try {
+
+            element.setPointerCapture(
+                event.pointerId
+            );
+
+        } catch (error) {
+            /* Ignore capture failure */
+        }
+
+
+        element.classList.add(
+            "selected"
+        );
+    }
+
+
+    /* ============================================================
+       Fè component lan swiv dwèt la
+    ============================================================ */
+
+    function moveTouchDrag(event) {
+
+        if (!active) {
+            return;
+        }
+
+
+        if (
+            event.pointerType !== "touch"
+        ) {
+            return;
+        }
+
+
+        if (
+            event.pointerId !==
+            pointerId
+        ) {
+            return;
+        }
+
+
+        if (!activeElement) {
+            return;
+        }
+
+
+        const layer =
+            getLayer();
+
+        if (!layer) {
+            return;
+        }
+
+
+        event.preventDefault();
+
+
+        const rect =
+            layer.getBoundingClientRect();
+
+
+        const zoom =
+            (
+                typeof state !== "undefined" &&
+                Number.isFinite(
+                    Number(state.zoom)
+                ) &&
+                Number(state.zoom) > 0
+            )
+                ? Number(state.zoom)
+                : 1;
+
+
+        let x =
+            (
+                event.clientX -
+                rect.left
+            ) / zoom -
+            offsetX;
+
+
+        let y =
+            (
+                event.clientY -
+                rect.top
+            ) / zoom -
+            offsetY;
+
+
+        /*
+         * Pa kite component lan soti nan pozisyon negatif.
+         */
+
+        x =
+            Math.max(
+                0,
+                x
+            );
+
+
+        y =
+            Math.max(
+                0,
+                y
+            );
+
+
+        /*
+         * Sa a se mouvman reyèl DOM lan.
+         */
+
+        activeElement.style.left =
+            `${x}px`;
+
+        activeElement.style.top =
+            `${y}px`;
+
+
+        /*
+         * Mete menm pozisyon an nan component state la.
+         */
+
+        if (activeComponent) {
+
+            activeComponent.x =
+                x;
+
+            activeComponent.y =
+                y;
+        }
+    }
+
+
+    /* ============================================================
+       Fini drag
+    ============================================================ */
+
+    function endTouchDrag(event) {
+
+        if (!active) {
+            return;
+        }
+
+
+        if (
+            event &&
+            event.pointerId !==
+            pointerId
+        ) {
+            return;
+        }
+
+
+        if (
+            event &&
+            event.pointerType === "touch"
+        ) {
+            event.preventDefault();
+        }
+
+
+        if (
+            activeElement &&
+            pointerId !== null
+        ) {
+
+            try {
+
+                if (
+                    activeElement.hasPointerCapture &&
+                    activeElement.hasPointerCapture(
+                        pointerId
+                    )
+                ) {
+
+                    activeElement.releasePointerCapture(
+                        pointerId
+                    );
+                }
+
+            } catch (error) {
+                /* Ignore release failure */
+            }
+        }
+
+
+        /*
+         * Pozisyon final la deja nan:
+         * - DOM
+         * - component.x
+         * - component.y
+         */
+
+        active = false;
+
+        activeElement = null;
+
+        activeComponent = null;
+
+        pointerId = null;
+
+        offsetX = 0;
+
+        offsetY = 0;
+    }
+
+
+    /* ============================================================
+       EVENTS
+       ------------------------------------------------------------
+       capture:true pèmèt blok sa a pran touch la anvan
+       pointerdown nòmal component la.
+    ============================================================ */
+
+    document.addEventListener(
+        "pointerdown",
+        startTouchDrag,
+        {
+            passive: false,
+            capture: true
+        }
+    );
+
+
+    document.addEventListener(
+        "pointermove",
+        moveTouchDrag,
+        {
+            passive: false,
+            capture: true
+        }
+    );
+
+
+    document.addEventListener(
+        "pointerup",
+        endTouchDrag,
+        {
+            passive: false,
+            capture: true
+        }
+    );
+
+
+    document.addEventListener(
+        "pointercancel",
+        endTouchDrag,
+        {
+            passive: false,
+            capture: true
+        }
+    );
+
+
+    /*
+     * Android long-press/context menu pa dwe
+     * entèfere ak déplacement tactile la.
+     */
+
+    document.addEventListener(
+        "contextmenu",
+        event => {
+
+            if (
+                event.target.closest(
+                    ".electronic-component"
+                )
+            ) {
+
+                event.preventDefault();
+            }
+        },
+        {
+            passive: false
+        }
+    );
+
+
+})();
