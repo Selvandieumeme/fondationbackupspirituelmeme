@@ -6482,17 +6482,16 @@ void loop() {
 
 
 
+
 /* ============================================================
    53A — CRÉATION D'UNE CARTE DE BIBLIOTHÈQUE
    ------------------------------------------------------------
-   FIX V2 :
-   - Carte créée dynamiquement
-   - Bouton AJOUTER toujours identifiable
-   - Aucun onclick inline
-   - L'action réelle est gérée par délégation
-   - Compatible souris + tactile Android
-   - Utilise exclusivement addComponent()
-   - Ne crée aucun deuxième moteur de composants
+   FIX V3 — VERSION CORRIGÉE
+   - Yon sèl fonction
+   - Pa gen kòd ki rete deyò fonction an
+   - Bouton AJOUTER idantifyab
+   - Pa gen onclick inline
+   - AddComponent() rete sèl moteur pou ajoute konpozan
 ============================================================= */
 
 function createLibraryComponentCard(
@@ -6523,24 +6522,19 @@ function createLibraryComponentCard(
     card.dataset.component =
         componentType;
 
-
     const valueText =
         definition.value !== undefined &&
         definition.value !== null
             ? `${definition.value}${definition.unit || ""}`
             : "";
 
-
     card.innerHTML = `
 
         <div class="fobas-library-visual">
-
             ${renderLibraryComponentVisual(
                 definition
             )}
-
         </div>
-
 
         <div class="fobas-library-info">
 
@@ -6566,7 +6560,6 @@ function createLibraryComponentCard(
 
         </div>
 
-
         <div class="fobas-library-actions">
 
             <button
@@ -6589,9 +6582,13 @@ function createLibraryComponentCard(
         </div>
     `;
 
-
     return card;
 }
+
+
+
+
+
 
 
 
