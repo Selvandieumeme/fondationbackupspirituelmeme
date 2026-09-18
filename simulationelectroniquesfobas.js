@@ -9089,17 +9089,38 @@ bind(
 
 
 
+
+
+
+
+
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — POSITION SAFE
+   COMPONENT VISIBILITY BRIDGE — V3
    ---------------------------------------------------------------
-   - Kenbe components vizib
-   - Kenbe pozisyon inisyal anlè-gòch la
-   - Pa remete pozisyon an apre Déplacer
-   - Pa modifye component.x / component.y
-================================================================ */
+   RESPONSABILITÉ UNIQUE :
+   - Fè component yo vizib
+   - Mete yo anlè-gòch sèlman premye fwa yo parèt
+   - PA re-mete pozisyon an pandan itilizatè a ap deplase component
+   - PA disparèt component lè yo resevwa pointer/touch
+   - PA modifye createComponent()
+   - PA modifye addComponent()
+   - PA modifye renderComponent()
+   - PA modifye renderAllComponents()
+   - PA modifye drag engine
+   - PA modifye wires
+   - PA modifye simulation
+   ================================================================ */
 
-(function FOBAS_ComponentVisibilityBridge_PositionSafe() {
+(function FOBAS_ComponentVisibilityBridge_V3() {
+
+    "use strict";
+
+
+    /* ============================================================
+       1 — RENDRE YON COMPONENT VIZIB
+       ============================================================ */
 
     function forceVisibleComponent(el, index) {
 
@@ -9107,7 +9128,10 @@ bind(
 
         const layer = el.parentElement;
 
-        if (layer && layer.id === "componentLayer") {
+        if (
+            layer &&
+            layer.id === "componentLayer"
+        ) {
 
             layer.style.position = "absolute";
             layer.style.inset = "0";
@@ -9120,23 +9144,15 @@ bind(
 
 
         /* --------------------------------------------------------
-           COMPONENT
+           POZISYON INITIAL SELMAN
+           --------------------------------------------------------
+           Bridge la pa dwe kontinye kontwole left/top.
+           Li mete pozisyon an yon sèl fwa.
+           Apre sa renderComponent() / drag engine pran kontwòl.
         -------------------------------------------------------- */
 
-        el.style.position = "absolute";
-
-
-        /*
-         * POZISYON INISYAL
-         * ------------------------------------------------------
-         * Sa fèt yon sèl fwa pou chak component.
-         *
-         * Apre sa, Déplacer ka modifye left/top san bridge la
-         * pa remete l nan kwen gòch.
-         */
-
         if (
-            el.dataset.fobasInitialPosition !== "true"
+            el.dataset.fobasInitialPosition !== "done"
         ) {
 
             const offset =
@@ -9152,9 +9168,15 @@ bind(
                 `${30 + offset}px`;
 
             el.dataset.fobasInitialPosition =
-                "true";
+                "done";
         }
 
+
+        /* --------------------------------------------------------
+           DIMANSYON
+        -------------------------------------------------------- */
+
+        el.style.position = "absolute";
 
         el.style.width = "118px";
         el.style.height = "72px";
@@ -9162,18 +9184,42 @@ bind(
         el.style.minWidth = "118px";
         el.style.minHeight = "72px";
 
-        el.style.display = "flex";
-        el.style.flexDirection = "column";
+        el.style.boxSizing = "border-box";
 
-        el.style.alignItems = "center";
-        el.style.justifyContent = "center";
+
+        /* --------------------------------------------------------
+           DISPLAY
+        -------------------------------------------------------- */
+
+        el.style.display = "flex";
+
+        el.style.flexDirection =
+            "column";
+
+        el.style.alignItems =
+            "center";
+
+        el.style.justifyContent =
+            "center";
 
         el.style.gap = "3px";
 
-        el.style.boxSizing = "border-box";
+        el.style.visibility =
+            "visible";
 
-        el.style.visibility = "visible";
-        el.style.opacity = "1";
+        el.style.opacity =
+            "1";
+
+        el.style.pointerEvents =
+            "auto";
+
+        el.style.overflow =
+            "visible";
+
+
+        /* --------------------------------------------------------
+           DESIGN COMPONENT
+        -------------------------------------------------------- */
 
         el.style.background =
             "linear-gradient(145deg,#17365f,#0a1d36)";
@@ -9181,29 +9227,32 @@ bind(
         el.style.border =
             "2px solid rgba(255,210,31,.85)";
 
-        el.style.borderRadius = "10px";
+        el.style.borderRadius =
+            "10px";
 
-        el.style.color = "#ffffff";
+        el.style.color =
+            "#ffffff";
 
         el.style.boxShadow =
             "0 7px 18px rgba(0,0,0,.55)";
 
-        el.style.zIndex = "31";
-
-        el.style.pointerEvents = "auto";
-
-        el.style.overflow = "visible";
+        el.style.zIndex =
+            "31";
 
         el.style.transformOrigin =
             "center center";
 
+        /*
+         * Important pour Android :
+         * le component peut recevoir le toucher directement.
+         */
         el.style.touchAction =
             "none";
 
 
-        /* --------------------------------------------------------
+        /* ========================================================
            HEADER
-        -------------------------------------------------------- */
+        ======================================================== */
 
         const header =
             el.querySelector(
@@ -9212,27 +9261,41 @@ bind(
 
         if (header) {
 
-            header.style.display = "block";
-            header.style.visibility = "visible";
-            header.style.opacity = "1";
+            header.style.display =
+                "block";
 
-            header.style.width = "100%";
-            header.style.height = "20px";
+            header.style.visibility =
+                "visible";
 
-            header.style.textAlign = "center";
+            header.style.opacity =
+                "1";
 
-            header.style.fontSize = "11px";
-            header.style.fontWeight = "700";
+            header.style.width =
+                "100%";
 
-            header.style.color = "#ffffff";
+            header.style.height =
+                "20px";
 
-            header.style.overflow = "visible";
+            header.style.textAlign =
+                "center";
+
+            header.style.fontSize =
+                "11px";
+
+            header.style.fontWeight =
+                "700";
+
+            header.style.color =
+                "#ffffff";
+
+            header.style.overflow =
+                "visible";
         }
 
 
-        /* --------------------------------------------------------
+        /* ========================================================
            BODY
-        -------------------------------------------------------- */
+        ======================================================== */
 
         const body =
             el.querySelector(
@@ -9241,26 +9304,38 @@ bind(
 
         if (body) {
 
-            body.style.display = "flex";
+            body.style.display =
+                "flex";
 
-            body.style.visibility = "visible";
-            body.style.opacity = "1";
+            body.style.visibility =
+                "visible";
 
-            body.style.width = "100%";
+            body.style.opacity =
+                "1";
 
-            body.style.height = "35px";
-            body.style.minHeight = "35px";
+            body.style.width =
+                "100%";
 
-            body.style.alignItems = "center";
-            body.style.justifyContent = "center";
+            body.style.height =
+                "35px";
 
-            body.style.position = "relative";
+            body.style.minHeight =
+                "35px";
+
+            body.style.alignItems =
+                "center";
+
+            body.style.justifyContent =
+                "center";
+
+            body.style.position =
+                "relative";
         }
 
 
-        /* --------------------------------------------------------
+        /* ========================================================
            PINS
-        -------------------------------------------------------- */
+        ======================================================== */
 
         const pins =
             el.querySelector(
@@ -9269,37 +9344,61 @@ bind(
 
         if (pins) {
 
-            pins.style.position = "absolute";
-            pins.style.inset = "0";
+            pins.style.position =
+                "absolute";
 
-            pins.style.width = "100%";
-            pins.style.height = "100%";
+            pins.style.inset =
+                "0";
 
-            pins.style.pointerEvents = "none";
+            pins.style.width =
+                "100%";
 
-            pins.style.zIndex = "45";
+            pins.style.height =
+                "100%";
+
+            pins.style.pointerEvents =
+                "none";
+
+            pins.style.zIndex =
+                "45";
         }
 
 
-        el.querySelectorAll(
-            ".component-pin"
-        ).forEach(
+        const componentPins =
+            el.querySelectorAll(
+                ".component-pin"
+            );
+
+
+        componentPins.forEach(
             (pin, pinIndex) => {
 
-                pin.style.position = "absolute";
+                pin.style.position =
+                    "absolute";
 
-                pin.style.display = "flex";
+                pin.style.display =
+                    "flex";
 
-                pin.style.width = "14px";
-                pin.style.height = "14px";
+                pin.style.width =
+                    "14px";
 
-                pin.style.minWidth = "14px";
-                pin.style.minHeight = "14px";
+                pin.style.height =
+                    "14px";
 
-                pin.style.padding = "0";
+                pin.style.minWidth =
+                    "14px";
 
-                pin.style.alignItems = "center";
-                pin.style.justifyContent = "center";
+                pin.style.minHeight =
+                    "14px";
+
+                pin.style.padding =
+                    "0";
+
+                pin.style.alignItems =
+                    "center";
+
+                pin.style.justifyContent =
+                    "center";
 
                 pin.style.border =
                     "2px solid #ffffff";
@@ -9313,37 +9412,50 @@ bind(
                 pin.style.color =
                     "#071a33";
 
-                pin.style.fontSize = "7px";
+                pin.style.fontSize =
+                    "7px";
 
-                pin.style.zIndex = "46";
-
-
-                const totalPins =
-                    el.querySelectorAll(
-                        ".component-pin"
-                    ).length;
+                pin.style.zIndex =
+                    "46";
 
 
-                if (totalPins === 1) {
+                if (
+                    componentPins.length === 1
+                ) {
 
-                    pin.style.left = "50%";
-                    pin.style.bottom = "-7px";
+                    pin.style.left =
+                        "50%";
 
-                } else if (
+                    pin.style.bottom =
+                        "-7px";
+
+                }
+
+                else if (
                     pinIndex === 0
                 ) {
 
-                    pin.style.left = "-7px";
-                    pin.style.top = "50%";
+                    pin.style.left =
+                        "-7px";
 
-                } else if (
+                    pin.style.top =
+                        "50%";
+
+                }
+
+                else if (
                     pinIndex === 1
                 ) {
 
-                    pin.style.right = "-7px";
-                    pin.style.top = "50%";
+                    pin.style.right =
+                        "-7px";
 
-                } else {
+                    pin.style.top =
+                        "50%";
+
+                }
+
+                else {
 
                     pin.style.left =
                         `${20 + (pinIndex * 20)}px`;
@@ -9355,14 +9467,18 @@ bind(
         );
 
 
-        /* --------------------------------------------------------
+        /* ========================================================
            VISUELS INTERNES
-        -------------------------------------------------------- */
+        ======================================================== */
 
         el.querySelectorAll(
-            ".generic-symbol,.led-visual,.bulb-visual," +
-            ".battery-visual,.resistor-visual," +
-            ".capacitor-visual,.controller-visual"
+            ".generic-symbol," +
+            ".led-visual," +
+            ".bulb-visual," +
+            ".battery-visual," +
+            ".resistor-visual," +
+            ".capacitor-visual," +
+            ".controller-visual"
         ).forEach(
             visual => {
 
@@ -9391,6 +9507,14 @@ bind(
     }
 
 
+    /* ============================================================
+       2 — SCAN COMPONENTS
+       ------------------------------------------------------------
+       IMPORTANT :
+       scanComponents() pa chanje pozisyon component ki deja
+       gen dataset "done".
+       ============================================================ */
+
     function scanComponents() {
 
         const layer =
@@ -9400,10 +9524,12 @@ bind(
 
         if (!layer) return;
 
+
         const components =
             layer.querySelectorAll(
                 ".electronic-component"
             );
+
 
         components.forEach(
             (el, index) => {
@@ -9412,11 +9538,21 @@ bind(
                     el,
                     index
                 );
-
             }
         );
     }
 
+
+    /* ============================================================
+       3 — OBSERVER
+       ------------------------------------------------------------
+       Observer la sèvi sèlman pou nouvo component ki antre
+       nan layer la.
+
+       Li pa obsève "attributes", konsa chanjman:
+       left / top / transform / style
+       pandan drag pa rele bridge la.
+       ============================================================ */
 
     function startBridge() {
 
@@ -9435,18 +9571,53 @@ bind(
             return;
         }
 
+
         scanComponents();
 
 
         const observer =
             new MutationObserver(
-                () => {
+                mutations => {
 
-                    scanComponents();
+                    let needsScan =
+                        false;
 
+
+                    mutations.forEach(
+                        mutation => {
+
+                            if (
+                                mutation.type ===
+                                "childList"
+                            ) {
+
+                                if (
+                                    mutation.addedNodes &&
+                                    mutation.addedNodes.length
+                                ) {
+
+                                    needsScan =
+                                        true;
+                                }
+                            }
+                        }
+                    );
+
+
+                    if (needsScan) {
+
+                        scanComponents();
+                    }
                 }
             );
 
+
+        /*
+         * childList sèlman.
+         *
+         * PA mete attributes:true.
+         * PA kite bridge la kontwole style pandan drag.
+         */
 
         observer.observe(
             layer,
@@ -9456,6 +9627,10 @@ bind(
             }
         );
 
+
+        /* --------------------------------------------------------
+           Ti scans inisyal pou asire premye affichage.
+           -------------------------------------------------------- */
 
         setTimeout(
             scanComponents,
@@ -9474,6 +9649,10 @@ bind(
     }
 
 
+    /* ============================================================
+       4 — START
+       ============================================================ */
+
     if (
         document.readyState ===
         "loading"
@@ -9490,7 +9669,7 @@ bind(
     } else {
 
         startBridge();
-
     }
+
 
 })();
