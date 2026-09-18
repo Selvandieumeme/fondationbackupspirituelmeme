@@ -5814,8 +5814,801 @@ void loop() {
     }
 
 
+
+
+
+
     /* ============================================================
-       53 — CATÉGORIES
+       53 — CATÉGORIES / BIBLIOTHÈQUE DES COMPOSANTS
+       ------------------------------------------------------------
+       - Affichage visuel des composants
+       - Carte 3D autonome sans bibliothèque externe
+       - Bouton AJOUTER fonctionnel
+       - Compatible avec addComponent()
+       - Aucun événement global supplémentaire
+    ============================================================ */
+
+    function renderLibraryComponentVisual(
+        definition
+    ) {
+
+        const type =
+            String(
+                definition?.type || ""
+            ).toLowerCase();
+
+        const name =
+            String(
+                definition?.name || ""
+            ).toLowerCase();
+
+
+        /* --------------------------------------------------------
+           LED
+        -------------------------------------------------------- */
+
+        if (
+            type === "led" ||
+            type === "led-red" ||
+            type === "led-green" ||
+            type === "led-blue" ||
+            type === "led-yellow" ||
+            type === "led-white" ||
+            type.includes("led") ||
+            name.includes("led")
+        ) {
+
+            const ledColor =
+                definition.color ||
+                "#ff3344";
+
+            return `
+                <div
+                    class="fobas-library-3d fobas-led-3d"
+                    style="
+                        --fobas-led-color:${escapeHTML(
+                            String(ledColor)
+                        )};
+                    "
+                >
+                    <div class="fobas-led-shadow"></div>
+
+                    <div class="fobas-led-body">
+                        <div class="fobas-led-dome"></div>
+                        <div class="fobas-led-highlight"></div>
+                    </div>
+
+                    <div class="fobas-led-base">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <div class="fobas-led-pin pin-left"></div>
+                    <div class="fobas-led-pin pin-right"></div>
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           RÉSISTANCE
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("resistor") ||
+            type.includes("resistance") ||
+            name.includes("résistance") ||
+            name.includes("resistor")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-resistor-3d">
+
+                    <div class="fobas-wire-left"></div>
+
+                    <div class="fobas-resistor-body">
+                        <span class="band band-1"></span>
+                        <span class="band band-2"></span>
+                        <span class="band band-3"></span>
+                        <span class="band band-4"></span>
+                        <div class="resistor-highlight"></div>
+                    </div>
+
+                    <div class="fobas-wire-right"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           CONDENSATEUR
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("capacitor") ||
+            type.includes("condens") ||
+            name.includes("condens")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-capacitor-3d">
+
+                    <div class="fobas-cap-pin left"></div>
+
+                    <div class="fobas-cap-body">
+                        <div class="cap-cylinder"></div>
+                        <div class="cap-highlight"></div>
+                        <div class="cap-mark">+</div>
+                    </div>
+
+                    <div class="fobas-cap-pin right"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           INDUCTEUR / BOBINE
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("inductor") ||
+            type.includes("coil") ||
+            type.includes("bobine") ||
+            name.includes("induct")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-inductor-3d">
+
+                    <div class="inductor-wire-left"></div>
+
+                    <div class="inductor-coils">
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                    </div>
+
+                    <div class="inductor-wire-right"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           DIODE
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("diode") ||
+            name.includes("diode")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-diode-3d">
+
+                    <div class="diode-pin"></div>
+
+                    <div class="diode-body">
+                        <div class="diode-glass"></div>
+                        <div class="diode-band"></div>
+                    </div>
+
+                    <div class="diode-pin"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           TRANSISTOR
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("transistor") ||
+            name.includes("transistor")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-transistor-3d">
+
+                    <div class="transistor-body">
+                        <div class="transistor-face">
+                            <span>Q</span>
+                        </div>
+                        <div class="transistor-highlight"></div>
+                    </div>
+
+                    <div class="transistor-pin p1"></div>
+                    <div class="transistor-pin p2"></div>
+                    <div class="transistor-pin p3"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           MOSFET
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("mosfet") ||
+            name.includes("mosfet")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-mosfet-3d">
+
+                    <div class="mosfet-body">
+                        <span>M</span>
+                    </div>
+
+                    <div class="mosfet-pin p1"></div>
+                    <div class="mosfet-pin p2"></div>
+                    <div class="mosfet-pin p3"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           RELAIS
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("relay") ||
+            type.includes("relais") ||
+            name.includes("relais") ||
+            name.includes("relay")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-relay-3d">
+
+                    <div class="relay-body">
+                        <div class="relay-label">
+                            RELAY
+                        </div>
+
+                        <div class="relay-window">
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <div class="relay-pin p1"></div>
+                    <div class="relay-pin p2"></div>
+                    <div class="relay-pin p3"></div>
+                    <div class="relay-pin p4"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           INTERRUPTEUR
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("switch") ||
+            type.includes("interrupteur") ||
+            name.includes("switch") ||
+            name.includes("interrupteur")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-switch-3d">
+
+                    <div class="switch-terminal left"></div>
+
+                    <div class="switch-base">
+                        <div class="switch-lever"></div>
+                    </div>
+
+                    <div class="switch-terminal right"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           BOUTON POUSSOIR
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("button") ||
+            type.includes("push") ||
+            name.includes("bouton") ||
+            name.includes("push")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-button-3d">
+
+                    <div class="push-button-body">
+                        <div class="push-button-cap">
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <div class="push-pin left"></div>
+                    <div class="push-pin right"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           POTENTIOMÈTRE
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("potentiometer") ||
+            type.includes("potentiometre") ||
+            name.includes("potentiom")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-potentiometer-3d">
+
+                    <div class="pot-body">
+                        <div class="pot-dial">
+                            <div class="pot-pointer"></div>
+                        </div>
+                    </div>
+
+                    <div class="pot-pin p1"></div>
+                    <div class="pot-pin p2"></div>
+                    <div class="pot-pin p3"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           FUSIBLE
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("fuse") ||
+            type.includes("fusible") ||
+            name.includes("fusible") ||
+            name.includes("fuse")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-fuse-3d">
+
+                    <div class="fuse-pin"></div>
+
+                    <div class="fuse-body">
+                        <div class="fuse-glass"></div>
+                        <div class="fuse-wire"></div>
+                    </div>
+
+                    <div class="fuse-pin"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           TRANSFORMATEUR
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("transformer") ||
+            type.includes("transformateur") ||
+            name.includes("transformateur")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-transformer-3d">
+
+                    <div class="transformer-core"></div>
+
+                    <div class="transformer-coil coil-left">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <div class="transformer-coil coil-right">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           REDRESSEUR
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("rectifier") ||
+            type.includes("redresseur") ||
+            name.includes("redresseur")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-rectifier-3d">
+
+                    <div class="rectifier-body">
+                        <div class="rectifier-mark">~</div>
+                        <div class="rectifier-mark">+</div>
+                        <div class="rectifier-mark">−</div>
+                    </div>
+
+                    <div class="rectifier-pin p1"></div>
+                    <div class="rectifier-pin p2"></div>
+                    <div class="rectifier-pin p3"></div>
+                    <div class="rectifier-pin p4"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           RÉGULATEUR
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("regulator") ||
+            type.includes("regulateur") ||
+            name.includes("7805") ||
+            name.includes("7812") ||
+            name.includes("régulateur")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-regulator-3d">
+
+                    <div class="regulator-body">
+                        <div class="regulator-face">
+                            REG
+                        </div>
+                        <div class="regulator-metal"></div>
+                    </div>
+
+                    <div class="regulator-pin p1"></div>
+                    <div class="regulator-pin p2"></div>
+                    <div class="regulator-pin p3"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           OP AMP
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("opamp") ||
+            type.includes("op-amp") ||
+            name.includes("opamp") ||
+            name.includes("ampli")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-opamp-3d">
+
+                    <div class="opamp-body">
+                        <span>+</span>
+                        <span>−</span>
+                        <b>OP</b>
+                    </div>
+
+                    <div class="opamp-pin input-plus"></div>
+                    <div class="opamp-pin input-minus"></div>
+                    <div class="opamp-pin output"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           LOGIQUE
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("logic") ||
+            type.includes("not") ||
+            type.includes("and") ||
+            type.includes("or") ||
+            name.includes("logic")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-logic-3d">
+
+                    <div class="logic-body">
+                        <div class="logic-symbol">
+                            ${escapeHTML(
+                                definition.symbol || "LOGIC"
+                            )}
+                        </div>
+                    </div>
+
+                    <div class="logic-pin p1"></div>
+                    <div class="logic-pin p2"></div>
+                    <div class="logic-pin p3"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           SOURCE / BATTERIE
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("battery") ||
+            type.includes("supply") ||
+            type.includes("source")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-power-3d">
+
+                    <div class="power-body">
+
+                        <div class="power-terminal plus">
+                            +
+                        </div>
+
+                        <div class="power-center">
+                            <div></div>
+                            <div></div>
+                        </div>
+
+                        <div class="power-terminal minus">
+                            −
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           FIL
+        -------------------------------------------------------- */
+
+        if (
+            type === "wire" ||
+            type.includes("wire") ||
+            type.includes("fil") ||
+            name.includes("fil")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-wire-3d">
+
+                    <div
+                        class="library-wire-line"
+                        style="
+                            background:${escapeHTML(
+                                String(
+                                    definition.color ||
+                                    "#e7edf5"
+                                )
+                            )};
+                        "
+                    ></div>
+
+                    <div class="library-wire-terminal left"></div>
+                    <div class="library-wire-terminal right"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           TERMINAL
+        -------------------------------------------------------- */
+
+        if (
+            type.includes("terminal") ||
+            type.includes("ground") ||
+            name.includes("terminal") ||
+            name.includes("gnd")
+        ) {
+
+            return `
+                <div class="fobas-library-3d fobas-terminal-3d">
+
+                    <div class="terminal-body">
+                        <span>
+                            ${escapeHTML(
+                                definition.symbol || "●"
+                            )}
+                        </span>
+                    </div>
+
+                    <div class="terminal-pin"></div>
+
+                </div>
+            `;
+        }
+
+
+        /* --------------------------------------------------------
+           VISUEL GÉNÉRIQUE
+        -------------------------------------------------------- */
+
+        return `
+            <div class="fobas-library-3d fobas-generic-3d">
+
+                <div class="generic-body">
+                    <span>
+                        ${escapeHTML(
+                            definition.symbol || "●"
+                        )}
+                    </span>
+                </div>
+
+                <div class="generic-pin left"></div>
+                <div class="generic-pin right"></div>
+
+            </div>
+        `;
+    }
+
+
+    /* ============================================================
+       53A — CRÉATION D'UNE CARTE DE BIBLIOTHÈQUE
+    ============================================================ */
+
+    function createLibraryComponentCard(
+        definition
+    ) {
+
+        if (!definition) {
+            return null;
+        }
+
+        const card =
+            document.createElement(
+                "article"
+            );
+
+        card.className =
+            "library-generated-item fobas-library-card";
+
+        card.dataset.component =
+            definition.type || "";
+
+
+        const valueText =
+            definition.value !== undefined
+                ? `${definition.value}${definition.unit || ""}`
+                : "";
+
+
+        card.innerHTML = `
+
+            <div class="fobas-library-visual">
+
+                ${renderLibraryComponentVisual(
+                    definition
+                )}
+
+            </div>
+
+
+            <div class="fobas-library-info">
+
+                <strong class="library-item-name">
+                    ${escapeHTML(
+                        definition.name ||
+                        definition.type ||
+                        "Composant"
+                    )}
+                </strong>
+
+                ${
+                    valueText
+                        ? `
+                            <small class="library-item-value">
+                                ${escapeHTML(
+                                    String(valueText)
+                                )}
+                            </small>
+                          `
+                        : ""
+                }
+
+            </div>
+
+
+            <div class="fobas-library-actions">
+
+                <button
+                    type="button"
+                    class="fobas-library-add-btn"
+                    data-library-add="true"
+                    data-component="${escapeHTML(
+                        definition.type || ""
+                    )}"
+                >
+                    Ajouter
+                </button>
+
+            </div>
+        `;
+
+
+        /* --------------------------------------------------------
+           IMPORTANT :
+           On attache UNE SEULE action au bouton AJOUTER.
+        -------------------------------------------------------- */
+
+        const addButton =
+            card.querySelector(
+                "[data-library-add='true']"
+            );
+
+        if (addButton) {
+
+            addButton.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                    const componentType =
+                        addButton.dataset.component;
+
+                    if (!componentType) {
+
+                        toast(
+                            "Type de composant introuvable.",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+                    addComponent(
+                        componentType
+                    );
+                }
+            );
+        }
+
+
+        return card;
+    }
+
+
+    /* ============================================================
+       53B — CATÉGORIE
     ============================================================ */
 
     function renderCategory(
@@ -5825,85 +6618,72 @@ void loop() {
         const grid =
             $("componentLibraryGrid");
 
-        if (!grid) return;
+        if (!grid) {
+            return;
+        }
+
 
         grid.innerHTML = "";
+
 
         const items =
             COMPONENT_LIBRARY[
                 category
             ] || [];
 
-        items.forEach(
-            definition => {
 
-                const button =
-                    document.createElement(
-                        "button"
-                    );
+        if (!items.length) {
 
-                button.type =
-                    "button";
+            grid.innerHTML = `
+                <div class="fobas-library-empty">
+                    Aucun composant disponible
+                    dans cette catégorie.
+                </div>
+            `;
 
-                button.className =
-                    "library-generated-item";
+        } else {
 
-                button.dataset.component =
-                    definition.type;
+            items.forEach(
+                definition => {
 
-                button.innerHTML = `
-                    <span class="library-item-symbol">
-                        ${escapeHTML(
-                            definition.symbol || "●"
-                        )}
-                    </span>
-                    <strong>
-                        ${escapeHTML(
-                            definition.name
-                        )}
-                    </strong>
-                    ${
-                        definition.value !== undefined
-                            ? `<small>
-                                ${escapeHTML(
-                                    String(
-                                        definition.value
-                                    )
-                                )}
-                                ${escapeHTML(
-                                    definition.unit || ""
-                                )}
-                               </small>`
-                            : ""
+                    const card =
+                        createLibraryComponentCard(
+                            definition
+                        );
+
+                    if (card) {
+
+                        grid.appendChild(
+                            card
+                        );
                     }
-                `;
+                }
+            );
+        }
 
-                button.addEventListener(
-                    "click",
-                    () =>
-                        addComponent(
-                            definition.type
-                        )
-                );
 
-                grid.appendChild(
-                    button
-                );
-            }
-        );
+        /* --------------------------------------------------------
+           CATÉGORIE ACTIVE
+        -------------------------------------------------------- */
 
         qsa(
             ".component-category-btn"
         ).forEach(
-            btn =>
+            btn => {
+
                 btn.classList.toggle(
                     "active",
                     btn.dataset.category ===
                         category
-                )
+                );
+            }
         );
     }
 
+
+    /* ============================================================
+       53C — RECHERCHE
+    ============================================================ */
 
     function searchComponents(
         query
@@ -5912,70 +6692,104 @@ void loop() {
         const grid =
             $("componentLibraryGrid");
 
-        if (!grid) return;
+        if (!grid) {
+            return;
+        }
+
 
         const value =
-            String(query || "")
+            String(
+                query || ""
+            )
                 .toLowerCase()
                 .trim();
 
+
         grid.innerHTML = "";
 
-        Object.values(
-            COMPONENT_LIBRARY
-        )
-            .flat()
-            .filter(
-                item =>
-                    !value ||
-                    item.name
-                        .toLowerCase()
-                        .includes(value) ||
-                    item.type
-                        .toLowerCase()
-                        .includes(value)
+
+        const results =
+            Object.values(
+                COMPONENT_LIBRARY
             )
-            .forEach(
-                definition => {
+                .flat()
+                .filter(
+                    item => {
 
-                    const button =
-                        document.createElement(
-                            "button"
-                        );
-
-                    button.type =
-                        "button";
-
-                    button.className =
-                        "library-generated-item";
-
-                    button.innerHTML = `
-                        <span>
-                            ${escapeHTML(
-                                definition.symbol || "●"
-                            )}
-                        </span>
-                        <strong>
-                            ${escapeHTML(
-                                definition.name
-                            )}
-                        </strong>
-                    `;
-
-                    button.addEventListener(
-                        "click",
-                        () =>
-                            addComponent(
-                                definition.type
+                        const itemName =
+                            String(
+                                item.name || ""
                             )
+                                .toLowerCase();
+
+                        const itemType =
+                            String(
+                                item.type || ""
+                            )
+                                .toLowerCase();
+
+                        const itemValue =
+                            String(
+                                item.value || ""
+                            )
+                                .toLowerCase();
+
+                        return (
+                            !value ||
+                            itemName.includes(
+                                value
+                            ) ||
+                            itemType.includes(
+                                value
+                            ) ||
+                            itemValue.includes(
+                                value
+                            )
+                        );
+                    }
+                );
+
+
+        if (!results.length) {
+
+            grid.innerHTML = `
+                <div class="fobas-library-empty">
+                    Aucun composant trouvé
+                    pour :
+                    <strong>
+                        ${escapeHTML(
+                            query || ""
+                        )}
+                    </strong>
+                </div>
+            `;
+
+            return;
+        }
+
+
+        results.forEach(
+            definition => {
+
+                const card =
+                    createLibraryComponentCard(
+                        definition
                     );
+
+                if (card) {
 
                     grid.appendChild(
-                        button
+                        card
                     );
                 }
-            );
+            }
+        );
     }
+
+
+
+
+
 
 
     /* ============================================================
