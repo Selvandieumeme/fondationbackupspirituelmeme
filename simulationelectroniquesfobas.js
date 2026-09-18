@@ -9080,118 +9080,96 @@ bind(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ================================================================
    FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — V3
+   COMPONENT VISIBILITY BRIDGE — V4
    ---------------------------------------------------------------
    RESPONSABILITÉ UNIQUE :
    - Fè component yo vizib
-   - Mete yo anlè-gòch sèlman premye fwa yo parèt
-   - PA re-mete pozisyon an pandan itilizatè a ap deplase component
-   - PA disparèt component lè yo resevwa pointer/touch
+   - PA kontwole left
+   - PA kontwole top
+   - PA kontwole x / y
+   - PA repositionner component yo
+   - PA entèfere ak drag
+   - PA modifye renderComponent()
    - PA modifye createComponent()
    - PA modifye addComponent()
-   - PA modifye renderComponent()
-   - PA modifye renderAllComponents()
-   - PA modifye drag engine
-   - PA modifye wires
-   - PA modifye simulation
    ================================================================ */
 
-(function FOBAS_ComponentVisibilityBridge_V3() {
+(function FOBAS_ComponentVisibilityBridge_V4() {
 
     "use strict";
 
 
     /* ============================================================
-       1 — RENDRE YON COMPONENT VIZIB
-       ============================================================ */
+       RENDRE COMPONENT VIZIB
+    ============================================================ */
 
-    function forceVisibleComponent(el, index) {
+    function forceVisibleComponent(el) {
 
         if (!el) return;
 
-        const layer = el.parentElement;
+
+        const layer =
+            el.parentElement;
+
+
+        /* --------------------------------------------------------
+           COMPONENT LAYER
+        -------------------------------------------------------- */
 
         if (
             layer &&
             layer.id === "componentLayer"
         ) {
 
-            layer.style.position = "absolute";
-            layer.style.inset = "0";
-            layer.style.display = "block";
-            layer.style.visibility = "visible";
-            layer.style.opacity = "1";
-            layer.style.pointerEvents = "none";
-            layer.style.zIndex = "30";
+            layer.style.position =
+                "absolute";
+
+            layer.style.inset =
+                "0";
+
+            layer.style.display =
+                "block";
+
+            layer.style.visibility =
+                "visible";
+
+            layer.style.opacity =
+                "1";
+
+            layer.style.pointerEvents =
+                "none";
+
+            layer.style.zIndex =
+                "30";
         }
 
 
         /* --------------------------------------------------------
-           POZISYON INITIAL SELMAN
+           COMPONENT
            --------------------------------------------------------
-           Bridge la pa dwe kontinye kontwole left/top.
-           Li mete pozisyon an yon sèl fwa.
-           Apre sa renderComponent() / drag engine pran kontwòl.
+           PA GEN left/top ISIT LA.
+           PA GEN transform ISIT LA.
         -------------------------------------------------------- */
 
-        if (
-            el.dataset.fobasInitialPosition !== "done"
-        ) {
+        el.style.position =
+            "absolute";
 
-            const offset =
-                Math.min(
-                    index * 18,
-                    180
-                );
+        el.style.width =
+            "118px";
 
-            el.style.left =
-                `${30 + offset}px`;
+        el.style.height =
+            "72px";
 
-            el.style.top =
-                `${30 + offset}px`;
+        el.style.minWidth =
+            "118px";
 
-            el.dataset.fobasInitialPosition =
-                "done";
-        }
+        el.style.minHeight =
+            "72px";
 
-
-        /* --------------------------------------------------------
-           DIMANSYON
-        -------------------------------------------------------- */
-
-        el.style.position = "absolute";
-
-        el.style.width = "118px";
-        el.style.height = "72px";
-
-        el.style.minWidth = "118px";
-        el.style.minHeight = "72px";
-
-        el.style.boxSizing = "border-box";
-
-
-        /* --------------------------------------------------------
-           DISPLAY
-        -------------------------------------------------------- */
-
-        el.style.display = "flex";
+        el.style.display =
+            "flex";
 
         el.style.flexDirection =
             "column";
@@ -9202,7 +9180,11 @@ bind(
         el.style.justifyContent =
             "center";
 
-        el.style.gap = "3px";
+        el.style.gap =
+            "3px";
+
+        el.style.boxSizing =
+            "border-box";
 
         el.style.visibility =
             "visible";
@@ -9215,11 +9197,6 @@ bind(
 
         el.style.overflow =
             "visible";
-
-
-        /* --------------------------------------------------------
-           DESIGN COMPONENT
-        -------------------------------------------------------- */
 
         el.style.background =
             "linear-gradient(145deg,#17365f,#0a1d36)";
@@ -9239,15 +9216,11 @@ bind(
         el.style.zIndex =
             "31";
 
-        el.style.transformOrigin =
-            "center center";
-
-        /*
-         * Important pour Android :
-         * le component peut recevoir le toucher directement.
-         */
         el.style.touchAction =
             "none";
+
+        el.style.transformOrigin =
+            "center center";
 
 
         /* ========================================================
@@ -9429,9 +9402,7 @@ bind(
                     pin.style.bottom =
                         "-7px";
 
-                }
-
-                else if (
+                } else if (
                     pinIndex === 0
                 ) {
 
@@ -9441,9 +9412,7 @@ bind(
                     pin.style.top =
                         "50%";
 
-                }
-
-                else if (
+                } else if (
                     pinIndex === 1
                 ) {
 
@@ -9453,9 +9422,7 @@ bind(
                     pin.style.top =
                         "50%";
 
-                }
-
-                else {
+                } else {
 
                     pin.style.left =
                         `${20 + (pinIndex * 20)}px`;
@@ -9508,11 +9475,7 @@ bind(
 
 
     /* ============================================================
-       2 — SCAN COMPONENTS
-       ------------------------------------------------------------
-       IMPORTANT :
-       scanComponents() pa chanje pozisyon component ki deja
-       gen dataset "done".
+       SCAN
        ============================================================ */
 
     function scanComponents() {
@@ -9532,11 +9495,10 @@ bind(
 
 
         components.forEach(
-            (el, index) => {
+            el => {
 
                 forceVisibleComponent(
-                    el,
-                    index
+                    el
                 );
             }
         );
@@ -9544,14 +9506,10 @@ bind(
 
 
     /* ============================================================
-       3 — OBSERVER
+       OBSERVER
        ------------------------------------------------------------
-       Observer la sèvi sèlman pou nouvo component ki antre
-       nan layer la.
-
-       Li pa obsève "attributes", konsa chanjman:
-       left / top / transform / style
-       pandan drag pa rele bridge la.
+       Sèlman nouvo nodes.
+       Bridge la pa touche pozisyon.
        ============================================================ */
 
     function startBridge() {
@@ -9579,7 +9537,7 @@ bind(
             new MutationObserver(
                 mutations => {
 
-                    let needsScan =
+                    let added =
                         false;
 
 
@@ -9588,36 +9546,24 @@ bind(
 
                             if (
                                 mutation.type ===
-                                "childList"
+                                "childList" &&
+                                mutation.addedNodes.length
                             ) {
 
-                                if (
-                                    mutation.addedNodes &&
-                                    mutation.addedNodes.length
-                                ) {
-
-                                    needsScan =
-                                        true;
-                                }
+                                added =
+                                    true;
                             }
                         }
                     );
 
 
-                    if (needsScan) {
+                    if (added) {
 
                         scanComponents();
                     }
                 }
             );
 
-
-        /*
-         * childList sèlman.
-         *
-         * PA mete attributes:true.
-         * PA kite bridge la kontwole style pandan drag.
-         */
 
         observer.observe(
             layer,
@@ -9626,32 +9572,12 @@ bind(
                 subtree: true
             }
         );
-
-
-        /* --------------------------------------------------------
-           Ti scans inisyal pou asire premye affichage.
-           -------------------------------------------------------- */
-
-        setTimeout(
-            scanComponents,
-            50
-        );
-
-        setTimeout(
-            scanComponents,
-            150
-        );
-
-        setTimeout(
-            scanComponents,
-            300
-        );
     }
 
 
     /* ============================================================
-       4 — START
-       ============================================================ */
+       START
+    ============================================================ */
 
     if (
         document.readyState ===
@@ -9671,5 +9597,16 @@ bind(
         startBridge();
     }
 
-
 })();
+
+
+
+
+
+
+
+
+
+
+
+
