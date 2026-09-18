@@ -6479,87 +6479,131 @@ void loop() {
     }
 
 
-    /* ============================================================
-       53A — CRÉATION D'UNE CARTE DE BIBLIOTHÈQUE
-    ============================================================ */
-
-    function createLibraryComponentCard(
-        definition
-    ) {
-
-        if (!definition) {
-            return null;
-        }
-
-        const card =
-            document.createElement(
-                "article"
-            );
-
-        card.className =
-            "library-generated-item fobas-library-card";
-
-        card.dataset.component =
-            definition.type || "";
 
 
-        const valueText =
-            definition.value !== undefined
-                ? `${definition.value}${definition.unit || ""}`
-                : "";
+
+/* ============================================================
+   53A — CRÉATION D'UNE CARTE DE BIBLIOTHÈQUE
+   ------------------------------------------------------------
+   FIX V2 :
+   - Carte créée dynamiquement
+   - Bouton AJOUTER toujours identifiable
+   - Aucun onclick inline
+   - L'action réelle est gérée par délégation
+   - Compatible souris + tactile Android
+   - Utilise exclusivement addComponent()
+   - Ne crée aucun deuxième moteur de composants
+============================================================= */
+
+function createLibraryComponentCard(
+    definition
+) {
+
+    if (!definition) {
+        return null;
+    }
+
+    const componentType =
+        String(
+            definition.type || ""
+        ).trim();
+
+    if (!componentType) {
+        return null;
+    }
+
+    const card =
+        document.createElement(
+            "article"
+        );
+
+    card.className =
+        "library-generated-item fobas-library-card";
+
+    card.dataset.component =
+        componentType;
 
 
-        card.innerHTML = `
+    const valueText =
+        definition.value !== undefined &&
+        definition.value !== null
+            ? `${definition.value}${definition.unit || ""}`
+            : "";
 
-            <div class="fobas-library-visual">
 
-                ${renderLibraryComponentVisual(
-                    definition
+    card.innerHTML = `
+
+        <div class="fobas-library-visual">
+
+            ${renderLibraryComponentVisual(
+                definition
+            )}
+
+        </div>
+
+
+        <div class="fobas-library-info">
+
+            <strong class="library-item-name">
+                ${escapeHTML(
+                    definition.name ||
+                    componentType ||
+                    "Composant"
                 )}
+            </strong>
 
-            </div>
+            ${
+                valueText
+                    ? `
+                        <small class="library-item-value">
+                            ${escapeHTML(
+                                String(valueText)
+                            )}
+                        </small>
+                      `
+                    : ""
+            }
+
+        </div>
 
 
-            <div class="fobas-library-info">
+        <div class="fobas-library-actions">
 
-                <strong class="library-item-name">
-                    ${escapeHTML(
+            <button
+                type="button"
+                class="fobas-library-add-btn"
+                data-library-add="true"
+                data-component="${escapeHTML(
+                    componentType
+                )}"
+                aria-label="Ajouter ${
+                    escapeHTML(
                         definition.name ||
-                        definition.type ||
-                        "Composant"
-                    )}
-                </strong>
+                        componentType
+                    )
+                } au laboratoire"
+            >
+                ＋ Ajouter
+            </button>
 
-                ${
-                    valueText
-                        ? `
-                            <small class="library-item-value">
-                                ${escapeHTML(
-                                    String(valueText)
-                                )}
-                            </small>
-                          `
-                        : ""
-                }
-
-            </div>
+        </div>
+    `;
 
 
-            <div class="fobas-library-actions">
+    return card;
+}
 
-                <button
-                    type="button"
-                    class="fobas-library-add-btn"
-                    data-library-add="true"
-                    data-component="${escapeHTML(
-                        definition.type || ""
-                    )}"
-                >
-                    Ajouter
-                </button>
 
-            </div>
-        `;
+
+
+
+
+
+
+
+
+
+
 
 
         /* --------------------------------------------------------
