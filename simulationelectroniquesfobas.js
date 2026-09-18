@@ -9940,3 +9940,2845 @@ bind(
 
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================================================================
+   FOBAS ELECTRONIQUE & ROBOTIQUE
+   ROBOTICS EXTENSION LIBRARY — V1.0.0
+   ---------------------------------------------------------------
+   EXTENSION ISOLÉE / INDÉPENDANTE
+
+   CONTENU :
+   - Arduino ecosystem
+   - ESP ecosystem
+   - Raspberry Pi
+   - Microcontrollers
+   - Breadboards / prototyping
+   - Sensors
+   - Motors
+   - Servos
+   - Drivers
+   - Relays
+   - LEDs / displays
+   - Communication modules
+   - Power modules
+   - Robot mechanics
+   - Robotic arms
+   - Code library
+   - Robotics missions
+   - Code → component → reaction architecture
+
+   IMPORTANT :
+   - Pa modifye createComponent()
+   - Pa modifye addComponent()
+   - Pa modifye renderComponent()
+   - Pa modifye Visibility Bridge
+   - Pa modifye drag system
+   - Pa modifye wires
+   - Pa modifye existing electronics engine
+   - Pa itilize Three.js
+   ================================================================ */
+
+(function FOBAS_ROBOTICS_EXTENSION() {
+
+    "use strict";
+
+
+    /* ============================================================
+       01 — GLOBAL CONFIGURATION
+    ============================================================ */
+
+    const ROBOTICS_EXTENSION_VERSION =
+        "1.0.0";
+
+    const ROBOTICS_STORAGE_KEY =
+        "FOBAS_ROBOTICS_EXTENSION_STATE";
+
+
+    const roboticsState = {
+
+        selectedComponent: null,
+
+        selectedCategory: "all",
+
+        codeLanguage: "javascript",
+
+        selectedMission: null,
+
+        placedComponents: [],
+
+        codeHistory: [],
+
+        missionHistory: [],
+
+        runningCode: false
+
+    };
+
+
+    /* ============================================================
+       02 — ROBOTICS COMPONENT DATABASE
+    ============================================================ */
+
+    const ROBOTICS_COMPONENTS = [
+
+        /* --------------------------------------------------------
+           ARDUINO BOARDS
+        -------------------------------------------------------- */
+
+        {
+            id: "arduino_uno",
+            name: "Arduino UNO",
+            category: "controllers",
+            family: "Arduino",
+            icon: "🔵",
+            pins: 14,
+            analogPins: 6,
+            description:
+                "Carte microcontrôleur Arduino UNO pour projets robotiques."
+        },
+
+        {
+            id: "arduino_nano",
+            name: "Arduino Nano",
+            category: "controllers",
+            family: "Arduino",
+            icon: "🔵",
+            pins: 22,
+            analogPins: 8,
+            description:
+                "Version compacte Arduino pour robotique embarquée."
+        },
+
+        {
+            id: "arduino_mega",
+            name: "Arduino Mega 2560",
+            category: "controllers",
+            family: "Arduino",
+            icon: "🔵",
+            pins: 54,
+            analogPins: 16,
+            description:
+                "Carte Arduino avec grand nombre de broches."
+        },
+
+        {
+            id: "arduino_leonardo",
+            name: "Arduino Leonardo",
+            category: "controllers",
+            family: "Arduino",
+            icon: "🔵",
+            pins: 20,
+            analogPins: 12,
+            description:
+                "Carte Arduino basée sur ATmega32U4."
+        },
+
+        {
+            id: "arduino_micro",
+            name: "Arduino Micro",
+            category: "controllers",
+            family: "Arduino",
+            icon: "🔵",
+            pins: 20,
+            analogPins: 12,
+            description:
+                "Microcontrôleur compact pour systèmes embarqués."
+        },
+
+        {
+            id: "arduino_pro_mini",
+            name: "Arduino Pro Mini",
+            category: "controllers",
+            family: "Arduino",
+            icon: "🔵",
+            pins: 14,
+            analogPins: 8,
+            description:
+                "Carte compacte destinée aux installations embarquées."
+        },
+
+
+        /* --------------------------------------------------------
+           ESP
+        -------------------------------------------------------- */
+
+        {
+            id: "esp32",
+            name: "ESP32",
+            category: "controllers",
+            family: "ESP",
+            icon: "🟣",
+            pins: 34,
+            description:
+                "Microcontrôleur avec Wi-Fi et Bluetooth."
+        },
+
+        {
+            id: "esp32_devkit",
+            name: "ESP32 DevKit",
+            category: "controllers",
+            family: "ESP",
+            icon: "🟣",
+            pins: 30,
+            description:
+                "Carte de développement ESP32."
+        },
+
+        {
+            id: "esp8266",
+            name: "ESP8266",
+            category: "controllers",
+            family: "ESP",
+            icon: "🟣",
+            pins: 17,
+            description:
+                "Microcontrôleur Wi-Fi pour systèmes IoT."
+        },
+
+
+        /* --------------------------------------------------------
+           RASPBERRY PI
+        -------------------------------------------------------- */
+
+        {
+            id: "raspberry_pi_4",
+            name: "Raspberry Pi 4",
+            category: "computers",
+            family: "Raspberry Pi",
+            icon: "🟢",
+            description:
+                "Ordinateur monocarte pour robotique avancée."
+        },
+
+        {
+            id: "raspberry_pi_5",
+            name: "Raspberry Pi 5",
+            category: "computers",
+            family: "Raspberry Pi",
+            icon: "🟢",
+            description:
+                "Plateforme informatique pour robotique avancée."
+        },
+
+        {
+            id: "raspberry_pi_zero",
+            name: "Raspberry Pi Zero",
+            category: "computers",
+            family: "Raspberry Pi",
+            icon: "🟢",
+            description:
+                "Ordinateur compact pour robotique embarquée."
+        },
+
+
+        /* --------------------------------------------------------
+           PROTOTYPAGE
+        -------------------------------------------------------- */
+
+        {
+            id: "breadboard",
+            name: "Breadboard",
+            category: "prototyping",
+            icon: "▦",
+            description:
+                "Plaque de prototypage sans soudure."
+        },
+
+        {
+            id: "mini_breadboard",
+            name: "Mini Breadboard",
+            category: "prototyping",
+            icon: "▦",
+            description:
+                "Petite plaque de prototypage."
+        },
+
+        {
+            id: "protoboard",
+            name: "Protoboard",
+            category: "prototyping",
+            icon: "▦",
+            description:
+                "Plaque pour montage électronique."
+        },
+
+        {
+            id: "pcb",
+            name: "PCB",
+            category: "prototyping",
+            icon: "▧",
+            description:
+                "Circuit imprimé."
+        },
+
+        {
+            id: "terminal_board",
+            name: "Terminal Board",
+            category: "prototyping",
+            icon: "▤",
+            description:
+                "Carte de connexion et distribution."
+        },
+
+
+        /* --------------------------------------------------------
+           DISTANCE / PROXIMITY
+        -------------------------------------------------------- */
+
+        {
+            id: "hc_sr04",
+            name: "HC-SR04 Ultrasonic",
+            category: "sensors",
+            icon: "📡",
+            description:
+                "Capteur ultrasonique de distance."
+        },
+
+        {
+            id: "ir_obstacle",
+            name: "IR Obstacle Sensor",
+            category: "sensors",
+            icon: "👁️",
+            description:
+                "Détection d'obstacles par infrarouge."
+        },
+
+        {
+            id: "sharp_ir",
+            name: "Sharp IR Distance",
+            category: "sensors",
+            icon: "📏",
+            description:
+                "Mesure de distance infrarouge."
+        },
+
+        {
+            id: "tof_sensor",
+            name: "ToF Distance Sensor",
+            category: "sensors",
+            icon: "📐",
+            description:
+                "Capteur de distance Time-of-Flight."
+        },
+
+
+        /* --------------------------------------------------------
+           LIGHT / COLOR
+        -------------------------------------------------------- */
+
+        {
+            id: "ldr",
+            name: "LDR Photoresistor",
+            category: "sensors",
+            icon: "☀️",
+            description:
+                "Capteur de luminosité."
+        },
+
+        {
+            id: "photo_diode",
+            name: "Photodiode",
+            category: "sensors",
+            icon: "💡",
+            description:
+                "Détection de lumière."
+        },
+
+        {
+            id: "color_sensor",
+            name: "Color Sensor",
+            category: "sensors",
+            icon: "🌈",
+            description:
+                "Détection de couleurs."
+        },
+
+
+        /* --------------------------------------------------------
+           TEMPERATURE / HUMIDITY
+        -------------------------------------------------------- */
+
+        {
+            id: "dht11",
+            name: "DHT11",
+            category: "sensors",
+            icon: "🌡️",
+            description:
+                "Température et humidité."
+        },
+
+        {
+            id: "dht22",
+            name: "DHT22",
+            category: "sensors",
+            icon: "🌡️",
+            description:
+                "Capteur numérique température/humidité."
+        },
+
+        {
+            id: "ds18b20",
+            name: "DS18B20",
+            category: "sensors",
+            icon: "🌡️",
+            description:
+                "Capteur de température numérique."
+        },
+
+
+        /* --------------------------------------------------------
+           MOTION
+        -------------------------------------------------------- */
+
+        {
+            id: "pir",
+            name: "PIR Motion Sensor",
+            category: "sensors",
+            icon: "🚶",
+            description:
+                "Détection de mouvement."
+        },
+
+        {
+            id: "mpu6050",
+            name: "MPU6050",
+            category: "sensors",
+            icon: "🧭",
+            description:
+                "Accéléromètre et gyroscope."
+        },
+
+        {
+            id: "mpu9250",
+            name: "MPU9250",
+            category: "sensors",
+            icon: "🧭",
+            description:
+                "IMU 9 axes."
+        },
+
+        {
+            id: "gyroscope",
+            name: "Gyroscope",
+            category: "sensors",
+            icon: "🔄",
+            description:
+                "Mesure de rotation."
+        },
+
+        {
+            id: "accelerometer",
+            name: "Accelerometer",
+            category: "sensors",
+            icon: "↔️",
+            description:
+                "Mesure d'accélération."
+        },
+
+
+        /* --------------------------------------------------------
+           SOUND
+        -------------------------------------------------------- */
+
+        {
+            id: "sound_sensor",
+            name: "Sound Sensor",
+            category: "sensors",
+            icon: "🎤",
+            description:
+                "Détection de niveau sonore."
+        },
+
+        {
+            id: "microphone_module",
+            name: "Microphone Module",
+            category: "sensors",
+            icon: "🎙️",
+            description:
+                "Entrée audio pour systèmes robotiques."
+        },
+
+
+        /* --------------------------------------------------------
+           ENCODERS
+        -------------------------------------------------------- */
+
+        {
+            id: "rotary_encoder",
+            name: "Rotary Encoder",
+            category: "sensors",
+            icon: "⚙️",
+            description:
+                "Mesure de rotation et position."
+        },
+
+        {
+            id: "wheel_encoder",
+            name: "Wheel Encoder",
+            category: "sensors",
+            icon: "⭕",
+            description:
+                "Mesure de rotation des roues."
+        },
+
+
+        /* --------------------------------------------------------
+           BUTTONS / SWITCHES
+        -------------------------------------------------------- */
+
+        {
+            id: "push_button",
+            name: "Push Button",
+            category: "inputs",
+            icon: "🔘",
+            description:
+                "Bouton poussoir."
+        },
+
+        {
+            id: "toggle_switch",
+            name: "Toggle Switch",
+            category: "inputs",
+            icon: "🔀",
+            description:
+                "Interrupteur."
+        },
+
+        {
+            id: "joystick",
+            name: "Joystick Module",
+            category: "inputs",
+            icon: "🕹️",
+            description:
+                "Commande directionnelle."
+        },
+
+        {
+            id: "keypad",
+            name: "4x4 Keypad",
+            category: "inputs",
+            icon: "🔢",
+            description:
+                "Clavier matriciel."
+        },
+
+
+        /* --------------------------------------------------------
+           DC MOTORS
+        -------------------------------------------------------- */
+
+        {
+            id: "dc_motor",
+            name: "DC Motor",
+            category: "motors",
+            icon: "⚙️",
+            description:
+                "Moteur à courant continu."
+        },
+
+        {
+            id: "gear_motor",
+            name: "Gear Motor",
+            category: "motors",
+            icon: "⚙️",
+            description:
+                "Moteur DC avec réducteur."
+        },
+
+        {
+            id: "micro_dc_motor",
+            name: "Micro DC Motor",
+            category: "motors",
+            icon: "⚙️",
+            description:
+                "Petit moteur DC."
+        },
+
+
+        /* --------------------------------------------------------
+           SERVO
+        -------------------------------------------------------- */
+
+        {
+            id: "servo_sg90",
+            name: "Servo SG90",
+            category: "motors",
+            icon: "🔧",
+            description:
+                "Micro servo moteur."
+        },
+
+        {
+            id: "servo_mg996r",
+            name: "Servo MG996R",
+            category: "motors",
+            icon: "🔧",
+            description:
+                "Servo haute puissance."
+        },
+
+        {
+            id: "continuous_servo",
+            name: "Continuous Servo",
+            category: "motors",
+            icon: "🔧",
+            description:
+                "Servo à rotation continue."
+        },
+
+
+        /* --------------------------------------------------------
+           STEPPER
+        -------------------------------------------------------- */
+
+        {
+            id: "stepper_motor",
+            name: "Stepper Motor",
+            category: "motors",
+            icon: "🔄",
+            description:
+                "Moteur pas à pas."
+        },
+
+        {
+            id: "nema17",
+            name: "NEMA 17",
+            category: "motors",
+            icon: "🔄",
+            description:
+                "Moteur pas à pas pour robotique."
+        },
+
+
+        /* --------------------------------------------------------
+           MOTOR DRIVERS
+        -------------------------------------------------------- */
+
+        {
+            id: "l298n",
+            name: "L298N Motor Driver",
+            category: "drivers",
+            icon: "⚡",
+            description:
+                "Driver double pont en H."
+        },
+
+        {
+            id: "tb6612fng",
+            name: "TB6612FNG",
+            category: "drivers",
+            icon: "⚡",
+            description:
+                "Driver moteur double canal."
+        },
+
+        {
+            id: "a4988",
+            name: "A4988 Stepper Driver",
+            category: "drivers",
+            icon: "⚡",
+            description:
+                "Driver pour moteur pas à pas."
+        },
+
+        {
+            id: "drv8825",
+            name: "DRV8825",
+            category: "drivers",
+            icon: "⚡",
+            description:
+                "Driver stepper haute résolution."
+        },
+
+        {
+            id: "servo_driver",
+            name: "PCA9685 Servo Driver",
+            category: "drivers",
+            icon: "⚙️",
+            description:
+                "Contrôleur multi-servo."
+        },
+
+
+        /* --------------------------------------------------------
+           RELAYS / ACTUATORS
+        -------------------------------------------------------- */
+
+        {
+            id: "relay_module",
+            name: "Relay Module",
+            category: "actuators",
+            icon: "🔌",
+            description:
+                "Module relais."
+        },
+
+        {
+            id: "buzzer",
+            name: "Buzzer",
+            category: "actuators",
+            icon: "🔊",
+            description:
+                "Avertisseur sonore."
+        },
+
+        {
+            id: "active_buzzer",
+            name: "Active Buzzer",
+            category: "actuators",
+            icon: "🔊",
+            description:
+                "Buzzer avec oscillateur intégré."
+        },
+
+        {
+            id: "solenoid",
+            name: "Solenoid",
+            category: "actuators",
+            icon: "🧲",
+            description:
+                "Actionneur électromagnétique."
+        },
+
+
+        /* --------------------------------------------------------
+           LEDs / LIGHTS
+        -------------------------------------------------------- */
+
+        {
+            id: "led_red",
+            name: "Red LED",
+            category: "outputs",
+            icon: "🔴",
+            description:
+                "LED rouge."
+        },
+
+        {
+            id: "led_green",
+            name: "Green LED",
+            category: "outputs",
+            icon: "🟢",
+            description:
+                "LED verte."
+        },
+
+        {
+            id: "led_blue",
+            name: "Blue LED",
+            category: "outputs",
+            icon: "🔵",
+            description:
+                "LED bleue."
+        },
+
+        {
+            id: "rgb_led",
+            name: "RGB LED",
+            category: "outputs",
+            icon: "🌈",
+            description:
+                "LED RGB."
+        },
+
+        {
+            id: "neopixel",
+            name: "NeoPixel RGB",
+            category: "outputs",
+            icon: "🌈",
+            description:
+                "LED adressable."
+        },
+
+
+        /* --------------------------------------------------------
+           DISPLAYS
+        -------------------------------------------------------- */
+
+        {
+            id: "lcd16x2",
+            name: "LCD 16x2",
+            category: "displays",
+            icon: "🖥️",
+            description:
+                "Écran LCD 16 caractères x 2 lignes."
+        },
+
+        {
+            id: "lcd20x4",
+            name: "LCD 20x4",
+            category: "displays",
+            icon: "🖥️",
+            description:
+                "Écran LCD 20x4."
+        },
+
+        {
+            id: "oled",
+            name: "OLED Display",
+            category: "displays",
+            icon: "🖥️",
+            description:
+                "Écran OLED."
+        },
+
+        {
+            id: "seven_segment",
+            name: "7 Segment Display",
+            category: "displays",
+            icon: "🔢",
+            description:
+                "Afficheur 7 segments."
+        },
+
+
+        /* --------------------------------------------------------
+           COMMUNICATION
+        -------------------------------------------------------- */
+
+        {
+            id: "hc05",
+            name: "HC-05 Bluetooth",
+            category: "communication",
+            icon: "📶",
+            description:
+                "Module Bluetooth série."
+        },
+
+        {
+            id: "hc06",
+            name: "HC-06 Bluetooth",
+            category: "communication",
+            icon: "📶",
+            description:
+                "Module Bluetooth."
+        },
+
+        {
+            id: "esp_wifi",
+            name: "Wi-Fi Module",
+            category: "communication",
+            icon: "📡",
+            description:
+                "Communication Wi-Fi."
+        },
+
+        {
+            id: "nrf24l01",
+            name: "NRF24L01",
+            category: "communication",
+            icon: "📡",
+            description:
+                "Communication radio 2.4 GHz."
+        },
+
+        {
+            id: "rf433",
+            name: "RF 433 MHz",
+            category: "communication",
+            icon: "📡",
+            description:
+                "Module radio longue portée."
+        },
+
+        {
+            id: "ir_receiver",
+            name: "IR Receiver",
+            category: "communication",
+            icon: "📡",
+            description:
+                "Récepteur infrarouge."
+        },
+
+
+        /* --------------------------------------------------------
+           RFID
+        -------------------------------------------------------- */
+
+        {
+            id: "rfid_rc522",
+            name: "RFID RC522",
+            category: "identification",
+            icon: "💳",
+            description:
+                "Lecteur RFID."
+        },
+
+        {
+            id: "nfc_module",
+            name: "NFC Module",
+            category: "identification",
+            icon: "📱",
+            description:
+                "Communication NFC."
+        },
+
+
+        /* --------------------------------------------------------
+           POWER
+        -------------------------------------------------------- */
+
+        {
+            id: "battery_9v",
+            name: "9V Battery",
+            category: "power",
+            icon: "🔋",
+            description:
+                "Pile 9 volts."
+        },
+
+        {
+            id: "battery_pack",
+            name: "Battery Pack",
+            category: "power",
+            icon: "🔋",
+            description:
+                "Bloc batterie."
+        },
+
+        {
+            id: "buck_converter",
+            name: "Buck Converter",
+            category: "power",
+            icon: "⚡",
+            description:
+                "Convertisseur abaisseur."
+        },
+
+        {
+            id: "boost_converter",
+            name: "Boost Converter",
+            category: "power",
+            icon: "⚡",
+            description:
+                "Convertisseur élévateur."
+        },
+
+        {
+            id: "power_supply",
+            name: "DC Power Supply",
+            category: "power",
+            icon: "🔌",
+            description:
+                "Alimentation DC simulée."
+        },
+
+
+        /* --------------------------------------------------------
+           ROBOT CHASSIS
+        -------------------------------------------------------- */
+
+        {
+            id: "two_wheel_chassis",
+            name: "2WD Robot Chassis",
+            category: "mechanics",
+            icon: "🤖",
+            description:
+                "Châssis robot deux roues."
+        },
+
+        {
+            id: "four_wheel_chassis",
+            name: "4WD Robot Chassis",
+            category: "mechanics",
+            icon: "🤖",
+            description:
+                "Châssis robot quatre roues."
+        },
+
+        {
+            id: "robot_wheel",
+            name: "Robot Wheel",
+            category: "mechanics",
+            icon: "⭕",
+            description:
+                "Roue robotique."
+        },
+
+        {
+            id: "caster_wheel",
+            name: "Caster Wheel",
+            category: "mechanics",
+            icon: "⭕",
+            description:
+                "Roue pivotante."
+        },
+
+
+        /* --------------------------------------------------------
+           ROBOT ARM
+        -------------------------------------------------------- */
+
+        {
+            id: "robot_arm_base",
+            name: "Robot Arm Base",
+            category: "robotic_arm",
+            icon: "🦾",
+            description:
+                "Base de bras robotique."
+        },
+
+        {
+            id: "robot_arm_joint",
+            name: "Robot Arm Joint",
+            category: "robotic_arm",
+            icon: "🦾",
+            description:
+                "Articulation robotique."
+        },
+
+        {
+            id: "robot_gripper",
+            name: "Robot Gripper",
+            category: "robotic_arm",
+            icon: "🦾",
+            description:
+                "Pince robotique."
+        },
+
+        {
+            id: "robotic_arm",
+            name: "6-Axis Robotic Arm",
+            category: "robotic_arm",
+            icon: "🦾",
+            description:
+                "Bras robotique six axes."
+        },
+
+
+        /* --------------------------------------------------------
+           LINE FOLLOWING
+        -------------------------------------------------------- */
+
+        {
+            id: "line_sensor",
+            name: "Line Tracking Sensor",
+            category: "sensors",
+            icon: "〰️",
+            description:
+                "Capteur de suivi de ligne."
+        },
+
+        {
+            id: "line_array",
+            name: "5-Channel Line Sensor",
+            category: "sensors",
+            icon: "〰️",
+            description:
+                "Barrette de capteurs de ligne."
+        },
+
+
+        /* --------------------------------------------------------
+           GAS / ENVIRONMENT
+        -------------------------------------------------------- */
+
+        {
+            id: "mq2",
+            name: "MQ-2 Gas Sensor",
+            category: "sensors",
+            icon: "🧪",
+            description:
+                "Détection de gaz et fumée."
+        },
+
+        {
+            id: "mq135",
+            name: "MQ-135 Air Sensor",
+            category: "sensors",
+            icon: "🌫️",
+            description:
+                "Qualité de l'air."
+        },
+
+
+        /* --------------------------------------------------------
+           CAMERA
+        -------------------------------------------------------- */
+
+        {
+            id: "camera_module",
+            name: "Robot Camera",
+            category: "vision",
+            icon: "📷",
+            description:
+                "Caméra pour vision robotique."
+        },
+
+        {
+            id: "pi_camera",
+            name: "Raspberry Pi Camera",
+            category: "vision",
+            icon: "📷",
+            description:
+                "Caméra Raspberry Pi."
+        }
+
+    ];
+
+
+    /* ============================================================
+       03 — CODE LIBRARY
+    ============================================================ */
+
+    const ROBOTICS_CODE_LIBRARY = [
+
+        {
+            id: "arduino_blink",
+            name: "LED Blink",
+            language: "arduino",
+            category: "beginner",
+            description:
+                "Faire clignoter une LED.",
+            code:
+`const int LED = 13;
+
+void setup() {
+  pinMode(LED, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(LED, HIGH);
+  delay(1000);
+
+  digitalWrite(LED, LOW);
+  delay(1000);
+}`
+        },
+
+        {
+            id: "arduino_button_led",
+            name: "Button → LED",
+            language: "arduino",
+            category: "beginner",
+            description:
+                "Commander une LED avec un bouton.",
+            code:
+`const int BUTTON = 2;
+const int LED = 13;
+
+void setup() {
+  pinMode(BUTTON, INPUT_PULLUP);
+  pinMode(LED, OUTPUT);
+}
+
+void loop() {
+
+  if (digitalRead(BUTTON) == LOW) {
+    digitalWrite(LED, HIGH);
+  } else {
+    digitalWrite(LED, LOW);
+  }
+}`
+        },
+
+        {
+            id: "arduino_servo",
+            name: "Servo Control",
+            language: "arduino",
+            category: "motors",
+            description:
+                "Contrôler un servo.",
+            code:
+`#include <Servo.h>
+
+Servo servo;
+
+void setup() {
+  servo.attach(9);
+}
+
+void loop() {
+
+  servo.write(0);
+  delay(1000);
+
+  servo.write(90);
+  delay(1000);
+
+  servo.write(180);
+  delay(1000);
+}`
+        },
+
+        {
+            id: "arduino_ultrasonic",
+            name: "Ultrasonic Distance",
+            language: "arduino",
+            category: "sensors",
+            description:
+                "Lire un capteur HC-SR04.",
+            code:
+`const int TRIG = 9;
+const int ECHO = 10;
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+}
+
+void loop() {
+
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+
+  digitalWrite(TRIG, LOW);
+
+  long duration =
+    pulseIn(ECHO, HIGH);
+
+  float distance =
+    duration * 0.0343 / 2;
+
+  Serial.println(distance);
+
+  delay(200);
+}`
+        },
+
+        {
+            id: "arduino_dc_motor",
+            name: "DC Motor",
+            language: "arduino",
+            category: "motors",
+            description:
+                "Commander un moteur DC via driver.",
+            code:
+`const int IN1 = 8;
+const int IN2 = 9;
+const int ENA = 10;
+
+void setup() {
+
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+}
+
+void loop() {
+
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+
+  analogWrite(ENA, 180);
+
+  delay(2000);
+
+  analogWrite(ENA, 0);
+
+  delay(1000);
+}`
+        },
+
+        {
+            id: "arduino_line_follow",
+            name: "Line Follower",
+            language: "arduino",
+            category: "robot",
+            description:
+                "Logique de base d'un robot suiveur de ligne.",
+            code:
+`const int LEFT_SENSOR = 2;
+const int RIGHT_SENSOR = 3;
+
+void setup() {
+
+  pinMode(LEFT_SENSOR, INPUT);
+  pinMode(RIGHT_SENSOR, INPUT);
+}
+
+void loop() {
+
+  int left =
+    digitalRead(LEFT_SENSOR);
+
+  int right =
+    digitalRead(RIGHT_SENSOR);
+
+  if (left == LOW && right == LOW) {
+    forward();
+  }
+
+  if (left == HIGH && right == LOW) {
+    turnLeft();
+  }
+
+  if (left == LOW && right == HIGH) {
+    turnRight();
+  }
+}
+
+void forward() {
+}
+
+void turnLeft() {
+}
+
+void turnRight() {
+}`
+        },
+
+        {
+            id: "arduino_obstacle_robot",
+            name: "Obstacle Avoidance",
+            language: "arduino",
+            category: "robot",
+            description:
+                "Robot autonome avec détection d'obstacles.",
+            code:
+`int distance;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  distance = readDistance();
+
+  if (distance < 20) {
+
+    stopRobot();
+
+    delay(300);
+
+    turnRight();
+
+    delay(600);
+
+  } else {
+
+    forward();
+  }
+}
+
+int readDistance() {
+  return 50;
+}
+
+void forward() {
+}
+
+void stopRobot() {
+}
+
+void turnRight() {
+}`
+        },
+
+        {
+            id: "esp32_wifi",
+            name: "ESP32 Wi-Fi",
+            language: "cpp",
+            category: "iot",
+            description:
+                "Initialisation Wi-Fi ESP32.",
+            code:
+`#include <WiFi.h>
+
+const char* ssid =
+  "FOBAS_WIFI";
+
+const char* password =
+  "FOBAS_PASSWORD";
+
+void setup() {
+
+  Serial.begin(115200);
+
+  WiFi.begin(
+    ssid,
+    password
+  );
+
+  while (
+    WiFi.status() !=
+    WL_CONNECTED
+  ) {
+    delay(500);
+  }
+}
+
+void loop() {
+}`
+        },
+
+        {
+            id: "arduino_buzzer",
+            name: "Buzzer Alarm",
+            language: "arduino",
+            category: "outputs",
+            description:
+                "Déclencher une alarme sonore.",
+            code:
+`const int BUZZER = 8;
+
+void setup() {
+  pinMode(BUZZER, OUTPUT);
+}
+
+void loop() {
+
+  tone(BUZZER, 1000);
+
+  delay(500);
+
+  noTone(BUZZER);
+
+  delay(500);
+}`
+        },
+
+        {
+            id: "arduino_lcd",
+            name: "LCD Display",
+            language: "arduino",
+            category: "display",
+            description:
+                "Afficher une information sur LCD.",
+            code:
+`#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(
+  12,
+  11,
+  5,
+  4,
+  3,
+  2
+);
+
+void setup() {
+
+  lcd.begin(16, 2);
+
+  lcd.print(
+    "FOBAS ROBOTICS"
+  );
+}
+
+void loop() {
+}`
+        }
+
+    ];
+
+
+    /* ============================================================
+       04 — ROBOTICS MISSIONS
+    ============================================================ */
+
+    const ROBOTICS_MISSIONS = [
+
+        {
+            id: "mission_led",
+            title: "Mission 01 — LED",
+            level: "Débutant",
+            objective:
+                "Connecter Arduino UNO à une LED et programmer son clignotement.",
+            required: [
+                "arduino_uno",
+                "led_red",
+                "breadboard"
+            ],
+            success:
+                "La LED doit clignoter régulièrement."
+        },
+
+        {
+            id: "mission_button",
+            title: "Mission 02 — Bouton",
+            level: "Débutant",
+            objective:
+                "Utiliser un bouton pour contrôler une LED.",
+            required: [
+                "arduino_uno",
+                "push_button",
+                "led_green",
+                "breadboard"
+            ],
+            success:
+                "La LED s'allume lorsque le bouton est pressé."
+        },
+
+        {
+            id: "mission_servo",
+            title: "Mission 03 — Servo",
+            level: "Débutant",
+            objective:
+                "Programmer un servo moteur.",
+            required: [
+                "arduino_uno",
+                "servo_sg90"
+            ],
+            success:
+                "Le servo doit atteindre plusieurs angles."
+        },
+
+        {
+            id: "mission_distance",
+            title: "Mission 04 — Distance",
+            level: "Intermédiaire",
+            objective:
+                "Mesurer une distance avec HC-SR04.",
+            required: [
+                "arduino_uno",
+                "hc_sr04",
+                "lcd16x2"
+            ],
+            success:
+                "La distance doit être affichée."
+        },
+
+        {
+            id: "mission_obstacle",
+            title: "Mission 05 — Robot Anti-Obstacle",
+            level: "Intermédiaire",
+            objective:
+                "Construire un robot capable d'éviter un obstacle.",
+            required: [
+                "arduino_uno",
+                "hc_sr04",
+                "l298n",
+                "gear_motor",
+                "two_wheel_chassis"
+            ],
+            success:
+                "Le robot doit détecter et contourner les obstacles."
+        },
+
+        {
+            id: "mission_line",
+            title: "Mission 06 — Line Follower",
+            level: "Intermédiaire",
+            objective:
+                "Construire un robot suiveur de ligne.",
+            required: [
+                "arduino_uno",
+                "line_array",
+                "l298n",
+                "gear_motor",
+                "two_wheel_chassis"
+            ],
+            success:
+                "Le robot doit suivre automatiquement une ligne."
+        },
+
+        {
+            id: "mission_rfid",
+            title: "Mission 07 — RFID",
+            level: "Avancé",
+            objective:
+                "Identifier une carte RFID.",
+            required: [
+                "arduino_uno",
+                "rfid_rc522",
+                "lcd16x2"
+            ],
+            success:
+                "Le système doit reconnaître un badge."
+        },
+
+        {
+            id: "mission_arm",
+            title: "Mission 08 — Bras Robotique",
+            level: "Avancé",
+            objective:
+                "Programmer plusieurs axes d'un bras robotique.",
+            required: [
+                "arduino_mega",
+                "servo_driver",
+                "robotic_arm",
+                "robot_gripper"
+            ],
+            success:
+                "Le bras doit exécuter une séquence de mouvements."
+        },
+
+        {
+            id: "mission_iot",
+            title: "Mission 09 — Robot IoT",
+            level: "Expert",
+            objective:
+                "Connecter un robot ESP32 à un réseau.",
+            required: [
+                "esp32",
+                "esp_wifi",
+                "dc_motor"
+            ],
+            success:
+                "Le contrôleur doit communiquer avec le réseau."
+        },
+
+        {
+            id: "mission_autonomous",
+            title: "Mission 10 — Robot Autonome",
+            level: "Expert",
+            objective:
+                "Créer un robot autonome combinant capteurs et moteurs.",
+            required: [
+                "arduino_mega",
+                "hc_sr04",
+                "line_array",
+                "mpu6050",
+                "l298n",
+                "gear_motor",
+                "two_wheel_chassis"
+            ],
+            success:
+                "Le robot doit prendre des décisions selon son environnement."
+        }
+
+    ];
+
+
+    /* ============================================================
+       05 — CATEGORIES
+    ============================================================ */
+
+    const ROBOTICS_CATEGORIES = [
+
+        ["all", "Tous"],
+
+        ["controllers", "Contrôleurs"],
+
+        ["computers", "Ordinateurs"],
+
+        ["prototyping", "Prototypage"],
+
+        ["sensors", "Capteurs"],
+
+        ["inputs", "Entrées"],
+
+        ["motors", "Moteurs"],
+
+        ["drivers", "Drivers"],
+
+        ["actuators", "Actionneurs"],
+
+        ["outputs", "Sorties"],
+
+        ["displays", "Afficheurs"],
+
+        ["communication", "Communication"],
+
+        ["identification", "RFID / NFC"],
+
+        ["power", "Alimentation"],
+
+        ["mechanics", "Mécanique"],
+
+        ["robotic_arm", "Bras robotique"],
+
+        ["vision", "Vision"]
+
+    ];
+
+
+    /* ============================================================
+       06 — PERSISTENCE
+    ============================================================ */
+
+    function saveRoboticsState() {
+
+        try {
+
+            localStorage.setItem(
+                ROBOTICS_STORAGE_KEY,
+                JSON.stringify({
+                    selectedCategory:
+                        roboticsState.selectedCategory,
+
+                    codeLanguage:
+                        roboticsState.codeLanguage,
+
+                    selectedMission:
+                        roboticsState.selectedMission,
+
+                    placedComponents:
+                        roboticsState.placedComponents,
+
+                    missionHistory:
+                        roboticsState.missionHistory
+                })
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "FOBAS Robotics storage:",
+                error
+            );
+        }
+    }
+
+
+    function loadRoboticsState() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    ROBOTICS_STORAGE_KEY
+                );
+
+            if (!raw) return;
+
+            const saved =
+                JSON.parse(raw);
+
+            if (!saved) return;
+
+            if (
+                typeof saved.selectedCategory ===
+                "string"
+            ) {
+
+                roboticsState.selectedCategory =
+                    saved.selectedCategory;
+            }
+
+            if (
+                Array.isArray(
+                    saved.placedComponents
+                )
+            ) {
+
+                roboticsState.placedComponents =
+                    saved.placedComponents;
+            }
+
+            if (
+                Array.isArray(
+                    saved.missionHistory
+                )
+            ) {
+
+                roboticsState.missionHistory =
+                    saved.missionHistory;
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "FOBAS Robotics load:",
+                error
+            );
+        }
+    }
+
+
+    /* ============================================================
+       07 — API PUBLIQUE DE L'EXTENSION
+    ============================================================ */
+
+    function getComponent(id) {
+
+        return ROBOTICS_COMPONENTS.find(
+            component =>
+                component.id === id
+        ) || null;
+    }
+
+
+    function getComponentsByCategory(
+        category
+    ) {
+
+        if (
+            category === "all"
+        ) {
+
+            return [
+                ...ROBOTICS_COMPONENTS
+            ];
+        }
+
+        return ROBOTICS_COMPONENTS.filter(
+            component =>
+                component.category ===
+                category
+        );
+    }
+
+
+    function searchComponents(
+        query
+    ) {
+
+        const q =
+            String(query || "")
+                .trim()
+                .toLowerCase();
+
+        if (!q) {
+
+            return [
+                ...ROBOTICS_COMPONENTS
+            ];
+        }
+
+        return ROBOTICS_COMPONENTS.filter(
+            component =>
+                component.name
+                    .toLowerCase()
+                    .includes(q) ||
+                component.description
+                    .toLowerCase()
+                    .includes(q) ||
+                component.family &&
+                component.family
+                    .toLowerCase()
+                    .includes(q)
+        );
+    }
+
+
+    function getCode(id) {
+
+        return ROBOTICS_CODE_LIBRARY.find(
+            item =>
+                item.id === id
+        ) || null;
+    }
+
+
+    function getMission(id) {
+
+        return ROBOTICS_MISSIONS.find(
+            mission =>
+                mission.id === id
+        ) || null;
+    }
+
+
+    /* ============================================================
+       08 — AJOUT LOGIQUE
+       ------------------------------------------------------------
+       Cette fonction ne force PAS l'ancien moteur électronique.
+       Elle expose simplement un événement robotique que le système
+       principal peut utiliser plus tard.
+    ============================================================ */
+
+    function registerRoboticsComponent(
+        componentId
+    ) {
+
+        const component =
+            getComponent(
+                componentId
+            );
+
+        if (!component) {
+
+            return null;
+        }
+
+
+        const instance = {
+
+            instanceId:
+                "robot-" +
+                component.id +
+                "-" +
+                Date.now(),
+
+            componentId:
+                component.id,
+
+            name:
+                component.name,
+
+            category:
+                component.category,
+
+            family:
+                component.family || null,
+
+            state: {
+
+                power: false,
+
+                enabled: false,
+
+                value: 0,
+
+                angle: 0,
+
+                speed: 0,
+
+                distance: 0,
+
+                temperature: 25
+            }
+        };
+
+
+        roboticsState.placedComponents.push(
+            instance
+        );
+
+
+        saveRoboticsState();
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:robotics-component-added",
+                {
+                    detail: instance
+                }
+            )
+        );
+
+
+        return instance;
+    }
+
+
+    /* ============================================================
+       09 — CODE EXECUTION BRIDGE
+       ------------------------------------------------------------
+       Simulation logique uniquement.
+       Pa itilize eval().
+       Pa egzekite kòd itilizatè dirèkteman.
+    ============================================================ */
+
+    function analyzeRoboticsCode(
+        code
+    ) {
+
+        const source =
+            String(code || "")
+                .trim();
+
+
+        if (!source) {
+
+            return {
+
+                valid: false,
+
+                score: 0,
+
+                messages: [
+                    "Aucun code fourni."
+                ]
+            };
+        }
+
+
+        const messages = [];
+
+        let score = 0;
+
+
+        if (
+            /void\s+setup\s*\(/i.test(
+                source
+            )
+        ) {
+
+            score += 20;
+
+            messages.push(
+                "setup() détecté."
+            );
+        }
+
+
+        if (
+            /void\s+loop\s*\(/i.test(
+                source
+            )
+        ) {
+
+            score += 20;
+
+            messages.push(
+                "loop() détecté."
+            );
+        }
+
+
+        if (
+            /pinMode\s*\(/i.test(
+                source
+            )
+        ) {
+
+            score += 15;
+
+            messages.push(
+                "Configuration des broches détectée."
+            );
+        }
+
+
+        if (
+            /digitalWrite\s*\(/i.test(
+                source
+            )
+        ) {
+
+            score += 15;
+
+            messages.push(
+                "Commande digitale détectée."
+            );
+        }
+
+
+        if (
+            /analogWrite\s*\(/i.test(
+                source
+            )
+        ) {
+
+            score += 10;
+
+            messages.push(
+                "Commande PWM détectée."
+            );
+        }
+
+
+        if (
+            /analogRead\s*\(/i.test(
+                source
+            )
+        ) {
+
+            score += 10;
+
+            messages.push(
+                "Lecture analogique détectée."
+            );
+        }
+
+
+        if (
+            /digitalRead\s*\(/i.test(
+                source
+            )
+        ) {
+
+            score += 10;
+
+            messages.push(
+                "Lecture digitale détectée."
+            );
+        }
+
+
+        const valid =
+            score >= 40;
+
+
+        return {
+
+            valid,
+
+            score,
+
+            messages
+        };
+    }
+
+
+    /* ============================================================
+       10 — CODE → ROBOT EVENT
+    ============================================================ */
+
+    function simulateRoboticsCode(
+        code
+    ) {
+
+        const analysis =
+            analyzeRoboticsCode(
+                code
+            );
+
+
+        const result = {
+
+            success:
+                analysis.valid,
+
+            analysis,
+
+            actions: [],
+
+            timestamp:
+                Date.now()
+        };
+
+
+        if (
+            !analysis.valid
+        ) {
+
+            result.actions.push({
+
+                type: "error",
+
+                message:
+                    "Le code ne contient pas suffisamment d'éléments robotiques reconnus."
+            });
+
+            return result;
+        }
+
+
+        const source =
+            String(code || "");
+
+
+        if (
+            /digitalWrite\s*\([^,]+,\s*HIGH/i
+                .test(source)
+        ) {
+
+            result.actions.push({
+
+                type: "digital_output",
+
+                value: "HIGH",
+
+                message:
+                    "Sortie digitale activée."
+            });
+        }
+
+
+        if (
+            /digitalWrite\s*\([^,]+,\s*LOW/i
+                .test(source)
+        ) {
+
+            result.actions.push({
+
+                type: "digital_output",
+
+                value: "LOW",
+
+                message:
+                    "Sortie digitale désactivée."
+            });
+        }
+
+
+        if (
+            /analogWrite\s*\(/i
+                .test(source)
+        ) {
+
+            result.actions.push({
+
+                type: "pwm",
+
+                message:
+                    "Commande PWM détectée."
+            });
+        }
+
+
+        if (
+            /servo\.write\s*\(/i
+                .test(source)
+        ) {
+
+            result.actions.push({
+
+                type: "servo",
+
+                message:
+                    "Commande servo détectée."
+            });
+        }
+
+
+        if (
+            /pulseIn\s*\(/i
+                .test(source)
+        ) {
+
+            result.actions.push({
+
+                type: "ultrasonic",
+
+                message:
+                    "Lecture ultrasonique détectée."
+            });
+        }
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:robotics-code-executed",
+                {
+                    detail: result
+                }
+            )
+        );
+
+
+        return result;
+    }
+
+
+    /* ============================================================
+       11 — MISSIONS API
+    ============================================================ */
+
+    function startMission(
+        missionId
+    ) {
+
+        const mission =
+            getMission(
+                missionId
+            );
+
+        if (!mission) {
+
+            return null;
+        }
+
+
+        roboticsState.selectedMission =
+            mission.id;
+
+
+        saveRoboticsState();
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:robotics-mission-started",
+                {
+                    detail: mission
+                }
+            )
+        );
+
+
+        return mission;
+    }
+
+
+    function completeMission(
+        missionId
+    ) {
+
+        const mission =
+            getMission(
+                missionId
+            );
+
+        if (!mission) {
+
+            return false;
+        }
+
+
+        if (
+            !roboticsState.missionHistory
+                .includes(
+                    mission.id
+                )
+        ) {
+
+            roboticsState.missionHistory.push(
+                mission.id
+            );
+        }
+
+
+        saveRoboticsState();
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:robotics-mission-completed",
+                {
+                    detail: mission
+                }
+            )
+        );
+
+
+        return true;
+    }
+
+
+    /* ============================================================
+       12 — BIBLIOTHÈQUE VISUELLE ISOLÉE
+       ------------------------------------------------------------
+       Le système cherche plusieurs IDs possibles déjà présents
+       dans l'application.
+       S'il ne trouve aucun panneau, il ne crée rien.
+    ============================================================ */
+
+    function findExistingLibraryContainer() {
+
+        const ids = [
+
+            "roboticsLibrary",
+
+            "roboticsMaterialsPanel",
+
+            "materialsPanel",
+
+            "componentLibrary",
+
+            "componentsLibrary",
+
+            "libraryPanel",
+
+            "electronicLibrary",
+
+            "roboticsComponentsPanel"
+
+        ];
+
+
+        for (
+            const id of ids
+        ) {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+            if (element) {
+
+                return element;
+            }
+        }
+
+
+        return null;
+    }
+
+
+    /* ============================================================
+       13 — RENDU CARTES ROBOTIQUES
+    ============================================================ */
+
+    function createRoboticsCard(
+        component
+    ) {
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+
+        card.className =
+            "fobas-robotics-component-card";
+
+
+        card.dataset.roboticsId =
+            component.id;
+
+
+        card.innerHTML = `
+
+            <div
+                class="fobas-robotics-card-icon"
+            >
+                ${component.icon || "⚙️"}
+            </div>
+
+            <div
+                class="fobas-robotics-card-name"
+            >
+                ${component.name}
+            </div>
+
+            <div
+                class="fobas-robotics-card-category"
+            >
+                ${component.category}
+            </div>
+
+            <button
+                type="button"
+                class="fobas-robotics-add"
+                data-robotics-add="${component.id}"
+            >
+                Ajouter
+            </button>
+
+        `;
+
+
+        return card;
+    }
+
+
+    /* ============================================================
+       14 — RENDU CATALOGUE
+    ============================================================ */
+
+    function renderRoboticsLibrary(
+        container,
+        components
+    ) {
+
+        if (!container) return;
+
+
+        let root =
+            container.querySelector(
+                ".fobas-robotics-extension-root"
+            );
+
+
+        if (!root) {
+
+            root =
+                document.createElement(
+                    "div"
+                );
+
+            root.className =
+                "fobas-robotics-extension-root";
+
+
+            container.appendChild(
+                root
+            );
+        }
+
+
+        root.innerHTML = `
+
+            <div
+                class="fobas-robotics-title"
+            >
+                🤖 FOBAS ROBOTICS
+            </div>
+
+            <div
+                class="fobas-robotics-search-row"
+            >
+
+                <input
+                    type="search"
+                    class="fobas-robotics-search"
+                    placeholder="Rechercher un composant robotique..."
+                >
+
+            </div>
+
+            <div
+                class="fobas-robotics-category-row"
+            ></div>
+
+            <div
+                class="fobas-robotics-components-grid"
+            ></div>
+
+        `;
+
+
+        const categoryRow =
+            root.querySelector(
+                ".fobas-robotics-category-row"
+            );
+
+
+        ROBOTICS_CATEGORIES.forEach(
+            category => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+                button.type =
+                    "button";
+
+                button.className =
+                    "fobas-robotics-category";
+
+                button.dataset.category =
+                    category[0];
+
+                button.textContent =
+                    category[1];
+
+                categoryRow.appendChild(
+                    button
+                );
+            }
+        );
+
+
+        const grid =
+            root.querySelector(
+                ".fobas-robotics-components-grid"
+            );
+
+
+        components.forEach(
+            component => {
+
+                grid.appendChild(
+                    createRoboticsCard(
+                        component
+                    )
+                );
+            }
+        );
+
+
+        const search =
+            root.querySelector(
+                ".fobas-robotics-search"
+            );
+
+
+        search.addEventListener(
+            "input",
+            () => {
+
+                const results =
+                    searchComponents(
+                        search.value
+                    );
+
+
+                renderRoboticsGridOnly(
+                    root,
+                    results
+                );
+            }
+        );
+
+
+        categoryRow.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        "[data-category]"
+                    );
+
+                if (!button) return;
+
+
+                const category =
+                    button.dataset.category;
+
+
+                roboticsState.selectedCategory =
+                    category;
+
+
+                const results =
+                    getComponentsByCategory(
+                        category
+                    );
+
+
+                renderRoboticsGridOnly(
+                    root,
+                    results
+                );
+
+
+                saveRoboticsState();
+            }
+        );
+
+
+        grid.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        "[data-robotics-add]"
+                    );
+
+                if (!button) return;
+
+
+                const id =
+                    button.dataset.roboticsAdd;
+
+
+                registerRoboticsComponent(
+                    id
+                );
+
+
+                button.textContent =
+                    "Ajouté ✓";
+
+
+                setTimeout(
+                    () => {
+
+                        button.textContent =
+                            "Ajouter";
+
+                    },
+                    800
+                );
+            }
+        );
+    }
+
+
+    /* ============================================================
+       15 — GRID ONLY
+    ============================================================ */
+
+    function renderRoboticsGridOnly(
+        root,
+        components
+    ) {
+
+        const grid =
+            root.querySelector(
+                ".fobas-robotics-components-grid"
+            );
+
+
+        if (!grid) return;
+
+
+        grid.innerHTML = "";
+
+
+        components.forEach(
+            component => {
+
+                grid.appendChild(
+                    createRoboticsCard(
+                        component
+                    )
+                );
+            }
+        );
+    }
+
+
+    /* ============================================================
+       16 — CODE LIBRARY API
+    ============================================================ */
+
+    function getAllCodes() {
+
+        return [
+            ...ROBOTICS_CODE_LIBRARY
+        ];
+    }
+
+
+    function getAllMissions() {
+
+        return [
+            ...ROBOTICS_MISSIONS
+        ];
+    }
+
+
+    function getAllComponents() {
+
+        return [
+            ...ROBOTICS_COMPONENTS
+        ];
+    }
+
+
+    /* ============================================================
+       17 — PUBLIC GLOBAL API
+    ============================================================ */
+
+    window.FOBAS_ROBOTICS_EXTENSION = {
+
+        version:
+            ROBOTICS_EXTENSION_VERSION,
+
+        state:
+            roboticsState,
+
+        components:
+            ROBOTICS_COMPONENTS,
+
+        codes:
+            ROBOTICS_CODE_LIBRARY,
+
+        missions:
+            ROBOTICS_MISSIONS,
+
+        categories:
+            ROBOTICS_CATEGORIES,
+
+        getComponent,
+
+        getComponentsByCategory,
+
+        searchComponents,
+
+        getCode,
+
+        getMission,
+
+        getAllComponents,
+
+        getAllCodes,
+
+        getAllMissions,
+
+        registerRoboticsComponent,
+
+        analyzeRoboticsCode,
+
+        simulateRoboticsCode,
+
+        startMission,
+
+        completeMission,
+
+        renderRoboticsLibrary
+    };
+
+
+    /* ============================================================
+       18 — INITIALISATION
+    ============================================================ */
+
+    function initializeRoboticsExtension() {
+
+        loadRoboticsState();
+
+
+        const library =
+            findExistingLibraryContainer();
+
+
+        /*
+         * Si une bibliothèque compatible existe déjà,
+         * l'extension peut y afficher son catalogue.
+         *
+         * Sinon, elle reste simplement disponible via
+         * window.FOBAS_ROBOTICS_EXTENSION.
+         */
+
+        if (library) {
+
+            renderRoboticsLibrary(
+                library,
+                getComponentsByCategory(
+                    roboticsState.selectedCategory
+                )
+            );
+        }
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "fobas:robotics-extension-ready",
+                {
+                    detail: {
+
+                        version:
+                            ROBOTICS_EXTENSION_VERSION,
+
+                        components:
+                            ROBOTICS_COMPONENTS.length,
+
+                        codes:
+                            ROBOTICS_CODE_LIBRARY.length,
+
+                        missions:
+                            ROBOTICS_MISSIONS.length
+                    }
+                }
+            )
+        );
+
+
+        console.log(
+            "FOBAS ROBOTICS EXTENSION READY",
+            {
+                version:
+                    ROBOTICS_EXTENSION_VERSION,
+
+                components:
+                    ROBOTICS_COMPONENTS.length,
+
+                codes:
+                    ROBOTICS_CODE_LIBRARY.length,
+
+                missions:
+                    ROBOTICS_MISSIONS.length
+            }
+        );
+    }
+
+
+    /* ============================================================
+       19 — START SAFE
+    ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeRoboticsExtension,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        initializeRoboticsExtension();
+    }
+
+
+})();
