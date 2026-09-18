@@ -3051,6 +3051,1849 @@ select:focus-visible {
 }
 
 
+
+
+
+
+
+/* ================================================================
+   FOBAS ELECTRONIQUE — BIBLIOTHÈQUE 3D
+   ---------------------------------------------------------------
+   Bloc CSS isolé
+   - Visualisation 3D des composants
+   - Cartes professionnelles
+   - Boutons AJOUTER
+   - Aucun framework externe
+   ================================================================ */
+
+
+/* ================================================================
+   01 — GRILLE DE LA BIBLIOTHÈQUE
+================================================================ */
+
+#componentLibraryGrid {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(210px, 1fr)
+        );
+
+    gap: 18px;
+
+    padding: 20px;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+/* ================================================================
+   02 — CARTE COMPOSANT
+================================================================ */
+
+#componentLibraryGrid
+.fobas-library-card {
+
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    min-height: 285px;
+
+    padding: 0;
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            #16243a 0%,
+            #0b1424 52%,
+            #070d18 100%
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+    box-shadow:
+        0 12px 30px
+        rgba(
+            0,
+            0,
+            0,
+            0.30
+        ),
+
+        inset 0 1px 0
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    transition:
+        transform .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+}
+
+
+#componentLibraryGrid
+.fobas-library-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    border-color:
+        rgba(
+            255,
+            205,
+            70,
+            0.65
+        );
+
+    box-shadow:
+        0 18px 40px
+        rgba(
+            0,
+            0,
+            0,
+            0.40
+        ),
+
+        0 0 24px
+        rgba(
+            255,
+            196,
+            40,
+            0.12
+        );
+}
+
+
+/* ================================================================
+   03 — ZONE VISUELLE
+================================================================ */
+
+.fobas-library-visual {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 150px;
+
+    padding: 18px;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(
+                47,
+                110,
+                180,
+                0.25
+            ),
+            transparent 58%
+        ),
+
+        linear-gradient(
+            180deg,
+            #14243b,
+            #09111e
+        );
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+}
+
+
+/* lumière décorative */
+
+.fobas-library-visual::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 130px;
+    height: 130px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(
+                255,
+                211,
+                82,
+                0.12
+            ),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+
+/* ================================================================
+   04 — MOTEUR VISUEL 3D COMMUN
+================================================================ */
+
+.fobas-library-3d {
+
+    position: relative;
+
+    width: 150px;
+    height: 100px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    transform:
+        perspective(600px)
+        rotateX(8deg);
+
+    filter:
+        drop-shadow(
+            0 15px 12px
+            rgba(
+                0,
+                0,
+                0,
+                0.45
+            )
+        );
+
+    z-index: 2;
+}
+
+
+/* ================================================================
+   05 — RÉSISTANCE
+================================================================ */
+
+.fobas-resistor-3d {
+
+    height: 70px;
+}
+
+
+.fobas-resistor-body {
+
+    position: relative;
+
+    width: 82px;
+    height: 38px;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #e4c99d,
+            #b99867
+        );
+
+    box-shadow:
+        inset 0 4px 5px
+        rgba(
+            255,
+            255,
+            255,
+            0.35
+        ),
+
+        inset 0 -5px 8px
+        rgba(
+            0,
+            0,
+            0,
+            0.28
+        );
+}
+
+
+.fobas-resistor-body .band {
+
+    position: absolute;
+
+    top: 0;
+
+    width: 7px;
+    height: 100%;
+}
+
+
+.fobas-resistor-body
+.band-1 {
+
+    left: 18px;
+
+    background:
+        #7b3e20;
+}
+
+
+.fobas-resistor-body
+.band-2 {
+
+    left: 36px;
+
+    background:
+        #111;
+}
+
+
+.fobas-resistor-body
+.band-3 {
+
+    left: 54px;
+
+    background:
+        #d39b1d;
+}
+
+
+.fobas-resistor-body
+.band-4 {
+
+    left: 68px;
+
+    background:
+        #b9a178;
+}
+
+
+.fobas-wire-left,
+.fobas-wire-right {
+
+    width: 35px;
+    height: 4px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #d9dfe7,
+            #747d88
+        );
+
+    box-shadow:
+        0 2px 3px
+        rgba(
+            0,
+            0,
+            0,
+            0.4
+        );
+}
+
+
+/* ================================================================
+   06 — LED
+================================================================ */
+
+.fobas-led-3d {
+
+    height: 115px;
+}
+
+
+.fobas-led-body {
+
+    position: relative;
+
+    width: 55px;
+    height: 62px;
+
+    border-radius:
+        50% 50%
+        44% 44%
+        32% 32%;
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            rgba(
+                255,
+                255,
+                255,
+                0.85
+            ),
+            transparent 15%
+        ),
+
+        radial-gradient(
+            circle at 50% 45%,
+            var(--fobas-led-color),
+            #111 100%
+        );
+
+    box-shadow:
+        0 0 22px
+        var(--fobas-led-color),
+
+        inset 7px 7px 12px
+        rgba(
+            255,
+            255,
+            255,
+            0.28
+        ),
+
+        inset -8px -10px 15px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+}
+
+
+.fobas-led-base {
+
+    position: absolute;
+
+    bottom: 18px;
+
+    width: 48px;
+    height: 22px;
+
+    border-radius:
+        5px 5px 9px 9px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #bfc5cb,
+            #565d65
+        );
+
+    box-shadow:
+        inset 0 2px 3px
+        rgba(
+            255,
+            255,
+            255,
+            0.35
+        );
+}
+
+
+.fobas-led-base span {
+
+    display: block;
+
+    height: 2px;
+
+    margin-top: 4px;
+
+    background:
+        rgba(
+            30,
+            35,
+            40,
+            0.65
+        );
+}
+
+
+.fobas-led-pin {
+
+    position: absolute;
+
+    bottom: 0;
+
+    width: 4px;
+    height: 22px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #656b72,
+            #d6dbe0,
+            #656b72
+        );
+}
+
+
+.fobas-led-pin.pin-left {
+    left: 58px;
+}
+
+
+.fobas-led-pin.pin-right {
+    right: 58px;
+}
+
+
+/* ================================================================
+   07 — CONDENSATEUR
+================================================================ */
+
+.fobas-cap-body {
+
+    position: relative;
+
+    width: 58px;
+    height: 72px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #1e2732,
+            #66717d,
+            #202a35
+        );
+
+    box-shadow:
+        inset 7px 0 9px
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        ),
+
+        inset -7px 0 10px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+}
+
+
+.fobas-cap-body::before,
+.fobas-cap-body::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    width: 100%;
+    height: 13px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            180deg,
+            #929ca7,
+            #353d46
+        );
+}
+
+
+.fobas-cap-body::before {
+    top: -5px;
+}
+
+
+.fobas-cap-body::after {
+    bottom: -5px;
+}
+
+
+.cap-mark {
+
+    position: absolute;
+
+    top: 22px;
+    left: 10px;
+
+    color: #f5f5f5;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+
+.fobas-cap-pin {
+
+    width: 4px;
+    height: 30px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #777,
+            #e0e0e0,
+            #777
+        );
+}
+
+
+/* ================================================================
+   08 — DIODE
+================================================================ */
+
+.fobas-diode-3d {
+
+    height: 70px;
+}
+
+
+.diode-body {
+
+    position: relative;
+
+    width: 78px;
+    height: 31px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #2d343d,
+            #090d12
+        );
+
+    box-shadow:
+        inset 0 4px 5px
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        );
+}
+
+
+.diode-glass {
+
+    position: absolute;
+
+    inset: 4px 7px;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #202830,
+            #667582,
+            #171e25
+        );
+}
+
+
+.diode-band {
+
+    position: absolute;
+
+    right: 14px;
+
+    top: 0;
+
+    width: 7px;
+    height: 100%;
+
+    background:
+        #d7dce1;
+}
+
+
+/* ================================================================
+   09 — TRANSISTOR / MOSFET
+================================================================ */
+
+.fobas-transistor-body,
+.transistor-body,
+.mosfet-body {
+
+    position: relative;
+
+    width: 65px;
+    height: 78px;
+
+    border-radius:
+        9px 9px 14px 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #242b33,
+            #090d12
+        );
+
+    box-shadow:
+        inset 7px 5px 10px
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        ),
+
+        inset -8px -8px 12px
+        rgba(
+            0,
+            0,
+            0,
+            0.45
+        );
+}
+
+
+.transistor-face,
+.mosfet-body span {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+
+    color:
+        #dce5ef;
+
+    font-size: 22px;
+    font-weight: 800;
+}
+
+
+.transistor-pin,
+.mosfet-pin {
+
+    position: absolute;
+
+    bottom: -16px;
+
+    width: 4px;
+    height: 28px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #666,
+            #d8dde2,
+            #666
+        );
+}
+
+
+.transistor-pin.p1,
+.mosfet-pin.p1 {
+    left: 20px;
+}
+
+
+.transistor-pin.p2,
+.mosfet-pin.p2 {
+    left: 32px;
+}
+
+
+.transistor-pin.p3,
+.mosfet-pin.p3 {
+    left: 44px;
+}
+
+
+/* ================================================================
+   10 — RELAIS
+================================================================ */
+
+.relay-body {
+
+    position: relative;
+
+    width: 100px;
+    height: 70px;
+
+    border-radius: 9px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #e9edf0,
+            #7f8992
+        );
+
+    box-shadow:
+        inset 5px 5px 9px
+        rgba(
+            255,
+            255,
+            255,
+            0.6
+        ),
+
+        inset -6px -7px 10px
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
+}
+
+
+.relay-label {
+
+    position: absolute;
+
+    top: 10px;
+    left: 12px;
+
+    color:
+        #17212b;
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+
+.relay-window {
+
+    position: absolute;
+
+    right: 12px;
+    top: 17px;
+
+    width: 28px;
+    height: 35px;
+
+    border-radius: 4px;
+
+    background:
+        #27323d;
+
+    box-shadow:
+        inset 0 3px 5px
+        rgba(
+            0,
+            0,
+            0,
+            0.45
+        );
+}
+
+
+/* ================================================================
+   11 — INTERRUPTEUR
+================================================================ */
+
+.switch-base {
+
+    position: relative;
+
+    width: 90px;
+    height: 38px;
+
+    border-radius: 9px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #747e88,
+            #292f36
+        );
+
+    box-shadow:
+        inset 0 4px 5px
+        rgba(
+            255,
+            255,
+            255,
+            0.25
+        );
+}
+
+
+.switch-lever {
+
+    position: absolute;
+
+    width: 52px;
+    height: 10px;
+
+    left: 20px;
+    top: 5px;
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #d7dce1,
+            #747c84
+        );
+
+    transform:
+        rotate(-22deg);
+
+    transform-origin:
+        10px 50%;
+}
+
+
+/* ================================================================
+   12 — BOUTON POUSSOIR
+================================================================ */
+
+.push-button-body {
+
+    position: relative;
+
+    width: 75px;
+    height: 58px;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #343c45,
+            #11161c
+        );
+
+    box-shadow:
+        inset 4px 4px 7px
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        );
+}
+
+
+.push-button-cap {
+
+    position: absolute;
+
+    left: 17px;
+    top: 7px;
+
+    width: 41px;
+    height: 41px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 25%,
+            #ff7272,
+            #b51d28 55%,
+            #570b10
+        );
+
+    box-shadow:
+        0 8px 8px
+        rgba(
+            0,
+            0,
+            0,
+            0.45
+        );
+}
+
+
+/* ================================================================
+   13 — POTENTIOMÈTRE
+================================================================ */
+
+.pot-body {
+
+    position: relative;
+
+    width: 72px;
+    height: 72px;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            #8b949d,
+            #30363d
+        );
+
+    box-shadow:
+        inset 5px 5px 9px
+        rgba(
+            255,
+            255,
+            255,
+            0.3
+        ),
+
+        inset -7px -8px 10px
+        rgba(
+            0,
+            0,
+            0,
+            0.4
+        );
+}
+
+
+.pot-dial {
+
+    position: absolute;
+
+    inset: 12px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #b9c1c8,
+            #59626a
+        );
+}
+
+
+.pot-pointer {
+
+    position: absolute;
+
+    width: 3px;
+    height: 20px;
+
+    left: 50%;
+    top: 5px;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        #171b20;
+}
+
+
+/* ================================================================
+   14 — FUSIBLE
+================================================================ */
+
+.fuse-body {
+
+    position: relative;
+
+    width: 82px;
+    height: 28px;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(
+                230,
+                240,
+                250,
+                0.55
+            ),
+            rgba(
+                100,
+                120,
+                135,
+                0.35
+            )
+        );
+
+    border:
+        2px solid
+        #b8c3cc;
+}
+
+
+.fuse-wire {
+
+    position: absolute;
+
+    left: 15px;
+    right: 15px;
+
+    top: 11px;
+
+    height: 4px;
+
+    background:
+        #d0a92d;
+}
+
+
+/* ================================================================
+   15 — TRANSFORMATEUR
+================================================================ */
+
+.transformer-core {
+
+    position: absolute;
+
+    width: 30px;
+    height: 80px;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #777,
+            #777 3px,
+            #444 3px,
+            #444 6px
+        );
+
+    box-shadow:
+        0 7px 10px
+        rgba(
+            0,
+            0,
+            0,
+            0.4
+        );
+}
+
+
+.transformer-coil {
+
+    position: absolute;
+
+    width: 40px;
+    height: 72px;
+
+    border:
+        6px solid
+        #b67a25;
+
+    border-radius: 50%;
+
+    box-shadow:
+        inset 0 0 7px
+        rgba(
+            0,
+            0,
+            0,
+            0.5
+        );
+}
+
+
+.transformer-coil.coil-left {
+    left: 22px;
+}
+
+
+.transformer-coil.coil-right {
+    right: 22px;
+}
+
+
+/* ================================================================
+   16 — RÉGULATEUR
+================================================================ */
+
+.regulator-body {
+
+    position: relative;
+
+    width: 60px;
+    height: 76px;
+
+    border-radius:
+        6px 6px 12px 12px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #343b42,
+            #11161b
+        );
+
+    box-shadow:
+        inset 5px 5px 8px
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        );
+}
+
+
+.regulator-face {
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+
+    color:
+        #e4e9ee;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+
+/* ================================================================
+   17 — OP AMP / LOGIQUE
+================================================================ */
+
+.opamp-body {
+
+    width: 100px;
+    height: 62px;
+
+    clip-path:
+        polygon(
+            0 0,
+            100% 50%,
+            0 100%
+        );
+
+    background:
+        linear-gradient(
+            145deg,
+            #5c6874,
+            #1b232b
+        );
+
+    color:
+        #f4f7fa;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    padding-left: 18px;
+
+    box-sizing: border-box;
+}
+
+
+.opamp-body b {
+
+    align-self: center;
+
+    margin-left: 20px;
+}
+
+
+.logic-body {
+
+    width: 92px;
+    height: 58px;
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #4c5864,
+            #161d25
+        );
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    box-shadow:
+        inset 5px 5px 8px
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        );
+}
+
+
+.logic-symbol {
+
+    color:
+        #f2c84b;
+
+    font-size: 18px;
+
+    font-weight: 900;
+}
+
+
+/* ================================================================
+   18 — SOURCE / BATTERIE
+================================================================ */
+
+.power-body {
+
+    position: relative;
+
+    width: 105px;
+    height: 60px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #3c4752,
+            #10161c
+        );
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-around;
+
+    box-shadow:
+        inset 5px 5px 9px
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+}
+
+
+.power-terminal {
+
+    width: 30px;
+    height: 30px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 900;
+
+    color: #fff;
+}
+
+
+.power-terminal.plus {
+    background: #a9272e;
+}
+
+
+.power-terminal.minus {
+    background: #202832;
+}
+
+
+.power-center {
+
+    display: flex;
+
+    gap: 7px;
+}
+
+
+.power-center div {
+
+    width: 7px;
+    height: 30px;
+
+    border-radius: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #777,
+            #e3e6e9,
+            #777
+        );
+}
+
+
+/* ================================================================
+   19 — FIL
+================================================================ */
+
+.fobas-wire-3d {
+
+    height: 60px;
+}
+
+
+.library-wire-line {
+
+    width: 110px;
+    height: 7px;
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 4px 5px
+        rgba(
+            0,
+            0,
+            0,
+            0.4
+        );
+}
+
+
+.library-wire-terminal {
+
+    position: absolute;
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background:
+        #bfc6cd;
+
+    box-shadow:
+        inset 2px 2px 3px
+        rgba(
+            255,
+            255,
+            255,
+            0.5
+        );
+}
+
+
+.library-wire-terminal.left {
+    left: 13px;
+}
+
+
+.library-wire-terminal.right {
+    right: 13px;
+}
+
+
+/* ================================================================
+   20 — GÉNÉRIQUE
+================================================================ */
+
+.fobas-generic-3d {
+
+    height: 85px;
+}
+
+
+.generic-body {
+
+    width: 80px;
+    height: 60px;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #556270,
+            #151c24
+        );
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color:
+        #f1c94c;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    box-shadow:
+        inset 6px 5px 9px
+        rgba(
+            255,
+            255,
+            255,
+            0.15
+        ),
+
+        0 10px 15px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+}
+
+
+/* ================================================================
+   21 — INFORMATIONS
+================================================================ */
+
+.fobas-library-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 58px;
+
+    padding:
+        10px 12px 4px;
+
+    text-align: center;
+}
+
+
+.fobas-library-info
+.library-item-name {
+
+    color:
+        #f4f7fb;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    line-height: 1.25;
+}
+
+
+.fobas-library-info
+.library-item-value {
+
+    margin-top: 5px;
+
+    color:
+        #aebdcd;
+
+    font-size: 12px;
+}
+
+
+/* ================================================================
+   22 — ZONE BOUTON AJOUTER
+================================================================ */
+
+.fobas-library-actions {
+
+    display: flex;
+
+    justify-content: center;
+
+    padding:
+        8px 14px 15px;
+}
+
+
+/* ================================================================
+   23 — BOUTON AJOUTER PROFESSIONNEL
+================================================================ */
+
+.fobas-library-add-btn {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height: 42px;
+
+    border: 0;
+
+    border-radius: 11px;
+
+    cursor: pointer;
+
+    color:
+        #101720;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffe27a 0%,
+            #f6c63d 48%,
+            #dca719 100%
+        );
+
+    font-family:
+        inherit;
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    letter-spacing:
+        .5px;
+
+    text-transform:
+        uppercase;
+
+    box-shadow:
+        0 6px 12px
+        rgba(
+            0,
+            0,
+            0,
+            0.30
+        ),
+
+        inset 0 1px 0
+        rgba(
+            255,
+            255,
+            255,
+            0.75
+        );
+
+    transition:
+        transform .16s ease,
+        box-shadow .16s ease,
+        filter .16s ease;
+}
+
+
+.fobas-library-add-btn::before {
+
+    content: "+";
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 19px;
+    height: 19px;
+
+    margin-right: 7px;
+
+    border-radius: 50%;
+
+    color:
+        #f8d65b;
+
+    background:
+        #17212d;
+
+    font-size: 14px;
+
+    vertical-align:
+        -2px;
+}
+
+
+.fobas-library-add-btn:hover {
+
+    transform:
+        translateY(-2px);
+
+    filter:
+        brightness(1.08);
+
+    box-shadow:
+        0 9px 18px
+        rgba(
+            0,
+            0,
+            0,
+            0.38
+        ),
+
+        0 0 14px
+        rgba(
+            255,
+            207,
+            60,
+            0.25
+        );
+}
+
+
+.fobas-library-add-btn:active {
+
+    transform:
+        translateY(1px)
+        scale(.98);
+
+    box-shadow:
+        0 3px 7px
+        rgba(
+            0,
+            0,
+            0,
+            0.30
+        );
+}
+
+
+.fobas-library-add-btn:focus-visible {
+
+    outline:
+        3px solid
+        rgba(
+            255,
+            226,
+            115,
+            0.45
+        );
+
+    outline-offset:
+        3px;
+}
+
+
+/* ================================================================
+   24 — MESSAGE VIDE
+================================================================ */
+
+.fobas-library-empty {
+
+    grid-column:
+        1 / -1;
+
+    min-height: 150px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    padding: 25px;
+
+    border-radius: 15px;
+
+    color:
+        #aebdcd;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.04
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    text-align: center;
+}
+
+
+/* ================================================================
+   25 — MOBILE
+================================================================ */
+
+@media (max-width: 700px) {
+
+    #componentLibraryGrid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap: 12px;
+
+        padding: 12px;
+    }
+
+
+    #componentLibraryGrid
+    .fobas-library-card {
+
+        min-height: 260px;
+
+        border-radius: 15px;
+    }
+
+
+    .fobas-library-visual {
+
+        min-height: 135px;
+    }
+
+
+    .fobas-library-info
+    .library-item-name {
+
+        font-size: 13px;
+    }
+
+
+    .fobas-library-add-btn {
+
+        min-height: 40px;
+
+        font-size: 12px;
+    }
+}
+
+
+@media (max-width: 430px) {
+
+    #componentLibraryGrid {
+
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+
+
+
+
+
+
 /* ================================================================
    FIN DU CSS
 ================================================================ */
