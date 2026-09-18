@@ -9000,121 +9000,320 @@ bind(
 
 
 
-
-
-
-
 /* ================================================================
    FOBAS ELECTRONIQUE
-   AUTO SAFE POSITION — TOP LEFT OF LABORATORY
+   COMPONENT VISIBILITY BRIDGE — SAFE / ISOLATED
    ---------------------------------------------------------------
-   ONE-BLOCK EXTENSION
-   - Pa modifye createComponent()
-   - Pa modifye addComponent()
-   - Pa modifye renderComponent()
-   - Pa modifye CSS
-   - Mete nouvo composants yo nan zòn anlè-gòch workspace la
-   - Evite pozisyon ki depase ekran vizib laboratwa a
+   RESPONSABILITÉ UNIQUE :
+   Fè component ki deja kreye a vizib nan workspace la.
+
+   PA MODIFYE :
+   - createComponent()
+   - addComponent()
+   - renderComponent()
+   - componentMarkup()
+   - wires
+   - simulation
+   - zoom
+   - measurements
    ================================================================ */
 
-(function FOBAS_SafeComponentPosition() {
+(function FOBAS_ComponentVisibilityBridge() {
 
-    const SAFE_MARGIN = 30;
+    function forceVisibleComponent(el, index) {
 
-    function placeNewComponentSafely(component) {
+        if (!el) return;
 
-        if (!component || !component.id) return;
+        /* --------------------------------------------------------
+           LAYER PARENT
+        -------------------------------------------------------- */
 
-        const canvas = document.getElementById("laboratoryCanvas");
-        const viewport = document.getElementById("laboratoryViewport");
+        const layer = el.parentElement;
 
-        if (!canvas || !viewport) return;
+        if (layer && layer.id === "componentLayer") {
 
-        /*
-         * Tout nouvo composants kòmanse nan anlè-gòch
-         * workspace la.
-         */
-        component.x = SAFE_MARGIN;
-        component.y = SAFE_MARGIN;
-
-        /*
-         * Si gen plizyè composants, nou fè yo desann
-         * piti piti pou yo pa tout kouvri menm plas la.
-         */
-        const components = Array.isArray(state.components)
-            ? state.components
-            : [];
-
-        const index = components.findIndex(item => item && item.id === component.id);
-
-        if (index > 0) {
-            const offset = Math.min(index * 20, 220);
-
-            component.x = SAFE_MARGIN + offset;
-            component.y = SAFE_MARGIN + offset;
+            layer.style.position = "absolute";
+            layer.style.inset = "0";
+            layer.style.display = "block";
+            layer.style.visibility = "visible";
+            layer.style.opacity = "1";
+            layer.style.pointerEvents = "none";
+            layer.style.zIndex = "30";
         }
 
+        /* --------------------------------------------------------
+           COMPONENT
+        -------------------------------------------------------- */
+
+        el.style.position = "absolute";
+
         /*
-         * Pa janm kite component la ale twò lwen deyò
-         * canvas laboratwa a.
+         * Pozisyon garanti nan zòn anlè-gòch.
+         * Chak nouvo component pran yon ti decalage.
          */
-        const canvasWidth = Number(canvas.clientWidth) || 2400;
-        const canvasHeight = Number(canvas.clientHeight) || 1800;
+        const offset = Math.min(index * 18, 180);
 
-        const componentWidth =
-            Number(window.COMPONENT_WIDTH) ||
-            118;
+        el.style.left = `${30 + offset}px`;
+        el.style.top = `${30 + offset}px`;
 
-        const componentHeight =
-            Number(window.COMPONENT_HEIGHT) ||
-            72;
+        el.style.width = "118px";
+        el.style.height = "72px";
+        el.style.minWidth = "118px";
+        el.style.minHeight = "72px";
 
-        component.x = Math.max(
-            SAFE_MARGIN,
-            Math.min(
-                Number(component.x) || SAFE_MARGIN,
-                canvasWidth - componentWidth - SAFE_MARGIN
-            )
-        );
+        el.style.display = "flex";
+        el.style.flexDirection = "column";
+        el.style.alignItems = "center";
+        el.style.justifyContent = "center";
+        el.style.gap = "3px";
 
-        component.y = Math.max(
-            SAFE_MARGIN,
-            Math.min(
-                Number(component.y) || SAFE_MARGIN,
-                canvasHeight - componentHeight - SAFE_MARGIN
-            )
-        );
+        el.style.boxSizing = "border-box";
+
+        el.style.visibility = "visible";
+        el.style.opacity = "1";
+
+        el.style.background =
+            "linear-gradient(145deg,#17365f,#0a1d36)";
+
+        el.style.border =
+            "2px solid rgba(255,210,31,.85)";
+
+        el.style.borderRadius = "10px";
+
+        el.style.color = "#ffffff";
+
+        el.style.boxShadow =
+            "0 7px 18px rgba(0,0,0,.55)";
+
+        el.style.zIndex = "31";
+
+        el.style.pointerEvents = "auto";
+
+        el.style.overflow = "visible";
+
+        el.style.transformOrigin = "center center";
+
+        /* --------------------------------------------------------
+           HEADER
+        -------------------------------------------------------- */
+
+        const header =
+            el.querySelector(".component-header");
+
+        if (header) {
+
+            header.style.display = "block";
+            header.style.visibility = "visible";
+            header.style.opacity = "1";
+            header.style.width = "100%";
+            header.style.height = "20px";
+            header.style.textAlign = "center";
+            header.style.fontSize = "11px";
+            header.style.fontWeight = "700";
+            header.style.color = "#ffffff";
+            header.style.overflow = "visible";
+        }
+
+        /* --------------------------------------------------------
+           BODY
+        -------------------------------------------------------- */
+
+        const body =
+            el.querySelector(".component-body");
+
+        if (body) {
+
+            body.style.display = "flex";
+            body.style.visibility = "visible";
+            body.style.opacity = "1";
+            body.style.width = "100%";
+            body.style.height = "35px";
+            body.style.minHeight = "35px";
+            body.style.alignItems = "center";
+            body.style.justifyContent = "center";
+            body.style.position = "relative";
+        }
+
+        /* --------------------------------------------------------
+           PINS
+        -------------------------------------------------------- */
+
+        const pins =
+            el.querySelector(".component-pins");
+
+        if (pins) {
+
+            pins.style.position = "absolute";
+            pins.style.inset = "0";
+            pins.style.width = "100%";
+            pins.style.height = "100%";
+            pins.style.pointerEvents = "none";
+            pins.style.zIndex = "45";
+        }
+
+        el.querySelectorAll(".component-pin")
+            .forEach((pin, pinIndex) => {
+
+                pin.style.position = "absolute";
+
+                pin.style.display = "flex";
+
+                pin.style.width = "14px";
+                pin.style.height = "14px";
+
+                pin.style.minWidth = "14px";
+                pin.style.minHeight = "14px";
+
+                pin.style.padding = "0";
+
+                pin.style.alignItems = "center";
+                pin.style.justifyContent = "center";
+
+                pin.style.border =
+                    "2px solid #ffffff";
+
+                pin.style.borderRadius = "50%";
+
+                pin.style.background =
+                    "#f2c300";
+
+                pin.style.color =
+                    "#071a33";
+
+                pin.style.fontSize = "7px";
+
+                pin.style.zIndex = "46";
+
+                /*
+                 * Premye pin agoch / dezyèm pin adwat.
+                 * Si gen plis pin, yo distribye otomatikman.
+                 */
+                if (el.querySelectorAll(".component-pin").length === 1) {
+
+                    pin.style.left = "50%";
+                    pin.style.bottom = "-7px";
+
+                } else if (pinIndex === 0) {
+
+                    pin.style.left = "-7px";
+                    pin.style.top = "50%";
+
+                } else if (pinIndex === 1) {
+
+                    pin.style.right = "-7px";
+                    pin.style.top = "50%";
+
+                } else {
+
+                    pin.style.left =
+                        `${20 + (pinIndex * 20)}px`;
+
+                    pin.style.bottom = "-7px";
+                }
+            });
+
+        /* --------------------------------------------------------
+           VISUAL INTERNE
+        -------------------------------------------------------- */
+
+        el.querySelectorAll(
+            ".generic-symbol,.led-visual,.bulb-visual," +
+            ".battery-visual,.resistor-visual,.capacitor-visual," +
+            ".controller-visual"
+        ).forEach(visual => {
+
+            visual.style.visibility = "visible";
+            visual.style.opacity = "1";
+            visual.style.display = "flex";
+
+            visual.style.alignItems = "center";
+            visual.style.justifyContent = "center";
+
+            visual.style.maxWidth = "100%";
+            visual.style.maxHeight = "100%";
+        });
     }
 
-    /*
-     * Obsève state.components san nou pa ranplase
-     * okenn fonksyon ki deja egziste.
-     */
-    let previousLength = Array.isArray(state.components)
-        ? state.components.length
-        : 0;
 
-    setInterval(() => {
+    function scanComponents() {
 
-        if (!Array.isArray(state.components)) return;
+        const layer =
+            document.getElementById("componentLayer");
 
-        if (state.components.length > previousLength) {
+        if (!layer) return;
 
-            const newComponents =
-                state.components.slice(previousLength);
+        const components =
+            layer.querySelectorAll(".electronic-component");
 
-            newComponents.forEach(placeNewComponentSafely);
+        components.forEach((el, index) => {
 
-            previousLength = state.components.length;
+            forceVisibleComponent(el, index);
 
-        } else if (state.components.length < previousLength) {
+        });
+    }
 
-            previousLength = state.components.length;
+
+    function startBridge() {
+
+        const layer =
+            document.getElementById("componentLayer");
+
+        if (!layer) {
+
+            setTimeout(startBridge, 100);
+
+            return;
         }
 
-    }, 80);
+        /*
+         * Rendre immédiatement visibles les composants
+         * déjà présents.
+         */
+        scanComponents();
+
+        /*
+         * Surveille uniquement l'apparition de nouveaux
+         * composants dans componentLayer.
+         */
+        const observer =
+            new MutationObserver(() => {
+
+                scanComponents();
+
+            });
+
+        observer.observe(layer, {
+
+            childList: true,
+            subtree: true
+
+        });
+
+        /*
+         * Sécurité pour le premier composant ajouté.
+         */
+        setTimeout(scanComponents, 50);
+        setTimeout(scanComponents, 150);
+        setTimeout(scanComponents, 300);
+    }
+
+
+    if (document.readyState === "loading") {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            startBridge,
+            { once: true }
+        );
+
+    } else {
+
+        startBridge();
+
+    }
 
 })();
+
 
 
 
