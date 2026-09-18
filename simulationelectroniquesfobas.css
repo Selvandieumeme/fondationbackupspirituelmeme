@@ -1,17 +1,30 @@
+
 /* ================================================================
    FOBAS — LABORATOIRE ÉLECTRONIQUE
    simulationelectroniquesfobas.css
-   Version: 1.0.0
-   Interface professionnelle — Electronique uniquement
-   Compatible avec simulationelectroniquesfobas.html
+   VERSION 2.0.0
+   CSS PROPRE — INTERFACE DYNAMIQUE
+   ---------------------------------------------------------------
+   OBJECTIFS :
+   - Aucun changement d'ID
+   - Aucun changement de data-name / data-* 
+   - Aucun onclick
+   - Aucun JavaScript incorporé
+   - Aucun conflit de bibliothèque
+   - Support des panneaux dynamiques
+   - Support componentLibraryPanel
+   - Support codeLibraryPanel
+   - Interface professionnelle Electronique & Robotique
+   - Compatible ordinateur / tablette / Android
 ================================================================ */
 
 
 /* ================================================================
-   01 — VARIABLES
+   01 — VARIABLES GLOBALES
 ================================================================ */
 
 :root {
+
     --fobas-blue-950: #03101f;
     --fobas-blue-900: #06182d;
     --fobas-blue-850: #08213b;
@@ -33,9 +46,12 @@
     --fobas-muted: #8ea6bd;
 
     --panel-border: rgba(120, 190, 255, 0.18);
-    --panel-background: rgba(6, 24, 45, 0.96);
 
-    --workspace-background: #071827;
+    --panel-background:
+        rgba(6, 24, 45, 0.97);
+
+    --workspace-background:
+        #071827;
 
     --header-height: 76px;
     --toolbar-height: 54px;
@@ -56,17 +72,19 @@
 
 
 /* ================================================================
-   02 — RESET
+   02 — RESET GLOBAL
 ================================================================ */
 
 * {
     box-sizing: border-box;
+
     -webkit-tap-highlight-color: transparent;
 }
 
 html {
     width: 100%;
     min-height: 100%;
+
     margin: 0;
     padding: 0;
 
@@ -91,7 +109,9 @@ html {
 
 body {
     width: 100%;
+    min-width: 320px;
     min-height: 100vh;
+
     margin: 0;
     padding: 0;
 
@@ -100,9 +120,9 @@ body {
     background:
         linear-gradient(
             135deg,
-            #020a14,
+            #020a14 0%,
             #061a30 50%,
-            #03101f
+            #03101f 100%
         );
 }
 
@@ -120,19 +140,21 @@ button {
 
 button:disabled {
     cursor: not-allowed;
+
     opacity: 0.48;
 }
 
 button:focus-visible,
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible {
     outline: 2px solid var(--fobas-yellow);
     outline-offset: 2px;
 }
 
 
 /* ================================================================
-   03 — MAIN APPLICATION
+   03 — APPLICATION PRINCIPALE
 ================================================================ */
 
 .fobas-electronic-app {
@@ -140,6 +162,7 @@ textarea:focus-visible {
     height: 100vh;
 
     min-width: 320px;
+    min-height: 0;
 
     display: flex;
     flex-direction: column;
@@ -212,6 +235,7 @@ textarea:focus-visible {
 
     font-size: 14px;
     font-weight: 1000;
+
     letter-spacing: 0.8px;
 
     background:
@@ -234,13 +258,17 @@ textarea:focus-visible {
 
     color: var(--fobas-white);
 
-    font-size: clamp(15px, 2vw, 22px);
+    font-size:
+        clamp(15px, 2vw, 22px);
+
     font-weight: 900;
 
     letter-spacing: 0.8px;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -252,7 +280,9 @@ textarea:focus-visible {
     font-size: 11px;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -267,9 +297,11 @@ textarea:focus-visible {
     padding: 8px 12px;
 
     border: 1px solid var(--panel-border);
+
     border-radius: 999px;
 
-    background: rgba(0, 0, 0, 0.2);
+    background:
+        rgba(0, 0, 0, 0.2);
 
     color: var(--fobas-text);
 
@@ -281,9 +313,12 @@ textarea:focus-visible {
     width: 9px;
     height: 9px;
 
+    flex: 0 0 9px;
+
     border-radius: 50%;
 
-    background: var(--fobas-green);
+    background:
+        var(--fobas-green);
 
     box-shadow:
         0 0 12px rgba(32, 212, 107, 0.75);
@@ -291,7 +326,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   05 — TOP TOOLBAR
+   05 — BARRE D'OUTILS PRINCIPALE
 ================================================================ */
 
 .electronic-top-toolbar {
@@ -330,7 +365,9 @@ textarea:focus-visible {
 
     padding: 8px 12px;
 
-    border: 1px solid rgba(125, 190, 245, 0.16);
+    border: 1px solid
+        rgba(125, 190, 245, 0.16);
+
     border-radius: 8px;
 
     color: var(--fobas-text);
@@ -343,17 +380,29 @@ textarea:focus-visible {
         );
 
     font-size: 12px;
+
     font-weight: 800;
+
+    white-space: nowrap;
 
     transition:
         transform 0.16s ease,
         border-color 0.16s ease,
-        background 0.16s ease;
+        background 0.16s ease,
+        box-shadow 0.16s ease;
 }
 
 .top-tool-btn:hover {
-    border-color: rgba(255, 210, 31, 0.45);
-    transform: translateY(-1px);
+    border-color:
+        rgba(255, 210, 31, 0.45);
+
+    transform:
+        translateY(-1px);
+}
+
+.top-tool-btn:active {
+    transform:
+        translateY(0) scale(0.98);
 }
 
 .top-tool-btn.active {
@@ -366,12 +415,17 @@ textarea:focus-visible {
             #ffb900
         );
 
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
+
+    box-shadow:
+        0 4px 14px
+        rgba(255, 210, 31, 0.16);
 }
 
 
 /* ================================================================
-   06 — LEVEL SELECTOR
+   06 — SELECTEUR DE NIVEAU
 ================================================================ */
 
 .level-selector {
@@ -389,7 +443,8 @@ textarea:focus-visible {
     background:
         rgba(3, 16, 31, 0.98);
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .level-label {
@@ -397,9 +452,11 @@ textarea:focus-visible {
 
     margin-right: 3px;
 
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 
     font-size: 12px;
+
     font-weight: 800;
 }
 
@@ -410,28 +467,41 @@ textarea:focus-visible {
 
     padding: 7px 13px;
 
-    border: 1px solid rgba(125, 190, 245, 0.16);
+    border: 1px solid
+        rgba(125, 190, 245, 0.16);
+
     border-radius: 8px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
-    background: rgba(12, 38, 63, 0.92);
+    background:
+        rgba(12, 38, 63, 0.92);
 
     font-size: 12px;
+
     font-weight: 800;
 }
 
+.level-btn:hover {
+    border-color:
+        rgba(255, 210, 31, 0.42);
+}
+
 .level-btn.active {
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 
-    color: #071827;
+    color:
+        #071827;
 
-    background: var(--fobas-yellow);
+    background:
+        var(--fobas-yellow);
 }
 
 
 /* ================================================================
-   07 — MAIN LAYOUT
+   07 — STRUCTURE PRINCIPALE
 ================================================================ */
 
 .electronic-main {
@@ -451,7 +521,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   08 — SIDEBAR
+   08 — SIDEBARS
 ================================================================ */
 
 .electronic-sidebar,
@@ -473,16 +543,18 @@ textarea:focus-visible {
 }
 
 .electronic-sidebar {
-    border-right: 1px solid var(--panel-border);
+    border-right:
+        1px solid var(--panel-border);
 }
 
 .electronic-control-panel {
-    border-left: 1px solid var(--panel-border);
+    border-left:
+        1px solid var(--panel-border);
 }
 
 
 /* ================================================================
-   09 — SIDEBAR PANELS
+   09 — PANELS DE SIDEBAR
 ================================================================ */
 
 .sidebar-panel,
@@ -491,8 +563,11 @@ textarea:focus-visible {
 
     padding: 10px;
 
-    border: 1px solid var(--panel-border);
-    border-radius: var(--radius-medium);
+    border:
+        1px solid var(--panel-border);
+
+    border-radius:
+        var(--radius-medium);
 
     background:
         linear-gradient(
@@ -501,7 +576,8 @@ textarea:focus-visible {
             rgba(4, 20, 37, 0.95)
         );
 
-    box-shadow: var(--shadow-small);
+    box-shadow:
+        var(--shadow-small);
 }
 
 .panel-heading {
@@ -518,9 +594,11 @@ textarea:focus-visible {
 .control-section h2 {
     margin: 0;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
     font-size: 13px;
+
     font-weight: 900;
 }
 
@@ -528,16 +606,31 @@ textarea:focus-visible {
     width: 31px;
     height: 31px;
 
+    flex: 0 0 31px;
+
+    display: grid;
+    place-items: center;
+
     border-radius: 7px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
-    background: rgba(255, 255, 255, 0.06);
+    background:
+        rgba(255, 255, 255, 0.06);
+}
+
+.panel-heading button:hover {
+    background:
+        rgba(255, 210, 31, 0.10);
+
+    color:
+        var(--fobas-yellow);
 }
 
 
 /* ================================================================
-   10 — COMPONENT SEARCH
+   10 — RECHERCHE DES COMPOSANTS
 ================================================================ */
 
 .component-search {
@@ -548,29 +641,43 @@ textarea:focus-visible {
 
     padding: 0 10px;
 
-    border: 1px solid rgba(120, 190, 255, 0.2);
+    border:
+        1px solid rgba(120, 190, 255, 0.2);
+
     border-radius: 8px;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
-    background: rgba(0, 0, 0, 0.22);
+    background:
+        rgba(0, 0, 0, 0.22);
 
     font-size: 12px;
 }
 
 .component-search::placeholder {
-    color: #6f879d;
+    color:
+        #6f879d;
+}
+
+.component-search:focus {
+    border-color:
+        var(--fobas-yellow);
+
+    background:
+        rgba(0, 0, 0, 0.30);
 }
 
 
 /* ================================================================
-   11 — COMPONENT CATEGORIES
+   11 — CATEGORIES COMPOSANTS
 ================================================================ */
 
 .component-categories {
     display: grid;
 
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
 
     gap: 5px;
 
@@ -582,14 +689,19 @@ textarea:focus-visible {
 
     padding: 5px 6px;
 
-    border: 1px solid rgba(120, 190, 255, 0.12);
+    border:
+        1px solid rgba(120, 190, 255, 0.12);
+
     border-radius: 7px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
-    background: rgba(10, 39, 64, 0.8);
+    background:
+        rgba(10, 39, 64, 0.8);
 
     font-size: 10px;
+
     font-weight: 700;
 
     text-align: center;
@@ -597,22 +709,28 @@ textarea:focus-visible {
 
 .component-category-btn:hover,
 .component-category-btn.active {
-    border-color: rgba(255, 210, 31, 0.55);
+    border-color:
+        rgba(255, 210, 31, 0.55);
 
-    color: var(--fobas-yellow);
+    color:
+        var(--fobas-yellow);
 
-    background: rgba(255, 210, 31, 0.08);
+    background:
+        rgba(255, 210, 31, 0.08);
 }
 
 
 /* ================================================================
-   12 — COMPONENT GRID
+   12 — GRILLE DE BIBLIOTHÈQUE
 ================================================================ */
 
 .component-library-grid {
+    width: 100%;
+
     display: grid;
 
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
 
     gap: 7px;
 }
@@ -620,6 +738,14 @@ textarea:focus-visible {
 .component-library-grid:empty {
     min-height: 30px;
 }
+
+
+/*
+   Important :
+   Ces règles ne créent aucun composant.
+   Elles permettent seulement au JavaScript de les injecter
+   dynamiquement dans la grille.
+*/
 
 .library-component-card {
     min-height: 82px;
@@ -633,7 +759,9 @@ textarea:focus-visible {
 
     gap: 5px;
 
-    border: 1px solid rgba(110, 180, 240, 0.14);
+    border:
+        1px solid rgba(110, 180, 240, 0.14);
+
     border-radius: 9px;
 
     background:
@@ -643,7 +771,8 @@ textarea:focus-visible {
             rgba(6, 26, 46, 0.96)
         );
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
     cursor: pointer;
 
@@ -651,18 +780,25 @@ textarea:focus-visible {
 
     transition:
         transform 0.15s ease,
-        border-color 0.15s ease;
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .library-component-card:hover {
-    transform: translateY(-2px);
+    transform:
+        translateY(-2px);
 
     border-color:
         rgba(255, 210, 31, 0.55);
+
+    box-shadow:
+        0 6px 18px
+        rgba(0, 0, 0, 0.25);
 }
 
 .library-component-card:active {
-    transform: scale(0.97);
+    transform:
+        scale(0.97);
 }
 
 .library-component-card .component-visual {
@@ -672,13 +808,17 @@ textarea:focus-visible {
     display: grid;
     place-items: center;
 
-    color: var(--fobas-yellow);
+    color:
+        var(--fobas-yellow);
 
     font-size: 23px;
 }
 
 .library-component-card .component-name {
+    max-width: 100%;
+
     font-size: 10px;
+
     font-weight: 800;
 
     text-align: center;
@@ -686,7 +826,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   13 — LIBRARY ITEM BUTTONS
+   13 — BOUTONS DE CONTROLE
 ================================================================ */
 
 .library-item-btn,
@@ -702,10 +842,13 @@ textarea:focus-visible {
 
     padding: 8px 9px;
 
-    border: 1px solid rgba(120, 190, 255, 0.16);
+    border:
+        1px solid rgba(120, 190, 255, 0.16);
+
     border-radius: 8px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
     background:
         linear-gradient(
@@ -715,27 +858,40 @@ textarea:focus-visible {
         );
 
     font-size: 11px;
+
     font-weight: 800;
 
     text-align: left;
 
     transition:
         transform 0.14s ease,
-        border-color 0.14s ease;
+        border-color 0.14s ease,
+        box-shadow 0.14s ease;
 }
 
 .library-item-btn:hover,
 .control-btn:hover,
 .fault-btn:hover {
-    border-color: rgba(255, 210, 31, 0.42);
+    border-color:
+        rgba(255, 210, 31, 0.42);
 
-    transform: translateY(-1px);
+    transform:
+        translateY(-1px);
+}
+
+.library-item-btn:active,
+.control-btn:active,
+.fault-btn:active {
+    transform:
+        scale(0.98);
 }
 
 .primary-control-btn {
-    color: #06182b;
+    color:
+        #06182b;
 
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 
     background:
         linear-gradient(
@@ -748,16 +904,20 @@ textarea:focus-visible {
 }
 
 .primary-control-btn:hover {
-    transform: translateY(-1px);
+    transform:
+        translateY(-1px);
 
     box-shadow:
-        0 5px 18px rgba(255, 210, 31, 0.18);
+        0 5px 18px
+        rgba(255, 210, 31, 0.18);
 }
 
 .danger-control-btn {
-    color: #fff;
+    color:
+        #fff;
 
-    border-color: rgba(255, 77, 94, 0.55);
+    border-color:
+        rgba(255, 77, 94, 0.55);
 
     background:
         linear-gradient(
@@ -771,7 +931,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   14 — WORKSPACE AREA
+   14 — ZONE LABORATOIRE
 ================================================================ */
 
 .laboratory-workspace-area {
@@ -784,12 +944,12 @@ textarea:focus-visible {
     overflow: hidden;
 
     background:
-        #071827;
+        var(--workspace-background);
 }
 
 
 /* ================================================================
-   15 — WORKSPACE TOOLBAR
+   15 — BARRE D'OUTILS DU WORKSPACE
 ================================================================ */
 
 .workspace-toolbar {
@@ -813,7 +973,8 @@ textarea:focus-visible {
             #061b31
         );
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .workspace-tool {
@@ -823,38 +984,53 @@ textarea:focus-visible {
 
     padding: 7px 9px;
 
-    border: 1px solid rgba(120, 190, 255, 0.15);
+    border:
+        1px solid rgba(120, 190, 255, 0.15);
+
     border-radius: 7px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
-    background: rgba(8, 37, 61, 0.9);
+    background:
+        rgba(8, 37, 61, 0.9);
 
     font-size: 10px;
+
     font-weight: 800;
 }
 
+.workspace-tool:hover {
+    border-color:
+        rgba(255, 210, 31, 0.40);
+}
+
 .workspace-tool.active {
-    color: #071827;
+    color:
+        #071827;
 
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 
-    background: var(--fobas-yellow);
+    background:
+        var(--fobas-yellow);
 }
 
 .toolbar-separator {
-    flex: 0 0 1px;
+    flex:
+        0 0 1px;
 
     height: 25px;
 
     margin: 0 3px;
 
-    background: rgba(120, 190, 255, 0.18);
+    background:
+        rgba(120, 190, 255, 0.18);
 }
 
 
 /* ================================================================
-   16 — LABORATORY VIEWPORT
+   16 — VIEWPORT LABORATOIRE
 ================================================================ */
 
 .laboratory-viewport {
@@ -882,7 +1058,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   17 — LABORATORY CANVAS
+   17 — CANVAS LABORATOIRE
 ================================================================ */
 
 .laboratory-canvas {
@@ -894,7 +1070,8 @@ textarea:focus-visible {
     width: 2400px;
     height: 1800px;
 
-    transform-origin: 0 0;
+    transform-origin:
+        0 0;
 
     background:
         linear-gradient(
@@ -907,24 +1084,19 @@ textarea:focus-visible {
             transparent 1px
         );
 
-    background-size: 25px 25px;
+    background-size:
+        25px 25px;
 
     box-shadow:
-        inset 0 0 90px rgba(0, 0, 0, 0.4);
+        inset 0 0 90px
+        rgba(0, 0, 0, 0.4);
 
     user-select: none;
 
     touch-action: none;
 }
 
-.laboratory-grid {
-    position: absolute;
-
-    inset: 0;
-
-    pointer-events: none;
-}
-
+.laboratory-grid,
 .component-layer,
 .connection-layer,
 .measurement-layer,
@@ -932,6 +1104,10 @@ textarea:focus-visible {
     position: absolute;
 
     inset: 0;
+}
+
+.laboratory-grid {
+    pointer-events: none;
 }
 
 .wire-layer {
@@ -951,7 +1127,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   18 — SIMULATED COMPONENT OBJECT
+   18 — OBJETS ÉLECTRONIQUES SIMULÉS
 ================================================================ */
 
 .simulated-component {
@@ -969,10 +1145,13 @@ textarea:focus-visible {
 
     gap: 4px;
 
-    border: 1px solid rgba(125, 205, 255, 0.28);
+    border:
+        1px solid rgba(125, 205, 255, 0.28);
+
     border-radius: 9px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
     background:
         linear-gradient(
@@ -982,7 +1161,8 @@ textarea:focus-visible {
         );
 
     box-shadow:
-        0 7px 18px rgba(0, 0, 0, 0.35);
+        0 7px 18px
+        rgba(0, 0, 0, 0.35);
 
     cursor: grab;
 
@@ -992,7 +1172,8 @@ textarea:focus-visible {
 
     touch-action: none;
 
-    transform-origin: center;
+    transform-origin:
+        center;
 }
 
 .simulated-component:active {
@@ -1000,11 +1181,14 @@ textarea:focus-visible {
 }
 
 .simulated-component.selected {
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 
     box-shadow:
-        0 0 0 2px rgba(255, 210, 31, 0.16),
-        0 9px 25px rgba(0, 0, 0, 0.45);
+        0 0 0 2px
+        rgba(255, 210, 31, 0.16),
+        0 9px 25px
+        rgba(0, 0, 0, 0.45);
 }
 
 .simulated-component .component-body {
@@ -1020,23 +1204,26 @@ textarea:focus-visible {
 .simulated-component .component-label {
     max-width: 110px;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
     font-size: 9px;
+
     font-weight: 900;
 
     white-space: nowrap;
 }
 
 .simulated-component .component-value {
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 
     font-size: 8px;
 }
 
 
 /* ================================================================
-   19 — COMPONENT PINS
+   19 — PINS
 ================================================================ */
 
 .component-pin {
@@ -1045,15 +1232,20 @@ textarea:focus-visible {
     width: 12px;
     height: 12px;
 
-    margin: -6px 0 0 -6px;
+    margin:
+        -6px 0 0 -6px;
 
-    border: 2px solid #b9d8ec;
+    border:
+        2px solid #b9d8ec;
+
     border-radius: 50%;
 
-    background: #102e45;
+    background:
+        #102e45;
 
     box-shadow:
-        0 0 5px rgba(100, 200, 255, 0.2);
+        0 0 5px
+        rgba(100, 200, 255, 0.2);
 
     cursor: crosshair;
 
@@ -1062,25 +1254,30 @@ textarea:focus-visible {
 
 .component-pin:hover,
 .component-pin.connected {
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 
-    background: var(--fobas-yellow);
+    background:
+        var(--fobas-yellow);
 
     box-shadow:
-        0 0 10px rgba(255, 210, 31, 0.65);
+        0 0 10px
+        rgba(255, 210, 31, 0.65);
 }
 
 .component-pin.positive {
-    border-color: #ff5264;
+    border-color:
+        #ff5264;
 }
 
 .component-pin.negative {
-    border-color: #4faaff;
+    border-color:
+        #4faaff;
 }
 
 
 /* ================================================================
-   20 — LED VISUALS
+   20 — LED
 ================================================================ */
 
 .simulated-led {
@@ -1091,7 +1288,9 @@ textarea:focus-visible {
 
     border-radius: 50%;
 
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    border:
+        2px solid
+        rgba(255, 255, 255, 0.5);
 
     background:
         radial-gradient(
@@ -1103,7 +1302,8 @@ textarea:focus-visible {
         );
 
     box-shadow:
-        inset 0 -4px 8px rgba(0, 0, 0, 0.35);
+        inset 0 -4px 8px
+        rgba(0, 0, 0, 0.35);
 
     transition:
         background 0.12s ease,
@@ -1156,7 +1356,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   21 — BULB
+   21 — AMPOULE
 ================================================================ */
 
 .simulated-bulb {
@@ -1167,7 +1367,8 @@ textarea:focus-visible {
 
     border-radius: 50%;
 
-    border: 2px solid #89939c;
+    border:
+        2px solid #89939c;
 
     background:
         radial-gradient(
@@ -1178,7 +1379,8 @@ textarea:focus-visible {
         );
 
     box-shadow:
-        inset 0 -6px 12px rgba(0, 0, 0, 0.45);
+        inset 0 -6px 12px
+        rgba(0, 0, 0, 0.45);
 }
 
 .simulated-bulb.on {
@@ -1194,7 +1396,8 @@ textarea:focus-visible {
     box-shadow:
         0 0 12px #ffe86a,
         0 0 28px #ffc52f,
-        0 0 50px rgba(255, 195, 40, 0.65);
+        0 0 50px
+        rgba(255, 195, 40, 0.65);
 }
 
 
@@ -1206,13 +1409,15 @@ textarea:focus-visible {
     position: absolute;
 
     width: 600px;
+
     min-height: 290px;
 
     padding: 25px;
 
     border-radius: 15px;
 
-    border: 2px solid #d3d6d8;
+    border:
+        2px solid #d3d6d8;
 
     background:
         linear-gradient(
@@ -1222,7 +1427,8 @@ textarea:focus-visible {
         );
 
     box-shadow:
-        0 15px 35px rgba(0, 0, 0, 0.45);
+        0 15px 35px
+        rgba(0, 0, 0, 0.45);
 
     z-index: 10;
 }
@@ -1235,15 +1441,17 @@ textarea:focus-visible {
 
     border-radius: 50%;
 
-    background: #182027;
+    background:
+        #182027;
 
     box-shadow:
-        inset 0 1px 2px rgba(0, 0, 0, 0.7);
+        inset 0 1px 2px
+        rgba(0, 0, 0, 0.7);
 }
 
 
 /* ================================================================
-   23 — WIRE COLORS
+   23 — FILS
 ================================================================ */
 
 .simulated-wire {
@@ -1252,6 +1460,7 @@ textarea:focus-visible {
     stroke-width: 5;
 
     stroke-linecap: round;
+
     stroke-linejoin: round;
 
     pointer-events: stroke;
@@ -1285,7 +1494,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   24 — WORKSPACE STATUS BAR
+   24 — STATUS WORKSPACE
 ================================================================ */
 
 .workspace-status-bar {
@@ -1302,24 +1511,28 @@ textarea:focus-visible {
 
     overflow-x: auto;
 
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 
     background:
         #041322;
 
-    border-top: 1px solid var(--panel-border);
+    border-top:
+        1px solid var(--panel-border);
 
     font-size: 10px;
+
     font-weight: 700;
 }
 
 .workspace-status-bar strong {
-    color: var(--fobas-yellow);
+    color:
+        var(--fobas-yellow);
 }
 
 
 /* ================================================================
-   25 — CONTROL PANEL
+   25 — MESURES / CARTES
 ================================================================ */
 
 .measurement-card {
@@ -1330,30 +1543,48 @@ textarea:focus-visible {
     gap: 8px;
 
     margin-top: 6px;
+
     padding: 8px;
 
-    border: 1px solid rgba(120, 190, 255, 0.11);
+    border:
+        1px solid rgba(120, 190, 255, 0.11);
+
     border-radius: 7px;
 
-    background: rgba(0, 0, 0, 0.18);
+    background:
+        rgba(0, 0, 0, 0.18);
 
     font-size: 10px;
 }
 
 .measurement-card span {
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 }
 
 .measurement-card strong {
-    color: var(--fobas-cyan);
+    color:
+        var(--fobas-cyan);
 
     font-size: 11px;
 }
 
 
 /* ================================================================
-   26 — APPLICATION PANELS
+   26 — PANELS D'APPLICATION DYNAMIQUES
 ================================================================ */
+
+/*
+   Tous les panneaux dynamiques utilisent la même architecture
+   visuelle.
+
+   Le JavaScript reste responsable de :
+   show(...)
+   hide(...)
+   ouverture
+   fermeture
+   rendu dynamique
+*/
 
 .application-panel {
     position: fixed;
@@ -1365,6 +1596,11 @@ textarea:focus-visible {
     display: flex;
     flex-direction: column;
 
+    min-width: 0;
+    min-height: 0;
+
+    overflow: hidden;
+
     background:
         linear-gradient(
             145deg,
@@ -1374,10 +1610,36 @@ textarea:focus-visible {
         );
 }
 
-.application-panel.hidden,
-.modal-overlay.hidden {
+
+/* État fermé */
+
+.application-panel.hidden {
     display: none !important;
 }
+
+
+/*
+   Support de l'état aria-hidden.
+   Le JS peut utiliser aria-hidden sans modifier
+   l'identité du panneau.
+*/
+
+.application-panel[aria-hidden="true"] {
+    visibility: hidden;
+
+    pointer-events: none;
+}
+
+.application-panel[aria-hidden="false"] {
+    visibility: visible;
+
+    pointer-events: auto;
+}
+
+
+/* ================================================================
+   27 — EN-TÊTE DES PANELS DYNAMIQUES
+================================================================ */
 
 .application-panel-header {
     flex: 0 0 auto;
@@ -1400,37 +1662,140 @@ textarea:focus-visible {
             #06182b
         );
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .application-panel-header h2 {
+    min-width: 0;
+
     margin: 0;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
-    font-size: clamp(15px, 2.4vw, 23px);
+    font-size:
+        clamp(15px, 2.4vw, 23px);
+
     font-weight: 900;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
 }
 
 .application-panel-header > button {
     width: 39px;
     height: 39px;
 
+    flex: 0 0 39px;
+
+    display: grid;
+    place-items: center;
+
     border-radius: 8px;
 
-    color: #fff;
+    color:
+        #fff;
 
     background:
         rgba(255, 77, 94, 0.16);
 
-    border: 1px solid rgba(255, 77, 94, 0.35);
+    border:
+        1px solid
+        rgba(255, 77, 94, 0.35);
 
     font-size: 18px;
 }
 
+.application-panel-header > button:hover {
+    background:
+        rgba(255, 77, 94, 0.28);
+}
+
 
 /* ================================================================
-   27 — CODE LIBRARY
+   28 — BIBLIOTHÈQUE COMPOSANTS DYNAMIQUE
+================================================================ */
+
+/*
+   Cette partie est volontairement compatible avec :
+
+   #componentLibraryPanel
+
+   sans changer son ID.
+
+   Si le JavaScript transforme ce panel en application-panel,
+   il prend automatiquement cette présentation.
+*/
+
+#componentLibraryPanel.application-panel {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 510;
+
+    width: 100vw;
+    height: 100vh;
+
+    margin: 0;
+
+    padding: 0;
+
+    border: 0;
+
+    border-radius: 0;
+
+    overflow: hidden;
+}
+
+
+/*
+   Si le panneau reste temporairement dans le sidebar,
+   ces règles ne cassent pas son affichage.
+*/
+
+#componentLibraryPanel.sidebar-panel {
+    position: relative;
+
+    width: auto;
+    height: auto;
+
+    z-index: auto;
+}
+
+
+/*
+   Lorsqu'un contenu dynamique est injecté dans le panel,
+   il peut occuper tout l'espace restant.
+*/
+
+#componentLibraryPanel.application-panel
+.component-library-grid {
+    flex: 1 1 auto;
+
+    min-width: 0;
+    min-height: 0;
+
+    align-content: start;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(150px, 1fr)
+        );
+
+    padding: 15px;
+
+    overflow-y: auto;
+}
+
+
+/* ================================================================
+   29 — BIBLIOTHÈQUE DE CODES
 ================================================================ */
 
 .code-library-levels,
@@ -1445,7 +1810,8 @@ textarea:focus-visible {
 
     overflow-x: auto;
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .code-level-btn,
@@ -1456,24 +1822,32 @@ textarea:focus-visible {
 
     padding: 8px 14px;
 
-    border: 1px solid rgba(120, 190, 255, 0.17);
+    border:
+        1px solid rgba(120, 190, 255, 0.17);
+
     border-radius: 8px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
-    background: rgba(9, 39, 64, 0.92);
+    background:
+        rgba(9, 39, 64, 0.92);
 
     font-size: 11px;
+
     font-weight: 800;
 }
 
 .code-level-btn.active,
 .mission-level-btn.active {
-    color: #071827;
+    color:
+        #071827;
 
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 
-    background: var(--fobas-yellow);
+    background:
+        var(--fobas-yellow);
 }
 
 .code-library-list {
@@ -1502,7 +1876,9 @@ textarea:focus-visible {
     display: flex;
     flex-direction: column;
 
-    border: 1px solid var(--panel-border);
+    border:
+        1px solid var(--panel-border);
+
     border-radius: 12px;
 
     background:
@@ -1514,28 +1890,33 @@ textarea:focus-visible {
 
     overflow: hidden;
 
-    box-shadow: var(--shadow-small);
+    box-shadow:
+        var(--shadow-small);
 }
 
 .code-card-header {
     padding: 11px;
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .code-card-title {
     margin: 0;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
     font-size: 14px;
+
     font-weight: 900;
 }
 
 .code-card-description {
     margin: 4px 0 0;
 
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 
     font-size: 10px;
 }
@@ -1549,9 +1930,11 @@ textarea:focus-visible {
 
     overflow: auto;
 
-    color: #d9f1ff;
+    color:
+        #d9f1ff;
 
-    background: #020a12;
+    background:
+        #020a12;
 
     font-family:
         "SFMono-Regular",
@@ -1581,17 +1964,20 @@ textarea:focus-visible {
 
     border-radius: 7px;
 
-    color: #071827;
+    color:
+        #071827;
 
-    background: var(--fobas-yellow);
+    background:
+        var(--fobas-yellow);
 
     font-size: 10px;
+
     font-weight: 900;
 }
 
 
 /* ================================================================
-   28 — CODE EDITOR
+   30 — ÉDITEUR DE CODE
 ================================================================ */
 
 .code-editor-layout {
@@ -1627,9 +2013,11 @@ textarea:focus-visible {
 
     overflow-x: auto;
 
-    background: #06182b;
+    background:
+        #06182b;
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .editor-toolbar button {
@@ -1639,25 +2027,32 @@ textarea:focus-visible {
 
     padding: 7px 10px;
 
-    border: 1px solid rgba(120, 190, 255, 0.17);
+    border:
+        1px solid rgba(120, 190, 255, 0.17);
+
     border-radius: 7px;
 
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
-    background: rgba(11, 44, 70, 0.9);
+    background:
+        rgba(11, 44, 70, 0.9);
 
     font-size: 10px;
+
     font-weight: 800;
 }
 
 .editor-toolbar button:hover {
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 }
 
 .electronic-code-editor {
     flex: 1 1 auto;
 
     width: 100%;
+
     min-height: 0;
 
     resize: none;
@@ -1668,7 +2063,8 @@ textarea:focus-visible {
 
     outline: none;
 
-    color: #d8efff;
+    color:
+        #d8efff;
 
     background:
         #020a12;
@@ -1689,7 +2085,8 @@ textarea:focus-visible {
 }
 
 .electronic-code-editor::placeholder {
-    color: #526d82;
+    color:
+        #526d82;
 }
 
 .code-execution-console {
@@ -1699,9 +2096,11 @@ textarea:focus-visible {
     display: flex;
     flex-direction: column;
 
-    border-left: 1px solid var(--panel-border);
+    border-left:
+        1px solid var(--panel-border);
 
-    background: #03101d;
+    background:
+        #03101d;
 }
 
 .code-execution-console h3 {
@@ -1711,11 +2110,13 @@ textarea:focus-visible {
 
     padding: 13px;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
     font-size: 13px;
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .code-console-output {
@@ -1727,7 +2128,8 @@ textarea:focus-visible {
 
     overflow-y: auto;
 
-    color: #b8d7e9;
+    color:
+        #b8d7e9;
 
     font-family:
         "SFMono-Regular",
@@ -1743,7 +2145,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   29 — MISSIONS
+   31 — MISSIONS
 ================================================================ */
 
 .missions-list {
@@ -1765,7 +2167,8 @@ textarea:focus-visible {
 
     overflow-y: auto;
 
-    border-bottom: 1px solid var(--panel-border);
+    border-bottom:
+        1px solid var(--panel-border);
 }
 
 .mission-card {
@@ -1773,7 +2176,9 @@ textarea:focus-visible {
 
     padding: 10px;
 
-    border: 1px solid var(--panel-border);
+    border:
+        1px solid var(--panel-border);
+
     border-radius: 9px;
 
     background:
@@ -1788,7 +2193,8 @@ textarea:focus-visible {
 
 .mission-card:hover,
 .mission-card.active {
-    border-color: var(--fobas-yellow);
+    border-color:
+        var(--fobas-yellow);
 
     background:
         rgba(255, 210, 31, 0.06);
@@ -1797,7 +2203,8 @@ textarea:focus-visible {
 .mission-card h3 {
     margin: 0;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
     font-size: 12px;
 }
@@ -1805,7 +2212,8 @@ textarea:focus-visible {
 .mission-card p {
     margin: 5px 0 0;
 
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 
     font-size: 10px;
 }
@@ -1823,13 +2231,15 @@ textarea:focus-visible {
 .mission-workspace h3 {
     margin: 0 0 8px;
 
-    color: var(--fobas-yellow);
+    color:
+        var(--fobas-yellow);
 
     font-size: 19px;
 }
 
 .mission-workspace > p {
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
     font-size: 13px;
 }
@@ -1839,15 +2249,18 @@ textarea:focus-visible {
 
     padding: 13px;
 
-    border: 1px solid var(--panel-border);
+    border:
+        1px solid var(--panel-border);
+
     border-radius: 9px;
 
-    background: rgba(0, 0, 0, 0.18);
+    background:
+        rgba(0, 0, 0, 0.18);
 }
 
 
 /* ================================================================
-   30 — DIAGNOSTIC
+   32 — DIAGNOSTIC
 ================================================================ */
 
 .diagnostic-results {
@@ -1861,10 +2274,13 @@ textarea:focus-visible {
 
     overflow-y: auto;
 
-    border: 1px solid var(--panel-border);
+    border:
+        1px solid var(--panel-border);
+
     border-radius: 10px;
 
-    background: #03101d;
+    background:
+        #03101d;
 
     font-family:
         "SFMono-Regular",
@@ -1877,20 +2293,23 @@ textarea:focus-visible {
 }
 
 .diagnostic-ok {
-    color: var(--fobas-green);
+    color:
+        var(--fobas-green);
 }
 
 .diagnostic-warning {
-    color: var(--fobas-orange);
+    color:
+        var(--fobas-orange);
 }
 
 .diagnostic-error {
-    color: var(--fobas-red);
+    color:
+        var(--fobas-red);
 }
 
 
 /* ================================================================
-   31 — FAULTS
+   33 — FAULTS
 ================================================================ */
 
 .fault-controls {
@@ -1927,7 +2346,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   32 — MEASUREMENTS DASHBOARD
+   34 — TABLEAU DES MESURES
 ================================================================ */
 
 .measurements-dashboard {
@@ -1961,7 +2380,9 @@ textarea:focus-visible {
     flex-direction: column;
     justify-content: space-between;
 
-    border: 1px solid var(--panel-border);
+    border:
+        1px solid var(--panel-border);
+
     border-radius: 13px;
 
     background:
@@ -1971,20 +2392,24 @@ textarea:focus-visible {
             rgba(3, 18, 32, 0.98)
         );
 
-    box-shadow: var(--shadow-small);
+    box-shadow:
+        var(--shadow-small);
 }
 
 .measurement-large-card span {
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 
     font-size: 11px;
+
     font-weight: 900;
 
     letter-spacing: 1px;
 }
 
 .measurement-large-card strong {
-    color: var(--fobas-cyan);
+    color:
+        var(--fobas-cyan);
 
     font-family:
         "SFMono-Regular",
@@ -1996,7 +2421,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   33 — MODALS
+   35 — MODALS
 ================================================================ */
 
 .modal-overlay {
@@ -2007,6 +2432,7 @@ textarea:focus-visible {
     z-index: 900;
 
     display: grid;
+
     place-items: center;
 
     padding: 18px;
@@ -2018,11 +2444,16 @@ textarea:focus-visible {
         blur(6px);
 }
 
+.modal-overlay.hidden {
+    display: none !important;
+}
+
 .component-details-modal,
 .mission-result-modal {
     position: relative;
 
-    width: min(500px, 100%);
+    width:
+        min(500px, 100%);
 
     max-height: 90vh;
 
@@ -2030,7 +2461,9 @@ textarea:focus-visible {
 
     padding: 20px;
 
-    border: 1px solid var(--panel-border);
+    border:
+        1px solid var(--panel-border);
+
     border-radius: 15px;
 
     background:
@@ -2040,7 +2473,8 @@ textarea:focus-visible {
             #041727
         );
 
-    box-shadow: var(--shadow-large);
+    box-shadow:
+        var(--shadow-large);
 }
 
 .modal-close-btn {
@@ -2052,11 +2486,16 @@ textarea:focus-visible {
     width: 34px;
     height: 34px;
 
+    display: grid;
+    place-items: center;
+
     border-radius: 7px;
 
-    color: #fff;
+    color:
+        #fff;
 
-    background: rgba(255, 77, 94, 0.15);
+    background:
+        rgba(255, 77, 94, 0.15);
 }
 
 .component-details-visual {
@@ -2082,7 +2521,8 @@ textarea:focus-visible {
 .mission-result-modal h2 {
     margin: 0 0 10px;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
     font-size: 21px;
 }
@@ -2099,22 +2539,26 @@ textarea:focus-visible {
 
     padding: 8px 0;
 
-    border-bottom: 1px solid rgba(120, 190, 255, 0.1);
+    border-bottom:
+        1px solid
+        rgba(120, 190, 255, 0.1);
 
     font-size: 11px;
 }
 
 .component-property span {
-    color: var(--fobas-muted);
+    color:
+        var(--fobas-muted);
 }
 
 .component-property strong {
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 }
 
 
 /* ================================================================
-   34 — MISSION RESULT
+   36 — RESULTAT MISSION
 ================================================================ */
 
 .mission-result-modal {
@@ -2132,19 +2576,24 @@ textarea:focus-visible {
 
     border-radius: 50%;
 
-    color: #06182b;
+    color:
+        #06182b;
 
-    background: var(--fobas-green);
+    background:
+        var(--fobas-green);
 
     font-size: 35px;
+
     font-weight: 1000;
 
     box-shadow:
-        0 0 28px rgba(32, 212, 107, 0.3);
+        0 0 28px
+        rgba(32, 212, 107, 0.3);
 }
 
 .mission-result-modal p {
-    color: var(--fobas-text);
+    color:
+        var(--fobas-text);
 
     font-size: 13px;
 
@@ -2153,7 +2602,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   35 — TOAST
+   37 — TOAST
 ================================================================ */
 
 .electronic-toast {
@@ -2164,21 +2613,28 @@ textarea:focus-visible {
 
     z-index: 1200;
 
-    max-width: min(480px, calc(100vw - 30px));
+    max-width:
+        min(480px, calc(100vw - 30px));
 
     padding: 11px 15px;
 
-    border: 1px solid rgba(255, 210, 31, 0.38);
+    border:
+        1px solid
+        rgba(255, 210, 31, 0.38);
+
     border-radius: 9px;
 
-    color: var(--fobas-white);
+    color:
+        var(--fobas-white);
 
     background:
         rgba(4, 19, 34, 0.96);
 
-    box-shadow: var(--shadow-medium);
+    box-shadow:
+        var(--shadow-medium);
 
     font-size: 12px;
+
     font-weight: 700;
 
     transform:
@@ -2217,7 +2673,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   36 — FOOTER
+   38 — FOOTER
 ================================================================ */
 
 .electronic-footer {
@@ -2235,12 +2691,15 @@ textarea:focus-visible {
 
     overflow: hidden;
 
-    color: #66839a;
+    color:
+        #66839a;
 
     background:
         #020d18;
 
-    border-top: 1px solid rgba(120, 190, 255, 0.09);
+    border-top:
+        1px solid
+        rgba(120, 190, 255, 0.09);
 
     font-size: 9px;
 
@@ -2248,12 +2707,13 @@ textarea:focus-visible {
 }
 
 .electronic-footer strong {
-    color: #8faec4;
+    color:
+        #8faec4;
 }
 
 
 /* ================================================================
-   37 — HIDDEN STATE
+   39 — ÉTAT HIDDEN UNIVERSEL
 ================================================================ */
 
 .hidden {
@@ -2262,31 +2722,37 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   38 — SIMULATION STATE COLORS
+   40 — ÉTATS DE SIMULATION
 ================================================================ */
 
 .simulation-running .status-dot {
-    background: var(--fobas-green);
+    background:
+        var(--fobas-green);
 
     animation:
         fobasPulse 1s infinite;
 }
 
 .simulation-error .status-dot {
-    background: var(--fobas-red);
+    background:
+        var(--fobas-red);
 
     box-shadow:
-        0 0 12px rgba(255, 77, 94, 0.75);
+        0 0 12px
+        rgba(255, 77, 94, 0.75);
 }
 
 .simulation-warning .status-dot {
-    background: var(--fobas-orange);
+    background:
+        var(--fobas-orange);
 
     box-shadow:
-        0 0 12px rgba(255, 159, 47, 0.75);
+        0 0 12px
+        rgba(255, 159, 47, 0.75);
 }
 
 @keyframes fobasPulse {
+
     0%,
     100% {
         opacity: 1;
@@ -2299,7 +2765,7 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   39 — TOUCH / MOBILE
+   41 — MOBILE / TABLETTE
 ================================================================ */
 
 @media (max-width: 1050px) {
@@ -2331,7 +2797,8 @@ textarea:focus-visible {
     }
 
     .electronic-header {
-        padding: 7px 9px;
+        padding:
+            7px 9px;
     }
 
     .fobas-electronic-logo {
@@ -2352,13 +2819,15 @@ textarea:focus-visible {
     }
 
     .simulation-status {
-        padding: 6px 8px;
+        padding:
+            6px 8px;
 
         font-size: 9px;
     }
 
     .electronic-main {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
     }
 
     .electronic-sidebar {
@@ -2379,7 +2848,17 @@ textarea:focus-visible {
     }
 
     .code-library-list {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            1fr;
+    }
+
+    #componentLibraryPanel.application-panel
+    .component-library-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
     }
 }
 
@@ -2435,11 +2914,26 @@ textarea:focus-visible {
     .measurement-large-card strong {
         font-size: 23px;
     }
+
+    #componentLibraryPanel.application-panel
+    .component-library-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        padding: 10px;
+    }
+
+    .library-component-card {
+        min-height: 76px;
+    }
 }
 
 
 /* ================================================================
-   40 — REDUCED MOTION
+   42 — ACCESSIBILITÉ / MOUVEMENT RÉDUIT
 ================================================================ */
 
 @media (prefers-reduced-motion: reduce) {
@@ -2448,19 +2942,26 @@ textarea:focus-visible {
     *::before,
     *::after {
         scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
     }
 }
 
 
 /* ================================================================
-   41 — SCROLLBARS
+   43 — SCROLLBARS
 ================================================================ */
 
 * {
     scrollbar-width: thin;
+
     scrollbar-color:
         #17527d
         #041321;
@@ -2472,7 +2973,8 @@ textarea:focus-visible {
 }
 
 *::-webkit-scrollbar-track {
-    background: #041321;
+    background:
+        #041321;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -2489,7 +2991,35 @@ textarea:focus-visible {
 
 
 /* ================================================================
-   42 — PRINT SAFETY
+   44 — PROTECTION DES CONTENUS DYNAMIQUES
+================================================================ */
+
+[data-component],
+[data-component-id],
+[data-tool],
+[data-tool-id],
+[data-device],
+[data-device-id] {
+    max-width: 100%;
+}
+
+
+/* ================================================================
+   45 — CONTENUS INJECTÉS DYNAMIQUEMENT
+================================================================ */
+
+.component-library-grid > *,
+.code-library-list > *,
+.component-layer > *,
+.connection-layer > *,
+.measurement-layer > *,
+.simulation-effects-layer > * {
+    min-width: 0;
+}
+
+
+/* ================================================================
+   46 — PRINT
 ================================================================ */
 
 @media print {
@@ -2524,3 +3054,19 @@ textarea:focus-visible {
 /* ================================================================
    FIN DU CSS
 ================================================================ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
