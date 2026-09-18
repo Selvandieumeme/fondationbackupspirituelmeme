@@ -9073,107 +9073,313 @@ bind(
 
 
 
+
+
+
+
+
+
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — SAFE
+   COMPONENT VISIBILITY BRIDGE — SAFE V2
    ---------------------------------------------------------------
-   OBJECTIF:
-   - Kenbe components yo vizib
-   - Pa modifye pozisyon yo
-   - Pa modifye component.x
-   - Pa modifye component.y
-   - Pa kraze Déplacer
+   RESPONSABILITÉ :
+   - Kenbe component yo vizib
+   - Pa fòse left/top
+   - Pa modifye component.x / component.y
+   - Pa anpeche Déplacer
 ================================================================ */
 
-(function FOBAS_ComponentVisibilityBridge_SAFE() {
+(function FOBAS_ComponentVisibilityBridge_SAFE_V2() {
 
     function forceVisibleComponent(el) {
 
-        if (!el) {
-            return;
-        }
+        if (!el) return;
 
-        const layer =
-            el.parentElement;
+        const layer = el.parentElement;
 
         if (
             layer &&
             layer.id === "componentLayer"
         ) {
-
-            layer.style.position =
-                "absolute";
-
-            layer.style.inset =
-                "0";
-
-            layer.style.display =
-                "block";
-
-            layer.style.visibility =
-                "visible";
-
-            layer.style.opacity =
-                "1";
-
-            layer.style.pointerEvents =
-                "none";
-
-            layer.style.zIndex =
-                "30";
+            layer.style.position = "absolute";
+            layer.style.inset = "0";
+            layer.style.display = "block";
+            layer.style.visibility = "visible";
+            layer.style.opacity = "1";
+            layer.style.pointerEvents = "none";
+            layer.style.zIndex = "30";
         }
 
+        /* --------------------------------------------------------
+           COMPONENT
+           --------------------------------------------------------
+           Pa mete left/top isit la.
+           renderComponent() deja responsab pozisyon an.
+        */
 
-        /*
-         * ------------------------------------------------------
-         * IMPORTANT
-         * ------------------------------------------------------
-         * PA TOUCHE:
-         *
-         * el.style.left
-         * el.style.top
-         * component.x
-         * component.y
-         *
-         * Se renderComponent() ki dwe kontwole pozisyon an.
-         * Sa pèmèt Déplacer travay nòmalman.
-         */
+        el.style.position = "absolute";
 
-        el.style.position =
-            "absolute";
+        el.style.width = "118px";
+        el.style.height = "72px";
 
-        el.style.width =
-            "118px";
+        el.style.minWidth = "118px";
+        el.style.minHeight = "72px";
 
-        el.style.height =
-            "72px";
+        el.style.display = "flex";
+        el.style.flexDirection = "column";
 
-        el.style.minWidth =
-            "118px";
+        el.style.alignItems = "center";
+        el.style.justifyContent = "center";
 
-        el.style.minHeight =
-            "72px";
+        el.style.gap = "3px";
 
-        el.style.display =
-            "flex";
+        el.style.boxSizing = "border-box";
 
-        el.style.visibility =
-            "visible";
+        el.style.visibility = "visible";
+        el.style.opacity = "1";
 
-        el.style.opacity =
-            "1";
+        el.style.background =
+            "linear-gradient(145deg,#17365f,#0a1d36)";
 
-        el.style.pointerEvents =
-            "auto";
+        el.style.border =
+            "2px solid rgba(255,210,31,.85)";
 
-        el.style.zIndex =
-            "31";
+        el.style.borderRadius = "10px";
 
-        el.style.boxSizing =
-            "border-box";
+        el.style.color = "#ffffff";
+
+        el.style.boxShadow =
+            "0 7px 18px rgba(0,0,0,.55)";
+
+        el.style.zIndex = "31";
+
+        el.style.pointerEvents = "auto";
+
+        el.style.overflow = "visible";
+
+        el.style.transformOrigin =
+            "center center";
 
         el.style.touchAction =
             "none";
+
+
+        /* --------------------------------------------------------
+           HEADER
+        -------------------------------------------------------- */
+
+        const header =
+            el.querySelector(
+                ".component-header"
+            );
+
+        if (header) {
+
+            header.style.display = "block";
+            header.style.visibility = "visible";
+            header.style.opacity = "1";
+
+            header.style.width = "100%";
+            header.style.height = "20px";
+
+            header.style.textAlign = "center";
+
+            header.style.fontSize = "11px";
+            header.style.fontWeight = "700";
+
+            header.style.color = "#ffffff";
+
+            header.style.overflow = "visible";
+        }
+
+
+        /* --------------------------------------------------------
+           BODY
+        -------------------------------------------------------- */
+
+        const body =
+            el.querySelector(
+                ".component-body"
+            );
+
+        if (body) {
+
+            body.style.display = "flex";
+
+            body.style.visibility = "visible";
+            body.style.opacity = "1";
+
+            body.style.width = "100%";
+
+            body.style.height = "35px";
+            body.style.minHeight = "35px";
+
+            body.style.alignItems = "center";
+            body.style.justifyContent = "center";
+
+            body.style.position = "relative";
+        }
+
+
+        /* --------------------------------------------------------
+           PINS
+        -------------------------------------------------------- */
+
+        const pins =
+            el.querySelector(
+                ".component-pins"
+            );
+
+        if (pins) {
+
+            pins.style.position = "absolute";
+            pins.style.inset = "0";
+
+            pins.style.width = "100%";
+            pins.style.height = "100%";
+
+            pins.style.pointerEvents = "none";
+
+            pins.style.zIndex = "45";
+        }
+
+
+        el.querySelectorAll(
+            ".component-pin"
+        ).forEach(
+            (pin, pinIndex) => {
+
+                pin.style.position =
+                    "absolute";
+
+                pin.style.display =
+                    "flex";
+
+                pin.style.width =
+                    "14px";
+
+                pin.style.height =
+                    "14px";
+
+                pin.style.minWidth =
+                    "14px";
+
+                pin.style.minHeight =
+                    "14px";
+
+                pin.style.padding =
+                    "0";
+
+                pin.style.alignItems =
+                    "center";
+
+                pin.style.justifyContent =
+                    "center";
+
+                pin.style.border =
+                    "2px solid #ffffff";
+
+                pin.style.borderRadius =
+                    "50%";
+
+                pin.style.background =
+                    "#f2c300";
+
+                pin.style.color =
+                    "#071a33";
+
+                pin.style.fontSize =
+                    "7px";
+
+                pin.style.zIndex =
+                    "46";
+
+
+                const totalPins =
+                    el.querySelectorAll(
+                        ".component-pin"
+                    ).length;
+
+
+                if (totalPins === 1) {
+
+                    pin.style.left =
+                        "50%";
+
+                    pin.style.bottom =
+                        "-7px";
+
+                } else if (
+                    pinIndex === 0
+                ) {
+
+                    pin.style.left =
+                        "-7px";
+
+                    pin.style.top =
+                        "50%";
+
+                } else if (
+                    pinIndex === 1
+                ) {
+
+                    pin.style.right =
+                        "-7px";
+
+                    pin.style.top =
+                        "50%";
+
+                } else {
+
+                    pin.style.left =
+                        `${20 + (pinIndex * 20)}px`;
+
+                    pin.style.bottom =
+                        "-7px";
+                }
+            }
+        );
+
+
+        /* --------------------------------------------------------
+           VISUELS INTERNES
+        -------------------------------------------------------- */
+
+        el.querySelectorAll(
+            ".generic-symbol," +
+            ".led-visual," +
+            ".bulb-visual," +
+            ".battery-visual," +
+            ".resistor-visual," +
+            ".capacitor-visual," +
+            ".controller-visual"
+        ).forEach(
+            visual => {
+
+                visual.style.visibility =
+                    "visible";
+
+                visual.style.opacity =
+                    "1";
+
+                visual.style.display =
+                    "flex";
+
+                visual.style.alignItems =
+                    "center";
+
+                visual.style.justifyContent =
+                    "center";
+
+                visual.style.maxWidth =
+                    "100%";
+
+                visual.style.maxHeight =
+                    "100%";
+            }
+        );
     }
 
 
@@ -9184,9 +9390,7 @@ bind(
                 "componentLayer"
             );
 
-        if (!layer) {
-            return;
-        }
+        if (!layer) return;
 
         const components =
             layer.querySelectorAll(
@@ -9281,22 +9485,6 @@ bind(
     }
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
