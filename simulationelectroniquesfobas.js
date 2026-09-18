@@ -2051,97 +2051,148 @@ function renderComponent(component) {
     }
 
 
-    /* ============================================================
-       20 — ÉVÉNEMENTS COMPOSANTS
-    ============================================================ */
 
-    function attachComponentEvents(el, component) {
 
-        el.addEventListener(
-            "pointerdown",
-            event => {
 
-                if (
-                    event.target.closest(
-                        ".component-pin"
-                    )
-                ) {
-                    return;
-                }
 
-                if (
-                    state.selectedTool === "delete"
-                ) {
-                    deleteComponent(
-                        component.id
-                    );
-                    return;
-                }
 
-                if (
-                    state.selectedTool === "rotate"
-                ) {
-                    rotateComponent(
-                        component.id
-                    );
-                    return;
-                }
 
-                if (
-                    state.selectedTool === "duplicate"
-                ) {
-                    duplicateComponent(
-                        component.id
-                    );
-                    return;
-                }
+/* ============================================================
+   20 — ÉVÉNEMENTS COMPOSANTS
+   ------------------------------------------------------------
+   CORRECTION DÉPLACER :
+   - Pa rebati component la anvan drag
+   - Déplacement souris + tactile
+   - Long-press pa louvri détails
+============================================================ */
 
-                selectComponent(
+function attachComponentEvents(el, component) {
+
+    el.addEventListener(
+        "pointerdown",
+        event => {
+
+            if (
+                event.target.closest(
+                    ".component-pin"
+                )
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+
+            if (
+                state.selectedTool === "delete"
+            ) {
+                deleteComponent(
                     component.id
                 );
-
-                if (
-                    state.selectedTool === "move" ||
-                    state.selectedTool === "select"
-                ) {
-
-                    beginComponentDrag(
-                        event,
-                        component,
-                        el
-                    );
-                }
+                return;
             }
-        );
 
-        el.addEventListener(
-            "dblclick",
-            event => {
-
-                if (
-                    event.target.closest(
-                        ".component-pin"
-                    )
-                ) return;
-
-                openComponentDetails(
+            if (
+                state.selectedTool === "rotate"
+            ) {
+                rotateComponent(
                     component.id
                 );
+                return;
             }
-        );
 
-        el.addEventListener(
-            "contextmenu",
-            event => {
-
-                event.preventDefault();
-
-                openComponentDetails(
+            if (
+                state.selectedTool === "duplicate"
+            ) {
+                duplicateComponent(
                     component.id
                 );
+                return;
             }
-        );
-    }
+
+            /*
+             * DÉPLACER
+             * ------------------------------------------------
+             * Pa rele selectComponent() isit la paske
+             * selectComponent() rele renderAllComponents()
+             * epi li ka ranplase element dwèt la.
+             */
+            if (
+                state.selectedTool === "move" ||
+                state.selectedTool === "select"
+            ) {
+
+                state.selectedComponentId =
+                    component.id;
+
+                state.selectedWireId =
+                    null;
+
+                el.classList.add(
+                    "selected"
+                );
+
+                beginComponentDrag(
+                    event,
+                    component,
+                    el
+                );
+
+                return;
+            }
+
+            selectComponent(
+                component.id
+            );
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    /*
+     * DOUBLE-CLICK:
+     * Ouvri detay component la.
+     */
+    el.addEventListener(
+        "dblclick",
+        event => {
+
+            if (
+                event.target.closest(
+                    ".component-pin"
+                )
+            ) {
+                return;
+            }
+
+            event.preventDefault();
+
+            openComponentDetails(
+                component.id
+            );
+        }
+    );
+
+
+    /*
+     * CONTEXTMENU / LONG-PRESS:
+     * Pa ouvri detay.
+     * Sa pèmèt long-press rete disponib pou Déplacer.
+     */
+    el.addEventListener(
+        "contextmenu",
+        event => {
+
+            event.preventDefault();
+        }
+    );
+}
+
+
+
+
+
 
 
     /* ============================================================
@@ -9016,310 +9067,211 @@ bind(
 
 
 
+
+
+
+
+
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — SAFE / ISOLATED
+   COMPONENT VISIBILITY BRIDGE — SAFE
    ---------------------------------------------------------------
-   RESPONSABILITÉ UNIQUE :
-   Fè component ki deja kreye a vizib nan workspace la.
+   OBJECTIF:
+   - Kenbe components yo vizib
+   - Pa modifye pozisyon yo
+   - Pa modifye component.x
+   - Pa modifye component.y
+   - Pa kraze Déplacer
+================================================================ */
 
-   PA MODIFYE :
-   - createComponent()
-   - addComponent()
-   - renderComponent()
-   - componentMarkup()
-   - wires
-   - simulation
-   - zoom
-   - measurements
-   ================================================================ */
+(function FOBAS_ComponentVisibilityBridge_SAFE() {
 
-(function FOBAS_ComponentVisibilityBridge() {
+    function forceVisibleComponent(el) {
 
-    function forceVisibleComponent(el, index) {
-
-        if (!el) return;
-
-        /* --------------------------------------------------------
-           LAYER PARENT
-        -------------------------------------------------------- */
-
-        const layer = el.parentElement;
-
-        if (layer && layer.id === "componentLayer") {
-
-            layer.style.position = "absolute";
-            layer.style.inset = "0";
-            layer.style.display = "block";
-            layer.style.visibility = "visible";
-            layer.style.opacity = "1";
-            layer.style.pointerEvents = "none";
-            layer.style.zIndex = "30";
+        if (!el) {
+            return;
         }
 
-        /* --------------------------------------------------------
-           COMPONENT
-        -------------------------------------------------------- */
+        const layer =
+            el.parentElement;
 
-        el.style.position = "absolute";
+        if (
+            layer &&
+            layer.id === "componentLayer"
+        ) {
+
+            layer.style.position =
+                "absolute";
+
+            layer.style.inset =
+                "0";
+
+            layer.style.display =
+                "block";
+
+            layer.style.visibility =
+                "visible";
+
+            layer.style.opacity =
+                "1";
+
+            layer.style.pointerEvents =
+                "none";
+
+            layer.style.zIndex =
+                "30";
+        }
+
 
         /*
-         * Pozisyon garanti nan zòn anlè-gòch.
-         * Chak nouvo component pran yon ti decalage.
+         * ------------------------------------------------------
+         * IMPORTANT
+         * ------------------------------------------------------
+         * PA TOUCHE:
+         *
+         * el.style.left
+         * el.style.top
+         * component.x
+         * component.y
+         *
+         * Se renderComponent() ki dwe kontwole pozisyon an.
+         * Sa pèmèt Déplacer travay nòmalman.
          */
-        const offset = Math.min(index * 18, 180);
 
-        el.style.left = `${30 + offset}px`;
-        el.style.top = `${30 + offset}px`;
+        el.style.position =
+            "absolute";
 
-        el.style.width = "118px";
-        el.style.height = "72px";
-        el.style.minWidth = "118px";
-        el.style.minHeight = "72px";
+        el.style.width =
+            "118px";
 
-        el.style.display = "flex";
-        el.style.flexDirection = "column";
-        el.style.alignItems = "center";
-        el.style.justifyContent = "center";
-        el.style.gap = "3px";
+        el.style.height =
+            "72px";
 
-        el.style.boxSizing = "border-box";
+        el.style.minWidth =
+            "118px";
 
-        el.style.visibility = "visible";
-        el.style.opacity = "1";
+        el.style.minHeight =
+            "72px";
 
-        el.style.background =
-            "linear-gradient(145deg,#17365f,#0a1d36)";
+        el.style.display =
+            "flex";
 
-        el.style.border =
-            "2px solid rgba(255,210,31,.85)";
+        el.style.visibility =
+            "visible";
 
-        el.style.borderRadius = "10px";
+        el.style.opacity =
+            "1";
 
-        el.style.color = "#ffffff";
+        el.style.pointerEvents =
+            "auto";
 
-        el.style.boxShadow =
-            "0 7px 18px rgba(0,0,0,.55)";
+        el.style.zIndex =
+            "31";
 
-        el.style.zIndex = "31";
+        el.style.boxSizing =
+            "border-box";
 
-        el.style.pointerEvents = "auto";
-
-        el.style.overflow = "visible";
-
-        el.style.transformOrigin = "center center";
-
-        /* --------------------------------------------------------
-           HEADER
-        -------------------------------------------------------- */
-
-        const header =
-            el.querySelector(".component-header");
-
-        if (header) {
-
-            header.style.display = "block";
-            header.style.visibility = "visible";
-            header.style.opacity = "1";
-            header.style.width = "100%";
-            header.style.height = "20px";
-            header.style.textAlign = "center";
-            header.style.fontSize = "11px";
-            header.style.fontWeight = "700";
-            header.style.color = "#ffffff";
-            header.style.overflow = "visible";
-        }
-
-        /* --------------------------------------------------------
-           BODY
-        -------------------------------------------------------- */
-
-        const body =
-            el.querySelector(".component-body");
-
-        if (body) {
-
-            body.style.display = "flex";
-            body.style.visibility = "visible";
-            body.style.opacity = "1";
-            body.style.width = "100%";
-            body.style.height = "35px";
-            body.style.minHeight = "35px";
-            body.style.alignItems = "center";
-            body.style.justifyContent = "center";
-            body.style.position = "relative";
-        }
-
-        /* --------------------------------------------------------
-           PINS
-        -------------------------------------------------------- */
-
-        const pins =
-            el.querySelector(".component-pins");
-
-        if (pins) {
-
-            pins.style.position = "absolute";
-            pins.style.inset = "0";
-            pins.style.width = "100%";
-            pins.style.height = "100%";
-            pins.style.pointerEvents = "none";
-            pins.style.zIndex = "45";
-        }
-
-        el.querySelectorAll(".component-pin")
-            .forEach((pin, pinIndex) => {
-
-                pin.style.position = "absolute";
-
-                pin.style.display = "flex";
-
-                pin.style.width = "14px";
-                pin.style.height = "14px";
-
-                pin.style.minWidth = "14px";
-                pin.style.minHeight = "14px";
-
-                pin.style.padding = "0";
-
-                pin.style.alignItems = "center";
-                pin.style.justifyContent = "center";
-
-                pin.style.border =
-                    "2px solid #ffffff";
-
-                pin.style.borderRadius = "50%";
-
-                pin.style.background =
-                    "#f2c300";
-
-                pin.style.color =
-                    "#071a33";
-
-                pin.style.fontSize = "7px";
-
-                pin.style.zIndex = "46";
-
-                /*
-                 * Premye pin agoch / dezyèm pin adwat.
-                 * Si gen plis pin, yo distribye otomatikman.
-                 */
-                if (el.querySelectorAll(".component-pin").length === 1) {
-
-                    pin.style.left = "50%";
-                    pin.style.bottom = "-7px";
-
-                } else if (pinIndex === 0) {
-
-                    pin.style.left = "-7px";
-                    pin.style.top = "50%";
-
-                } else if (pinIndex === 1) {
-
-                    pin.style.right = "-7px";
-                    pin.style.top = "50%";
-
-                } else {
-
-                    pin.style.left =
-                        `${20 + (pinIndex * 20)}px`;
-
-                    pin.style.bottom = "-7px";
-                }
-            });
-
-        /* --------------------------------------------------------
-           VISUAL INTERNE
-        -------------------------------------------------------- */
-
-        el.querySelectorAll(
-            ".generic-symbol,.led-visual,.bulb-visual," +
-            ".battery-visual,.resistor-visual,.capacitor-visual," +
-            ".controller-visual"
-        ).forEach(visual => {
-
-            visual.style.visibility = "visible";
-            visual.style.opacity = "1";
-            visual.style.display = "flex";
-
-            visual.style.alignItems = "center";
-            visual.style.justifyContent = "center";
-
-            visual.style.maxWidth = "100%";
-            visual.style.maxHeight = "100%";
-        });
+        el.style.touchAction =
+            "none";
     }
 
 
     function scanComponents() {
 
         const layer =
-            document.getElementById("componentLayer");
+            document.getElementById(
+                "componentLayer"
+            );
 
-        if (!layer) return;
+        if (!layer) {
+            return;
+        }
 
         const components =
-            layer.querySelectorAll(".electronic-component");
+            layer.querySelectorAll(
+                ".electronic-component"
+            );
 
-        components.forEach((el, index) => {
+        components.forEach(
+            el => {
 
-            forceVisibleComponent(el, index);
+                forceVisibleComponent(
+                    el
+                );
 
-        });
+            }
+        );
     }
 
 
     function startBridge() {
 
         const layer =
-            document.getElementById("componentLayer");
+            document.getElementById(
+                "componentLayer"
+            );
 
         if (!layer) {
 
-            setTimeout(startBridge, 100);
+            setTimeout(
+                startBridge,
+                100
+            );
 
             return;
         }
 
-        /*
-         * Rendre immédiatement visibles les composants
-         * déjà présents.
-         */
         scanComponents();
 
-        /*
-         * Surveille uniquement l'apparition de nouveaux
-         * composants dans componentLayer.
-         */
+
         const observer =
-            new MutationObserver(() => {
+            new MutationObserver(
+                () => {
 
-                scanComponents();
+                    scanComponents();
 
-            });
+                }
+            );
 
-        observer.observe(layer, {
 
-            childList: true,
-            subtree: true
+        observer.observe(
+            layer,
+            {
+                childList: true,
+                subtree: true
+            }
+        );
 
-        });
 
-        /*
-         * Sécurité pour le premier composant ajouté.
-         */
-        setTimeout(scanComponents, 50);
-        setTimeout(scanComponents, 150);
-        setTimeout(scanComponents, 300);
+        setTimeout(
+            scanComponents,
+            50
+        );
+
+        setTimeout(
+            scanComponents,
+            150
+        );
+
+        setTimeout(
+            scanComponents,
+            300
+        );
     }
 
 
-    if (document.readyState === "loading") {
+    if (
+        document.readyState ===
+        "loading"
+    ) {
 
         document.addEventListener(
             "DOMContentLoaded",
             startBridge,
-            { once: true }
+            {
+                once: true
+            }
         );
 
     } else {
@@ -9336,70 +9288,6 @@ bind(
 
 
 
-
-
-
-
-/* ================================================================
-   FOBAS ELECTRONIQUE
-   DRAG POINTER BRIDGE
-   ---------------------------------------------------------------
-   RESPONSABILITÉ UNIQUE :
-   - Fè pointermove rele moveComponent()
-   - Fè pointerup rele endComponentDrag()
-   - Fè pointercancel fini déplacement la
-   - Pa modifye createComponent()
-   - Pa modifye renderComponent()
-   - Pa modifye CSS
-   ================================================================ */
-
-(function FOBAS_DragPointerBridge() {
-
-    function handlePointerMove(event) {
-
-        if (!state || !state.drag || !state.drag.active) {
-            return;
-        }
-
-        event.preventDefault();
-
-        moveComponent(event);
-    }
-
-
-    function handlePointerUp(event) {
-
-        if (!state || !state.drag || !state.drag.active) {
-            return;
-        }
-
-        event.preventDefault();
-
-        endComponentDrag();
-    }
-
-
-    document.addEventListener(
-        "pointermove",
-        handlePointerMove,
-        { passive: false }
-    );
-
-
-    document.addEventListener(
-        "pointerup",
-        handlePointerUp,
-        { passive: false }
-    );
-
-
-    document.addEventListener(
-        "pointercancel",
-        handlePointerUp,
-        { passive: false }
-    );
-
-})();
 
 
 
