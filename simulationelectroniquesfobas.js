@@ -415,605 +415,1795 @@
         return aliases[type] || [type];
     }
 
-    /* ============================================================
-       05. COMPONENT DATABASE
-       ============================================================ */
 
-    const COMPONENTS = [
-        {
-            id: "battery",
-            name: "Batterie",
-            category: "power",
-            icon: "🔋",
-            color: "#263238",
-            width: 120,
-            height: 76,
-            voltage: 9,
-            resistance: 0.5,
-            pins: [
-                { id: "positive", name: "+", side: "right" },
-                { id: "negative", name: "−", side: "left" }
-            ]
-        },
-        {
-            id: "dc-supply",
-            name: "Alimentation DC",
-            category: "power",
-            icon: "⚡",
-            color: "#37474f",
-            width: 150,
-            height: 90,
-            voltage: 5,
-            adjustableVoltage: true,
-            pins: [
-                { id: "V+", name: "V+", side: "right" },
-                { id: "GND", name: "GND", side: "left" }
-            ]
-        },
-        {
-            id: "ac-supply",
-            name: "Alimentation AC",
-            category: "power",
-            icon: "∿",
-            color: "#455a64",
-            width: 150,
-            height: 90,
-            voltage: 120,
-            frequency: 60,
-            pins: [
-                { id: "L", name: "L", side: "right" },
-                { id: "N", name: "N", side: "left" }
-            ]
-        },
-        {
-            id: "signal-generator",
-            name: "Générateur de signaux",
-            category: "power",
-            icon: "〰",
-            color: "#263238",
-            width: 160,
-            height: 90,
-            voltage: 5,
-            frequency: 1000,
-            pins: [
-                { id: "OUT", name: "OUT", side: "right" },
-                { id: "GND", name: "GND", side: "left" }
-            ]
-        },
-        {
-            id: "resistor",
-            name: "Résistance",
-            category: "resistors",
-            icon: "Ω",
-            color: "#8d6e63",
-            width: 125,
-            height: 64,
-            resistance: 220,
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "capacitor",
-            name: "Condensateur",
-            category: "capacitors",
-            icon: "║",
-            color: "#1565c0",
-            width: 100,
-            height: 76,
-            capacitance: "100 µF",
-            pins: [
-                { id: "positive", name: "+", side: "left" },
-                { id: "negative", name: "−", side: "right" }
-            ]
-        },
-        {
-            id: "inductor",
-            name: "Bobine",
-            category: "inductors",
-            icon: "〰",
-            color: "#6a1b9a",
-            width: 125,
-            height: 64,
-            inductance: "10 mH",
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "diode",
-            name: "Diode",
-            category: "diodes",
-            icon: "▷|",
-            color: "#455a64",
-            width: 110,
-            height: 64,
-            pins: [
-                { id: "anode", name: "A", side: "left" },
-                { id: "cathode", name: "K", side: "right" }
-            ]
-        },
-        {
-            id: "led",
-            name: "LED",
-            category: "leds",
-            icon: "💡",
-            color: "#c62828",
-            width: 110,
-            height: 90,
-            voltageDrop: 2,
-            current: 0.02,
-            state: "off",
-            pins: [
-                { id: "anode", name: "A", side: "left" },
-                { id: "cathode", name: "K", side: "right" }
-            ]
-        },
-        {
-            id: "bulb",
-            name: "Ampoule",
-            category: "bulbs",
-            icon: "💡",
-            color: "#f9a825",
-            width: 115,
-            height: 95,
-            voltageDrop: 3,
-            current: 0.1,
-            state: "off",
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "transistor",
-            name: "Transistor NPN",
-            category: "transistors",
-            icon: "NPN",
-            color: "#263238",
-            width: 120,
-            height: 90,
-            pins: [
-                { id: "B", name: "B", side: "left" },
-                { id: "C", name: "C", side: "right" },
-                { id: "E", name: "E", side: "bottom" }
-            ]
-        },
-        {
-            id: "mosfet",
-            name: "MOSFET",
-            category: "mosfet",
-            icon: "MOS",
-            color: "#37474f",
-            width: 120,
-            height: 90,
-            pins: [
-                { id: "G", name: "G", side: "left" },
-                { id: "D", name: "D", side: "right" },
-                { id: "S", name: "S", side: "bottom" }
-            ]
-        },
-        {
-            id: "relay",
-            name: "Relais",
-            category: "relays",
-            icon: "REL",
-            color: "#5d4037",
-            width: 135,
-            height: 90,
-            state: "off",
-            pins: [
-                { id: "coil+", name: "+", side: "left" },
-                { id: "coil-", name: "−", side: "left" },
-                { id: "COM", name: "COM", side: "right" },
-                { id: "NO", name: "NO", side: "right" },
-                { id: "NC", name: "NC", side: "right" }
-            ]
-        },
-        {
-            id: "switch",
-            name: "Interrupteur",
-            category: "switches",
-            icon: "⏻",
-            color: "#455a64",
-            width: 115,
-            height: 70,
-            state: "open",
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "push-button",
-            name: "Bouton poussoir",
-            category: "buttons",
-            icon: "●",
-            color: "#c62828",
-            width: 120,
-            height: 80,
-            state: "released",
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "potentiometer",
-            name: "Potentiomètre",
-            category: "potentiometers",
-            icon: "◉",
-            color: "#1565c0",
-            width: 125,
-            height: 85,
-            value: 50,
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "W", name: "W", side: "top" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "fuse",
-            name: "Fusible",
-            category: "fuses",
-            icon: "▬",
-            color: "#6d4c41",
-            width: 120,
-            height: 60,
-            state: "good",
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "transformer",
-            name: "Transformateur",
-            category: "transformers",
-            icon: "ΩΩ",
-            color: "#4e342e",
-            width: 145,
-            height: 95,
-            pins: [
-                { id: "P1", name: "P1", side: "left" },
-                { id: "P2", name: "P2", side: "left" },
-                { id: "S1", name: "S1", side: "right" },
-                { id: "S2", name: "S2", side: "right" }
-            ]
-        },
-        {
-            id: "rectifier",
-            name: "Pont redresseur",
-            category: "rectifiers",
-            icon: "▱",
-            color: "#37474f",
-            width: 125,
-            height: 85,
-            pins: [
-                { id: "AC1", name: "~", side: "left" },
-                { id: "AC2", name: "~", side: "left" },
-                { id: "PLUS", name: "+", side: "right" },
-                { id: "MINUS", name: "−", side: "right" }
-            ]
-        },
-        {
-            id: "regulator",
-            name: "Régulateur 5V",
-            category: "regulators",
-            icon: "REG",
-            color: "#283593",
-            width: 130,
-            height: 80,
-            pins: [
-                { id: "IN", name: "IN", side: "left" },
-                { id: "GND", name: "GND", side: "bottom" },
-                { id: "OUT", name: "OUT", side: "right" }
-            ]
-        },
-        {
-            id: "opamp",
-            name: "Amplificateur opérationnel",
-            category: "opamps",
-            icon: "▷",
-            color: "#4527a0",
-            width: 125,
-            height: 90,
-            pins: [
-                { id: "IN-", name: "−", side: "left" },
-                { id: "IN+", name: "+", side: "left" },
-                { id: "V+", name: "V+", side: "top" },
-                { id: "V-", name: "V-", side: "bottom" },
-                { id: "OUT", name: "OUT", side: "right" }
-            ]
-        },
-        {
-            id: "logic-gate",
-            name: "Porte logique AND",
-            category: "logic",
-            icon: "AND",
-            color: "#00838f",
-            width: 135,
-            height: 90,
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "left" },
-                { id: "Y", name: "Y", side: "right" }
-            ]
-        },
-        {
-            id: "arduino-uno",
-            name: "Arduino UNO",
-            category: "controllers",
-            icon: "UNO",
-            color: "#00695c",
-            width: 210,
-            height: 145,
-            controller: "arduino",
-            pins: [
-                { id: "D0", name: "D0", side: "right" },
-                { id: "D1", name: "D1", side: "right" },
-                { id: "D2", name: "D2", side: "right" },
-                { id: "D3", name: "D3", side: "right" },
-                { id: "D4", name: "D4", side: "right" },
-                { id: "D5", name: "D5", side: "right" },
-                { id: "D6", name: "D6", side: "right" },
-                { id: "D7", name: "D7", side: "right" },
-                { id: "D8", name: "D8", side: "right" },
-                { id: "D9", name: "D9", side: "right" },
-                { id: "D10", name: "D10", side: "right" },
-                { id: "D11", name: "D11", side: "right" },
-                { id: "D12", name: "D12", side: "right" },
-                { id: "D13", name: "D13", side: "right" },
-                { id: "A0", name: "A0", side: "left" },
-                { id: "A1", name: "A1", side: "left" },
-                { id: "A2", name: "A2", side: "left" },
-                { id: "A3", name: "A3", side: "left" },
-                { id: "A4", name: "A4", side: "left" },
-                { id: "A5", name: "A5", side: "left" },
-                { id: "5V", name: "5V", side: "top" },
-                { id: "3V3", name: "3V3", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" }
-            ]
-        },
-        {
-            id: "arduino-nano",
-            name: "Arduino Nano",
-            category: "controllers",
-            icon: "NANO",
-            color: "#00695c",
-            width: 180,
-            height: 115,
-            controller: "arduino",
-            pins: [
-                { id: "D2", name: "D2", side: "right" },
-                { id: "D3", name: "D3", side: "right" },
-                { id: "D5", name: "D5", side: "right" },
-                { id: "D6", name: "D6", side: "right" },
-                { id: "D9", name: "D9", side: "right" },
-                { id: "D10", name: "D10", side: "right" },
-                { id: "D11", name: "D11", side: "right" },
-                { id: "D12", name: "D12", side: "right" },
-                { id: "D13", name: "D13", side: "right" },
-                { id: "A0", name: "A0", side: "left" },
-                { id: "A1", name: "A1", side: "left" },
-                { id: "A2", name: "A2", side: "left" },
-                { id: "A3", name: "A3", side: "left" },
-                { id: "A4", name: "A4", side: "left" },
-                { id: "A5", name: "A5", side: "left" },
-                { id: "5V", name: "5V", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" }
-            ]
-        },
-        {
-            id: "arduino-mega",
-            name: "Arduino Mega",
-            category: "controllers",
-            icon: "MEGA",
-            color: "#00695c",
-            width: 230,
-            height: 150,
-            controller: "arduino",
-            pins: [
-                { id: "D2", name: "D2", side: "right" },
-                { id: "D3", name: "D3", side: "right" },
-                { id: "D4", name: "D4", side: "right" },
-                { id: "D5", name: "D5", side: "right" },
-                { id: "D6", name: "D6", side: "right" },
-                { id: "D7", name: "D7", side: "right" },
-                { id: "D8", name: "D8", side: "right" },
-                { id: "D9", name: "D9", side: "right" },
-                { id: "D10", name: "D10", side: "right" },
-                { id: "D11", name: "D11", side: "right" },
-                { id: "D12", name: "D12", side: "right" },
-                { id: "D13", name: "D13", side: "right" },
-                { id: "5V", name: "5V", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" }
-            ]
-        },
-        {
-            id: "esp32",
-            name: "ESP32",
-            category: "controllers",
-            icon: "ESP32",
-            color: "#263238",
-            width: 195,
-            height: 125,
-            controller: "esp32",
-            pins: [
-                { id: "GPIO2", name: "GPIO2", side: "right" },
-                { id: "GPIO4", name: "GPIO4", side: "right" },
-                { id: "GPIO5", name: "GPIO5", side: "right" },
-                { id: "GPIO18", name: "GPIO18", side: "right" },
-                { id: "GPIO19", name: "GPIO19", side: "right" },
-                { id: "GPIO21", name: "GPIO21", side: "right" },
-                { id: "GPIO22", name: "GPIO22", side: "right" },
-                { id: "GPIO23", name: "GPIO23", side: "right" },
-                { id: "3V3", name: "3V3", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" }
-            ]
-        },
-        {
-            id: "raspberry-pi",
-            name: "Raspberry Pi",
-            category: "controllers",
-            icon: "PI",
-            color: "#6a1b9a",
-            width: 215,
-            height: 135,
-            controller: "raspberry",
-            pins: [
-                { id: "GPIO17", name: "GPIO17", side: "right" },
-                { id: "GPIO18", name: "GPIO18", side: "right" },
-                { id: "GPIO27", name: "GPIO27", side: "right" },
-                { id: "GPIO22", name: "GPIO22", side: "right" },
-                { id: "3V3", name: "3V3", side: "top" },
-                { id: "5V", name: "5V", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" }
-            ]
-        },
-        {
-            id: "servo",
-            name: "Servo moteur",
-            category: "robotics",
-            icon: "SERVO",
-            color: "#1565c0",
-            width: 145,
-            height: 110,
-            state: "0",
-            angle: 0,
-            pins: [
-                { id: "SIG", name: "SIG", side: "right" },
-                { id: "VCC", name: "VCC", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" }
-            ]
-        },
-        {
-            id: "dc-motor",
-            name: "Moteur DC",
-            category: "robotics",
-            icon: "M",
-            color: "#455a64",
-            width: 130,
-            height: 95,
-            state: "off",
-            speed: 0,
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "buzzer",
-            name: "Buzzer",
-            category: "robotics",
-            icon: "🔊",
-            color: "#37474f",
-            width: 115,
-            height: 85,
-            state: "off",
-            frequency: 0,
-            pins: [
-                { id: "SIG", name: "SIG", side: "right" },
-                { id: "GND", name: "GND", side: "left" }
-            ]
-        },
-        {
-            id: "hc-sr04",
-            name: "Capteur Ultrason HC-SR04",
-            category: "robotics",
-            icon: "US",
-            color: "#0277bd",
-            width: 165,
-            height: 105,
-            distance: 25,
-            pins: [
-                { id: "VCC", name: "VCC", side: "top" },
-                { id: "TRIG", name: "TRIG", side: "right" },
-                { id: "ECHO", name: "ECHO", side: "right" },
-                { id: "GND", name: "GND", side: "bottom" }
-            ]
-        },
-        {
-            id: "ldr",
-            name: "Capteur LDR",
-            category: "robotics",
-            icon: "☀",
-            color: "#ef6c00",
-            width: 120,
-            height: 85,
-            value: 500,
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "lcd",
-            name: "LCD 16x2",
-            category: "robotics",
-            icon: "LCD",
-            color: "#2e7d32",
-            width: 175,
-            height: 105,
-            displayText: "",
-            pins: [
-                { id: "VCC", name: "VCC", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" },
-                { id: "SDA", name: "SDA", side: "left" },
-                { id: "SCL", name: "SCL", side: "right" }
-            ]
-        },
-        {
-            id: "joystick",
-            name: "Joystick",
-            category: "robotics",
-            icon: "◉",
-            color: "#5e35b1",
-            width: 125,
-            height: 110,
-            xValue: 512,
-            yValue: 512,
-            pins: [
-                { id: "VCC", name: "VCC", side: "top" },
-                { id: "GND", name: "GND", side: "bottom" },
-                { id: "VRX", name: "VRX", side: "left" },
-                { id: "VRY", name: "VRY", side: "right" }
-            ]
-        },
-        {
-            id: "wire",
-            name: "Fil de connexion",
-            category: "wires",
-            icon: "━",
-            color: "#263238",
-            width: 130,
-            height: 45,
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        },
-        {
-            id: "terminal",
-            name: "Borne",
-            category: "terminals",
-            icon: "●",
-            color: "#424242",
-            width: 95,
-            height: 70,
-            pins: [
-                { id: "A", name: "A", side: "left" },
-                { id: "B", name: "B", side: "right" }
-            ]
-        }
-    ];
 
-    function getComponentDefinition(type) {
-        return COMPONENTS.find(component => component.id === type) || null;
+
+
+/* ============================================================
+   05. COMPONENT DATABASE
+   ============================================================
+   BASE DE DONNÉES COMPLÈTE DES COMPOSANTS
+   ------------------------------------------------------------
+   Compatible avec :
+   - Bloc 08 : DYNAMIC COMPONENT LIBRARY
+   - Bloc 09 : COMPONENT VISUAL ENGINE
+   - Création dynamique des composants
+   - Connexions / pins
+   - Simulation
+   - Arduino / ESP32 / Raspberry Pi
+   - Robotique
+   - Capteurs
+   - Modules électroniques
+   - LED multicolores
+   - Breadboard / PCB
+   ============================================================ */
+
+const COMPONENTS = [
+
+    /* =========================================================
+       01. ALIMENTATION / POWER
+       ========================================================= */
+
+    {
+        id: "battery",
+        name: "Batterie",
+        category: "power",
+        icon: "🔋",
+        color: "#263238",
+        width: 120,
+        height: 76,
+        voltage: 9,
+        resistance: 0.5,
+        pins: [
+            { id: "positive", name: "+", side: "right" },
+            { id: "negative", name: "−", side: "left" }
+        ]
+    },
+
+    {
+        id: "battery-3v",
+        name: "Pile 3V",
+        category: "power",
+        icon: "🔋",
+        color: "#37474f",
+        width: 110,
+        height: 70,
+        voltage: 3,
+        resistance: 0.3,
+        pins: [
+            { id: "positive", name: "+", side: "right" },
+            { id: "negative", name: "−", side: "left" }
+        ]
+    },
+
+    {
+        id: "battery-5v",
+        name: "Batterie 5V",
+        category: "power",
+        icon: "🔋",
+        color: "#455a64",
+        width: 115,
+        height: 72,
+        voltage: 5,
+        resistance: 0.35,
+        pins: [
+            { id: "positive", name: "+", side: "right" },
+            { id: "negative", name: "−", side: "left" }
+        ]
+    },
+
+    {
+        id: "battery-12v",
+        name: "Batterie 12V",
+        category: "power",
+        icon: "🔋",
+        color: "#263238",
+        width: 125,
+        height: 78,
+        voltage: 12,
+        resistance: 0.6,
+        pins: [
+            { id: "positive", name: "+", side: "right" },
+            { id: "negative", name: "−", side: "left" }
+        ]
+    },
+
+    {
+        id: "dc-supply",
+        name: "Alimentation DC",
+        category: "power",
+        icon: "⚡",
+        color: "#37474f",
+        width: 150,
+        height: 90,
+        voltage: 5,
+        adjustableVoltage: true,
+        pins: [
+            { id: "V+", name: "V+", side: "right" },
+            { id: "GND", name: "GND", side: "left" }
+        ]
+    },
+
+    {
+        id: "ac-supply",
+        name: "Alimentation AC",
+        category: "power",
+        icon: "∿",
+        color: "#455a64",
+        width: 150,
+        height: 90,
+        voltage: 120,
+        frequency: 60,
+        pins: [
+            { id: "L", name: "L", side: "right" },
+            { id: "N", name: "N", side: "left" }
+        ]
+    },
+
+    {
+        id: "signal-generator",
+        name: "Générateur de signaux",
+        category: "power",
+        icon: "〰",
+        color: "#263238",
+        width: 160,
+        height: 90,
+        voltage: 5,
+        frequency: 1000,
+        pins: [
+            { id: "OUT", name: "OUT", side: "right" },
+            { id: "GND", name: "GND", side: "left" }
+        ]
+    },
+
+    /* =========================================================
+       02. RÉSISTANCES
+       ========================================================= */
+
+    {
+        id: "resistor",
+        name: "Résistance",
+        category: "resistors",
+        icon: "Ω",
+        color: "#8d6e63",
+        width: 125,
+        height: 64,
+        resistance: 220,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "resistor-100",
+        name: "Résistance 100 Ω",
+        category: "resistors",
+        icon: "Ω",
+        color: "#8d6e63",
+        width: 125,
+        height: 64,
+        resistance: 100,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "resistor-220",
+        name: "Résistance 220 Ω",
+        category: "resistors",
+        icon: "Ω",
+        color: "#8d6e63",
+        width: 125,
+        height: 64,
+        resistance: 220,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "resistor-330",
+        name: "Résistance 330 Ω",
+        category: "resistors",
+        icon: "Ω",
+        color: "#795548",
+        width: 125,
+        height: 64,
+        resistance: 330,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "resistor-1k",
+        name: "Résistance 1 kΩ",
+        category: "resistors",
+        icon: "Ω",
+        color: "#6d4c41",
+        width: 125,
+        height: 64,
+        resistance: 1000,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "resistor-10k",
+        name: "Résistance 10 kΩ",
+        category: "resistors",
+        icon: "Ω",
+        color: "#5d4037",
+        width: 125,
+        height: 64,
+        resistance: 10000,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       03. CAPACITORS / INDUCTORS
+       ========================================================= */
+
+    {
+        id: "capacitor",
+        name: "Condensateur",
+        category: "capacitors",
+        icon: "║",
+        color: "#1565c0",
+        width: 100,
+        height: 76,
+        capacitance: "100 µF",
+        pins: [
+            { id: "positive", name: "+", side: "left" },
+            { id: "negative", name: "−", side: "right" }
+        ]
+    },
+
+    {
+        id: "capacitor-10uf",
+        name: "Condensateur 10 µF",
+        category: "capacitors",
+        icon: "║",
+        color: "#1976d2",
+        width: 100,
+        height: 76,
+        capacitance: "10 µF",
+        pins: [
+            { id: "positive", name: "+", side: "left" },
+            { id: "negative", name: "−", side: "right" }
+        ]
+    },
+
+    {
+        id: "capacitor-100uf",
+        name: "Condensateur 100 µF",
+        category: "capacitors",
+        icon: "║",
+        color: "#1565c0",
+        width: 100,
+        height: 76,
+        capacitance: "100 µF",
+        pins: [
+            { id: "positive", name: "+", side: "left" },
+            { id: "negative", name: "−", side: "right" }
+        ]
+    },
+
+    {
+        id: "capacitor-1000uf",
+        name: "Condensateur 1000 µF",
+        category: "capacitors",
+        icon: "║",
+        color: "#0d47a1",
+        width: 105,
+        height: 80,
+        capacitance: "1000 µF",
+        pins: [
+            { id: "positive", name: "+", side: "left" },
+            { id: "negative", name: "−", side: "right" }
+        ]
+    },
+
+    {
+        id: "ceramic-capacitor",
+        name: "Condensateur céramique",
+        category: "capacitors",
+        icon: "C",
+        color: "#d4a017",
+        width: 95,
+        height: 65,
+        capacitance: "100 nF",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "inductor",
+        name: "Bobine",
+        category: "inductors",
+        icon: "〰",
+        color: "#6a1b9a",
+        width: 125,
+        height: 64,
+        inductance: "10 mH",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       04. DIODES
+       ========================================================= */
+
+    {
+        id: "diode",
+        name: "Diode",
+        category: "diodes",
+        icon: "▷|",
+        color: "#455a64",
+        width: 110,
+        height: 64,
+        voltageDrop: 0.7,
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "zener-diode",
+        name: "Diode Zener",
+        category: "diodes",
+        icon: "Z",
+        color: "#37474f",
+        width: 110,
+        height: 64,
+        voltageDrop: 5.1,
+        zenerVoltage: 5.1,
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "schottky-diode",
+        name: "Diode Schottky",
+        category: "diodes",
+        icon: "S",
+        color: "#263238",
+        width: 110,
+        height: 64,
+        voltageDrop: 0.3,
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       05. LEDS — VARIANTS
+       ========================================================= */
+
+    {
+        id: "led",
+        name: "LED",
+        category: "leds",
+        icon: "💡",
+        color: "#c62828",
+        width: 110,
+        height: 90,
+        voltageDrop: 2,
+        current: 0.02,
+        state: "off",
+        variant: "red",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-red",
+        name: "LED Rouge",
+        category: "leds",
+        icon: "🔴",
+        color: "#ff1744",
+        width: 110,
+        height: 90,
+        voltageDrop: 2,
+        current: 0.02,
+        state: "off",
+        variant: "red",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-green",
+        name: "LED Verte",
+        category: "leds",
+        icon: "🟢",
+        color: "#00e676",
+        width: 110,
+        height: 90,
+        voltageDrop: 2.1,
+        current: 0.02,
+        state: "off",
+        variant: "green",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-blue",
+        name: "LED Bleue",
+        category: "leds",
+        icon: "🔵",
+        color: "#2979ff",
+        width: 110,
+        height: 90,
+        voltageDrop: 3.0,
+        current: 0.02,
+        state: "off",
+        variant: "blue",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-yellow",
+        name: "LED Jaune",
+        category: "leds",
+        icon: "🟡",
+        color: "#ffd600",
+        width: 110,
+        height: 90,
+        voltageDrop: 2.1,
+        current: 0.02,
+        state: "off",
+        variant: "yellow",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-white",
+        name: "LED Blanche",
+        category: "leds",
+        icon: "⚪",
+        color: "#f5f7ff",
+        width: 110,
+        height: 90,
+        voltageDrop: 3.2,
+        current: 0.02,
+        state: "off",
+        variant: "white",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-orange",
+        name: "LED Orange",
+        category: "leds",
+        icon: "🟠",
+        color: "#ff6d00",
+        width: 110,
+        height: 90,
+        voltageDrop: 2.0,
+        current: 0.02,
+        state: "off",
+        variant: "orange",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-violet",
+        name: "LED Violette",
+        category: "leds",
+        icon: "🟣",
+        color: "#aa00ff",
+        width: 110,
+        height: 90,
+        voltageDrop: 3.2,
+        current: 0.02,
+        state: "off",
+        variant: "violet",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-rgb",
+        name: "LED RGB",
+        category: "leds",
+        icon: "🌈",
+        color: "#00e5ff",
+        width: 115,
+        height: 95,
+        voltageDrop: 2.5,
+        current: 0.02,
+        state: "off",
+        variant: "rgb",
+        pins: [
+            { id: "R", name: "R", side: "left" },
+            { id: "G", name: "G", side: "left" },
+            { id: "B", name: "B", side: "right" },
+            { id: "GND", name: "GND", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-rgbw",
+        name: "LED RGBW",
+        category: "leds",
+        icon: "🌈",
+        color: "#ffffff",
+        width: 120,
+        height: 100,
+        voltageDrop: 2.8,
+        current: 0.02,
+        state: "off",
+        variant: "rgbw",
+        pins: [
+            { id: "R", name: "R", side: "left" },
+            { id: "G", name: "G", side: "left" },
+            { id: "B", name: "B", side: "right" },
+            { id: "W", name: "W", side: "right" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "led-ir",
+        name: "LED Infrarouge",
+        category: "leds",
+        icon: "IR",
+        color: "#8b0000",
+        width: 110,
+        height: 90,
+        voltageDrop: 1.2,
+        current: 0.02,
+        state: "off",
+        variant: "ir",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    {
+        id: "led-uv",
+        name: "LED Ultraviolet",
+        category: "leds",
+        icon: "UV",
+        color: "#7c4dff",
+        width: 110,
+        height: 90,
+        voltageDrop: 3.2,
+        current: 0.02,
+        state: "off",
+        variant: "uv",
+        pins: [
+            { id: "anode", name: "A", side: "left" },
+            { id: "cathode", name: "K", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       06. AMPOULE / INDICATEURS
+       ========================================================= */
+
+    {
+        id: "bulb",
+        name: "Ampoule",
+        category: "bulbs",
+        icon: "💡",
+        color: "#f9a825",
+        width: 115,
+        height: 95,
+        voltageDrop: 3,
+        current: 0.1,
+        state: "off",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "lamp",
+        name: "Lampe",
+        category: "bulbs",
+        icon: "💡",
+        color: "#ffb300",
+        width: 120,
+        height: 95,
+        voltageDrop: 3,
+        current: 0.1,
+        state: "off",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       07. TRANSISTORS / MOSFET
+       ========================================================= */
+
+    {
+        id: "transistor",
+        name: "Transistor NPN",
+        category: "transistors",
+        icon: "NPN",
+        color: "#263238",
+        width: 120,
+        height: 90,
+        transistorType: "NPN",
+        pins: [
+            { id: "B", name: "B", side: "left" },
+            { id: "C", name: "C", side: "right" },
+            { id: "E", name: "E", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "transistor-pnp",
+        name: "Transistor PNP",
+        category: "transistors",
+        icon: "PNP",
+        color: "#37474f",
+        width: 120,
+        height: 90,
+        transistorType: "PNP",
+        pins: [
+            { id: "B", name: "B", side: "left" },
+            { id: "C", name: "C", side: "right" },
+            { id: "E", name: "E", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "mosfet",
+        name: "MOSFET",
+        category: "mosfet",
+        icon: "MOS",
+        color: "#37474f",
+        width: 120,
+        height: 90,
+        pins: [
+            { id: "G", name: "G", side: "left" },
+            { id: "D", name: "D", side: "right" },
+            { id: "S", name: "S", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "mosfet-n",
+        name: "MOSFET N-Channel",
+        category: "mosfet",
+        icon: "N-MOS",
+        color: "#263238",
+        width: 125,
+        height: 90,
+        mosfetType: "N",
+        pins: [
+            { id: "G", name: "G", side: "left" },
+            { id: "D", name: "D", side: "right" },
+            { id: "S", name: "S", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "mosfet-p",
+        name: "MOSFET P-Channel",
+        category: "mosfet",
+        icon: "P-MOS",
+        color: "#455a64",
+        width: 125,
+        height: 90,
+        mosfetType: "P",
+        pins: [
+            { id: "G", name: "G", side: "left" },
+            { id: "D", name: "D", side: "right" },
+            { id: "S", name: "S", side: "bottom" }
+        ]
+    },
+
+    /* =========================================================
+       08. RELAIS / INTERRUPTEURS
+       ========================================================= */
+
+    {
+        id: "relay",
+        name: "Relais",
+        category: "relays",
+        icon: "REL",
+        color: "#5d4037",
+        width: 135,
+        height: 90,
+        state: "off",
+        pins: [
+            { id: "coil+", name: "+", side: "left" },
+            { id: "coil-", name: "−", side: "left" },
+            { id: "COM", name: "COM", side: "right" },
+            { id: "NO", name: "NO", side: "right" },
+            { id: "NC", name: "NC", side: "right" }
+        ]
+    },
+
+    {
+        id: "relay-2ch",
+        name: "Module Relais 2 Canaux",
+        category: "relays",
+        icon: "REL2",
+        color: "#4e342e",
+        width: 160,
+        height: 105,
+        state: "off",
+        channels: 2,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" },
+            { id: "IN1", name: "IN1", side: "left" },
+            { id: "IN2", name: "IN2", side: "left" },
+            { id: "COM1", name: "COM1", side: "right" },
+            { id: "NO1", name: "NO1", side: "right" },
+            { id: "COM2", name: "COM2", side: "right" },
+            { id: "NO2", name: "NO2", side: "right" }
+        ]
+    },
+
+    {
+        id: "switch",
+        name: "Interrupteur",
+        category: "switches",
+        icon: "⏻",
+        color: "#455a64",
+        width: 115,
+        height: 70,
+        state: "open",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "push-button",
+        name: "Bouton poussoir",
+        category: "buttons",
+        icon: "●",
+        color: "#c62828",
+        width: 120,
+        height: 80,
+        state: "released",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "push-button-no",
+        name: "Bouton NO",
+        category: "buttons",
+        icon: "NO",
+        color: "#d32f2f",
+        width: 120,
+        height: 80,
+        state: "released",
+        contactType: "NO",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "push-button-nc",
+        name: "Bouton NC",
+        category: "buttons",
+        icon: "NC",
+        color: "#7b1fa2",
+        width: 120,
+        height: 80,
+        state: "released",
+        contactType: "NC",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       09. POTENTIOMÈTRES
+       ========================================================= */
+
+    {
+        id: "potentiometer",
+        name: "Potentiomètre",
+        category: "potentiometers",
+        icon: "◉",
+        color: "#1565c0",
+        width: 125,
+        height: 85,
+        value: 50,
+        resistance: 10000,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "W", name: "W", side: "top" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "potentiometer-10k",
+        name: "Potentiomètre 10 kΩ",
+        category: "potentiometers",
+        icon: "◉",
+        color: "#1565c0",
+        width: 125,
+        height: 85,
+        value: 50,
+        resistance: 10000,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "W", name: "W", side: "top" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       10. PROTECTION
+       ========================================================= */
+
+    {
+        id: "fuse",
+        name: "Fusible",
+        category: "fuses",
+        icon: "▬",
+        color: "#6d4c41",
+        width: 120,
+        height: 60,
+        state: "good",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "fuse-1a",
+        name: "Fusible 1 A",
+        category: "fuses",
+        icon: "▬",
+        color: "#795548",
+        width: 120,
+        height: 60,
+        state: "good",
+        currentRating: 1,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       11. TRANSFORMATEUR / REDRESSEMENT / RÉGULATION
+       ========================================================= */
+
+    {
+        id: "transformer",
+        name: "Transformateur",
+        category: "transformers",
+        icon: "ΩΩ",
+        color: "#4e342e",
+        width: 145,
+        height: 95,
+        pins: [
+            { id: "P1", name: "P1", side: "left" },
+            { id: "P2", name: "P2", side: "left" },
+            { id: "S1", name: "S1", side: "right" },
+            { id: "S2", name: "S2", side: "right" }
+        ]
+    },
+
+    {
+        id: "rectifier",
+        name: "Pont redresseur",
+        category: "rectifiers",
+        icon: "▱",
+        color: "#37474f",
+        width: 125,
+        height: 85,
+        pins: [
+            { id: "AC1", name: "~", side: "left" },
+            { id: "AC2", name: "~", side: "left" },
+            { id: "PLUS", name: "+", side: "right" },
+            { id: "MINUS", name: "−", side: "right" }
+        ]
+    },
+
+    {
+        id: "regulator",
+        name: "Régulateur 5V",
+        category: "regulators",
+        icon: "REG",
+        color: "#283593",
+        width: 130,
+        height: 80,
+        outputVoltage: 5,
+        pins: [
+            { id: "IN", name: "IN", side: "left" },
+            { id: "GND", name: "GND", side: "bottom" },
+            { id: "OUT", name: "OUT", side: "right" }
+        ]
+    },
+
+    {
+        id: "regulator-3v3",
+        name: "Régulateur 3,3V",
+        category: "regulators",
+        icon: "REG",
+        color: "#303f9f",
+        width: 130,
+        height: 80,
+        outputVoltage: 3.3,
+        pins: [
+            { id: "IN", name: "IN", side: "left" },
+            { id: "GND", name: "GND", side: "bottom" },
+            { id: "OUT", name: "OUT", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       12. AMPLIFICATION / IC / LOGIQUE
+       ========================================================= */
+
+    {
+        id: "opamp",
+        name: "Amplificateur opérationnel",
+        category: "opamps",
+        icon: "▷",
+        color: "#4527a0",
+        width: 125,
+        height: 90,
+        pins: [
+            { id: "IN-", name: "−", side: "left" },
+            { id: "IN+", name: "+", side: "left" },
+            { id: "V+", name: "V+", side: "top" },
+            { id: "V-", name: "V-", side: "bottom" },
+            { id: "OUT", name: "OUT", side: "right" }
+        ]
+    },
+
+    {
+        id: "ic",
+        name: "Circuit intégré",
+        category: "ics",
+        icon: "IC",
+        color: "#212121",
+        width: 145,
+        height: 95,
+        pins: [
+            { id: "1", name: "1", side: "left" },
+            { id: "2", name: "2", side: "left" },
+            { id: "3", name: "3", side: "left" },
+            { id: "4", name: "4", side: "left" },
+            { id: "5", name: "5", side: "right" },
+            { id: "6", name: "6", side: "right" },
+            { id: "7", name: "7", side: "right" },
+            { id: "8", name: "8", side: "right" }
+        ]
+    },
+
+    {
+        id: "ic-555",
+        name: "Timer NE555",
+        category: "ics",
+        icon: "555",
+        color: "#263238",
+        width: 145,
+        height: 100,
+        pins: [
+            { id: "GND", name: "GND", side: "left" },
+            { id: "TRIG", name: "TRIG", side: "left" },
+            { id: "OUT", name: "OUT", side: "right" },
+            { id: "RESET", name: "RESET", side: "right" },
+            { id: "CTRL", name: "CTRL", side: "right" },
+            { id: "THR", name: "THR", side: "left" },
+            { id: "DIS", name: "DIS", side: "left" },
+            { id: "VCC", name: "VCC", side: "top" }
+        ]
+    },
+
+    {
+        id: "logic-gate",
+        name: "Porte logique AND",
+        category: "logic",
+        icon: "AND",
+        color: "#00838f",
+        width: 135,
+        height: 90,
+        gateType: "AND",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "left" },
+            { id: "Y", name: "Y", side: "right" }
+        ]
+    },
+
+    {
+        id: "logic-gate-or",
+        name: "Porte logique OR",
+        category: "logic",
+        icon: "OR",
+        color: "#00695c",
+        width: 135,
+        height: 90,
+        gateType: "OR",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "left" },
+            { id: "Y", name: "Y", side: "right" }
+        ]
+    },
+
+    {
+        id: "logic-gate-not",
+        name: "Porte logique NOT",
+        category: "logic",
+        icon: "NOT",
+        color: "#00796b",
+        width: 125,
+        height: 80,
+        gateType: "NOT",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "Y", name: "Y", side: "right" }
+        ]
+    },
+
+    {
+        id: "logic-gate-xor",
+        name: "Porte logique XOR",
+        category: "logic",
+        icon: "XOR",
+        color: "#00838f",
+        width: 140,
+        height: 90,
+        gateType: "XOR",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "left" },
+            { id: "Y", name: "Y", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       13. CONTRÔLEURS
+       ========================================================= */
+
+    {
+        id: "arduino-uno",
+        name: "Arduino UNO",
+        category: "controllers",
+        icon: "UNO",
+        color: "#00695c",
+        width: 210,
+        height: 145,
+        controller: "arduino",
+        pins: [
+            { id: "D0", name: "D0", side: "right" },
+            { id: "D1", name: "D1", side: "right" },
+            { id: "D2", name: "D2", side: "right" },
+            { id: "D3", name: "D3", side: "right" },
+            { id: "D4", name: "D4", side: "right" },
+            { id: "D5", name: "D5", side: "right" },
+            { id: "D6", name: "D6", side: "right" },
+            { id: "D7", name: "D7", side: "right" },
+            { id: "D8", name: "D8", side: "right" },
+            { id: "D9", name: "D9", side: "right" },
+            { id: "D10", name: "D10", side: "right" },
+            { id: "D11", name: "D11", side: "right" },
+            { id: "D12", name: "D12", side: "right" },
+            { id: "D13", name: "D13", side: "right" },
+            { id: "A0", name: "A0", side: "left" },
+            { id: "A1", name: "A1", side: "left" },
+            { id: "A2", name: "A2", side: "left" },
+            { id: "A3", name: "A3", side: "left" },
+            { id: "A4", name: "A4", side: "left" },
+            { id: "A5", name: "A5", side: "left" },
+            { id: "5V", name: "5V", side: "top" },
+            { id: "3V3", name: "3V3", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "arduino-nano",
+        name: "Arduino Nano",
+        category: "controllers",
+        icon: "NANO",
+        color: "#00695c",
+        width: 180,
+        height: 115,
+        controller: "arduino",
+        pins: [
+            { id: "D2", name: "D2", side: "right" },
+            { id: "D3", name: "D3", side: "right" },
+            { id: "D5", name: "D5", side: "right" },
+            { id: "D6", name: "D6", side: "right" },
+            { id: "D9", name: "D9", side: "right" },
+            { id: "D10", name: "D10", side: "right" },
+            { id: "D11", name: "D11", side: "right" },
+            { id: "D12", name: "D12", side: "right" },
+            { id: "D13", name: "D13", side: "right" },
+            { id: "A0", name: "A0", side: "left" },
+            { id: "A1", name: "A1", side: "left" },
+            { id: "A2", name: "A2", side: "left" },
+            { id: "A3", name: "A3", side: "left" },
+            { id: "A4", name: "A4", side: "left" },
+            { id: "A5", name: "A5", side: "left" },
+            { id: "5V", name: "5V", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "arduino-mega",
+        name: "Arduino Mega",
+        category: "controllers",
+        icon: "MEGA",
+        color: "#00695c",
+        width: 230,
+        height: 150,
+        controller: "arduino",
+        pins: [
+            { id: "D2", name: "D2", side: "right" },
+            { id: "D3", name: "D3", side: "right" },
+            { id: "D4", name: "D4", side: "right" },
+            { id: "D5", name: "D5", side: "right" },
+            { id: "D6", name: "D6", side: "right" },
+            { id: "D7", name: "D7", side: "right" },
+            { id: "D8", name: "D8", side: "right" },
+            { id: "D9", name: "D9", side: "right" },
+            { id: "D10", name: "D10", side: "right" },
+            { id: "D11", name: "D11", side: "right" },
+            { id: "D12", name: "D12", side: "right" },
+            { id: "D13", name: "D13", side: "right" },
+            { id: "5V", name: "5V", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "esp32",
+        name: "ESP32",
+        category: "controllers",
+        icon: "ESP32",
+        color: "#263238",
+        width: 195,
+        height: 125,
+        controller: "esp32",
+        pins: [
+            { id: "GPIO2", name: "GPIO2", side: "right" },
+            { id: "GPIO4", name: "GPIO4", side: "right" },
+            { id: "GPIO5", name: "GPIO5", side: "right" },
+            { id: "GPIO18", name: "GPIO18", side: "right" },
+            { id: "GPIO19", name: "GPIO19", side: "right" },
+            { id: "GPIO21", name: "GPIO21", side: "right" },
+            { id: "GPIO22", name: "GPIO22", side: "right" },
+            { id: "GPIO23", name: "GPIO23", side: "right" },
+            { id: "3V3", name: "3V3", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "esp8266",
+        name: "ESP8266",
+        category: "controllers",
+        icon: "ESP8266",
+        color: "#37474f",
+        width: 185,
+        height: 120,
+        controller: "esp8266",
+        pins: [
+            { id: "D0", name: "D0", side: "right" },
+            { id: "D1", name: "D1", side: "right" },
+            { id: "D2", name: "D2", side: "right" },
+            { id: "D3", name: "D3", side: "right" },
+            { id: "D4", name: "D4", side: "right" },
+            { id: "D5", name: "D5", side: "right" },
+            { id: "D6", name: "D6", side: "right" },
+            { id: "D7", name: "D7", side: "right" },
+            { id: "3V3", name: "3V3", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "raspberry-pi",
+        name: "Raspberry Pi",
+        category: "controllers",
+        icon: "PI",
+        color: "#6a1b9a",
+        width: 215,
+        height: 135,
+        controller: "raspberry",
+        pins: [
+            { id: "GPIO17", name: "GPIO17", side: "right" },
+            { id: "GPIO18", name: "GPIO18", side: "right" },
+            { id: "GPIO27", name: "GPIO27", side: "right" },
+            { id: "GPIO22", name: "GPIO22", side: "right" },
+            { id: "3V3", name: "3V3", side: "top" },
+            { id: "5V", name: "5V", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    /* =========================================================
+       14. ROBOTIQUE — MOTEURS
+       ========================================================= */
+
+    {
+        id: "servo",
+        name: "Servo moteur",
+        category: "robotics",
+        icon: "SERVO",
+        color: "#1565c0",
+        width: 145,
+        height: 110,
+        state: "0",
+        angle: 0,
+        pins: [
+            { id: "SIG", name: "SIG", side: "right" },
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "micro-servo",
+        name: "Micro Servo SG90",
+        category: "robotics",
+        icon: "SERVO",
+        color: "#1976d2",
+        width: 140,
+        height: 105,
+        state: "0",
+        angle: 0,
+        pins: [
+            { id: "SIG", name: "SIG", side: "right" },
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "dc-motor",
+        name: "Moteur DC",
+        category: "robotics",
+        icon: "M",
+        color: "#455a64",
+        width: 130,
+        height: 95,
+        state: "off",
+        speed: 0,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "stepper-motor",
+        name: "Moteur pas à pas",
+        category: "robotics",
+        icon: "STEP",
+        color: "#37474f",
+        width: 145,
+        height: 105,
+        state: "off",
+        step: 0,
+        pins: [
+            { id: "A+", name: "A+", side: "left" },
+            { id: "A-", name: "A-", side: "left" },
+            { id: "B+", name: "B+", side: "right" },
+            { id: "B-", name: "B-", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       15. AUDIO
+       ========================================================= */
+
+    {
+        id: "buzzer",
+        name: "Buzzer",
+        category: "robotics",
+        icon: "🔊",
+        color: "#37474f",
+        width: 115,
+        height: 85,
+        state: "off",
+        frequency: 0,
+        pins: [
+            { id: "SIG", name: "SIG", side: "right" },
+            { id: "GND", name: "GND", side: "left" }
+        ]
+    },
+
+    {
+        id: "speaker",
+        name: "Haut-parleur",
+        category: "robotics",
+        icon: "🔊",
+        color: "#263238",
+        width: 125,
+        height: 95,
+        state: "off",
+        frequency: 0,
+        volume: 0,
+        pins: [
+            { id: "IN", name: "IN", side: "right" },
+            { id: "GND", name: "GND", side: "left" }
+        ]
+    },
+
+    /* =========================================================
+       16. CAPTEURS
+       ========================================================= */
+
+    {
+        id: "hc-sr04",
+        name: "Capteur Ultrason HC-SR04",
+        category: "robotics",
+        icon: "US",
+        color: "#0277bd",
+        width: 165,
+        height: 105,
+        distance: 25,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "TRIG", name: "TRIG", side: "right" },
+            { id: "ECHO", name: "ECHO", side: "right" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "ldr",
+        name: "Capteur LDR",
+        category: "robotics",
+        icon: "☀",
+        color: "#ef6c00",
+        width: 120,
+        height: 85,
+        value: 500,
+        resistance: 10000,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "ir-sensor",
+        name: "Capteur infrarouge",
+        category: "robotics",
+        icon: "IR",
+        color: "#6d4c41",
+        width: 130,
+        height: 85,
+        value: 0,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "OUT", name: "OUT", side: "right" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "pir-sensor",
+        name: "Capteur de mouvement PIR",
+        category: "robotics",
+        icon: "PIR",
+        color: "#5e35b1",
+        width: 145,
+        height: 95,
+        detected: false,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "OUT", name: "OUT", side: "right" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "temperature-sensor",
+        name: "Capteur de température",
+        category: "robotics",
+        icon: "TEMP",
+        color: "#e65100",
+        width: 135,
+        height: 90,
+        temperature: 25,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "OUT", name: "OUT", side: "right" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    /* =========================================================
+       17. AFFICHAGE / INTERFACE
+       ========================================================= */
+
+    {
+        id: "lcd",
+        name: "LCD 16x2",
+        category: "robotics",
+        icon: "LCD",
+        color: "#2e7d32",
+        width: 175,
+        height: 105,
+        displayText: "",
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" },
+            { id: "SDA", name: "SDA", side: "left" },
+            { id: "SCL", name: "SCL", side: "right" }
+        ]
+    },
+
+    {
+        id: "lcd-i2c",
+        name: "LCD 16x2 I2C",
+        category: "robotics",
+        icon: "LCD",
+        color: "#388e3c",
+        width: 175,
+        height: 105,
+        displayText: "",
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" },
+            { id: "SDA", name: "SDA", side: "left" },
+            { id: "SCL", name: "SCL", side: "right" }
+        ]
+    },
+
+    {
+        id: "seven-segment",
+        name: "Afficheur 7 segments",
+        category: "robotics",
+        icon: "8",
+        color: "#c62828",
+        width: 125,
+        height: 105,
+        displayValue: "0",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "left" },
+            { id: "C", name: "C", side: "left" },
+            { id: "D", name: "D", side: "right" },
+            { id: "E", name: "E", side: "right" },
+            { id: "F", name: "F", side: "right" },
+            { id: "G", name: "G", side: "right" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "joystick",
+        name: "Joystick",
+        category: "robotics",
+        icon: "◉",
+        color: "#5e35b1",
+        width: 125,
+        height: 110,
+        xValue: 512,
+        yValue: 512,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" },
+            { id: "VRX", name: "VRX", side: "left" },
+            { id: "VRY", name: "VRY", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       18. BREADBOARD / PCB / PROTOTYPAGE
+       ========================================================= */
+
+    {
+        id: "breadboard",
+        name: "Breadboard",
+        category: "breadboards",
+        icon: "BOARD",
+        color: "#eceff1",
+        width: 250,
+        height: 145,
+        rows: 30,
+        columns: 10,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "mini-breadboard",
+        name: "Mini Breadboard",
+        category: "breadboards",
+        icon: "MINI",
+        color: "#f5f5f5",
+        width: 180,
+        height: 115,
+        rows: 17,
+        columns: 10,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "protoboard",
+        name: "Protoboard",
+        category: "breadboards",
+        icon: "PROTO",
+        color: "#d7ccc8",
+        width: 220,
+        height: 135,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    {
+        id: "pcb",
+        name: "Carte PCB",
+        category: "pcb",
+        icon: "PCB",
+        color: "#1b5e20",
+        width: 230,
+        height: 145,
+        pins: [
+            { id: "VCC", name: "VCC", side: "top" },
+            { id: "GND", name: "GND", side: "bottom" },
+            { id: "IN", name: "IN", side: "left" },
+            { id: "OUT", name: "OUT", side: "right" }
+        ]
+    },
+
+    {
+        id: "terminal-board",
+        name: "Terminal Board",
+        category: "terminals",
+        icon: "TERM",
+        color: "#424242",
+        width: 155,
+        height: 95,
+        pins: [
+            { id: "1", name: "1", side: "left" },
+            { id: "2", name: "2", side: "left" },
+            { id: "3", name: "3", side: "right" },
+            { id: "4", name: "4", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       19. FILS / BORNES
+       ========================================================= */
+
+    {
+        id: "wire",
+        name: "Fil de connexion",
+        category: "wires",
+        icon: "━",
+        color: "#263238",
+        width: 130,
+        height: 45,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "wire-red",
+        name: "Fil Rouge",
+        category: "wires",
+        icon: "━",
+        color: "#d32f2f",
+        width: 130,
+        height: 45,
+        wireColor: "#d32f2f",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "wire-black",
+        name: "Fil Noir",
+        category: "wires",
+        icon: "━",
+        color: "#212121",
+        width: 130,
+        height: 45,
+        wireColor: "#212121",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "wire-green",
+        name: "Fil Vert",
+        category: "wires",
+        icon: "━",
+        color: "#2e7d32",
+        width: 130,
+        height: 45,
+        wireColor: "#2e7d32",
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "terminal",
+        name: "Borne",
+        category: "terminals",
+        icon: "●",
+        color: "#424242",
+        width: 95,
+        height: 70,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    /* =========================================================
+       20. INSTRUMENTS
+       ========================================================= */
+
+    {
+        id: "multimeter",
+        name: "Multimètre",
+        category: "instruments",
+        icon: "MM",
+        color: "#263238",
+        width: 145,
+        height: 180,
+        instrument: "multimeter",
+        mode: "voltage",
+        value: 0,
+        pins: [
+            { id: "COM", name: "COM", side: "bottom" },
+            { id: "VΩ", name: "VΩ", side: "top" }
+        ]
+    },
+
+    {
+        id: "oscilloscope",
+        name: "Oscilloscope",
+        category: "instruments",
+        icon: "OSC",
+        color: "#263238",
+        width: 175,
+        height: 125,
+        instrument: "oscilloscope",
+        frequency: 0,
+        voltage: 0,
+        pins: [
+            { id: "CH1", name: "CH1", side: "left" },
+            { id: "GND", name: "GND", side: "bottom" }
+        ]
+    },
+
+    /* =========================================================
+       21. COMPOSANTS SUPPLÉMENTAIRES
+       ========================================================= */
+
+    {
+        id: "crystal",
+        name: "Quartz",
+        category: "oscillators",
+        icon: "XTAL",
+        color: "#78909c",
+        width: 105,
+        height: 65,
+        frequency: 16000000,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "thermistor",
+        name: "Thermistance NTC",
+        category: "sensors",
+        icon: "NTC",
+        color: "#ef6c00",
+        width: 115,
+        height: 70,
+        resistance: 10000,
+        temperature: 25,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
+    },
+
+    {
+        id: "photoresistor",
+        name: "Photorésistance",
+        category: "sensors",
+        icon: "LDR",
+        color: "#f57c00",
+        width: 115,
+        height: 75,
+        resistance: 5000,
+        value: 500,
+        pins: [
+            { id: "A", name: "A", side: "left" },
+            { id: "B", name: "B", side: "right" }
+        ]
     }
+
+];
+
+/* ============================================================
+   COMPONENT DEFINITION ACCESS
+   ============================================================ */
+
+function getComponentDefinition(type) {
+    return COMPONENTS.find(component => component.id === type) || null;
+}
+
+
 
     /* ============================================================
        06. CODE LIBRARY
