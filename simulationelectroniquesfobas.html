@@ -58,10 +58,15 @@
             </div>
 
             <div class="brand-text">
-                <h1>LABORATOIRE ÉLECTRONIQUE</h1>
+
+                <h1>
+                    LABORATOIRE ÉLECTRONIQUE
+                </h1>
+
                 <p>
                     Simulation professionnelle de pratique électronique
                 </p>
+
             </div>
 
         </div>
@@ -70,6 +75,7 @@
             id="simulationStatus"
             class="simulation-status"
         >
+
             <span
                 id="simulationStatusDot"
                 class="status-dot"
@@ -78,6 +84,7 @@
             <span id="simulationStatusText">
                 Simulation prête
             </span>
+
         </div>
 
     </header>
@@ -96,30 +103,26 @@
             id="laboratoryBtn"
             class="top-tool-btn active"
             type="button"
+            aria-controls="laboratoryWorkspaceArea"
         >
             🔬 Laboratoire
         </button>
 
-
-<button
-    id="libraryBtn"
-    class="top-tool-btn"
-    type="button"
-    aria-controls="componentLibraryPanel"
-    aria-expanded="false"
->
-    🧰 Bibliothèque
-</button>
-
-
-
-
-        
+        <button
+            id="libraryBtn"
+            class="top-tool-btn"
+            type="button"
+            aria-controls="componentLibraryPanel"
+            aria-expanded="false"
+        >
+            🧰 Bibliothèque
+        </button>
 
         <button
             id="codeLibraryBtn"
             class="top-tool-btn"
             type="button"
+            aria-controls="codeLibraryPanel"
         >
             💻 Bibliothèque Codes
         </button>
@@ -128,6 +131,7 @@
             id="codeEditorBtn"
             class="top-tool-btn"
             type="button"
+            aria-controls="codeEditorPanel"
         >
             📝 Éditeur de Code
         </button>
@@ -136,6 +140,7 @@
             id="missionsBtn"
             class="top-tool-btn"
             type="button"
+            aria-controls="missionsPanel"
         >
             🎯 Missions
         </button>
@@ -144,6 +149,7 @@
             id="measurementsBtn"
             class="top-tool-btn"
             type="button"
+            aria-controls="measurementsPanel"
         >
             📊 Mesures
         </button>
@@ -152,6 +158,7 @@
             id="diagnosticBtn"
             class="top-tool-btn"
             type="button"
+            aria-controls="diagnosticPanel"
         >
             🛠 Diagnostic
         </button>
@@ -160,6 +167,7 @@
             id="faultsBtn"
             class="top-tool-btn"
             type="button"
+            aria-controls="faultsPanel"
         >
             ⚠️ Pannes
         </button>
@@ -226,239 +234,20 @@
             class="electronic-sidebar"
         >
 
-            <!-- ----------------------------------------------------
-                 COMPONENT LIBRARY
-            ----------------------------------------------------- -->
-            <section
-                id="componentLibraryPanel"
-                class="sidebar-panel"
-            >
-
-                <div class="panel-heading">
-                    <h2>🧰 Composants</h2>
-
-                    <button
-                        id="componentSearchBtn"
-                        type="button"
-                        title="Rechercher un composant"
-                    >
-                        🔎
-                    </button>
-                </div>
-
-                <input
-                    id="componentSearchInput"
-                    class="component-search"
-                    type="search"
-                    placeholder="Rechercher un composant..."
-                    autocomplete="off"
-                >
-
-                <div
-                    id="componentCategories"
-                    class="component-categories"
-                >
-
-                    <button
-                        id="resistorsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="resistors"
-                    >
-                        Résistances
-                    </button>
-
-                    <button
-                        id="capacitorsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="capacitors"
-                    >
-                        Condensateurs
-                    </button>
-
-                    <button
-                        id="inductorsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="inductors"
-                    >
-                        Bobines
-                    </button>
-
-                    <button
-                        id="diodesCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="diodes"
-                    >
-                        Diodes
-                    </button>
-
-                    <button
-                        id="ledsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="leds"
-                    >
-                        LEDs
-                    </button>
-
-                    <button
-                        id="bulbsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="bulbs"
-                    >
-                        Ampoules
-                    </button>
-
-                    <button
-                        id="transistorsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="transistors"
-                    >
-                        Transistors
-                    </button>
-
-                    <button
-                        id="mosfetCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="mosfet"
-                    >
-                        MOSFET
-                    </button>
-
-                    <button
-                        id="relaysCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="relays"
-                    >
-                        Relais
-                    </button>
-
-                    <button
-                        id="switchesCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="switches"
-                    >
-                        Interrupteurs
-                    </button>
-
-                    <button
-                        id="buttonsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="buttons"
-                    >
-                        Boutons poussoirs
-                    </button>
-
-                    <button
-                        id="potentiometersCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="potentiometers"
-                    >
-                        Potentiomètres
-                    </button>
-
-                    <button
-                        id="fusesCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="fuses"
-                    >
-                        Fusibles
-                    </button>
-
-                    <button
-                        id="transformersCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="transformers"
-                    >
-                        Transformateurs
-                    </button>
-
-                    <button
-                        id="rectifiersCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="rectifiers"
-                    >
-                        Ponts redresseurs
-                    </button>
-
-                    <button
-                        id="regulatorsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="regulators"
-                    >
-                        Régulateurs
-                    </button>
-
-                    <button
-                        id="opampsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="opamps"
-                    >
-                        Amplificateurs opérationnels
-                    </button>
-
-                    <button
-                        id="logicCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="logic"
-                    >
-                        Circuits logiques
-                    </button>
-
-                    <button
-                        id="wiresCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="wires"
-                    >
-                        Fils / Câbles
-                    </button>
-
-                    <button
-                        id="terminalsCategoryBtn"
-                        class="component-category-btn"
-                        type="button"
-                        data-category="terminals"
-                    >
-                        Bornes
-                    </button>
-
-                </div>
-
-                <div
-                    id="componentLibraryGrid"
-                    class="component-library-grid"
-                ></div>
-
-            </section>
-
-
-            <!-- ----------------------------------------------------
+            <!-- ====================================================
                  ELECTRICAL SOURCES
-            ----------------------------------------------------- -->
+            ===================================================== -->
             <section
                 id="powerSourcesPanel"
                 class="sidebar-panel"
             >
 
                 <div class="panel-heading">
-                    <h2>⚡ Sources</h2>
+
+                    <h2>
+                        ⚡ Sources
+                    </h2>
+
                 </div>
 
                 <button
@@ -500,16 +289,20 @@
             </section>
 
 
-            <!-- ----------------------------------------------------
+            <!-- ====================================================
                  INSTRUMENTS
-            ----------------------------------------------------- -->
+            ===================================================== -->
             <section
                 id="instrumentsPanel"
                 class="sidebar-panel"
             >
 
                 <div class="panel-heading">
-                    <h2>📐 Instruments</h2>
+
+                    <h2>
+                        📐 Instruments
+                    </h2>
+
                 </div>
 
                 <button
@@ -588,6 +381,9 @@
             class="laboratory-workspace-area"
         >
 
+            <!-- ====================================================
+                 WORKSPACE TOOLBAR
+            ===================================================== -->
             <div
                 id="workspaceToolbar"
                 class="workspace-toolbar"
@@ -769,7 +565,9 @@
 
                 <span>
                     État :
-                    <strong id="circuitState">Circuit ouvert</strong>
+                    <strong id="circuitState">
+                        Circuit ouvert
+                    </strong>
                 </span>
 
             </div>
@@ -785,15 +583,17 @@
             class="electronic-control-panel"
         >
 
-            <!-- ----------------------------------------------------
+            <!-- ====================================================
                  CIRCUIT CONTROLS
-            ----------------------------------------------------- -->
+            ===================================================== -->
             <section
                 id="circuitControlPanel"
                 class="control-section"
             >
 
-                <h2>⚡ Contrôle du circuit</h2>
+                <h2>
+                    ⚡ Contrôle du circuit
+                </h2>
 
                 <button
                     id="powerOnBtn"
@@ -838,34 +638,44 @@
             </section>
 
 
-            <!-- ----------------------------------------------------
+            <!-- ====================================================
                  MEASUREMENTS
-            ----------------------------------------------------- -->
+            ===================================================== -->
             <section
                 id="measurementControlPanel"
                 class="control-section"
             >
 
-                <h2>📊 Mesures</h2>
+                <h2>
+                    📊 Mesures
+                </h2>
 
                 <div class="measurement-card">
                     <span>Tension</span>
-                    <strong id="voltageDisplay">0.00 V</strong>
+                    <strong id="voltageDisplay">
+                        0.00 V
+                    </strong>
                 </div>
 
                 <div class="measurement-card">
                     <span>Courant</span>
-                    <strong id="currentDisplay">0.00 A</strong>
+                    <strong id="currentDisplay">
+                        0.00 A
+                    </strong>
                 </div>
 
                 <div class="measurement-card">
                     <span>Résistance</span>
-                    <strong id="resistanceDisplay">— Ω</strong>
+                    <strong id="resistanceDisplay">
+                        — Ω
+                    </strong>
                 </div>
 
                 <div class="measurement-card">
                     <span>Fréquence</span>
-                    <strong id="frequencyDisplay">0 Hz</strong>
+                    <strong id="frequencyDisplay">
+                        0 Hz
+                    </strong>
                 </div>
 
                 <button
@@ -895,15 +705,17 @@
             </section>
 
 
-            <!-- ----------------------------------------------------
+            <!-- ====================================================
                  CODE EXECUTION
-            ----------------------------------------------------- -->
+            ===================================================== -->
             <section
                 id="codeExecutionPanel"
                 class="control-section"
             >
 
-                <h2>💻 Programme</h2>
+                <h2>
+                    💻 Programme
+                </h2>
 
                 <button
                     id="openCodeEditorBtn"
@@ -940,15 +752,17 @@
             </section>
 
 
-            <!-- ----------------------------------------------------
+            <!-- ====================================================
                  SAVE / LOAD
-            ----------------------------------------------------- -->
+            ===================================================== -->
             <section
                 id="projectControlPanel"
                 class="control-section"
             >
 
-                <h2>💾 Projet</h2>
+                <h2>
+                    💾 Projet
+                </h2>
 
                 <button
                     id="saveProjectBtn"
@@ -982,6 +796,274 @@
 
 
     <!-- ============================================================
+         DYNAMIC COMPONENT LIBRARY
+         
+         IMPORTANT:
+         This panel replaces the old static sidebar component
+         library. All component/category content can be controlled
+         dynamically by JavaScript.
+         
+         IDs and data-* names are preserved.
+    ============================================================= -->
+    <section
+        id="componentLibraryPanel"
+        class="application-panel hidden"
+        aria-hidden="true"
+    >
+
+        <div class="application-panel-header">
+
+            <h2>
+                🧰 Bibliothèque des Composants Électroniques
+            </h2>
+
+            <button
+                id="closeComponentLibraryBtn"
+                type="button"
+                aria-label="Fermer la bibliothèque"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <!-- ========================================================
+             LIBRARY SEARCH
+        ========================================================= -->
+        <div class="component-library-controls">
+
+            <div class="panel-heading">
+
+                <h2>
+                    Composants
+                </h2>
+
+                <button
+                    id="componentSearchBtn"
+                    type="button"
+                    title="Rechercher un composant"
+                    aria-label="Rechercher un composant"
+                >
+                    🔎
+                </button>
+
+            </div>
+
+            <input
+                id="componentSearchInput"
+                class="component-search"
+                type="search"
+                placeholder="Rechercher un composant..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <!-- ========================================================
+             COMPONENT CATEGORIES
+        ========================================================= -->
+        <div
+            id="componentCategories"
+            class="component-categories"
+        >
+
+            <button
+                id="resistorsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="resistors"
+            >
+                Résistances
+            </button>
+
+            <button
+                id="capacitorsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="capacitors"
+            >
+                Condensateurs
+            </button>
+
+            <button
+                id="inductorsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="inductors"
+            >
+                Bobines
+            </button>
+
+            <button
+                id="diodesCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="diodes"
+            >
+                Diodes
+            </button>
+
+            <button
+                id="ledsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="leds"
+            >
+                LEDs
+            </button>
+
+            <button
+                id="bulbsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="bulbs"
+            >
+                Ampoules
+            </button>
+
+            <button
+                id="transistorsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="transistors"
+            >
+                Transistors
+            </button>
+
+            <button
+                id="mosfetCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="mosfet"
+            >
+                MOSFET
+            </button>
+
+            <button
+                id="relaysCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="relays"
+            >
+                Relais
+            </button>
+
+            <button
+                id="switchesCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="switches"
+            >
+                Interrupteurs
+            </button>
+
+            <button
+                id="buttonsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="buttons"
+            >
+                Boutons poussoirs
+            </button>
+
+            <button
+                id="potentiometersCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="potentiometers"
+            >
+                Potentiomètres
+            </button>
+
+            <button
+                id="fusesCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="fuses"
+            >
+                Fusibles
+            </button>
+
+            <button
+                id="transformersCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="transformers"
+            >
+                Transformateurs
+            </button>
+
+            <button
+                id="rectifiersCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="rectifiers"
+            >
+                Ponts redresseurs
+            </button>
+
+            <button
+                id="regulatorsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="regulators"
+            >
+                Régulateurs
+            </button>
+
+            <button
+                id="opampsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="opamps"
+            >
+                Amplificateurs opérationnels
+            </button>
+
+            <button
+                id="logicCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="logic"
+            >
+                Circuits logiques
+            </button>
+
+            <button
+                id="wiresCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="wires"
+            >
+                Fils / Câbles
+            </button>
+
+            <button
+                id="terminalsCategoryBtn"
+                class="component-category-btn"
+                type="button"
+                data-category="terminals"
+            >
+                Bornes
+            </button>
+
+        </div>
+
+
+        <!-- ========================================================
+             DYNAMIC COMPONENT GRID
+        ========================================================= -->
+        <div
+            id="componentLibraryGrid"
+            class="component-library-grid"
+        ></div>
+
+    </section>
+
+
+    <!-- ============================================================
          CODE LIBRARY OVERLAY
     ============================================================= -->
     <section
@@ -992,7 +1074,9 @@
 
         <div class="application-panel-header">
 
-            <h2>💻 Bibliothèque de Codes Électroniques</h2>
+            <h2>
+                💻 Bibliothèque de Codes Électroniques
+            </h2>
 
             <button
                 id="closeCodeLibraryBtn"
@@ -1053,7 +1137,9 @@
 
         <div class="application-panel-header">
 
-            <h2>📝 Éditeur de Code Électronique</h2>
+            <h2>
+                📝 Éditeur de Code Électronique
+            </h2>
 
             <button
                 id="closeCodeEditorBtn"
@@ -1131,7 +1217,9 @@
                 class="code-execution-console"
             >
 
-                <h3>Console d'exécution</h3>
+                <h3>
+                    Console d'exécution
+                </h3>
 
                 <div
                     id="codeConsoleOutput"
@@ -1160,7 +1248,9 @@
 
         <div class="application-panel-header">
 
-            <h2>🎯 Missions Électroniques</h2>
+            <h2>
+                🎯 Missions Électroniques
+            </h2>
 
             <button
                 id="closeMissionsBtn"
@@ -1257,7 +1347,9 @@
 
         <div class="application-panel-header">
 
-            <h2>🛠 Diagnostic Électronique</h2>
+            <h2>
+                🛠 Diagnostic Électronique
+            </h2>
 
             <button
                 id="closeDiagnosticBtn"
@@ -1295,7 +1387,9 @@
 
         <div class="application-panel-header">
 
-            <h2>⚠️ Simulation de Pannes</h2>
+            <h2>
+                ⚠️ Simulation de Pannes
+            </h2>
 
             <button
                 id="closeFaultsBtn"
@@ -1364,7 +1458,9 @@
 
         <div class="application-panel-header">
 
-            <h2>📊 Centre de Mesures</h2>
+            <h2>
+                📊 Centre de Mesures
+            </h2>
 
             <button
                 id="closeMeasurementsBtn"
@@ -1381,33 +1477,75 @@
         >
 
             <div class="measurement-large-card">
-                <span>VOLTAGE</span>
-                <strong id="dashboardVoltage">0.00 V</strong>
+
+                <span>
+                    VOLTAGE
+                </span>
+
+                <strong id="dashboardVoltage">
+                    0.00 V
+                </strong>
+
             </div>
 
             <div class="measurement-large-card">
-                <span>CURRENT</span>
-                <strong id="dashboardCurrent">0.00 A</strong>
+
+                <span>
+                    CURRENT
+                </span>
+
+                <strong id="dashboardCurrent">
+                    0.00 A
+                </strong>
+
             </div>
 
             <div class="measurement-large-card">
-                <span>RESISTANCE</span>
-                <strong id="dashboardResistance">— Ω</strong>
+
+                <span>
+                    RESISTANCE
+                </span>
+
+                <strong id="dashboardResistance">
+                    — Ω
+                </strong>
+
             </div>
 
             <div class="measurement-large-card">
-                <span>FREQUENCY</span>
-                <strong id="dashboardFrequency">0 Hz</strong>
+
+                <span>
+                    FREQUENCY
+                </span>
+
+                <strong id="dashboardFrequency">
+                    0 Hz
+                </strong>
+
             </div>
 
             <div class="measurement-large-card">
-                <span>POWER</span>
-                <strong id="dashboardPower">0 W</strong>
+
+                <span>
+                    POWER
+                </span>
+
+                <strong id="dashboardPower">
+                    0 W
+                </strong>
+
             </div>
 
             <div class="measurement-large-card">
-                <span>CONTINUITÉ</span>
-                <strong id="dashboardContinuity">—</strong>
+
+                <span>
+                    CONTINUITÉ
+                </span>
+
+                <strong id="dashboardContinuity">
+                    —
+                </strong>
+
             </div>
 
         </div>
@@ -1551,9 +1689,8 @@
 
 <!-- ================================================================
      JAVASCRIPT
-     Le moteur dynamique sera chargé séparément.
+     Moteur dynamique chargé séparément.
 ================================================================ -->
-
 <script
     src="simulationelectroniquesfobas.js"
     defer
@@ -1561,3 +1698,23 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
