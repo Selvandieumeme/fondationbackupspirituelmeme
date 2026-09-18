@@ -8340,6 +8340,41 @@ bind(
                 )
         );
 
+
+
+        /* ========================================================
+           FERMETURE BIBLIOTHÈQUE DES COMPOSANTS
+        ======================================================== */
+
+        bind(
+            "closeComponentLibraryBtn",
+            "click",
+            () => {
+
+                hide(
+                    "componentLibraryPanel"
+                );
+
+                const libraryButton =
+                    $("libraryBtn");
+
+                if (libraryButton) {
+
+                    libraryButton.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+                }
+            }
+        );
+
+
+
+
+
+
+
+
         bind(
             "addComponentFromDetailsBtn",
             "click",
