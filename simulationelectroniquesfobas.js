@@ -1,71 +1,273 @@
+
+
+
 /* ================================================================
-   FOBAS — LABORATOIRE ÉLECTRONIQUE
-   ELECTRONIC ENGINE v1.0.0
-   ---------------------------------------------------------------
-   Moteur autonome — aucune bibliothèque externe.
-   Compatible avec :
-   simulationelectroniquesfobas.html
-   ================================================================ */
+   FOBAS — LABORATOIRE ÉLECTRONIQUE & ROBOTIQUE
+   SIMULATION ELECTRONIQUE ENGINE
+   VERSION 2.0.0
+   ----------------------------------------------------------------
+   ARCHITECTURE :
+   - Aucun Three.js
+   - Aucun module 3D externe
+   - Bibliothèque composants dynamique
+   - Visualisation 3D légère HTML/CSS/SVG
+   - Montage libre
+   - Déplacement tactile Android avec Pointer Events
+   - Sélection / Déplacement / Rotation / Suppression / Duplication
+   - Fils et connexions
+   - Zoom laboratoire
+   - Pinch 2 doigts pour zoom global de l'application
+   - Code Library dynamique
+   - Code Editor
+   - Arduino code interpreter
+   - Hardware mapping
+   - Simulation des réactions des composants
+   - Missions
+   - Mesures
+   - Diagnostic
+   - Pannes
+   - Sauvegarde / chargement JSON
+   - Aucun changement requis dans le HTML fourni
+================================================================ */
 
 (() => {
     "use strict";
 
     /* ============================================================
-       01 — CONFIGURATION GÉNÉRALE
+       01. ENGINE CONFIGURATION
     ============================================================ */
 
     const ENGINE_NAME = "FOBAS_ELECTRONIC_ENGINE";
-    const ENGINE_VERSION = "1.0.0";
+    const ENGINE_VERSION = "2.0.0";
+    const STORAGE_KEY = "FOBAS_ELECTRONIC_LABORATORY_STATE_V2";
+    const PROJECT_FORMAT = "FOBAS_ELECTRONIC_PROJECT_V2";
 
-    const STORAGE_KEY = "FOBAS_ELECTRONIC_LAB_PROJECT_V1";
-    const SESSION_KEY = "FOBAS_ELECTRONIC_LAB_SESSION_V1";
+    const app = document.getElementById("fobasElectronicApp");
 
-    const GRID_SIZE = 20;
-    const MIN_ZOOM = 0.55;
-    const MAX_ZOOM = 2.8;
-    const ZOOM_STEP = 0.1;
+    if (!app) {
+        console.error("FOBAS Electronic Engine : #fobasElectronicApp introuvable.");
+        return;
+    }
 
-    const COMPONENT_WIDTH = 118;
-    const COMPONENT_HEIGHT = 72;
+    app.dataset.engine = ENGINE_NAME;
+    app.dataset.version = ENGINE_VERSION;
+
+    /* ============================================================
+       02. DOM HELPERS
+    ============================================================ */
+
+    const $ = (id) => document.getElementById(id);
+
+    const dom = {
+        header: $("electronicHeader"),
+        logo: $("fobasElectronicLogo"),
+
+        status: $("simulationStatus"),
+        statusDot: $("simulationStatusDot"),
+        statusText: $("simulationStatusText"),
+
+        laboratoryBtn: $("laboratoryBtn"),
+        libraryBtn: $("libraryBtn"),
+        codeLibraryBtn: $("codeLibraryBtn"),
+        codeEditorBtn: $("codeEditorBtn"),
+        missionsBtn: $("missionsBtn"),
+        measurementsBtn: $("measurementsBtn"),
+        diagnosticBtn: $("diagnosticBtn"),
+        faultsBtn: $("faultsBtn"),
+
+        levelSelector: $("levelSelector"),
+        beginnerLevelBtn: $("beginnerLevelBtn"),
+        intermediateLevelBtn: $("intermediateLevelBtn"),
+        expertLevelBtn: $("expertLevelBtn"),
+
+        electronicMain: $("electronicMain"),
+        sidebar: $("electronicSidebar"),
+
+        batteryBtn: $("batteryBtn"),
+        dcSupplyBtn: $("dcSupplyBtn"),
+        acSupplyBtn: $("acSupplyBtn"),
+        signalGeneratorBtn: $("signalGeneratorBtn"),
+
+        multimeterBtn: $("multimeterBtn"),
+        oscilloscopeBtn: $("oscilloscopeBtn"),
+        voltmeterBtn: $("voltmeterBtn"),
+        ammeterBtn: $("ammeterBtn"),
+        ohmmeterBtn: $("ohmmeterBtn"),
+        frequencyMeterBtn: $("frequencyMeterBtn"),
+        logicAnalyzerBtn: $("logicAnalyzerBtn"),
+
+        workspaceArea: $("laboratoryWorkspaceArea"),
+        workspaceToolbar: $("workspaceToolbar"),
+        selectToolBtn: $("selectToolBtn"),
+        wireToolBtn: $("wireToolBtn"),
+        moveToolBtn: $("moveToolBtn"),
+        rotateToolBtn: $("rotateToolBtn"),
+        deleteToolBtn: $("deleteToolBtn"),
+        duplicateToolBtn: $("duplicateToolBtn"),
+        zoomInBtn: $("zoomInBtn"),
+        zoomOutBtn: $("zoomOutBtn"),
+        zoomResetBtn: $("zoomResetBtn"),
+        fitWorkspaceBtn: $("fitWorkspaceBtn"),
+
+        viewport: $("laboratoryViewport"),
+        canvas: $("laboratoryCanvas"),
+        grid: $("laboratoryGrid"),
+        componentLayer: $("componentLayer"),
+        wireLayer: $("wireLayer"),
+        connectionLayer: $("connectionLayer"),
+        measurementLayer: $("measurementLayer"),
+        effectsLayer: $("simulationEffectsLayer"),
+
+        workspaceStatusBar: $("workspaceStatusBar"),
+        componentCount: $("componentCount"),
+        connectionCount: $("connectionCount"),
+        workspaceVoltage: $("workspaceVoltage"),
+        workspaceCurrent: $("workspaceCurrent"),
+        circuitState: $("circuitState"),
+
+        controlPanel: $("electronicControlPanel"),
+        powerOnBtn: $("powerOnBtn"),
+        powerOffBtn: $("powerOffBtn"),
+        runCircuitBtn: $("runCircuitBtn"),
+        stopCircuitBtn: $("stopCircuitBtn"),
+        resetCircuitBtn: $("resetCircuitBtn"),
+
+        voltageDisplay: $("voltageDisplay"),
+        currentDisplay: $("currentDisplay"),
+        resistanceDisplay: $("resistanceDisplay"),
+        frequencyDisplay: $("frequencyDisplay"),
+        measureVoltageBtn: $("measureVoltageBtn"),
+        measureCurrentBtn: $("measureCurrentBtn"),
+        measureResistanceBtn: $("measureResistanceBtn"),
+
+        openCodeEditorBtn: $("openCodeEditorBtn"),
+        executeCodeBtn: $("executeCodeBtn"),
+        stopCodeBtn: $("stopCodeBtn"),
+        clearCodeBtn: $("clearCodeBtn"),
+
+        saveProjectBtn: $("saveProjectBtn"),
+        loadProjectBtn: $("loadProjectBtn"),
+        clearWorkspaceBtn: $("clearWorkspaceBtn"),
+        projectFileInput: $("projectFileInput"),
+
+        componentLibraryPanel: $("componentLibraryPanel"),
+        closeComponentLibraryBtn: $("closeComponentLibraryBtn"),
+        componentSearchBtn: $("componentSearchBtn"),
+        componentSearchInput: $("componentSearchInput"),
+        componentCategories: $("componentCategories"),
+        componentLibraryGrid: $("componentLibraryGrid"),
+
+        codeLibraryPanel: $("codeLibraryPanel"),
+        closeCodeLibraryBtn: $("closeCodeLibraryBtn"),
+        codeLibraryLevels: $("codeLibraryLevels"),
+        codeBeginnerBtn: $("codeBeginnerBtn"),
+        codeIntermediateBtn: $("codeIntermediateBtn"),
+        codeExpertBtn: $("codeExpertBtn"),
+        codeLibraryList: $("codeLibraryList"),
+
+        codeEditorPanel: $("codeEditorPanel"),
+        closeCodeEditorBtn: $("closeCodeEditorBtn"),
+        pasteCodeBtn: $("pasteCodeBtn"),
+        copyCodeBtn: $("copyCodeBtn"),
+        validateCodeBtn: $("validateCodeBtn"),
+        executeEditorCodeBtn: $("executeEditorCodeBtn"),
+        stopEditorCodeBtn: $("stopEditorCodeBtn"),
+        clearEditorCodeBtn: $("clearEditorCodeBtn"),
+        electronicCodeEditor: $("electronicCodeEditor"),
+        codeExecutionConsole: $("codeExecutionConsole"),
+        codeConsoleOutput: $("codeConsoleOutput"),
+
+        missionsPanel: $("missionsPanel"),
+        closeMissionsBtn: $("closeMissionsBtn"),
+        beginnerMissionsBtn: $("beginnerMissionsBtn"),
+        intermediateMissionsBtn: $("intermediateMissionsBtn"),
+        expertMissionsBtn: $("expertMissionsBtn"),
+        missionsList: $("missionsList"),
+        missionWorkspace: $("missionWorkspace"),
+        activeMissionTitle: $("activeMissionTitle"),
+        activeMissionDescription: $("activeMissionDescription"),
+        missionRequirements: $("missionRequirements"),
+        startMissionBtn: $("startMissionBtn"),
+        validateMissionBtn: $("validateMissionBtn"),
+
+        diagnosticPanel: $("diagnosticPanel"),
+        closeDiagnosticBtn: $("closeDiagnosticBtn"),
+        diagnosticResults: $("diagnosticResults"),
+        runDiagnosticBtn: $("runDiagnosticBtn"),
+
+        faultsPanel: $("faultsPanel"),
+        closeFaultsBtn: $("closeFaultsBtn"),
+        createOpenCircuitFaultBtn: $("createOpenCircuitFaultBtn"),
+        createShortCircuitFaultBtn: $("createShortCircuitFaultBtn"),
+        createPolarityFaultBtn: $("createPolarityFaultBtn"),
+        createComponentFaultBtn: $("createComponentFaultBtn"),
+        clearFaultsBtn: $("clearFaultsBtn"),
+
+        measurementsPanel: $("measurementsPanel"),
+        closeMeasurementsBtn: $("closeMeasurementsBtn"),
+        measurementsDashboard: $("measurementsDashboard"),
+        dashboardVoltage: $("dashboardVoltage"),
+        dashboardCurrent: $("dashboardCurrent"),
+        dashboardResistance: $("dashboardResistance"),
+        dashboardFrequency: $("dashboardFrequency"),
+        dashboardPower: $("dashboardPower"),
+        dashboardContinuity: $("dashboardContinuity"),
+
+        componentDetailsModal: $("componentDetailsModal"),
+        closeComponentDetailsBtn: $("closeComponentDetailsBtn"),
+        componentDetailsVisual: $("componentDetailsVisual"),
+        componentDetailsTitle: $("componentDetailsTitle"),
+        componentDetailsProperties: $("componentDetailsProperties"),
+        addComponentFromDetailsBtn: $("addComponentFromDetailsBtn"),
+
+        missionResultModal: $("missionResultModal"),
+        missionResultIcon: $("missionResultIcon"),
+        missionResultTitle: $("missionResultTitle"),
+        missionResultMessage: $("missionResultMessage"),
+        closeMissionResultBtn: $("closeMissionResultBtn"),
+
+        toast: $("electronicToast"),
+        engineVersion: $("engineVersion")
+    };
+
+    /* ============================================================
+       03. ENGINE STATE
+    ============================================================ */
 
     const state = {
-        version: ENGINE_VERSION,
-
-        level: "beginner",
-
-        selectedTool: "select",
-
         components: [],
         wires: [],
-
         selectedComponentId: null,
-        selectedWireId: null,
 
-        pendingWirePin: null,
+        activeTool: "select",
 
         zoom: 1,
         panX: 0,
         panY: 0,
 
-        gridVisible: true,
-        snapEnabled: true,
+        globalScale: 1,
 
         powerOn: false,
         circuitRunning: false,
-
-        simulationTimer: null,
-        codeTimer: null,
-
         codeRunning: false,
 
-        currentCode: "",
+        currentLevel: "beginner",
+        currentCodeLevel: "beginner",
 
-        activeCodeId: null,
+        currentLibraryCategory: "all",
+        currentCodeId: null,
 
-        activeMission: null,
-        missionRunning: false,
+        activeMissionId: null,
+        missionStarted: false,
 
-        activeFaults: [],
+        selectedComponentType: null,
+
+        faults: {
+            openCircuit: false,
+            shortCircuit: false,
+            reversedPolarity: false,
+            defectiveComponent: false
+        },
 
         measurements: {
             voltage: 0,
@@ -73,1945 +275,48 @@
             resistance: null,
             frequency: 0,
             power: 0,
-            continuity: false
+            continuity: null
         },
 
-        history: [],
-        historyIndex: -1,
+        code: "",
 
-        componentSequence: 0,
-        wireSequence: 0,
+        wireStart: null,
 
         drag: {
             active: false,
             componentId: null,
+            pointerId: null,
             offsetX: 0,
             offsetY: 0
         },
 
-        viewportGesture: {
+        pinch: {
             active: false,
-            lastX: 0,
-            lastY: 0,
-            pinchDistance: null,
-            pinchZoom: 1
+            pointerIds: [],
+            startDistance: 0,
+            startScale: 1
         },
 
-        simulation: {
-            sourceVoltage: 0,
-            totalResistance: Infinity,
-            current: 0,
-            poweredNodes: new Set(),
-            componentStates: {}
-        }
+        simulationTimer: null,
+
+        initialized: false
     };
 
-
     /* ============================================================
-       02 — OUTILS DOM
+       04. UTILITY FUNCTIONS
     ============================================================ */
 
-    const $ = (id) => document.getElementById(id);
-
-    function qs(selector, root = document) {
-        return root.querySelector(selector);
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
     }
 
-    function qsa(selector, root = document) {
-        return Array.from(root.querySelectorAll(selector));
+    function uid(prefix = "obj") {
+        return `${prefix}_${Date.now().toString(36)}_${Math.random()
+            .toString(36)
+            .slice(2, 9)}`;
     }
-
-    function exists(id) {
-        return !!$(id);
-    }
-
-    function text(id, value) {
-        const el = $(id);
-        if (el) el.textContent = value;
-    }
-
-    function show(id) {
-        const el = $(id);
-        if (!el) return;
-        el.classList.remove("hidden");
-        el.setAttribute("aria-hidden", "false");
-    }
-
-    function hide(id) {
-        const el = $(id);
-        if (!el) return;
-        el.classList.add("hidden");
-        el.setAttribute("aria-hidden", "true");
-    }
-
-    function toggle(id, force = null) {
-        const el = $(id);
-        if (!el) return;
-
-        const shouldShow =
-            force === null
-                ? el.classList.contains("hidden")
-                : force;
-
-        if (shouldShow) show(id);
-        else hide(id);
-    }
-
-
-    /* ============================================================
-       03 — NOTIFICATIONS
-    ============================================================ */
-
-    let toastTimer = null;
-
-    function toast(message, type = "info") {
-
-        const el = $("electronicToast");
-
-        if (!el) {
-            console.log("[FOBAS]", message);
-            return;
-        }
-
-        el.textContent = message;
-
-        el.classList.remove(
-            "success",
-            "error",
-            "warning",
-            "info"
-        );
-
-        el.classList.add(type);
-
-        el.classList.add("visible");
-
-        clearTimeout(toastTimer);
-
-        toastTimer = setTimeout(() => {
-            el.classList.remove("visible");
-        }, 3000);
-    }
-
-
-    /* ============================================================
-       04 — STATUT
-    ============================================================ */
-
-    function setStatus(message, type = "ready") {
-
-        text("simulationStatusText", message);
-
-        const dot = $("simulationStatusDot");
-
-        if (!dot) return;
-
-        dot.classList.remove(
-            "ready",
-            "running",
-            "warning",
-            "error"
-        );
-
-        dot.classList.add(type);
-    }
-
-
-    /* ============================================================
-       05 — IDENTIFIANTS
-    ============================================================ */
-
-    function newComponentId() {
-
-        state.componentSequence += 1;
-
-        return (
-            "component_" +
-            Date.now().toString(36) +
-            "_" +
-            state.componentSequence
-        );
-    }
-
-    function newWireId() {
-
-        state.wireSequence += 1;
-
-        return (
-            "wire_" +
-            Date.now().toString(36) +
-            "_" +
-            state.wireSequence
-        );
-    }
-
-
-    /* ============================================================
-       06 — BIBLIOTHÈQUE DES COMPOSANTS
-    ============================================================ */
-
-    const COMPONENT_LIBRARY = {
-
-        resistors: [
-            {
-                type: "resistor",
-                name: "Résistance 220 Ω",
-                symbol: "R",
-                value: 220,
-                unit: "Ω",
-                color: "#d9b36c",
-                pins: ["A", "B"]
-            },
-            {
-                type: "resistor",
-                name: "Résistance 330 Ω",
-                symbol: "R",
-                value: 330,
-                unit: "Ω",
-                color: "#d9b36c",
-                pins: ["A", "B"]
-            },
-            {
-                type: "resistor",
-                name: "Résistance 1 kΩ",
-                symbol: "R",
-                value: 1000,
-                unit: "Ω",
-                color: "#d9b36c",
-                pins: ["A", "B"]
-            },
-            {
-                type: "resistor",
-                name: "Résistance 10 kΩ",
-                symbol: "R",
-                value: 10000,
-                unit: "Ω",
-                color: "#d9b36c",
-                pins: ["A", "B"]
-            },
-            {
-                type: "resistor",
-                name: "Résistance 100 kΩ",
-                symbol: "R",
-                value: 100000,
-                unit: "Ω",
-                color: "#d9b36c",
-                pins: ["A", "B"]
-            }
-        ],
-
-        capacitors: [
-            {
-                type: "capacitor",
-                name: "Condensateur 100 µF",
-                symbol: "C",
-                value: 100,
-                unit: "µF",
-                pins: ["+", "-"]
-            },
-            {
-                type: "capacitor",
-                name: "Condensateur 470 µF",
-                symbol: "C",
-                value: 470,
-                unit: "µF",
-                pins: ["+", "-"]
-            },
-            {
-                type: "capacitor",
-                name: "Condensateur 1000 µF",
-                symbol: "C",
-                value: 1000,
-                unit: "µF",
-                pins: ["+", "-"]
-            }
-        ],
-
-        inductors: [
-            {
-                type: "inductor",
-                name: "Bobine 10 mH",
-                symbol: "L",
-                value: 10,
-                unit: "mH",
-                pins: ["A", "B"]
-            },
-            {
-                type: "inductor",
-                name: "Bobine 100 mH",
-                symbol: "L",
-                value: 100,
-                unit: "mH",
-                pins: ["A", "B"]
-            }
-        ],
-
-        diodes: [
-            {
-                type: "diode",
-                name: "Diode 1N4007",
-                symbol: "D",
-                value: "1N4007",
-                pins: ["A", "K"]
-            },
-            {
-                type: "zener",
-                name: "Diode Zener",
-                symbol: "ZD",
-                value: "5V1",
-                pins: ["A", "K"]
-            }
-        ],
-
-        leds: [
-            {
-                type: "led",
-                name: "LED Rouge",
-                symbol: "LED",
-                color: "#ff3030",
-                forwardVoltage: 2.0,
-                pins: ["A", "K"]
-            },
-            {
-                type: "led",
-                name: "LED Verte",
-                symbol: "LED",
-                color: "#28e66b",
-                forwardVoltage: 2.1,
-                pins: ["A", "K"]
-            },
-            {
-                type: "led",
-                name: "LED Bleue",
-                symbol: "LED",
-                color: "#278cff",
-                forwardVoltage: 3.0,
-                pins: ["A", "K"]
-            },
-            {
-                type: "led",
-                name: "LED Jaune",
-                symbol: "LED",
-                color: "#ffd329",
-                forwardVoltage: 2.1,
-                pins: ["A", "K"]
-            },
-            {
-                type: "led",
-                name: "LED Blanche",
-                symbol: "LED",
-                color: "#ffffff",
-                forwardVoltage: 3.0,
-                pins: ["A", "K"]
-            }
-        ],
-
-        bulbs: [
-            {
-                type: "bulb",
-                name: "Ampoule 6 V",
-                symbol: "💡",
-                voltage: 6,
-                resistance: 12,
-                pins: ["A", "B"]
-            },
-            {
-                type: "bulb",
-                name: "Ampoule 12 V",
-                symbol: "💡",
-                voltage: 12,
-                resistance: 24,
-                pins: ["A", "B"]
-            }
-        ],
-
-        transistors: [
-            {
-                type: "transistor-npn",
-                name: "Transistor NPN",
-                symbol: "NPN",
-                pins: ["C", "B", "E"]
-            },
-            {
-                type: "transistor-pnp",
-                name: "Transistor PNP",
-                symbol: "PNP",
-                pins: ["C", "B", "E"]
-            }
-        ],
-
-        mosfet: [
-            {
-                type: "mosfet",
-                name: "MOSFET N-Channel",
-                symbol: "NMOS",
-                pins: ["D", "G", "S"]
-            },
-            {
-                type: "mosfet-p",
-                name: "MOSFET P-Channel",
-                symbol: "PMOS",
-                pins: ["D", "G", "S"]
-            }
-        ],
-
-        relays: [
-            {
-                type: "relay",
-                name: "Relais 5 V",
-                symbol: "K",
-                coilVoltage: 5,
-                pins: ["COIL+", "COIL-", "COM", "NO", "NC"]
-            }
-        ],
-
-        switches: [
-            {
-                type: "switch",
-                name: "Interrupteur ON/OFF",
-                symbol: "SW",
-                pins: ["A", "B"]
-            }
-        ],
-
-        buttons: [
-            {
-                type: "pushbutton",
-                name: "Bouton poussoir",
-                symbol: "BTN",
-                pins: ["A", "B"]
-            }
-        ],
-
-        potentiometers: [
-            {
-                type: "potentiometer",
-                name: "Potentiomètre 10 kΩ",
-                symbol: "POT",
-                value: 10000,
-                unit: "Ω",
-                pins: ["A", "W", "B"]
-            }
-        ],
-
-        fuses: [
-            {
-                type: "fuse",
-                name: "Fusible 1 A",
-                symbol: "FUSE",
-                currentLimit: 1,
-                pins: ["A", "B"]
-            },
-            {
-                type: "fuse",
-                name: "Fusible 5 A",
-                symbol: "FUSE",
-                currentLimit: 5,
-                pins: ["A", "B"]
-            }
-        ],
-
-        transformers: [
-            {
-                type: "transformer",
-                name: "Transformateur",
-                symbol: "TR",
-                pins: ["P1", "P2", "S1", "S2"]
-            }
-        ],
-
-        rectifiers: [
-            {
-                type: "bridge",
-                name: "Pont redresseur",
-                symbol: "BR",
-                pins: ["AC1", "AC2", "+", "-"]
-            }
-        ],
-
-        regulators: [
-            {
-                type: "regulator",
-                name: "Régulateur 7805",
-                symbol: "7805",
-                outputVoltage: 5,
-                pins: ["IN", "GND", "OUT"]
-            },
-            {
-                type: "regulator",
-                name: "Régulateur 7812",
-                symbol: "7812",
-                outputVoltage: 12,
-                pins: ["IN", "GND", "OUT"]
-            }
-        ],
-
-        opamps: [
-            {
-                type: "opamp",
-                name: "Amplificateur opérationnel",
-                symbol: "OPAMP",
-                pins: ["V+", "V-", "IN+", "IN-", "OUT"]
-            }
-        ],
-
-        logic: [
-            {
-                type: "logic-not",
-                name: "Porte NOT",
-                symbol: "NOT",
-                pins: ["VCC", "GND", "IN", "OUT"]
-            },
-            {
-                type: "logic-and",
-                name: "Porte AND",
-                symbol: "AND",
-                pins: ["VCC", "GND", "A", "B", "OUT"]
-            },
-            {
-                type: "logic-or",
-                name: "Porte OR",
-                symbol: "OR",
-                pins: ["VCC", "GND", "A", "B", "OUT"]
-            }
-        ],
-
-        wires: [
-            {
-                type: "wire",
-                name: "Fil rouge",
-                symbol: "━",
-                color: "#ff3030",
-                pins: []
-            },
-            {
-                type: "wire",
-                name: "Fil noir",
-                symbol: "━",
-                color: "#151515",
-                pins: []
-            },
-            {
-                type: "wire",
-                name: "Fil bleu",
-                symbol: "━",
-                color: "#278cff",
-                pins: []
-            },
-            {
-                type: "wire",
-                name: "Fil vert",
-                symbol: "━",
-                color: "#29d978",
-                pins: []
-            }
-        ],
-
-        terminals: [
-            {
-                type: "terminal",
-                name: "Borne +",
-                symbol: "+",
-                pins: ["+"]
-            },
-            {
-                type: "terminal",
-                name: "Borne -",
-                symbol: "-",
-                pins: ["-"]
-            },
-            {
-                type: "ground",
-                name: "Masse GND",
-                symbol: "GND",
-                pins: ["GND"]
-            }
-        ]
-    };
-
-
-    /* ============================================================
-       07 — SOURCES ÉLECTRIQUES
-    ============================================================ */
-
-    const POWER_COMPONENTS = {
-
-        battery: {
-            type: "battery",
-            name: "Batterie 9 V",
-            symbol: "🔋",
-            voltage: 9,
-            pins: ["+", "-"]
-        },
-
-        "dc-supply": {
-            type: "dc-supply",
-            name: "Alimentation DC",
-            symbol: "DC",
-            voltage: 12,
-            adjustable: true,
-            pins: ["+", "-"]
-        },
-
-        "ac-supply": {
-            type: "ac-supply",
-            name: "Alimentation AC",
-            symbol: "∿",
-            voltage: 12,
-            frequency: 60,
-            pins: ["L", "N"]
-        },
-
-        "signal-generator": {
-            type: "signal-generator",
-            name: "Générateur de signaux",
-            symbol: "〰",
-            voltage: 5,
-            frequency: 1000,
-            waveform: "sine",
-            pins: ["OUT", "GND"]
-        }
-    };
-
-
-    /* ============================================================
-       08 — INSTRUMENTS
-    ============================================================ */
-
-    const INSTRUMENTS = {
-
-        multimeter: {
-            type: "multimeter",
-            name: "Multimètre",
-            symbol: "📟",
-            pins: ["COM", "VΩ", "A"]
-        },
-
-        oscilloscope: {
-            type: "oscilloscope",
-            name: "Oscilloscope",
-            symbol: "📈",
-            pins: ["CH1", "CH2", "GND"]
-        },
-
-        voltmeter: {
-            type: "voltmeter",
-            name: "Voltmètre",
-            symbol: "V",
-            pins: ["+", "-"]
-        },
-
-        ammeter: {
-            type: "ammeter",
-            name: "Ampèremètre",
-            symbol: "A",
-            pins: ["+", "-"]
-        },
-
-        ohmmeter: {
-            type: "ohmmeter",
-            name: "Ohmmètre",
-            symbol: "Ω",
-            pins: ["+", "-"]
-        },
-
-        "frequency-meter": {
-            type: "frequency-meter",
-            name: "Fréquencemètre",
-            symbol: "Hz",
-            pins: ["IN", "GND"]
-        },
-
-        "logic-analyzer": {
-            type: "logic-analyzer",
-            name: "Analyseur logique",
-            symbol: "▣",
-            pins: ["CH0", "CH1", "CH2", "CH3", "GND"]
-        }
-    };
-
-
-    /* ============================================================
-       09 — CODE LIBRARY
-    ============================================================ */
-
-    const CODE_LIBRARY = [
-
-        {
-            id: "led-on",
-            level: "beginner",
-            title: "Allumage 1 LED",
-            description:
-                "Allume une LED connectée sur la sortie D13.",
-            code:
-`const int LED = 13;
-
-void setup() {
-    pinMode(LED, OUTPUT);
-}
-
-void loop() {
-    digitalWrite(LED, HIGH);
-}`,
-            required: ["arduino", "led"],
-            action: {
-                type: "digital",
-                pin: 13,
-                value: 1
-            }
-        },
-
-        {
-            id: "led-off",
-            level: "beginner",
-            title: "Extinction 1 LED",
-            description:
-                "Éteint une LED connectée sur D13.",
-            code:
-`const int LED = 13;
-
-void setup() {
-    pinMode(LED, OUTPUT);
-}
-
-void loop() {
-    digitalWrite(LED, LOW);
-}`,
-            required: ["arduino", "led"],
-            action: {
-                type: "digital",
-                pin: 13,
-                value: 0
-            }
-        },
-
-        {
-            id: "led-blink",
-            level: "beginner",
-            title: "Clignotement LED",
-            description:
-                "Fait clignoter une LED sur D13.",
-            code:
-`const int LED = 13;
-
-void setup() {
-    pinMode(LED, OUTPUT);
-}
-
-void loop() {
-    digitalWrite(LED, HIGH);
-    delay(500);
-    digitalWrite(LED, LOW);
-    delay(500);
-}`,
-            required: ["arduino", "led"],
-            action: {
-                type: "blink",
-                pin: 13,
-                interval: 500
-            }
-        },
-
-        {
-            id: "button-led",
-            level: "beginner",
-            title: "Bouton → LED",
-            description:
-                "La LED s'allume lorsque le bouton est actif.",
-            code:
-`const int BUTTON = 2;
-const int LED = 13;
-
-void setup() {
-    pinMode(BUTTON, INPUT);
-    pinMode(LED, OUTPUT);
-}
-
-void loop() {
-    if (digitalRead(BUTTON) == HIGH) {
-        digitalWrite(LED, HIGH);
-    } else {
-        digitalWrite(LED, LOW);
-    }
-}`,
-            required: ["arduino", "led", "pushbutton"],
-            action: {
-                type: "buttonLed",
-                inputPin: 2,
-                outputPin: 13
-            }
-        },
-
-        {
-            id: "pot-led",
-            level: "intermediate",
-            title: "Potentiomètre → Luminosité LED",
-            description:
-                "Contrôle la luminosité d'une LED avec A0.",
-            code:
-`const int POT = A0;
-const int LED = 9;
-
-void setup() {
-    pinMode(LED, OUTPUT);
-}
-
-void loop() {
-    int value = analogRead(POT);
-    int brightness = map(value, 0, 1023, 0, 255);
-    analogWrite(LED, brightness);
-}`,
-            required: ["arduino", "led", "potentiometer"],
-            action: {
-                type: "analogLed",
-                inputPin: "A0",
-                outputPin: 9
-            }
-        },
-
-        {
-            id: "ldr-lamp",
-            level: "intermediate",
-            title: "Capteur → Lampe automatique",
-            description:
-                "Commande automatiquement une charge lumineuse.",
-            code:
-`const int SENSOR = A0;
-const int LAMP = 8;
-
-void setup() {
-    pinMode(LAMP, OUTPUT);
-}
-
-void loop() {
-    int value = analogRead(SENSOR);
-
-    if (value < 400) {
-        digitalWrite(LAMP, HIGH);
-    } else {
-        digitalWrite(LAMP, LOW);
-    }
-}`,
-            required: ["arduino"],
-            action: {
-                type: "sensorLamp",
-                inputPin: "A0",
-                outputPin: 8
-            }
-        },
-
-        {
-            id: "buzzer",
-            level: "intermediate",
-            title: "Buzzer électronique",
-            description:
-                "Active un buzzer sur D10.",
-            code:
-`const int BUZZER = 10;
-
-void setup() {
-    pinMode(BUZZER, OUTPUT);
-}
-
-void loop() {
-    tone(BUZZER, 1000);
-}`,
-            required: ["arduino"],
-            action: {
-                type: "tone",
-                pin: 10,
-                frequency: 1000
-            }
-        },
-
-        {
-            id: "traffic-light",
-            level: "intermediate",
-            title: "Feu tricolore",
-            description:
-                "Séquence rouge, jaune, verte.",
-            code:
-`const int RED = 8;
-const int YELLOW = 9;
-const int GREEN = 10;
-
-void setup() {
-    pinMode(RED, OUTPUT);
-    pinMode(YELLOW, OUTPUT);
-    pinMode(GREEN, OUTPUT);
-}
-
-void loop() {
-    digitalWrite(RED, HIGH);
-    delay(2000);
-    digitalWrite(RED, LOW);
-
-    digitalWrite(YELLOW, HIGH);
-    delay(1000);
-    digitalWrite(YELLOW, LOW);
-
-    digitalWrite(GREEN, HIGH);
-    delay(2000);
-    digitalWrite(GREEN, LOW);
-}`,
-            required: ["arduino"],
-            action: {
-                type: "traffic"
-            }
-        },
-
-        {
-            id: "relay-control",
-            level: "expert",
-            title: "Commande d'un relais",
-            description:
-                "Commande une sortie relais.",
-            code:
-`const int RELAY = 7;
-
-void setup() {
-    pinMode(RELAY, OUTPUT);
-}
-
-void loop() {
-    digitalWrite(RELAY, HIGH);
-}`,
-            required: ["arduino", "relay"],
-            action: {
-                type: "digital",
-                pin: 7,
-                value: 1
-            }
-        },
-
-        {
-            id: "pwm-motor",
-            level: "expert",
-            title: "Commande PWM",
-            description:
-                "Commande une charge avec PWM.",
-            code:
-`const int OUTPUT_PIN = 5;
-
-void setup() {
-    pinMode(OUTPUT_PIN, OUTPUT);
-}
-
-void loop() {
-    analogWrite(OUTPUT_PIN, 180);
-}`,
-            required: ["arduino"],
-            action: {
-                type: "pwm",
-                pin: 5,
-                value: 180
-            }
-        }
-    ];
-
-
-    /* ============================================================
-       10 — MISSIONS
-    ============================================================ */
-
-    const MISSIONS = {
-
-        beginner: [
-            {
-                id: "b1",
-                title: "Allumer une LED",
-                description:
-                    "Construisez un circuit avec une source, une résistance et une LED.",
-                requirements: [
-                    "Ajouter une source",
-                    "Ajouter une résistance",
-                    "Ajouter une LED",
-                    "Créer les connexions",
-                    "Mettre l'alimentation ON"
-                ],
-                validate() {
-                    return validateBasicLED();
-                }
-            },
-            {
-                id: "b2",
-                title: "Interrupteur et LED",
-                description:
-                    "Réalisez un circuit dans lequel l'interrupteur contrôle la LED.",
-                requirements: [
-                    "Source",
-                    "Résistance",
-                    "LED",
-                    "Interrupteur"
-                ],
-                validate() {
-                    return (
-                        hasType("led") &&
-                        hasType("resistor") &&
-                        hasType("switch") &&
-                        state.wires.length >= 4
-                    );
-                }
-            },
-            {
-                id: "b3",
-                title: "Mesurer une tension",
-                description:
-                    "Construisez un circuit alimenté puis effectuez une mesure.",
-                requirements: [
-                    "Source",
-                    "Charge",
-                    "Alimentation ON",
-                    "Mesure de tension"
-                ],
-                validate() {
-                    return (
-                        hasPowerSource() &&
-                        state.powerOn &&
-                        state.measurements.voltage > 0
-                    );
-                }
-            },
-            {
-                id: "b4",
-                title: "Protection par fusible",
-                description:
-                    "Ajoutez un fusible dans le circuit.",
-                requirements: [
-                    "Source",
-                    "Fusible",
-                    "Charge"
-                ],
-                validate() {
-                    return (
-                        hasPowerSource() &&
-                        hasType("fuse") &&
-                        hasLoad()
-                    );
-                }
-            },
-            {
-                id: "b5",
-                title: "Utiliser le multimètre",
-                description:
-                    "Placez un multimètre et mesurez le circuit.",
-                requirements: [
-                    "Multimètre",
-                    "Circuit alimenté",
-                    "Mesure"
-                ],
-                validate() {
-                    return (
-                        hasType("multimeter") &&
-                        state.powerOn &&
-                        state.measurements.voltage > 0
-                    );
-                }
-            }
-        ],
-
-        intermediate: [
-            {
-                id: "i1",
-                title: "LED clignotante",
-                description:
-                    "Programmez une LED pour qu'elle clignote.",
-                requirements: [
-                    "Arduino",
-                    "LED",
-                    "Code LED Blink",
-                    "Exécution"
-                ],
-                validate() {
-                    return (
-                        hasType("arduino") &&
-                        hasType("led") &&
-                        state.codeRunning
-                    );
-                }
-            },
-            {
-                id: "i2",
-                title: "Potentiomètre et luminosité",
-                description:
-                    "Utilisez un potentiomètre pour contrôler une LED.",
-                requirements: [
-                    "Arduino",
-                    "Potentiomètre",
-                    "LED",
-                    "Programme analogique"
-                ],
-                validate() {
-                    return (
-                        hasType("arduino") &&
-                        hasType("potentiometer") &&
-                        hasType("led") &&
-                        state.codeRunning
-                    );
-                }
-            },
-            {
-                id: "i3",
-                title: "Commande par bouton",
-                description:
-                    "Le bouton doit commander une sortie.",
-                requirements: [
-                    "Arduino",
-                    "Bouton",
-                    "LED",
-                    "Programme"
-                ],
-                validate() {
-                    return (
-                        hasType("arduino") &&
-                        hasType("pushbutton") &&
-                        hasType("led") &&
-                        state.codeRunning
-                    );
-                }
-            },
-            {
-                id: "i4",
-                title: "Régulation 5 V",
-                description:
-                    "Utilisez un régulateur 7805.",
-                requirements: [
-                    "Source",
-                    "7805",
-                    "Charge"
-                ],
-                validate() {
-                    return (
-                        hasPowerSource() &&
-                        state.components.some(
-                            c =>
-                                c.type === "regulator" &&
-                                c.outputVoltage === 5
-                        )
-                    );
-                }
-            },
-            {
-                id: "i5",
-                title: "Signal périodique",
-                description:
-                    "Utilisez un générateur de signaux et mesurez sa fréquence.",
-                requirements: [
-                    "Générateur",
-                    "Fréquencemètre",
-                    "Connexion"
-                ],
-                validate() {
-                    return (
-                        hasType("signal-generator") &&
-                        hasType("frequency-meter") &&
-                        state.measurements.frequency > 0
-                    );
-                }
-            }
-        ],
-
-        expert: [
-            {
-                id: "e1",
-                title: "Commande transistorisée",
-                description:
-                    "Construisez une commande avec transistor NPN.",
-                requirements: [
-                    "Source",
-                    "Transistor NPN",
-                    "Résistance",
-                    "Charge"
-                ],
-                validate() {
-                    return (
-                        hasType("transistor-npn") &&
-                        hasType("resistor") &&
-                        hasLoad()
-                    );
-                }
-            },
-            {
-                id: "e2",
-                title: "Commande relais",
-                description:
-                    "Activez un relais à partir d'une sortie électronique.",
-                requirements: [
-                    "Relais",
-                    "Source",
-                    "Commande"
-                ],
-                validate() {
-                    return (
-                        hasType("relay") &&
-                        state.codeRunning
-                    );
-                }
-            },
-            {
-                id: "e3",
-                title: "Filtrage RC",
-                description:
-                    "Construisez un filtre avec résistance et condensateur.",
-                requirements: [
-                    "Résistance",
-                    "Condensateur",
-                    "Source"
-                ],
-                validate() {
-                    return (
-                        hasType("resistor") &&
-                        hasType("capacitor") &&
-                        hasPowerSource()
-                    );
-                }
-            },
-            {
-                id: "e4",
-                title: "Redressement",
-                description:
-                    "Construisez une alimentation redressée.",
-                requirements: [
-                    "Source AC",
-                    "Pont redresseur",
-                    "Condensateur"
-                ],
-                validate() {
-                    return (
-                        hasType("ac-supply") &&
-                        hasType("bridge") &&
-                        hasType("capacitor")
-                    );
-                }
-            },
-            {
-                id: "e5",
-                title: "Diagnostic professionnel",
-                description:
-                    "Créez puis analysez un circuit comportant une panne.",
-                requirements: [
-                    "Circuit",
-                    "Panne",
-                    "Diagnostic"
-                ],
-                validate() {
-                    return (
-                        state.activeFaults.length > 0 &&
-                        lastDiagnosticPassed()
-                    );
-                }
-            }
-        ]
-    };
-
-
-    /* ============================================================
-       11 — UTILITAIRES COMPOSANTS
-    ============================================================ */
-
-    function hasType(type) {
-        return state.components.some(c => c.type === type);
-    }
-
-    function hasPowerSource() {
-        return state.components.some(
-            c =>
-                c.type === "battery" ||
-                c.type === "dc-supply" ||
-                c.type === "ac-supply" ||
-                c.type === "signal-generator"
-        );
-    }
-
-    function hasLoad() {
-        return state.components.some(
-            c =>
-                [
-                    "led",
-                    "bulb",
-                    "motor",
-                    "buzzer",
-                    "relay"
-                ].includes(c.type)
-        );
-    }
-
-    function getComponent(id) {
-        return state.components.find(c => c.id === id);
-    }
-
-    function getWire(id) {
-        return state.wires.find(w => w.id === id);
-    }
-
-
-    /* ============================================================
-       12 — CRÉATION D'UN COMPOSANT
-    ============================================================ */
-
-    function createComponent(definition, x = null, y = null) {
-
-        const canvas = $("laboratoryCanvas");
-
-        if (!canvas) return null;
-
-        const rect = canvas.getBoundingClientRect();
-
-        if (x === null) {
-            x =
-                Math.max(
-                    30,
-                    (rect.width / 2 - 80) /
-                        Math.max(state.zoom, 0.1)
-                );
-        }
-
-        if (y === null) {
-            y =
-                Math.max(
-                    30,
-                    (rect.height / 2 - 40) /
-                        Math.max(state.zoom, 0.1)
-                );
-        }
-
-        const component = {
-
-            id: newComponentId(),
-
-            type: definition.type,
-
-            name: definition.name,
-
-            symbol: definition.symbol || "●",
-
-            value:
-                definition.value !== undefined
-                    ? definition.value
-                    : null,
-
-            unit:
-                definition.unit || "",
-
-            voltage:
-                definition.voltage || 0,
-
-            resistance:
-                definition.resistance || 0,
-
-            forwardVoltage:
-                definition.forwardVoltage || 0,
-
-            outputVoltage:
-                definition.outputVoltage || 0,
-
-            frequency:
-                definition.frequency || 0,
-
-            color:
-                definition.color || "",
-
-            pins:
-                (definition.pins || []).map(pin => ({
-                    name: pin,
-                    id:
-                        "pin_" +
-                        Math.random()
-                            .toString(36)
-                            .slice(2)
-                })),
-
-            x: x,
-
-            y: y,
-
-            rotation: 0,
-
-            enabled: true,
-
-            active: false,
-
-            brightness: 0,
-
-            fault: null,
-
-            valueState:
-                definition.value !== undefined
-                    ? Number(definition.value) || 0
-                    : 0,
-
-            arduinoPin: null,
-
-            pwm: 0,
-
-            metadata: {}
-        };
-
-        if (definition.type === "battery") {
-            component.voltage = 9;
-        }
-
-        if (definition.type === "dc-supply") {
-            component.voltage = 12;
-        }
-
-        state.components.push(component);
-
-        pushHistory();
-
-        renderComponent(component);
-
-        updateWorkspace();
-
-        return component;
-    }
-
-
-    /* ============================================================
-       13 — AJOUT PAR TYPE
-    ============================================================ */
-
-    function addComponent(type) {
-
-        let definition = null;
-
-        if (POWER_COMPONENTS[type]) {
-            definition = POWER_COMPONENTS[type];
-        }
-
-        if (!definition) {
-
-            for (const category of Object.keys(COMPONENT_LIBRARY)) {
-
-                const found =
-                    COMPONENT_LIBRARY[category]
-                        .find(item => item.type === type);
-
-                if (found) {
-                    definition = found;
-                    break;
-                }
-            }
-        }
-
-        if (!definition) {
-            toast(
-                "Composant introuvable : " + type,
-                "error"
-            );
-            return null;
-        }
-
-        const component =
-            createComponent(
-                structuredCloneSafe(definition)
-            );
-
-        if (component) {
-
-            selectComponent(component.id);
-
-            toast(
-                component.name + " ajouté au laboratoire.",
-                "success"
-            );
-
-            setStatus(
-                component.name + " prêt.",
-                "ready"
-            );
-        }
-
-        return component;
-    }
-
-
-    /* ============================================================
-       14 — AJOUT INSTRUMENT
-    ============================================================ */
-
-    function addInstrument(type) {
-
-        const definition = INSTRUMENTS[type];
-
-        if (!definition) {
-            toast("Instrument introuvable.", "error");
-            return;
-        }
-
-        const component =
-            createComponent(
-                structuredCloneSafe(definition)
-            );
-
-        if (component) {
-
-            component.metadata.instrument = true;
-
-            renderComponent(component);
-
-            selectComponent(component.id);
-
-            toast(
-                component.name + " ajouté.",
-                "success"
-            );
-        }
-    }
-
-
-    /* ============================================================
-       15 — CLONAGE SÉCURISÉ
-    ============================================================ */
-
-    function structuredCloneSafe(value) {
-
-        try {
-            return structuredClone(value);
-        } catch (error) {
-            return JSON.parse(JSON.stringify(value));
-        }
-    }
-
-
-
-
-
-
-
-
-
-/* ============================================================
-   16 — RENDU DES COMPOSANTS
-   ------------------------------------------------------------
-   CORRECTION:
-   - Le JavaScript utilise .electronic-component
-   - Rendu forcé dans #componentLayer
-   - Position, taille et visibilité garanties
-   - Ne modifie pas createComponent()
-   - Ne modifie pas addComponent()
-   - Ne modifie pas le système de fils
-============================================================ */
-
-function renderAllComponents() {
-
-    const layer = $("componentLayer");
-
-    if (!layer) return;
-
-    layer.innerHTML = "";
-
-    state.components.forEach(component => {
-
-        renderComponent(component);
-
-    });
-
-    renderWires();
-}
-
-
-function renderComponent(component) {
-
-    const layer = $("componentLayer");
-
-    if (!layer || !component) return;
-
-
-    /* --------------------------------------------------------
-       RECHERCHE DE L'ÉLÉMENT EXISTANT
-    -------------------------------------------------------- */
-
-    let el = layer.querySelector(
-        `[data-component-id="${CSS.escape(component.id)}"]`
-    );
-
-
-    /* --------------------------------------------------------
-       CRÉATION DU CONTENEUR
-    -------------------------------------------------------- */
-
-    if (!el) {
-
-        el = document.createElement("div");
-
-        el.className =
-            "electronic-component";
-
-        el.dataset.componentId =
-            component.id;
-
-        el.tabIndex = 0;
-
-        layer.appendChild(el);
-
-        attachComponentEvents(
-            el,
-            component
-        );
-    }
-
-
-    /* --------------------------------------------------------
-       POSITION ET DIMENSIONS
-    -------------------------------------------------------- */
-
-    const safeX =
-        Number.isFinite(Number(component.x))
-            ? Number(component.x)
-            : 120;
-
-    const safeY =
-        Number.isFinite(Number(component.y))
-            ? Number(component.y)
-            : 120;
-
-    const safeRotation =
-        Number.isFinite(Number(component.rotation))
-            ? Number(component.rotation)
-            : 0;
-
-
-    el.style.position = "absolute";
-
-    el.style.left =
-        `${safeX}px`;
-
-    el.style.top =
-        `${safeY}px`;
-
-    el.style.width =
-        `${COMPONENT_WIDTH}px`;
-
-    el.style.minWidth =
-        `${COMPONENT_WIDTH}px`;
-
-    el.style.height =
-        `${COMPONENT_HEIGHT}px`;
-
-    el.style.minHeight =
-        `${COMPONENT_HEIGHT}px`;
-
-    el.style.display =
-        "flex";
-
-    el.style.visibility =
-        "visible";
-
-    el.style.opacity =
-        "1";
-
-    el.style.pointerEvents =
-        "auto";
-
-    el.style.zIndex =
-        "31";
-
-    el.style.transform =
-        `rotate(${safeRotation}deg)`;
-
-    el.style.transformOrigin =
-        "center center";
-
-    el.style.touchAction =
-        "none";
-
-    el.style.boxSizing =
-        "border-box";
-
-
-    /* --------------------------------------------------------
-       ÉTAT VISUEL
-    -------------------------------------------------------- */
-
-    el.classList.toggle(
-        "selected",
-        state.selectedComponentId === component.id
-    );
-
-    el.classList.toggle(
-        "component-active",
-        !!component.active
-    );
-
-    el.classList.toggle(
-        "component-fault",
-        !!component.fault
-    );
-
-
-    /* --------------------------------------------------------
-       CONTENU DU COMPOSANT
-    -------------------------------------------------------- */
-
-    el.innerHTML =
-        componentMarkup(component);
-
-
-    /* --------------------------------------------------------
-       GARANTIE DU RENDU INTERNE
-    -------------------------------------------------------- */
-
-    const header =
-        el.querySelector(
-            ".component-header"
-        );
-
-    if (header) {
-
-        header.style.display =
-            "block";
-
-        header.style.visibility =
-            "visible";
-
-        header.style.opacity =
-            "1";
-
-        header.style.width =
-            "100%";
-
-        header.style.textAlign =
-            "center";
-
-        header.style.pointerEvents =
-            "none";
-    }
-
-
-    const body =
-        el.querySelector(
-            ".component-body"
-        );
-
-    if (body) {
-
-        body.style.display =
-            "flex";
-
-        body.style.visibility =
-            "visible";
-
-        body.style.opacity =
-            "1";
-
-        body.style.width =
-            "100%";
-
-        body.style.minHeight =
-            "30px";
-
-        body.style.alignItems =
-            "center";
-
-        body.style.justifyContent =
-            "center";
-
-        body.style.position =
-            "relative";
-
-        body.style.pointerEvents =
-            "none";
-    }
-
-
-    const pinsContainer =
-        el.querySelector(
-            ".component-pins"
-        );
-
-    if (pinsContainer) {
-
-        pinsContainer.style.position =
-            "absolute";
-
-        pinsContainer.style.inset =
-            "0";
-
-        pinsContainer.style.width =
-            "100%";
-
-        pinsContainer.style.height =
-            "100%";
-
-        pinsContainer.style.pointerEvents =
-            "none";
-
-        pinsContainer.style.zIndex =
-            "45";
-    }
-
-
-    /* --------------------------------------------------------
-       REBRANCHEMENT DES BORNES
-    -------------------------------------------------------- */
-
-    attachPinEvents(
-        el,
-        component
-    );
-
-
-    /* --------------------------------------------------------
-       EFFET COMPOSANT ACTIF
-    -------------------------------------------------------- */
-
-    if (component.active) {
-
-        el.style.boxShadow =
-            "0 0 24px rgba(0,220,255,.75)";
-
-    } else if (
-        state.selectedComponentId === component.id
-    ) {
-
-        el.style.boxShadow =
-            "0 0 0 2px rgba(255,210,31,.25), " +
-            "0 8px 20px rgba(0,0,0,.40)";
-
-    } else {
-
-        el.style.boxShadow =
-            "0 7px 18px rgba(0,0,0,.35)";
-    }
-}
-
-
-
-
-
-
-
-
-    /* ============================================================
-       17 — MARKUP COMPOSANT
-    ============================================================ */
-
-    function componentMarkup(component) {
-
-        let extra = "";
-
-        if (component.type === "led") {
-
-            const glow =
-                component.brightness > 0
-                    ? `box-shadow:0 0 22px ${component.color};`
-                    : "";
-
-            extra =
-                `<div class="led-visual"
-                    style="
-                        background:${component.color};
-                        ${glow}
-                    ">
-                </div>`;
-        }
-
-        else if (component.type === "bulb") {
-
-            extra =
-                `<div class="bulb-visual ${
-                    component.active
-                        ? "bulb-on"
-                        : ""
-                }">💡</div>`;
-        }
-
-        else if (component.type === "battery") {
-
-            extra =
-                `<div class="battery-visual">
-                    <span>+</span>
-                    <strong>${component.voltage}V</strong>
-                    <span>−</span>
-                </div>`;
-        }
-
-        else if (component.type === "resistor") {
-
-            extra =
-                `<div class="resistor-visual">
-                    <span>▰</span>
-                    <strong>
-                        ${formatResistance(component.value)}
-                    </strong>
-                </div>`;
-        }
-
-        else if (component.type === "capacitor") {
-
-            extra =
-                `<div class="capacitor-visual">
-                    <span>║</span>
-                    <strong>
-                        ${component.value}${component.unit}
-                    </strong>
-                </div>`;
-        }
-
-        else if (
-            component.type === "arduino"
-        ) {
-
-            extra =
-                `<div class="controller-visual">
-                    <span>USB</span>
-                    <strong>ARDUINO UNO</strong>
-                    <small>D0–D13 • A0–A5</small>
-                </div>`;
-        }
-
-        else {
-
-            extra =
-                `<div class="generic-symbol">
-                    ${component.symbol}
-                </div>`;
-        }
-
-        const pins =
-            component.pins
-                .map(
-                    pin =>
-                        `<button
-                            type="button"
-                            class="component-pin"
-                            data-pin="${pin.name}"
-                            title="${pin.name}"
-                        >${pin.name}</button>`
-                )
-                .join("");
-
-        return `
-            <div class="component-header">
-                <span>${escapeHTML(component.name)}</span>
-            </div>
-
-            <div class="component-body">
-                ${extra}
-            </div>
-
-            <div class="component-pins">
-                ${pins}
-            </div>
-
-            ${
-                component.fault
-                    ? `<div class="component-fault-label">
-                        ⚠ PANNE
-                       </div>`
-                    : ""
-            }
-        `;
-    }
-
-
-    /* ============================================================
-       18 — HTML SAFE
-    ============================================================ */
 
     function escapeHTML(value) {
-
         return String(value ?? "")
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -2020,6832 +325,5689 @@ function renderComponent(component) {
             .replace(/'/g, "&#039;");
     }
 
-
-    /* ============================================================
-       19 — RÉSISTANCE
-    ============================================================ */
-
-    function formatResistance(value) {
-
-        const n = Number(value) || 0;
-
-        if (n >= 1000000) {
-            return (
-                (n / 1000000)
-                    .toFixed(2)
-                    .replace(/\.00$/, "") +
-                " MΩ"
-            );
-        }
-
-        if (n >= 1000) {
-            return (
-                (n / 1000)
-                    .toFixed(2)
-                    .replace(/\.00$/, "") +
-                " kΩ"
-            );
-        }
-
-        return n + " Ω";
+    function normalizeText(value) {
+        return String(value ?? "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
     }
 
+    function distance(a, b) {
+        return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+    }
 
+    function showToast(message, type = "info") {
+        if (!dom.toast) return;
 
+        dom.toast.textContent = message;
+        dom.toast.dataset.type = type;
+        dom.toast.classList.add("show");
 
+        clearTimeout(showToast.timer);
 
+        showToast.timer = setTimeout(() => {
+            dom.toast.classList.remove("show");
+        }, 2600);
+    }
 
-
-
-/* ============================================================
-   20 — ÉVÉNEMENTS COMPOSANTS
-   ------------------------------------------------------------
-   CORRECTION DÉPLACER :
-   - Pa rebati component la anvan drag
-   - Déplacement souris + tactile
-   - Long-press pa louvri détails
-============================================================ */
-
-function attachComponentEvents(el, component) {
-
-    el.addEventListener(
-        "pointerdown",
-        event => {
-
-            if (
-                event.target.closest(
-                    ".component-pin"
-                )
-            ) {
-                return;
-            }
-
-            event.preventDefault();
-
-            if (
-                state.selectedTool === "delete"
-            ) {
-                deleteComponent(
-                    component.id
-                );
-                return;
-            }
-
-            if (
-                state.selectedTool === "rotate"
-            ) {
-                rotateComponent(
-                    component.id
-                );
-                return;
-            }
-
-            if (
-                state.selectedTool === "duplicate"
-            ) {
-                duplicateComponent(
-                    component.id
-                );
-                return;
-            }
-
-            /*
-             * DÉPLACER
-             * ------------------------------------------------
-             * Pa rele selectComponent() isit la paske
-             * selectComponent() rele renderAllComponents()
-             * epi li ka ranplase element dwèt la.
-             */
-            if (
-                state.selectedTool === "move" ||
-                state.selectedTool === "select"
-            ) {
-
-                state.selectedComponentId =
-                    component.id;
-
-                state.selectedWireId =
-                    null;
-
-                el.classList.add(
-                    "selected"
-                );
-
-                beginComponentDrag(
-                    event,
-                    component,
-                    el
-                );
-
-                return;
-            }
-
-            selectComponent(
-                component.id
-            );
-        },
-        {
-            passive: false
+    function setStatus(message, mode = "ready") {
+        if (dom.statusText) {
+            dom.statusText.textContent = message;
         }
-    );
 
-
-    /*
-     * DOUBLE-CLICK:
-     * Ouvri detay component la.
-     */
-    el.addEventListener(
-        "dblclick",
-        event => {
-
-            if (
-                event.target.closest(
-                    ".component-pin"
-                )
-            ) {
-                return;
-            }
-
-            event.preventDefault();
-
-            openComponentDetails(
-                component.id
-            );
+        if (dom.statusDot) {
+            dom.statusDot.dataset.status = mode;
         }
-    );
+    }
 
+    function consoleLog(message, type = "info") {
+        if (!dom.codeConsoleOutput) return;
 
-    /*
-     * CONTEXTMENU / LONG-PRESS:
-     * Pa ouvri detay.
-     * Sa pèmèt long-press rete disponib pou Déplacer.
-     */
-    el.addEventListener(
-        "contextmenu",
-        event => {
+        const row = document.createElement("div");
+        row.className = `console-line console-${type}`;
+        row.textContent = message;
 
-            event.preventDefault();
-        }
-    );
-}
+        dom.codeConsoleOutput.appendChild(row);
+        dom.codeConsoleOutput.scrollTop = dom.codeConsoleOutput.scrollHeight;
+    }
 
+    function clearConsole() {
+        if (!dom.codeConsoleOutput) return;
+        dom.codeConsoleOutput.innerHTML = "";
+    }
 
+    function findComponent(id) {
+        return state.components.find(component => component.id === id) || null;
+    }
 
+    function findComponentByType(type) {
+        return state.components.find(component => component.type === type) || null;
+    }
 
+    function selectedComponent() {
+        return findComponent(state.selectedComponentId);
+    }
 
+    function componentHasType(type) {
+        return state.components.some(component => component.type === type);
+    }
 
+    function componentTypeAliases(type) {
+        const aliases = {
+            "arduino-uno": ["arduino", "arduino-uno", "controller"],
+            "arduino-nano": ["arduino", "arduino-nano", "controller"],
+            "arduino-mega": ["arduino", "arduino-mega", "controller"],
+            "esp32": ["esp32", "controller"],
+            "esp8266": ["esp8266", "controller"],
+            "raspberry-pi": ["raspberry", "controller"],
+            "led": ["led", "diode"],
+            "resistor": ["resistor", "resistors"],
+            "push-button": ["button", "buttons", "switch"],
+            "servo": ["servo", "motor"],
+            "dc-motor": ["motor", "dc-motor"],
+            "buzzer": ["buzzer"],
+            "hc-sr04": ["sensor", "ultrasonic"],
+            "ldr": ["sensor", "ldr"],
+            "potentiometer": ["potentiometer"],
+            "relay": ["relay"]
+        };
+
+        return aliases[type] || [type];
+    }
 
     /* ============================================================
-       21 — PINS
+       05. COMPONENT DATABASE
+       ============================================================ */
+
+    const COMPONENTS = [
+        {
+            id: "battery",
+            name: "Batterie",
+            category: "power",
+            icon: "🔋",
+            color: "#263238",
+            width: 120,
+            height: 76,
+            voltage: 9,
+            resistance: 0.5,
+            pins: [
+                { id: "positive", name: "+", side: "right" },
+                { id: "negative", name: "−", side: "left" }
+            ]
+        },
+        {
+            id: "dc-supply",
+            name: "Alimentation DC",
+            category: "power",
+            icon: "⚡",
+            color: "#37474f",
+            width: 150,
+            height: 90,
+            voltage: 5,
+            adjustableVoltage: true,
+            pins: [
+                { id: "V+", name: "V+", side: "right" },
+                { id: "GND", name: "GND", side: "left" }
+            ]
+        },
+        {
+            id: "ac-supply",
+            name: "Alimentation AC",
+            category: "power",
+            icon: "∿",
+            color: "#455a64",
+            width: 150,
+            height: 90,
+            voltage: 120,
+            frequency: 60,
+            pins: [
+                { id: "L", name: "L", side: "right" },
+                { id: "N", name: "N", side: "left" }
+            ]
+        },
+        {
+            id: "signal-generator",
+            name: "Générateur de signaux",
+            category: "power",
+            icon: "〰",
+            color: "#263238",
+            width: 160,
+            height: 90,
+            voltage: 5,
+            frequency: 1000,
+            pins: [
+                { id: "OUT", name: "OUT", side: "right" },
+                { id: "GND", name: "GND", side: "left" }
+            ]
+        },
+        {
+            id: "resistor",
+            name: "Résistance",
+            category: "resistors",
+            icon: "Ω",
+            color: "#8d6e63",
+            width: 125,
+            height: 64,
+            resistance: 220,
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "capacitor",
+            name: "Condensateur",
+            category: "capacitors",
+            icon: "║",
+            color: "#1565c0",
+            width: 100,
+            height: 76,
+            capacitance: "100 µF",
+            pins: [
+                { id: "positive", name: "+", side: "left" },
+                { id: "negative", name: "−", side: "right" }
+            ]
+        },
+        {
+            id: "inductor",
+            name: "Bobine",
+            category: "inductors",
+            icon: "〰",
+            color: "#6a1b9a",
+            width: 125,
+            height: 64,
+            inductance: "10 mH",
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "diode",
+            name: "Diode",
+            category: "diodes",
+            icon: "▷|",
+            color: "#455a64",
+            width: 110,
+            height: 64,
+            pins: [
+                { id: "anode", name: "A", side: "left" },
+                { id: "cathode", name: "K", side: "right" }
+            ]
+        },
+        {
+            id: "led",
+            name: "LED",
+            category: "leds",
+            icon: "💡",
+            color: "#c62828",
+            width: 110,
+            height: 90,
+            voltageDrop: 2,
+            current: 0.02,
+            state: "off",
+            pins: [
+                { id: "anode", name: "A", side: "left" },
+                { id: "cathode", name: "K", side: "right" }
+            ]
+        },
+        {
+            id: "bulb",
+            name: "Ampoule",
+            category: "bulbs",
+            icon: "💡",
+            color: "#f9a825",
+            width: 115,
+            height: 95,
+            voltageDrop: 3,
+            current: 0.1,
+            state: "off",
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "transistor",
+            name: "Transistor NPN",
+            category: "transistors",
+            icon: "NPN",
+            color: "#263238",
+            width: 120,
+            height: 90,
+            pins: [
+                { id: "B", name: "B", side: "left" },
+                { id: "C", name: "C", side: "right" },
+                { id: "E", name: "E", side: "bottom" }
+            ]
+        },
+        {
+            id: "mosfet",
+            name: "MOSFET",
+            category: "mosfet",
+            icon: "MOS",
+            color: "#37474f",
+            width: 120,
+            height: 90,
+            pins: [
+                { id: "G", name: "G", side: "left" },
+                { id: "D", name: "D", side: "right" },
+                { id: "S", name: "S", side: "bottom" }
+            ]
+        },
+        {
+            id: "relay",
+            name: "Relais",
+            category: "relays",
+            icon: "REL",
+            color: "#5d4037",
+            width: 135,
+            height: 90,
+            state: "off",
+            pins: [
+                { id: "coil+", name: "+", side: "left" },
+                { id: "coil-", name: "−", side: "left" },
+                { id: "COM", name: "COM", side: "right" },
+                { id: "NO", name: "NO", side: "right" },
+                { id: "NC", name: "NC", side: "right" }
+            ]
+        },
+        {
+            id: "switch",
+            name: "Interrupteur",
+            category: "switches",
+            icon: "⏻",
+            color: "#455a64",
+            width: 115,
+            height: 70,
+            state: "open",
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "push-button",
+            name: "Bouton poussoir",
+            category: "buttons",
+            icon: "●",
+            color: "#c62828",
+            width: 120,
+            height: 80,
+            state: "released",
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "potentiometer",
+            name: "Potentiomètre",
+            category: "potentiometers",
+            icon: "◉",
+            color: "#1565c0",
+            width: 125,
+            height: 85,
+            value: 50,
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "W", name: "W", side: "top" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "fuse",
+            name: "Fusible",
+            category: "fuses",
+            icon: "▬",
+            color: "#6d4c41",
+            width: 120,
+            height: 60,
+            state: "good",
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "transformer",
+            name: "Transformateur",
+            category: "transformers",
+            icon: "ΩΩ",
+            color: "#4e342e",
+            width: 145,
+            height: 95,
+            pins: [
+                { id: "P1", name: "P1", side: "left" },
+                { id: "P2", name: "P2", side: "left" },
+                { id: "S1", name: "S1", side: "right" },
+                { id: "S2", name: "S2", side: "right" }
+            ]
+        },
+        {
+            id: "rectifier",
+            name: "Pont redresseur",
+            category: "rectifiers",
+            icon: "▱",
+            color: "#37474f",
+            width: 125,
+            height: 85,
+            pins: [
+                { id: "AC1", name: "~", side: "left" },
+                { id: "AC2", name: "~", side: "left" },
+                { id: "PLUS", name: "+", side: "right" },
+                { id: "MINUS", name: "−", side: "right" }
+            ]
+        },
+        {
+            id: "regulator",
+            name: "Régulateur 5V",
+            category: "regulators",
+            icon: "REG",
+            color: "#283593",
+            width: 130,
+            height: 80,
+            pins: [
+                { id: "IN", name: "IN", side: "left" },
+                { id: "GND", name: "GND", side: "bottom" },
+                { id: "OUT", name: "OUT", side: "right" }
+            ]
+        },
+        {
+            id: "opamp",
+            name: "Amplificateur opérationnel",
+            category: "opamps",
+            icon: "▷",
+            color: "#4527a0",
+            width: 125,
+            height: 90,
+            pins: [
+                { id: "IN-", name: "−", side: "left" },
+                { id: "IN+", name: "+", side: "left" },
+                { id: "V+", name: "V+", side: "top" },
+                { id: "V-", name: "V-", side: "bottom" },
+                { id: "OUT", name: "OUT", side: "right" }
+            ]
+        },
+        {
+            id: "logic-gate",
+            name: "Porte logique AND",
+            category: "logic",
+            icon: "AND",
+            color: "#00838f",
+            width: 135,
+            height: 90,
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "left" },
+                { id: "Y", name: "Y", side: "right" }
+            ]
+        },
+        {
+            id: "arduino-uno",
+            name: "Arduino UNO",
+            category: "controllers",
+            icon: "UNO",
+            color: "#00695c",
+            width: 210,
+            height: 145,
+            controller: "arduino",
+            pins: [
+                { id: "D0", name: "D0", side: "right" },
+                { id: "D1", name: "D1", side: "right" },
+                { id: "D2", name: "D2", side: "right" },
+                { id: "D3", name: "D3", side: "right" },
+                { id: "D4", name: "D4", side: "right" },
+                { id: "D5", name: "D5", side: "right" },
+                { id: "D6", name: "D6", side: "right" },
+                { id: "D7", name: "D7", side: "right" },
+                { id: "D8", name: "D8", side: "right" },
+                { id: "D9", name: "D9", side: "right" },
+                { id: "D10", name: "D10", side: "right" },
+                { id: "D11", name: "D11", side: "right" },
+                { id: "D12", name: "D12", side: "right" },
+                { id: "D13", name: "D13", side: "right" },
+                { id: "A0", name: "A0", side: "left" },
+                { id: "A1", name: "A1", side: "left" },
+                { id: "A2", name: "A2", side: "left" },
+                { id: "A3", name: "A3", side: "left" },
+                { id: "A4", name: "A4", side: "left" },
+                { id: "A5", name: "A5", side: "left" },
+                { id: "5V", name: "5V", side: "top" },
+                { id: "3V3", name: "3V3", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" }
+            ]
+        },
+        {
+            id: "arduino-nano",
+            name: "Arduino Nano",
+            category: "controllers",
+            icon: "NANO",
+            color: "#00695c",
+            width: 180,
+            height: 115,
+            controller: "arduino",
+            pins: [
+                { id: "D2", name: "D2", side: "right" },
+                { id: "D3", name: "D3", side: "right" },
+                { id: "D5", name: "D5", side: "right" },
+                { id: "D6", name: "D6", side: "right" },
+                { id: "D9", name: "D9", side: "right" },
+                { id: "D10", name: "D10", side: "right" },
+                { id: "D11", name: "D11", side: "right" },
+                { id: "D12", name: "D12", side: "right" },
+                { id: "D13", name: "D13", side: "right" },
+                { id: "A0", name: "A0", side: "left" },
+                { id: "A1", name: "A1", side: "left" },
+                { id: "A2", name: "A2", side: "left" },
+                { id: "A3", name: "A3", side: "left" },
+                { id: "A4", name: "A4", side: "left" },
+                { id: "A5", name: "A5", side: "left" },
+                { id: "5V", name: "5V", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" }
+            ]
+        },
+        {
+            id: "arduino-mega",
+            name: "Arduino Mega",
+            category: "controllers",
+            icon: "MEGA",
+            color: "#00695c",
+            width: 230,
+            height: 150,
+            controller: "arduino",
+            pins: [
+                { id: "D2", name: "D2", side: "right" },
+                { id: "D3", name: "D3", side: "right" },
+                { id: "D4", name: "D4", side: "right" },
+                { id: "D5", name: "D5", side: "right" },
+                { id: "D6", name: "D6", side: "right" },
+                { id: "D7", name: "D7", side: "right" },
+                { id: "D8", name: "D8", side: "right" },
+                { id: "D9", name: "D9", side: "right" },
+                { id: "D10", name: "D10", side: "right" },
+                { id: "D11", name: "D11", side: "right" },
+                { id: "D12", name: "D12", side: "right" },
+                { id: "D13", name: "D13", side: "right" },
+                { id: "5V", name: "5V", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" }
+            ]
+        },
+        {
+            id: "esp32",
+            name: "ESP32",
+            category: "controllers",
+            icon: "ESP32",
+            color: "#263238",
+            width: 195,
+            height: 125,
+            controller: "esp32",
+            pins: [
+                { id: "GPIO2", name: "GPIO2", side: "right" },
+                { id: "GPIO4", name: "GPIO4", side: "right" },
+                { id: "GPIO5", name: "GPIO5", side: "right" },
+                { id: "GPIO18", name: "GPIO18", side: "right" },
+                { id: "GPIO19", name: "GPIO19", side: "right" },
+                { id: "GPIO21", name: "GPIO21", side: "right" },
+                { id: "GPIO22", name: "GPIO22", side: "right" },
+                { id: "GPIO23", name: "GPIO23", side: "right" },
+                { id: "3V3", name: "3V3", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" }
+            ]
+        },
+        {
+            id: "raspberry-pi",
+            name: "Raspberry Pi",
+            category: "controllers",
+            icon: "PI",
+            color: "#6a1b9a",
+            width: 215,
+            height: 135,
+            controller: "raspberry",
+            pins: [
+                { id: "GPIO17", name: "GPIO17", side: "right" },
+                { id: "GPIO18", name: "GPIO18", side: "right" },
+                { id: "GPIO27", name: "GPIO27", side: "right" },
+                { id: "GPIO22", name: "GPIO22", side: "right" },
+                { id: "3V3", name: "3V3", side: "top" },
+                { id: "5V", name: "5V", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" }
+            ]
+        },
+        {
+            id: "servo",
+            name: "Servo moteur",
+            category: "robotics",
+            icon: "SERVO",
+            color: "#1565c0",
+            width: 145,
+            height: 110,
+            state: "0",
+            angle: 0,
+            pins: [
+                { id: "SIG", name: "SIG", side: "right" },
+                { id: "VCC", name: "VCC", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" }
+            ]
+        },
+        {
+            id: "dc-motor",
+            name: "Moteur DC",
+            category: "robotics",
+            icon: "M",
+            color: "#455a64",
+            width: 130,
+            height: 95,
+            state: "off",
+            speed: 0,
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "buzzer",
+            name: "Buzzer",
+            category: "robotics",
+            icon: "🔊",
+            color: "#37474f",
+            width: 115,
+            height: 85,
+            state: "off",
+            frequency: 0,
+            pins: [
+                { id: "SIG", name: "SIG", side: "right" },
+                { id: "GND", name: "GND", side: "left" }
+            ]
+        },
+        {
+            id: "hc-sr04",
+            name: "Capteur Ultrason HC-SR04",
+            category: "robotics",
+            icon: "US",
+            color: "#0277bd",
+            width: 165,
+            height: 105,
+            distance: 25,
+            pins: [
+                { id: "VCC", name: "VCC", side: "top" },
+                { id: "TRIG", name: "TRIG", side: "right" },
+                { id: "ECHO", name: "ECHO", side: "right" },
+                { id: "GND", name: "GND", side: "bottom" }
+            ]
+        },
+        {
+            id: "ldr",
+            name: "Capteur LDR",
+            category: "robotics",
+            icon: "☀",
+            color: "#ef6c00",
+            width: 120,
+            height: 85,
+            value: 500,
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "lcd",
+            name: "LCD 16x2",
+            category: "robotics",
+            icon: "LCD",
+            color: "#2e7d32",
+            width: 175,
+            height: 105,
+            displayText: "",
+            pins: [
+                { id: "VCC", name: "VCC", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" },
+                { id: "SDA", name: "SDA", side: "left" },
+                { id: "SCL", name: "SCL", side: "right" }
+            ]
+        },
+        {
+            id: "joystick",
+            name: "Joystick",
+            category: "robotics",
+            icon: "◉",
+            color: "#5e35b1",
+            width: 125,
+            height: 110,
+            xValue: 512,
+            yValue: 512,
+            pins: [
+                { id: "VCC", name: "VCC", side: "top" },
+                { id: "GND", name: "GND", side: "bottom" },
+                { id: "VRX", name: "VRX", side: "left" },
+                { id: "VRY", name: "VRY", side: "right" }
+            ]
+        },
+        {
+            id: "wire",
+            name: "Fil de connexion",
+            category: "wires",
+            icon: "━",
+            color: "#263238",
+            width: 130,
+            height: 45,
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        },
+        {
+            id: "terminal",
+            name: "Borne",
+            category: "terminals",
+            icon: "●",
+            color: "#424242",
+            width: 95,
+            height: 70,
+            pins: [
+                { id: "A", name: "A", side: "left" },
+                { id: "B", name: "B", side: "right" }
+            ]
+        }
+    ];
+
+    function getComponentDefinition(type) {
+        return COMPONENTS.find(component => component.id === type) || null;
+    }
+
+    /* ============================================================
+       06. CODE LIBRARY
     ============================================================ */
 
-    function attachPinEvents(el, component) {
+    const CODE_LIBRARY = [
+        {
+            id: "arduino-led-on",
+            title: "Allumer une LED",
+            level: "beginner",
+            category: "Arduino",
+            description: "Allume une LED connectée à la broche D13.",
+            requiredTypes: ["arduino-uno", "led"],
+            preferredPins: ["D13"],
+            tags: ["led", "arduino", "digitalWrite"],
+            code:
+`void setup() {
+  pinMode(13, OUTPUT);
+}
 
-        qsa(
-            ".component-pin",
-            el
-        ).forEach(pinEl => {
+void loop() {
+  digitalWrite(13, HIGH);
+}`,
+            actions: [
+                { type: "pinMode", pin: "13", mode: "OUTPUT" },
+                { type: "digitalWrite", pin: "13", value: 1 }
+            ]
+        },
+        {
+            id: "arduino-led-blink",
+            title: "Faire clignoter une LED",
+            level: "beginner",
+            category: "Arduino",
+            description: "Fait clignoter la LED sur D13.",
+            requiredTypes: ["arduino-uno", "led"],
+            preferredPins: ["D13"],
+            tags: ["led", "blink", "arduino"],
+            code:
+`void setup() {
+  pinMode(13, OUTPUT);
+}
 
-            pinEl.addEventListener(
-                "pointerdown",
-                event => {
+void loop() {
+  digitalWrite(13, HIGH);
+  delay(1000);
+  digitalWrite(13, LOW);
+  delay(1000);
+}`,
+            actions: [
+                { type: "pinMode", pin: "13", mode: "OUTPUT" },
+                { type: "digitalWrite", pin: "13", value: 1 },
+                { type: "delay", value: 1000 },
+                { type: "digitalWrite", pin: "13", value: 0 },
+                { type: "delay", value: 1000 }
+            ]
+        },
+        {
+            id: "arduino-button-led",
+            title: "Bouton → LED",
+            level: "beginner",
+            category: "Arduino",
+            description: "Allume la LED quand le bouton est activé.",
+            requiredTypes: ["arduino-uno", "push-button", "led"],
+            preferredPins: ["2", "13"],
+            tags: ["button", "led", "digitalRead"],
+            code:
+`void setup() {
+  pinMode(2, INPUT);
+  pinMode(13, OUTPUT);
+}
 
-                    event.stopPropagation();
+void loop() {
+  if (digitalRead(2) == HIGH) {
+    digitalWrite(13, HIGH);
+  } else {
+    digitalWrite(13, LOW);
+  }
+}`,
+            actions: [
+                { type: "pinMode", pin: "2", mode: "INPUT" },
+                { type: "pinMode", pin: "13", mode: "OUTPUT" }
+            ]
+        },
+        {
+            id: "arduino-pwm-led",
+            title: "Luminosité LED PWM",
+            level: "intermediate",
+            category: "Arduino",
+            description: "Contrôle la luminosité d'une LED avec PWM.",
+            requiredTypes: ["arduino-uno", "led"],
+            preferredPins: ["9"],
+            tags: ["pwm", "analogWrite", "led"],
+            code:
+`void setup() {
+  pinMode(9, OUTPUT);
+}
 
-                    const pinName =
-                        pinEl.dataset.pin;
+void loop() {
+  analogWrite(9, 180);
+}`,
+            actions: [
+                { type: "pinMode", pin: "9", mode: "OUTPUT" },
+                { type: "analogWrite", pin: "9", value: 180 }
+            ]
+        },
+        {
+            id: "arduino-buzzer",
+            title: "Faire sonner un buzzer",
+            level: "beginner",
+            category: "Arduino",
+            description: "Produit une tonalité de 1000 Hz.",
+            requiredTypes: ["arduino-uno", "buzzer"],
+            preferredPins: ["8"],
+            tags: ["buzzer", "tone"],
+            code:
+`void setup() {
+}
 
-                    handlePinClick(
-                        component.id,
-                        pinName
-                    );
-                }
+void loop() {
+  tone(8, 1000);
+}`,
+            actions: [
+                { type: "tone", pin: "8", frequency: 1000 }
+            ]
+        },
+        {
+            id: "arduino-servo",
+            title: "Positionner un servo à 90°",
+            level: "intermediate",
+            category: "Robotique",
+            description: "Commande un servo connecté à D9.",
+            requiredTypes: ["arduino-uno", "servo"],
+            preferredPins: ["9"],
+            tags: ["servo", "robotique"],
+            code:
+`#include <Servo.h>
+
+Servo monServo;
+
+void setup() {
+  monServo.attach(9);
+}
+
+void loop() {
+  monServo.write(90);
+}`,
+            actions: [
+                { type: "servoAttach", pin: "9" },
+                { type: "servoWrite", pin: "9", angle: 90 }
+            ]
+        },
+        {
+            id: "arduino-motor",
+            title: "Activer un moteur DC",
+            level: "intermediate",
+            category: "Robotique",
+            description: "Active un moteur via une sortie digitale.",
+            requiredTypes: ["arduino-uno", "dc-motor"],
+            preferredPins: ["5"],
+            tags: ["motor", "robotique"],
+            code:
+`void setup() {
+  pinMode(5, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(5, HIGH);
+}`,
+            actions: [
+                { type: "pinMode", pin: "5", mode: "OUTPUT" },
+                { type: "digitalWrite", pin: "5", value: 1 }
+            ]
+        },
+        {
+            id: "arduino-ultrasonic",
+            title: "Lire un capteur ultrason",
+            level: "intermediate",
+            category: "Robotique",
+            description: "Configure TRIG sur D9 et ECHO sur D10.",
+            requiredTypes: ["arduino-uno", "hc-sr04"],
+            preferredPins: ["9", "10"],
+            tags: ["ultrason", "hc-sr04", "robotique"],
+            code:
+`const int trigPin = 9;
+const int echoPin = 10;
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+void loop() {
+  digitalWrite(trigPin, LOW);
+  digitalWrite(trigPin, HIGH);
+  digitalWrite(trigPin, LOW);
+
+  long distance = pulseIn(echoPin, HIGH);
+}`,
+            actions: [
+                { type: "pinMode", pin: "9", mode: "OUTPUT" },
+                { type: "pinMode", pin: "10", mode: "INPUT" }
+            ]
+        },
+        {
+            id: "arduino-potentiometer",
+            title: "Lire un potentiomètre",
+            level: "beginner",
+            category: "Arduino",
+            description: "Lit une valeur analogique sur A0.",
+            requiredTypes: ["arduino-uno", "potentiometer"],
+            preferredPins: ["A0"],
+            tags: ["potentiometer", "analogRead"],
+            code:
+`void setup() {
+}
+
+void loop() {
+  int valeur = analogRead(A0);
+}`,
+            actions: [
+                { type: "analogRead", pin: "A0" }
+            ]
+        },
+        {
+            id: "arduino-ldr",
+            title: "Lire une LDR",
+            level: "intermediate",
+            category: "Robotique",
+            description: "Lit un capteur de lumière sur A0.",
+            requiredTypes: ["arduino-uno", "ldr"],
+            preferredPins: ["A0"],
+            tags: ["ldr", "sensor", "analogRead"],
+            code:
+`void setup() {
+}
+
+void loop() {
+  int lumiere = analogRead(A0);
+}`,
+            actions: [
+                { type: "analogRead", pin: "A0" }
+            ]
+        },
+        {
+            id: "arduino-relay",
+            title: "Commander un relais",
+            level: "intermediate",
+            category: "Électronique",
+            description: "Active un relais connecté à D7.",
+            requiredTypes: ["arduino-uno", "relay"],
+            preferredPins: ["7"],
+            tags: ["relay", "digitalWrite"],
+            code:
+`void setup() {
+  pinMode(7, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(7, HIGH);
+}`,
+            actions: [
+                { type: "pinMode", pin: "7", mode: "OUTPUT" },
+                { type: "digitalWrite", pin: "7", value: 1 }
+            ]
+        },
+        {
+            id: "arduino-expert-multi",
+            title: "Deux sorties indépendantes",
+            level: "expert",
+            category: "Arduino",
+            description: "Commande deux sorties séparément.",
+            requiredTypes: ["arduino-uno", "led"],
+            preferredPins: ["12", "13"],
+            tags: ["multi-output", "arduino"],
+            code:
+`void setup() {
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(12, HIGH);
+  digitalWrite(13, LOW);
+}`,
+            actions: [
+                { type: "pinMode", pin: "12", mode: "OUTPUT" },
+                { type: "pinMode", pin: "13", mode: "OUTPUT" },
+                { type: "digitalWrite", pin: "12", value: 1 },
+                { type: "digitalWrite", pin: "13", value: 0 }
+            ]
+        }
+    ];
+
+    /* ============================================================
+       07. MISSIONS
+    ============================================================ */
+
+    const MISSIONS = [
+        {
+            id: "mission-led",
+            level: "beginner",
+            title: "Allumer une LED avec Arduino",
+            description:
+                "Réalisez un montage Arduino UNO + résistance + LED puis utilisez le code correspondant.",
+            requirements: [
+                "Arduino UNO",
+                "LED",
+                "Résistance",
+                "LED commandée sur D13"
+            ],
+            requiredTypes: ["arduino-uno", "led", "resistor"],
+            codeId: "arduino-led-on"
+        },
+        {
+            id: "mission-button",
+            level: "beginner",
+            title: "Commander une LED avec un bouton",
+            description:
+                "Utilisez un bouton poussoir pour commander une LED.",
+            requirements: [
+                "Arduino UNO",
+                "Bouton poussoir",
+                "LED",
+                "Résistance"
+            ],
+            requiredTypes: ["arduino-uno", "push-button", "led", "resistor"],
+            codeId: "arduino-button-led"
+        },
+        {
+            id: "mission-buzzer",
+            level: "intermediate",
+            title: "Commander un buzzer",
+            description:
+                "Réalisez un montage Arduino avec buzzer puis exécutez un programme sonore.",
+            requirements: [
+                "Arduino UNO",
+                "Buzzer"
+            ],
+            requiredTypes: ["arduino-uno", "buzzer"],
+            codeId: "arduino-buzzer"
+        },
+        {
+            id: "mission-servo",
+            level: "intermediate",
+            title: "Positionner un servo moteur",
+            description:
+                "Connectez un servo à Arduino et commandez une position de 90 degrés.",
+            requirements: [
+                "Arduino UNO",
+                "Servo moteur"
+            ],
+            requiredTypes: ["arduino-uno", "servo"],
+            codeId: "arduino-servo"
+        },
+        {
+            id: "mission-ultrasonic",
+            level: "expert",
+            title: "Capteur ultrason",
+            description:
+                "Connectez un HC-SR04 à Arduino et préparez ses broches TRIG/ECHO.",
+            requirements: [
+                "Arduino UNO",
+                "HC-SR04"
+            ],
+            requiredTypes: ["arduino-uno", "hc-sr04"],
+            codeId: "arduino-ultrasonic"
+        }
+    ];
+
+    /* ============================================================
+       08. DYNAMIC COMPONENT LIBRARY
+    ============================================================ */
+
+    let dynamicLibraryCategoriesCreated = false;
+
+    function ensureDynamicLibraryCategories() {
+        if (!dom.componentCategories || dynamicLibraryCategoriesCreated) return;
+
+        const extraCategories = [
+            ["all", "Tous"],
+            ["controllers", "Contrôleurs"],
+            ["robotics", "Robotique"]
+        ];
+
+        extraCategories.reverse().forEach(([value, label]) => {
+            if (dom.componentCategories.querySelector(
+                `[data-category="${value}"]`
+            )) {
+                return;
+            }
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "component-category-btn";
+            button.dataset.category = value;
+            button.textContent = label;
+
+            dom.componentCategories.prepend(button);
+        });
+
+        dynamicLibraryCategoriesCreated = true;
+    }
+
+    function renderComponentLibrary() {
+        if (!dom.componentLibraryGrid) return;
+
+        ensureDynamicLibraryCategories();
+
+        const search = normalizeText(dom.componentSearchInput?.value || "");
+        let components = COMPONENTS.slice();
+
+        if (state.currentLibraryCategory !== "all") {
+            components = components.filter(component =>
+                component.category === state.currentLibraryCategory
             );
+        }
+
+        if (search) {
+            components = components.filter(component => {
+                const text = normalizeText(
+                    `${component.name} ${component.category} ${component.id}`
+                );
+
+                return text.includes(search);
+            });
+        }
+
+        dom.componentLibraryGrid.innerHTML = "";
+
+        if (!components.length) {
+            dom.componentLibraryGrid.innerHTML = `
+                <div class="library-empty-state">
+                    Aucun composant trouvé.
+                </div>
+            `;
+            return;
+        }
+
+        components.forEach(definition => {
+            const card = document.createElement("article");
+            card.className = "component-library-card";
+            card.dataset.componentType = definition.id;
+            card.dataset.category = definition.category;
+
+            card.innerHTML = `
+                <div class="component-library-visual">
+                    ${createComponentVisualHTML(definition, true)}
+                </div>
+
+                <div class="component-library-name">
+                    ${escapeHTML(definition.name)}
+                </div>
+
+                <div class="component-library-category">
+                    ${escapeHTML(definition.category)}
+                </div>
+
+                <button
+                    class="component-add-btn"
+                    type="button"
+                    data-add-component="${escapeHTML(definition.id)}"
+                >
+                    ＋ AJOUTER
+                </button>
+            `;
+
+            card.addEventListener("click", event => {
+                if (event.target.closest("[data-add-component]")) {
+                    return;
+                }
+
+                state.selectedComponentType = definition.id;
+                openComponentDetails(definition.id);
+            });
+
+            dom.componentLibraryGrid.appendChild(card);
         });
     }
 
+    function openComponentLibrary() {
+        closeAllPanelsExcept("componentLibraryPanel");
 
-    function handlePinClick(
-        componentId,
-        pinName
-    ) {
+        dom.componentLibraryPanel?.classList.remove("hidden");
+        dom.componentLibraryPanel?.setAttribute("aria-hidden", "false");
 
-        const pin = {
-            componentId,
-            pinName
-        };
+        if (dom.libraryBtn) {
+            dom.libraryBtn.setAttribute("aria-expanded", "true");
+        }
 
-        if (!state.pendingWirePin) {
+        renderComponentLibrary();
+    }
 
-            state.pendingWirePin = pin;
+    function closeComponentLibrary() {
+        dom.componentLibraryPanel?.classList.add("hidden");
+        dom.componentLibraryPanel?.setAttribute("aria-hidden", "true");
 
-            state.selectedTool = "wire";
+        if (dom.libraryBtn) {
+            dom.libraryBtn.setAttribute("aria-expanded", "false");
+        }
+    }
 
-            setToolbarActive(
-                "wireToolBtn"
+    /* ============================================================
+       09. COMPONENT VISUAL ENGINE
+    ============================================================ */
+
+    function createComponentVisualHTML(definition, libraryMode = false) {
+        const icon = escapeHTML(definition.icon || "●");
+
+        return `
+            <div
+                class="fobas-electronic-3d"
+                data-visual-type="${escapeHTML(definition.id)}"
+                style="
+                    --component-color:${escapeHTML(definition.color || "#263238")};
+                    --component-width:${Math.max(60, definition.width || 110)}px;
+                    --component-height:${Math.max(45, definition.height || 70)}px;
+                "
+            >
+                <div class="component-3d-shadow"></div>
+                <div class="component-3d-body">
+                    <div class="component-3d-highlight"></div>
+                    <div class="component-3d-icon">${icon}</div>
+                    <div class="component-3d-label">
+                        ${escapeHTML(definition.name)}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createComponentPinHTML(pin) {
+        return `
+            <button
+                type="button"
+                class="electronic-pin"
+                data-pin-id="${escapeHTML(pin.id)}"
+                data-pin-name="${escapeHTML(pin.name)}"
+                data-pin-side="${escapeHTML(pin.side || "right")}"
+                title="${escapeHTML(pin.name)}"
+                aria-label="Pin ${escapeHTML(pin.name)}"
+            >
+                <span>${escapeHTML(pin.name)}</span>
+            </button>
+        `;
+    }
+
+    function createComponentInstance(type, options = {}) {
+        const definition = getComponentDefinition(type);
+
+        if (!definition) {
+            console.warn(`Composant inconnu : ${type}`);
+            return null;
+        }
+
+        const index = state.components.length;
+
+        const viewportRect = dom.viewport?.getBoundingClientRect();
+
+        const defaultX =
+            options.x ??
+            Math.max(
+                30,
+                ((viewportRect?.width || 700) / 2) -
+                (definition.width / 2) +
+                (index % 4) * 35
             );
 
-            toast(
-                `Borne ${pinName} sélectionnée. Sélectionnez une deuxième borne.`,
-                "info"
+        const defaultY =
+            options.y ??
+            Math.max(
+                30,
+                ((viewportRect?.height || 500) / 2) -
+                (definition.height / 2) +
+                (index % 3) * 35
+            );
+
+        const component = {
+            id: options.id || uid(type),
+            type: definition.id,
+            name: definition.name,
+            category: definition.category,
+
+            x: Number.isFinite(options.x) ? options.x : defaultX,
+            y: Number.isFinite(options.y) ? options.y : defaultY,
+
+            width: definition.width || 110,
+            height: definition.height || 70,
+
+            rotation: Number.isFinite(options.rotation)
+                ? options.rotation
+                : 0,
+
+            state: options.state ?? definition.state ?? "off",
+
+            value: options.value ?? definition.value ?? null,
+            angle: Number.isFinite(options.angle)
+                ? options.angle
+                : Number(definition.angle || 0),
+
+            speed: Number.isFinite(options.speed)
+                ? options.speed
+                : Number(definition.speed || 0),
+
+            frequency: Number.isFinite(options.frequency)
+                ? options.frequency
+                : Number(definition.frequency || 0),
+
+            displayText: options.displayText ?? definition.displayText ?? "",
+
+            pinStates: options.pinStates
+                ? { ...options.pinStates }
+                : {},
+
+            pinModes: options.pinModes
+                ? { ...options.pinModes }
+                : {},
+
+            analogValues: options.analogValues
+                ? { ...options.analogValues }
+                : {},
+
+            digitalValues: options.digitalValues
+                ? { ...options.digitalValues }
+                : {},
+
+            faults: options.faults
+                ? { ...options.faults }
+                : {
+                    open: false,
+                    short: false,
+                    polarity: false,
+                    defective: false
+                }
+        };
+
+        state.components.push(component);
+        renderComponent(component);
+        updateWorkspaceState();
+
+        return component;
+    }
+
+    function renderComponent(component) {
+        if (!dom.componentLayer || !component) return;
+
+        let element = document.getElementById(component.id);
+
+        if (!element) {
+            element = document.createElement("div");
+            element.id = component.id;
+            element.className = "electronic-component";
+            element.dataset.componentId = component.id;
+            element.dataset.componentType = component.type;
+
+            element.setAttribute("tabindex", "0");
+
+            dom.componentLayer.appendChild(element);
+        }
+
+        const definition = getComponentDefinition(component.type);
+
+        if (!definition) return;
+
+        element.style.position = "absolute";
+        element.style.left = `${component.x}px`;
+        element.style.top = `${component.y}px`;
+        element.style.width = `${component.width}px`;
+        element.style.height = `${component.height}px`;
+        element.style.transform =
+            `rotate(${component.rotation}deg)`;
+        element.style.touchAction = "none";
+        element.style.userSelect = "none";
+
+        const selected =
+            component.id === state.selectedComponentId;
+
+        element.classList.toggle("selected", selected);
+        element.classList.toggle(
+            "component-running",
+            state.circuitRunning
+        );
+
+        element.dataset.state = String(component.state || "off");
+
+        const pins = definition.pins || [];
+
+        element.innerHTML = `
+            <div class="electronic-component-shell">
+
+                <div class="electronic-component-visual">
+                    ${createComponentVisualHTML(definition)}
+                </div>
+
+                <div class="electronic-component-pins">
+                    ${pins.map(createComponentPinHTML).join("")}
+                </div>
+
+                <div class="electronic-component-state">
+                    ${getComponentStateLabel(component)}
+                </div>
+
+            </div>
+        `;
+
+        applyComponentVisualState(element, component);
+        positionComponentPins(element, definition);
+
+        attachComponentEvents(element, component);
+    }
+
+    function positionComponentPins(element, definition) {
+        const pinElements = Array.from(
+            element.querySelectorAll(".electronic-pin")
+        );
+
+        const sideGroups = {
+            left: [],
+            right: [],
+            top: [],
+            bottom: []
+        };
+
+        pinElements.forEach(pinElement => {
+            const side = pinElement.dataset.pinSide || "right";
+            if (!sideGroups[side]) sideGroups[side] = [];
+            sideGroups[side].push(pinElement);
+        });
+
+        Object.entries(sideGroups).forEach(([side, elements]) => {
+            elements.forEach((pinElement, index) => {
+                const total = elements.length;
+                const ratio = (index + 1) / (total + 1);
+
+                pinElement.style.position = "absolute";
+
+                if (side === "left") {
+                    pinElement.style.left = "-8px";
+                    pinElement.style.top = `${ratio * 100}%`;
+                    pinElement.style.transform = "translateY(-50%)";
+                }
+
+                if (side === "right") {
+                    pinElement.style.right = "-8px";
+                    pinElement.style.top = `${ratio * 100}%`;
+                    pinElement.style.transform = "translateY(-50%)";
+                }
+
+                if (side === "top") {
+                    pinElement.style.top = "-8px";
+                    pinElement.style.left = `${ratio * 100}%`;
+                    pinElement.style.transform = "translateX(-50%)";
+                }
+
+                if (side === "bottom") {
+                    pinElement.style.bottom = "-8px";
+                    pinElement.style.left = `${ratio * 100}%`;
+                    pinElement.style.transform = "translateX(-50%)";
+                }
+            });
+        });
+    }
+
+    function getComponentStateLabel(component) {
+        if (!component) return "";
+
+        if (component.type === "led") {
+            return component.state === "on" ? "● ON" : "○ OFF";
+        }
+
+        if (component.type === "bulb") {
+            return component.state === "on" ? "● ALLUMÉE" : "○ ÉTEINTE";
+        }
+
+        if (component.type === "switch") {
+            return component.state === "closed" ? "FERMÉ" : "OUVERT";
+        }
+
+        if (component.type === "push-button") {
+            return component.state === "pressed" ? "PRESSÉ" : "LIBRE";
+        }
+
+        if (component.type === "servo") {
+            return `ANGLE ${Math.round(component.angle || 0)}°`;
+        }
+
+        if (component.type === "dc-motor") {
+            return component.speed
+                ? `VITESSE ${Math.round(component.speed)}%`
+                : "ARRÊT";
+        }
+
+        if (component.type === "buzzer") {
+            return component.state === "on"
+                ? `${component.frequency || 0} Hz`
+                : "OFF";
+        }
+
+        if (component.type === "lcd") {
+            return component.displayText || "LCD";
+        }
+
+        return component.name;
+    }
+
+    function applyComponentVisualState(element, component) {
+        if (!element || !component) return;
+
+        const visual = element.querySelector(".fobas-electronic-3d");
+        const body = element.querySelector(".component-3d-body");
+
+        if (!visual || !body) return;
+
+        if (component.type === "led") {
+            visual.dataset.lit = component.state === "on" ? "true" : "false";
+        }
+
+        if (component.type === "bulb") {
+            visual.dataset.lit = component.state === "on" ? "true" : "false";
+        }
+
+        if (component.type === "buzzer") {
+            visual.dataset.active = component.state === "on" ? "true" : "false";
+        }
+
+        if (component.type === "dc-motor") {
+            visual.dataset.active = component.speed > 0 ? "true" : "false";
+            body.style.setProperty(
+                "--motor-speed",
+                `${Math.max(0, Math.min(100, component.speed || 0))}`
+            );
+        }
+
+        if (component.type === "servo") {
+            visual.dataset.angle = String(component.angle || 0);
+        }
+
+        if (component.type === "relay") {
+            visual.dataset.active = component.state === "on" ? "true" : "false";
+        }
+
+        if (component.type === "push-button") {
+            visual.dataset.pressed =
+                component.state === "pressed" ? "true" : "false";
+        }
+
+        if (component.type === "switch") {
+            visual.dataset.closed =
+                component.state === "closed" ? "true" : "false";
+        }
+
+        if (component.type === "lcd") {
+            const label = element.querySelector(".component-3d-label");
+
+            if (label) {
+                label.textContent =
+                    component.displayText || component.name;
+            }
+        }
+    }
+
+    /* ============================================================
+       10. COMPONENT EVENTS
+    ============================================================ */
+
+    function attachComponentEvents(element, component) {
+        if (!element || !component) return;
+
+        element.onpointerdown = event => {
+            if (event.button !== undefined && event.button !== 0) {
+                return;
+            }
+
+            const pin = event.target.closest(".electronic-pin");
+
+            if (pin) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                handlePinPointerDown(event, component, pin);
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (state.activeTool === "delete") {
+                deleteComponent(component.id);
+                return;
+            }
+
+            if (state.activeTool === "rotate") {
+                rotateComponent(component.id);
+                return;
+            }
+
+            if (state.activeTool === "duplicate") {
+                duplicateComponent(component.id);
+                return;
+            }
+
+            selectComponent(component.id);
+
+            if (state.activeTool === "move") {
+                beginComponentDrag(event, component, element);
+            }
+        };
+
+        element.onclick = event => {
+            if (event.target.closest(".electronic-pin")) {
+                return;
+            }
+
+            if (state.activeTool === "select") {
+                selectComponent(component.id);
+            }
+        };
+
+        element.ondblclick = event => {
+            if (event.target.closest(".electronic-pin")) {
+                return;
+            }
+
+            openComponentDetails(component.type);
+        };
+
+        element.onkeydown = event => {
+            if (event.key === "Delete") {
+                deleteComponent(component.id);
+            }
+
+            if (event.key === "r" || event.key === "R") {
+                rotateComponent(component.id);
+            }
+
+            if (event.key === "Escape") {
+                selectComponent(null);
+            }
+        };
+
+        if (component.type === "push-button") {
+            element.addEventListener("pointerdown", event => {
+                if (state.activeTool !== "move") return;
+                if (event.target.closest(".electronic-pin")) return;
+
+                component.state = "pressed";
+                renderComponent(component);
+                runSimulation();
+            });
+
+            element.addEventListener("pointerup", () => {
+                if (component.type !== "push-button") return;
+
+                component.state = "released";
+                renderComponent(component);
+                runSimulation();
+            });
+        }
+    }
+
+    /* ============================================================
+       11. SELECTION
+    ============================================================ */
+
+    function selectComponent(id) {
+        state.selectedComponentId = id || null;
+
+        state.components.forEach(component => {
+            const element = document.getElementById(component.id);
+
+            if (element) {
+                element.classList.toggle(
+                    "selected",
+                    component.id === state.selectedComponentId
+                );
+            }
+        });
+
+        updateWorkspaceState();
+    }
+
+    /* ============================================================
+       12. DRAG ENGINE
+    ============================================================ */
+
+    function beginComponentDrag(event, component, element) {
+        if (!component || !element) return;
+
+        state.drag.active = true;
+        state.drag.componentId = component.id;
+        state.drag.pointerId = event.pointerId;
+
+        const point = clientToWorkspace(event.clientX, event.clientY);
+
+        state.drag.offsetX = point.x - component.x;
+        state.drag.offsetY = point.y - component.y;
+
+        try {
+            element.setPointerCapture(event.pointerId);
+        } catch (_) {
+            /* Pointer capture unavailable: document listeners remain active. */
+        }
+
+        element.onpointermove = dragComponentPointerMove;
+        element.onpointerup = endComponentDrag;
+        element.onpointercancel = endComponentDrag;
+
+        setStatus("Déplacement du composant", "working");
+    }
+
+    function dragComponentPointerMove(event) {
+        if (!state.drag.active) return;
+        if (event.pointerId !== state.drag.pointerId) return;
+
+        event.preventDefault();
+
+        const component = findComponent(state.drag.componentId);
+
+        if (!component) {
+            endComponentDrag(event);
+            return;
+        }
+
+        const point = clientToWorkspace(event.clientX, event.clientY);
+
+        component.x = point.x - state.drag.offsetX;
+        component.y = point.y - state.drag.offsetY;
+
+        clampComponentPosition(component);
+
+        const element = document.getElementById(component.id);
+
+        if (element) {
+            element.style.left = `${component.x}px`;
+            element.style.top = `${component.y}px`;
+        }
+
+        renderWires();
+    }
+
+    function endComponentDrag(event) {
+        if (!state.drag.active) return;
+        if (
+            event &&
+            event.pointerId !== undefined &&
+            event.pointerId !== state.drag.pointerId
+        ) {
+            return;
+        }
+
+        const component = findComponent(state.drag.componentId);
+
+        if (component) {
+            renderComponent(component);
+        }
+
+        state.drag.active = false;
+        state.drag.componentId = null;
+        state.drag.pointerId = null;
+        state.drag.offsetX = 0;
+        state.drag.offsetY = 0;
+
+        renderWires();
+        updateWorkspaceState();
+
+        setStatus("Simulation prête", "ready");
+    }
+
+    function clampComponentPosition(component) {
+        const viewportWidth =
+            dom.canvas?.clientWidth || dom.viewport?.clientWidth || 1000;
+
+        const viewportHeight =
+            dom.canvas?.clientHeight || dom.viewport?.clientHeight || 700;
+
+        component.x = Math.max(
+            -component.width + 15,
+            Math.min(component.x, viewportWidth - 15)
+        );
+
+        component.y = Math.max(
+            -component.height + 15,
+            Math.min(component.y, viewportHeight - 15)
+        );
+    }
+
+    /* ============================================================
+       13. POINTER COORDINATE CONVERSION
+    ============================================================ */
+
+    function clientToWorkspace(clientX, clientY) {
+        if (!dom.viewport || !dom.canvas) {
+            return { x: clientX, y: clientY };
+        }
+
+        const rect = dom.viewport.getBoundingClientRect();
+
+        return {
+            x:
+                (clientX - rect.left - state.panX) /
+                state.zoom,
+            y:
+                (clientY - rect.top - state.panY) /
+                state.zoom
+        };
+    }
+
+    /* ============================================================
+       14. TOOL MANAGEMENT
+    ============================================================ */
+
+    function setActiveTool(tool) {
+        const validTools = [
+            "select",
+            "wire",
+            "move",
+            "rotate",
+            "delete",
+            "duplicate"
+        ];
+
+        if (!validTools.includes(tool)) {
+            tool = "select";
+        }
+
+        state.activeTool = tool;
+
+        const buttons = [
+            [dom.selectToolBtn, "select"],
+            [dom.wireToolBtn, "wire"],
+            [dom.moveToolBtn, "move"],
+            [dom.rotateToolBtn, "rotate"],
+            [dom.deleteToolBtn, "delete"],
+            [dom.duplicateToolBtn, "duplicate"]
+        ];
+
+        buttons.forEach(([button, value]) => {
+            if (!button) return;
+
+            button.classList.toggle(
+                "active",
+                value === state.activeTool
+            );
+        });
+
+        state.wireStart = null;
+
+        if (tool === "wire") {
+            setStatus(
+                "Fil actif : sélectionnez deux pins",
+                "working"
+            );
+        } else if (tool === "delete") {
+            setStatus(
+                "Suppression active : touchez un composant",
+                "working"
+            );
+        } else if (tool === "move") {
+            setStatus(
+                "Déplacement actif : touchez puis glissez",
+                "working"
+            );
+        } else {
+            setStatus("Simulation prête", "ready");
+        }
+    }
+
+    /* ============================================================
+       15. ROTATE / DELETE / DUPLICATE
+    ============================================================ */
+
+    function rotateComponent(id) {
+        const component = findComponent(id);
+
+        if (!component) {
+            showToast("Sélectionnez un composant à tourner.", "warning");
+            return;
+        }
+
+        component.rotation =
+            (Number(component.rotation || 0) + 90) % 360;
+
+        renderComponent(component);
+        renderWires();
+        updateWorkspaceState();
+
+        showToast(
+            `${component.name} tourné à ${component.rotation}°.`,
+            "success"
+        );
+    }
+
+    function deleteComponent(id) {
+        const component = findComponent(id);
+
+        if (!component) {
+            showToast("Aucun composant sélectionné.", "warning");
+            return;
+        }
+
+        state.components = state.components.filter(
+            item => item.id !== id
+        );
+
+        state.wires = state.wires.filter(
+            wire =>
+                wire.from.componentId !== id &&
+                wire.to.componentId !== id
+        );
+
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.remove();
+        }
+
+        if (state.selectedComponentId === id) {
+            state.selectedComponentId = null;
+        }
+
+        renderWires();
+        updateWorkspaceState();
+        runSimulation();
+
+        showToast(`${component.name} supprimé.`, "success");
+    }
+
+    function duplicateComponent(id) {
+        const source = findComponent(id);
+
+        if (!source) {
+            showToast("Sélectionnez un composant à dupliquer.", "warning");
+            return;
+        }
+
+        const copy = createComponentInstance(source.type, {
+            x: source.x + 35,
+            y: source.y + 35,
+            rotation: source.rotation,
+            state: source.state,
+            value: source.value,
+            angle: source.angle,
+            speed: source.speed,
+            frequency: source.frequency,
+            displayText: source.displayText,
+            pinStates: { ...source.pinStates },
+            pinModes: { ...source.pinModes },
+            analogValues: { ...source.analogValues },
+            digitalValues: { ...source.digitalValues }
+        });
+
+        if (copy) {
+            selectComponent(copy.id);
+            showToast(`${source.name} dupliqué.`, "success");
+        }
+    }
+
+    /* ============================================================
+       16. WIRING ENGINE
+    ============================================================ */
+
+    function handlePinPointerDown(event, component, pinElement) {
+        if (state.activeTool !== "wire") {
+            selectComponent(component.id);
+            return;
+        }
+
+        const pinId = pinElement.dataset.pinId;
+
+        if (!pinId) return;
+
+        if (!state.wireStart) {
+            state.wireStart = {
+                componentId: component.id,
+                pinId
+            };
+
+            pinElement.classList.add("wire-start");
+
+            setStatus(
+                `Pin ${pinElement.dataset.pinName} sélectionné — choisissez le second pin`,
+                "working"
             );
 
             return;
         }
 
         if (
-            state.pendingWirePin.componentId ===
-            componentId &&
-            state.pendingWirePin.pinName ===
-            pinName
+            state.wireStart.componentId === component.id &&
+            state.wireStart.pinId === pinId
         ) {
-
-            state.pendingWirePin = null;
-
-            toast(
-                "Connexion annulée.",
-                "warning"
-            );
-
+            state.wireStart = null;
+            renderAllComponents();
+            setStatus("Connexion annulée", "ready");
             return;
         }
 
         createWire(
-            state.pendingWirePin,
-            pin
+            state.wireStart.componentId,
+            state.wireStart.pinId,
+            component.id,
+            pinId
         );
 
-        state.pendingWirePin = null;
+        state.wireStart = null;
+
+        renderAllComponents();
+        renderWires();
+        updateWorkspaceState();
+        runSimulation();
     }
 
-
-    /* ============================================================
-       22 — CRÉATION DES FILS
-    ============================================================ */
-
-    function createWire(from, to) {
-
-        const duplicate =
-            state.wires.some(
-                wire =>
-                    (
-                        wire.from.componentId ===
-                            from.componentId &&
-                        wire.from.pinName ===
-                            from.pinName &&
-                        wire.to.componentId ===
-                            to.componentId &&
-                        wire.to.pinName ===
-                            to.pinName
-                    ) ||
-                    (
-                        wire.from.componentId ===
-                            to.componentId &&
-                        wire.from.pinName ===
-                            to.pinName &&
-                        wire.to.componentId ===
-                            from.componentId &&
-                        wire.to.pinName ===
-                            from.pinName
-                    )
-            );
+    function createWire(fromComponentId, fromPinId, toComponentId, toPinId) {
+        const duplicate = state.wires.some(wire =>
+            (
+                wire.from.componentId === fromComponentId &&
+                wire.from.pinId === fromPinId &&
+                wire.to.componentId === toComponentId &&
+                wire.to.pinId === toPinId
+            ) ||
+            (
+                wire.from.componentId === toComponentId &&
+                wire.from.pinId === toPinId &&
+                wire.to.componentId === fromComponentId &&
+                wire.to.pinId === fromPinId
+            )
+        );
 
         if (duplicate) {
+            showToast("Cette connexion existe déjà.", "warning");
+            return;
+        }
 
-            toast(
-                "Cette connexion existe déjà.",
+        state.wires.push({
+            id: uid("wire"),
+            from: {
+                componentId: fromComponentId,
+                pinId: fromPinId
+            },
+            to: {
+                componentId: toComponentId,
+                pinId: toPinId
+            },
+            active: false
+        });
+
+        showToast("Connexion créée.", "success");
+    }
+
+    function getPinPosition(componentId, pinId) {
+        const component = findComponent(componentId);
+
+        if (!component) return null;
+
+        const definition = getComponentDefinition(component.type);
+
+        if (!definition) return null;
+
+        const pinIndex = definition.pins.findIndex(
+            pin => pin.id === pinId
+        );
+
+        if (pinIndex < 0) return null;
+
+        const pin = definition.pins[pinIndex];
+
+        const sidePins = definition.pins.filter(
+            item => item.side === pin.side
+        );
+
+        const indexOnSide = sidePins.findIndex(
+            item => item.id === pin.id
+        );
+
+        const ratio =
+            (indexOnSide + 1) /
+            (sidePins.length + 1);
+
+        let x = component.x + component.width / 2;
+        let y = component.y + component.height / 2;
+
+        if (pin.side === "left") {
+            x = component.x;
+            y = component.y + component.height * ratio;
+        }
+
+        if (pin.side === "right") {
+            x = component.x + component.width;
+            y = component.y + component.height * ratio;
+        }
+
+        if (pin.side === "top") {
+            x = component.x + component.width * ratio;
+            y = component.y;
+        }
+
+        if (pin.side === "bottom") {
+            x = component.x + component.width * ratio;
+            y = component.y + component.height;
+        }
+
+        return { x, y };
+    }
+
+    function renderWires() {
+        if (!dom.wireLayer) return;
+
+        const width =
+            dom.canvas?.clientWidth ||
+            dom.viewport?.clientWidth ||
+            1000;
+
+        const height =
+            dom.canvas?.clientHeight ||
+            dom.viewport?.clientHeight ||
+            700;
+
+        dom.wireLayer.setAttribute("width", String(width));
+        dom.wireLayer.setAttribute("height", String(height));
+        dom.wireLayer.setAttribute(
+            "viewBox",
+            `0 0 ${width} ${height}`
+        );
+
+        dom.wireLayer.innerHTML = "";
+
+        state.wires.forEach(wire => {
+            const from = getPinPosition(
+                wire.from.componentId,
+                wire.from.pinId
+            );
+
+            const to = getPinPosition(
+                wire.to.componentId,
+                wire.to.pinId
+            );
+
+            if (!from || !to) return;
+
+            const midX = (from.x + to.x) / 2;
+
+            const path = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "path"
+            );
+
+            path.setAttribute(
+                "d",
+                `M ${from.x} ${from.y}
+                 C ${midX} ${from.y},
+                   ${midX} ${to.y},
+                   ${to.x} ${to.y}`
+            );
+
+            path.setAttribute(
+                "class",
+                wire.active ? "electronic-wire active" : "electronic-wire"
+            );
+
+            path.dataset.wireId = wire.id;
+
+            dom.wireLayer.appendChild(path);
+        });
+    }
+
+    /* ============================================================
+       17. ADD COMPONENT
+    ============================================================ */
+
+    function addComponent(type, options = {}) {
+        const component = createComponentInstance(type, options);
+
+        if (!component) return null;
+
+        selectComponent(component.id);
+        renderWires();
+        updateWorkspaceState();
+
+        return component;
+    }
+
+    /* ============================================================
+       18. COMPONENT DETAILS
+    ============================================================ */
+
+    function openComponentDetails(type) {
+        const definition = getComponentDefinition(type);
+
+        if (!definition || !dom.componentDetailsModal) return;
+
+        state.selectedComponentType = type;
+
+        if (dom.componentDetailsTitle) {
+            dom.componentDetailsTitle.textContent =
+                definition.name;
+        }
+
+        if (dom.componentDetailsVisual) {
+            dom.componentDetailsVisual.innerHTML =
+                createComponentVisualHTML(definition);
+        }
+
+        if (dom.componentDetailsProperties) {
+            dom.componentDetailsProperties.innerHTML = `
+                <div><strong>Catégorie :</strong> ${escapeHTML(definition.category)}</div>
+                <div><strong>Dimensions :</strong> ${definition.width} × ${definition.height}</div>
+                <div><strong>Pins :</strong> ${definition.pins
+                    .map(pin => escapeHTML(pin.name))
+                    .join(", ")}</div>
+                ${
+                    definition.resistance
+                        ? `<div><strong>Résistance :</strong> ${definition.resistance} Ω</div>`
+                        : ""
+                }
+                ${
+                    definition.voltage
+                        ? `<div><strong>Tension :</strong> ${definition.voltage} V</div>`
+                        : ""
+                }
+            `;
+        }
+
+        dom.componentDetailsModal.classList.remove("hidden");
+        dom.componentDetailsModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeComponentDetails() {
+        dom.componentDetailsModal?.classList.add("hidden");
+        dom.componentDetailsModal?.setAttribute("aria-hidden", "true");
+    }
+
+    /* ============================================================
+       19. PANEL MANAGEMENT
+    ============================================================ */
+
+    const PANEL_IDS = [
+        "componentLibraryPanel",
+        "codeLibraryPanel",
+        "codeEditorPanel",
+        "missionsPanel",
+        "diagnosticPanel",
+        "faultsPanel",
+        "measurementsPanel"
+    ];
+
+    function closeAllPanelsExcept(exceptId = null) {
+        PANEL_IDS.forEach(id => {
+            if (id === exceptId) return;
+
+            const panel = $(id);
+
+            if (!panel) return;
+
+            panel.classList.add("hidden");
+            panel.setAttribute("aria-hidden", "true");
+        });
+
+        if (exceptId !== "componentLibraryPanel") {
+            dom.libraryBtn?.setAttribute("aria-expanded", "false");
+        }
+    }
+
+    function openPanel(id) {
+        const panel = $(id);
+
+        if (!panel) return;
+
+        closeAllPanelsExcept(id);
+
+        panel.classList.remove("hidden");
+        panel.setAttribute("aria-hidden", "false");
+    }
+
+    function closePanel(id) {
+        const panel = $(id);
+
+        if (!panel) return;
+
+        panel.classList.add("hidden");
+        panel.setAttribute("aria-hidden", "true");
+    }
+
+    /* ============================================================
+       20. CODE LIBRARY RENDERING
+    ============================================================ */
+
+    function renderCodeLibrary() {
+        if (!dom.codeLibraryList) return;
+
+        const currentComponents = state.components.map(
+            component => component.type
+        );
+
+        const searchText = "";
+
+        const codes = CODE_LIBRARY.filter(code =>
+            code.level === state.currentCodeLevel
+        ).filter(code => {
+            if (!searchText) return true;
+
+            return normalizeText(
+                `${code.title} ${code.description} ${code.tags.join(" ")}`
+            ).includes(normalizeText(searchText));
+        });
+
+        dom.codeLibraryList.innerHTML = "";
+
+        codes.forEach(code => {
+            const compatibility = getCodeCompatibility(
+                code,
+                currentComponents
+            );
+
+            const card = document.createElement("article");
+            card.className = "code-library-card";
+            card.dataset.codeId = code.id;
+
+            const statusText =
+                compatibility.score >= 100
+                    ? "✓ Montage compatible"
+                    : compatibility.score >= 50
+                        ? "◐ Compatibilité partielle"
+                        : "○ Faites le montage correspondant";
+
+            card.innerHTML = `
+                <div class="code-card-header">
+                    <div>
+                        <h3>${escapeHTML(code.title)}</h3>
+                        <span>${escapeHTML(code.category)}</span>
+                    </div>
+
+                    <strong class="code-compatibility">
+                        ${escapeHTML(statusText)}
+                    </strong>
+                </div>
+
+                <p>${escapeHTML(code.description)}</p>
+
+                <div class="code-required-components">
+                    ${code.requiredTypes.map(type => {
+                        const definition = getComponentDefinition(type);
+                        return `
+                            <span>
+                                ${escapeHTML(definition?.name || type)}
+                            </span>
+                        `;
+                    }).join("")}
+                </div>
+
+                <pre class="code-library-preview"><code>${escapeHTML(code.code)}</code></pre>
+
+                <div class="code-card-actions">
+
+                    <button
+                        type="button"
+                        class="code-copy-btn"
+                        data-copy-code="${escapeHTML(code.id)}"
+                    >
+                        📋 COPIER
+                    </button>
+
+                    <button
+                        type="button"
+                        class="code-use-btn"
+                        data-use-code="${escapeHTML(code.id)}"
+                    >
+                        📝 UTILISER DANS L'ÉDITEUR
+                    </button>
+
+                </div>
+            `;
+
+            dom.codeLibraryList.appendChild(card);
+        });
+    }
+
+    function getCodeCompatibility(code, currentTypes) {
+        if (!code.requiredTypes.length) {
+            return { score: 100, missing: [] };
+        }
+
+        let matched = 0;
+        const missing = [];
+
+        code.requiredTypes.forEach(requiredType => {
+            if (currentTypes.includes(requiredType)) {
+                matched++;
+                return;
+            }
+
+            const aliases = componentTypeAliases(requiredType);
+
+            const found = currentTypes.some(currentType =>
+                aliases.includes(currentType) ||
+                componentTypeAliases(currentType).includes(requiredType)
+            );
+
+            if (found) {
+                matched++;
+            } else {
+                missing.push(requiredType);
+            }
+        });
+
+        return {
+            score: Math.round(
+                (matched / code.requiredTypes.length) * 100
+            ),
+            missing
+        };
+    }
+
+    function openCodeLibrary() {
+        closeAllPanelsExcept("codeLibraryPanel");
+        renderCodeLibrary();
+        openPanel("codeLibraryPanel");
+    }
+
+    function useCode(codeId) {
+        const code = CODE_LIBRARY.find(item => item.id === codeId);
+
+        if (!code || !dom.electronicCodeEditor) return;
+
+        state.currentCodeId = code.id;
+        state.code = code.code;
+
+        dom.electronicCodeEditor.value = code.code;
+
+        openCodeEditor();
+
+        consoleLog(`Code chargé : ${code.title}`, "success");
+        consoleLog(
+            "Vérifiez que votre montage correspond avant l'exécution.",
+            "info"
+        );
+    }
+
+    function copyCode(codeId) {
+        const code = CODE_LIBRARY.find(item => item.id === codeId);
+
+        if (!code) return;
+
+        copyText(code.code).then(success => {
+            if (success) {
+                showToast("Code copié.", "success");
+            } else {
+                showToast("Copie automatique indisponible.", "warning");
+            }
+        });
+    }
+
+    async function copyText(text) {
+        try {
+            if (
+                navigator.clipboard &&
+                typeof navigator.clipboard.writeText === "function"
+            ) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+        } catch (_) {
+            /* Fallback below. */
+        }
+
+        try {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            const success = document.execCommand("copy");
+            textarea.remove();
+
+            return success;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    /* ============================================================
+       21. CODE EDITOR
+    ============================================================ */
+
+    function openCodeEditor() {
+        closeAllPanelsExcept("codeEditorPanel");
+
+        if (dom.codeEditorPanel) {
+            dom.codeEditorPanel.classList.remove("hidden");
+            dom.codeEditorPanel.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+        }
+
+        if (dom.electronicCodeEditor) {
+            setTimeout(() => {
+                dom.electronicCodeEditor.focus();
+            }, 50);
+        }
+    }
+
+    function validateCode(code = dom.electronicCodeEditor?.value || "") {
+        const result = analyzeArduinoCode(code);
+
+        clearConsole();
+
+        if (!result.valid) {
+            result.errors.forEach(error =>
+                consoleLog(`ERREUR : ${error}`, "error")
+            );
+
+            showToast(
+                "Le code contient des erreurs.",
+                "error"
+            );
+
+            return false;
+        }
+
+        result.warnings.forEach(warning =>
+            consoleLog(`AVERTISSEMENT : ${warning}`, "warning")
+        );
+
+        result.instructions.forEach(instruction =>
+            consoleLog(
+                `✓ ${instruction.description}`,
+                "success"
+            )
+        );
+
+        if (!result.instructions.length) {
+            consoleLog(
+                "Code syntaxiquement accepté, mais aucune instruction simulable détectée.",
+                "warning"
+            );
+        }
+
+        showToast("Code vérifié.", "success");
+
+        return true;
+    }
+
+    function analyzeArduinoCode(code) {
+        const source = String(code || "");
+
+        const result = {
+            valid: true,
+            errors: [],
+            warnings: [],
+            instructions: [],
+            pinModes: {},
+            digitalWrites: {},
+            analogWrites: {},
+            tones: {},
+            servoWrites: {},
+            digitalReads: [],
+            analogReads: [],
+            delays: []
+        };
+
+        if (!source.trim()) {
+            result.valid = false;
+            result.errors.push("Le code est vide.");
+            return result;
+        }
+
+        let braceBalance = 0;
+
+        for (const char of source) {
+            if (char === "{") braceBalance++;
+            if (char === "}") braceBalance--;
+
+            if (braceBalance < 0) {
+                break;
+            }
+        }
+
+        if (braceBalance !== 0) {
+            result.valid = false;
+            result.errors.push(
+                "Les accolades { } ne sont pas équilibrées."
+            );
+        }
+
+        const pinModeRegex =
+            /pinMode\s*\(\s*([A-Za-z0-9_]+)\s*,\s*(INPUT_PULLUP|INPUT|OUTPUT)\s*\)/gi;
+
+        let match;
+
+        while ((match = pinModeRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+
+            result.pinModes[pin] = match[2].toUpperCase();
+
+            result.instructions.push({
+                type: "pinMode",
+                pin,
+                mode: match[2].toUpperCase(),
+                description:
+                    `pinMode(${pin}, ${match[2].toUpperCase()})`
+            });
+        }
+
+        const digitalWriteRegex =
+            /digitalWrite\s*\(\s*([A-Za-z0-9_]+)\s*,\s*(HIGH|LOW|1|0)\s*\)/gi;
+
+        while ((match = digitalWriteRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+            const value =
+                /HIGH|1/i.test(match[2]) ? 1 : 0;
+
+            result.digitalWrites[pin] = value;
+
+            result.instructions.push({
+                type: "digitalWrite",
+                pin,
+                value,
+                description:
+                    `digitalWrite(${pin}, ${value ? "HIGH" : "LOW"})`
+            });
+        }
+
+        const analogWriteRegex =
+            /analogWrite\s*\(\s*([A-Za-z0-9_]+)\s*,\s*(\d+(?:\.\d+)?)\s*\)/gi;
+
+        while ((match = analogWriteRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+            const value = clamp(
+                Number(match[2]),
+                0,
+                255
+            );
+
+            result.analogWrites[pin] = value;
+
+            result.instructions.push({
+                type: "analogWrite",
+                pin,
+                value,
+                description:
+                    `analogWrite(${pin}, ${value})`
+            });
+        }
+
+        const digitalReadRegex =
+            /digitalRead\s*\(\s*([A-Za-z0-9_]+)\s*\)/gi;
+
+        while ((match = digitalReadRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+
+            result.digitalReads.push(pin);
+
+            result.instructions.push({
+                type: "digitalRead",
+                pin,
+                description:
+                    `digitalRead(${pin})`
+            });
+        }
+
+        const analogReadRegex =
+            /analogRead\s*\(\s*([A-Za-z0-9_]+)\s*\)/gi;
+
+        while ((match = analogReadRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+
+            result.analogReads.push(pin);
+
+            result.instructions.push({
+                type: "analogRead",
+                pin,
+                description:
+                    `analogRead(${pin})`
+            });
+        }
+
+        const toneRegex =
+            /tone\s*\(\s*([A-Za-z0-9_]+)\s*,\s*(\d+(?:\.\d+)?)\s*(?:,\s*(\d+(?:\.\d+)?))?\s*\)/gi;
+
+        while ((match = toneRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+            const frequency = Number(match[2]);
+
+            result.tones[pin] = frequency;
+
+            result.instructions.push({
+                type: "tone",
+                pin,
+                frequency,
+                duration: match[3]
+                    ? Number(match[3])
+                    : null,
+                description:
+                    `tone(${pin}, ${frequency})`
+            });
+        }
+
+        const noToneRegex =
+            /noTone\s*\(\s*([A-Za-z0-9_]+)\s*\)/gi;
+
+        while ((match = noToneRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+
+            result.tones[pin] = 0;
+
+            result.instructions.push({
+                type: "noTone",
+                pin,
+                description:
+                    `noTone(${pin})`
+            });
+        }
+
+        const servoAttachRegex =
+            /\.attach\s*\(\s*([A-Za-z0-9_]+)\s*\)/gi;
+
+        while ((match = servoAttachRegex.exec(source))) {
+            const pin = normalizePin(match[1]);
+
+            result.instructions.push({
+                type: "servoAttach",
+                pin,
+                description:
+                    `Servo.attach(${pin})`
+            });
+        }
+
+        const servoWriteRegex =
+            /\.write\s*\(\s*(\d+(?:\.\d+)?)\s*\)/gi;
+
+        while ((match = servoWriteRegex.exec(source))) {
+            const angle = clamp(
+                Number(match[1]),
+                0,
+                180
+            );
+
+            const pin =
+                findServoAttachPin(source) || "9";
+
+            result.servoWrites[pin] = angle;
+
+            result.instructions.push({
+                type: "servoWrite",
+                pin,
+                angle,
+                description:
+                    `Servo.write(${angle}°)`
+            });
+        }
+
+        const delayRegex =
+            /delay\s*\(\s*(\d+(?:\.\d+)?)\s*\)/gi;
+
+        while ((match = delayRegex.exec(source))) {
+            result.delays.push(Number(match[1]));
+
+            result.instructions.push({
+                type: "delay",
+                value: Number(match[1]),
+                description:
+                    `delay(${Number(match[1])} ms)`
+            });
+        }
+
+        if (/pulseIn\s*\(/i.test(source)) {
+            result.instructions.push({
+                type: "pulseIn",
+                description:
+                    "Lecture pulseIn détectée"
+            });
+        }
+
+        if (/lcd/i.test(source) && /print\s*\(/i.test(source)) {
+            result.instructions.push({
+                type: "lcdPrint",
+                description:
+                    "Instruction LCD détectée"
+            });
+        }
+
+        if (
+            !/void\s+setup\s*\(/i.test(source) &&
+            !/void\s+loop\s*\(/i.test(source)
+        ) {
+            result.warnings.push(
+                "Le code ne contient ni setup() ni loop()."
+            );
+        }
+
+        return result;
+    }
+
+    function normalizePin(pin) {
+        const value = String(pin || "").trim();
+
+        if (/^D\d+$/i.test(value)) {
+            return value.toUpperCase();
+        }
+
+        if (/^GPIO\d+$/i.test(value)) {
+            return value.toUpperCase();
+        }
+
+        if (/^A\d+$/i.test(value)) {
+            return value.toUpperCase();
+        }
+
+        if (/^\d+$/.test(value)) {
+            return `D${value}`;
+        }
+
+        return value;
+    }
+
+    function findServoAttachPin(source) {
+        const match =
+            source.match(/\.attach\s*\(\s*([A-Za-z0-9_]+)\s*\)/i);
+
+        return match
+            ? normalizePin(match[1])
+            : null;
+    }
+
+    /* ============================================================
+       22. CODE EXECUTION
+    ============================================================ */
+
+    function executeCurrentCode() {
+        if (!dom.electronicCodeEditor) return;
+
+        const code = dom.electronicCodeEditor.value || "";
+
+        state.code = code;
+
+        const analysis = analyzeArduinoCode(code);
+
+        clearConsole();
+
+        if (!analysis.valid) {
+            analysis.errors.forEach(error =>
+                consoleLog(`ERREUR : ${error}`, "error")
+            );
+
+            showToast(
+                "Exécution refusée : code invalide.",
+                "error"
+            );
+
+            return;
+        }
+
+        state.codeRunning = true;
+
+        consoleLog(
+            "FOBAS Arduino Code Engine — démarrage...",
+            "info"
+        );
+
+        const controller =
+            findControllerForCode();
+
+        if (!controller) {
+            consoleLog(
+                "Aucun contrôleur Arduino/ESP32 compatible trouvé dans le laboratoire.",
+                "error"
+            );
+
+            state.codeRunning = false;
+
+            showToast(
+                "Ajoutez d'abord un Arduino ou contrôleur compatible.",
                 "warning"
             );
 
             return;
         }
 
-        const wire = {
-
-            id: newWireId(),
-
-            from: {
-                componentId:
-                    from.componentId,
-                pinName:
-                    from.pinName
-            },
-
-            to: {
-                componentId:
-                    to.componentId,
-                pinName:
-                    to.pinName
-            },
-
-            color: "#22c9ff",
-
-            active: false,
-
-            fault: null
-        };
-
-        state.wires.push(wire);
-
-        pushHistory();
-
-        renderWires();
-
-        updateWorkspace();
-
-        toast(
-            "Connexion créée.",
+        consoleLog(
+            `Contrôleur détecté : ${controller.name}`,
             "success"
         );
 
-        simulateCircuit();
-    }
+        const mapping = buildHardwareMapping(controller);
 
-
-    /* ============================================================
-       23 — POSITION DES PINS
-    ============================================================ */
-
-    function getPinPosition(
-        component,
-        pinName
-    ) {
-
-        const element =
-            document.querySelector(
-                `[data-component-id="${component.id}"]`
+        if (!mapping.length) {
+            consoleLog(
+                "Aucune connexion matérielle détectable pour les instructions actuelles.",
+                "warning"
             );
-
-        if (!element) {
-
-            return {
-                x: component.x,
-                y: component.y
-            };
         }
 
-        const pin =
-            element.querySelector(
-                `.component-pin[data-pin="${CSS.escape(pinName)}"]`
+        analysis.instructions.forEach(instruction => {
+            executeInstruction(
+                controller,
+                instruction,
+                mapping
             );
+        });
 
-        if (!pin) {
+        state.codeRunning = true;
+        state.circuitRunning = true;
 
-            return {
-                x:
-                    component.x +
-                    COMPONENT_WIDTH / 2,
+        renderAllComponents();
+        renderWires();
+        runSimulation();
 
-                y:
-                    component.y +
-                    COMPONENT_HEIGHT / 2
-            };
-        }
+        consoleLog(
+            "Exécution terminée : les états du montage ont été mis à jour.",
+            "success"
+        );
 
-        const canvas =
-            $("laboratoryCanvas");
+        setStatus(
+            "Code exécuté sur le montage",
+            "working"
+        );
 
-        const canvasRect =
-            canvas.getBoundingClientRect();
+        showToast(
+            "Code exécuté sur le laboratoire.",
+            "success"
+        );
 
-        const pinRect =
-            pin.getBoundingClientRect();
-
-        return {
-
-            x:
-                (
-                    pinRect.left +
-                    pinRect.width / 2 -
-                    canvasRect.left
-                ) / state.zoom,
-
-            y:
-                (
-                    pinRect.top +
-                    pinRect.height / 2 -
-                    canvasRect.top
-                ) / state.zoom
-        };
+        updateWorkspaceState();
     }
 
+    function findControllerForCode() {
+        return state.components.find(component => {
+            const definition = getComponentDefinition(component.type);
+            return definition && definition.controller;
+        }) || null;
+    }
 
-    /* ============================================================
-       24 — RENDU DES FILS
-    ============================================================ */
+    function buildHardwareMapping(controller) {
+        const mappings = [];
 
-    function renderWires() {
+        state.wires.forEach(wire => {
+            let controllerPin = null;
+            let other = null;
 
-        const svg = $("wireLayer");
-
-        if (!svg) return;
-
-        svg.innerHTML = "";
-
-        svg.setAttribute(
-            "width",
-            "100%"
-        );
-
-        svg.setAttribute(
-            "height",
-            "100%"
-        );
-
-        state.wires.forEach(
-            wire => {
-
-                const a =
-                    getComponent(
-                        wire.from.componentId
-                    );
-
-                const b =
-                    getComponent(
-                        wire.to.componentId
-                    );
-
-                if (!a || !b) return;
-
-                const p1 =
-                    getPinPosition(
-                        a,
-                        wire.from.pinName
-                    );
-
-                const p2 =
-                    getPinPosition(
-                        b,
-                        wire.to.pinName
-                    );
-
-                const path =
-                    document.createElementNS(
-                        "http://www.w3.org/2000/svg",
-                        "path"
-                    );
-
-                const midX =
-                    (p1.x + p2.x) / 2;
-
-                const d =
-                    `M ${p1.x} ${p1.y}
-                     C ${midX} ${p1.y},
-                       ${midX} ${p2.y},
-                       ${p2.x} ${p2.y}`;
-
-                path.setAttribute(
-                    "d",
-                    d
-                );
-
-                path.setAttribute(
-                    "fill",
-                    "none"
-                );
-
-                path.setAttribute(
-                    "stroke",
-                    wire.active
-                        ? "#19e6ff"
-                        : wire.color
-                );
-
-                path.setAttribute(
-                    "stroke-width",
-                    wire.active
-                        ? "5"
-                        : "3"
-                );
-
-                path.setAttribute(
-                    "stroke-linecap",
-                    "round"
-                );
-
-                path.dataset.wireId =
-                    wire.id;
-
-                path.style.cursor =
-                    "pointer";
-
-                path.addEventListener(
-                    "pointerdown",
-                    event => {
-
-                        event.stopPropagation();
-
-                        selectWire(
-                            wire.id
-                        );
-                    }
-                );
-
-                svg.appendChild(path);
+            if (wire.from.componentId === controller.id) {
+                controllerPin = wire.from.pinId;
+                other = wire.to;
             }
-        );
+
+            if (wire.to.componentId === controller.id) {
+                controllerPin = wire.to.pinId;
+                other = wire.from;
+            }
+
+            if (!controllerPin || !other) return;
+
+            const target = findComponent(other.componentId);
+
+            if (!target) return;
+
+            mappings.push({
+                controllerId: controller.id,
+                controllerPin: normalizePin(controllerPin),
+                componentId: target.id,
+                componentPin: other.pinId,
+                componentType: target.type
+            });
+        });
+
+        return mappings;
     }
 
+    function executeInstruction(controller, instruction, mapping) {
+        const pin = normalizePin(instruction.pin || "");
 
-    /* ============================================================
-       25 — SÉLECTION
-    ============================================================ */
+        if (instruction.type === "pinMode") {
+            controller.pinModes[pin] = instruction.mode;
+            return;
+        }
 
-    function selectComponent(id) {
+        if (instruction.type === "digitalWrite") {
+            controller.digitalValues[pin] = instruction.value;
 
-        state.selectedComponentId = id;
-        state.selectedWireId = null;
+            const targets = mapping.filter(
+                item => item.controllerPin === pin
+            );
 
-        renderAllComponents();
-
-        updateComponentDetailsIfOpen();
-    }
-
-
-    function selectWire(id) {
-
-        state.selectedWireId = id;
-        state.selectedComponentId = null;
-
-        renderAllComponents();
-
-        qsa(
-            "[data-wire-id]"
-        ).forEach(
-            el =>
-                el.classList.toggle(
-                    "selected-wire",
-                    el.dataset.wireId === id
+            targets.forEach(target =>
+                applyDigitalOutput(
+                    target,
+                    instruction.value
                 )
-        );
-    }
-
-
-    /* ============================================================
-       26 — DRAG DES COMPOSANTS
-    ============================================================ */
-
-    function beginComponentDrag(
-        event,
-        component,
-        element
-    ) {
-
-        state.drag.active = true;
-
-        state.drag.componentId =
-            component.id;
-
-        const canvas =
-            $("laboratoryCanvas");
-
-        const rect =
-            canvas.getBoundingClientRect();
-
-        const x =
-            (
-                event.clientX -
-                rect.left
-            ) / state.zoom;
-
-        const y =
-            (
-                event.clientY -
-                rect.top
-            ) / state.zoom;
-
-        state.drag.offsetX =
-            x - component.x;
-
-        state.drag.offsetY =
-            y - component.y;
-
-        element.setPointerCapture?.(
-            event.pointerId
-        );
-    }
-
-
-    function moveComponent(
-        event
-    ) {
-
-        if (
-            !state.drag.active
-        ) return;
-
-        const component =
-            getComponent(
-                state.drag.componentId
-            );
-
-        if (!component) return;
-
-        const canvas =
-            $("laboratoryCanvas");
-
-        const rect =
-            canvas.getBoundingClientRect();
-
-        let x =
-            (
-                event.clientX -
-                rect.left
-            ) / state.zoom -
-            state.drag.offsetX;
-
-        let y =
-            (
-                event.clientY -
-                rect.top
-            ) / state.zoom -
-            state.drag.offsetY;
-
-        if (state.snapEnabled) {
-
-            x =
-                Math.round(
-                    x / GRID_SIZE
-                ) * GRID_SIZE;
-
-            y =
-                Math.round(
-                    y / GRID_SIZE
-                ) * GRID_SIZE;
-        }
-
-        component.x = Math.max(
-            0,
-            x
-        );
-
-        component.y = Math.max(
-            0,
-            y
-        );
-
-        renderComponent(
-            component
-        );
-
-        renderWires();
-    }
-
-
-    function endComponentDrag() {
-
-        if (!state.drag.active) return;
-
-        state.drag.active = false;
-
-        state.drag.componentId = null;
-
-        pushHistory();
-
-        updateWorkspace();
-    }
-
-
-    /* ============================================================
-       27 — ROTATION
-    ============================================================ */
-
-    function rotateComponent(id) {
-
-        const component =
-            getComponent(id);
-
-        if (!component) return;
-
-        component.rotation =
-            (
-                component.rotation +
-                90
-            ) % 360;
-
-        pushHistory();
-
-        renderComponent(
-            component
-        );
-
-        renderWires();
-
-        toast(
-            component.name +
-            " tourné de 90°.",
-            "success"
-        );
-    }
-
-
-    /* ============================================================
-       28 — DUPLICATION
-    ============================================================ */
-
-    function duplicateComponent(id) {
-
-        const original =
-            getComponent(id);
-
-        if (!original) return;
-
-        const copy =
-            structuredCloneSafe(
-                original
-            );
-
-        copy.id =
-            newComponentId();
-
-        copy.x += 40;
-        copy.y += 40;
-
-        copy.pins =
-            copy.pins.map(
-                pin => ({
-                    ...pin,
-                    id:
-                        "pin_" +
-                        Math.random()
-                            .toString(36)
-                            .slice(2)
-                })
-            );
-
-        state.components.push(copy);
-
-        pushHistory();
-
-        renderComponent(copy);
-
-        selectComponent(copy.id);
-
-        updateWorkspace();
-
-        toast(
-            "Composant dupliqué.",
-            "success"
-        );
-    }
-
-
-    /* ============================================================
-       29 — SUPPRESSION
-    ============================================================ */
-
-    function deleteComponent(id) {
-
-        const component =
-            getComponent(id);
-
-        if (!component) return;
-
-        state.wires =
-            state.wires.filter(
-                wire =>
-                    wire.from.componentId !== id &&
-                    wire.to.componentId !== id
-            );
-
-        state.components =
-            state.components.filter(
-                c => c.id !== id
-            );
-
-        if (
-            state.selectedComponentId === id
-        ) {
-            state.selectedComponentId =
-                null;
-        }
-
-        pushHistory();
-
-        renderAllComponents();
-
-        renderWires();
-
-        updateWorkspace();
-
-        toast(
-            component.name +
-            " supprimé.",
-            "success"
-        );
-
-        simulateCircuit();
-    }
-
-
-    function deleteSelected() {
-
-        if (
-            state.selectedComponentId
-        ) {
-
-            deleteComponent(
-                state.selectedComponentId
             );
 
             return;
         }
 
-        if (state.selectedWireId) {
+        if (instruction.type === "analogWrite") {
+            controller.analogValues[pin] = instruction.value;
 
-            deleteWire(
-                state.selectedWireId
-            );
-        }
-    }
-
-
-    function deleteWire(id) {
-
-        const index =
-            state.wires.findIndex(
-                w => w.id === id
+            const targets = mapping.filter(
+                item => item.controllerPin === pin
             );
 
-        if (index < 0) return;
-
-        state.wires.splice(
-            index,
-            1
-        );
-
-        state.selectedWireId =
-            null;
-
-        pushHistory();
-
-        renderWires();
-
-        updateWorkspace();
-
-        simulateCircuit();
-
-        toast(
-            "Connexion supprimée.",
-            "success"
-        );
-    }
-
-
-    /* ============================================================
-       30 — OUTILS
-    ============================================================ */
-
-    function setTool(tool) {
-
-        state.selectedTool =
-            tool;
-
-        state.pendingWirePin =
-            null;
-
-        const map = {
-            select: "selectToolBtn",
-            wire: "wireToolBtn",
-            move: "moveToolBtn",
-            rotate: "rotateToolBtn",
-            delete: "deleteToolBtn",
-            duplicate: "duplicateToolBtn"
-        };
-
-        Object.values(map).forEach(
-            id => {
-                const el = $(id);
-                if (el) {
-                    el.classList.remove(
-                        "active"
-                    );
-                }
-            }
-        );
-
-        if (map[tool]) {
-            const el =
-                $(map[tool]);
-
-            if (el) {
-                el.classList.add(
-                    "active"
-                );
-            }
-        }
-    }
-
-
-    function setToolbarActive(id) {
-
-        qsa(
-            ".workspace-tool"
-        ).forEach(
-            el =>
-                el.classList.remove(
-                    "active"
-                )
-        );
-
-        const el = $(id);
-
-        if (el) {
-            el.classList.add(
-                "active"
-            );
-        }
-    }
-
-
-    /* ============================================================
-       31 — ZOOM
-    ============================================================ */
-
-    function setZoom(value) {
-
-        state.zoom =
-            Math.max(
-                MIN_ZOOM,
-                Math.min(
-                    MAX_ZOOM,
-                    value
+            targets.forEach(target =>
+                applyAnalogOutput(
+                    target,
+                    instruction.value
                 )
             );
 
-        applyCanvasTransform();
-
-        text(
-            "zoomResetBtn",
-            Math.round(
-                state.zoom * 100
-            ) + "%"
-        );
-
-        renderWires();
-    }
-
-
-    function zoomIn() {
-        setZoom(
-            state.zoom +
-            ZOOM_STEP
-        );
-    }
-
-
-    function zoomOut() {
-        setZoom(
-            state.zoom -
-            ZOOM_STEP
-        );
-    }
-
-
-    function resetZoom() {
-        setZoom(1);
-    }
-
-
-    function applyCanvasTransform() {
-
-        const canvas =
-            $("laboratoryCanvas");
-
-        if (!canvas) return;
-
-        canvas.style.transform =
-            `translate(${state.panX}px, ${state.panY}px)
-             scale(${state.zoom})`;
-
-        canvas.style.transformOrigin =
-            "0 0";
-    }
-
-
-    function fitWorkspace() {
-
-        state.panX = 0;
-        state.panY = 0;
-
-        setZoom(1);
-
-        toast(
-            "Laboratoire adapté.",
-            "success"
-        );
-    }
-
-
-    /* ============================================================
-       32 — ZOOM TACTILE / PINCH
-    ============================================================ */
-
-    function touchDistance(
-        touches
-    ) {
-
-        if (touches.length < 2) {
-            return null;
+            return;
         }
 
-        const a = touches[0];
-        const b = touches[1];
-
-        return Math.hypot(
-            b.clientX - a.clientX,
-            b.clientY - a.clientY
-        );
-    }
-
-
-    function setupTouchZoom() {
-
-        const viewport =
-            $("laboratoryViewport");
-
-        if (!viewport) return;
-
-        viewport.addEventListener(
-            "touchstart",
-            event => {
-
-                if (
-                    event.touches.length === 2
-                ) {
-
-                    state.viewportGesture
-                        .pinchDistance =
-                        touchDistance(
-                            event.touches
-                        );
-
-                    state.viewportGesture
-                        .pinchZoom =
-                        state.zoom;
-                }
-            },
-            {
-                passive: true
-            }
-        );
-
-        viewport.addEventListener(
-            "touchmove",
-            event => {
-
-                if (
-                    event.touches.length !== 2
-                ) return;
-
-                const distance =
-                    touchDistance(
-                        event.touches
-                    );
-
-                const initial =
-                    state.viewportGesture
-                        .pinchDistance;
-
-                if (
-                    !distance ||
-                    !initial
-                ) return;
-
-                const ratio =
-                    distance / initial;
-
-                setZoom(
-                    state.viewportGesture
-                        .pinchZoom *
-                    ratio
+        if (instruction.type === "digitalRead") {
+            const value =
+                readDigitalInput(
+                    controller,
+                    pin,
+                    mapping
                 );
-            },
-            {
-                passive: true
-            }
-        );
 
-        viewport.addEventListener(
-            "touchend",
-            () => {
-
-                state.viewportGesture
-                    .pinchDistance = null;
-            },
-            {
-                passive: true
-            }
-        );
-    }
-
-
-    /* ============================================================
-       33 — GRILLE
-    ============================================================ */
-
-    function toggleGrid() {
-
-        state.gridVisible =
-            !state.gridVisible;
-
-        const grid =
-            $("laboratoryGrid");
-
-        if (grid) {
-
-            grid.style.display =
-                state.gridVisible
-                    ? ""
-                    : "none";
+            controller.digitalValues[pin] = value;
+            return;
         }
-    }
 
+        if (instruction.type === "analogRead") {
+            const value =
+                readAnalogInput(
+                    controller,
+                    pin,
+                    mapping
+                );
 
-    function toggleSnap() {
-
-        state.snapEnabled =
-            !state.snapEnabled;
-
-        toast(
-            state.snapEnabled
-                ? "Alignement magnétique activé."
-                : "Alignement magnétique désactivé.",
-            "info"
-        );
-    }
-
-
-    /* ============================================================
-       34 — SIMULATION CIRCUIT
-    ============================================================ */
-
-    function simulateCircuit() {
-
-        const result =
-            calculateCircuit();
-
-        state.simulation =
-            result;
-
-        state.measurements.voltage =
-            result.voltage;
-
-        state.measurements.current =
-            result.current;
-
-        state.measurements.resistance =
-            result.totalResistance;
-
-        state.measurements.frequency =
-            result.frequency;
-
-        state.measurements.power =
-            result.voltage *
-            result.current;
-
-        state.measurements.continuity =
-            result.continuity;
-
-        applySimulationStates(
-            result
-        );
-
-        updateMeasurementDisplays();
-
-        updateWorkspace();
-
-        renderAllComponents();
-
-        renderWires();
-
-        return result;
-    }
-
-
-    /* ============================================================
-       35 — CALCUL DU CIRCUIT
-    ============================================================ */
-
-    function calculateCircuit() {
-
-        const result = {
-
-            sourceVoltage: 0,
-
-            voltage: 0,
-
-            current: 0,
-
-            totalResistance: Infinity,
-
-            frequency: 0,
-
-            continuity: false,
-
-            poweredNodes: new Set(),
-
-            componentStates: {}
-        };
-
-        const source =
-            state.components.find(
-                c =>
-                    [
-                        "battery",
-                        "dc-supply"
-                    ].includes(c.type)
-            );
+            controller.analogValues[pin] = value;
+            return;
+        }
 
         if (
-            source &&
-            state.powerOn
+            instruction.type === "tone" ||
+            instruction.type === "noTone"
         ) {
-
-            result.sourceVoltage =
-                Number(
-                    source.voltage
-                ) || 0;
-        }
-
-        const acSource =
-            state.components.find(
-                c =>
-                    c.type === "ac-supply"
+            const targets = mapping.filter(
+                item => item.controllerPin === pin
             );
 
-        const signalSource =
-            state.components.find(
-                c =>
-                    c.type ===
-                    "signal-generator"
+            targets.forEach(target => {
+                const component =
+                    findComponent(target.componentId);
+
+                if (!component) return;
+
+                if (component.type === "buzzer") {
+                    component.state =
+                        instruction.type === "tone" &&
+                        instruction.frequency > 0
+                            ? "on"
+                            : "off";
+
+                    component.frequency =
+                        instruction.frequency || 0;
+                }
+            });
+
+            return;
+        }
+
+        if (instruction.type === "servoAttach") {
+            controller.pinModes[pin] = "SERVO";
+            return;
+        }
+
+        if (instruction.type === "servoWrite") {
+            const targets = mapping.filter(
+                item => item.controllerPin === pin
             );
 
-        if (acSource) {
+            targets.forEach(target => {
+                const component =
+                    findComponent(target.componentId);
 
-            result.sourceVoltage =
-                state.powerOn
-                    ? Number(
-                        acSource.voltage
-                    ) || 0
-                    : 0;
+                if (!component) return;
 
-            result.frequency =
-                Number(
-                    acSource.frequency
-                ) || 0;
+                if (component.type === "servo") {
+                    component.angle = clamp(
+                        instruction.angle,
+                        0,
+                        180
+                    );
+
+                    component.state = "on";
+                }
+            });
+
+            return;
         }
 
-        if (signalSource) {
+        if (instruction.type === "lcdPrint") {
+            const lcd = state.components.find(
+                component => component.type === "lcd"
+            );
 
-            result.frequency =
-                Number(
-                    signalSource.frequency
-                ) || 0;
+            if (lcd) {
+                lcd.displayText = "FOBAS";
+            }
+        }
+    }
+
+    function applyDigitalOutput(target, value) {
+        const component =
+            findComponent(target.componentId);
+
+        if (!component) return;
+
+        const on = Number(value) === 1;
+
+        if (component.type === "led") {
+            component.state = on ? "on" : "off";
         }
 
-        if (!state.powerOn) {
-
-            return result;
+        if (component.type === "bulb") {
+            component.state = on ? "on" : "off";
         }
 
-        const conductive =
-            buildElectricalGraph();
-
-        result.continuity =
-            conductive.hasClosedPath;
-
-        if (!conductive.hasClosedPath) {
-
-            return result;
+        if (component.type === "buzzer") {
+            component.state = on ? "on" : "off";
         }
+
+        if (component.type === "relay") {
+            component.state = on ? "on" : "off";
+        }
+
+        if (component.type === "dc-motor") {
+            component.speed = on ? 100 : 0;
+            component.state = on ? "on" : "off";
+        }
+
+        if (component.type === "switch") {
+            component.state = on ? "closed" : "open";
+        }
+
+        component.pinStates[target.componentPin] = on ? 1 : 0;
+    }
+
+    function applyAnalogOutput(target, value) {
+        const component =
+            findComponent(target.componentId);
+
+        if (!component) return;
+
+        const normalized =
+            clamp(Number(value), 0, 255);
+
+        const percentage =
+            (normalized / 255) * 100;
+
+        if (component.type === "led") {
+            component.state =
+                normalized > 0 ? "on" : "off";
+
+            component.value = normalized;
+        }
+
+        if (component.type === "dc-motor") {
+            component.speed = percentage;
+            component.state =
+                percentage > 0 ? "on" : "off";
+        }
+
+        if (component.type === "servo") {
+            component.angle =
+                (normalized / 255) * 180;
+        }
+    }
+
+    function readDigitalInput(controller, pin, mapping) {
+        const targets = mapping.filter(
+            item => item.controllerPin === pin
+        );
+
+        for (const target of targets) {
+            const component =
+                findComponent(target.componentId);
+
+            if (!component) continue;
+
+            if (component.type === "push-button") {
+                return component.state === "pressed" ? 1 : 0;
+            }
+
+            if (component.type === "switch") {
+                return component.state === "closed" ? 1 : 0;
+            }
+
+            return Number(
+                component.digitalValues[target.componentPin] || 0
+            );
+        }
+
+        return 0;
+    }
+
+    function readAnalogInput(controller, pin, mapping) {
+        const targets = mapping.filter(
+            item => item.controllerPin === pin
+        );
+
+        for (const target of targets) {
+            const component =
+                findComponent(target.componentId);
+
+            if (!component) continue;
+
+            if (component.type === "potentiometer") {
+                return clamp(
+                    Number(component.value ?? 50) * 10.23,
+                    0,
+                    1023
+                );
+            }
+
+            if (component.type === "ldr") {
+                return clamp(
+                    Number(component.value ?? 500),
+                    0,
+                    1023
+                );
+            }
+
+            if (component.type === "joystick") {
+                return clamp(
+                    Number(component.xValue ?? 512),
+                    0,
+                    1023
+                );
+            }
+        }
+
+        return 0;
+    }
+
+    /* ============================================================
+       23. CIRCUIT SIMULATION
+    ============================================================ */
+
+    function runSimulation() {
+        calculateMeasurements();
+
+        const powered =
+            state.powerOn ||
+            state.circuitRunning ||
+            state.codeRunning;
+
+        state.wires.forEach(wire => {
+            wire.active = powered;
+        });
+
+        if (powered) {
+            propagateSimpleCircuitState();
+        }
+
+        renderAllComponents();
+        renderWires();
+        updateWorkspaceState();
+        updateMeasurementDisplays();
+    }
+
+    function propagateSimpleCircuitState() {
+        state.components.forEach(component => {
+            if (component.type === "led") {
+                if (component.state === "on") return;
+
+                const poweredByWire =
+                    isComponentConnectedToPower(component.id);
+
+                if (poweredByWire && !hasBlockingFault(component)) {
+                    component.state = "on";
+                }
+            }
+
+            if (component.type === "bulb") {
+                if (
+                    isComponentConnectedToPower(component.id) &&
+                    !hasBlockingFault(component)
+                ) {
+                    component.state = "on";
+                }
+            }
+        });
+    }
+
+    function isComponentConnectedToPower(componentId) {
+        const visited = new Set();
+        const queue = [componentId];
+
+        while (queue.length) {
+            const currentId = queue.shift();
+
+            if (visited.has(currentId)) continue;
+
+            visited.add(currentId);
+
+            const component =
+                findComponent(currentId);
+
+            if (!component) continue;
+
+            if (
+                component.type === "battery" ||
+                component.type === "dc-supply"
+            ) {
+                return state.powerOn || state.circuitRunning;
+            }
+
+            state.wires.forEach(wire => {
+                if (wire.from.componentId === currentId) {
+                    queue.push(wire.to.componentId);
+                }
+
+                if (wire.to.componentId === currentId) {
+                    queue.push(wire.from.componentId);
+                }
+            });
+        }
+
+        return false;
+    }
+
+    function hasBlockingFault(component) {
+        return (
+            component.faults?.open ||
+            component.faults?.defective ||
+            state.faults.openCircuit ||
+            state.faults.defectiveComponent
+        );
+    }
+
+    function calculateMeasurements() {
+        const source =
+            state.components.find(component =>
+                component.type === "battery" ||
+                component.type === "dc-supply" ||
+                component.type === "ac-supply" ||
+                component.type === "signal-generator"
+            );
+
+        const voltage =
+            state.powerOn && source
+                ? Number(source.voltage || 0)
+                : 0;
+
+        let resistance = null;
 
         const resistors =
             state.components.filter(
-                c =>
-                    c.type ===
-                    "resistor"
+                component => component.type === "resistor"
             );
 
-        let resistance =
-            resistors.reduce(
-                (
-                    total,
-                    resistor
-                ) =>
-                    total +
-                    Math.max(
-                        0.1,
-                        Number(
-                            resistor.value
-                        ) || 0
-                    ),
+        if (resistors.length) {
+            resistance = resistors.reduce(
+                (sum, resistor) =>
+                    sum + Number(resistor.resistance || 0),
                 0
             );
-
-        const bulbs =
-            state.components.filter(
-                c =>
-                    c.type ===
-                    "bulb"
-            );
-
-        bulbs.forEach(
-            bulb => {
-
-                resistance +=
-                    Number(
-                        bulb.resistance
-                    ) || 10;
-            }
-        );
-
-        const leds =
-            state.components.filter(
-                c =>
-                    c.type ===
-                    "led"
-            );
-
-        leds.forEach(
-            led => {
-
-                resistance +=
-                    100;
-            }
-        );
-
-        if (
-            resistance <= 0
-        ) {
-
-            resistance = 1;
         }
 
-        result.totalResistance =
-            resistance;
+        const current =
+            voltage > 0 && resistance > 0
+                ? voltage / resistance
+                : 0;
 
-        result.voltage =
-            result.sourceVoltage;
+        const frequency =
+            state.components.find(
+                component =>
+                    component.type === "signal-generator" ||
+                    component.type === "buzzer"
+            )?.frequency || 0;
 
-        result.current =
-            result.voltage /
-            resistance;
+        state.measurements.voltage = voltage;
+        state.measurements.current = current;
+        state.measurements.resistance = resistance;
+        state.measurements.frequency = frequency;
+        state.measurements.power = voltage * current;
 
-        result.poweredNodes =
-            conductive.poweredNodes;
-
-        return result;
+        state.measurements.continuity =
+            state.wires.length > 0
+                ? "OK"
+                : null;
     }
-
 
     /* ============================================================
-       36 — GRAPHE ÉLECTRIQUE
-    ============================================================ */
-
-    function buildElectricalGraph() {
-
-        const adjacency =
-            new Map();
-
-        function nodeKey(
-            componentId,
-            pinName
-        ) {
-            return (
-                componentId +
-                "::" +
-                pinName
-            );
-        }
-
-        function addNode(key) {
-
-            if (!adjacency.has(key)) {
-                adjacency.set(
-                    key,
-                    new Set()
-                );
-            }
-        }
-
-        state.components.forEach(
-            component => {
-
-                component.pins.forEach(
-                    pin => {
-
-                        addNode(
-                            nodeKey(
-                                component.id,
-                                pin.name
-                            )
-                        );
-                    }
-                );
-            }
-        );
-
-        state.wires.forEach(
-            wire => {
-
-                if (wire.fault === "open") {
-                    return;
-                }
-
-                const a =
-                    nodeKey(
-                        wire.from.componentId,
-                        wire.from.pinName
-                    );
-
-                const b =
-                    nodeKey(
-                        wire.to.componentId,
-                        wire.to.pinName
-                    );
-
-                addNode(a);
-                addNode(b);
-
-                adjacency
-                    .get(a)
-                    .add(b);
-
-                adjacency
-                    .get(b)
-                    .add(a);
-            }
-        );
-
-        const sources =
-            state.components.filter(
-                c =>
-                    c.type ===
-                        "battery" ||
-                    c.type ===
-                        "dc-supply" ||
-                    c.type ===
-                        "ac-supply"
-            );
-
-        const positiveRoots = [];
-
-        sources.forEach(
-            source => {
-
-                const positivePin =
-                    source.pins.find(
-                        p =>
-                            [
-                                "+",
-                                "L"
-                            ].includes(
-                                p.name
-                            )
-                    );
-
-                if (positivePin) {
-
-                    positiveRoots.push(
-                        nodeKey(
-                            source.id,
-                            positivePin.name
-                        )
-                    );
-                }
-            }
-        );
-
-        const poweredNodes =
-            new Set();
-
-        const queue =
-            [...positiveRoots];
-
-        while (queue.length) {
-
-            const current =
-                queue.shift();
-
-            if (
-                poweredNodes.has(
-                    current
-                )
-            ) continue;
-
-            poweredNodes.add(
-                current
-            );
-
-            const neighbors =
-                adjacency.get(
-                    current
-                );
-
-            if (!neighbors) continue;
-
-            neighbors.forEach(
-                next => {
-
-                    if (
-                        !poweredNodes.has(
-                            next
-                        )
-                    ) {
-                        queue.push(next);
-                    }
-                }
-            );
-        }
-
-        let hasClosedPath = false;
-
-        sources.forEach(
-            source => {
-
-                const negative =
-                    source.pins.find(
-                        p =>
-                            [
-                                "-",
-                                "N"
-                            ].includes(
-                                p.name
-                            )
-                    );
-
-                if (!negative) return;
-
-                const key =
-                    nodeKey(
-                        source.id,
-                        negative.name
-                    );
-
-                if (
-                    poweredNodes.has(key)
-                ) {
-                    hasClosedPath = true;
-                }
-            }
-        );
-
-        return {
-            adjacency,
-            poweredNodes,
-            hasClosedPath
-        };
-    }
-
-
-    /* ============================================================
-       37 — ÉTAT DES COMPOSANTS
-    ============================================================ */
-
-    function applySimulationStates(
-        result
-    ) {
-
-        state.components.forEach(
-            component => {
-
-                component.active = false;
-                component.brightness = 0;
-
-                if (
-                    component.fault
-                ) {
-                    return;
-                }
-
-                if (
-                    component.type ===
-                    "led"
-                ) {
-
-                    const connected =
-                        componentConnected(
-                            component
-                        );
-
-                    if (
-                        connected &&
-                        result.current > 0
-                    ) {
-
-                        const voltage =
-                            result.voltage;
-
-                        if (
-                            voltage >=
-                            component.forwardVoltage
-                        ) {
-
-                            component.active =
-                                true;
-
-                            component.brightness =
-                                Math.min(
-                                    1,
-                                    result.current *
-                                    100
-                                );
-                        }
-                    }
-                }
-
-                if (
-                    component.type ===
-                    "bulb"
-                ) {
-
-                    if (
-                        componentConnected(
-                            component
-                        ) &&
-                        result.current > 0
-                    ) {
-
-                        component.active =
-                            true;
-
-                        component.brightness =
-                            Math.min(
-                                1,
-                                result.current *
-                                10
-                            );
-                    }
-                }
-
-                if (
-                    [
-                        "relay",
-                        "buzzer",
-                        "motor"
-                    ].includes(
-                        component.type
-                    )
-                ) {
-
-                    if (
-                        componentConnected(
-                            component
-                        ) &&
-                        result.current > 0
-                    ) {
-                        component.active = true;
-                    }
-                }
-            }
-        );
-
-        state.wires.forEach(
-            wire => {
-
-                wire.active =
-                    result.current > 0 &&
-                    !wire.fault;
-            }
-        );
-    }
-
-
-    function componentConnected(
-        component
-    ) {
-
-        return state.wires.some(
-            wire =>
-                wire.from.componentId ===
-                    component.id ||
-                wire.to.componentId ===
-                    component.id
-        );
-    }
-
-
-    /* ============================================================
-       38 — ALIMENTATION
+       24. POWER / CIRCUIT CONTROLS
     ============================================================ */
 
     function powerOn() {
-
         state.powerOn = true;
+        state.circuitRunning = true;
 
         setStatus(
             "Alimentation active",
-            "running"
+            "working"
         );
 
-        simulateCircuit();
+        runSimulation();
 
-        toast(
+        showToast(
             "Alimentation ON.",
             "success"
         );
     }
 
-
     function powerOff() {
-
         state.powerOn = false;
-
         state.circuitRunning = false;
 
-        simulateCircuit();
+        state.components.forEach(component => {
+            if (component.type === "led") {
+                component.state = "off";
+            }
+
+            if (component.type === "bulb") {
+                component.state = "off";
+            }
+
+            if (component.type === "buzzer") {
+                component.state = "off";
+            }
+
+            if (component.type === "dc-motor") {
+                component.state = "off";
+                component.speed = 0;
+            }
+        });
 
         setStatus(
-            "Alimentation arrêtée",
+            "Alimentation coupée",
             "ready"
         );
 
-        toast(
+        runSimulation();
+
+        showToast(
             "Alimentation OFF.",
-            "info"
+            "success"
         );
     }
-
 
     function runCircuit() {
-
         state.circuitRunning = true;
 
+        if (!state.powerOn) {
+            state.powerOn = true;
+        }
+
         setStatus(
-            "Simulation du circuit en cours",
-            "running"
+            "Circuit en simulation",
+            "working"
         );
 
-        simulateCircuit();
-
-        diagnoseCircuit();
-
-        toast(
-            state.measurements.continuity
-                ? "Circuit testé : chemin électrique détecté."
-                : "Test terminé : circuit ouvert.",
-            state.measurements.continuity
-                ? "success"
-                : "warning"
-        );
+        runSimulation();
     }
 
-
     function stopCircuit() {
-
         state.circuitRunning = false;
 
-        stopSimulationEffects();
+        state.components.forEach(component => {
+            if (component.type === "led") {
+                component.state = "off";
+            }
+
+            if (component.type === "bulb") {
+                component.state = "off";
+            }
+
+            if (component.type === "dc-motor") {
+                component.speed = 0;
+                component.state = "off";
+            }
+
+            if (component.type === "buzzer") {
+                component.state = "off";
+            }
+        });
 
         setStatus(
-            "Simulation arrêtée",
+            "Circuit arrêté",
             "ready"
         );
 
-        toast(
-            "Circuit arrêté.",
-            "info"
-        );
+        runSimulation();
     }
-
 
     function resetCircuit() {
-
-        powerOff();
-
-        state.components.forEach(
-            component => {
-
-                component.active = false;
-                component.brightness = 0;
-                component.fault = null;
-            }
-        );
-
-        state.wires.forEach(
-            wire => {
-                wire.active = false;
-                wire.fault = null;
-            }
-        );
-
-        state.activeFaults = [];
-
-        simulateCircuit();
-
-        toast(
-            "Circuit réinitialisé.",
-            "success"
-        );
-    }
-
-
-    /* ============================================================
-       39 — MESURES
-    ============================================================ */
-
-    function measureVoltage() {
-
-        simulateCircuit();
-
-        const value =
-            state.measurements.voltage;
-
-        displayMeasurement(
-            "voltage",
-            value
-        );
-
-        toast(
-            `Tension mesurée : ${value.toFixed(2)} V`,
-            value > 0
-                ? "success"
-                : "warning"
-        );
-    }
-
-
-    function measureCurrent() {
-
-        simulateCircuit();
-
-        const value =
-            state.measurements.current;
-
-        displayMeasurement(
-            "current",
-            value
-        );
-
-        toast(
-            `Courant mesuré : ${value.toFixed(4)} A`,
-            value > 0
-                ? "success"
-                : "warning"
-        );
-    }
-
-
-    function measureResistance() {
-
-        simulateCircuit();
-
-        const value =
-            state.measurements.resistance;
-
-        displayMeasurement(
-            "resistance",
-            value
-        );
-
-        toast(
-            value === null ||
-            !Number.isFinite(value)
-                ? "Résistance non mesurable."
-                : `Résistance équivalente : ${formatResistance(value)}`,
-            value === null ||
-            !Number.isFinite(value)
-                ? "warning"
-                : "success"
-        );
-    }
-
-
-    function displayMeasurement(
-        type,
-        value
-    ) {
-
-        if (type === "voltage") {
-
-            text(
-                "voltageDisplay",
-                `${Number(value).toFixed(2)} V`
-            );
-
-            text(
-                "dashboardVoltage",
-                `${Number(value).toFixed(2)} V`
-            );
-        }
-
-        if (type === "current") {
-
-            text(
-                "currentDisplay",
-                `${Number(value).toFixed(4)} A`
-            );
-
-            text(
-                "dashboardCurrent",
-                `${Number(value).toFixed(4)} A`
-            );
-        }
-
-        if (type === "resistance") {
-
-            const display =
-                Number.isFinite(value)
-                    ? formatResistance(value)
-                    : "— Ω";
-
-            text(
-                "resistanceDisplay",
-                display
-            );
-
-            text(
-                "dashboardResistance",
-                display
-            );
-        }
-    }
-
-
-    function updateMeasurementDisplays() {
-
-        const m =
-            state.measurements;
-
-        text(
-            "voltageDisplay",
-            `${m.voltage.toFixed(2)} V`
-        );
-
-        text(
-            "currentDisplay",
-            `${m.current.toFixed(4)} A`
-        );
-
-        text(
-            "resistanceDisplay",
-            Number.isFinite(
-                m.resistance
-            )
-                ? formatResistance(
-                    m.resistance
-                )
-                : "— Ω"
-        );
-
-        text(
-            "frequencyDisplay",
-            `${m.frequency.toFixed(0)} Hz`
-        );
-
-        text(
-            "dashboardVoltage",
-            `${m.voltage.toFixed(2)} V`
-        );
-
-        text(
-            "dashboardCurrent",
-            `${m.current.toFixed(4)} A`
-        );
-
-        text(
-            "dashboardResistance",
-            Number.isFinite(
-                m.resistance
-            )
-                ? formatResistance(
-                    m.resistance
-                )
-                : "— Ω"
-        );
-
-        text(
-            "dashboardFrequency",
-            `${m.frequency.toFixed(0)} Hz`
-        );
-
-        text(
-            "dashboardPower",
-            `${m.power.toFixed(3)} W`
-        );
-
-        text(
-            "dashboardContinuity",
-            m.continuity
-                ? "OUI"
-                : "NON"
-        );
-    }
-
-
-    /* ============================================================
-       40 — WORKSPACE STATUS
-    ============================================================ */
-
-    function updateWorkspace() {
-
-        text(
-            "componentCount",
-            state.components.length
-        );
-
-        text(
-            "connectionCount",
-            state.wires.length
-        );
-
-        text(
-            "workspaceVoltage",
-            `${state.measurements.voltage.toFixed(2)} V`
-        );
-
-        text(
-            "workspaceCurrent",
-            `${state.measurements.current.toFixed(4)} A`
-        );
-
-        text(
-            "circuitState",
-            state.measurements.continuity
-                ? "Circuit fermé"
-                : "Circuit ouvert"
-        );
-    }
-
-
-    /* ============================================================
-       41 — CODE LIBRARY UI
-    ============================================================ */
-
-    function renderCodeLibrary(
-        level = state.level
-    ) {
-
-        const container =
-            $("codeLibraryList");
-
-        if (!container) return;
-
-        container.innerHTML = "";
-
-        CODE_LIBRARY
-            .filter(
-                code =>
-                    code.level === level
-            )
-            .forEach(
-                code => {
-
-                    const card =
-                        document.createElement(
-                            "article"
-                        );
-
-                    card.className =
-                        "code-library-card";
-
-                    card.innerHTML = `
-                        <h3>
-                            ${escapeHTML(
-                                code.title
-                            )}
-                        </h3>
-
-                        <p>
-                            ${escapeHTML(
-                                code.description
-                            )}
-                        </p>
-
-                        <pre><code>${escapeHTML(
-                            code.code
-                        )}</code></pre>
-
-                        <div class="code-card-actions">
-                            <button
-                                type="button"
-                                data-code-copy="${code.id}"
-                            >
-                                📑 Copier
-                            </button>
-
-                            <button
-                                type="button"
-                                data-code-open="${code.id}"
-                            >
-                                📝 Ouvrir
-                            </button>
-
-                            <button
-                                type="button"
-                                data-code-run="${code.id}"
-                            >
-                                ▶ Charger / Exécuter
-                            </button>
-                        </div>
-                    `;
-
-                    container.appendChild(
-                        card
-                    );
-                }
-            );
-
-        qsa(
-            "[data-code-copy]",
-            container
-        ).forEach(
-            btn =>
-                btn.addEventListener(
-                    "click",
-                    () =>
-                        copyCodeById(
-                            btn.dataset.codeCopy
-                        )
-                )
-        );
-
-        qsa(
-            "[data-code-open]",
-            container
-        ).forEach(
-            btn =>
-                btn.addEventListener(
-                    "click",
-                    () =>
-                        openCodeById(
-                            btn.dataset.codeOpen
-                        )
-                )
-        );
-
-        qsa(
-            "[data-code-run]",
-            container
-        ).forEach(
-            btn =>
-                btn.addEventListener(
-                    "click",
-                    () =>
-                        runLibraryCode(
-                            btn.dataset.codeRun
-                        )
-                )
-        );
-    }
-
-
-    function openCodeById(id) {
-
-        const item =
-            CODE_LIBRARY.find(
-                code =>
-                    code.id === id
-            );
-
-        if (!item) return;
-
-        state.activeCodeId = id;
-
-        state.currentCode =
-            item.code;
-
-        const editor =
-            $("electronicCodeEditor");
-
-        if (editor) {
-            editor.value =
-                item.code;
-        }
-
-        show("codeEditorPanel");
-
-        toast(
-            "Code chargé dans l'éditeur.",
-            "success"
-        );
-    }
-
-
-    async function copyCodeById(id) {
-
-        const item =
-            CODE_LIBRARY.find(
-                code =>
-                    code.id === id
-            );
-
-        if (!item) return;
-
-        await copyText(
-            item.code
-        );
-
-        toast(
-            "Code copié.",
-            "success"
-        );
-    }
-
-
-    async function copyCurrentCode() {
-
-        const editor =
-            $("electronicCodeEditor");
-
-        if (!editor) return;
-
-        await copyText(
-            editor.value
-        );
-
-        toast(
-            "Code copié.",
-            "success"
-        );
-    }
-
-
-    async function copyText(value) {
-
-        try {
-
-            await navigator.clipboard.writeText(
-                value
-            );
-
-        } catch (error) {
-
-            const area =
-                document.createElement(
-                    "textarea"
+        state.powerOn = false;
+        state.circuitRunning = false;
+        state.codeRunning = false;
+
+        state.components.forEach(component => {
+            component.state =
+                getComponentDefinition(component.type)?.state ||
+                "off";
+
+            component.angle =
+                Number(
+                    getComponentDefinition(component.type)?.angle ||
+                    0
                 );
 
-            area.value = value;
+            component.speed = 0;
+            component.frequency = 0;
+        });
 
-            area.style.position =
-                "fixed";
-
-            area.style.opacity = "0";
-
-            document.body.appendChild(
-                area
-            );
-
-            area.select();
-
-            document.execCommand(
-                "copy"
-            );
-
-            area.remove();
-        }
-    }
-
-
-    async function pasteCode() {
-
-        const editor =
-            $("electronicCodeEditor");
-
-        if (!editor) return;
-
-        try {
-
-            const value =
-                await navigator.clipboard.readText();
-
-            editor.value += value;
-
-            toast(
-                "Code collé.",
-                "success"
-            );
-
-        } catch (error) {
-
-            toast(
-                "Le presse-papiers n'est pas accessible. Utilisez Coller du système.",
-                "warning"
-            );
-        }
-    }
-
-
-    /* ============================================================
-       42 — VALIDATION CODE
-    ============================================================ */
-
-    function validateCode(
-        code
-    ) {
-
-        const errors = [];
-        const warnings = [];
-
-        if (
-            !code ||
-            !code.trim()
-        ) {
-
-            errors.push(
-                "Le programme est vide."
-            );
-        }
-
-        if (
-            code &&
-            !/void\s+setup\s*\(/i.test(
-                code
-            )
-        ) {
-
-            warnings.push(
-                "La fonction setup() n'a pas été détectée."
-            );
-        }
-
-        if (
-            code &&
-            !/void\s+loop\s*\(/i.test(
-                code
-            )
-        ) {
-
-            warnings.push(
-                "La fonction loop() n'a pas été détectée."
-            );
-        }
-
-        const braces =
-            (code.match(/{/g) || [])
-                .length;
-
-        const closeBraces =
-            (code.match(/}/g) || [])
-                .length;
-
-        if (
-            braces !== closeBraces
-        ) {
-
-            errors.push(
-                "Les accolades { } ne sont pas équilibrées."
-            );
-        }
-
-        const knownFunctions = [
-            "pinMode",
-            "digitalWrite",
-            "digitalRead",
-            "analogRead",
-            "analogWrite",
-            "delay",
-            "tone",
-            "noTone",
-            "map"
-        ];
-
-        const functionFound =
-            knownFunctions.some(
-                fn =>
-                    code.includes(
-                        fn + "("
-                    )
-            );
-
-        if (
-            code &&
-            !functionFound
-        ) {
-
-            warnings.push(
-                "Aucune fonction de contrôle électronique connue n'a été détectée."
-            );
-        }
-
-        return {
-            valid:
-                errors.length === 0,
-            errors,
-            warnings
-        };
-    }
-
-
-    function validateCurrentCode() {
-
-        const editor =
-            $("electronicCodeEditor");
-
-        if (!editor) return false;
-
-        const result =
-            validateCode(
-                editor.value
-            );
-
-        consoleOutputClear();
-
-        if (result.valid) {
-
-            consoleOutput(
-                "✓ Programme syntaxiquement exploitable.",
-                "success"
-            );
-
-        } else {
-
-            result.errors.forEach(
-                error =>
-                    consoleOutput(
-                        "✕ " + error,
-                        "error"
-                    )
-            );
-        }
-
-        result.warnings.forEach(
-            warning =>
-                consoleOutput(
-                    "⚠ " + warning,
-                    "warning"
-                )
+        setStatus(
+            "Circuit réinitialisé",
+            "ready"
         );
 
-        return result.valid;
+        runSimulation();
     }
-
 
     /* ============================================================
-       43 — PARSER ARDUINO
+       25. WORKSPACE ZOOM
     ============================================================ */
 
-    function parseArduinoCode(
-        code
-    ) {
+    function setWorkspaceZoom(value, centerX = null, centerY = null) {
+        const oldZoom = state.zoom;
 
-        const program = {
-
-            digitalWrites: [],
-
-            analogWrites: [],
-
-            pinModes: [],
-
-            delays: [],
-
-            tones: [],
-
-            digitalReads: [],
-
-            analogReads: [],
-
-            variables: {}
-        };
-
-        const variablePattern =
-            /(?:const\s+int|int)\s+([A-Za-z_]\w*)\s*=\s*(A\d+|\d+)\s*;/gi;
-
-        let match;
-
-        while (
-            (match =
-                variablePattern.exec(
-                    code
-                ))
-        ) {
-
-            program.variables[
-                match[1]
-            ] = normalizePin(
-                match[2]
-            );
-        }
-
-        const pinModeRegex =
-            /pinMode\s*\(\s*([A-Za-z_]\w*|A\d+|\d+)\s*,\s*(INPUT_PULLUP|INPUT|OUTPUT)\s*\)/gi;
-
-        while (
-            (match =
-                pinModeRegex.exec(
-                    code
-                ))
-        ) {
-
-            program.pinModes.push({
-                pin:
-                    resolvePin(
-                        match[1],
-                        program.variables
-                    ),
-                mode:
-                    match[2].toUpperCase()
-            });
-        }
-
-        const digitalWriteRegex =
-            /digitalWrite\s*\(\s*([A-Za-z_]\w*|A\d+|\d+)\s*,\s*(HIGH|LOW|1|0)\s*\)/gi;
-
-        while (
-            (match =
-                digitalWriteRegex.exec(
-                    code
-                ))
-        ) {
-
-            program.digitalWrites.push({
-                pin:
-                    resolvePin(
-                        match[1],
-                        program.variables
-                    ),
-                value:
-                    /HIGH|1/i.test(
-                        match[2]
-                    )
-                        ? 1
-                        : 0
-            });
-        }
-
-        const analogWriteRegex =
-            /analogWrite\s*\(\s*([A-Za-z_]\w*|A\d+|\d+)\s*,\s*(\d+)\s*\)/gi;
-
-        while (
-            (match =
-                analogWriteRegex.exec(
-                    code
-                ))
-        ) {
-
-            program.analogWrites.push({
-                pin:
-                    resolvePin(
-                        match[1],
-                        program.variables
-                    ),
-                value:
-                    Number(
-                        match[2]
-                    )
-            });
-        }
-
-        const delayRegex =
-            /delay\s*\(\s*(\d+)\s*\)/gi;
-
-        while (
-            (match =
-                delayRegex.exec(
-                    code
-                ))
-        ) {
-
-            program.delays.push(
-                Number(match[1])
-            );
-        }
-
-        const toneRegex =
-            /tone\s*\(\s*([A-Za-z_]\w*|A\d+|\d+)\s*,\s*(\d+)(?:\s*,\s*(\d+))?\s*\)/gi;
-
-        while (
-            (match =
-                toneRegex.exec(
-                    code
-                ))
-        ) {
-
-            program.tones.push({
-                pin:
-                    resolvePin(
-                        match[1],
-                        program.variables
-                    ),
-                frequency:
-                    Number(match[2]),
-                duration:
-                    match[3]
-                        ? Number(match[3])
-                        : null
-            });
-        }
-
-        const digitalReadRegex =
-            /digitalRead\s*\(\s*([A-Za-z_]\w*|A\d+|\d+)\s*\)/gi;
-
-        while (
-            (match =
-                digitalReadRegex.exec(
-                    code
-                ))
-        ) {
-
-            program.digitalReads.push(
-                resolvePin(
-                    match[1],
-                    program.variables
-                )
-            );
-        }
-
-        const analogReadRegex =
-            /analogRead\s*\(\s*([A-Za-z_]\w*|A\d+|\d+)\s*\)/gi;
-
-        while (
-            (match =
-                analogReadRegex.exec(
-                    code
-                ))
-        ) {
-
-            program.analogReads.push(
-                resolvePin(
-                    match[1],
-                    program.variables
-                )
-            );
-        }
-
-        return program;
-    }
-
-
-    function normalizePin(pin) {
-
-        const value =
-            String(pin)
-                .trim()
-                .toUpperCase();
+        state.zoom = clamp(
+            Number(value) || 1,
+            0.35,
+            3
+        );
 
         if (
-            /^A\d+$/.test(value)
+            centerX !== null &&
+            centerY !== null &&
+            dom.viewport
         ) {
-            return value;
+            const rect =
+                dom.viewport.getBoundingClientRect();
+
+            const localX =
+                centerX - rect.left;
+
+            const localY =
+                centerY - rect.top;
+
+            state.panX =
+                localX -
+                (
+                    (localX - state.panX) *
+                    state.zoom /
+                    oldZoom
+                );
+
+            state.panY =
+                localY -
+                (
+                    (localY - state.panY) *
+                    state.zoom /
+                    oldZoom
+                );
         }
 
-        return Number(value);
+        applyWorkspaceTransform();
+        renderWires();
     }
 
-
-    function resolvePin(
-        value,
-        variables
-    ) {
-
-        const key =
-            String(value)
-                .trim();
-
-        if (
-            Object.prototype.hasOwnProperty.call(
-                variables,
-                key
-            )
-        ) {
-            return variables[key];
-        }
-
-        return normalizePin(key);
+    function zoomInWorkspace() {
+        setWorkspaceZoom(
+            state.zoom + 0.15
+        );
     }
 
+    function zoomOutWorkspace() {
+        setWorkspaceZoom(
+            state.zoom - 0.15
+        );
+    }
 
-    /* ============================================================
-       44 — EXÉCUTION DU CODE
-    ============================================================ */
+    function resetWorkspaceZoom() {
+        state.zoom = 1;
+        state.panX = 0;
+        state.panY = 0;
 
-    function executeCurrentCode() {
+        applyWorkspaceTransform();
+        renderWires();
+    }
 
-        const editor =
-            $("electronicCodeEditor");
-
-        if (!editor) return;
-
-        const code =
-            editor.value;
-
-        const validation =
-            validateCode(code);
-
-        if (!validation.valid) {
-
-            validation.errors.forEach(
-                error =>
-                    consoleOutput(
-                        "✕ " + error,
-                        "error"
-                    )
-            );
-
-            toast(
-                "Le code contient des erreurs.",
-                "error"
-            );
-
+    function fitWorkspace() {
+        if (!state.components.length) {
+            resetWorkspaceZoom();
             return;
         }
 
-        state.currentCode = code;
+        const bounds = getComponentsBounds();
 
-        const program =
-            parseArduinoCode(
-                code
-            );
+        const viewportWidth =
+            dom.viewport?.clientWidth || 800;
 
-        stopCode(false);
+        const viewportHeight =
+            dom.viewport?.clientHeight || 600;
 
-        state.codeRunning = true;
+        const contentWidth =
+            Math.max(bounds.width, 100);
 
-        setStatus(
-            "Programme électronique en exécution",
-            "running"
+        const contentHeight =
+            Math.max(bounds.height, 100);
+
+        const zoomX =
+            (viewportWidth - 80) /
+            contentWidth;
+
+        const zoomY =
+            (viewportHeight - 80) /
+            contentHeight;
+
+        state.zoom = clamp(
+            Math.min(zoomX, zoomY),
+            0.35,
+            2
         );
 
-        consoleOutput(
-            "▶ Programme lancé.",
-            "success"
-        );
+        state.panX =
+            ((viewportWidth - contentWidth * state.zoom) / 2) -
+            bounds.minX * state.zoom;
 
-        consoleOutput(
-            `Sorties numériques détectées : ${program.digitalWrites.length}`,
-            "info"
-        );
+        state.panY =
+            ((viewportHeight - contentHeight * state.zoom) / 2) -
+            bounds.minY * state.zoom;
 
-        consoleOutput(
-            `Sorties PWM détectées : ${program.analogWrites.length}`,
-            "info"
-        );
-
-        executeArduinoProgram(
-            program,
-            code
-        );
+        applyWorkspaceTransform();
+        renderWires();
     }
 
-
-    function executeArduinoProgram(
-        program,
-        rawCode
-    ) {
-
-        applyDigitalOutputs(
-            program.digitalWrites
-        );
-
-        applyAnalogOutputs(
-            program.analogWrites
-        );
-
-        applyToneOutputs(
-            program.tones
-        );
-
-        state.components
-            .filter(
-                c =>
-                    c.type ===
-                    "arduino"
-            )
-            .forEach(
-                board => {
-
-                    board.metadata.lastProgram =
-                        rawCode;
-
-                    board.active = true;
-                }
-            );
-
-        simulateCircuit();
-
-        const blink =
-            detectBlinkProgram(
-                rawCode
-            );
-
-        if (blink) {
-
-            runBlinkProgram(
-                blink
-            );
-        }
-
-        const traffic =
-            detectTrafficProgram(
-                rawCode
-            );
-
-        if (traffic) {
-
-            runTrafficProgram(
-                traffic
-            );
-        }
-
-        consoleOutput(
-            "✓ Programme appliqué aux éléments physiques simulés.",
-            "success"
-        );
-
-        toast(
-            "Code exécuté sur le laboratoire.",
-            "success"
-        );
-    }
-
-
-    function applyDigitalOutputs(
-        outputs
-    ) {
-
-        outputs.forEach(
-            output => {
-
-                const components =
-                    findComponentsByArduinoPin(
-                        output.pin
-                    );
-
-                if (
-                    components.length === 0
-                ) {
-
-                    consoleOutput(
-                        `⚠ Aucun composant relié à D${output.pin}.`,
-                        "warning"
-                    );
-
-                    return;
-                }
-
-                components.forEach(
-                    component => {
-
-                        component.active =
-                            output.value === 1;
-
-                        component.brightness =
-                            output.value === 1
-                                ? 1
-                                : 0;
-
-                        component.metadata
-                            .digitalValue =
-                            output.value;
-                    }
-                );
-
-                consoleOutput(
-                    `D${output.pin} = ${
-                        output.value
-                            ? "HIGH"
-                            : "LOW"
-                    }`,
-                    "info"
-                );
-            }
-        );
-
-        renderAllComponents();
-    }
-
-
-    function applyAnalogOutputs(
-        outputs
-    ) {
-
-        outputs.forEach(
-            output => {
-
-                const components =
-                    findComponentsByArduinoPin(
-                        output.pin
-                    );
-
-                components.forEach(
-                    component => {
-
-                        component.pwm =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    255,
-                                    output.value
-                                )
-                            );
-
-                        component.active =
-                            output.value > 0;
-
-                        component.brightness =
-                            output.value /
-                            255;
-
-                        component.metadata
-                            .analogValue =
-                            output.value;
-                    }
-                );
-
-                consoleOutput(
-                    `${formatPin(output.pin)} PWM = ${output.value}/255`,
-                    "info"
-                );
-            }
-        );
-
-        renderAllComponents();
-    }
-
-
-    function applyToneOutputs(
-        outputs
-    ) {
-
-        outputs.forEach(
-            output => {
-
-                const components =
-                    findComponentsByArduinoPin(
-                        output.pin
-                    );
-
-                components.forEach(
-                    component => {
-
-                        component.active =
-                            true;
-
-                        component.metadata
-                            .frequency =
-                            output.frequency;
-                    }
-                );
-
-                state.measurements.frequency =
-                    output.frequency;
-
-                text(
-                    "frequencyDisplay",
-                    `${output.frequency} Hz`
-                );
-
-                text(
-                    "dashboardFrequency",
-                    `${output.frequency} Hz`
-                );
-
-                consoleOutput(
-                    `${formatPin(output.pin)} → ${output.frequency} Hz`,
-                    "success"
-                );
-            }
-        );
-    }
-
-
-    function findComponentsByArduinoPin(
-        pin
-    ) {
-
-        const normalized =
-            normalizePin(pin);
-
-        const direct =
-            state.components.filter(
-                component =>
-                    normalizePin(
-                        component.arduinoPin
-                    ) === normalized
-            );
-
-        if (direct.length) {
-            return direct;
-        }
-
-        const connected =
-            findArduinoConnectedComponents(
-                normalized
-            );
-
-        return connected;
-    }
-
-
-    function findArduinoConnectedComponents(
-        pin
-    ) {
-
-        const boards =
-            state.components.filter(
-                c =>
-                    c.type ===
-                    "arduino"
-            );
-
-        if (!boards.length) {
-            return [];
-        }
-
-        const result = [];
-
-        boards.forEach(
-            board => {
-
-                const pinNames =
-                    [
-                        String(pin),
-                        formatPin(pin)
-                    ];
-
-                const matchingWires =
-                    state.wires.filter(
-                        wire => {
-
-                            const endpoints = [
-                                wire.from,
-                                wire.to
-                            ];
-
-                            return endpoints.some(
-                                endpoint =>
-                                    endpoint.componentId ===
-                                        board.id &&
-                                    pinNames.includes(
-                                        String(
-                                            endpoint.pinName
-                                        )
-                                    )
-                            );
-                        }
-                    );
-
-                matchingWires.forEach(
-                    wire => {
-
-                        const other =
-                            wire.from.componentId ===
-                                board.id
-                                ? wire.to
-                                : wire.from;
-
-                        const component =
-                            getComponent(
-                                other.componentId
-                            );
-
-                        if (
-                            component &&
-                            component.id !==
-                                board.id
-                        ) {
-
-                            result.push(
-                                component
-                            );
-                        }
-                    }
-                );
-            }
-        );
-
-        return [
-            ...new Map(
-                result.map(
-                    component =>
-                        [
-                            component.id,
-                            component
-                        ]
-                )
-            ).values()
-        ];
-    }
-
-
-    function formatPin(pin) {
-
-        if (
-            typeof pin ===
-                "string" &&
-            /^A\d+$/i.test(pin)
-        ) {
-            return pin.toUpperCase();
-        }
-
-        return "D" + pin;
-    }
-
-
-    /* ============================================================
-       45 — DÉTECTION CLIGNOTEMENT
-    ============================================================ */
-
-    function detectBlinkProgram(
-        code
-    ) {
-
-        const high =
-            code.match(
-                /digitalWrite\s*\(\s*([A-Za-z_]\w*|\d+)\s*,\s*HIGH\s*\)/i
-            );
-
-        const low =
-            code.match(
-                /digitalWrite\s*\(\s*([A-Za-z_]\w*|\d+)\s*,\s*LOW\s*\)/i
-            );
-
-        const delay =
-            code.match(
-                /delay\s*\(\s*(\d+)\s*\)/i
-            );
-
-        if (
-            high &&
-            low &&
-            delay
-        ) {
-
+    function getComponentsBounds() {
+        if (!state.components.length) {
             return {
-                pin:
-                    resolvePin(
-                        high[1],
-                        {}
-                    ),
-                interval:
-                    Number(
-                        delay[1]
-                    )
+                minX: 0,
+                minY: 0,
+                maxX: 0,
+                maxY: 0,
+                width: 0,
+                height: 0
             };
         }
 
-        return null;
-    }
-
-
-    function runBlinkProgram(
-        config
-    ) {
-
-        clearInterval(
-            state.codeTimer
-        );
-
-        let on = false;
-
-        state.codeTimer =
-            setInterval(
-                () => {
-
-                    if (
-                        !state.codeRunning
-                    ) {
-
-                        clearInterval(
-                            state.codeTimer
-                        );
-
-                        return;
-                    }
-
-                    on = !on;
-
-                    const components =
-                        findComponentsByArduinoPin(
-                            config.pin
-                        );
-
-                    components.forEach(
-                        component => {
-
-                            component.active =
-                                on;
-
-                            component.brightness =
-                                on ? 1 : 0;
-                        }
-                    );
-
-                    renderAllComponents();
-
-                },
-                Math.max(
-                    50,
-                    config.interval
+        const minX =
+            Math.min(
+                ...state.components.map(
+                    component => component.x
                 )
             );
-    }
 
-
-    /* ============================================================
-       46 — FEU TRICOLORE
-    ============================================================ */
-
-    function detectTrafficProgram(
-        code
-    ) {
-
-        if (
-            !/digitalWrite/i.test(
-                code
-            )
-        ) return false;
-
-        return (
-            /RED/i.test(code) &&
-            /YELLOW/i.test(code) &&
-            /GREEN/i.test(code)
-        );
-    }
-
-
-    function runTrafficProgram() {
-
-        clearInterval(
-            state.codeTimer
-        );
-
-        const pins = [
-            8,
-            9,
-            10
-        ];
-
-        let index = 0;
-
-        state.codeTimer =
-            setInterval(
-                () => {
-
-                    if (
-                        !state.codeRunning
-                    ) {
-
-                        clearInterval(
-                            state.codeTimer
-                        );
-
-                        return;
-                    }
-
-                    state.components.forEach(
-                        component => {
-
-                            const pin =
-                                normalizePin(
-                                    component.arduinoPin
-                                );
-
-                            if (
-                                pins.includes(
-                                    pin
-                                )
-                            ) {
-
-                                component.active =
-                                    pin ===
-                                    pins[index];
-
-                                component.brightness =
-                                    component.active
-                                        ? 1
-                                        : 0;
-                            }
-                        }
-                    );
-
-                    index =
-                        (
-                            index + 1
-                        ) % 3;
-
-                    renderAllComponents();
-
-                },
-                1000
-            );
-    }
-
-
-    /* ============================================================
-       47 — STOP CODE
-    ============================================================ */
-
-    function stopCode(
-        notify = true
-    ) {
-
-        state.codeRunning =
-            false;
-
-        clearInterval(
-            state.codeTimer
-        );
-
-        state.codeTimer =
-            null;
-
-        if (notify) {
-
-            setStatus(
-                "Programme arrêté",
-                "ready"
-            );
-
-            consoleOutput(
-                "■ Programme arrêté.",
-                "warning"
-            );
-        }
-    }
-
-
-    /* ============================================================
-       48 — CONSOLE
-    ============================================================ */
-
-    function consoleOutput(
-        message,
-        type = "info"
-    ) {
-
-        const consoleEl =
-            $("codeConsoleOutput");
-
-        if (!consoleEl) return;
-
-        const line =
-            document.createElement(
-                "div"
-            );
-
-        line.className =
-            `console-line ${type}`;
-
-        line.textContent =
-            message;
-
-        consoleEl.appendChild(
-            line
-        );
-
-        consoleEl.scrollTop =
-            consoleEl.scrollHeight;
-    }
-
-
-    function consoleOutputClear() {
-
-        const consoleEl =
-            $("codeConsoleOutput");
-
-        if (!consoleEl) return;
-
-        consoleEl.innerHTML = "";
-    }
-
-
-    /* ============================================================
-       49 — PANNE
-    ============================================================ */
-
-    function createOpenCircuitFault() {
-
-        clearFaults();
-
-        const wire =
-            state.wires[0];
-
-        if (!wire) {
-
-            toast(
-                "Aucun fil disponible pour créer une panne.",
-                "warning"
-            );
-
-            return;
-        }
-
-        wire.fault = "open";
-
-        state.activeFaults.push({
-            type: "open",
-            target: wire.id
-        });
-
-        renderWires();
-
-        simulateCircuit();
-
-        toast(
-            "Panne créée : circuit ouvert.",
-            "warning"
-        );
-    }
-
-
-    function createShortCircuitFault() {
-
-        clearFaults();
-
-        const source =
-            state.components.find(
-                c =>
-                    c.type ===
-                    "battery" ||
-                    c.type ===
-                    "dc-supply"
-            );
-
-        if (!source) {
-
-            toast(
-                "Ajoutez d'abord une source.",
-                "warning"
-            );
-
-            return;
-        }
-
-        state.activeFaults.push({
-            type: "short",
-            target: source.id
-        });
-
-        source.fault =
-            "short";
-
-        simulateCircuit();
-
-        toast(
-            "Panne créée : court-circuit.",
-            "error"
-        );
-    }
-
-
-    function createPolarityFault() {
-
-        const led =
-            state.components.find(
-                c =>
-                    c.type ===
-                    "led"
-            );
-
-        if (!led) {
-
-            toast(
-                "Ajoutez une LED avant de simuler cette panne.",
-                "warning"
-            );
-
-            return;
-        }
-
-        clearFaults();
-
-        led.fault =
-            "polarity";
-
-        state.activeFaults.push({
-            type: "polarity",
-            target: led.id
-        });
-
-        simulateCircuit();
-
-        toast(
-            "Panne créée : polarité inversée.",
-            "warning"
-        );
-    }
-
-
-    function createComponentFault() {
-
-        const component =
-            state.components.find(
-                c =>
-                    ![
-                        "battery",
-                        "dc-supply"
-                    ].includes(
-                        c.type
-                    )
-            );
-
-        if (!component) {
-
-            toast(
-                "Aucun composant disponible.",
-                "warning"
-            );
-
-            return;
-        }
-
-        clearFaults();
-
-        component.fault =
-            "defective";
-
-        state.activeFaults.push({
-            type: "component",
-            target: component.id
-        });
-
-        simulateCircuit();
-
-        toast(
-            `Panne simulée sur ${component.name}.`,
-            "warning"
-        );
-    }
-
-
-    function clearFaults() {
-
-        state.components.forEach(
-            c => {
-                c.fault = null;
-            }
-        );
-
-        state.wires.forEach(
-            wire => {
-                wire.fault = null;
-            }
-        );
-
-        state.activeFaults = [];
-
-        simulateCircuit();
-
-        toast(
-            "Toutes les pannes ont été supprimées.",
-            "success"
-        );
-    }
-
-
-    /* ============================================================
-       50 — DIAGNOSTIC
-    ============================================================ */
-
-    let diagnosticPassed = false;
-
-    function diagnoseCircuit() {
-
-        const results =
-            $("diagnosticResults");
-
-        if (!results) return;
-
-        results.innerHTML = "";
-
-        diagnosticPassed = true;
-
-        const checks = [];
-
-        if (!hasPowerSource()) {
-
-            checks.push({
-                title:
-                    "Source d'alimentation",
-                ok: false,
-                message:
-                    "Aucune source détectée."
-            });
-
-            diagnosticPassed = false;
-
-        } else {
-
-            checks.push({
-                title:
-                    "Source d'alimentation",
-                ok: true,
-                message:
-                    "Source détectée."
-            });
-        }
-
-        if (
-            state.activeFaults.length
-        ) {
-
-            checks.push({
-                title:
-                    "Pannes actives",
-                ok: false,
-                message:
-                    `${state.activeFaults.length} panne(s) détectée(s).`
-            });
-
-            diagnosticPassed = false;
-
-        } else {
-
-            checks.push({
-                title:
-                    "Pannes actives",
-                ok: true,
-                message:
-                    "Aucune panne active."
-            });
-        }
-
-        if (
-            state.wires.length === 0
-        ) {
-
-            checks.push({
-                title:
-                    "Câblage",
-                ok: false,
-                message:
-                    "Aucune connexion."
-            });
-
-            diagnosticPassed = false;
-
-        } else {
-
-            checks.push({
-                title:
-                    "Câblage",
-                ok: true,
-                message:
-                    `${state.wires.length} connexion(s).`
-            });
-        }
-
-        if (
-            state.measurements.continuity
-        ) {
-
-            checks.push({
-                title:
-                    "Continuité",
-                ok: true,
-                message:
-                    "Chemin électrique détecté."
-            });
-
-        } else {
-
-            checks.push({
-                title:
-                    "Continuité",
-                ok: false,
-                message:
-                    "Circuit ouvert."
-            });
-
-            diagnosticPassed = false;
-        }
-
-        checks.forEach(
-            check => {
-
-                const card =
-                    document.createElement(
-                        "div"
-                    );
-
-                card.className =
-                    check.ok
-                        ? "diagnostic-ok"
-                        : "diagnostic-error";
-
-                card.innerHTML = `
-                    <strong>
-                        ${check.ok ? "✓" : "✕"}
-                        ${escapeHTML(
-                            check.title
-                        )}
-                    </strong>
-                    <span>
-                        ${escapeHTML(
-                            check.message
-                        )}
-                    </span>
-                `;
-
-                results.appendChild(
-                    card
-                );
-            }
-        );
-
-        toast(
-            diagnosticPassed
-                ? "Diagnostic terminé : aucune anomalie critique détectée."
-                : "Diagnostic terminé : anomalies détectées.",
-            diagnosticPassed
-                ? "success"
-                : "warning"
-        );
-
-        return diagnosticPassed;
-    }
-
-
-    function lastDiagnosticPassed() {
-        return diagnosticPassed;
-    }
-
-
-    /* ============================================================
-       51 — MISSIONS UI
-    ============================================================ */
-
-    function renderMissions(
-        level = state.level
-    ) {
-
-        const list =
-            $("missionsList");
-
-        if (!list) return;
-
-        list.innerHTML = "";
-
-        const missions =
-            MISSIONS[level] || [];
-
-        missions.forEach(
-            mission => {
-
-                const card =
-                    document.createElement(
-                        "article"
-                    );
-
-                card.className =
-                    "mission-card";
-
-                card.innerHTML = `
-                    <h3>
-                        ${escapeHTML(
-                            mission.title
-                        )}
-                    </h3>
-
-                    <p>
-                        ${escapeHTML(
-                            mission.description
-                        )}
-                    </p>
-
-                    <button
-                        type="button"
-                        data-mission-id="${mission.id}"
-                    >
-                        Sélectionner
-                    </button>
-                `;
-
-                list.appendChild(
-                    card
-                );
-            }
-        );
-
-        qsa(
-            "[data-mission-id]",
-            list
-        ).forEach(
-            button =>
-                button.addEventListener(
-                    "click",
-                    () =>
-                        selectMission(
-                            button.dataset.missionId
-                        )
+        const minY =
+            Math.min(
+                ...state.components.map(
+                    component => component.y
                 )
-        );
-    }
-
-
-    function selectMission(id) {
-
-        const missions =
-            MISSIONS[state.level] || [];
-
-        const mission =
-            missions.find(
-                m =>
-                    m.id === id
             );
 
-        if (!mission) return;
-
-        state.activeMission =
-            mission;
-
-        text(
-            "activeMissionTitle",
-            mission.title
-        );
-
-        text(
-            "activeMissionDescription",
-            mission.description
-        );
-
-        const requirements =
-            $("missionRequirements");
-
-        if (requirements) {
-
-            requirements.innerHTML = "";
-
-            mission.requirements.forEach(
-                requirement => {
-
-                    const item =
-                        document.createElement(
-                            "div"
-                        );
-
-                    item.textContent =
-                        "□ " +
-                        requirement;
-
-                    requirements.appendChild(
-                        item
-                    );
-                }
-            );
-        }
-
-        toast(
-            "Mission sélectionnée.",
-            "success"
-        );
-    }
-
-
-    function startMission() {
-
-        if (!state.activeMission) {
-
-            toast(
-                "Sélectionnez d'abord une mission.",
-                "warning"
-            );
-
-            return;
-        }
-
-        state.missionRunning =
-            true;
-
-        setStatus(
-            "Mission en cours",
-            "running"
-        );
-
-        toast(
-            `Mission commencée : ${state.activeMission.title}`,
-            "success"
-        );
-    }
-
-
-    function validateMission() {
-
-        if (!state.activeMission) {
-
-            toast(
-                "Aucune mission sélectionnée.",
-                "warning"
-            );
-
-            return;
-        }
-
-        if (
-            !state.missionRunning
-        ) {
-
-            toast(
-                "Commencez la mission avant de la valider.",
-                "warning"
-            );
-
-            return;
-        }
-
-        const success =
-            !!state.activeMission.validate();
-
-        showMissionResult(
-            success,
-            state.activeMission
-        );
-    }
-
-
-    function showMissionResult(
-        success,
-        mission
-    ) {
-
-        const icon =
-            $("missionResultIcon");
-
-        const title =
-            $("missionResultTitle");
-
-        const message =
-            $("missionResultMessage");
-
-        if (icon) {
-            icon.textContent =
-                success
-                    ? "✓"
-                    : "✕";
-        }
-
-        if (title) {
-            title.textContent =
-                success
-                    ? "Mission réussie"
-                    : "Mission non validée";
-        }
-
-        if (message) {
-
-            message.textContent =
-                success
-                    ? `La mission « ${mission.title} » est validée.`
-                    : `La mission « ${mission.title} » n'est pas encore complète. Vérifiez les exigences.`;
-        }
-
-        show("missionResultModal");
-
-        if (success) {
-
-            state.missionRunning =
-                false;
-
-            setStatus(
-                "Mission validée",
-                "ready"
-            );
-        }
-    }
-
-
-    /* ============================================================
-       52 — NIVEAUX
-    ============================================================ */
-
-    function setLevel(level) {
-
-        if (
-            ![
-                "beginner",
-                "intermediate",
-                "expert"
-            ].includes(level)
-        ) {
-            return;
-        }
-
-        state.level = level;
-
-        qsa(
-            ".level-btn"
-        ).forEach(
-            btn =>
-                btn.classList.toggle(
-                    "active",
-                    btn.dataset.level === level
+        const maxX =
+            Math.max(
+                ...state.components.map(
+                    component =>
+                        component.x + component.width
                 )
-        );
+            );
 
-        qsa(
-            ".code-level-btn"
-        ).forEach(
-            btn =>
-                btn.classList.toggle(
-                    "active",
-                    btn.id.toLowerCase()
-                        .includes(
-                            level ===
-                                "beginner"
-                                ? "beginner"
-                                : level ===
-                                    "intermediate"
-                                    ? "intermediate"
-                                    : "expert"
-                        )
+        const maxY =
+            Math.max(
+                ...state.components.map(
+                    component =>
+                        component.y + component.height
                 )
-        );
-
-        qsa(
-            ".mission-level-btn"
-        ).forEach(
-            btn =>
-                btn.classList.toggle(
-                    "active",
-                    btn.dataset.level === level
-                )
-        );
-
-        renderCodeLibrary(
-            level
-        );
-
-        renderMissions(
-            level
-        );
-
-        toast(
-            `Niveau ${levelLabel(level)} sélectionné.`,
-            "success"
-        );
-    }
-
-
-    function levelLabel(level) {
+            );
 
         return {
-            beginner: "Débutant",
-            intermediate: "Intermédiaire",
-            expert: "Expert"
-        }[level] || level;
-    }
-
-
-
-
-
-
-    /* ============================================================
-       53 — CATÉGORIES / BIBLIOTHÈQUE DES COMPOSANTS
-       ------------------------------------------------------------
-       - Affichage visuel des composants
-       - Carte 3D autonome sans bibliothèque externe
-       - Bouton AJOUTER fonctionnel
-       - Compatible avec addComponent()
-       - Aucun événement global supplémentaire
-    ============================================================ */
-
-    function renderLibraryComponentVisual(
-        definition
-    ) {
-
-        const type =
-            String(
-                definition?.type || ""
-            ).toLowerCase();
-
-        const name =
-            String(
-                definition?.name || ""
-            ).toLowerCase();
-
-
-        /* --------------------------------------------------------
-           LED
-        -------------------------------------------------------- */
-
-        if (
-            type === "led" ||
-            type === "led-red" ||
-            type === "led-green" ||
-            type === "led-blue" ||
-            type === "led-yellow" ||
-            type === "led-white" ||
-            type.includes("led") ||
-            name.includes("led")
-        ) {
-
-            const ledColor =
-                definition.color ||
-                "#ff3344";
-
-            return `
-                <div
-                    class="fobas-library-3d fobas-led-3d"
-                    style="
-                        --fobas-led-color:${escapeHTML(
-                            String(ledColor)
-                        )};
-                    "
-                >
-                    <div class="fobas-led-shadow"></div>
-
-                    <div class="fobas-led-body">
-                        <div class="fobas-led-dome"></div>
-                        <div class="fobas-led-highlight"></div>
-                    </div>
-
-                    <div class="fobas-led-base">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-
-                    <div class="fobas-led-pin pin-left"></div>
-                    <div class="fobas-led-pin pin-right"></div>
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           RÉSISTANCE
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("resistor") ||
-            type.includes("resistance") ||
-            name.includes("résistance") ||
-            name.includes("resistor")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-resistor-3d">
-
-                    <div class="fobas-wire-left"></div>
-
-                    <div class="fobas-resistor-body">
-                        <span class="band band-1"></span>
-                        <span class="band band-2"></span>
-                        <span class="band band-3"></span>
-                        <span class="band band-4"></span>
-                        <div class="resistor-highlight"></div>
-                    </div>
-
-                    <div class="fobas-wire-right"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           CONDENSATEUR
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("capacitor") ||
-            type.includes("condens") ||
-            name.includes("condens")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-capacitor-3d">
-
-                    <div class="fobas-cap-pin left"></div>
-
-                    <div class="fobas-cap-body">
-                        <div class="cap-cylinder"></div>
-                        <div class="cap-highlight"></div>
-                        <div class="cap-mark">+</div>
-                    </div>
-
-                    <div class="fobas-cap-pin right"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           INDUCTEUR / BOBINE
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("inductor") ||
-            type.includes("coil") ||
-            type.includes("bobine") ||
-            name.includes("induct")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-inductor-3d">
-
-                    <div class="inductor-wire-left"></div>
-
-                    <div class="inductor-coils">
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                    </div>
-
-                    <div class="inductor-wire-right"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           DIODE
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("diode") ||
-            name.includes("diode")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-diode-3d">
-
-                    <div class="diode-pin"></div>
-
-                    <div class="diode-body">
-                        <div class="diode-glass"></div>
-                        <div class="diode-band"></div>
-                    </div>
-
-                    <div class="diode-pin"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           TRANSISTOR
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("transistor") ||
-            name.includes("transistor")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-transistor-3d">
-
-                    <div class="transistor-body">
-                        <div class="transistor-face">
-                            <span>Q</span>
-                        </div>
-                        <div class="transistor-highlight"></div>
-                    </div>
-
-                    <div class="transistor-pin p1"></div>
-                    <div class="transistor-pin p2"></div>
-                    <div class="transistor-pin p3"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           MOSFET
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("mosfet") ||
-            name.includes("mosfet")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-mosfet-3d">
-
-                    <div class="mosfet-body">
-                        <span>M</span>
-                    </div>
-
-                    <div class="mosfet-pin p1"></div>
-                    <div class="mosfet-pin p2"></div>
-                    <div class="mosfet-pin p3"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           RELAIS
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("relay") ||
-            type.includes("relais") ||
-            name.includes("relais") ||
-            name.includes("relay")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-relay-3d">
-
-                    <div class="relay-body">
-                        <div class="relay-label">
-                            RELAY
-                        </div>
-
-                        <div class="relay-window">
-                            <span></span>
-                        </div>
-                    </div>
-
-                    <div class="relay-pin p1"></div>
-                    <div class="relay-pin p2"></div>
-                    <div class="relay-pin p3"></div>
-                    <div class="relay-pin p4"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           INTERRUPTEUR
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("switch") ||
-            type.includes("interrupteur") ||
-            name.includes("switch") ||
-            name.includes("interrupteur")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-switch-3d">
-
-                    <div class="switch-terminal left"></div>
-
-                    <div class="switch-base">
-                        <div class="switch-lever"></div>
-                    </div>
-
-                    <div class="switch-terminal right"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           BOUTON POUSSOIR
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("button") ||
-            type.includes("push") ||
-            name.includes("bouton") ||
-            name.includes("push")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-button-3d">
-
-                    <div class="push-button-body">
-                        <div class="push-button-cap">
-                            <span></span>
-                        </div>
-                    </div>
-
-                    <div class="push-pin left"></div>
-                    <div class="push-pin right"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           POTENTIOMÈTRE
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("potentiometer") ||
-            type.includes("potentiometre") ||
-            name.includes("potentiom")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-potentiometer-3d">
-
-                    <div class="pot-body">
-                        <div class="pot-dial">
-                            <div class="pot-pointer"></div>
-                        </div>
-                    </div>
-
-                    <div class="pot-pin p1"></div>
-                    <div class="pot-pin p2"></div>
-                    <div class="pot-pin p3"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           FUSIBLE
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("fuse") ||
-            type.includes("fusible") ||
-            name.includes("fusible") ||
-            name.includes("fuse")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-fuse-3d">
-
-                    <div class="fuse-pin"></div>
-
-                    <div class="fuse-body">
-                        <div class="fuse-glass"></div>
-                        <div class="fuse-wire"></div>
-                    </div>
-
-                    <div class="fuse-pin"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           TRANSFORMATEUR
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("transformer") ||
-            type.includes("transformateur") ||
-            name.includes("transformateur")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-transformer-3d">
-
-                    <div class="transformer-core"></div>
-
-                    <div class="transformer-coil coil-left">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-
-                    <div class="transformer-coil coil-right">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           REDRESSEUR
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("rectifier") ||
-            type.includes("redresseur") ||
-            name.includes("redresseur")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-rectifier-3d">
-
-                    <div class="rectifier-body">
-                        <div class="rectifier-mark">~</div>
-                        <div class="rectifier-mark">+</div>
-                        <div class="rectifier-mark">−</div>
-                    </div>
-
-                    <div class="rectifier-pin p1"></div>
-                    <div class="rectifier-pin p2"></div>
-                    <div class="rectifier-pin p3"></div>
-                    <div class="rectifier-pin p4"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           RÉGULATEUR
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("regulator") ||
-            type.includes("regulateur") ||
-            name.includes("7805") ||
-            name.includes("7812") ||
-            name.includes("régulateur")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-regulator-3d">
-
-                    <div class="regulator-body">
-                        <div class="regulator-face">
-                            REG
-                        </div>
-                        <div class="regulator-metal"></div>
-                    </div>
-
-                    <div class="regulator-pin p1"></div>
-                    <div class="regulator-pin p2"></div>
-                    <div class="regulator-pin p3"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           OP AMP
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("opamp") ||
-            type.includes("op-amp") ||
-            name.includes("opamp") ||
-            name.includes("ampli")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-opamp-3d">
-
-                    <div class="opamp-body">
-                        <span>+</span>
-                        <span>−</span>
-                        <b>OP</b>
-                    </div>
-
-                    <div class="opamp-pin input-plus"></div>
-                    <div class="opamp-pin input-minus"></div>
-                    <div class="opamp-pin output"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           LOGIQUE
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("logic") ||
-            type.includes("not") ||
-            type.includes("and") ||
-            type.includes("or") ||
-            name.includes("logic")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-logic-3d">
-
-                    <div class="logic-body">
-                        <div class="logic-symbol">
-                            ${escapeHTML(
-                                definition.symbol || "LOGIC"
-                            )}
-                        </div>
-                    </div>
-
-                    <div class="logic-pin p1"></div>
-                    <div class="logic-pin p2"></div>
-                    <div class="logic-pin p3"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           SOURCE / BATTERIE
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("battery") ||
-            type.includes("supply") ||
-            type.includes("source")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-power-3d">
-
-                    <div class="power-body">
-
-                        <div class="power-terminal plus">
-                            +
-                        </div>
-
-                        <div class="power-center">
-                            <div></div>
-                            <div></div>
-                        </div>
-
-                        <div class="power-terminal minus">
-                            −
-                        </div>
-
-                    </div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           FIL
-        -------------------------------------------------------- */
-
-        if (
-            type === "wire" ||
-            type.includes("wire") ||
-            type.includes("fil") ||
-            name.includes("fil")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-wire-3d">
-
-                    <div
-                        class="library-wire-line"
-                        style="
-                            background:${escapeHTML(
-                                String(
-                                    definition.color ||
-                                    "#e7edf5"
-                                )
-                            )};
-                        "
-                    ></div>
-
-                    <div class="library-wire-terminal left"></div>
-                    <div class="library-wire-terminal right"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           TERMINAL
-        -------------------------------------------------------- */
-
-        if (
-            type.includes("terminal") ||
-            type.includes("ground") ||
-            name.includes("terminal") ||
-            name.includes("gnd")
-        ) {
-
-            return `
-                <div class="fobas-library-3d fobas-terminal-3d">
-
-                    <div class="terminal-body">
-                        <span>
-                            ${escapeHTML(
-                                definition.symbol || "●"
-                            )}
-                        </span>
-                    </div>
-
-                    <div class="terminal-pin"></div>
-
-                </div>
-            `;
-        }
-
-
-        /* --------------------------------------------------------
-           VISUEL GÉNÉRIQUE
-        -------------------------------------------------------- */
-
-        return `
-            <div class="fobas-library-3d fobas-generic-3d">
-
-                <div class="generic-body">
-                    <span>
-                        ${escapeHTML(
-                            definition.symbol || "●"
-                        )}
-                    </span>
-                </div>
-
-                <div class="generic-pin left"></div>
-                <div class="generic-pin right"></div>
-
-            </div>
-        `;
-    }
-
-
-
-
-
-/* ============================================================
-       53A — CRÉATION D'UNE CARTE DE BIBLIOTHÈQUE
-    ============================================================ */
-
-    function createLibraryComponentCard(
-        definition
-    ) {
-
-        if (!definition) {
-            return null;
-        }
-
-        const card =
-            document.createElement(
-                "article"
-            );
-
-        card.className =
-            "library-generated-item fobas-library-card";
-
-        card.dataset.component =
-            definition.type || "";
-
-
-        const valueText =
-            definition.value !== undefined
-                ? `${definition.value}${definition.unit || ""}`
-                : "";
-
-
-        card.innerHTML = `
-
-            <div class="fobas-library-visual">
-
-                ${renderLibraryComponentVisual(
-                    definition
-                )}
-
-            </div>
-
-
-            <div class="fobas-library-info">
-
-                <strong class="library-item-name">
-                    ${escapeHTML(
-                        definition.name ||
-                        definition.type ||
-                        "Composant"
-                    )}
-                </strong>
-
-                ${
-                    valueText
-                        ? `
-                            <small class="library-item-value">
-                                ${escapeHTML(
-                                    String(valueText)
-                                )}
-                            </small>
-                          `
-                        : ""
-                }
-
-            </div>
-
-
-            <div class="fobas-library-actions">
-
-                <button
-                    type="button"
-                    class="fobas-library-add-btn"
-                    data-library-add="true"
-                    data-component="${escapeHTML(
-                        definition.type || ""
-                    )}"
-                >
-                    Ajouter
-                </button>
-
-            </div>
-        `;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /* --------------------------------------------------------
-           IMPORTANT :
-           On attache UNE SEULE action au bouton AJOUTER.
-        -------------------------------------------------------- */
-
-        const addButton =
-            card.querySelector(
-                "[data-library-add='true']"
-            );
-
-        if (addButton) {
-
-            addButton.addEventListener(
-                "click",
-                event => {
-
-                    event.preventDefault();
-
-                    event.stopPropagation();
-
-                    const componentType =
-                        addButton.dataset.component;
-
-                    if (!componentType) {
-
-                        toast(
-                            "Type de composant introuvable.",
-                            "error"
-                        );
-
-                        return;
-                    }
-
-                    addComponent(
-                        componentType
-                    );
-                }
-            );
-        }
-
-
-        return card;
-    }
-
-
-    /* ============================================================
-       53B — CATÉGORIE
-    ============================================================ */
-
-    function renderCategory(
-        category
-    ) {
-
-        const grid =
-            $("componentLibraryGrid");
-
-        if (!grid) {
-            return;
-        }
-
-
-        grid.innerHTML = "";
-
-
-        const items =
-            COMPONENT_LIBRARY[
-                category
-            ] || [];
-
-
-        if (!items.length) {
-
-            grid.innerHTML = `
-                <div class="fobas-library-empty">
-                    Aucun composant disponible
-                    dans cette catégorie.
-                </div>
-            `;
-
-        } else {
-
-            items.forEach(
-                definition => {
-
-                    const card =
-                        createLibraryComponentCard(
-                            definition
-                        );
-
-                    if (card) {
-
-                        grid.appendChild(
-                            card
-                        );
-                    }
-                }
-            );
-        }
-
-
-        /* --------------------------------------------------------
-           CATÉGORIE ACTIVE
-        -------------------------------------------------------- */
-
-        qsa(
-            ".component-category-btn"
-        ).forEach(
-            btn => {
-
-                btn.classList.toggle(
-                    "active",
-                    btn.dataset.category ===
-                        category
-                );
-            }
-        );
-    }
-
-
-    /* ============================================================
-       53C — RECHERCHE
-    ============================================================ */
-
-    function searchComponents(
-        query
-    ) {
-
-        const grid =
-            $("componentLibraryGrid");
-
-        if (!grid) {
-            return;
-        }
-
-
-        const value =
-            String(
-                query || ""
-            )
-                .toLowerCase()
-                .trim();
-
-
-        grid.innerHTML = "";
-
-
-        const results =
-            Object.values(
-                COMPONENT_LIBRARY
-            )
-                .flat()
-                .filter(
-                    item => {
-
-                        const itemName =
-                            String(
-                                item.name || ""
-                            )
-                                .toLowerCase();
-
-                        const itemType =
-                            String(
-                                item.type || ""
-                            )
-                                .toLowerCase();
-
-                        const itemValue =
-                            String(
-                                item.value || ""
-                            )
-                                .toLowerCase();
-
-                        return (
-                            !value ||
-                            itemName.includes(
-                                value
-                            ) ||
-                            itemType.includes(
-                                value
-                            ) ||
-                            itemValue.includes(
-                                value
-                            )
-                        );
-                    }
-                );
-
-
-        if (!results.length) {
-
-            grid.innerHTML = `
-                <div class="fobas-library-empty">
-                    Aucun composant trouvé
-                    pour :
-                    <strong>
-                        ${escapeHTML(
-                            query || ""
-                        )}
-                    </strong>
-                </div>
-            `;
-
-            return;
-        }
-
-
-        results.forEach(
-            definition => {
-
-                const card =
-                    createLibraryComponentCard(
-                        definition
-                    );
-
-                if (card) {
-
-                    grid.appendChild(
-                        card
-                    );
-                }
-            }
-        );
-    }
-
-
-
-
-
-
-
-    /* ============================================================
-       54 — DÉTAILS COMPOSANT
-    ============================================================ */
-
-    let detailsComponentId =
-        null;
-
-    function openComponentDetails(
-        id
-    ) {
-
-        const component =
-            getComponent(id);
-
-        if (!component) return;
-
-        detailsComponentId = id;
-
-        text(
-            "componentDetailsTitle",
-            component.name
-        );
-
-        const visual =
-            $("componentDetailsVisual");
-
-        if (visual) {
-
-            visual.innerHTML =
-                componentMarkup(
-                    component
-                );
-        }
-
-        const properties =
-            $("componentDetailsProperties");
-
-        if (properties) {
-
-            const rows = [
-                ["Type", component.type],
-                ["Valeur", component.value ?? "—"],
-                ["Unité", component.unit || "—"],
-                ["Tension", component.voltage || "—"],
-                ["Broches", component.pins.map(
-                    p => p.name
-                ).join(", ")],
-                ["Rotation", `${component.rotation}°`],
-                ["État",
-                    component.active
-                        ? "ACTIF"
-                        : "INACTIF"
-                ]
-            ];
-
-            properties.innerHTML =
-                rows
-                    .map(
-                        row =>
-                            `<div class="property-row">
-                                <span>${escapeHTML(row[0])}</span>
-                                <strong>${escapeHTML(row[1])}</strong>
-                            </div>`
-                    )
-                    .join("");
-        }
-
-        show(
-            "componentDetailsModal"
-        );
-    }
-
-
-    function updateComponentDetailsIfOpen() {
-
-        const modal =
-            $("componentDetailsModal");
-
-        if (
-            !modal ||
-            modal.classList.contains(
-                "hidden"
-            )
-        ) return;
-
-        if (
-            detailsComponentId
-        ) {
-            openComponentDetails(
-                detailsComponentId
-            );
-        }
-    }
-
-
-    function addComponentFromDetails() {
-
-        if (!detailsComponentId) {
-            return;
-        }
-
-        const component =
-            getComponent(
-                detailsComponentId
-            );
-
-        if (!component) return;
-
-        addComponent(
-            component.type
-        );
-
-        hide(
-            "componentDetailsModal"
-        );
-    }
-
-
-    /* ============================================================
-       55 — ARDUINO UNO
-    ============================================================ */
-
-    function addArduinoUno() {
-
-        const definition = {
-
-            type: "arduino",
-
-            name: "Arduino UNO",
-
-            symbol: "UNO",
-
-            pins: [
-                "D0",
-                "D1",
-                "D2",
-                "D3",
-                "D4",
-                "D5",
-                "D6",
-                "D7",
-                "D8",
-                "D9",
-                "D10",
-                "D11",
-                "D12",
-                "D13",
-                "A0",
-                "A1",
-                "A2",
-                "A3",
-                "A4",
-                "A5",
-                "5V",
-                "3.3V",
-                "GND"
-            ]
-        };
-
-        const board =
-            createComponent(
-                definition
-            );
-
-        if (board) {
-
-            toast(
-                "Arduino UNO ajouté au laboratoire.",
-                "success"
-            );
-        }
-    }
-
-
-
-
-
-
-
-
-/* ============================================================
-   56 — BOUTONS TOP
-============================================================= */
-
-
-
-
-function openLaboratory() {
-
-        hide("codeLibraryPanel");
-        hide("codeEditorPanel");
-        hide("missionsPanel");
-        hide("diagnosticPanel");
-        hide("faultsPanel");
-        hide("measurementsPanel");
-
-        toast(
-            "Laboratoire ouvert.",
-            "info"
-        );
-    }
-
-
-
-
-
-
-
-function openComponentLibrary() {
-
-    hide("codeLibraryPanel");
-    hide("codeEditorPanel");
-    hide("missionsPanel");
-    hide("diagnosticPanel");
-    hide("faultsPanel");
-    hide("measurementsPanel");
-
-    show("componentLibraryPanel");
-
-    const button =
-        $("libraryBtn");
-
-    if (button) {
-        button.setAttribute(
-            "aria-expanded",
-            "true"
-        );
-    }
-
-    toast(
-        "Bibliothèque des composants active.",
-        "info"
-    );
-}
-
-
-
-
-
-
-
-
-
-
-
-
-    function openCodeLibrary() {
-
-        renderCodeLibrary(
-            state.level
-        );
-
-        show(
-            "codeLibraryPanel"
-        );
-    }
-
-
-    function openCodeEditor() {
-
-        show(
-            "codeEditorPanel"
-        );
-
-        const editor =
-            $("electronicCodeEditor");
-
-        if (
-            editor &&
-            !editor.value &&
-            state.currentCode
-        ) {
-            editor.value =
-                state.currentCode;
-        }
-    }
-
-
-    function openMissions() {
-
-        renderMissions(
-            state.level
-        );
-
-        show(
-            "missionsPanel"
-        );
-    }
-
-
-    function openMeasurements() {
-
-        simulateCircuit();
-
-        show(
-            "measurementsPanel"
-        );
-    }
-
-
-    function openDiagnostic() {
-
-        diagnoseCircuit();
-
-        show(
-            "diagnosticPanel"
-        );
-    }
-
-
-    function openFaults() {
-
-        show(
-            "faultsPanel"
-        );
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    /* ============================================================
-       57 — SAUVEGARDE
-    ============================================================ */
-
-    function projectData() {
-
-        return {
-
-            version:
-                ENGINE_VERSION,
-
-            level:
-                state.level,
-
-            components:
-                state.components,
-
-            wires:
-                state.wires,
-
-            zoom:
-                state.zoom,
-
-            panX:
-                state.panX,
-
-            panY:
-                state.panY,
-
-            gridVisible:
-                state.gridVisible,
-
-            snapEnabled:
-                state.snapEnabled,
-
-            currentCode:
-                state.currentCode,
-
-            activeMissionId:
-                state.activeMission
-                    ? state.activeMission.id
-                    : null,
-
-            activeFaults:
-                state.activeFaults
+            minX,
+            minY,
+            maxX,
+            maxY,
+            width: maxX - minX,
+            height: maxY - minY
         };
     }
 
+    function applyWorkspaceTransform() {
+        if (!dom.canvas) return;
 
-    function saveProject() {
+        dom.canvas.style.transform =
+            `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
 
-        try {
+        dom.canvas.style.transformOrigin = "0 0";
 
-            localStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(
-                    projectData()
-                )
-            );
+        if (dom.zoomResetBtn) {
+            dom.zoomResetBtn.textContent =
+                `${Math.round(state.zoom * 100)}%`;
+        }
+    }
 
-            sessionStorage.setItem(
-                SESSION_KEY,
-                JSON.stringify(
-                    projectData()
-                )
-            );
+    /* ============================================================
+       26. GLOBAL TWO-FINGER PINCH ZOOM
+    ============================================================ */
 
-            toast(
-                "Projet sauvegardé localement.",
-                "success"
-            );
+    const activePointers = new Map();
 
-        } catch (error) {
+    function handleGlobalPointerDown(event) {
+        if (!event.isPrimary && event.pointerType === "mouse") {
+            return;
+        }
 
-            console.error(error);
+        activePointers.set(
+            event.pointerId,
+            {
+                clientX: event.clientX,
+                clientY: event.clientY
+            }
+        );
 
-            toast(
-                "Impossible de sauvegarder le projet.",
-                "error"
+        if (activePointers.size === 2) {
+            const points =
+                Array.from(activePointers.values());
+
+            state.pinch.active = true;
+            state.pinch.pointerIds =
+                Array.from(activePointers.keys());
+
+            state.pinch.startDistance =
+                Math.hypot(
+                    points[0].clientX - points[1].clientX,
+                    points[0].clientY - points[1].clientY
+                );
+
+            state.pinch.startScale =
+                state.globalScale;
+
+            setStatus(
+                "Zoom global actif",
+                "working"
             );
         }
     }
 
+    function handleGlobalPointerMove(event) {
+        if (!activePointers.has(event.pointerId)) return;
 
-    function loadProject() {
+        activePointers.set(
+            event.pointerId,
+            {
+                clientX: event.clientX,
+                clientY: event.clientY
+            }
+        );
 
-        try {
+        if (
+            state.pinch.active &&
+            activePointers.size >= 2
+        ) {
+            const points =
+                Array.from(activePointers.values()).slice(0, 2);
 
-            const raw =
-                localStorage.getItem(
-                    STORAGE_KEY
+            const currentDistance =
+                Math.hypot(
+                    points[0].clientX - points[1].clientX,
+                    points[0].clientY - points[1].clientY
                 );
 
-            if (!raw) {
-
-                toast(
-                    "Aucun projet sauvegardé.",
-                    "warning"
-                );
-
+            if (state.pinch.startDistance <= 0) {
                 return;
             }
 
-            restoreProject(
-                JSON.parse(raw)
-            );
+            const factor =
+                currentDistance /
+                state.pinch.startDistance;
 
-            toast(
-                "Projet chargé.",
-                "success"
-            );
+            state.globalScale =
+                clamp(
+                    state.pinch.startScale * factor,
+                    0.65,
+                    1.6
+                );
 
-        } catch (error) {
+            applyGlobalScale();
 
-            console.error(error);
-
-            toast(
-                "Projet invalide ou endommagé.",
-                "error"
-            );
+            event.preventDefault();
         }
     }
 
+    function handleGlobalPointerUp(event) {
+        activePointers.delete(event.pointerId);
 
-    function restoreProject(
-        data
-    ) {
-
-        if (
-            !data ||
-            !Array.isArray(
-                data.components
-            )
-        ) {
-
-            throw new Error(
-                "Format projet invalide."
-            );
+        if (activePointers.size < 2) {
+            state.pinch.active = false;
+            state.pinch.pointerIds = [];
         }
-
-        state.components =
-            data.components;
-
-        state.wires =
-            Array.isArray(
-                data.wires
-            )
-                ? data.wires
-                : [];
-
-        state.level =
-            data.level ||
-            "beginner";
-
-        state.zoom =
-            Number(
-                data.zoom
-            ) || 1;
-
-        state.panX =
-            Number(
-                data.panX
-            ) || 0;
-
-        state.panY =
-            Number(
-                data.panY
-            ) || 0;
-
-        state.gridVisible =
-            data.gridVisible !== false;
-
-        state.snapEnabled =
-            data.snapEnabled !== false;
-
-        state.currentCode =
-            data.currentCode ||
-            "";
-
-        state.activeFaults =
-            Array.isArray(
-                data.activeFaults
-            )
-                ? data.activeFaults
-                : [];
-
-        const editor =
-            $("electronicCodeEditor");
-
-        if (editor) {
-            editor.value =
-                state.currentCode;
-        }
-
-        renderAllComponents();
-
-        renderWires();
-
-        setZoom(
-            state.zoom
-        );
-
-        updateWorkspace();
-
-        simulateCircuit();
-
-        setLevel(
-            state.level
-        );
     }
 
+    function applyGlobalScale() {
+        if (!app) return;
+
+        app.style.setProperty(
+            "--fobas-global-scale",
+            String(state.globalScale)
+        );
+
+        app.style.transform =
+            `scale(${state.globalScale})`;
+
+        app.style.transformOrigin = "center top";
+    }
 
     /* ============================================================
-       58 — EXPORT / IMPORT
+       27. MEASUREMENTS
     ============================================================ */
 
-    function exportProject() {
+    function updateMeasurementDisplays() {
+        const m = state.measurements;
 
-        const data =
-            JSON.stringify(
-                projectData(),
-                null,
-                2
+        const voltage =
+            `${m.voltage.toFixed(2)} V`;
+
+        const current =
+            `${m.current.toFixed(3)} A`;
+
+        const resistance =
+            m.resistance === null
+                ? "— Ω"
+                : `${m.resistance.toFixed(1)} Ω`;
+
+        const frequency =
+            `${Number(m.frequency || 0).toFixed(0)} Hz`;
+
+        const power =
+            `${m.power.toFixed(3)} W`;
+
+        if (dom.voltageDisplay)
+            dom.voltageDisplay.textContent = voltage;
+
+        if (dom.currentDisplay)
+            dom.currentDisplay.textContent = current;
+
+        if (dom.resistanceDisplay)
+            dom.resistanceDisplay.textContent = resistance;
+
+        if (dom.frequencyDisplay)
+            dom.frequencyDisplay.textContent = frequency;
+
+        if (dom.dashboardVoltage)
+            dom.dashboardVoltage.textContent = voltage;
+
+        if (dom.dashboardCurrent)
+            dom.dashboardCurrent.textContent = current;
+
+        if (dom.dashboardResistance)
+            dom.dashboardResistance.textContent = resistance;
+
+        if (dom.dashboardFrequency)
+            dom.dashboardFrequency.textContent = frequency;
+
+        if (dom.dashboardPower)
+            dom.dashboardPower.textContent = power;
+
+        if (dom.dashboardContinuity)
+            dom.dashboardContinuity.textContent =
+                m.continuity || "—";
+    }
+
+    function measureVoltage() {
+        calculateMeasurements();
+        updateMeasurementDisplays();
+
+        showToast(
+            `Tension mesurée : ${state.measurements.voltage.toFixed(2)} V`,
+            "success"
+        );
+    }
+
+    function measureCurrent() {
+        calculateMeasurements();
+        updateMeasurementDisplays();
+
+        showToast(
+            `Courant mesuré : ${state.measurements.current.toFixed(3)} A`,
+            "success"
+        );
+    }
+
+    function measureResistance() {
+        calculateMeasurements();
+        updateMeasurementDisplays();
+
+        showToast(
+            `Résistance mesurée : ${
+                state.measurements.resistance === null
+                    ? "aucune"
+                    : state.measurements.resistance.toFixed(1) + " Ω"
+            }`,
+            "success"
+        );
+    }
+
+    /* ============================================================
+       28. WORKSPACE STATUS
+    ============================================================ */
+
+    function updateWorkspaceState() {
+        if (dom.componentCount) {
+            dom.componentCount.textContent =
+                String(state.components.length);
+        }
+
+        if (dom.connectionCount) {
+            dom.connectionCount.textContent =
+                String(state.wires.length);
+        }
+
+        if (dom.workspaceVoltage) {
+            dom.workspaceVoltage.textContent =
+                `${state.measurements.voltage.toFixed(2)} V`;
+        }
+
+        if (dom.workspaceCurrent) {
+            dom.workspaceCurrent.textContent =
+                `${state.measurements.current.toFixed(3)} A`;
+        }
+
+        if (dom.circuitState) {
+            if (state.powerOn && state.circuitRunning) {
+                dom.circuitState.textContent =
+                    "Circuit actif";
+            } else if (state.powerOn) {
+                dom.circuitState.textContent =
+                    "Alimentation ON";
+            } else if (state.wires.length) {
+                dom.circuitState.textContent =
+                    "Montage connecté";
+            } else {
+                dom.circuitState.textContent =
+                    "Circuit ouvert";
+            }
+        }
+    }
+
+    /* ============================================================
+       29. RENDER ALL
+    ============================================================ */
+
+    function renderAllComponents() {
+        if (!dom.componentLayer) return;
+
+        const currentIds =
+            new Set(
+                state.components.map(
+                    component => component.id
+                )
             );
+
+        Array.from(
+            dom.componentLayer.querySelectorAll(
+                ".electronic-component"
+            )
+        ).forEach(element => {
+            if (!currentIds.has(element.dataset.componentId)) {
+                element.remove();
+            }
+        });
+
+        state.components.forEach(component =>
+            renderComponent(component)
+        );
+
+        renderWires();
+    }
+
+    /* ============================================================
+       30. SAVE / LOAD
+    ============================================================ */
+
+    function getSerializableState() {
+        return {
+            format: PROJECT_FORMAT,
+            version: ENGINE_VERSION,
+            savedAt: new Date().toISOString(),
+
+            components: state.components,
+            wires: state.wires,
+
+            selectedComponentId:
+                state.selectedComponentId,
+
+            activeTool: state.activeTool,
+
+            zoom: state.zoom,
+            panX: state.panX,
+            panY: state.panY,
+
+            powerOn: state.powerOn,
+            circuitRunning: state.circuitRunning,
+            codeRunning: false,
+
+            currentLevel: state.currentLevel,
+            currentCodeLevel: state.currentCodeLevel,
+            currentCodeId: state.currentCodeId,
+
+            code:
+                dom.electronicCodeEditor?.value ||
+                state.code ||
+                "",
+
+            faults: state.faults
+        };
+    }
+
+    function saveProject() {
+        const data = getSerializableState();
+
+        const json =
+            JSON.stringify(data, null, 2);
 
         const blob =
             new Blob(
-                [data],
+                [json],
                 {
-                    type:
-                        "application/json"
+                    type: "application/json"
                 }
             );
 
         const url =
-            URL.createObjectURL(
-                blob
+            URL.createObjectURL(blob);
+
+        const anchor =
+            document.createElement("a");
+
+        anchor.href = url;
+        anchor.download =
+            `FOBAS_Electronique_${Date.now()}.json`;
+
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 1000);
+
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                json
             );
+        } catch (_) {
+            /* Browser storage may be unavailable. */
+        }
 
-        const a =
-            document.createElement(
-                "a"
-            );
-
-        a.href = url;
-
-        a.download =
-            "fobas-electronique-projet.json";
-
-        document.body.appendChild(a);
-
-        a.click();
-
-        a.remove();
-
-        URL.revokeObjectURL(
-            url
-        );
-
-        toast(
-            "Projet exporté.",
+        showToast(
+            "Projet sauvegardé.",
             "success"
         );
     }
 
+    function loadProject() {
+        if (!dom.projectFileInput) return;
 
-    function importProjectFile(
-        file
-    ) {
+        dom.projectFileInput.value = "";
+        dom.projectFileInput.click();
+    }
+
+    function applyLoadedProject(data) {
+        if (!data || typeof data !== "object") {
+            throw new Error("Projet invalide.");
+        }
+
+        if (
+            data.format &&
+            data.format !== PROJECT_FORMAT
+        ) {
+            throw new Error(
+                "Format de projet incompatible."
+            );
+        }
+
+        state.components = Array.isArray(data.components)
+            ? data.components
+            : [];
+
+        state.wires = Array.isArray(data.wires)
+            ? data.wires
+            : [];
+
+        state.selectedComponentId =
+            data.selectedComponentId || null;
+
+        state.activeTool =
+            data.activeTool || "select";
+
+        state.zoom =
+            clamp(
+                Number(data.zoom) || 1,
+                0.35,
+                3
+            );
+
+        state.panX =
+            Number(data.panX) || 0;
+
+        state.panY =
+            Number(data.panY) || 0;
+
+        state.powerOn =
+            Boolean(data.powerOn);
+
+        state.circuitRunning =
+            Boolean(data.circuitRunning);
+
+        state.currentLevel =
+            data.currentLevel || "beginner";
+
+        state.currentCodeLevel =
+            data.currentCodeLevel || "beginner";
+
+        state.currentCodeId =
+            data.currentCodeId || null;
+
+        state.faults = {
+            ...state.faults,
+            ...(data.faults || {})
+        };
+
+        state.code =
+            String(data.code || "");
+
+        if (dom.electronicCodeEditor) {
+            dom.electronicCodeEditor.value =
+                state.code;
+        }
+
+        setActiveTool(state.activeTool);
+
+        renderAllComponents();
+        applyWorkspaceTransform();
+        runSimulation();
+        updateLevelUI();
+
+        showToast(
+            "Projet chargé avec succès.",
+            "success"
+        );
+    }
+
+    function handleProjectFile(event) {
+        const file =
+            event.target.files?.[0];
 
         if (!file) return;
 
         const reader =
             new FileReader();
 
-        reader.onload =
-            event => {
+        reader.onload = () => {
+            try {
+                const data =
+                    JSON.parse(reader.result);
 
-                try {
+                applyLoadedProject(data);
+            } catch (error) {
+                console.error(error);
 
-                    const data =
-                        JSON.parse(
-                            event.target.result
-                        );
+                showToast(
+                    "Impossible de charger ce projet.",
+                    "error"
+                );
+            }
+        };
 
-                    restoreProject(
-                        data
-                    );
+        reader.onerror = () => {
+            showToast(
+                "Erreur de lecture du fichier.",
+                "error"
+            );
+        };
 
-                    saveProject();
-
-                    toast(
-                        "Projet importé avec succès.",
-                        "success"
-                    );
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    toast(
-                        "Fichier projet invalide.",
-                        "error"
-                    );
-                }
-            };
-
-        reader.readAsText(
-            file
-        );
+        reader.readAsText(file);
     }
 
-
     /* ============================================================
-       59 — HISTORIQUE UNDO / REDO
+       31. LOCAL AUTOSAVE
     ============================================================ */
 
-    function snapshot() {
-
-        return JSON.stringify({
-            components:
-                state.components,
-            wires:
-                state.wires
-        });
-    }
-
-
-    function pushHistory() {
-
-        const snap =
-            snapshot();
-
-        if (
-            state.history[
-                state.historyIndex
-            ] === snap
-        ) {
-            return;
-        }
-
-        state.history =
-            state.history.slice(
-                0,
-                state.historyIndex + 1
+    function autoSaveState() {
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(
+                    getSerializableState()
+                )
             );
-
-        state.history.push(
-            snap
-        );
-
-        if (
-            state.history.length >
-            50
-        ) {
-
-            state.history.shift();
+        } catch (_) {
+            /* Optional browser storage. */
         }
-
-        state.historyIndex =
-            state.history.length - 1;
     }
 
+    function restoreLocalState() {
+        try {
+            const raw =
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
 
-    function restoreSnapshot(
-        snap
-    ) {
+            if (!raw) return false;
 
-        const data =
-            JSON.parse(
-                snap
-            );
+            const data =
+                JSON.parse(raw);
 
-        state.components =
-            data.components || [];
+            if (
+                !data ||
+                data.format !== PROJECT_FORMAT
+            ) {
+                return false;
+            }
 
-        state.wires =
-            data.wires || [];
+            applyLoadedProject(data);
 
-        renderAllComponents();
-
-        renderWires();
-
-        updateWorkspace();
-
-        simulateCircuit();
-    }
-
-
-    function undo() {
-
-        if (
-            state.historyIndex <= 0
-        ) {
-
-            toast(
-                "Aucune action à annuler.",
-                "warning"
-            );
-
-            return;
+            return true;
+        } catch (_) {
+            return false;
         }
-
-        state.historyIndex--;
-
-        restoreSnapshot(
-            state.history[
-                state.historyIndex
-            ]
-        );
-
-        toast(
-            "Action annulée.",
-            "info"
-        );
     }
-
-
-    function redo() {
-
-        if (
-            state.historyIndex >=
-            state.history.length - 1
-        ) {
-
-            toast(
-                "Aucune action à rétablir.",
-                "warning"
-            );
-
-            return;
-        }
-
-        state.historyIndex++;
-
-        restoreSnapshot(
-            state.history[
-                state.historyIndex
-            ]
-        );
-
-        toast(
-            "Action rétablie.",
-            "info"
-        );
-    }
-
 
     /* ============================================================
-       60 — VIDER LABORATOIRE
+       32. CLEAR WORKSPACE
     ============================================================ */
 
     function clearWorkspace() {
-
-        const confirmed =
-            window.confirm(
-                "Voulez-vous vraiment vider complètement le laboratoire ?"
+        if (!state.components.length && !state.wires.length) {
+            showToast(
+                "Le laboratoire est déjà vide.",
+                "info"
             );
-
-        if (!confirmed) return;
+            return;
+        }
 
         state.components = [];
         state.wires = [];
+        state.selectedComponentId = null;
+        state.wireStart = null;
 
-        state.selectedComponentId =
-            null;
+        state.powerOn = false;
+        state.circuitRunning = false;
+        state.codeRunning = false;
 
-        state.selectedWireId =
-            null;
+        if (dom.componentLayer) {
+            dom.componentLayer.innerHTML = "";
+        }
 
-        state.pendingWirePin =
-            null;
+        if (dom.wireLayer) {
+            dom.wireLayer.innerHTML = "";
+        }
 
-        state.powerOn =
-            false;
-
-        state.activeFaults =
-            [];
-
-        state.measurements = {
-            voltage: 0,
-            current: 0,
-            resistance: null,
-            frequency: 0,
-            power: 0,
-            continuity: false
-        };
-
-        pushHistory();
-
-        renderAllComponents();
-
-        renderWires();
-
-        updateWorkspace();
-
+        resetWorkspaceZoom();
+        calculateMeasurements();
         updateMeasurementDisplays();
+        updateWorkspaceState();
 
-        setStatus(
-            "Laboratoire vide",
-            "ready"
+        showToast(
+            "Laboratoire vidé.",
+            "success"
         );
 
-        toast(
-            "Laboratoire vidé.",
+        autoSaveState();
+    }
+
+    /* ============================================================
+       33. LEVEL SYSTEM
+    ============================================================ */
+
+    function setCurrentLevel(level) {
+        if (
+            !["beginner", "intermediate", "expert"]
+                .includes(level)
+        ) {
+            return;
+        }
+
+        state.currentLevel = level;
+
+        updateLevelUI();
+        renderMissions();
+    }
+
+    function setCurrentCodeLevel(level) {
+        if (
+            !["beginner", "intermediate", "expert"]
+                .includes(level)
+        ) {
+            return;
+        }
+
+        state.currentCodeLevel = level;
+
+        updateCodeLevelUI();
+        renderCodeLibrary();
+    }
+
+    function updateLevelUI() {
+        [
+            [dom.beginnerLevelBtn, "beginner"],
+            [dom.intermediateLevelBtn, "intermediate"],
+            [dom.expertLevelBtn, "expert"]
+        ].forEach(([button, level]) => {
+            button?.classList.toggle(
+                "active",
+                state.currentLevel === level
+            );
+        });
+    }
+
+    function updateCodeLevelUI() {
+        [
+            [dom.codeBeginnerBtn, "beginner"],
+            [dom.codeIntermediateBtn, "intermediate"],
+            [dom.codeExpertBtn, "expert"]
+        ].forEach(([button, level]) => {
+            button?.classList.toggle(
+                "active",
+                state.currentCodeLevel === level
+            );
+        });
+    }
+
+    /* ============================================================
+       34. MISSIONS
+    ============================================================ */
+
+    function renderMissions() {
+        if (!dom.missionsList) return;
+
+        const missions =
+            MISSIONS.filter(
+                mission =>
+                    mission.level === state.currentLevel
+            );
+
+        dom.missionsList.innerHTML = "";
+
+        missions.forEach(mission => {
+            const card =
+                document.createElement("article");
+
+            card.className = "mission-card";
+            card.dataset.missionId = mission.id;
+
+            const compatibility =
+                getCodeCompatibility(
+                    {
+                        requiredTypes:
+                            mission.requiredTypes
+                    },
+                    state.components.map(
+                        component =>
+                            component.type
+                    )
+                );
+
+            card.innerHTML = `
+                <h3>${escapeHTML(mission.title)}</h3>
+                <p>${escapeHTML(mission.description)}</p>
+
+                <div class="mission-card-requirements">
+                    ${mission.requiredTypes.map(type => {
+                        const definition =
+                            getComponentDefinition(type);
+
+                        return `
+                            <span>
+                                ${escapeHTML(
+                                    definition?.name || type
+                                )}
+                            </span>
+                        `;
+                    }).join("")}
+                </div>
+
+                <strong>
+                    ${
+                        compatibility.score >= 100
+                            ? "✓ Montage compatible"
+                            : `${compatibility.score}% préparé`
+                    }
+                </strong>
+            `;
+
+            card.addEventListener("click", () =>
+                selectMission(mission.id)
+            );
+
+            dom.missionsList.appendChild(card);
+        });
+    }
+
+    function selectMission(id) {
+        const mission =
+            MISSIONS.find(
+                item => item.id === id
+            );
+
+        if (!mission) return;
+
+        state.activeMissionId = id;
+        state.missionStarted = false;
+
+        if (dom.activeMissionTitle) {
+            dom.activeMissionTitle.textContent =
+                mission.title;
+        }
+
+        if (dom.activeMissionDescription) {
+            dom.activeMissionDescription.textContent =
+                mission.description;
+        }
+
+        if (dom.missionRequirements) {
+            dom.missionRequirements.innerHTML =
+                mission.requirements
+                    .map(
+                        requirement =>
+                            `<div>✓ ${escapeHTML(requirement)}</div>`
+                    )
+                    .join("");
+        }
+
+        document
+            .querySelectorAll(".mission-card")
+            .forEach(card => {
+                card.classList.toggle(
+                    "active",
+                    card.dataset.missionId === id
+                );
+            });
+    }
+
+    function startMission() {
+        if (!state.activeMissionId) {
+            showToast(
+                "Sélectionnez une mission.",
+                "warning"
+            );
+            return;
+        }
+
+        state.missionStarted = true;
+
+        showToast(
+            "Mission démarrée. Vous pouvez réaliser le montage.",
             "success"
         );
     }
 
+    function validateMission() {
+        if (!state.activeMissionId) {
+            showToast(
+                "Aucune mission sélectionnée.",
+                "warning"
+            );
+            return;
+        }
 
-    /* ============================================================
-       61 — SIMULATION EFFECTS
-    ============================================================ */
+        const mission =
+            MISSIONS.find(
+                item =>
+                    item.id === state.activeMissionId
+            );
 
-    function startSimulationEffects() {
+        if (!mission) return;
+
+        const types =
+            state.components.map(
+                component =>
+                    component.type
+            );
+
+        const compatibility =
+            getCodeCompatibility(
+                {
+                    requiredTypes:
+                        mission.requiredTypes
+                },
+                types
+            );
+
+        const code =
+            CODE_LIBRARY.find(
+                item =>
+                    item.id === mission.codeId
+            );
+
+        let success =
+            compatibility.score >= 100;
+
+        if (code && state.code) {
+            const normalizedCurrent =
+                normalizeText(state.code);
+
+            const normalizedMission =
+                normalizeText(code.code);
+
+            if (
+                normalizedCurrent.includes(
+                    "digitalwrite"
+                ) &&
+                normalizedMission.includes(
+                    "digitalwrite"
+                )
+            ) {
+                success = success &&
+                    true;
+            }
+        }
 
         if (
-            state.simulationTimer
+            mission.codeId === "arduino-led-on"
+        ) {
+            const led =
+                state.components.find(
+                    component =>
+                        component.type === "led"
+                );
+
+            if (led && led.state === "on") {
+                success = true;
+            }
+        }
+
+        showMissionResult(
+            success,
+            mission
+        );
+    }
+
+    function showMissionResult(success, mission) {
+        if (!dom.missionResultModal) return;
+
+        if (dom.missionResultIcon) {
+            dom.missionResultIcon.textContent =
+                success ? "✓" : "!";
+        }
+
+        if (dom.missionResultTitle) {
+            dom.missionResultTitle.textContent =
+                success
+                    ? "Mission réussie"
+                    : "Mission non validée";
+        }
+
+        if (dom.missionResultMessage) {
+            dom.missionResultMessage.textContent =
+                success
+                    ? `Bravo. Le montage "${mission.title}" répond aux conditions détectées.`
+                    : `Le laboratoire ne répond pas encore à toutes les conditions de "${mission.title}".`;
+        }
+
+        dom.missionResultModal.classList.remove("hidden");
+        dom.missionResultModal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+    }
+
+    function closeMissionResult() {
+        dom.missionResultModal?.classList.add("hidden");
+        dom.missionResultModal?.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+    }
+
+    /* ============================================================
+       35. DIAGNOSTIC
+    ============================================================ */
+
+    function runDiagnostic() {
+        if (!dom.diagnosticResults) return;
+
+        const results = [];
+
+        if (!state.components.length) {
+            results.push({
+                type: "warning",
+                text: "Aucun composant dans le laboratoire."
+            });
+        }
+
+        const controllers =
+            state.components.filter(component => {
+                const definition =
+                    getComponentDefinition(component.type);
+
+                return Boolean(definition?.controller);
+            });
+
+        if (controllers.length) {
+            results.push({
+                type: "success",
+                text:
+                    `${controllers.length} contrôleur(s) détecté(s).`
+            });
+        } else {
+            results.push({
+                type: "warning",
+                text:
+                    "Aucun contrôleur Arduino/ESP32 détecté."
+            });
+        }
+
+        if (state.wires.length) {
+            results.push({
+                type: "success",
+                text:
+                    `${state.wires.length} connexion(s) détectée(s).`
+            });
+        } else {
+            results.push({
+                type: "warning",
+                text:
+                    "Aucune connexion détectée."
+            });
+        }
+
+        if (state.faults.openCircuit) {
+            results.push({
+                type: "error",
+                text:
+                    "Panne active : circuit ouvert."
+            });
+        }
+
+        if (state.faults.shortCircuit) {
+            results.push({
+                type: "error",
+                text:
+                    "Panne active : court-circuit."
+            });
+        }
+
+        if (state.faults.reversedPolarity) {
+            results.push({
+                type: "error",
+                text:
+                    "Panne active : polarité inversée."
+            });
+        }
+
+        if (state.faults.defectiveComponent) {
+            results.push({
+                type: "error",
+                text:
+                    "Panne active : composant défectueux."
+            });
+        }
+
+        if (
+            state.powerOn &&
+            state.components.length
+        ) {
+            results.push({
+                type: "success",
+                text:
+                    "Alimentation active."
+            });
+        }
+
+        dom.diagnosticResults.innerHTML =
+            results.map(result => `
+                <div class="diagnostic-result ${result.type}">
+                    ${escapeHTML(result.text)}
+                </div>
+            `).join("");
+
+        showToast(
+            "Diagnostic terminé.",
+            "success"
+        );
+    }
+
+    /* ============================================================
+       36. FAULT SYSTEM
+    ============================================================ */
+
+    function createFault(type) {
+        if (
+            ![
+                "openCircuit",
+                "shortCircuit",
+                "reversedPolarity",
+                "defectiveComponent"
+            ].includes(type)
         ) {
             return;
         }
 
-        state.simulationTimer =
-            setInterval(
-                () => {
+        state.faults[type] = true;
 
-                    if (
-                        state.circuitRunning
-                    ) {
-
-                        simulateCircuit();
-                    }
-                },
-                300
-            );
-    }
-
-
-    function stopSimulationEffects() {
-
-        clearInterval(
-            state.simulationTimer
+        setStatus(
+            "Panne simulée",
+            "working"
         );
 
-        state.simulationTimer =
-            null;
+        runSimulation();
+
+        showToast(
+            "Panne simulée dans le laboratoire.",
+            "warning"
+        );
     }
 
+    function clearFaults() {
+        state.faults = {
+            openCircuit: false,
+            shortCircuit: false,
+            reversedPolarity: false,
+            defectiveComponent: false
+        };
+
+        state.components.forEach(component => {
+            component.faults = {
+                open: false,
+                short: false,
+                polarity: false,
+                defective: false
+            };
+        });
+
+        runSimulation();
+
+        setStatus(
+            "Pannes supprimées",
+            "ready"
+        );
+
+        showToast(
+            "Toutes les pannes ont été supprimées.",
+            "success"
+        );
+    }
 
     /* ============================================================
-       62 — INITIALISATION DES BOUTONS
+       37. SOURCE / INSTRUMENT BUTTONS
     ============================================================ */
 
-    function bind(
-        id,
-        event,
-        handler
-    ) {
+    function setupStaticLibraryButtons() {
+        const sourceButtons = [
+            [dom.batteryBtn, "battery"],
+            [dom.dcSupplyBtn, "dc-supply"],
+            [dom.acSupplyBtn, "ac-supply"],
+            [dom.signalGeneratorBtn, "signal-generator"]
+        ];
 
-        const el = $(id);
+        sourceButtons.forEach(([button, type]) => {
+            button?.addEventListener(
+                "click",
+                () => {
+                    openComponentLibrary();
+                    addComponent(type);
+                }
+            );
+        });
 
-        if (!el) return;
+        const instrumentButtons = [
+            [dom.multimeterBtn, "multimeter"],
+            [dom.oscilloscopeBtn, "oscilloscope"],
+            [dom.voltmeterBtn, "voltmeter"],
+            [dom.ammeterBtn, "ammeter"],
+            [dom.ohmmeterBtn, "ohmmeter"],
+            [dom.frequencyMeterBtn, "frequency-meter"],
+            [dom.logicAnalyzerBtn, "logic-analyzer"]
+        ];
 
-        el.addEventListener(
-            event,
-            handler
+        instrumentButtons.forEach(([button, type]) => {
+            button?.addEventListener(
+                "click",
+                () => {
+                    addInstrument(type);
+                }
+            );
+        });
+    }
+
+    function addInstrument(type) {
+        const labels = {
+            multimeter: "Multimètre",
+            oscilloscope: "Oscilloscope",
+            voltmeter: "Voltmètre",
+            ammeter: "Ampèremètre",
+            ohmmeter: "Ohmmètre",
+            "frequency-meter": "Fréquencemètre",
+            "logic-analyzer": "Analyseur logique"
+        };
+
+        const component = {
+            id: uid("instrument"),
+            type: `instrument-${type}`,
+            name: labels[type] || "Instrument",
+            category: "instrument",
+            x: 80 + state.components.length * 25,
+            y: 80 + state.components.length * 20,
+            width: 170,
+            height: 105,
+            rotation: 0,
+            state: "ready",
+            value: null,
+            angle: 0,
+            speed: 0,
+            frequency: 0,
+            displayText: "",
+            pinStates: {},
+            pinModes: {},
+            analogValues: {},
+            digitalValues: {},
+            faults: {
+                open: false,
+                short: false,
+                polarity: false,
+                defective: false
+            }
+        };
+
+        state.components.push(component);
+
+        renderInstrument(component);
+        selectComponent(component.id);
+        updateWorkspaceState();
+
+        showToast(
+            `${component.name} ajouté au laboratoire.`,
+            "success"
         );
     }
 
+    function renderInstrument(component) {
+        if (!dom.componentLayer) return;
 
-    function setupEvents() {
+        let element =
+            document.getElementById(component.id);
 
-        /* TOP */
+        if (!element) {
+            element =
+                document.createElement("div");
 
+            element.id = component.id;
+            element.className =
+                "electronic-component electronic-instrument";
 
+            element.dataset.componentId =
+                component.id;
 
+            element.dataset.componentType =
+                component.type;
 
-bind(
-    "libraryBtn",
-    "click",
-    () => {
-        hide("codeLibraryPanel");
-        hide("codeEditorPanel");
-        hide("missionsPanel");
-        hide("diagnosticPanel");
-        hide("faultsPanel");
-        hide("measurementsPanel");
-
-        show("componentLibraryPanel");
-
-        const button = document.getElementById("libraryBtn");
-
-        if (button) {
-            button.setAttribute("aria-expanded", "true");
+            dom.componentLayer.appendChild(element);
         }
 
-        toast(
-            "Bibliothèque des composants active.",
-            "info"
-        );
-    }
-);
+        element.style.position = "absolute";
+        element.style.left = `${component.x}px`;
+        element.style.top = `${component.y}px`;
+        element.style.width = `${component.width}px`;
+        element.style.height = `${component.height}px`;
+        element.style.transform =
+            `rotate(${component.rotation}deg)`;
+        element.style.touchAction = "none";
 
+        element.innerHTML = `
+            <div class="instrument-body">
+                <div class="instrument-screen">
+                    ${escapeHTML(getInstrumentReading(component.type))}
+                </div>
 
+                <strong>
+                    ${escapeHTML(component.name)}
+                </strong>
 
+                <span>
+                    ${escapeHTML(component.type.replace("instrument-", ""))}
+                </span>
+            </div>
+        `;
 
+        element.onpointerdown = event => {
+            event.preventDefault();
 
+            selectComponent(component.id);
 
+            if (state.activeTool === "delete") {
+                deleteComponent(component.id);
+                return;
+            }
 
+            if (state.activeTool === "rotate") {
+                rotateComponent(component.id);
+                return;
+            }
 
+            if (state.activeTool === "duplicate") {
+                duplicateComponent(component.id);
+                return;
+            }
 
-        bind(
-            "codeLibraryBtn",
-            "click",
-            openCodeLibrary
-        );
-
-        bind(
-            "codeEditorBtn",
-            "click",
-            openCodeEditor
-        );
-
-        bind(
-            "missionsBtn",
-            "click",
-            openMissions
-        );
-
-        bind(
-            "measurementsBtn",
-            "click",
-            openMeasurements
-        );
-
-        bind(
-            "diagnosticBtn",
-            "click",
-            openDiagnostic
-        );
-
-        bind(
-            "faultsBtn",
-            "click",
-            openFaults
-        );
-
-
-        /* NIVEAUX */
-
-        bind(
-            "beginnerLevelBtn",
-            "click",
-            () =>
-                setLevel("beginner")
-        );
-
-        bind(
-            "intermediateLevelBtn",
-            "click",
-            () =>
-                setLevel("intermediate")
-        );
-
-        bind(
-            "expertLevelBtn",
-            "click",
-            () =>
-                setLevel("expert")
-        );
-
-
-        /* CATEGORIES */
-
-        qsa(
-            ".component-category-btn"
-        ).forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () =>
-                        renderCategory(
-                            button.dataset.category
-                        )
+            if (state.activeTool === "move") {
+                beginComponentDrag(
+                    event,
+                    component,
+                    element
                 );
             }
-        );
+        };
+    }
 
+    function getInstrumentReading(type) {
+        const m = state.measurements;
 
+        if (type === "instrument-multimeter")
+            return `${m.voltage.toFixed(2)}V`;
 
+        if (type === "instrument-voltmeter")
+            return `${m.voltage.toFixed(2)} V`;
 
+        if (type === "instrument-ammeter")
+            return `${m.current.toFixed(3)} A`;
 
+        if (type === "instrument-ohmmeter")
+            return m.resistance === null
+                ? "— Ω"
+                : `${m.resistance.toFixed(1)} Ω`;
 
+        if (type === "instrument-frequency-meter")
+            return `${m.frequency.toFixed(0)} Hz`;
 
+        if (type === "instrument-oscilloscope")
+            return `CH1 ${m.voltage.toFixed(2)}V`;
 
+        if (type === "instrument-logic-analyzer")
+            return state.circuitRunning
+                ? "HIGH/LOW"
+                : "IDLE";
 
+        return "READY";
+    }
 
-        /* RECHERCHE */
+    /* ============================================================
+       38. PANEL EVENTS
+    ============================================================ */
 
-        bind(
-            "componentSearchBtn",
+    function setupPanelEvents() {
+        dom.laboratoryBtn?.addEventListener(
             "click",
             () => {
-
-                const input =
-                    $("componentSearchInput");
-
-                if (input) {
-                    input.focus();
-                }
+                closeAllPanelsExcept(null);
+                setStatus("Simulation prête", "ready");
             }
         );
 
-        bind(
-            "componentSearchInput",
-            "input",
-            event =>
-                searchComponents(
-                    event.target.value
-                )
+        dom.libraryBtn?.addEventListener(
+            "click",
+            () => openComponentLibrary()
         );
 
+        dom.codeLibraryBtn?.addEventListener(
+            "click",
+            () => openCodeLibrary()
+        );
 
-        /* SOURCES */
+        dom.codeEditorBtn?.addEventListener(
+            "click",
+            () => openCodeEditor()
+        );
 
-        qsa(
-            "[data-component]"
-        ).forEach(
-            button => {
-
-                if (
-                    button.closest(
-                        "#componentLibraryGrid"
-                    )
-                ) return;
-
-                button.addEventListener(
-                    "click",
-                    () =>
-                        addComponent(
-                            button.dataset.component
-                        )
-                );
+        dom.missionsBtn?.addEventListener(
+            "click",
+            () => {
+                renderMissions();
+                openPanel("missionsPanel");
             }
         );
 
-
-        /* INSTRUMENTS */
-
-        qsa(
-            "[data-instrument]"
-        ).forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () =>
-                        addInstrument(
-                            button.dataset.instrument
-                        )
-                );
+        dom.measurementsBtn?.addEventListener(
+            "click",
+            () => {
+                calculateMeasurements();
+                updateMeasurementDisplays();
+                openPanel("measurementsPanel");
             }
         );
 
-
-        /* WORKSPACE TOOLS */
-
-        bind(
-            "selectToolBtn",
+        dom.diagnosticBtn?.addEventListener(
             "click",
-            () =>
-                setTool("select")
+            () => openPanel("diagnosticPanel")
         );
 
-        bind(
-            "wireToolBtn",
+        dom.faultsBtn?.addEventListener(
             "click",
-            () =>
-                setTool("wire")
+            () => openPanel("faultsPanel")
         );
 
-        bind(
-            "moveToolBtn",
+        dom.closeComponentLibraryBtn?.addEventListener(
             "click",
-            () =>
-                setTool("move")
+            closeComponentLibrary
         );
 
-        bind(
-            "rotateToolBtn",
+        dom.closeCodeLibraryBtn?.addEventListener(
             "click",
-            () =>
-                setTool("rotate")
+            () => closePanel("codeLibraryPanel")
         );
 
-        bind(
-            "deleteToolBtn",
+        dom.closeCodeEditorBtn?.addEventListener(
             "click",
-            () =>
-                setTool("delete")
+            () => closePanel("codeEditorPanel")
         );
 
-        bind(
-            "duplicateToolBtn",
+        dom.closeMissionsBtn?.addEventListener(
             "click",
-            () =>
-                setTool("duplicate")
+            () => closePanel("missionsPanel")
         );
 
-
-        /* ZOOM */
-
-        bind(
-            "zoomInBtn",
+        dom.closeDiagnosticBtn?.addEventListener(
             "click",
-            zoomIn
+            () => closePanel("diagnosticPanel")
         );
 
-        bind(
-            "zoomOutBtn",
+        dom.closeFaultsBtn?.addEventListener(
             "click",
-            zoomOut
+            () => closePanel("faultsPanel")
         );
 
-        bind(
-            "zoomResetBtn",
+        dom.closeMeasurementsBtn?.addEventListener(
             "click",
-            resetZoom
+            () => closePanel("measurementsPanel")
         );
 
-        bind(
-            "fitWorkspaceBtn",
-            "click",
-            fitWorkspace
-        );
-
-
-        /* CIRCUIT */
-
-        bind(
-            "powerOnBtn",
-            "click",
-            powerOn
-        );
-
-        bind(
-            "powerOffBtn",
-            "click",
-            powerOff
-        );
-
-        bind(
-            "runCircuitBtn",
-            "click",
-            runCircuit
-        );
-
-        bind(
-            "stopCircuitBtn",
-            "click",
-            stopCircuit
-        );
-
-        bind(
-            "resetCircuitBtn",
-            "click",
-            resetCircuit
-        );
-
-
-        /* MESURES */
-
-        bind(
-            "measureVoltageBtn",
-            "click",
-            measureVoltage
-        );
-
-        bind(
-            "measureCurrentBtn",
-            "click",
-            measureCurrent
-        );
-
-        bind(
-            "measureResistanceBtn",
-            "click",
-            measureResistance
-        );
-
-
-        /* CODE */
-
-        bind(
-            "openCodeEditorBtn",
+        dom.openCodeEditorBtn?.addEventListener(
             "click",
             openCodeEditor
         );
 
-        bind(
-            "executeCodeBtn",
+        dom.executeCodeBtn?.addEventListener(
             "click",
             executeCurrentCode
         );
 
-        bind(
-            "stopCodeBtn",
+        dom.stopCodeBtn?.addEventListener(
             "click",
-            () =>
-                stopCode(true)
+            stopCodeExecution
         );
 
-        bind(
-            "clearCodeBtn",
+        dom.clearCodeBtn?.addEventListener(
             "click",
-            () => {
-
-                const editor =
-                    $("electronicCodeEditor");
-
-                if (editor) {
-                    editor.value = "";
-                }
-
-                state.currentCode = "";
-
-                toast(
-                    "Code effacé.",
-                    "success"
-                );
-            }
+            clearCode
         );
 
-
-        bind(
-            "pasteCodeBtn",
+        dom.pasteCodeBtn?.addEventListener(
             "click",
             pasteCode
         );
 
-        bind(
-            "copyCodeBtn",
+        dom.copyCodeBtn?.addEventListener(
             "click",
-            copyCurrentCode
+            copyEditorCode
         );
 
-        bind(
-            "validateCodeBtn",
+        dom.validateCodeBtn?.addEventListener(
             "click",
-            validateCurrentCode
+            () => validateCode()
         );
 
-        bind(
-            "executeEditorCodeBtn",
+        dom.executeEditorCodeBtn?.addEventListener(
             "click",
             executeCurrentCode
         );
 
-        bind(
-            "stopEditorCodeBtn",
+        dom.stopEditorCodeBtn?.addEventListener(
             "click",
-            () =>
-                stopCode(true)
+            stopCodeExecution
         );
 
-        bind(
-            "clearEditorCodeBtn",
+        dom.clearEditorCodeBtn?.addEventListener(
             "click",
-            () => {
+            clearCode
+        );
+    }
 
-                const editor =
-                    $("electronicCodeEditor");
+    async function pasteCode() {
+        if (!dom.electronicCodeEditor) return;
 
-                if (editor) {
-                    editor.value = "";
-                }
+        try {
+            if (
+                navigator.clipboard &&
+                typeof navigator.clipboard.readText === "function"
+            ) {
+                const text =
+                    await navigator.clipboard.readText();
 
-                state.currentCode = "";
+                dom.electronicCodeEditor.value =
+                    text;
 
-                consoleOutputClear();
+                state.code = text;
 
-                toast(
-                    "Éditeur effacé.",
+                showToast(
+                    "Code collé.",
                     "success"
                 );
+
+                return;
             }
+        } catch (_) {
+            /* Browser may block clipboard read. */
+        }
+
+        dom.electronicCodeEditor.focus();
+
+        showToast(
+            "Autorisez l'accès au presse-papiers ou utilisez Coller du système.",
+            "warning"
+        );
+    }
+
+    function copyEditorCode() {
+        const code =
+            dom.electronicCodeEditor?.value || "";
+
+        if (!code) {
+            showToast(
+                "Aucun code à copier.",
+                "warning"
+            );
+            return;
+        }
+
+        copyText(code).then(success => {
+            showToast(
+                success
+                    ? "Code copié."
+                    : "Copie indisponible.",
+                success
+                    ? "success"
+                    : "warning"
+            );
+        });
+    }
+
+    function stopCodeExecution() {
+        state.codeRunning = false;
+
+        if (state.simulationTimer) {
+            clearTimeout(
+                state.simulationTimer
+            );
+
+            state.simulationTimer = null;
+        }
+
+        setStatus(
+            "Code arrêté",
+            "ready"
         );
 
+        consoleLog(
+            "Exécution du code arrêtée.",
+            "warning"
+        );
 
-        /* CODE LIBRARY LEVELS */
+        showToast(
+            "Code arrêté.",
+            "success"
+        );
+    }
 
-        bind(
-            "codeBeginnerBtn",
+    function clearCode() {
+        if (dom.electronicCodeEditor) {
+            dom.electronicCodeEditor.value = "";
+        }
+
+        state.code = "";
+        state.currentCodeId = null;
+
+        clearConsole();
+
+        consoleLog(
+            "Éditeur vidé.",
+            "info"
+        );
+    }
+
+    /* ============================================================
+       39. TOOLBAR EVENTS
+    ============================================================ */
+
+    function setupToolbarEvents() {
+        dom.selectToolBtn?.addEventListener(
             "click",
-            () =>
-                renderCodeLibrary(
-                    "beginner"
-                )
+            () => setActiveTool("select")
         );
 
-        bind(
-            "codeIntermediateBtn",
+        dom.wireToolBtn?.addEventListener(
             "click",
-            () =>
-                renderCodeLibrary(
-                    "intermediate"
-                )
+            () => setActiveTool("wire")
         );
 
-        bind(
-            "codeExpertBtn",
+        dom.moveToolBtn?.addEventListener(
             "click",
-            () =>
-                renderCodeLibrary(
-                    "expert"
-                )
+            () => setActiveTool("move")
         );
 
-
-        /* MISSIONS */
-
-        bind(
-            "beginnerMissionsBtn",
+        dom.rotateToolBtn?.addEventListener(
             "click",
             () => {
+                if (state.selectedComponentId) {
+                    rotateComponent(
+                        state.selectedComponentId
+                    );
+                } else {
+                    setActiveTool("rotate");
 
-                state.level =
-                    "beginner";
-
-                renderMissions(
-                    "beginner"
-                );
-            }
-        );
-
-        bind(
-            "intermediateMissionsBtn",
-            "click",
-            () => {
-
-                state.level =
-                    "intermediate";
-
-                renderMissions(
-                    "intermediate"
-                );
-            }
-        );
-
-        bind(
-            "expertMissionsBtn",
-            "click",
-            () => {
-
-                state.level =
-                    "expert";
-
-                renderMissions(
-                    "expert"
-                );
-            }
-        );
-
-        bind(
-            "startMissionBtn",
-            "click",
-            startMission
-        );
-
-        bind(
-            "validateMissionBtn",
-            "click",
-            validateMission
-        );
-
-
-        /* DIAGNOSTIC */
-
-        bind(
-            "runDiagnosticBtn",
-            "click",
-            diagnoseCircuit
-        );
-
-
-        /* FAULTS */
-
-        bind(
-            "createOpenCircuitFaultBtn",
-            "click",
-            createOpenCircuitFault
-        );
-
-        bind(
-            "createShortCircuitFaultBtn",
-            "click",
-            createShortCircuitFault
-        );
-
-        bind(
-            "createPolarityFaultBtn",
-            "click",
-            createPolarityFault
-        );
-
-        bind(
-            "createComponentFaultBtn",
-            "click",
-            createComponentFault
-        );
-
-        bind(
-            "clearFaultsBtn",
-            "click",
-            clearFaults
-        );
-
-
-        /* PROJECT */
-
-        bind(
-            "saveProjectBtn",
-            "click",
-            saveProject
-        );
-
-        bind(
-            "loadProjectBtn",
-            "click",
-            loadProject
-        );
-
-        bind(
-            "clearWorkspaceBtn",
-            "click",
-            clearWorkspace
-        );
-
-        bind(
-            "projectFileInput",
-            "change",
-            event => {
-
-                const file =
-                    event.target.files?.[0];
-
-                importProjectFile(
-                    file
-                );
-
-                event.target.value =
-                    "";
-            }
-        );
-
-
-        /* MODALS */
-
-        bind(
-            "closeCodeLibraryBtn",
-            "click",
-            () =>
-                hide(
-                    "codeLibraryPanel"
-                )
-        );
-
-        bind(
-            "closeCodeEditorBtn",
-            "click",
-            () =>
-                hide(
-                    "codeEditorPanel"
-                )
-        );
-
-        bind(
-            "closeMissionsBtn",
-            "click",
-            () =>
-                hide(
-                    "missionsPanel"
-                )
-        );
-
-        bind(
-            "closeDiagnosticBtn",
-            "click",
-            () =>
-                hide(
-                    "diagnosticPanel"
-                )
-        );
-
-        bind(
-            "closeFaultsBtn",
-            "click",
-            () =>
-                hide(
-                    "faultsPanel"
-                )
-        );
-
-        bind(
-            "closeMeasurementsBtn",
-            "click",
-            () =>
-                hide(
-                    "measurementsPanel"
-                )
-        );
-
-        bind(
-            "closeComponentDetailsBtn",
-            "click",
-            () =>
-                hide(
-                    "componentDetailsModal"
-                )
-        );
-
-
-
-        /* ========================================================
-           FERMETURE BIBLIOTHÈQUE DES COMPOSANTS
-        ======================================================== */
-
-        bind(
-            "closeComponentLibraryBtn",
-            "click",
-            () => {
-
-                hide(
-                    "componentLibraryPanel"
-                );
-
-                const libraryButton =
-                    $("libraryBtn");
-
-                if (libraryButton) {
-
-                    libraryButton.setAttribute(
-                        "aria-expanded",
-                        "false"
+                    showToast(
+                        "Sélectionnez un composant à tourner.",
+                        "info"
                     );
                 }
             }
         );
 
-
-
-
-
-
-
-
-        bind(
-            "addComponentFromDetailsBtn",
+        dom.deleteToolBtn?.addEventListener(
             "click",
-            addComponentFromDetails
+            () => setActiveTool("delete")
         );
 
-        bind(
-            "closeMissionResultBtn",
+        dom.duplicateToolBtn?.addEventListener(
             "click",
-            () =>
-                hide(
-                    "missionResultModal"
-                )
-        );
-
-
-        /* FILE IMPORT */
-
-        bind(
-            "loadProjectBtn",
-            "dblclick",
             () => {
+                if (state.selectedComponentId) {
+                    duplicateComponent(
+                        state.selectedComponentId
+                    );
+                } else {
+                    setActiveTool("duplicate");
 
-                const input =
-                    $("projectFileInput");
-
-                if (input) {
-                    input.click();
+                    showToast(
+                        "Sélectionnez un composant à dupliquer.",
+                        "info"
+                    );
                 }
             }
         );
 
+        dom.zoomInBtn?.addEventListener(
+            "click",
+            zoomInWorkspace
+        );
 
-        /* CANVAS */
+        dom.zoomOutBtn?.addEventListener(
+            "click",
+            zoomOutWorkspace
+        );
 
-        const canvas =
-            $("laboratoryCanvas");
+        dom.zoomResetBtn?.addEventListener(
+            "click",
+            resetWorkspaceZoom
+        );
 
-        if (canvas) {
-
-            canvas.addEventListener(
-                "pointerdown",
-                event => {
-
-                    if (
-                        event.target ===
-                            canvas ||
-                        event.target ===
-                            $("laboratoryGrid")
-                    ) {
-
-                        state.selectedComponentId =
-                            null;
-
-                        state.selectedWireId =
-                            null;
-
-                        renderAllComponents();
-                    }
-                }
-            );
-        }
+        dom.fitWorkspaceBtn?.addEventListener(
+            "click",
+            fitWorkspace
+        );
     }
 
+    /* ============================================================
+       40. LEVEL / LIBRARY EVENTS
+    ============================================================ */
+
+    function setupLevelEvents() {
+        dom.beginnerLevelBtn?.addEventListener(
+            "click",
+            () => setCurrentLevel("beginner")
+        );
+
+        dom.intermediateLevelBtn?.addEventListener(
+            "click",
+            () => setCurrentLevel("intermediate")
+        );
+
+        dom.expertLevelBtn?.addEventListener(
+            "click",
+            () => setCurrentLevel("expert")
+        );
+
+        dom.codeBeginnerBtn?.addEventListener(
+            "click",
+            () => setCurrentCodeLevel("beginner")
+        );
+
+        dom.codeIntermediateBtn?.addEventListener(
+            "click",
+            () => setCurrentCodeLevel("intermediate")
+        );
+
+        dom.codeExpertBtn?.addEventListener(
+            "click",
+            () => setCurrentCodeLevel("expert")
+        );
+    }
+
+    function setupComponentLibraryEvents() {
+        dom.componentCategories?.addEventListener(
+            "click",
+            event => {
+                const button =
+                    event.target.closest(
+                        "[data-category]"
+                    );
+
+                if (!button) return;
+
+                state.currentLibraryCategory =
+                    button.dataset.category || "all";
+
+                dom.componentCategories
+                    .querySelectorAll(
+                        "[data-category]"
+                    )
+                    .forEach(categoryButton => {
+                        categoryButton.classList.toggle(
+                            "active",
+                            categoryButton === button
+                        );
+                    });
+
+                renderComponentLibrary();
+            }
+        );
+
+        dom.componentSearchInput?.addEventListener(
+            "input",
+            () => renderComponentLibrary()
+        );
+
+        dom.componentSearchBtn?.addEventListener(
+            "click",
+            () => {
+                dom.componentSearchInput?.focus();
+            }
+        );
+
+        dom.componentLibraryGrid?.addEventListener(
+            "click",
+            event => {
+                const addButton =
+                    event.target.closest(
+                        "[data-add-component]"
+                    );
+
+                if (!addButton) return;
+
+                const type =
+                    addButton.dataset.addComponent;
+
+                addComponent(type);
+
+                showToast(
+                    `${getComponentDefinition(type)?.name || type} ajouté au laboratoire.`,
+                    "success"
+                );
+            }
+        );
+
+        dom.addComponentFromDetailsBtn?.addEventListener(
+            "click",
+            () => {
+                if (!state.selectedComponentType) return;
+
+                addComponent(
+                    state.selectedComponentType
+                );
+
+                closeComponentDetails();
+            }
+        );
+
+        dom.closeComponentDetailsBtn?.addEventListener(
+            "click",
+            closeComponentDetails
+        );
+    }
 
     /* ============================================================
-       63 — ÉVÉNEMENTS GLOBAUX
+       41. CODE LIBRARY EVENTS
+    ============================================================ */
+
+    function setupCodeLibraryEvents() {
+        dom.codeLibraryList?.addEventListener(
+            "click",
+            event => {
+                const copyButton =
+                    event.target.closest(
+                        "[data-copy-code]"
+                    );
+
+                if (copyButton) {
+                    copyCode(
+                        copyButton.dataset.copyCode
+                    );
+                    return;
+                }
+
+                const useButton =
+                    event.target.closest(
+                        "[data-use-code]"
+                    );
+
+                if (useButton) {
+                    useCode(
+                        useButton.dataset.useCode
+                    );
+                }
+            }
+        );
+    }
+
+    /* ============================================================
+       42. MISSION EVENTS
+    ============================================================ */
+
+    function setupMissionEvents() {
+        dom.beginnerMissionsBtn?.addEventListener(
+            "click",
+            () => {
+                setCurrentLevel("beginner");
+                updateMissionLevelButtons();
+            }
+        );
+
+        dom.intermediateMissionsBtn?.addEventListener(
+            "click",
+            () => {
+                setCurrentLevel("intermediate");
+                updateMissionLevelButtons();
+            }
+        );
+
+        dom.expertMissionsBtn?.addEventListener(
+            "click",
+            () => {
+                setCurrentLevel("expert");
+                updateMissionLevelButtons();
+            }
+        );
+
+        dom.startMissionBtn?.addEventListener(
+            "click",
+            startMission
+        );
+
+        dom.validateMissionBtn?.addEventListener(
+            "click",
+            validateMission
+        );
+
+        dom.closeMissionResultBtn?.addEventListener(
+            "click",
+            closeMissionResult
+        );
+    }
+
+    function updateMissionLevelButtons() {
+        [
+            [dom.beginnerMissionsBtn, "beginner"],
+            [dom.intermediateMissionsBtn, "intermediate"],
+            [dom.expertMissionsBtn, "expert"]
+        ].forEach(([button, level]) => {
+            button?.classList.toggle(
+                "active",
+                state.currentLevel === level
+            );
+        });
+
+        renderMissions();
+    }
+
+    /* ============================================================
+       43. DIAGNOSTIC / FAULT / MEASUREMENT EVENTS
+    ============================================================ */
+
+    function setupDiagnosticEvents() {
+        dom.runDiagnosticBtn?.addEventListener(
+            "click",
+            runDiagnostic
+        );
+
+        dom.createOpenCircuitFaultBtn?.addEventListener(
+            "click",
+            () => createFault("openCircuit")
+        );
+
+        dom.createShortCircuitFaultBtn?.addEventListener(
+            "click",
+            () => createFault("shortCircuit")
+        );
+
+        dom.createPolarityFaultBtn?.addEventListener(
+            "click",
+            () => createFault("reversedPolarity")
+        );
+
+        dom.createComponentFaultBtn?.addEventListener(
+            "click",
+            () => createFault("defectiveComponent")
+        );
+
+        dom.clearFaultsBtn?.addEventListener(
+            "click",
+            clearFaults
+        );
+
+        dom.measureVoltageBtn?.addEventListener(
+            "click",
+            measureVoltage
+        );
+
+        dom.measureCurrentBtn?.addEventListener(
+            "click",
+            measureCurrent
+        );
+
+        dom.measureResistanceBtn?.addEventListener(
+            "click",
+            measureResistance
+        );
+    }
+
+    /* ============================================================
+       44. POWER / PROJECT EVENTS
+    ============================================================ */
+
+    function setupControlEvents() {
+        dom.powerOnBtn?.addEventListener(
+            "click",
+            powerOn
+        );
+
+        dom.powerOffBtn?.addEventListener(
+            "click",
+            powerOff
+        );
+
+        dom.runCircuitBtn?.addEventListener(
+            "click",
+            runCircuit
+        );
+
+        dom.stopCircuitBtn?.addEventListener(
+            "click",
+            stopCircuit
+        );
+
+        dom.resetCircuitBtn?.addEventListener(
+            "click",
+            resetCircuit
+        );
+
+        dom.saveProjectBtn?.addEventListener(
+            "click",
+            saveProject
+        );
+
+        dom.loadProjectBtn?.addEventListener(
+            "click",
+            loadProject
+        );
+
+        dom.clearWorkspaceBtn?.addEventListener(
+            "click",
+            clearWorkspace
+        );
+
+        dom.projectFileInput?.addEventListener(
+            "change",
+            handleProjectFile
+        );
+    }
+
+    /* ============================================================
+       45. VIEWPORT / CANVAS EVENTS
+    ============================================================ */
+
+    function setupViewportEvents() {
+        dom.viewport?.addEventListener(
+            "wheel",
+            event => {
+                if (!event.ctrlKey) return;
+
+                event.preventDefault();
+
+                const delta =
+                    event.deltaY < 0
+                        ? 0.1
+                        : -0.1;
+
+                setWorkspaceZoom(
+                    state.zoom + delta,
+                    event.clientX,
+                    event.clientY
+                );
+            },
+            { passive: false }
+        );
+
+        dom.canvas?.addEventListener(
+            "pointerdown",
+            event => {
+                if (event.target !== dom.canvas) return;
+
+                if (state.activeTool === "select") {
+                    selectComponent(null);
+                }
+            }
+        );
+    }
+
+    /* ============================================================
+       46. GLOBAL EVENTS
     ============================================================ */
 
     function setupGlobalEvents() {
+        document.addEventListener(
+            "pointerdown",
+            handleGlobalPointerDown,
+            { passive: false }
+        );
 
         document.addEventListener(
             "pointermove",
-            moveComponent
+            handleGlobalPointerMove,
+            { passive: false }
         );
 
         document.addEventListener(
             "pointerup",
-            endComponentDrag
+            handleGlobalPointerUp,
+            { passive: false }
+        );
+
+        document.addEventListener(
+            "pointercancel",
+            handleGlobalPointerUp,
+            { passive: false }
         );
 
         document.addEventListener(
             "keydown",
             event => {
-
                 const target =
                     event.target;
 
                 const editing =
-                    target &&
-                    (
-                        target.tagName ===
-                            "TEXTAREA" ||
-                        target.tagName ===
-                            "INPUT"
+                    target instanceof HTMLInputElement ||
+                    target instanceof HTMLTextAreaElement ||
+                    target?.isContentEditable;
+
+                if (editing) return;
+
+                if (event.key === "Escape") {
+                    state.wireStart = null;
+                    selectComponent(null);
+                    setActiveTool("select");
+                }
+
+                if (
+                    event.key === "Delete" &&
+                    state.selectedComponentId
+                ) {
+                    deleteComponent(
+                        state.selectedComponentId
                     );
-
-                if (
-                    event.key ===
-                    "Delete"
-                ) {
-
-                    if (!editing) {
-                        deleteSelected();
-                    }
-
-                    return;
                 }
 
                 if (
-                    event.ctrlKey &&
-                    event.key.toLowerCase() ===
-                        "z"
+                    event.key.toLowerCase() === "r" &&
+                    state.selectedComponentId
                 ) {
-
-                    event.preventDefault();
-
-                    undo();
-
-                    return;
+                    rotateComponent(
+                        state.selectedComponentId
+                    );
                 }
 
                 if (
-                    event.ctrlKey &&
-                    event.key.toLowerCase() ===
-                        "y"
+                    (event.ctrlKey || event.metaKey) &&
+                    event.key.toLowerCase() === "s"
                 ) {
-
                     event.preventDefault();
-
-                    redo();
-
-                    return;
-                }
-
-                if (
-                    event.ctrlKey &&
-                    event.key.toLowerCase() ===
-                        "s"
-                ) {
-
-                    event.preventDefault();
-
                     saveProject();
-
-                    return;
-                }
-
-                if (
-                    event.key === "+"
-                ) {
-
-                    zoomIn();
-
-                    return;
-                }
-
-                if (
-                    event.key === "-"
-                ) {
-
-                    zoomOut();
-
-                    return;
-                }
-
-                if (
-                    event.key === "Escape"
-                ) {
-
-                    state.pendingWirePin =
-                        null;
-
-                    state.drag.active =
-                        false;
-
-                    return;
                 }
             }
         );
@@ -8853,3542 +6015,700 @@ bind(
         window.addEventListener(
             "resize",
             () => {
-
                 renderWires();
+            }
+        );
+
+        window.addEventListener(
+            "beforeunload",
+            autoSaveState
+        );
+    }
+
+    /* ============================================================
+       47. INITIAL COMPONENT STATE
+    ============================================================ */
+
+    function initializeDefaultState() {
+        state.components = [];
+        state.wires = [];
+        state.selectedComponentId = null;
+
+        state.zoom = 1;
+        state.panX = 0;
+        state.panY = 0;
+
+        state.powerOn = false;
+        state.circuitRunning = false;
+        state.codeRunning = false;
+
+        state.faults = {
+            openCircuit: false,
+            shortCircuit: false,
+            reversedPolarity: false,
+            defectiveComponent: false
+        };
+
+        state.measurements = {
+            voltage: 0,
+            current: 0,
+            resistance: null,
+            frequency: 0,
+            power: 0,
+            continuity: null
+        };
+    }
+
+    /* ============================================================
+       48. ENGINE STYLE SAFETY
+       ----------------------------------------------------------------
+       This does not replace the external CSS.
+       It only guarantees the core interactive geometry needed
+       for components, pins, wires and global pinch behavior.
+    ============================================================ */
+
+    function injectEngineSafetyStyles() {
+        if (document.getElementById("fobasElectronicEngineStyles")) {
+            return;
+        }
+
+        const style =
+            document.createElement("style");
+
+        style.id =
+            "fobasElectronicEngineStyles";
+
+        style.textContent = `
+            #fobasElectronicApp {
+                --fobas-global-scale: 1;
+            }
+
+            #laboratoryViewport {
+                touch-action: pan-x pan-y;
+                position: relative;
+                overflow: hidden;
+            }
+
+            #laboratoryCanvas {
+                position: relative;
+                transform-origin: 0 0;
+                min-width: 100%;
+                min-height: 100%;
+            }
+
+            #componentLayer {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+            }
+
+            .electronic-component {
+                pointer-events: auto;
+                box-sizing: border-box;
+                cursor: pointer;
+                z-index: 20;
+            }
+
+            .electronic-component.selected {
+                z-index: 50;
+            }
+
+            .electronic-component-shell {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+
+            .electronic-component-visual {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+            }
+
+            .fobas-electronic-3d {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                min-height: 45px;
+                pointer-events: none;
+                perspective: 500px;
+            }
+
+            .component-3d-shadow {
+                position: absolute;
+                left: 7%;
+                right: 0;
+                bottom: 1%;
+                height: 20%;
+                border-radius: 50%;
+                background: rgba(0,0,0,.24);
+                filter: blur(5px);
+                transform: translateY(7px);
+            }
+
+            .component-3d-body {
+                position: absolute;
+                inset: 0;
+                border-radius: 10px;
+                background:
+                    linear-gradient(
+                        145deg,
+                        rgba(255,255,255,.34),
+                        rgba(255,255,255,0) 35%
+                    ),
+                    var(--component-color, #263238);
+                border: 1px solid rgba(255,255,255,.35);
+                box-shadow:
+                    inset 2px 2px 5px rgba(255,255,255,.18),
+                    inset -3px -4px 8px rgba(0,0,0,.28),
+                    0 5px 10px rgba(0,0,0,.24);
+                transform:
+                    translateZ(0)
+                    rotateX(2deg);
+                overflow: hidden;
+            }
+
+            .component-3d-highlight {
+                position: absolute;
+                inset: 5px;
+                border-radius: 7px;
+                background:
+                    linear-gradient(
+                        135deg,
+                        rgba(255,255,255,.24),
+                        transparent 45%
+                    );
+                pointer-events: none;
+            }
+
+            .component-3d-icon {
+                position: absolute;
+                left: 50%;
+                top: 42%;
+                transform: translate(-50%, -50%);
+                font-size: clamp(18px, 4vw, 32px);
+                font-weight: 800;
+                color: #fff;
+                text-shadow: 0 2px 3px rgba(0,0,0,.45);
+                white-space: nowrap;
+            }
+
+            .component-3d-label {
+                position: absolute;
+                left: 4px;
+                right: 4px;
+                bottom: 4px;
+                text-align: center;
+                font-size: 10px;
+                line-height: 1.15;
+                color: #fff;
+                font-weight: 700;
+                text-shadow: 0 1px 2px rgba(0,0,0,.65);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .electronic-component.selected
+            .component-3d-body {
+                outline: 3px solid rgba(255,193,7,.95);
+                outline-offset: 2px;
+            }
+
+            .electronic-component[data-state="on"]
+            .fobas-electronic-3d[data-lit="true"]
+            .component-3d-body {
+                box-shadow:
+                    0 0 20px rgba(255,193,7,.85),
+                    inset 2px 2px 5px rgba(255,255,255,.2),
+                    inset -3px -4px 8px rgba(0,0,0,.28);
+            }
+
+            .electronic-component[data-state="on"]
+            .fobas-electronic-3d[data-active="true"]
+            .component-3d-body {
+                filter: brightness(1.28);
+            }
+
+            .electronic-component-state {
+                position: absolute;
+                left: 50%;
+                bottom: -18px;
+                transform: translateX(-50%);
+                white-space: nowrap;
+                font-size: 9px;
+                font-weight: 700;
+                color: currentColor;
+                pointer-events: none;
+            }
+
+            .electronic-component-pins {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+            }
+
+            .electronic-pin {
+                width: 18px;
+                height: 18px;
+                min-width: 18px;
+                min-height: 18px;
+                padding: 0;
+                border-radius: 50%;
+                border: 2px solid #fff;
+                background: #263238;
+                color: #fff;
+                z-index: 60;
+                pointer-events: auto;
+                touch-action: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 2px 4px rgba(0,0,0,.35);
+            }
+
+            .electronic-pin span {
+                position: absolute;
+                white-space: nowrap;
+                font-size: 8px;
+                pointer-events: none;
+                background: rgba(0,0,0,.75);
+                padding: 2px 4px;
+                border-radius: 3px;
+                color: #fff;
+            }
+
+            .electronic-pin.wire-start {
+                background: #ffc107;
+                transform: scale(1.25);
+            }
+
+            .wire-layer,
+            #wireLayer {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                overflow: visible;
+                pointer-events: none;
+                z-index: 10;
+            }
+
+            .electronic-wire {
+                fill: none;
+                stroke: #37474f;
+                stroke-width: 4;
+                stroke-linecap: round;
+                filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
+            }
+
+            .electronic-wire.active {
+                stroke: #ffc107;
+                stroke-width: 5;
+            }
+
+            .instrument-body {
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
+                border-radius: 10px;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                background:
+                    linear-gradient(145deg,#37474f,#17232a);
+                color: #fff;
+                box-shadow:
+                    inset 2px 2px 5px rgba(255,255,255,.12),
+                    inset -3px -4px 8px rgba(0,0,0,.35),
+                    0 6px 12px rgba(0,0,0,.25);
+            }
+
+            .instrument-screen {
+                min-height: 34px;
+                border-radius: 5px;
+                padding: 6px;
+                background: #08110c;
+                color: #80cbc4;
+                font-family: monospace;
+                font-weight: 700;
+                text-align: center;
+            }
+
+            .component-library-card,
+            .code-library-card,
+            .mission-card {
+                cursor: pointer;
+            }
+
+            .component-add-btn,
+            .code-copy-btn,
+            .code-use-btn {
+                cursor: pointer;
+                touch-action: manipulation;
+            }
+
+            .library-empty-state {
+                padding: 30px;
+                text-align: center;
+                opacity: .75;
+            }
+
+            .console-line {
+                padding: 3px 0;
+                font-family: monospace;
+                font-size: 12px;
+            }
+
+            .console-success {
+                color: #43a047;
+            }
+
+            .console-error {
+                color: #e53935;
+            }
+
+            .console-warning {
+                color: #fb8c00;
+            }
+
+            .console-info {
+                color: #1976d2;
+            }
+
+            .diagnostic-result {
+                padding: 9px;
+                margin-bottom: 6px;
+                border-radius: 6px;
+            }
+
+            .diagnostic-result.success {
+                background: rgba(76,175,80,.12);
+            }
+
+            .diagnostic-result.warning {
+                background: rgba(255,152,0,.12);
+            }
+
+            .diagnostic-result.error {
+                background: rgba(244,67,54,.12);
+            }
+
+            .hidden {
+                display: none !important;
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
+    /* ============================================================
+       49. AUTOMATIC CODE / MONTAGE REACTION
+    ============================================================ */
+
+    function synchronizeArduinoInputs() {
+        const controllers =
+            state.components.filter(component => {
+                const definition =
+                    getComponentDefinition(component.type);
+
+                return Boolean(definition?.controller);
+            });
+
+        controllers.forEach(controller => {
+            const mapping =
+                buildHardwareMapping(controller);
+
+            mapping.forEach(item => {
+                const target =
+                    findComponent(item.componentId);
+
+                if (!target) return;
+
+                if (
+                    target.type === "push-button" ||
+                    target.type === "switch"
+                ) {
+                    controller.digitalValues[
+                        item.controllerPin
+                    ] =
+                        target.state === "pressed" ||
+                        target.state === "closed"
+                            ? 1
+                            : 0;
+                }
+
+                if (
+                    target.type === "potentiometer"
+                ) {
+                    controller.analogValues[
+                        item.controllerPin
+                    ] =
+                        clamp(
+                            Number(target.value || 0) *
+                            10.23,
+                            0,
+                            1023
+                        );
+                }
+
+                if (target.type === "ldr") {
+                    controller.analogValues[
+                        item.controllerPin
+                    ] =
+                        clamp(
+                            Number(target.value || 500),
+                            0,
+                            1023
+                        );
+                }
+            });
+        });
+    }
+
+    /* ============================================================
+       50. TOUCH INTERACTION FOR PUSH BUTTON
+    ============================================================ */
+
+    function setupPhysicalSimulationInteractions() {
+        dom.componentLayer?.addEventListener(
+            "pointerdown",
+            event => {
+                const componentElement =
+                    event.target.closest(
+                        ".electronic-component"
+                    );
+
+                if (!componentElement) return;
+
+                const component =
+                    findComponent(
+                        componentElement.dataset.componentId
+                    );
+
+                if (!component) return;
+
+                if (
+                    component.type === "push-button" &&
+                    state.activeTool === "select"
+                ) {
+                    event.preventDefault();
+
+                    component.state = "pressed";
+
+                    renderComponent(component);
+                    synchronizeArduinoInputs();
+
+                    if (state.codeRunning) {
+                        executeCurrentCode();
+                    }
+
+                    runSimulation();
+                }
+            }
+        );
+
+        dom.componentLayer?.addEventListener(
+            "pointerup",
+            event => {
+                const componentElement =
+                    event.target.closest(
+                        ".electronic-component"
+                    );
+
+                if (!componentElement) return;
+
+                const component =
+                    findComponent(
+                        componentElement.dataset.componentId
+                    );
+
+                if (!component) return;
+
+                if (
+                    component.type === "push-button"
+                ) {
+                    component.state = "released";
+
+                    renderComponent(component);
+                    synchronizeArduinoInputs();
+
+                    if (state.codeRunning) {
+                        executeCurrentCode();
+                    }
+
+                    runSimulation();
+                }
             }
         );
     }
 
-
     /* ============================================================
-       64 — INITIALISATION
+       51. CODE LOOP SIMULATION
     ============================================================ */
 
-    function initialize() {
-
-        console.log(
-            `[${ENGINE_NAME}] v${ENGINE_VERSION}`
+    function startSimulationLoop() {
+        clearInterval(
+            startSimulationLoop.timer
         );
 
-        setupEvents();
+        startSimulationLoop.timer =
+            setInterval(() => {
+                if (
+                    !state.codeRunning &&
+                    !state.circuitRunning
+                ) {
+                    return;
+                }
 
+                synchronizeArduinoInputs();
+
+                if (state.codeRunning) {
+                    const code =
+                        dom.electronicCodeEditor?.value ||
+                        "";
+
+                    const analysis =
+                        analyzeArduinoCode(code);
+
+                    const controller =
+                        findControllerForCode();
+
+                    if (
+                        controller &&
+                        analysis.valid
+                    ) {
+                        const mapping =
+                            buildHardwareMapping(
+                                controller
+                            );
+
+                        analysis.instructions
+                            .filter(instruction =>
+                                instruction.type ===
+                                "digitalWrite" ||
+                                instruction.type ===
+                                "analogWrite" ||
+                                instruction.type ===
+                                "tone" ||
+                                instruction.type ===
+                                "servoWrite"
+                            )
+                            .forEach(instruction => {
+                                executeInstruction(
+                                    controller,
+                                    instruction,
+                                    mapping
+                                );
+                            });
+                    }
+                }
+
+                runSimulation();
+            }, 250);
+    }
+
+    /* ============================================================
+       52. ENGINE INITIALIZATION
+    ============================================================ */
+
+    function initializeEngine() {
+        if (state.initialized) {
+            return;
+        }
+
+        state.initialized = true;
+
+        injectEngineSafetyStyles();
+
+        if (dom.engineVersion) {
+            dom.engineVersion.textContent =
+                `Electronic Engine v${ENGINE_VERSION}`;
+        }
+
+        initializeDefaultState();
+
+        setupStaticLibraryButtons();
+        setupPanelEvents();
+        setupToolbarEvents();
+        setupLevelEvents();
+        setupComponentLibraryEvents();
+        setupCodeLibraryEvents();
+        setupMissionEvents();
+        setupDiagnosticEvents();
+        setupControlEvents();
+        setupViewportEvents();
         setupGlobalEvents();
+        setupPhysicalSimulationInteractions();
 
-        setupTouchZoom();
+        ensureDynamicLibraryCategories();
 
-        renderCategory(
-            "resistors"
-        );
+        if (dom.componentCategories) {
+            const allButton =
+                dom.componentCategories.querySelector(
+                    '[data-category="all"]'
+                );
 
-        renderCodeLibrary(
-            state.level
-        );
+            if (allButton) {
+                allButton.classList.add("active");
+            }
+        }
 
-        renderMissions(
-            state.level
-        );
+        renderComponentLibrary();
+        renderCodeLibrary();
+        renderMissions();
 
-        updateWorkspace();
+        updateLevelUI();
+        updateCodeLevelUI();
 
+        applyWorkspaceTransform();
+        calculateMeasurements();
         updateMeasurementDisplays();
+        updateWorkspaceState();
 
-        applyCanvasTransform();
+        setActiveTool("select");
 
-        startSimulationEffects();
+        restoreLocalState();
 
-        pushHistory();
+        startSimulationLoop();
 
         setStatus(
             "Simulation prête",
             "ready"
         );
 
-        text(
-            "engineVersion",
-            `Electronic Engine v${ENGINE_VERSION}`
-        );
-
-        /*
-         * Arduino UNO n'est pas affiché automatiquement.
-         * Il peut être ajouté depuis la bibliothèque dynamique
-         * via la fonction publique ci-dessous.
-         */
-
-        toast(
-            "FOBAS Electronic Engine prêt.",
+        consoleLog(
+            `FOBAS Electronic Engine v${ENGINE_VERSION} prêt.`,
             "success"
         );
+
+        consoleLog(
+            "Laboratoire libre disponible : vous pouvez créer votre propre montage.",
+            "info"
+        );
+
+        consoleLog(
+            "Bibliothèque Code → Copier → Éditeur → Exécuter.",
+            "info"
+        );
     }
 
-
     /* ============================================================
-       65 — API PUBLIQUE FOBAS
+       53. DOM READY
     ============================================================ */
 
-    window.FOBAS_ELECTRONIC_ENGINE = {
-
-        version:
-            ENGINE_VERSION,
-
-        state,
-
-        addComponent,
-
-        addInstrument,
-
-        addArduinoUno,
-
-        createWire,
-
-        deleteComponent,
-
-        deleteWire,
-
-        rotateComponent,
-
-        duplicateComponent,
-
-        simulateCircuit,
-
-        powerOn,
-
-        powerOff,
-
-        runCircuit,
-
-        stopCircuit,
-
-        resetCircuit,
-
-        executeCurrentCode,
-
-        validateCurrentCode,
-
-        openCodeLibrary,
-
-        openCodeEditor,
-
-        openMissions,
-
-        openMeasurements,
-
-        openDiagnostic,
-
-        openFaults,
-
-        diagnoseCircuit,
-
-        createOpenCircuitFault,
-
-        createShortCircuitFault,
-
-        createPolarityFault,
-
-        createComponentFault,
-
-        clearFaults,
-
-        saveProject,
-
-        loadProject,
-
-        exportProject,
-
-        importProjectFile,
-
-        clearWorkspace,
-
-        undo,
-
-        redo,
-
-        setZoom,
-
-        zoomIn,
-
-        zoomOut,
-
-        resetZoom,
-
-        fitWorkspace,
-
-        setLevel,
-
-        selectMission,
-
-        startMission,
-
-        validateMission
-    };
-
-
-    /* ============================================================
-       66 — INITIALISATION DOM
-    ============================================================ */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
+    if (document.readyState === "loading") {
         document.addEventListener(
             "DOMContentLoaded",
-            initialize,
-            {
-                once: true
-            }
+            initializeEngine,
+            { once: true }
         );
-
     } else {
-
-        initialize();
+        initializeEngine();
     }
-
-
 
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ================================================================
-   FOBAS ELECTRONIQUE & ROBOTIQUE
-   ROBOTICS + ARDUINO COMPONENT LIBRARY EXTENSION
-   V2.0.0 — DIRECT GRID INTEGRATION
-   ----------------------------------------------------------------
-   CIBLE EXACTE :
-       #componentLibraryGrid
-
-   CETTE EXTENSION :
-   - Ajoute Robotique dirèkteman nan bibliyotèk aktyèl la
-   - Pa kreye yon deuxième bibliothèque indépendante
-   - Pa modifye HTML prensipal la
-   - Pa modifye createComponent()
-   - Pa modifye addComponent()
-   - Pa modifye renderComponent()
-   - Pa modifye Visibility Bridge
-   - Pa modifye drag system
-   - Pa modifye wires
-   - Pa modifye mesures
-   - Pa modifye zoom
-   - Pa itilize Three.js
-   - Pa itilize aucune bibliothèque externe
-
-   AJOUTE :
-   - Arduino
-   - ESP32 / ESP8266
-   - Raspberry Pi / Pico
-   - Microcontrollers
-   - Breadboards
-   - Sensors
-   - Motors
-   - Servos
-   - Motor Drivers
-   - Relays
-   - LEDs
-   - Displays
-   - Communication
-   - RFID / NFC
-   - Power
-   - Robot mechanics
-   - Robotic arm
-   - Vision
-   - Robotics modules
-
-   IMPORTANT :
-   Le bouton "Ajouter" tente d'utiliser le système existant
-   addComponent() sans le remplacer.
-================================================================ */
-
-(function FOBAS_ROBOTICS_LIBRARY_GRID_EXTENSION() {
-
-    "use strict";
-
-    /* ============================================================
-       01 — PROTECTION CONTRE DOUBLE INSTALLATION
-    ============================================================ */
-
-    if (
-        window.FOBAS_ROBOTICS_LIBRARY_GRID_EXTENSION
-    ) {
-        return;
-    }
-
-
-    const EXTENSION_VERSION = "2.0.0";
-
-    const GRID_ID =
-        "componentLibraryGrid";
-
-    const ROBOTICS_SECTION_ID =
-        "fobasRoboticsGridSection";
-
-    const ROBOTICS_STYLE_ID =
-        "fobasRoboticsGridExtensionStyle";
-
-    const ROBOTICS_MARKER =
-        "data-fobas-robotics-extension";
-
-
-    /* ============================================================
-       02 — DATABASE ROBOTIQUE
-    ============================================================ */
-
-    const ROBOTICS_COMPONENTS = [
-
-        /* =========================
-           ARDUINO
-        ========================= */
-
-        {
-            id: "arduino_uno",
-            type: "arduino_uno",
-            name: "Arduino UNO R3",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Carte Arduino UNO pour projets robotiques."
-        },
-
-        {
-            id: "arduino_nano",
-            type: "arduino_nano",
-            name: "Arduino Nano",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Carte Arduino compacte."
-        },
-
-        {
-            id: "arduino_mega",
-            type: "arduino_mega",
-            name: "Arduino Mega 2560",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Arduino avec nombreuses entrées et sorties."
-        },
-
-        {
-            id: "arduino_leonardo",
-            type: "arduino_leonardo",
-            name: "Arduino Leonardo",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Arduino basé sur ATmega32U4."
-        },
-
-        {
-            id: "arduino_micro",
-            type: "arduino_micro",
-            name: "Arduino Micro",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Microcontrôleur Arduino compact."
-        },
-
-        {
-            id: "arduino_pro_mini",
-            type: "arduino_pro_mini",
-            name: "Arduino Pro Mini",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Carte Arduino pour systèmes embarqués."
-        },
-
-        {
-            id: "arduino_due",
-            type: "arduino_due",
-            name: "Arduino Due",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Carte Arduino 32 bits."
-        },
-
-        {
-            id: "arduino_zero",
-            type: "arduino_zero",
-            name: "Arduino Zero",
-            family: "Arduino",
-            category: "controllers",
-            icon: "🔵",
-            description: "Carte Arduino ARM."
-        },
-
-        /* =========================
-           ESP
-        ========================= */
-
-        {
-            id: "esp32",
-            type: "esp32",
-            name: "ESP32",
-            family: "ESP",
-            category: "controllers",
-            icon: "🟣",
-            description: "Microcontrôleur Wi-Fi et Bluetooth."
-        },
-
-        {
-            id: "esp32_devkit",
-            type: "esp32_devkit",
-            name: "ESP32 DevKit",
-            family: "ESP",
-            category: "controllers",
-            icon: "🟣",
-            description: "Carte de développement ESP32."
-        },
-
-        {
-            id: "esp8266",
-            type: "esp8266",
-            name: "ESP8266 NodeMCU",
-            family: "ESP",
-            category: "controllers",
-            icon: "🟣",
-            description: "Carte Wi-Fi pour IoT."
-        },
-
-        {
-            id: "esp32_cam",
-            type: "esp32_cam",
-            name: "ESP32-CAM",
-            family: "ESP",
-            category: "vision",
-            icon: "📷",
-            description: "ESP32 avec caméra."
-        },
-
-        /* =========================
-           RASPBERRY
-        ========================= */
-
-        {
-            id: "raspberry_pi_4",
-            type: "raspberry_pi_4",
-            name: "Raspberry Pi 4",
-            family: "Raspberry Pi",
-            category: "computers",
-            icon: "🟢",
-            description: "Ordinateur monocarte pour robotique."
-        },
-
-        {
-            id: "raspberry_pi_5",
-            type: "raspberry_pi_5",
-            name: "Raspberry Pi 5",
-            family: "Raspberry Pi",
-            category: "computers",
-            icon: "🟢",
-            description: "Plateforme informatique robotique avancée."
-        },
-
-        {
-            id: "raspberry_pi_zero",
-            type: "raspberry_pi_zero",
-            name: "Raspberry Pi Zero",
-            family: "Raspberry Pi",
-            category: "computers",
-            icon: "🟢",
-            description: "Ordinateur compact."
-        },
-
-        {
-            id: "raspberry_pico",
-            type: "raspberry_pico",
-            name: "Raspberry Pi Pico",
-            family: "Raspberry Pi",
-            category: "controllers",
-            icon: "🟢",
-            description: "Microcontrôleur Raspberry Pi."
-        },
-
-        {
-            id: "raspberry_pico_w",
-            type: "raspberry_pico_w",
-            name: "Raspberry Pi Pico W",
-            family: "Raspberry Pi",
-            category: "controllers",
-            icon: "🟢",
-            description: "Pico avec connectivité sans fil."
-        },
-
-        /* =========================
-           MICROCONTROLLERS
-        ========================= */
-
-        {
-            id: "stm32_bluepill",
-            type: "stm32_bluepill",
-            name: "STM32 Blue Pill",
-            family: "STM32",
-            category: "controllers",
-            icon: "🟦",
-            description: "Carte STM32 pour systèmes embarqués."
-        },
-
-        {
-            id: "attiny85",
-            type: "attiny85",
-            name: "ATtiny85",
-            family: "AVR",
-            category: "controllers",
-            icon: "🔲",
-            description: "Microcontrôleur compact."
-        },
-
-        {
-            id: "microcontroller_generic",
-            type: "microcontroller_generic",
-            name: "Microcontroller",
-            family: "MCU",
-            category: "controllers",
-            icon: "🔲",
-            description: "Microcontrôleur générique."
-        },
-
-        /* =========================
-           PROTOTYPAGE
-        ========================= */
-
-        {
-            id: "breadboard",
-            type: "breadboard",
-            name: "Breadboard",
-            category: "prototyping",
-            icon: "▦",
-            description: "Plaque de prototypage sans soudure."
-        },
-
-        {
-            id: "mini_breadboard",
-            type: "mini_breadboard",
-            name: "Mini Breadboard",
-            category: "prototyping",
-            icon: "▦",
-            description: "Petite plaque de prototypage."
-        },
-
-        {
-            id: "protoboard",
-            type: "protoboard",
-            name: "Protoboard",
-            category: "prototyping",
-            icon: "▧",
-            description: "Plaque de montage électronique."
-        },
-
-        {
-            id: "pcb_robotics",
-            type: "pcb_robotics",
-            name: "Robot PCB",
-            category: "prototyping",
-            icon: "▧",
-            description: "Circuit imprimé robotique."
-        },
-
-        {
-            id: "terminal_board",
-            type: "terminal_board",
-            name: "Terminal Board",
-            category: "prototyping",
-            icon: "▤",
-            description: "Carte de connexion."
-        },
-
-        /* =========================
-           DISTANCE
-        ========================= */
-
-        {
-            id: "hc_sr04",
-            type: "hc_sr04",
-            name: "HC-SR04 Ultrasonic",
-            category: "sensors",
-            icon: "📡",
-            description: "Capteur ultrasonique de distance."
-        },
-
-        {
-            id: "ir_obstacle",
-            type: "ir_obstacle",
-            name: "IR Obstacle Sensor",
-            category: "sensors",
-            icon: "👁️",
-            description: "Détection infrarouge d'obstacles."
-        },
-
-        {
-            id: "sharp_ir",
-            type: "sharp_ir",
-            name: "Sharp IR Distance",
-            category: "sensors",
-            icon: "📏",
-            description: "Capteur infrarouge de distance."
-        },
-
-        {
-            id: "tof_sensor",
-            type: "tof_sensor",
-            name: "ToF Distance Sensor",
-            category: "sensors",
-            icon: "📐",
-            description: "Capteur Time-of-Flight."
-        },
-
-        /* =========================
-           TEMPERATURE
-        ========================= */
-
-        {
-            id: "dht11",
-            type: "dht11",
-            name: "DHT11",
-            category: "sensors",
-            icon: "🌡️",
-            description: "Température et humidité."
-        },
-
-        {
-            id: "dht22",
-            type: "dht22",
-            name: "DHT22",
-            category: "sensors",
-            icon: "🌡️",
-            description: "Capteur température et humidité."
-        },
-
-        {
-            id: "ds18b20",
-            type: "ds18b20",
-            name: "DS18B20",
-            category: "sensors",
-            icon: "🌡️",
-            description: "Capteur numérique de température."
-        },
-
-        {
-            id: "bmp280",
-            type: "bmp280",
-            name: "BMP280",
-            category: "sensors",
-            icon: "🌡️",
-            description: "Pression atmosphérique et température."
-        },
-
-        /* =========================
-           MOUVEMENT
-        ========================= */
-
-        {
-            id: "pir",
-            type: "pir",
-            name: "PIR Motion Sensor",
-            category: "sensors",
-            icon: "🚶",
-            description: "Détection de mouvement."
-        },
-
-        {
-            id: "mpu6050",
-            type: "mpu6050",
-            name: "MPU6050",
-            category: "sensors",
-            icon: "🧭",
-            description: "Accéléromètre et gyroscope."
-        },
-
-        {
-            id: "mpu9250",
-            type: "mpu9250",
-            name: "MPU9250",
-            category: "sensors",
-            icon: "🧭",
-            description: "IMU 9 axes."
-        },
-
-        {
-            id: "accelerometer",
-            type: "accelerometer",
-            name: "Accelerometer",
-            category: "sensors",
-            icon: "↔️",
-            description: "Mesure d'accélération."
-        },
-
-        {
-            id: "gyroscope",
-            type: "gyroscope",
-            name: "Gyroscope",
-            category: "sensors",
-            icon: "🔄",
-            description: "Mesure de rotation."
-        },
-
-        /* =========================
-           LUMIERE
-        ========================= */
-
-        {
-            id: "ldr",
-            type: "ldr",
-            name: "LDR Photoresistor",
-            category: "sensors",
-            icon: "☀️",
-            description: "Capteur de luminosité."
-        },
-
-        {
-            id: "photodiode",
-            type: "photodiode",
-            name: "Photodiode",
-            category: "sensors",
-            icon: "💡",
-            description: "Détection de lumière."
-        },
-
-        {
-            id: "color_sensor",
-            type: "color_sensor",
-            name: "Color Sensor",
-            category: "sensors",
-            icon: "🌈",
-            description: "Capteur de couleur."
-        },
-
-        /* =========================
-           SON
-        ========================= */
-
-        {
-            id: "sound_sensor",
-            type: "sound_sensor",
-            name: "Sound Sensor",
-            category: "sensors",
-            icon: "🎤",
-            description: "Détection sonore."
-        },
-
-        {
-            id: "microphone_module",
-            type: "microphone_module",
-            name: "Microphone Module",
-            category: "sensors",
-            icon: "🎙️",
-            description: "Entrée audio."
-        },
-
-        /* =========================
-           ENCODERS
-        ========================= */
-
-        {
-            id: "rotary_encoder",
-            type: "rotary_encoder",
-            name: "Rotary Encoder",
-            category: "sensors",
-            icon: "⚙️",
-            description: "Mesure de rotation."
-        },
-
-        {
-            id: "wheel_encoder",
-            type: "wheel_encoder",
-            name: "Wheel Encoder",
-            category: "sensors",
-            icon: "⭕",
-            description: "Encodeur de roue."
-        },
-
-        /* =========================
-           INPUTS
-        ========================= */
-
-        {
-            id: "push_button",
-            type: "push_button",
-            name: "Push Button",
-            category: "inputs",
-            icon: "🔘",
-            description: "Bouton poussoir."
-        },
-
-        {
-            id: "toggle_switch",
-            type: "toggle_switch",
-            name: "Toggle Switch",
-            category: "inputs",
-            icon: "🔀",
-            description: "Interrupteur."
-        },
-
-        {
-            id: "joystick",
-            type: "joystick",
-            name: "Joystick Module",
-            category: "inputs",
-            icon: "🕹️",
-            description: "Commande directionnelle."
-        },
-
-        {
-            id: "keypad",
-            type: "keypad",
-            name: "4x4 Keypad",
-            category: "inputs",
-            icon: "🔢",
-            description: "Clavier matriciel."
-        },
-
-        /* =========================
-           DC MOTORS
-        ========================= */
-
-        {
-            id: "dc_motor",
-            type: "dc_motor",
-            name: "DC Motor",
-            category: "motors",
-            icon: "⚙️",
-            description: "Moteur à courant continu."
-        },
-
-        {
-            id: "micro_dc_motor",
-            type: "micro_dc_motor",
-            name: "Micro DC Motor",
-            category: "motors",
-            icon: "⚙️",
-            description: "Petit moteur DC."
-        },
-
-        {
-            id: "gear_motor",
-            type: "gear_motor",
-            name: "Gear Motor",
-            category: "motors",
-            icon: "⚙️",
-            description: "Moteur avec réducteur."
-        },
-
-        /* =========================
-           SERVOS
-        ========================= */
-
-        {
-            id: "servo_sg90",
-            type: "servo_sg90",
-            name: "Servo SG90",
-            category: "motors",
-            icon: "🔧",
-            description: "Micro servo moteur."
-        },
-
-        {
-            id: "servo_mg996r",
-            type: "servo_mg996r",
-            name: "Servo MG996R",
-            category: "motors",
-            icon: "🔧",
-            description: "Servo haute puissance."
-        },
-
-        {
-            id: "continuous_servo",
-            type: "continuous_servo",
-            name: "Continuous Servo",
-            category: "motors",
-            icon: "🔧",
-            description: "Servo rotation continue."
-        },
-
-        /* =========================
-           STEPPER
-        ========================= */
-
-        {
-            id: "stepper_motor",
-            type: "stepper_motor",
-            name: "Stepper Motor",
-            category: "motors",
-            icon: "🔄",
-            description: "Moteur pas à pas."
-        },
-
-        {
-            id: "nema17",
-            type: "nema17",
-            name: "NEMA 17",
-            category: "motors",
-            icon: "🔄",
-            description: "Moteur pas à pas robotique."
-        },
-
-        /* =========================
-           DRIVERS
-        ========================= */
-
-        {
-            id: "l298n",
-            type: "l298n",
-            name: "L298N Motor Driver",
-            category: "drivers",
-            icon: "⚡",
-            description: "Driver double pont en H."
-        },
-
-        {
-            id: "l293d",
-            type: "l293d",
-            name: "L293D Motor Driver",
-            category: "drivers",
-            icon: "⚡",
-            description: "Driver de moteurs."
-        },
-
-        {
-            id: "tb6612fng",
-            type: "tb6612fng",
-            name: "TB6612FNG",
-            category: "drivers",
-            icon: "⚡",
-            description: "Driver moteur double canal."
-        },
-
-        {
-            id: "a4988",
-            type: "a4988",
-            name: "A4988",
-            category: "drivers",
-            icon: "⚡",
-            description: "Driver moteur pas à pas."
-        },
-
-        {
-            id: "drv8825",
-            type: "drv8825",
-            name: "DRV8825",
-            category: "drivers",
-            icon: "⚡",
-            description: "Driver stepper."
-        },
-
-        {
-            id: "pca9685",
-            type: "pca9685",
-            name: "PCA9685 Servo Driver",
-            category: "drivers",
-            icon: "⚙️",
-            description: "Contrôleur PWM multi-canaux."
-        },
-
-        {
-            id: "uln2003",
-            type: "uln2003",
-            name: "ULN2003",
-            category: "drivers",
-            icon: "⚡",
-            description: "Driver pour charges inductives."
-        },
-
-        /* =========================
-           RELAIS / ACTIONNEURS
-        ========================= */
-
-        {
-            id: "relay_module",
-            type: "relay_module",
-            name: "Relay Module",
-            category: "actuators",
-            icon: "🔌",
-            description: "Module relais."
-        },
-
-        {
-            id: "relay_4_channel",
-            type: "relay_4_channel",
-            name: "4-Channel Relay",
-            category: "actuators",
-            icon: "🔌",
-            description: "Module relais quatre canaux."
-        },
-
-        {
-            id: "buzzer",
-            type: "buzzer",
-            name: "Buzzer",
-            category: "actuators",
-            icon: "🔊",
-            description: "Avertisseur sonore."
-        },
-
-        {
-            id: "solenoid",
-            type: "solenoid",
-            name: "Solenoid",
-            category: "actuators",
-            icon: "🧲",
-            description: "Actionneur électromagnétique."
-        },
-
-        /* =========================
-           LED
-        ========================= */
-
-        {
-            id: "led_red",
-            type: "led_red",
-            name: "Red LED",
-            category: "outputs",
-            icon: "🔴",
-            description: "LED rouge."
-        },
-
-        {
-            id: "led_green",
-            type: "led_green",
-            name: "Green LED",
-            category: "outputs",
-            icon: "🟢",
-            description: "LED verte."
-        },
-
-        {
-            id: "led_blue",
-            type: "led_blue",
-            name: "Blue LED",
-            category: "outputs",
-            icon: "🔵",
-            description: "LED bleue."
-        },
-
-        {
-            id: "rgb_led",
-            type: "rgb_led",
-            name: "RGB LED",
-            category: "outputs",
-            icon: "🌈",
-            description: "LED RGB."
-        },
-
-        {
-            id: "neopixel",
-            type: "neopixel",
-            name: "NeoPixel RGB",
-            category: "outputs",
-            icon: "🌈",
-            description: "LED RGB adressable."
-        },
-
-        /* =========================
-           DISPLAYS
-        ========================= */
-
-        {
-            id: "lcd16x2",
-            type: "lcd16x2",
-            name: "LCD 16x2",
-            category: "displays",
-            icon: "🖥️",
-            description: "Écran LCD 16x2."
-        },
-
-        {
-            id: "lcd20x4",
-            type: "lcd20x4",
-            name: "LCD 20x4",
-            category: "displays",
-            icon: "🖥️",
-            description: "Écran LCD 20x4."
-        },
-
-        {
-            id: "oled",
-            type: "oled",
-            name: "OLED Display",
-            category: "displays",
-            icon: "🖥️",
-            description: "Écran OLED."
-        },
-
-        {
-            id: "seven_segment",
-            type: "seven_segment",
-            name: "7 Segment Display",
-            category: "displays",
-            icon: "🔢",
-            description: "Afficheur sept segments."
-        },
-
-        {
-            id: "led_matrix",
-            type: "led_matrix",
-            name: "8x8 LED Matrix",
-            category: "displays",
-            icon: "🔳",
-            description: "Matrice LED."
-        },
-
-        /* =========================
-           COMMUNICATION
-        ========================= */
-
-        {
-            id: "hc05",
-            type: "hc05",
-            name: "HC-05 Bluetooth",
-            category: "communication",
-            icon: "📶",
-            description: "Bluetooth série."
-        },
-
-        {
-            id: "hc06",
-            type: "hc06",
-            name: "HC-06 Bluetooth",
-            category: "communication",
-            icon: "📶",
-            description: "Module Bluetooth."
-        },
-
-        {
-            id: "nrf24l01",
-            type: "nrf24l01",
-            name: "NRF24L01",
-            category: "communication",
-            icon: "📡",
-            description: "Radio 2.4 GHz."
-        },
-
-        {
-            id: "rf433",
-            type: "rf433",
-            name: "RF 433 MHz",
-            category: "communication",
-            icon: "📡",
-            description: "Communication radio."
-        },
-
-        {
-            id: "ir_receiver",
-            type: "ir_receiver",
-            name: "IR Receiver",
-            category: "communication",
-            icon: "📡",
-            description: "Récepteur infrarouge."
-        },
-
-        {
-            id: "gps_neo6m",
-            type: "gps_neo6m",
-            name: "GPS NEO-6M",
-            category: "communication",
-            icon: "🛰️",
-            description: "Module GPS."
-        },
-
-        {
-            id: "sim800l",
-            type: "sim800l",
-            name: "SIM800L GSM",
-            category: "communication",
-            icon: "📱",
-            description: "Communication GSM."
-        },
-
-        {
-            id: "lora_sx1278",
-            type: "lora_sx1278",
-            name: "LoRa SX1278",
-            category: "communication",
-            icon: "📡",
-            description: "Communication longue portée."
-        },
-
-        /* =========================
-           RFID / NFC
-        ========================= */
-
-        {
-            id: "rfid_rc522",
-            type: "rfid_rc522",
-            name: "RFID RC522",
-            category: "identification",
-            icon: "💳",
-            description: "Lecteur RFID."
-        },
-
-        {
-            id: "nfc_module",
-            type: "nfc_module",
-            name: "NFC Module",
-            category: "identification",
-            icon: "📱",
-            description: "Module NFC."
-        },
-
-        /* =========================
-           POWER
-        ========================= */
-
-        {
-            id: "battery_9v",
-            type: "battery_9v",
-            name: "9V Battery",
-            category: "power",
-            icon: "🔋",
-            description: "Pile 9 volts."
-        },
-
-        {
-            id: "battery_pack",
-            type: "battery_pack",
-            name: "Battery Pack",
-            category: "power",
-            icon: "🔋",
-            description: "Bloc batterie."
-        },
-
-        {
-            id: "buck_converter",
-            type: "buck_converter",
-            name: "LM2596 Buck Converter",
-            category: "power",
-            icon: "⚡",
-            description: "Convertisseur abaisseur."
-        },
-
-        {
-            id: "boost_converter",
-            type: "boost_converter",
-            name: "MT3608 Boost Converter",
-            category: "power",
-            icon: "⚡",
-            description: "Convertisseur élévateur."
-        },
-
-        {
-            id: "power_supply",
-            type: "power_supply",
-            name: "DC Power Supply",
-            category: "power",
-            icon: "🔌",
-            description: "Alimentation DC simulée."
-        },
-
-        /* =========================
-           ROBOT MECANICS
-        ========================= */
-
-        {
-            id: "two_wheel_chassis",
-            type: "two_wheel_chassis",
-            name: "2WD Robot Chassis",
-            category: "mechanics",
-            icon: "🤖",
-            description: "Châssis robot deux roues."
-        },
-
-        {
-            id: "four_wheel_chassis",
-            type: "four_wheel_chassis",
-            name: "4WD Robot Chassis",
-            category: "mechanics",
-            icon: "🤖",
-            description: "Châssis robot quatre roues."
-        },
-
-        {
-            id: "robot_wheel",
-            type: "robot_wheel",
-            name: "Robot Wheel",
-            category: "mechanics",
-            icon: "⭕",
-            description: "Roue robotique."
-        },
-
-        {
-            id: "caster_wheel",
-            type: "caster_wheel",
-            name: "Caster Wheel",
-            category: "mechanics",
-            icon: "⭕",
-            description: "Roue pivotante."
-        },
-
-        /* =========================
-           BRAS ROBOTIQUE
-        ========================= */
-
-        {
-            id: "robot_arm_base",
-            type: "robot_arm_base",
-            name: "Robot Arm Base",
-            category: "robotic_arm",
-            icon: "🦾",
-            description: "Base de bras robotique."
-        },
-
-        {
-            id: "robot_arm_joint",
-            type: "robot_arm_joint",
-            name: "Robot Arm Joint",
-            category: "robotic_arm",
-            icon: "🦾",
-            description: "Articulation robotique."
-        },
-
-        {
-            id: "robot_gripper",
-            type: "robot_gripper",
-            name: "Robot Gripper",
-            category: "robotic_arm",
-            icon: "🦾",
-            description: "Pince robotique."
-        },
-
-        {
-            id: "robotic_arm",
-            type: "robotic_arm",
-            name: "6-Axis Robotic Arm",
-            category: "robotic_arm",
-            icon: "🦾",
-            description: "Bras robotique six axes."
-        },
-
-        /* =========================
-           LINE FOLLOWER
-        ========================= */
-
-        {
-            id: "line_sensor",
-            type: "line_sensor",
-            name: "Line Tracking Sensor",
-            category: "sensors",
-            icon: "〰️",
-            description: "Capteur de suivi de ligne."
-        },
-
-        {
-            id: "line_array",
-            type: "line_array",
-            name: "5-Channel Line Sensor",
-            category: "sensors",
-            icon: "〰️",
-            description: "Barrette de capteurs de ligne."
-        },
-
-        /* =========================
-           GAS / ENVIRONMENT
-        ========================= */
-
-        {
-            id: "mq2",
-            type: "mq2",
-            name: "MQ-2 Gas Sensor",
-            category: "sensors",
-            icon: "🧪",
-            description: "Détection de gaz et fumée."
-        },
-
-        {
-            id: "mq135",
-            type: "mq135",
-            name: "MQ-135 Air Sensor",
-            category: "sensors",
-            icon: "🌫️",
-            description: "Qualité de l'air."
-        },
-
-        {
-            id: "soil_moisture",
-            type: "soil_moisture",
-            name: "Soil Moisture Sensor",
-            category: "sensors",
-            icon: "🌱",
-            description: "Humidité du sol."
-        },
-
-        {
-            id: "rain_sensor",
-            type: "rain_sensor",
-            name: "Rain Sensor",
-            category: "sensors",
-            icon: "🌧️",
-            description: "Détection de pluie."
-        },
-
-        /* =========================
-           VISION
-        ========================= */
-
-        {
-            id: "camera_module",
-            type: "camera_module",
-            name: "Robot Camera",
-            category: "vision",
-            icon: "📷",
-            description: "Caméra robotique."
-        },
-
-        {
-            id: "pi_camera",
-            type: "pi_camera",
-            name: "Raspberry Pi Camera",
-            category: "vision",
-            icon: "📷",
-            description: "Caméra Raspberry Pi."
-        }
-
-    ];
-
-
-    /* ============================================================
-       03 — CATÉGORIES
-    ============================================================ */
-
-    const CATEGORIES = [
-
-        ["all", "Tous"],
-
-        ["controllers", "Contrôleurs"],
-
-        ["computers", "Ordinateurs"],
-
-        ["prototyping", "Prototypage"],
-
-        ["sensors", "Capteurs"],
-
-        ["inputs", "Entrées"],
-
-        ["motors", "Moteurs"],
-
-        ["drivers", "Drivers"],
-
-        ["actuators", "Actionneurs"],
-
-        ["outputs", "LED / Sorties"],
-
-        ["displays", "Afficheurs"],
-
-        ["communication", "Communication"],
-
-        ["identification", "RFID / NFC"],
-
-        ["power", "Alimentation"],
-
-        ["mechanics", "Mécanique"],
-
-        ["robotic_arm", "Bras robotique"],
-
-        ["vision", "Vision"]
-
-    ];
-
-
-    /* ============================================================
-       04 — STYLE ISOLÉ
-       ------------------------------------------------------------
-       Le CSS est injecté par ce JS.
-       Aucun fichier CSS existant n'est modifié.
-    ============================================================ */
-
-    function installStyles() {
-
-        if (
-            document.getElementById(
-                ROBOTICS_STYLE_ID
-            )
-        ) {
-            return;
-        }
-
-
-        const style =
-            document.createElement("style");
-
-
-        style.id =
-            ROBOTICS_STYLE_ID;
-
-
-        style.textContent = `
-
-            #${ROBOTICS_SECTION_ID} {
-                width: 100%;
-                box-sizing: border-box;
-                margin: 18px 0 0 0;
-                padding: 18px;
-                border-radius: 18px;
-                background:
-                    linear-gradient(
-                        145deg,
-                        rgba(8,25,50,.98),
-                        rgba(3,13,29,.98)
-                    );
-                border: 1px solid
-                    rgba(50,150,255,.35);
-                box-shadow:
-                    0 14px 35px
-                    rgba(0,0,0,.35),
-                    inset 0 1px 0
-                    rgba(255,255,255,.06);
-                box-sizing: border-box;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-header {
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                gap:12px;
-                margin-bottom:15px;
-                flex-wrap:wrap;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-title {
-                font-size:20px;
-                font-weight:800;
-                letter-spacing:.4px;
-                color:#ffffff;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-count {
-                padding:6px 10px;
-                border-radius:999px;
-                font-size:12px;
-                font-weight:700;
-                background:
-                    rgba(255,193,7,.13);
-                border:1px solid
-                    rgba(255,193,7,.35);
-                color:#ffd54f;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-search {
-                width:100%;
-                min-height:42px;
-                box-sizing:border-box;
-                padding:10px 13px;
-                margin-bottom:12px;
-                border-radius:11px;
-                border:1px solid
-                    rgba(255,255,255,.14);
-                outline:none;
-                background:
-                    rgba(255,255,255,.07);
-                color:#ffffff;
-                font-size:14px;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-search::placeholder {
-                color:rgba(255,255,255,.52);
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-category-row {
-                display:flex;
-                gap:7px;
-                overflow-x:auto;
-                padding:2px 0 12px 0;
-                scrollbar-width:thin;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-category {
-                flex:0 0 auto;
-                border:1px solid
-                    rgba(255,255,255,.12);
-                border-radius:999px;
-                padding:8px 12px;
-                background:
-                    rgba(255,255,255,.06);
-                color:#dcecff;
-                font-size:12px;
-                font-weight:700;
-                cursor:pointer;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-category.active {
-                background:
-                    rgba(0,140,255,.22);
-                border-color:
-                    rgba(0,180,255,.65);
-                color:#ffffff;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-components-grid {
-                display:grid;
-                grid-template-columns:
-                    repeat(
-                        auto-fill,
-                        minmax(155px,1fr)
-                    );
-                gap:11px;
-                width:100%;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-card {
-                position:relative;
-                min-height:175px;
-                padding:13px;
-                box-sizing:border-box;
-                border-radius:15px;
-                background:
-                    linear-gradient(
-                        145deg,
-                        rgba(255,255,255,.09),
-                        rgba(255,255,255,.035)
-                    );
-                border:1px solid
-                    rgba(255,255,255,.11);
-                box-shadow:
-                    0 8px 18px
-                    rgba(0,0,0,.25);
-                display:flex;
-                flex-direction:column;
-                align-items:center;
-                text-align:center;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-card-icon {
-                width:58px;
-                height:58px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                margin-bottom:8px;
-                border-radius:14px;
-                background:
-                    rgba(0,140,255,.13);
-                border:1px solid
-                    rgba(0,180,255,.22);
-                font-size:30px;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-card-name {
-                color:#ffffff;
-                font-size:13px;
-                font-weight:800;
-                line-height:1.25;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-card-family {
-                margin-top:4px;
-                color:#78c8ff;
-                font-size:10px;
-                font-weight:700;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-card-description {
-                margin-top:6px;
-                min-height:31px;
-                color:
-                    rgba(255,255,255,.62);
-                font-size:10px;
-                line-height:1.35;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-add {
-                width:100%;
-                margin-top:auto;
-                padding:9px 8px;
-                border:0;
-                border-radius:9px;
-                background:
-                    linear-gradient(
-                        135deg,
-                        #0878d1,
-                        #0050a8
-                    );
-                color:#ffffff;
-                font-size:12px;
-                font-weight:800;
-                cursor:pointer;
-                touch-action:manipulation;
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-add:active {
-                transform:scale(.97);
-            }
-
-            #${ROBOTICS_SECTION_ID}
-            .fobas-robotics-empty {
-                grid-column:1 / -1;
-                padding:30px 15px;
-                text-align:center;
-                color:rgba(255,255,255,.6);
-            }
-
-            @media (max-width:600px) {
-
-                #${ROBOTICS_SECTION_ID} {
-                    padding:12px;
-                    border-radius:14px;
-                }
-
-                #${ROBOTICS_SECTION_ID}
-                .fobas-robotics-components-grid {
-                    grid-template-columns:
-                        repeat(
-                            2,
-                            minmax(0,1fr)
-                        );
-                    gap:8px;
-                }
-
-                #${ROBOTICS_SECTION_ID}
-                .fobas-robotics-card {
-                    min-height:165px;
-                    padding:10px;
-                }
-
-            }
-
-        `;
-
-
-        document.head.appendChild(
-            style
-        );
-    }
-
-
-    /* ============================================================
-       05 — TROUVER EXACTEMENT LA BIBLIOTHÈQUE ACTUELLE
-    ============================================================ */
-
-    function getLibraryGrid() {
-
-        return document.getElementById(
-            GRID_ID
-        );
-    }
-
-
-    /* ============================================================
-       06 — RECHERCHE
-    ============================================================ */
-
-    function filterComponents(
-        query,
-        category
-    ) {
-
-        const q =
-            String(query || "")
-                .trim()
-                .toLowerCase();
-
-
-        return ROBOTICS_COMPONENTS.filter(
-            component => {
-
-                const categoryMatch =
-                    category === "all" ||
-                    component.category ===
-                    category;
-
-
-                if (!categoryMatch) {
-                    return false;
-                }
-
-
-                if (!q) {
-                    return true;
-                }
-
-
-                const text = [
-
-                    component.name,
-
-                    component.family || "",
-
-                    component.category,
-
-                    component.description
-
-                ]
-                    .join(" ")
-                    .toLowerCase();
-
-
-                return text.includes(q);
-            }
-        );
-    }
-
-
-    /* ============================================================
-       07 — APPEL DU VRAI addComponent() EXISTANT
-       ------------------------------------------------------------
-       IMPORTANT :
-       Cette extension ne redéfinit jamais addComponent().
-    ============================================================ */
-
-    function addThroughExistingEngine(
-        component
-    ) {
-
-        const type =
-            component.type;
-
-
-        /*
-         * 1 — Fonction globale existante.
-         */
-
-        if (
-            typeof window.addComponent ===
-            "function"
-        ) {
-
-            try {
-
-                const result =
-                    window.addComponent(
-                        type
-                    );
-
-
-                document.dispatchEvent(
-                    new CustomEvent(
-                        "fobas:robotics-added",
-                        {
-                            detail: {
-                                component,
-                                result,
-                                method:
-                                    "addComponent(type)"
-                            }
-                        }
-                    )
-                );
-
-
-                return true;
-
-            } catch (firstError) {
-
-                /*
-                 * Certaines architectures peuvent
-                 * attendre un objet plutôt qu'un string.
-                 * On tente donc une seconde forme,
-                 * sans remplacer la fonction existante.
-                 */
-
-                try {
-
-                    const result =
-                        window.addComponent(
-                            {
-                                id:
-                                    component.id,
-
-                                type:
-                                    component.type,
-
-                                name:
-                                    component.name,
-
-                                category:
-                                    component.category,
-
-                                family:
-                                    component.family || null
-                            }
-                        );
-
-
-                    document.dispatchEvent(
-                        new CustomEvent(
-                            "fobas:robotics-added",
-                            {
-                                detail: {
-                                    component,
-                                    result,
-                                    method:
-                                        "addComponent(object)"
-                                }
-                            }
-                        )
-                    );
-
-
-                    return true;
-
-                } catch (secondError) {
-
-                    console.warn(
-                        "FOBAS Robotics: addComponent() existe mais le type robotique n'a pas pu être ajouté.",
-                        firstError,
-                        secondError
-                    );
-
-                    return false;
-                }
-            }
-        }
-
-
-        /*
-         * 2 — Certains moteurs exposent
-         * createComponent() au niveau global.
-         *
-         * On ne modifie pas cette fonction.
-         * On l'appelle uniquement si addComponent()
-         * n'existe pas.
-         */
-
-        if (
-            typeof window.createComponent ===
-            "function"
-        ) {
-
-            try {
-
-                window.createComponent(
-                    type
-                );
-
-
-                document.dispatchEvent(
-                    new CustomEvent(
-                        "fobas:robotics-added",
-                        {
-                            detail: {
-                                component,
-                                method:
-                                    "createComponent(type)"
-                            }
-                        }
-                    )
-                );
-
-
-                return true;
-
-            } catch (error) {
-
-                console.warn(
-                    "FOBAS Robotics: createComponent() n'a pas accepté ce composant.",
-                    error
-                );
-            }
-        }
-
-
-        /*
-         * 3 — Événement de secours.
-         *
-         * Le moteur principal peut l'écouter plus tard
-         * sans modifier cette extension.
-         */
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "fobas:robotics-request-add",
-                {
-                    detail: {
-                        component
-                    }
-                }
-            )
-        );
-
-
-        return false;
-    }
-
-
-    /* ============================================================
-       08 — CRÉATION D'UNE CARTE
-    ============================================================ */
-
-    function createCard(
-        component
-    ) {
-
-        const card =
-            document.createElement(
-                "article"
-            );
-
-
-        card.className =
-            "fobas-robotics-card";
-
-
-        card.dataset.roboticsId =
-            component.id;
-
-
-        card.setAttribute(
-            ROBOTICS_MARKER,
-            "true"
-        );
-
-
-        const icon =
-            document.createElement(
-                "div"
-            );
-
-        icon.className =
-            "fobas-robotics-card-icon";
-
-        icon.textContent =
-            component.icon || "⚙️";
-
-
-        const name =
-            document.createElement(
-                "div"
-            );
-
-        name.className =
-            "fobas-robotics-card-name";
-
-        name.textContent =
-            component.name;
-
-
-        const family =
-            document.createElement(
-                "div"
-            );
-
-        family.className =
-            "fobas-robotics-card-family";
-
-        family.textContent =
-            component.family ||
-            component.category;
-
-
-        const description =
-            document.createElement(
-                "div"
-            );
-
-        description.className =
-            "fobas-robotics-card-description";
-
-        description.textContent =
-            component.description;
-
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-        button.type =
-            "button";
-
-        button.className =
-            "fobas-robotics-add";
-
-        button.textContent =
-            "Ajouter";
-
-        button.dataset.roboticsAdd =
-            component.id;
-
-
-        button.addEventListener(
-            "click",
-            function(event) {
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-
-                const added =
-                    addThroughExistingEngine(
-                        component
-                    );
-
-
-                if (added) {
-
-                    button.textContent =
-                        "Ajouté ✓";
-
-
-                    setTimeout(
-                        function() {
-
-                            button.textContent =
-                                "Ajouter";
-
-                        },
-                        900
-                    );
-
-                } else {
-
-                    button.textContent =
-                        "Envoyé";
-
-
-                    setTimeout(
-                        function() {
-
-                            button.textContent =
-                                "Ajouter";
-
-                        },
-                        900
-                    );
-                }
-
-            },
-            {
-                passive: false
-            }
-        );
-
-
-        card.appendChild(
-            icon
-        );
-
-        card.appendChild(
-            name
-        );
-
-        card.appendChild(
-            family
-        );
-
-        card.appendChild(
-            description
-        );
-
-        card.appendChild(
-            button
-        );
-
-
-        return card;
-    }
-
-
-    /* ============================================================
-       09 — RENDU DES COMPOSANTS
-    ============================================================ */
-
-    function renderCards(
-        root,
-        components
-    ) {
-
-        if (!root) {
-            return;
-        }
-
-
-        const grid =
-            root.querySelector(
-                ".fobas-robotics-components-grid"
-            );
-
-
-        if (!grid) {
-            return;
-        }
-
-
-        grid.innerHTML = "";
-
-
-        if (
-            !components.length
-        ) {
-
-            const empty =
-                document.createElement(
-                    "div"
-                );
-
-            empty.className =
-                "fobas-robotics-empty";
-
-            empty.textContent =
-                "Aucun composant robotique trouvé.";
-
-
-            grid.appendChild(
-                empty
-            );
-
-            return;
-        }
-
-
-        const fragment =
-            document.createDocumentFragment();
-
-
-        components.forEach(
-            component => {
-
-                fragment.appendChild(
-                    createCard(
-                        component
-                    )
-                );
-            }
-        );
-
-
-        grid.appendChild(
-            fragment
-        );
-
-
-        const count =
-            root.querySelector(
-                ".fobas-robotics-count"
-            );
-
-
-        if (count) {
-
-            count.textContent =
-                components.length +
-                " composants";
-        }
-    }
-
-
-    /* ============================================================
-       10 — CRÉER LA SECTION DIRECTEMENT DANS
-            #componentLibraryGrid
-    ============================================================ */
-
-    function createRoboticsSection() {
-
-        const libraryGrid =
-            getLibraryGrid();
-
-
-        if (!libraryGrid) {
-
-            return null;
-        }
-
-
-        let section =
-            document.getElementById(
-                ROBOTICS_SECTION_ID
-            );
-
-
-        /*
-         * Si la section existe déjà,
-         * on la réutilise.
-         */
-
-        if (section) {
-
-            return section;
-        }
-
-
-        section =
-            document.createElement(
-                "section"
-            );
-
-
-        section.id =
-            ROBOTICS_SECTION_ID;
-
-
-        section.setAttribute(
-            ROBOTICS_MARKER,
-            "true"
-        );
-
-
-        const header =
-            document.createElement(
-                "div"
-            );
-
-
-        header.className =
-            "fobas-robotics-header";
-
-
-        const title =
-            document.createElement(
-                "div"
-            );
-
-
-        title.className =
-            "fobas-robotics-title";
-
-
-        title.textContent =
-            "🤖 ROBOTIQUE & ARDUINO";
-
-
-        const count =
-            document.createElement(
-                "div"
-            );
-
-
-        count.className =
-            "fobas-robotics-count";
-
-
-        count.textContent =
-            ROBOTICS_COMPONENTS.length +
-            " composants";
-
-
-        header.appendChild(
-            title
-        );
-
-        header.appendChild(
-            count
-        );
-
-
-        const search =
-            document.createElement(
-                "input"
-            );
-
-
-        search.type =
-            "search";
-
-        search.className =
-            "fobas-robotics-search";
-
-        search.placeholder =
-            "🔎 Rechercher Arduino, ESP32, capteur, moteur...";
-
-        search.autocomplete =
-            "off";
-
-
-        const categoryRow =
-            document.createElement(
-                "div"
-            );
-
-
-        categoryRow.className =
-            "fobas-robotics-category-row";
-
-
-        const componentsGrid =
-            document.createElement(
-                "div"
-            );
-
-
-        componentsGrid.className =
-            "fobas-robotics-components-grid";
-
-
-        section.appendChild(
-            header
-        );
-
-        section.appendChild(
-            search
-        );
-
-        section.appendChild(
-            categoryRow
-        );
-
-        section.appendChild(
-            componentsGrid
-        );
-
-
-        /*
-         * INSERTION EXACTE :
-         *
-         * #componentLibraryGrid
-         *      └── #fobasRoboticsGridSection
-         *
-         * Aucun autre endroit.
-         */
-
-        libraryGrid.appendChild(
-            section
-        );
-
-
-        CATEGORIES.forEach(
-            function(category, index) {
-
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                button.type =
-                    "button";
-
-
-                button.className =
-                    "fobas-robotics-category";
-
-
-                button.dataset.category =
-                    category[0];
-
-
-                button.textContent =
-                    category[1];
-
-
-                if (index === 0) {
-
-                    button.classList.add(
-                        "active"
-                    );
-                }
-
-
-                button.addEventListener(
-                    "click",
-                    function(event) {
-
-                        event.preventDefault();
-
-                        event.stopPropagation();
-
-
-                        categoryRow
-                            .querySelectorAll(
-                                ".fobas-robotics-category"
-                            )
-                            .forEach(
-                                item => {
-
-                                    item.classList
-                                        .remove(
-                                            "active"
-                                        );
-                                }
-                            );
-
-
-                        button.classList.add(
-                            "active"
-                        );
-
-
-                        renderCards(
-                            section,
-                            filterComponents(
-                                search.value,
-                                category[0]
-                            )
-                        );
-                    }
-                );
-
-
-                categoryRow.appendChild(
-                    button
-                );
-            }
-        );
-
-
-        search.addEventListener(
-            "input",
-            function() {
-
-                const active =
-                    categoryRow.querySelector(
-                        ".fobas-robotics-category.active"
-                    );
-
-
-                const category =
-                    active
-                        ? active.dataset.category
-                        : "all";
-
-
-                renderCards(
-                    section,
-                    filterComponents(
-                        search.value,
-                        category
-                    )
-                );
-            }
-        );
-
-
-        renderCards(
-            section,
-            ROBOTICS_COMPONENTS
-        );
-
-
-        return section;
-    }
-
-
-    /* ============================================================
-       11 — GARDE-FOU SI LE MOTEUR PRINCIPAL
-            VIDE #componentLibraryGrid
-    ============================================================ */
-
-    let observer = null;
-
-    let restoring =
-        false;
-
-
-    function protectRoboticsSection() {
-
-        const grid =
-            getLibraryGrid();
-
-
-        if (!grid) {
-            return;
-        }
-
-
-        if (observer) {
-            return;
-        }
-
-
-        observer =
-            new MutationObserver(
-                function() {
-
-                    if (restoring) {
-                        return;
-                    }
-
-
-                    if (
-                        !document.getElementById(
-                            ROBOTICS_SECTION_ID
-                        )
-                    ) {
-
-                        restoring = true;
-
-
-                        /*
-                         * Le moteur principal peut
-                         * reconstruire la bibliothèque.
-                         *
-                         * On attend le prochain cycle
-                         * DOM avant de remettre notre
-                         * section.
-                         */
-
-                        requestAnimationFrame(
-                            function() {
-
-                                try {
-
-                                    createRoboticsSection();
-
-                                } finally {
-
-                                    restoring = false;
-                                }
-
-                            }
-                        );
-                    }
-
-                }
-            );
-
-
-        observer.observe(
-            grid,
-            {
-                childList: true
-            }
-        );
-    }
-
-
-    /* ============================================================
-       12 — BOUTON DYNAMIQUE DANS LES CATÉGORIES PRINCIPALES
-       ------------------------------------------------------------
-       On ajoute seulement un bouton Robotique.
-       Aucun bouton existant n'est supprimé.
-    ============================================================ */
-
-    function installRoboticsCategoryShortcut() {
-
-        const categories =
-            document.getElementById(
-                "componentCategories"
-            );
-
-
-        if (!categories) {
-            return;
-        }
-
-
-        if (
-            document.getElementById(
-                "fobasRoboticsCategoryShortcut"
-            )
-        ) {
-            return;
-        }
-
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-
-        button.id =
-            "fobasRoboticsCategoryShortcut";
-
-
-        button.type =
-            "button";
-
-
-        button.className =
-            "component-category-btn";
-
-
-        button.dataset.category =
-            "robotics";
-
-
-        button.textContent =
-            "🤖 Robotique & Arduino";
-
-
-        button.addEventListener(
-            "click",
-            function(event) {
-
-                event.preventDefault();
-
-
-                const section =
-                    document.getElementById(
-                        ROBOTICS_SECTION_ID
-                    );
-
-
-                if (section) {
-
-                    section.scrollIntoView(
-                        {
-                            behavior:
-                                "smooth",
-                            block:
-                                "start"
-                        }
-                    );
-                }
-
-            }
-        );
-
-
-        categories.appendChild(
-            button
-        );
-    }
-
-
-    /* ============================================================
-       13 — API PUBLIQUE
-    ============================================================ */
-
-    function getComponent(
-        id
-    ) {
-
-        return ROBOTICS_COMPONENTS.find(
-            component =>
-                component.id === id
-        ) || null;
-    }
-
-
-    function search(
-        query
-    ) {
-
-        const q =
-            String(query || "")
-                .toLowerCase()
-                .trim();
-
-
-        if (!q) {
-
-            return [
-                ...ROBOTICS_COMPONENTS
-            ];
-        }
-
-
-        return ROBOTICS_COMPONENTS.filter(
-            component => {
-
-                return [
-
-                    component.name,
-
-                    component.type,
-
-                    component.family || "",
-
-                    component.category,
-
-                    component.description
-
-                ]
-                    .join(" ")
-                    .toLowerCase()
-                    .includes(q);
-            }
-        );
-    }
-
-
-    function getByCategory(
-        category
-    ) {
-
-        if (
-            category === "all"
-        ) {
-
-            return [
-                ...ROBOTICS_COMPONENTS
-            ];
-        }
-
-
-        return ROBOTICS_COMPONENTS.filter(
-            component =>
-                component.category ===
-                category
-        );
-    }
-
-
-    /* ============================================================
-       14 — PUBLIC GLOBAL
-    ============================================================ */
-
-    window.FOBAS_ROBOTICS_LIBRARY_GRID_EXTENSION = {
-
-        version:
-            EXTENSION_VERSION,
-
-        target:
-            GRID_ID,
-
-        components:
-            ROBOTICS_COMPONENTS,
-
-        categories:
-            CATEGORIES,
-
-        getComponent,
-
-        search,
-
-        getByCategory,
-
-        addComponent:
-            addThroughExistingEngine,
-
-        render:
-            createRoboticsSection
-
-    };
-
-
-    /* ============================================================
-       15 — INITIALISATION SÉCURISÉE
-    ============================================================ */
-
-    function initialize() {
-
-        installStyles();
-
-
-        const grid =
-            getLibraryGrid();
-
-
-        /*
-         * Si le HTML est déjà chargé,
-         * on injecte immédiatement.
-         */
-
-        if (grid) {
-
-            createRoboticsSection();
-
-            protectRoboticsSection();
-
-            installRoboticsCategoryShortcut();
-
-            console.log(
-                "FOBAS ROBOTICS EXTENSION : intégrée dans #componentLibraryGrid",
-                ROBOTICS_COMPONENTS.length +
-                " composants"
-            );
-
-            return;
-        }
-
-
-        /*
-         * Si le script est chargé avant le HTML,
-         * on attend que le DOM soit disponible.
-         */
-
-        setTimeout(
-            initialize,
-            100
-        );
-    }
-
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initialize,
-            {
-                once: true
-            }
-        );
-
-    } else {
-
-        initialize();
-    }
-
-
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ================================================================
-   FOBAS ELECTRONIQUE
-   COMPONENT VISIBILITY BRIDGE — DRAG SAFE / ISOLATED
-   ---------------------------------------------------------------
-   RESPONSABILITÉ UNIQUE :
-   - Rendre les composants visibles
-   - NE JAMAIS modifier leur position pendant le fonctionnement
-
-   IMPORTANT :
-   - Ne touche pas à createComponent()
-   - Ne touche pas à addComponent()
-   - Ne touche pas à renderComponent()
-   - Ne touche pas au drag system
-   - Ne touche pas aux wires
-   - Ne touche pas au zoom
-   - Ne réécrit JAMAIS component.x / component.y
-   - Ne réécrit JAMAIS left / top après création
-================================================================ */
-
-(function FOBAS_ComponentVisibilityBridge() {
-
-    "use strict";
-
-
-    /* ============================================================
-       01 — RENDRE UN COMPONENT VISIBLE
-       ------------------------------------------------------------
-       IMPORTANT :
-       Aucune position n'est imposée ici.
-       La position appartient exclusivement au moteur principal.
-    ============================================================ */
-
-    function forceVisibleComponent(el) {
-
-        if (!el) return;
-
-
-        /* --------------------------------------------------------
-           LAYER PARENT
-        -------------------------------------------------------- */
-
-        const layer = el.parentElement;
-
-        if (
-            layer &&
-            layer.id === "componentLayer"
-        ) {
-
-            layer.style.position = "absolute";
-            layer.style.inset = "0";
-            layer.style.display = "block";
-            layer.style.visibility = "visible";
-            layer.style.opacity = "1";
-
-            /*
-             * Le layer ne doit pas bloquer les interactions
-             * avec les components.
-             */
-            layer.style.pointerEvents = "none";
-
-            layer.style.zIndex = "30";
-        }
-
-
-        /* --------------------------------------------------------
-           COMPONENT
-        -------------------------------------------------------- */
-
-        el.style.position = "absolute";
-
-        /*
-         * IMPORTANT :
-         *
-         * NE PAS faire :
-         *
-         * el.style.left = ...
-         * el.style.top = ...
-         *
-         * La position est contrôlée par :
-         *
-         * component.x
-         * component.y
-         *
-         * puis par renderComponent().
-         */
-
-
-        el.style.display = "flex";
-
-        el.style.flexDirection =
-            "column";
-
-        el.style.alignItems =
-            "center";
-
-        el.style.justifyContent =
-            "center";
-
-        el.style.gap = "3px";
-
-        el.style.boxSizing =
-            "border-box";
-
-
-        el.style.visibility =
-            "visible";
-
-        el.style.opacity =
-            "1";
-
-
-        el.style.width =
-            "118px";
-
-        el.style.height =
-            "72px";
-
-        el.style.minWidth =
-            "118px";
-
-        el.style.minHeight =
-            "72px";
-
-
-        el.style.background =
-            "linear-gradient(145deg,#17365f,#0a1d36)";
-
-
-        el.style.border =
-            "2px solid rgba(255,210,31,.85)";
-
-
-        el.style.borderRadius =
-            "10px";
-
-
-        el.style.color =
-            "#ffffff";
-
-
-        el.style.boxShadow =
-            "0 7px 18px rgba(0,0,0,.55)";
-
-
-        el.style.zIndex =
-            "31";
-
-
-        /*
-         * CRITIQUE POUR ANDROID / TOUCH :
-         */
-        el.style.pointerEvents =
-            "auto";
-
-        el.style.touchAction =
-            "none";
-
-
-        el.style.overflow =
-            "visible";
-
-
-        el.style.transformOrigin =
-            "center center";
-
-
-        /* --------------------------------------------------------
-           HEADER
-        -------------------------------------------------------- */
-
-        const header =
-            el.querySelector(
-                ".component-header"
-            );
-
-        if (header) {
-
-            header.style.display =
-                "block";
-
-            header.style.visibility =
-                "visible";
-
-            header.style.opacity =
-                "1";
-
-            header.style.width =
-                "100%";
-
-            header.style.height =
-                "20px";
-
-            header.style.textAlign =
-                "center";
-
-            header.style.fontSize =
-                "11px";
-
-            header.style.fontWeight =
-                "700";
-
-            header.style.color =
-                "#ffffff";
-
-            header.style.overflow =
-                "visible";
-
-            /*
-             * Le header ne capture pas le pointer.
-             * Le component parent reçoit le pointerdown.
-             */
-            header.style.pointerEvents =
-                "none";
-        }
-
-
-        /* --------------------------------------------------------
-           BODY
-        -------------------------------------------------------- */
-
-        const body =
-            el.querySelector(
-                ".component-body"
-            );
-
-        if (body) {
-
-            body.style.display =
-                "flex";
-
-            body.style.visibility =
-                "visible";
-
-            body.style.opacity =
-                "1";
-
-            body.style.width =
-                "100%";
-
-            body.style.height =
-                "35px";
-
-            body.style.minHeight =
-                "35px";
-
-            body.style.alignItems =
-                "center";
-
-            body.style.justifyContent =
-                "center";
-
-            body.style.position =
-                "relative";
-
-            body.style.pointerEvents =
-                "none";
-        }
-
-
-        /* --------------------------------------------------------
-           PINS CONTAINER
-        -------------------------------------------------------- */
-
-        const pins =
-            el.querySelector(
-                ".component-pins"
-            );
-
-        if (pins) {
-
-            pins.style.position =
-                "absolute";
-
-            pins.style.inset =
-                "0";
-
-            pins.style.width =
-                "100%";
-
-            pins.style.height =
-                "100%";
-
-            pins.style.pointerEvents =
-                "none";
-
-            pins.style.zIndex =
-                "45";
-        }
-
-
-        /* --------------------------------------------------------
-           PINS
-        -------------------------------------------------------- */
-
-        const pinList =
-            el.querySelectorAll(
-                ".component-pin"
-            );
-
-
-        pinList.forEach(
-            (pin, pinIndex) => {
-
-                pin.style.position =
-                    "absolute";
-
-                pin.style.display =
-                    "flex";
-
-                pin.style.width =
-                    "14px";
-
-                pin.style.height =
-                    "14px";
-
-                pin.style.minWidth =
-                    "14px";
-
-                pin.style.minHeight =
-                    "14px";
-
-                pin.style.padding =
-                    "0";
-
-                pin.style.alignItems =
-                    "center";
-
-                pin.style.justifyContent =
-                    "center";
-
-                pin.style.border =
-                    "2px solid #ffffff";
-
-                pin.style.borderRadius =
-                    "50%";
-
-                pin.style.background =
-                    "#f2c300";
-
-                pin.style.color =
-                    "#071a33";
-
-                pin.style.fontSize =
-                    "7px";
-
-                pin.style.zIndex =
-                    "46";
-
-
-                /*
-                 * Les pins restent interactifs pour le câblage.
-                 */
-
-                pin.style.pointerEvents =
-                    "auto";
-
-
-                if (
-                    pinList.length === 1
-                ) {
-
-                    pin.style.left =
-                        "50%";
-
-                    pin.style.bottom =
-                        "-7px";
-
-                } else if (
-                    pinIndex === 0
-                ) {
-
-                    pin.style.left =
-                        "-7px";
-
-                    pin.style.top =
-                        "50%";
-
-                } else if (
-                    pinIndex === 1
-                ) {
-
-                    pin.style.right =
-                        "-7px";
-
-                    pin.style.top =
-                        "50%";
-
-                } else {
-
-                    pin.style.left =
-                        `${20 + (pinIndex * 20)}px`;
-
-                    pin.style.bottom =
-                        "-7px";
-                }
-            }
-        );
-
-
-        /* --------------------------------------------------------
-           VISUELS INTERNES
-        -------------------------------------------------------- */
-
-        el.querySelectorAll(
-            ".generic-symbol," +
-            ".led-visual," +
-            ".bulb-visual," +
-            ".battery-visual," +
-            ".resistor-visual," +
-            ".capacitor-visual," +
-            ".controller-visual"
-        ).forEach(
-            visual => {
-
-                visual.style.visibility =
-                    "visible";
-
-                visual.style.opacity =
-                    "1";
-
-                visual.style.display =
-                    "flex";
-
-                visual.style.alignItems =
-                    "center";
-
-                visual.style.justifyContent =
-                    "center";
-
-                visual.style.maxWidth =
-                    "100%";
-
-                visual.style.maxHeight =
-                    "100%";
-
-                visual.style.pointerEvents =
-                    "none";
-            }
-        );
-    }
-
-
-    /* ============================================================
-       02 — SCAN COMPONENTS
-       ------------------------------------------------------------
-       Cette fonction ne modifie plus leur position.
-    ============================================================ */
-
-    function scanComponents() {
-
-        const layer =
-            document.getElementById(
-                "componentLayer"
-            );
-
-        if (!layer) {
-            return;
-        }
-
-
-        const components =
-            layer.querySelectorAll(
-                ".electronic-component"
-            );
-
-
-        components.forEach(
-            el => {
-
-                forceVisibleComponent(
-                    el
-                );
-            }
-        );
-    }
-
-
-    /* ============================================================
-       03 — OBSERVATION DU LAYER
-       ------------------------------------------------------------
-       Le bridge peut toujours détecter les nouveaux components,
-       mais il ne peut plus les replacer arbitrairement.
-    ============================================================ */
-
-    function startBridge() {
-
-        const layer =
-            document.getElementById(
-                "componentLayer"
-            );
-
-
-        if (!layer) {
-
-            setTimeout(
-                startBridge,
-                100
-            );
-
-            return;
-        }
-
-
-        /*
-         * Premier scan.
-         */
-        scanComponents();
-
-
-        /*
-         * Observe uniquement l'apparition / disparition
-         * de nodes.
-         *
-         * IMPORTANT :
-         * Le bridge ne touche jamais à la position.
-         */
-        const observer =
-            new MutationObserver(
-                mutations => {
-
-                    let relevantChange =
-                        false;
-
-
-                    for (
-                        const mutation
-                        of mutations
-                    ) {
-
-                        if (
-                            mutation.type ===
-                            "childList"
-                        ) {
-
-                            relevantChange =
-                                true;
-
-                            break;
-                        }
-                    }
-
-
-                    if (
-                        relevantChange
-                    ) {
-
-                        scanComponents();
-                    }
-                }
-            );
-
-
-        observer.observe(
-            layer,
-            {
-                childList: true,
-                subtree: true
-            }
-        );
-
-
-        /*
-         * Sécurités initiales.
-         */
-        setTimeout(
-            scanComponents,
-            50
-        );
-
-        setTimeout(
-            scanComponents,
-            150
-        );
-
-        setTimeout(
-            scanComponents,
-            300
-        );
-    }
-
-
-    /* ============================================================
-       04 — INITIALISATION
-    ============================================================ */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            startBridge,
-            {
-                once: true
-            }
-        );
-
-    } else {
-
-        startBridge();
-    }
-
-
-})();
-
-
-
-
-
-
-
-
-
-
 
 
 
