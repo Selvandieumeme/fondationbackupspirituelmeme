@@ -9599,6 +9599,1587 @@ function applyComponentVisualState(
 
 
 
+/* ================================================================
+   11. WIRE → WIRE CONNECTION EXTENSION
+   ---------------------------------------------------------------
+   FOBAS ELECTRONIQUE & ROBOTIQUE
+   ---------------------------------------------------------------
+   BLOC ISOLÉ / PROTÉGÉ — V1.0.0
+
+   INTÉGRATION :
+   - Utilise uniquement window.FOBASWireCableEngine
+   - S'appuie sur Block 10 existant
+   - NE MODIFIE PAS Block 10
+   - NE REMPLACE AUCUNE fonction existante
+   - NE CRÉE AUCUN nouveau système de câble
+
+   FONCTIONS AJOUTÉES :
+   - Endpoint WIRE → Endpoint WIRE
+   - A → A
+   - A → B
+   - B → A
+   - B → B
+   - Connexion bidirectionnelle réelle
+   - Snap automatique des endpoints
+   - Déconnexion si l'endpoint est éloigné
+   - Suivi des endpoints connectés
+   - Déplacement indépendant des câbles
+   - Conservation de WIRE → PIN
+   - Les croisements de câbles ne créent PAS de connexion
+   - Support souris + tactile
+   - Compatible avec l'Auto Save existant
+   - Aucun Three.js
+================================================================ */
+
+(function () {
+    "use strict";
+
+    /* ============================================================
+       PROTECTION CONTRE DOUBLE CHARGEMENT
+    ============================================================ */
+
+    if (window.__FOBAS_WIRE_CONNECTION_EXTENSION_V1__) {
+        return;
+    }
+
+    window.__FOBAS_WIRE_CONNECTION_EXTENSION_V1__ = true;
+
+
+    /* ============================================================
+       CONFIGURATION
+    ============================================================ */
+
+    const FOBAS_WIRE_CONNECTION_CONFIG = {
+        version: "1.0.0",
+
+        endpointSnapDistance: 34,
+
+        disconnectDistance: 42,
+
+        endpointSelector:
+            '[data-fobas-wire-handle="A"], [data-fobas-wire-handle="B"]',
+
+        initialized: false,
+
+        observer: null,
+
+        retryTimer: null,
+
+        pointerTracking: {
+            active: false,
+            pointerId: null,
+            wireId: null,
+            side: null
+        }
+    };
+
+
+    /* ============================================================
+       OUTILS DE BASE
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_getEngine() {
+        return window.FOBASWireCableEngine || null;
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_getState() {
+
+        const engine = FOBAS_WIRE_CONNECTION_getEngine();
+
+        if (!engine || !engine.state) {
+            return null;
+        }
+
+        return engine.state;
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_getWires() {
+
+        const state = FOBAS_WIRE_CONNECTION_getState();
+
+        if (!state || !state.wires) {
+            return null;
+        }
+
+        return state.wires;
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_getWire(wireId) {
+
+        const wires = FOBAS_WIRE_CONNECTION_getWires();
+
+        if (!wires || !wireId) {
+            return null;
+        }
+
+        if (typeof wires.get === "function") {
+            return wires.get(wireId) || null;
+        }
+
+        return null;
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_isWireObject(wire) {
+
+        return !!(
+            wire &&
+            wire.id &&
+            wire.a &&
+            wire.b &&
+            wire.connections
+        );
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_getPoint(wire, side) {
+
+        if (!FOBAS_WIRE_CONNECTION_isWireObject(wire)) {
+            return null;
+        }
+
+        if (side === "A") {
+            return wire.a;
+        }
+
+        if (side === "B") {
+            return wire.b;
+        }
+
+        return null;
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_distance(a, b) {
+
+        if (!a || !b) {
+            return Infinity;
+        }
+
+        const dx = Number(a.x) - Number(b.x);
+        const dy = Number(a.y) - Number(b.y);
+
+        return Math.sqrt(
+            (dx * dx) +
+            (dy * dy)
+        );
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_clonePoint(point) {
+
+        if (!point) {
+            return null;
+        }
+
+        return {
+            x: Number(point.x) || 0,
+            y: Number(point.y) || 0
+        };
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_getConnection(wire, side) {
+
+        if (!FOBAS_WIRE_CONNECTION_isWireObject(wire)) {
+            return null;
+        }
+
+        if (side !== "A" && side !== "B") {
+            return null;
+        }
+
+        return wire.connections[side] || null;
+    }
+
+
+    /* ============================================================
+       DÉTECTION DES ENDPOINTS DES AUTRES WIRES
+       ------------------------------------------------------------
+       IMPORTANT :
+       On recherche uniquement les endpoints.
+       Le corps d'un câble ne peut jamais provoquer une connexion.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_findNearestWireEndpoint(
+        sourceWire,
+        sourceSide,
+        point
+    ) {
+
+        const wires = FOBAS_WIRE_CONNECTION_getWires();
+
+        if (!wires || !point) {
+            return null;
+        }
+
+        let nearest = null;
+        let nearestDistance =
+            FOBAS_WIRE_CONNECTION_CONFIG.endpointSnapDistance;
+
+        wires.forEach(function (candidateWire) {
+
+            if (!FOBAS_WIRE_CONNECTION_isWireObject(candidateWire)) {
+                return;
+            }
+
+            if (candidateWire.id === sourceWire.id) {
+                return;
+            }
+
+            ["A", "B"].forEach(function (candidateSide) {
+
+                const candidatePoint =
+                    FOBAS_WIRE_CONNECTION_getPoint(
+                        candidateWire,
+                        candidateSide
+                    );
+
+                if (!candidatePoint) {
+                    return;
+                }
+
+                const distance =
+                    FOBAS_WIRE_CONNECTION_distance(
+                        point,
+                        candidatePoint
+                    );
+
+                if (distance <= nearestDistance) {
+
+                    nearestDistance = distance;
+
+                    nearest = {
+                        wire: candidateWire,
+                        wireId: candidateWire.id,
+                        side: candidateSide,
+                        point: candidatePoint,
+                        distance: distance
+                    };
+                }
+            });
+        });
+
+        return nearest;
+    }
+
+
+    /* ============================================================
+       SUPPRESSION D'UNE CONNEXION WIRE → WIRE
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_disconnectPair(
+        wire,
+        side,
+        silent
+    ) {
+
+        if (!FOBAS_WIRE_CONNECTION_isWireObject(wire)) {
+            return false;
+        }
+
+        const connection =
+            FOBAS_WIRE_CONNECTION_getConnection(
+                wire,
+                side
+            );
+
+        if (!connection) {
+            return false;
+        }
+
+        if (connection.kind !== "wire") {
+
+            return false;
+        }
+
+        const targetWire =
+            FOBAS_WIRE_CONNECTION_getWire(
+                connection.wireId
+            );
+
+        const targetSide =
+            connection.side;
+
+        wire.connections[side] = null;
+
+        if (
+            targetWire &&
+            targetSide &&
+            targetWire.connections &&
+            targetWire.connections[targetSide] &&
+            targetWire.connections[targetSide].kind === "wire" &&
+            targetWire.connections[targetSide].wireId === wire.id &&
+            targetWire.connections[targetSide].side === side
+        ) {
+
+            targetWire.connections[targetSide] = null;
+        }
+
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "fobas:wire-wire-disconnected",
+                    {
+                        detail: {
+                            wireId: wire.id,
+                            side: side,
+                            targetWireId:
+                                connection.wireId,
+                            targetSide:
+                                connection.side
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+            /* événement non critique */
+        }
+
+        if (!silent) {
+
+            FOBAS_WIRE_CONNECTION_renderWire(
+                wire
+            );
+
+            if (targetWire) {
+
+                FOBAS_WIRE_CONNECTION_renderWire(
+                    targetWire
+                );
+            }
+        }
+
+        return true;
+    }
+
+
+    /* ============================================================
+       CRÉATION D'UNE CONNEXION BIDIRECTIONNELLE
+       ------------------------------------------------------------
+       WIRE A ↔ WIRE B
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_connectPair(
+        wire,
+        side,
+        targetWire,
+        targetSide
+    ) {
+
+        if (
+            !FOBAS_WIRE_CONNECTION_isWireObject(wire) ||
+            !FOBAS_WIRE_CONNECTION_isWireObject(targetWire)
+        ) {
+            return false;
+        }
+
+        if (
+            side !== "A" &&
+            side !== "B"
+        ) {
+            return false;
+        }
+
+        if (
+            targetSide !== "A" &&
+            targetSide !== "B"
+        ) {
+            return false;
+        }
+
+        if (wire.id === targetWire.id) {
+            return false;
+        }
+
+
+        /* --------------------------------------------------------
+           SI L'ENDPOINT SOURCE EST DÉJÀ CONNECTÉ
+        -------------------------------------------------------- */
+
+        if (wire.connections[side]) {
+
+            FOBAS_WIRE_CONNECTION_disconnectPair(
+                wire,
+                side,
+                true
+            );
+        }
+
+
+        /* --------------------------------------------------------
+           SI L'ENDPOINT CIBLE EST DÉJÀ CONNECTÉ
+        -------------------------------------------------------- */
+
+        if (targetWire.connections[targetSide]) {
+
+            FOBAS_WIRE_CONNECTION_disconnectPair(
+                targetWire,
+                targetSide,
+                true
+            );
+        }
+
+
+        /* --------------------------------------------------------
+           POSITION COMMUNE
+        -------------------------------------------------------- */
+
+        const targetPoint =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                targetWire,
+                targetSide
+            );
+
+        if (!targetPoint) {
+            return false;
+        }
+
+        const commonPoint =
+            FOBAS_WIRE_CONNECTION_clonePoint(
+                targetPoint
+            );
+
+        const sourcePoint =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                wire,
+                side
+            );
+
+        if (!sourcePoint) {
+            return false;
+        }
+
+        sourcePoint.x = commonPoint.x;
+        sourcePoint.y = commonPoint.y;
+
+
+        /* --------------------------------------------------------
+           CONNEXION SOURCE
+        -------------------------------------------------------- */
+
+        wire.connections[side] = {
+            kind: "wire",
+            wireId: targetWire.id,
+            side: targetSide
+        };
+
+
+        /* --------------------------------------------------------
+           CONNEXION CIBLE
+        -------------------------------------------------------- */
+
+        targetWire.connections[targetSide] = {
+            kind: "wire",
+            wireId: wire.id,
+            side: side
+        };
+
+
+        /* --------------------------------------------------------
+           SYNCHRONISATION DE LA POSITION
+        -------------------------------------------------------- */
+
+        const targetPointAfter =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                targetWire,
+                targetSide
+            );
+
+        if (targetPointAfter) {
+
+            sourcePoint.x =
+                targetPointAfter.x;
+
+            sourcePoint.y =
+                targetPointAfter.y;
+        }
+
+
+        /* --------------------------------------------------------
+           RENDU
+        -------------------------------------------------------- */
+
+        FOBAS_WIRE_CONNECTION_renderWire(
+            wire
+        );
+
+        FOBAS_WIRE_CONNECTION_renderWire(
+            targetWire
+        );
+
+
+        /* --------------------------------------------------------
+           ÉVÉNEMENT
+        -------------------------------------------------------- */
+
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "fobas:wire-wire-connected",
+                    {
+                        detail: {
+                            wireId: wire.id,
+                            side: side,
+                            targetWireId: targetWire.id,
+                            targetSide: targetSide
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+            /* événement non critique */
+        }
+
+
+        /* --------------------------------------------------------
+           SYNCHRONISATION AUTOSAVE
+        -------------------------------------------------------- */
+
+        FOBAS_WIRE_CONNECTION_syncAutoSave();
+
+        return true;
+    }
+
+
+    /* ============================================================
+       SYNCHRONISATION DES CONNEXIONS
+       ------------------------------------------------------------
+       Cette fonction suit les endpoints connectés à d'autres wires.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_updateConnectedEndpoints() {
+
+        const wires =
+            FOBAS_WIRE_CONNECTION_getWires();
+
+        if (!wires) {
+            return;
+        }
+
+        const visited = new Set();
+
+
+        wires.forEach(function (wire) {
+
+            if (
+                !FOBAS_WIRE_CONNECTION_isWireObject(wire)
+            ) {
+                return;
+            }
+
+            ["A", "B"].forEach(function (side) {
+
+                const connection =
+                    wire.connections[side];
+
+                if (
+                    !connection ||
+                    connection.kind !== "wire"
+                ) {
+                    return;
+                }
+
+                const key =
+                    wire.id +
+                    "::" +
+                    side;
+
+                if (visited.has(key)) {
+                    return;
+                }
+
+                visited.add(key);
+
+
+                const targetWire =
+                    FOBAS_WIRE_CONNECTION_getWire(
+                        connection.wireId
+                    );
+
+                if (!targetWire) {
+
+                    wire.connections[side] = null;
+
+                    return;
+                }
+
+
+                const targetPoint =
+                    FOBAS_WIRE_CONNECTION_getPoint(
+                        targetWire,
+                        connection.side
+                    );
+
+                const sourcePoint =
+                    FOBAS_WIRE_CONNECTION_getPoint(
+                        wire,
+                        side
+                    );
+
+                if (
+                    !targetPoint ||
+                    !sourcePoint
+                ) {
+                    return;
+                }
+
+
+                /* ------------------------------------------------
+                   LE POINT SOURCE SUIT LE POINT CIBLE
+                ------------------------------------------------ */
+
+                sourcePoint.x =
+                    Number(targetPoint.x) || 0;
+
+                sourcePoint.y =
+                    Number(targetPoint.y) || 0;
+
+
+                visited.add(
+                    targetWire.id +
+                    "::" +
+                    connection.side
+                );
+            });
+        });
+
+
+        /* --------------------------------------------------------
+           MISE À JOUR VISUELLE
+        -------------------------------------------------------- */
+
+        wires.forEach(function (wire) {
+
+            if (
+                FOBAS_WIRE_CONNECTION_isWireObject(wire)
+            ) {
+
+                FOBAS_WIRE_CONNECTION_renderWire(
+                    wire
+                );
+            }
+        });
+    }
+
+
+    /* ============================================================
+       RENDU DIRECT DES WIRES EXISTANTS
+       ------------------------------------------------------------
+       Block 10 possède déjà son moteur de rendu.
+       Ici nous mettons simplement à jour les éléments SVG
+       existants après une connexion WIRE → WIRE.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_renderWire(wire) {
+
+        if (
+            !FOBAS_WIRE_CONNECTION_isWireObject(wire)
+        ) {
+            return;
+        }
+
+        const svg =
+            wire.svg;
+
+        if (!svg) {
+            return;
+        }
+
+        const a = wire.a;
+        const b = wire.b;
+
+        if (!a || !b) {
+            return;
+        }
+
+
+        /* --------------------------------------------------------
+           CALCUL DU CHEMIN
+        -------------------------------------------------------- */
+
+        let pathData = null;
+
+        try {
+
+            const engine =
+                FOBAS_WIRE_CONNECTION_getEngine();
+
+            if (
+                engine &&
+                typeof engine.createWirePath === "function"
+            ) {
+
+                pathData =
+                    engine.createWirePath(
+                        a,
+                        b
+                    );
+            }
+
+        } catch (error) {
+            pathData = null;
+        }
+
+
+        /* --------------------------------------------------------
+           CHEMIN DE SECOURS
+        -------------------------------------------------------- */
+
+        if (!pathData) {
+
+            const dx =
+                Number(b.x) -
+                Number(a.x);
+
+            const curve =
+                Math.max(
+                    35,
+                    Math.abs(dx) * 0.35
+                );
+
+            pathData =
+                "M " +
+                a.x +
+                " " +
+                a.y +
+                " C " +
+                (a.x + curve) +
+                " " +
+                a.y +
+                ", " +
+                (b.x - curve) +
+                " " +
+                b.y +
+                ", " +
+                b.x +
+                " " +
+                b.y;
+        }
+
+
+        /* --------------------------------------------------------
+           PATHS SVG
+        -------------------------------------------------------- */
+
+        const paths =
+            svg.querySelectorAll(
+                "path"
+            );
+
+        paths.forEach(function (path) {
+
+            path.setAttribute(
+                "d",
+                pathData
+            );
+        });
+
+
+        /* --------------------------------------------------------
+           HANDLE A
+        -------------------------------------------------------- */
+
+        const handleA =
+            svg.querySelector(
+                '[data-fobas-wire-handle="A"]'
+            );
+
+        if (handleA) {
+
+            handleA.setAttribute(
+                "cx",
+                a.x
+            );
+
+            handleA.setAttribute(
+                "cy",
+                a.y
+            );
+        }
+
+
+        /* --------------------------------------------------------
+           HANDLE B
+        -------------------------------------------------------- */
+
+        const handleB =
+            svg.querySelector(
+                '[data-fobas-wire-handle="B"]'
+            );
+
+        if (handleB) {
+
+            handleB.setAttribute(
+                "cx",
+                b.x
+            );
+
+            handleB.setAttribute(
+                "cy",
+                b.y
+            );
+        }
+    }
+
+
+    /* ============================================================
+       DÉTECTION DU HANDLE ACTUEL
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_getHandleFromEvent(
+        event
+    ) {
+
+        if (!event) {
+            return null;
+        }
+
+        const target =
+            event.target;
+
+        if (!target) {
+            return null;
+        }
+
+        const handle =
+            target.closest &&
+            target.closest(
+                FOBAS_WIRE_CONNECTION_CONFIG
+                    .endpointSelector
+            );
+
+        if (!handle) {
+            return null;
+        }
+
+        const svg =
+            handle.closest(
+                "[data-fobas-wire-id]"
+            );
+
+        if (!svg) {
+            return null;
+        }
+
+        const wireId =
+            svg.getAttribute(
+                "data-fobas-wire-id"
+            );
+
+        const side =
+            handle.getAttribute(
+                "data-fobas-wire-handle"
+            );
+
+        if (!wireId || !side) {
+            return null;
+        }
+
+        return {
+            wireId: wireId,
+            side: side,
+            handle: handle,
+            svg: svg
+        };
+    }
+
+
+    /* ============================================================
+       POINTER MOVE
+       ------------------------------------------------------------
+       Block 10 continue de gérer le déplacement.
+       Cette extension surveille seulement la proximité d'un
+       autre endpoint.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_onPointerMove(
+        event
+    ) {
+
+        const tracking =
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .pointerTracking;
+
+        if (!tracking.active) {
+            return;
+        }
+
+        if (
+            tracking.pointerId !== null &&
+            event.pointerId !== tracking.pointerId
+        ) {
+            return;
+        }
+
+        const wire =
+            FOBAS_WIRE_CONNECTION_getWire(
+                tracking.wireId
+            );
+
+        if (!wire) {
+            return;
+        }
+
+        const point =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                wire,
+                tracking.side
+            );
+
+        if (!point) {
+            return;
+        }
+
+
+        /* --------------------------------------------------------
+           RECHERCHE D'UN ENDPOINT PROCHÉ
+        -------------------------------------------------------- */
+
+        const nearest =
+            FOBAS_WIRE_CONNECTION_findNearestWireEndpoint(
+                wire,
+                tracking.side,
+                point
+            );
+
+
+        /* --------------------------------------------------------
+           SNAP VISUEL IMMÉDIAT
+           -------------------------------------------------------- */
+
+        if (
+            nearest &&
+            nearest.wire &&
+            nearest.point
+        ) {
+
+            point.x =
+                Number(nearest.point.x) || 0;
+
+            point.y =
+                Number(nearest.point.y) || 0;
+
+            FOBAS_WIRE_CONNECTION_renderWire(
+                wire
+            );
+        }
+    }
+
+
+    /* ============================================================
+       POINTER DOWN
+       ------------------------------------------------------------
+       On surveille uniquement les endpoints.
+       Le déplacement principal reste assuré par Block 10.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_onPointerDown(
+        event
+    ) {
+
+        const info =
+            FOBAS_WIRE_CONNECTION_getHandleFromEvent(
+                event
+            );
+
+        if (!info) {
+            return;
+        }
+
+        const wire =
+            FOBAS_WIRE_CONNECTION_getWire(
+                info.wireId
+            );
+
+        if (!wire) {
+            return;
+        }
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .pointerTracking.active = true;
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .pointerTracking.pointerId =
+                event.pointerId;
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .pointerTracking.wireId =
+                info.wireId;
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .pointerTracking.side =
+                info.side;
+    }
+
+
+    /* ============================================================
+       POINTER UP
+       ------------------------------------------------------------
+       C'est ici que la connexion WIRE → WIRE devient réelle.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_onPointerUp(
+        event
+    ) {
+
+        const tracking =
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .pointerTracking;
+
+        if (!tracking.active) {
+            return;
+        }
+
+        if (
+            tracking.pointerId !== null &&
+            event.pointerId !== tracking.pointerId
+        ) {
+            return;
+        }
+
+
+        const wire =
+            FOBAS_WIRE_CONNECTION_getWire(
+                tracking.wireId
+            );
+
+        if (!wire) {
+
+            FOBAS_WIRE_CONNECTION_resetTracking();
+
+            return;
+        }
+
+
+        const side =
+            tracking.side;
+
+        const point =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                wire,
+                side
+            );
+
+        if (!point) {
+
+            FOBAS_WIRE_CONNECTION_resetTracking();
+
+            return;
+        }
+
+
+        /* --------------------------------------------------------
+           RECHERCHE DE L'ENDPOINT CIBLE
+        -------------------------------------------------------- */
+
+        const nearest =
+            FOBAS_WIRE_CONNECTION_findNearestWireEndpoint(
+                wire,
+                side,
+                point
+            );
+
+
+        /* --------------------------------------------------------
+           CONNEXION SI UN ENDPOINT EST À PROXIMITÉ
+        -------------------------------------------------------- */
+
+        if (
+            nearest &&
+            nearest.wire &&
+            nearest.point
+        ) {
+
+            FOBAS_WIRE_CONNECTION_connectPair(
+                wire,
+                side,
+                nearest.wire,
+                nearest.side
+            );
+
+        } else {
+
+            /* ----------------------------------------------------
+               SI L'ENDPOINT A ÉTÉ DÉPLACÉ LOIN DE SON ANCIEN
+               WIRE → WIRE, ON SUPPRIME LA CONNEXION.
+            ---------------------------------------------------- */
+
+            const currentConnection =
+                wire.connections[side];
+
+            if (
+                currentConnection &&
+                currentConnection.kind === "wire"
+            ) {
+
+                const targetWire =
+                    FOBAS_WIRE_CONNECTION_getWire(
+                        currentConnection.wireId
+                    );
+
+                if (targetWire) {
+
+                    const targetPoint =
+                        FOBAS_WIRE_CONNECTION_getPoint(
+                            targetWire,
+                            currentConnection.side
+                        );
+
+                    if (targetPoint) {
+
+                        const distance =
+                            FOBAS_WIRE_CONNECTION_distance(
+                                point,
+                                targetPoint
+                            );
+
+                        if (
+                            distance >
+                            FOBAS_WIRE_CONNECTION_CONFIG
+                                .disconnectDistance
+                        ) {
+
+                            FOBAS_WIRE_CONNECTION_disconnectPair(
+                                wire,
+                                side,
+                                false
+                            );
+                        }
+                    } else {
+
+                        FOBAS_WIRE_CONNECTION_disconnectPair(
+                            wire,
+                            side,
+                            false
+                        );
+                    }
+
+                } else {
+
+                    wire.connections[side] = null;
+                }
+            }
+        }
+
+
+        /* --------------------------------------------------------
+           SYNCHRONISATION GLOBALE
+        -------------------------------------------------------- */
+
+        FOBAS_WIRE_CONNECTION_updateConnectedEndpoints();
+
+        FOBAS_WIRE_CONNECTION_syncAutoSave();
+
+        FOBAS_WIRE_CONNECTION_resetTracking();
+    }
+
+
+    /* ============================================================
+       RESET POINTER
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_resetTracking() {
+
+        const tracking =
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .pointerTracking;
+
+        tracking.active = false;
+        tracking.pointerId = null;
+        tracking.wireId = null;
+        tracking.side = null;
+    }
+
+
+    /* ============================================================
+       AUTOSAVE
+       ------------------------------------------------------------
+       Le Block 10 conserve les wires dans son Map.
+       Cette extension synchronise les connexions WIRE → WIRE
+       dans le state global lorsqu'il existe.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_syncAutoSave() {
+
+        const engine =
+            FOBAS_WIRE_CONNECTION_getEngine();
+
+        if (!engine || !engine.state) {
+            return;
+        }
+
+        const state =
+            engine.state;
+
+
+        /* --------------------------------------------------------
+           SI UN STATE GLOBAL EXISTE
+        -------------------------------------------------------- */
+
+        if (
+            typeof window.state === "object" &&
+            window.state
+        ) {
+
+            try {
+
+                window.state.wires =
+                    Array.from(
+                        state.wires.values()
+                    ).map(function (wire) {
+
+                        return {
+                            id: wire.id,
+                            type: wire.type,
+                            color: wire.color,
+                            a: FOBAS_WIRE_CONNECTION_clonePoint(
+                                wire.a
+                            ),
+                            b: FOBAS_WIRE_CONNECTION_clonePoint(
+                                wire.b
+                            ),
+                            connections: {
+                                A: wire.connections &&
+                                   wire.connections.A
+                                    ? Object.assign(
+                                        {},
+                                        wire.connections.A
+                                    )
+                                    : null,
+
+                                B: wire.connections &&
+                                   wire.connections.B
+                                    ? Object.assign(
+                                        {},
+                                        wire.connections.B
+                                    )
+                                    : null
+                            }
+                        };
+                    });
+
+            } catch (error) {
+                /* autosave non critique */
+            }
+        }
+
+
+        /* --------------------------------------------------------
+           ÉVÉNEMENT POUR LE SYSTÈME AUTOSAVE
+        -------------------------------------------------------- */
+
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "fobas:wire-state-changed",
+                    {
+                        detail: {
+                            source:
+                                "WIRE_CONNECTION_EXTENSION"
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+            /* événement non critique */
+        }
+    }
+
+
+    /* ============================================================
+       MISE À JOUR APRÈS MODIFICATION DU DOM
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_refresh() {
+
+        FOBAS_WIRE_CONNECTION_updateConnectedEndpoints();
+
+        FOBAS_WIRE_CONNECTION_syncAutoSave();
+    }
+
+
+    /* ============================================================
+       OBSERVATEUR DES WIRES
+       ------------------------------------------------------------
+       Permet de prendre en compte les nouveaux wires créés
+       par Block 10.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_installObserver() {
+
+        if (
+            FOBAS_WIRE_CONNECTION_CONFIG.observer
+        ) {
+            return;
+        }
+
+        const engine =
+            FOBAS_WIRE_CONNECTION_getEngine();
+
+        if (!engine || !engine.state) {
+            return;
+        }
+
+        const state =
+            engine.state;
+
+        const wires =
+            state.wires;
+
+        if (
+            !wires ||
+            typeof wires.forEach !== "function"
+        ) {
+            return;
+        }
+
+
+        /* --------------------------------------------------------
+           PATCH NON INVASIF DE MAP
+           --------------------------------------------------------
+           Aucun remplacement de fonction du Block 10.
+           On utilise simplement un timer léger pour détecter
+           les nouveaux objets du Map.
+        -------------------------------------------------------- */
+
+        let previousCount =
+            typeof wires.size === "number"
+                ? wires.size
+                : 0;
+
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .observer =
+            setInterval(function () {
+
+                try {
+
+                    const currentCount =
+                        typeof wires.size === "number"
+                            ? wires.size
+                            : 0;
+
+                    if (
+                        currentCount !==
+                        previousCount
+                    ) {
+
+                        previousCount =
+                            currentCount;
+
+                        FOBAS_WIRE_CONNECTION_refresh();
+                    }
+
+                } catch (error) {
+                    /* observer non critique */
+                }
+
+            }, 250);
+    }
+
+
+    /* ============================================================
+       LISTENERS GLOBAUX
+       ------------------------------------------------------------
+       Capture uniquement pour surveiller les endpoints.
+       Block 10 garde son propre moteur.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_installListeners() {
+
+        if (
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .listenersInstalled
+        ) {
+            return;
+        }
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .listenersInstalled = true;
+
+
+        document.addEventListener(
+            "pointerdown",
+            FOBAS_WIRE_CONNECTION_onPointerDown,
+            true
+        );
+
+
+        document.addEventListener(
+            "pointermove",
+            FOBAS_WIRE_CONNECTION_onPointerMove,
+            false
+        );
+
+
+        document.addEventListener(
+            "pointerup",
+            FOBAS_WIRE_CONNECTION_onPointerUp,
+            false
+        );
+
+
+        document.addEventListener(
+            "pointercancel",
+            FOBAS_WIRE_CONNECTION_onPointerUp,
+            false
+        );
+    }
+
+
+    /* ============================================================
+       API PUBLIQUE DE L'EXTENSION
+       ------------------------------------------------------------ */
+
+    function FOBAS_WIRE_CONNECTION_init() {
+
+        const engine =
+            FOBAS_WIRE_CONNECTION_getEngine();
+
+        if (!engine) {
+
+            if (
+                !FOBAS_WIRE_CONNECTION_CONFIG
+                    .retryTimer
+            ) {
+
+                FOBAS_WIRE_CONNECTION_CONFIG
+                    .retryTimer =
+                    setTimeout(
+                        function () {
+
+                            FOBAS_WIRE_CONNECTION_CONFIG
+                                .retryTimer = null;
+
+                            FOBAS_WIRE_CONNECTION_init();
+
+                        },
+                        500
+                    );
+            }
+
+            return;
+        }
+
+
+        if (
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .initialized
+        ) {
+            return;
+        }
+
+
+        FOBAS_WIRE_CONNECTION_installListeners();
+
+        FOBAS_WIRE_CONNECTION_installObserver();
+
+        FOBAS_WIRE_CONNECTION_refresh();
+
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .initialized = true;
+
+
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "fobas:wire-wire-engine-ready",
+                    {
+                        detail: {
+                            version:
+                                FOBAS_WIRE_CONNECTION_CONFIG
+                                    .version
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+            /* événement non critique */
+        }
+    }
+
+
+    /* ============================================================
+       API PUBLIQUE
+       ------------------------------------------------------------ */
+
+    window.FOBASWireWireConnectionExtension = {
+
+        version:
+            FOBAS_WIRE_CONNECTION_CONFIG.version,
+
+        connect:
+            FOBAS_WIRE_CONNECTION_connectPair,
+
+        disconnect:
+            FOBAS_WIRE_CONNECTION_disconnectPair,
+
+        update:
+            FOBAS_WIRE_CONNECTION_updateConnectedEndpoints,
+
+        refresh:
+            FOBAS_WIRE_CONNECTION_refresh,
+
+        findNearest:
+            FOBAS_WIRE_CONNECTION_findNearestWireEndpoint,
+
+        syncAutoSave:
+            FOBAS_WIRE_CONNECTION_syncAutoSave,
+
+        state:
+            FOBAS_WIRE_CONNECTION_CONFIG
+    };
+
+
+    /* ============================================================
+       INITIALISATION
+       ============================================================ */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            FOBAS_WIRE_CONNECTION_init,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        FOBAS_WIRE_CONNECTION_init();
+    }
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
