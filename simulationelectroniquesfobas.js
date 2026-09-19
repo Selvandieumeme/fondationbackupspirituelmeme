@@ -5186,125 +5186,139 @@ function createComponentInstance(type, options = {}) {
 }
 
 
-/* ============================================================
-   09.9 — RENDER COMPONENT
-============================================================ */
 
-function renderComponent(component) {
-    if (!dom.componentLayer || !component) return;
 
-    let element =
-        document.getElementById(component.id);
 
-    if (!element) {
-        element = document.createElement("div");
 
-        element.id = component.id;
 
-        element.className =
-            "electronic-component";
 
-        element.dataset.componentId =
-            component.id;
 
-        element.dataset.componentType =
-            component.type;
+ /* ============================================================
+    09.9 — RENDER COMPONENT
+    ------------------------------------------------------------
+    CLEAN VISUAL VERSION
+    ------------------------------------------------------------
+    - Aucun état affiché sous le composant
+    - Visual 3D conservé
+    - Pins conservés
+    - Drag / Touch conservés
+    - Interaction conservée
+    - Logique électronique conservée
+ ============================================================ */
 
-        element.setAttribute(
-            "tabindex",
-            "0"
-        );
+ function renderComponent(component) {
+     if (!dom.componentLayer || !component) return;
 
-        dom.componentLayer.appendChild(element);
-    }
+     let element =
+         document.getElementById(component.id);
 
-    const definition =
-        getComponentDefinition(
-            component.type
-        );
+     if (!element) {
+         element = document.createElement("div");
 
-    if (!definition) return;
+         element.id = component.id;
 
-    element.style.position = "absolute";
+         element.className =
+             "electronic-component";
 
-    element.style.left =
-        `${component.x}px`;
+         element.dataset.componentId =
+             component.id;
 
-    element.style.top =
-        `${component.y}px`;
+         element.dataset.componentType =
+             component.type;
 
-    element.style.width =
-        `${component.width}px`;
+         element.setAttribute(
+             "tabindex",
+             "0"
+         );
 
-    element.style.height =
-        `${component.height}px`;
+         dom.componentLayer.appendChild(element);
+     }
 
-    element.style.transform =
-        `rotate(${component.rotation}deg)`;
+     const definition =
+         getComponentDefinition(
+             component.type
+         );
 
-    element.style.touchAction =
-        "none";
+     if (!definition) return;
 
-    element.style.userSelect =
-        "none";
+     element.style.position = "absolute";
 
-    const selected =
-        component.id ===
-        state.selectedComponentId;
+     element.style.left =
+         `${component.x}px`;
 
-    element.classList.toggle(
-        "selected",
-        selected
-    );
+     element.style.top =
+         `${component.y}px`;
 
-    element.classList.toggle(
-        "component-running",
-        state.circuitRunning
-    );
+     element.style.width =
+         `${component.width}px`;
 
-    element.dataset.state =
-        String(
-            component.state || "off"
-        );
+     element.style.height =
+         `${component.height}px`;
 
-    const pins =
-        definition.pins || [];
+     element.style.transform =
+         `rotate(${component.rotation}deg)`;
 
-    element.innerHTML = `
-        <div class="electronic-component-shell">
+     element.style.touchAction =
+         "none";
 
-            <div class="electronic-component-visual">
-                ${createComponentVisualHTML(definition)}
-            </div>
+     element.style.userSelect =
+         "none";
 
-            <div class="electronic-component-pins">
-                ${pins
-                    .map(createComponentPinHTML)
-                    .join("")}
-            </div>
+     const selected =
+         component.id ===
+         state.selectedComponentId;
 
-            <div class="electronic-component-state">
-                ${getComponentStateLabel(component)}
-            </div>
+     element.classList.toggle(
+         "selected",
+         selected
+     );
 
-        </div>
-    `;
+     element.classList.toggle(
+         "component-running",
+         state.circuitRunning
+     );
 
-    applyComponentVisualState(
-        element,
-        component
-    );
+     element.dataset.state =
+         String(
+             component.state || "off"
+         );
 
-    positionComponentPins(
-        element,
-        definition
-    );
+     const pins =
+         definition.pins || [];
 
-    attachComponentEvents(
-        element,
-        component
-    );
-}
+     element.innerHTML = `
+         <div class="electronic-component-shell">
+
+             <div class="electronic-component-visual">
+                 ${createComponentVisualHTML(definition)}
+             </div>
+
+             <div class="electronic-component-pins">
+                 ${pins
+                     .map(createComponentPinHTML)
+                     .join("")}
+             </div>
+
+         </div>
+     `;
+
+     applyComponentVisualState(
+         element,
+         component
+     );
+
+     positionComponentPins(
+         element,
+         definition
+     );
+
+     attachComponentEvents(
+         element,
+         component
+     );
+ }
+
+
 
 
 /* ============================================================
