@@ -5859,6 +5859,90 @@ select:focus-visible {
 
 
 
+
+
+
+
+
+
+
+
+/* ================================================================
+   FOBAS ELECTRONIQUE
+   ANDROID / MOBILE CONTROL PANEL VISIBILITY FIX
+   ---------------------------------------------------------------
+   OBJECTIF :
+   - Rendre #resetCircuitBtn visible sur petit écran
+   - Rendre #saveProjectBtn visible sur petit écran
+   - Ne modifie PAS le HTML
+   - Ne modifie PAS le JavaScript
+   - Ne modifie PAS le comportement des boutons
+   - Ne touche PAS au desktop
+================================================================ */
+
+@media screen and (max-width: 768px) {
+
+    /* Le conteneur principal doit pouvoir s'adapter
+       à la largeur réelle de l'écran Android */
+    #fobasElectronicApp {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    #electronicMain {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+    }
+
+    /* Le panneau de contrôle droit devient un panneau
+       mobile normal, au lieu de rester hors écran */
+    #electronicControlPanel {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: visible;
+        position: relative;
+        display: block;
+    }
+
+    /* Chaque section du panneau doit pouvoir occuper
+       toute la largeur disponible */
+    #electronicControlPanel .control-section {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: visible;
+    }
+
+    /* FORCE la visibilité des deux boutons concernés */
+    #resetCircuitBtn,
+    #saveProjectBtn {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 /* ================================================================
    FIN DU CSS
 ================================================================ */
