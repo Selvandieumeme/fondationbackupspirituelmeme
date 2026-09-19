@@ -4910,24 +4910,24 @@ select:focus-visible {
 
 
 
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   MOBILE PROJECT ACTIONS FIX
+   MOBILE PROJECT ACTIONS FIX — COMPACT VERSION
    ---------------------------------------------------------------
    OBJECTIF :
-   - Fè panel Projet orijinal la vizib sou Android
-   - Fè bouton Sauvegarder vizib
-   - Fè bouton Vider le laboratoire vizib
-   - Pa kreye okenn nouvo bouton
-   - Pa chanje ID ki egziste yo
-   - Pa afekte bouton Reset Circuit la
+   - Kenbe 2 boutons originaux visibles sur Android
+   - Garder leur taille compacte comme les autres boutons
+   - Ne créer aucun nouveau bouton
+   - Ne changer aucun ID
+   - Ne pas modifier Reset Circuit
+   - Ne pas modifier les autres parties du laboratoire
    ================================================================ */
 
 @media screen and (max-width: 768px) {
 
     /* ------------------------------------------------------------
-       1. RE-AFFICHE LE PANNEAU DE CONTROLE QUI EST
-          CACHE PAR LE MEDIA QUERY <= 1050px
+       1. RE-AFFICHE LE PANNEAU DE CONTROLE SUR MOBILE
        ------------------------------------------------------------ */
     #electronicControlPanel {
         display: block !important;
@@ -4946,8 +4946,8 @@ select:focus-visible {
 
 
     /* ------------------------------------------------------------
-       2. CACHE LES AUTRES SECTIONS DU PANNEAU
-          POUR NE LAISSER QUE LE BLOC PROJET
+       2. CACHE LES AUTRES SECTIONS
+          ET CONSERVE UNIQUEMENT LE BLOC PROJET
        ------------------------------------------------------------ */
     #electronicControlPanel > .control-section {
         display: none !important;
@@ -4955,7 +4955,7 @@ select:focus-visible {
 
 
     /* ------------------------------------------------------------
-       3. AFFICHE UNIQUEMENT LE BLOC PROJET
+       3. AFFICHE LE BLOC PROJET
        ------------------------------------------------------------ */
     #electronicControlPanel > #projectControlPanel {
         display: block !important;
@@ -4974,71 +4974,85 @@ select:focus-visible {
 
 
     /* ------------------------------------------------------------
-       4. CONTENEUR DES BOUTONS DU PROJET
+       4. CONTENEUR DU BLOC PROJET
+          CONSERVE UN ESPACEMENT COMPACT
        ------------------------------------------------------------ */
     #projectControlPanel {
-        padding: 10px !important;
+        padding: 6px !important;
         box-sizing: border-box !important;
     }
 
 
     /* ------------------------------------------------------------
-       5. BOUTON SAUVEGARDER
+       5. SAUVEGARDER
+          REPREND LA TAILLE NORMALE DES AUTRES BOUTONS
        ------------------------------------------------------------ */
     #projectControlPanel #saveProjectBtn {
-        display: block !important;
+        display: inline-flex !important;
 
-        width: 100% !important;
+        width: auto !important;
         min-width: 0 !important;
         max-width: 100% !important;
 
-        min-height: 46px !important;
+        min-height: 0 !important;
         height: auto !important;
 
         box-sizing: border-box !important;
 
         flex-shrink: 0 !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
 
     /* ------------------------------------------------------------
-       6. BOUTON VIDER LE LABORATOIRE
+       6. VIDER LE LABORATOIRE
+          REPREND LA TAILLE NORMALE DES AUTRES BOUTONS
        ------------------------------------------------------------ */
     #projectControlPanel #clearWorkspaceBtn {
-        display: block !important;
+        display: inline-flex !important;
 
-        width: 100% !important;
+        width: auto !important;
         min-width: 0 !important;
         max-width: 100% !important;
 
-        min-height: 46px !important;
+        min-height: 0 !important;
         height: auto !important;
 
         box-sizing: border-box !important;
 
         flex-shrink: 0 !important;
+
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 
 
     /* ------------------------------------------------------------
-       7. LE BOUTON CHARGER RESTE CACHE
-          POUR GARDER UNIQUEMENT LES 2 BOUTONS DEMANDES
+       7. CHARGER RESTE MASQUÉ
        ------------------------------------------------------------ */
     #projectControlPanel #loadProjectBtn {
         display: none !important;
     }
 
-
-    /* ------------------------------------------------------------
-       8. EVITE QU'UN ANCIEN STYLE FLEX/GRID CACHE LES BOUTONS
-       ------------------------------------------------------------ */
-    #projectControlPanel button#saveProjectBtn,
-    #projectControlPanel button#clearWorkspaceBtn {
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: relative !important;
-    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
