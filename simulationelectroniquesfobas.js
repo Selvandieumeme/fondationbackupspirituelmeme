@@ -5764,42 +5764,49 @@ function applyComponentVisualState(
 
 
 
-
-
-
-
-
 /* ================================================================
    10. FOBAS AUTO SAVE & AUTO RESTORE ENGINE
    ---------------------------------------------------------------
-   VERSION : 1.0.0
+   VERSION : 2.0.0
    ---------------------------------------------------------------
    OBJECTIF :
    - Sauvegarde automatique toutes les 5 minutes
+   - Sauvegarde immédiate lorsque le laboratoire est quitté
+   - Sauvegarde lors de pagehide / visibilitychange
+   - Détection des modifications
    - Restauration automatique au retour dans le laboratoire
+   - Sauvegarde complète de l'état serializable du laboratoire
+   - Sauvegarde complète des composants
+   - Sauvegarde complète des fils
+   - Sauvegarde des endpoints A / B
+   - Sauvegarde des connexions PIN
+   - Sauvegarde des connexions WIRE → WIRE
+   - Reconstruction des fils au retour
    - Utilisation de localStorage
    - Aucun bouton "Save" obligatoire
    - Fonctionnement autonome
    - Protection contre les erreurs localStorage
    - Protection contre les doublons
+   - Protection contre les références circulaires
    - Ne modifie PAS les Blocks 01 à 09
-   - Ne modifie PAS les fonctions existantes
-   - Compatible avec les composants, fils et états futurs
+   - Ne remplace PAS les fonctions existantes
+   - Compatible avec les moteurs futurs
    ================================================================ */
 
 (function () {
 
     "use strict";
 
+
     /* ============================================================
        10.1 — PROTECTION DU MOTEUR
     ============================================================ */
 
-    if (window.__FOBAS_AUTO_SAVE_ENGINE_V1__) {
+    if (window.__FOBAS_AUTO_SAVE_ENGINE_V2__) {
         return;
     }
 
-    window.__FOBAS_AUTO_SAVE_ENGINE_V1__ = true;
+    window.__FOBAS_AUTO_SAVE_ENGINE_V2__ = true;
 
 
     /* ============================================================
@@ -5808,42 +5815,47 @@ function applyComponentVisualState(
 
     const FOBAS_AUTOSAVE_CONFIG = {
 
-        /* Clé principale du laboratoire */
         storageKey:
             "FOBAS_ELECTRONIQUE_ROBOTIQUE_AUTOSAVE_V1",
 
-        /* Version des données */
         dataVersion:
-            1,
+            2,
 
         /* 5 minutes */
         interval:
             5 * 60 * 1000,
 
-        /* Détection des changements */
+        /* Vérification des changements */
         changeCheckInterval:
             3000,
 
-        /* Nombre maximum de sauvegardes locales */
+        /* Taille maximale */
         maxStorageSize:
             4 * 1024 * 1024,
 
-        /* Délai avant restauration automatique */
+        /* Délai de restauration */
         restoreDelay:
+            500,
+
+        /* Tentatives d'initialisation */
+        maxInitAttempts:
+            60,
+
+        /* Délai entre tentatives */
+        initRetryDelay:
             250,
 
-        /* Nombre maximum de tentatives d'initialisation */
-        maxInitAttempts:
-            40,
-
-        /* Intervalle entre tentatives */
-        initRetryDelay:
-            250
+        /*
+         * Plusieurs appels de sauvegarde peuvent être déclenchés
+         * presque simultanément par visibilitychange/pagehide/etc.
+         */
+        leaveSaveCooldown:
+            800
     };
 
 
     /* ============================================================
-       10.3 — ÉTAT INTERNE DU MOTEUR
+       10.3 — ÉTAT INTERNE
     ============================================================ */
 
     const FOBAS_AUTOSAVE_STATE = {
@@ -5858,6 +5870,9 @@ function applyComponentVisualState(
             false,
 
         restored:
+            false,
+
+        hasChanges:
             false,
 
         lastSaveTime:
@@ -5875,13 +5890,22 @@ function applyComponentVisualState(
         changeTimer:
             null,
 
+        initTimer:
+            null,
+
         initAttempts:
-            0
+            0,
+
+        lastLeaveSaveTime:
+            0,
+
+        lastSnapshot:
+            null
     };
 
 
     /* ============================================================
-       10.4 — OUTILS SÉCURISÉS
+       10.4 — OUTILS STORAGE
     ============================================================ */
 
     function FOBAS_AUTOSAVE_getStorage() {
@@ -5914,7 +5938,14 @@ function applyComponentVisualState(
     }
 
 
+    /* ============================================================
+       10.5 — SERIALISATION SÉCURISÉE
+    ============================================================ */
+
     function FOBAS_AUTOSAVE_safeStringify(data) {
+
+        const seen =
+            new WeakSet();
 
         try {
 
@@ -5923,32 +5954,117 @@ function applyComponentVisualState(
                 function (key, value) {
 
                     /*
-                     * Évite les références circulaires.
+                     * Les fonctions ne sont jamais sauvegardées.
                      */
                     if (
-                        typeof value === "object" &&
+                        typeof value ===
+                        "function"
+                    ) {
+                        return undefined;
+                    }
+
+
+                    /*
+                     * Les références DOM ne doivent jamais
+                     * entrer dans localStorage.
+                     */
+                    if (
+                        typeof Node !==
+                        "undefined" &&
+                        value instanceof Node
+                    ) {
+                        return undefined;
+                    }
+
+
+                    if (
+                        typeof HTMLElement !==
+                        "undefined" &&
+                        value instanceof HTMLElement
+                    ) {
+                        return undefined;
+                    }
+
+
+                    /*
+                     * Protection contre les objets DOM
+                     * et propriétés circulaires connues.
+                     */
+                    if (
+                        key === "element" ||
+                        key === "dom" ||
+                        key === "parentNode" ||
+                        key === "ownerDocument" ||
+                        key === "offsetParent" ||
+                        key === "parentElement" ||
+                        key === "children"
+                    ) {
+
+                        return undefined;
+                    }
+
+
+                    /*
+                     * Protection contre les références circulaires.
+                     */
+                    if (
+                        typeof value ===
+                        "object" &&
                         value !== null
                     ) {
 
                         if (
-                            key === "element" ||
-                            key === "dom" ||
-                            key === "parentNode" ||
-                            key === "ownerDocument"
+                            seen.has(value)
                         ) {
+
                             return undefined;
                         }
+
+                        seen.add(value);
                     }
 
+
                     /*
-                     * Les fonctions ne doivent jamais
-                     * être enregistrées dans localStorage.
+                     * Map.
+                     *
+                     * Les Map sont converties en tableau.
+                     * Cela permet au système de sauvegarder
+                     * correctement le Wire Engine.
                      */
                     if (
-                        typeof value === "function"
+                        value instanceof Map
                     ) {
-                        return undefined;
+
+                        return {
+                            __fobasType:
+                                "Map",
+
+                            entries:
+                                Array.from(
+                                    value.entries()
+                                )
+                        };
                     }
+
+
+                    /*
+                     * Set.
+                     */
+                    if (
+                        value instanceof Set
+                    ) {
+
+                        return {
+                            __fobasType:
+                                "Set",
+
+                            values:
+                                Array.from(
+                                    value.values()
+                                )
+                        };
+                    }
+
 
                     return value;
                 }
@@ -5957,7 +6073,7 @@ function applyComponentVisualState(
         } catch (error) {
 
             console.warn(
-                "[FOBAS AUTO SAVE] Impossible de convertir les données.",
+                "[FOBAS AUTO SAVE] Impossible de sérialiser les données.",
                 error
             );
 
@@ -5965,6 +6081,10 @@ function applyComponentVisualState(
         }
     }
 
+
+    /* ============================================================
+       10.6 — PARSING SÉCURISÉ
+    ============================================================ */
 
     function FOBAS_AUTOSAVE_safeParse(value) {
 
@@ -5989,18 +6109,302 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.5 — EXTRACTION DES DONNÉES DU LABORATOIRE
+       10.7 — CLONAGE SÉCURISÉ
+       ------------------------------------------------------------
+       Permet de créer une copie indépendante des données.
     ============================================================ */
 
-    function FOBAS_AUTOSAVE_buildSnapshot() {
+    function FOBAS_AUTOSAVE_cloneSerializable(data) {
+
+        const serialized =
+            FOBAS_AUTOSAVE_safeStringify(
+                data
+            );
+
+        if (!serialized) {
+            return null;
+        }
+
+        return FOBAS_AUTOSAVE_safeParse(
+            serialized
+        );
+    }
+
+
+    /* ============================================================
+       10.8 — EXTRACTION DU STATE COMPLET
+       ------------------------------------------------------------
+       Au lieu de choisir seulement quelques propriétés,
+       cette fonction sauvegarde toutes les propriétés
+       serializables présentes dans "state".
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_extractFullState() {
 
         if (
-            typeof state === "undefined" ||
+            typeof state ===
+            "undefined" ||
             !state
         ) {
 
             return null;
         }
+
+        const result = {};
+
+        try {
+
+            Object.keys(state).forEach(
+                function (key) {
+
+                    try {
+
+                        const value =
+                            state[key];
+
+                        /*
+                         * Les fonctions ne sont pas utiles
+                         * dans localStorage.
+                         */
+                        if (
+                            typeof value ===
+                            "function"
+                        ) {
+                            return;
+                        }
+
+                        /*
+                         * Les références DOM connues
+                         * sont ignorées.
+                         */
+                        if (
+                            key === "dom" ||
+                            key === "element"
+                        ) {
+                            return;
+                        }
+
+                        result[key] =
+                            value;
+
+                    } catch (error) {
+                        /* propriété non accessible */
+                    }
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Extraction du state impossible.",
+                error
+            );
+        }
+
+        return result;
+    }
+
+
+    /* ============================================================
+       10.9 — EXTRACTION COMPLÈTE DES WIRES
+       ------------------------------------------------------------
+       IMPORTANT :
+       Le Wire Engine utilise un Map interne.
+       state.wires seul peut donc être incomplet.
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_extractWires() {
+
+        const result = [];
+
+        const engine =
+            window.FOBASWireCableEngine;
+
+        if (
+            !engine ||
+            !engine.state ||
+            !engine.state.wires
+        ) {
+
+            /*
+             * Fallback sur state.wires.
+             */
+            if (
+                typeof state !==
+                "undefined" &&
+                state &&
+                Array.isArray(state.wires)
+            ) {
+
+                return FOBAS_AUTOSAVE_cloneSerializable(
+                    state.wires
+                ) || [];
+            }
+
+            return [];
+        }
+
+
+        try {
+
+            const wires =
+                engine.state.wires;
+
+
+            /*
+             * Map du Wire Engine.
+             */
+            if (
+                typeof wires.forEach ===
+                "function"
+            ) {
+
+                wires.forEach(
+                    function (wire) {
+
+                        if (!wire) {
+                            return;
+                        }
+
+                        const savedWire = {
+
+                            id:
+                                wire.id ??
+                                null,
+
+                            type:
+                                wire.type ??
+                                "wire",
+
+                            color:
+                                wire.color ??
+                                null,
+
+                            width:
+                                wire.width ??
+                                null,
+
+                            height:
+                                wire.height ??
+                                null,
+
+                            x:
+                                wire.x ??
+                                null,
+
+                            y:
+                                wire.y ??
+                                null,
+
+                            a:
+                                wire.a
+                                    ? {
+                                        x:
+                                            Number(
+                                                wire.a.x
+                                            ) || 0,
+
+                                        y:
+                                            Number(
+                                                wire.a.y
+                                            ) || 0
+                                    }
+                                    : null,
+
+                            b:
+                                wire.b
+                                    ? {
+                                        x:
+                                            Number(
+                                                wire.b.x
+                                            ) || 0,
+
+                                        y:
+                                            Number(
+                                                wire.b.y
+                                            ) || 0
+                                    }
+                                    : null,
+
+                            connections:
+                                {
+                                    A:
+                                        FOBAS_AUTOSAVE_cloneSerializable(
+                                            wire.connections &&
+                                            wire.connections.A
+                                                ? wire.connections.A
+                                                : null
+                                        ),
+
+                                    B:
+                                        FOBAS_AUTOSAVE_cloneSerializable(
+                                            wire.connections &&
+                                            wire.connections.B
+                                                ? wire.connections.B
+                                                : null
+                                        )
+                                },
+
+                            selected:
+                                !!wire.selected
+                        };
+
+                        result.push(
+                            savedWire
+                        );
+                    }
+                );
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Extraction des wires impossible.",
+                error
+            );
+        }
+
+
+        return result;
+    }
+
+
+    /* ============================================================
+       10.10 — CONSTRUCTION DU SNAPSHOT COMPLET
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_buildSnapshot() {
+
+        if (
+            typeof state ===
+            "undefined" ||
+            !state
+        ) {
+
+            return null;
+        }
+
+
+        const fullState =
+            FOBAS_AUTOSAVE_extractFullState();
+
+
+        if (!fullState) {
+            return null;
+        }
+
+
+        const wires =
+            FOBAS_AUTOSAVE_extractWires();
+
+
+        /*
+         * Les wires du moteur deviennent également
+         * accessibles dans le state sauvegardé.
+         */
+        fullState.wires =
+            wires;
+
 
         const snapshot = {
 
@@ -6013,84 +6417,95 @@ function applyComponentVisualState(
             application:
                 "FOBAS ELECTRONIQUE & ROBOTIQUE",
 
-            components:
-                Array.isArray(state.components)
-                    ? state.components
-                    : [],
+            /*
+             * State complet.
+             */
+            state:
+                fullState,
 
             /*
-             * Le moteur de fils peut ajouter state.wires
-             * ultérieurement sans modifier ce système.
+             * Compatibilité avec l'ancien format.
              */
-            wires:
-                Array.isArray(state.wires)
-                    ? state.wires
+            components:
+                Array.isArray(fullState.components)
+                    ? fullState.components
                     : [],
+
+            wires:
+                wires,
 
             connections:
-                Array.isArray(state.connections)
-                    ? state.connections
+                Array.isArray(fullState.connections)
+                    ? fullState.connections
                     : [],
 
             /*
-             * États généraux utiles au laboratoire.
+             * États historiques conservés.
              */
             circuitRunning:
-                state.circuitRunning ?? false,
+                fullState.circuitRunning ??
+                false,
 
             selectedComponentId:
-                state.selectedComponentId ?? null,
+                fullState.selectedComponentId ??
+                null,
 
             selectedComponentType:
-                state.selectedComponentType ?? null,
+                fullState.selectedComponentType ??
+                null,
 
             currentLibraryCategory:
-                state.currentLibraryCategory ?? "all",
+                fullState.currentLibraryCategory ??
+                "all",
 
             selectedTool:
-                state.selectedTool ?? null,
+                fullState.selectedTool ??
+                null,
 
             selectedPanel:
-                state.selectedPanel ?? null,
+                fullState.selectedPanel ??
+                null,
 
             mode:
-                state.mode ?? null,
+                fullState.mode ??
+                null,
 
-            /*
-             * Valeurs supplémentaires si elles existent.
-             */
             measurements:
-                state.measurements ?? null,
+                fullState.measurements ??
+                null,
 
             simulation:
-                state.simulation ?? null,
+                fullState.simulation ??
+                null,
 
             laboratory:
-                state.laboratory ?? null
+                fullState.laboratory ??
+                null
         };
+
 
         return snapshot;
     }
 
 
     /* ============================================================
-       10.6 — SIGNATURE DES DONNÉES
+       10.11 — HASH
     ============================================================ */
 
     function FOBAS_AUTOSAVE_createHash(snapshot) {
 
         const serialized =
-            FOBAS_AUTOSAVE_safeStringify(snapshot);
+            FOBAS_AUTOSAVE_safeStringify(
+                snapshot
+            );
 
         if (!serialized) {
             return "";
         }
 
-        /*
-         * Hash léger interne.
-         * Il sert uniquement à détecter les changements.
-         */
+
         let hash = 0;
+
 
         for (
             let i = 0;
@@ -6107,47 +6522,59 @@ function applyComponentVisualState(
                 0;
         }
 
+
         return String(hash);
     }
 
 
     /* ============================================================
-       10.7 — SAUVEGARDE LOCALE
+       10.12 — SAUVEGARDE LOCALE
     ============================================================ */
 
-    function FOBAS_AUTOSAVE_save(reason = "automatic") {
+    function FOBAS_AUTOSAVE_save(
+        reason = "automatic"
+    ) {
 
         if (
             FOBAS_AUTOSAVE_STATE.saving
         ) {
+
             return false;
         }
 
+
         const storage =
             FOBAS_AUTOSAVE_getStorage();
+
 
         if (!storage) {
             return false;
         }
 
+
         const snapshot =
             FOBAS_AUTOSAVE_buildSnapshot();
+
 
         if (!snapshot) {
             return false;
         }
+
 
         const serialized =
             FOBAS_AUTOSAVE_safeStringify(
                 snapshot
             );
 
+
         if (!serialized) {
             return false;
         }
 
+
         /*
-         * Protection contre une taille excessive.
+         * Ne jamais détruire une ancienne sauvegarde
+         * si la nouvelle est trop volumineuse.
          */
         if (
             serialized.length >
@@ -6161,8 +6588,10 @@ function applyComponentVisualState(
             return false;
         }
 
+
         FOBAS_AUTOSAVE_STATE.saving =
             true;
+
 
         try {
 
@@ -6171,21 +6600,33 @@ function applyComponentVisualState(
                 serialized
             );
 
+
             FOBAS_AUTOSAVE_STATE.lastSaveTime =
                 Date.now();
+
 
             FOBAS_AUTOSAVE_STATE.lastHash =
                 FOBAS_AUTOSAVE_createHash(
                     snapshot
                 );
 
+
+            FOBAS_AUTOSAVE_STATE.hasChanges =
+                false;
+
+
+            FOBAS_AUTOSAVE_STATE.lastSnapshot =
+                snapshot;
+
+
             /*
-             * Petit registre technique.
+             * Métadonnées.
              */
             storage.setItem(
                 FOBAS_AUTOSAVE_CONFIG.storageKey +
                 "_META",
                 JSON.stringify({
+
                     version:
                         FOBAS_AUTOSAVE_CONFIG.dataVersion,
 
@@ -6193,24 +6634,46 @@ function applyComponentVisualState(
                         snapshot.savedAt,
 
                     reason:
-                        reason
+                        reason,
+
+                    size:
+                        serialized.length,
+
+                    components:
+                        Array.isArray(
+                            snapshot.components
+                        )
+                            ? snapshot.components.length
+                            : 0,
+
+                    wires:
+                        Array.isArray(
+                            snapshot.wires
+                        )
+                            ? snapshot.wires.length
+                            : 0
                 })
             );
+
 
             FOBAS_AUTOSAVE_STATE.saving =
                 false;
 
+
             return true;
+
 
         } catch (error) {
 
             FOBAS_AUTOSAVE_STATE.saving =
                 false;
 
+
             console.warn(
                 "[FOBAS AUTO SAVE] Échec de sauvegarde.",
                 error
             );
+
 
             return false;
         }
@@ -6218,7 +6681,7 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.8 — LECTURE DE LA SAUVEGARDE
+       10.13 — LECTURE DE LA SAUVEGARDE
     ============================================================ */
 
     function FOBAS_AUTOSAVE_loadSnapshot() {
@@ -6226,9 +6689,11 @@ function applyComponentVisualState(
         const storage =
             FOBAS_AUTOSAVE_getStorage();
 
+
         if (!storage) {
             return null;
         }
+
 
         try {
 
@@ -6237,30 +6702,42 @@ function applyComponentVisualState(
                     FOBAS_AUTOSAVE_CONFIG.storageKey
                 );
 
+
             if (!raw) {
                 return null;
             }
 
+
             const snapshot =
-                FOBAS_AUTOSAVE_safeParse(raw);
+                FOBAS_AUTOSAVE_safeParse(
+                    raw
+                );
+
 
             if (!snapshot) {
                 return null;
             }
 
-            /*
-             * Vérification minimale de sécurité.
-             */
+
             if (
                 snapshot.application !==
                 "FOBAS ELECTRONIQUE & ROBOTIQUE"
             ) {
+
                 return null;
             }
 
+
+            /*
+             * V1 et V2 sont acceptées.
+             *
+             * V1 permet de récupérer une ancienne sauvegarde.
+             */
             if (
                 Number(snapshot.version) !==
-                FOBAS_AUTOSAVE_CONFIG.dataVersion
+                    1 &&
+                Number(snapshot.version) !==
+                    2
             ) {
 
                 console.warn(
@@ -6270,7 +6747,9 @@ function applyComponentVisualState(
                 return null;
             }
 
+
             return snapshot;
+
 
         } catch (error) {
 
@@ -6279,229 +6758,742 @@ function applyComponentVisualState(
                 error
             );
 
+
             return null;
         }
     }
 
 
     /* ============================================================
-       10.9 — RESTAURATION DE L'ÉTAT
+       10.14 — RESTAURATION DU STATE
     ============================================================ */
 
-    function FOBAS_AUTOSAVE_restore(snapshot) {
+    function FOBAS_AUTOSAVE_restoreState(
+        snapshot
+    ) {
 
         if (
-            !snapshot ||
-            typeof state === "undefined" ||
+            typeof state ===
+            "undefined" ||
             !state
         ) {
+
             return false;
         }
 
+
+        let restoredState =
+            snapshot.state;
+
+
+        /*
+         * Compatibilité avec les anciennes sauvegardes V1.
+         */
         if (
-            FOBAS_AUTOSAVE_STATE.restoring
+            !restoredState ||
+            typeof restoredState !==
+            "object"
         ) {
-            return false;
+
+            restoredState = {
+
+                components:
+                    snapshot.components || [],
+
+                wires:
+                    snapshot.wires || [],
+
+                connections:
+                    snapshot.connections || [],
+
+                circuitRunning:
+                    snapshot.circuitRunning ??
+                    false,
+
+                selectedComponentId:
+                    snapshot.selectedComponentId ??
+                    null,
+
+                selectedComponentType:
+                    snapshot.selectedComponentType ??
+                    null,
+
+                currentLibraryCategory:
+                    snapshot.currentLibraryCategory ??
+                    "all",
+
+                selectedTool:
+                    snapshot.selectedTool ??
+                    null,
+
+                selectedPanel:
+                    snapshot.selectedPanel ??
+                    null,
+
+                mode:
+                    snapshot.mode ??
+                    null,
+
+                measurements:
+                    snapshot.measurements ??
+                    null,
+
+                simulation:
+                    snapshot.simulation ??
+                    null,
+
+                laboratory:
+                    snapshot.laboratory ??
+                    null
+            };
         }
 
-        FOBAS_AUTOSAVE_STATE.restoring =
-            true;
 
         try {
 
-            /*
-             * Les tableaux principaux sont restaurés
-             * sans remplacer l'objet global "state".
-             */
+            Object.keys(
+                restoredState
+            ).forEach(
+                function (key) {
 
-            if (
-                Array.isArray(snapshot.components)
-            ) {
-
-                state.components =
-                    snapshot.components.map(
-                        component => ({
-                            ...component
-                        })
-                    );
-            }
-
-            if (
-                Array.isArray(snapshot.wires)
-            ) {
-
-                state.wires =
-                    snapshot.wires.map(
-                        wire => ({
-                            ...wire
-                        })
-                    );
-            }
-
-            if (
-                Array.isArray(snapshot.connections)
-            ) {
-
-                state.connections =
-                    snapshot.connections.map(
-                        connection => ({
-                            ...connection
-                        })
-                    );
-            }
-
-            /*
-             * États généraux.
-             */
-
-            if (
-                snapshot.circuitRunning !== undefined
-            ) {
-
-                state.circuitRunning =
-                    snapshot.circuitRunning;
-            }
-
-            if (
-                snapshot.selectedComponentId !== undefined
-            ) {
-
-                state.selectedComponentId =
-                    snapshot.selectedComponentId;
-            }
-
-            if (
-                snapshot.selectedComponentType !== undefined
-            ) {
-
-                state.selectedComponentType =
-                    snapshot.selectedComponentType;
-            }
-
-            if (
-                snapshot.currentLibraryCategory !== undefined
-            ) {
-
-                state.currentLibraryCategory =
-                    snapshot.currentLibraryCategory;
-            }
-
-            if (
-                snapshot.selectedTool !== undefined
-            ) {
-
-                state.selectedTool =
-                    snapshot.selectedTool;
-            }
-
-            if (
-                snapshot.selectedPanel !== undefined
-            ) {
-
-                state.selectedPanel =
-                    snapshot.selectedPanel;
-            }
-
-            if (
-                snapshot.mode !== undefined
-            ) {
-
-                state.mode =
-                    snapshot.mode;
-            }
-
-            if (
-                snapshot.measurements !== undefined
-            ) {
-
-                state.measurements =
-                    snapshot.measurements;
-            }
-
-            if (
-                snapshot.simulation !== undefined
-            ) {
-
-                state.simulation =
-                    snapshot.simulation;
-            }
-
-            if (
-                snapshot.laboratory !== undefined
-            ) {
-
-                state.laboratory =
-                    snapshot.laboratory;
-            }
+                    /*
+                     * Le state global doit rester le même objet.
+                     */
+                    if (
+                        key === "dom"
+                    ) {
+                        return;
+                    }
 
 
-            /* ----------------------------------------------------
-               RECONSTRUCTION VISUELLE
-            ---------------------------------------------------- */
+                    try {
 
-            /*
-             * Si la fonction existante existe,
-             * elle est appelée sans la modifier.
-             */
-            if (
-                typeof renderComponent === "function"
-            ) {
+                        state[key] =
+                            FOBAS_AUTOSAVE_cloneSerializable(
+                                restoredState[key]
+                            );
 
-                if (
-                    Array.isArray(state.components)
-                ) {
+                    } catch (error) {
 
-                    state.components.forEach(
-                        component => {
-
-                            try {
-
-                                renderComponent(
-                                    component
-                                );
-
-                            } catch (error) {
-
-                                console.warn(
-                                    "[FOBAS AUTO SAVE] Erreur rendu composant.",
-                                    error
-                                );
-                            }
-                        }
-                    );
+                        console.warn(
+                            "[FOBAS AUTO SAVE] Propriété non restaurée :",
+                            key,
+                            error
+                        );
+                    }
                 }
-            }
+            );
 
 
             /*
-             * Si le moteur des fils existe déjà,
-             * on lui demande de reconstruire ses fils.
-             *
-             * Aucun moteur n'est exigé pour que
-             * l'Auto Save fonctionne.
+             * Sécurité minimale.
              */
+            if (
+                !Array.isArray(
+                    state.components
+                )
+            ) {
+
+                state.components = [];
+            }
+
 
             if (
-                typeof window.FOBAS_WIRE_restore ===
-                "function"
+                !Array.isArray(
+                    state.wires
+                )
             ) {
+
+                state.wires = [];
+            }
+
+
+            if (
+                !Array.isArray(
+                    state.connections
+                )
+            ) {
+
+                state.connections = [];
+            }
+
+
+            return true;
+
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Restauration du state échouée.",
+                error
+            );
+
+
+            return false;
+        }
+    }
+
+
+    /* ============================================================
+       10.15 — RENDU DES COMPOSANTS
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_restoreComponents() {
+
+        if (
+            typeof state ===
+            "undefined" ||
+            !state ||
+            !Array.isArray(
+                state.components
+            )
+        ) {
+
+            return;
+        }
+
+
+        if (
+            typeof renderComponent !==
+            "function"
+        ) {
+
+            return;
+        }
+
+
+        state.components.forEach(
+            function (component) {
 
                 try {
 
-                    window.FOBAS_WIRE_restore();
+                    renderComponent(
+                        component
+                    );
 
                 } catch (error) {
 
                     console.warn(
-                        "[FOBAS AUTO SAVE] Erreur restauration des fils.",
+                        "[FOBAS AUTO SAVE] Erreur rendu composant.",
                         error
                     );
                 }
             }
+        );
+    }
+
+
+    /* ============================================================
+       10.16 — RECONSTRUCTION DES WIRES
+       ------------------------------------------------------------
+       Cette fonction devient le pont officiel entre
+       Auto Save et le Wire Engine.
+
+       Elle utilise l'API publique du Wire Engine
+       sans modifier ses fonctions internes.
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_restoreWires() {
+
+        const engine =
+            window.FOBASWireCableEngine;
+
+
+        if (
+            !engine ||
+            !engine.state ||
+            !engine.state.wires
+        ) {
+
+            /*
+             * Le Wire Engine peut ne pas être encore chargé.
+             * On réessaiera plus tard.
+             */
+            return false;
+        }
+
+
+        const savedWires =
+            Array.isArray(state.wires)
+                ? state.wires
+                : [];
+
+
+        try {
+
+            /*
+             * Suppression des anciens wires du moteur.
+             *
+             * On ne touche pas aux composants.
+             */
+            if (
+                typeof engine.clearWires ===
+                "function"
+            ) {
+
+                engine.clearWires();
+            }
 
 
             /*
-             * Mise à jour éventuelle du workspace.
+             * Reconstruction.
+             */
+            savedWires.forEach(
+                function (savedWire) {
+
+                    if (
+                        !savedWire
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        typeof engine.createWire !==
+                        "function"
+                    ) {
+
+                        return;
+                    }
+
+
+                    const type =
+                        savedWire.type ||
+                        "wire";
+
+
+                    const startX =
+                        savedWire.a &&
+                        Number.isFinite(
+                            Number(
+                                savedWire.a.x
+                            )
+                        )
+                            ? Number(
+                                savedWire.a.x
+                            )
+                            : 100;
+
+
+                    const startY =
+                        savedWire.a &&
+                        Number.isFinite(
+                            Number(
+                                savedWire.a.y
+                            )
+                        )
+                            ? Number(
+                                savedWire.a.y
+                            )
+                            : 100;
+
+
+                    /*
+                     * Le moteur existant crée le wire
+                     * avec son propre système.
+                     */
+                    const createdWire =
+                        engine.createWire(
+                            type,
+                            {
+                                x:
+                                    startX,
+
+                                y:
+                                    startY
+                            }
+                        );
+
+
+                    if (
+                        !createdWire
+                    ) {
+                        return;
+                    }
+
+
+                    /*
+                     * On récupère l'objet réellement créé.
+                     */
+                    let wire =
+                        createdWire;
+
+
+                    if (
+                        createdWire.id &&
+                        typeof engine.getWire ===
+                        "function"
+                    ) {
+
+                        wire =
+                            engine.getWire(
+                                createdWire.id
+                            ) ||
+                            createdWire;
+                    }
+
+
+                    if (!wire) {
+                        return;
+                    }
+
+
+                    /*
+                     * ID original.
+                     *
+                     * On le conserve lorsque possible.
+                     */
+                    if (
+                        savedWire.id
+                    ) {
+
+                        wire.id =
+                            savedWire.id;
+                    }
+
+
+                    /*
+                     * Endpoint A.
+                     */
+                    if (
+                        savedWire.a
+                    ) {
+
+                        wire.a = {
+
+                            x:
+                                Number(
+                                    savedWire.a.x
+                                ) || 0,
+
+                            y:
+                                Number(
+                                    savedWire.a.y
+                                ) || 0
+                        };
+                    }
+
+
+                    /*
+                     * Endpoint B.
+                     */
+                    if (
+                        savedWire.b
+                    ) {
+
+                        wire.b = {
+
+                            x:
+                                Number(
+                                    savedWire.b.x
+                                ) || 0,
+
+                            y:
+                                Number(
+                                    savedWire.b.y
+                                ) || 0
+                        };
+
+                    } else {
+
+                        /*
+                         * Compatibilité avec un ancien wire
+                         * qui n'aurait pas encore B.
+                         */
+                        wire.b = {
+
+                            x:
+                                (
+                                    wire.a &&
+                                    Number(
+                                        wire.a.x
+                                    )
+                                ) || 0,
+
+                            y:
+                                (
+                                    wire.a &&
+                                    Number(
+                                        wire.a.y
+                                    )
+                                ) || 0
+                        };
+                    }
+
+
+                    /*
+                     * Connexions.
+                     *
+                     * Elles sont restaurées comme données.
+                     * Le Wire Connection Extension pourra
+                     * ensuite rétablir la topologie.
+                     */
+                    if (
+                        savedWire.connections
+                    ) {
+
+                        wire.connections = {
+
+                            A:
+                                FOBAS_AUTOSAVE_cloneSerializable(
+                                    savedWire.connections.A
+                                ),
+
+                            B:
+                                FOBAS_AUTOSAVE_cloneSerializable(
+                                    savedWire.connections.B
+                                )
+                        };
+
+                    } else {
+
+                        wire.connections = {
+
+                            A: null,
+
+                            B: null
+                        };
+                    }
+
+
+                    /*
+                     * Positionnement visuel.
+                     *
+                     * L'API publique update est utilisée
+                     * lorsque disponible.
+                     */
+                    try {
+
+                        if (
+                            typeof engine.update ===
+                            "function"
+                        ) {
+
+                            engine.update();
+                        }
+
+                    } catch (error) {
+                        /* rendu différé */
+                    }
+                }
+            );
+
+
+            /*
+             * Mise à jour finale.
+             */
+            if (
+                typeof engine.update ===
+                "function"
+            ) {
+
+                engine.update();
+            }
+
+
+            /*
+             * Synchronisation avec le state.
+             */
+            state.wires =
+                FOBAS_AUTOSAVE_extractWires();
+
+
+            return true;
+
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS AUTO SAVE] Reconstruction des wires échouée.",
+                error
+            );
+
+
+            return false;
+        }
+    }
+
+
+    /* ============================================================
+       10.17 — FONCTION OFFICIELLE DE RESTAURATION DES WIRES
+       ------------------------------------------------------------
+       Le Wire Engine / les extensions peuvent appeler cette
+       fonction sans connaître le fonctionnement interne
+       du système Auto Save.
+    ============================================================ */
+
+    if (
+        typeof window.FOBAS_WIRE_restore !==
+        "function"
+    ) {
+
+        window.FOBAS_WIRE_restore =
+            function () {
+
+                return FOBAS_AUTOSAVE_restoreWires();
+
+            };
+    }
+
+
+    /* ============================================================
+       10.18 — RESTAURATION DES CONNEXIONS
+       ------------------------------------------------------------
+       1. PIN → WIRE
+       2. WIRE → WIRE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_restoreConnections() {
+
+        /*
+         * Le Wire Connection Extension peut être chargé
+         * après ce moteur.
+         *
+         * On ne force donc rien si l'extension n'existe pas.
+         */
+
+
+        const wireExtension =
+            window.FOBASWireWireConnectionExtension;
+
+
+        /*
+         * Les connexions WIRE → WIRE sauvegardées sont
+         * déjà présentes dans les objets wires.
+         *
+         * L'extension peut reconstruire sa topologie
+         * depuis ces données.
+         */
+        if (
+            wireExtension &&
+            typeof wireExtension.restore ===
+            "function"
+        ) {
+
+            try {
+
+                wireExtension.restore();
+
+            } catch (error) {
+
+                console.warn(
+                    "[FOBAS AUTO SAVE] Restauration WIRE → WIRE échouée.",
+                    error
+                );
+            }
+        }
+
+
+        /*
+         * Si l'extension n'a pas encore de fonction restore,
+         * on émet un événement.
+         *
+         * Elle pourra l'utiliser sans modification
+         * du moteur Auto Save.
+         */
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "fobas:autosave-wires-restored",
+                    {
+                        detail: {
+
+                            wires:
+                                Array.isArray(
+                                    state.wires
+                                )
+                                    ? state.wires
+                                    : [],
+
+                            connections:
+                                Array.isArray(
+                                    state.connections
+                                )
+                                    ? state.connections
+                                    : []
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+            /* événement non critique */
+        }
+    }
+
+
+    /* ============================================================
+       10.19 — RESTAURATION COMPLÈTE
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_restore(
+        snapshot
+    ) {
+
+        if (
+            !snapshot ||
+            typeof state ===
+            "undefined" ||
+            !state
+        ) {
+
+            return false;
+        }
+
+
+        if (
+            FOBAS_AUTOSAVE_STATE.restoring
+        ) {
+
+            return false;
+        }
+
+
+        FOBAS_AUTOSAVE_STATE.restoring =
+            true;
+
+
+        try {
+
+            /*
+             * 1. Restaurer toutes les données du state.
+             */
+            const stateRestored =
+                FOBAS_AUTOSAVE_restoreState(
+                    snapshot
+                );
+
+
+            if (!stateRestored) {
+
+                FOBAS_AUTOSAVE_STATE.restoring =
+                    false;
+
+                return false;
+            }
+
+
+            /*
+             * 2. Restaurer les composants.
+             */
+            FOBAS_AUTOSAVE_restoreComponents();
+
+
+            /*
+             * 3. Restaurer les wires.
+             */
+            FOBAS_AUTOSAVE_restoreWires();
+
+
+            /*
+             * 4. Restaurer les connexions.
+             */
+            FOBAS_AUTOSAVE_restoreConnections();
+
+
+            /*
+             * 5. Mise à jour éventuelle du workspace.
              */
             if (
                 typeof updateWorkspaceState ===
@@ -6522,31 +7514,64 @@ function applyComponentVisualState(
             }
 
 
+            /*
+             * 6. Événement global.
+             */
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        "fobas:autosave-restored",
+                        {
+                            detail: {
+                                snapshot:
+                                    snapshot
+                            }
+                        }
+                    )
+                );
+
+            } catch (error) {
+                /* événement non critique */
+            }
+
+
             FOBAS_AUTOSAVE_STATE.lastRestoreTime =
                 Date.now();
+
 
             FOBAS_AUTOSAVE_STATE.lastHash =
                 FOBAS_AUTOSAVE_createHash(
                     snapshot
                 );
 
+
+            FOBAS_AUTOSAVE_STATE.hasChanges =
+                false;
+
+
             FOBAS_AUTOSAVE_STATE.restored =
                 true;
+
 
             FOBAS_AUTOSAVE_STATE.restoring =
                 false;
 
+
             return true;
+
 
         } catch (error) {
 
             FOBAS_AUTOSAVE_STATE.restoring =
                 false;
 
+
             console.warn(
                 "[FOBAS AUTO SAVE] Restauration échouée.",
                 error
             );
+
 
             return false;
         }
@@ -6554,7 +7579,7 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.10 — RESTAURATION AUTOMATIQUE
+       10.20 — RESTAURATION AUTOMATIQUE
     ============================================================ */
 
     function FOBAS_AUTOSAVE_autoRestore() {
@@ -6562,11 +7587,14 @@ function applyComponentVisualState(
         if (
             FOBAS_AUTOSAVE_STATE.restored
         ) {
+
             return;
         }
 
+
         const snapshot =
             FOBAS_AUTOSAVE_loadSnapshot();
+
 
         if (!snapshot) {
 
@@ -6576,12 +7604,14 @@ function applyComponentVisualState(
             return;
         }
 
-        /*
-         * On attend que le workspace existe.
-         */
+
         setTimeout(
             function () {
 
+                /*
+                 * Les composants et le workspace doivent
+                 * avoir eu le temps de s'initialiser.
+                 */
                 FOBAS_AUTOSAVE_restore(
                     snapshot
                 );
@@ -6593,7 +7623,7 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.11 — DÉTECTION DES MODIFICATIONS
+       10.21 — DÉTECTION DES MODIFICATIONS
     ============================================================ */
 
     function FOBAS_AUTOSAVE_checkForChanges() {
@@ -6601,24 +7631,30 @@ function applyComponentVisualState(
         if (
             FOBAS_AUTOSAVE_STATE.restoring
         ) {
+
             return;
         }
+
 
         const snapshot =
             FOBAS_AUTOSAVE_buildSnapshot();
 
+
         if (!snapshot) {
             return;
         }
+
 
         const currentHash =
             FOBAS_AUTOSAVE_createHash(
                 snapshot
             );
 
+
         if (!currentHash) {
             return;
         }
+
 
         /*
          * Première signature.
@@ -6633,13 +7669,9 @@ function applyComponentVisualState(
             return;
         }
 
+
         /*
-         * Si le travail a changé,
-         * la sauvegarde sera faite automatiquement.
-         *
-         * On ne sauvegarde pas à chaque milliseconde :
-         * le timer principal reste responsable
-         * de la sauvegarde toutes les 5 minutes.
+         * Une modification est détectée.
          */
         if (
             currentHash !==
@@ -6653,7 +7685,38 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.12 — SAUVEGARDE AUTOMATIQUE TOUTES LES 5 MINUTES
+       10.22 — SAUVEGARDE IMMÉDIATE APRÈS MODIFICATION
+       ------------------------------------------------------------
+       Cette fonction permet au système de ne pas attendre
+       5 minutes lorsqu'un changement important est détecté.
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_saveIfChanged() {
+
+        if (
+            FOBAS_AUTOSAVE_STATE.restoring
+        ) {
+
+            return false;
+        }
+
+
+        if (
+            !FOBAS_AUTOSAVE_STATE.hasChanges
+        ) {
+
+            return false;
+        }
+
+
+        return FOBAS_AUTOSAVE_save(
+            "change-detected"
+        );
+    }
+
+
+    /* ============================================================
+       10.23 — TIMER 5 MINUTES
     ============================================================ */
 
     function FOBAS_AUTOSAVE_startTimer() {
@@ -6667,6 +7730,7 @@ function applyComponentVisualState(
             );
         }
 
+
         FOBAS_AUTOSAVE_STATE.saveTimer =
             setInterval(
                 function () {
@@ -6674,28 +7738,27 @@ function applyComponentVisualState(
                     const snapshot =
                         FOBAS_AUTOSAVE_buildSnapshot();
 
+
                     if (!snapshot) {
                         return;
                     }
+
 
                     const currentHash =
                         FOBAS_AUTOSAVE_createHash(
                             snapshot
                         );
 
-                    /*
-                     * On sauvegarde même si aucune
-                     * modification importante n'a été
-                     * détectée : cela garantit une
-                     * sauvegarde périodique robuste.
-                     */
 
+                    /*
+                     * Sauvegarde périodique garantie.
+                     */
                     if (
                         currentHash !==
-                        FOBAS_AUTOSAVE_STATE.lastHash ||
+                            FOBAS_AUTOSAVE_STATE.lastHash ||
                         Date.now() -
-                        FOBAS_AUTOSAVE_STATE.lastSaveTime >=
-                        FOBAS_AUTOSAVE_CONFIG.interval
+                            FOBAS_AUTOSAVE_STATE.lastSaveTime >=
+                            FOBAS_AUTOSAVE_CONFIG.interval
                     ) {
 
                         FOBAS_AUTOSAVE_save(
@@ -6710,23 +7773,56 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.13 — SAUVEGARDE AVANT QUITTER / MASQUER LA PAGE
+       10.24 — SAUVEGARDE AVANT QUITTER
+       ------------------------------------------------------------
+       IMPORTANT :
+       Cette fonction est appelée AVANT que l'application
+       ne disparaisse.
+
+       Elle ne dépend PAS du délai de 5 minutes.
     ============================================================ */
 
-    function FOBAS_AUTOSAVE_saveBeforeLeave() {
+    function FOBAS_AUTOSAVE_saveBeforeLeave(
+        reason = "page-leave"
+    ) {
+
+        const now =
+            Date.now();
+
 
         /*
-         * Attention :
-         * les navigateurs modernes limitent les opérations
-         * pendant beforeunload/pagehide.
+         * Plusieurs événements peuvent se déclencher
+         * presque simultanément :
          *
-         * localStorage reste cependant synchrone.
+         * beforeunload
+         * pagehide
+         * visibilitychange
+         *
+         * On évite uniquement les doublons immédiats.
          */
+        if (
+            now -
+            FOBAS_AUTOSAVE_STATE.lastLeaveSaveTime <
+            FOBAS_AUTOSAVE_CONFIG.leaveSaveCooldown
+        ) {
+
+            return;
+        }
+
+
+        FOBAS_AUTOSAVE_STATE.lastLeaveSaveTime =
+            now;
+
 
         try {
 
+            /*
+             * Sauvegarde FORCÉE.
+             *
+             * Même si les 5 minutes ne sont pas écoulées.
+             */
             FOBAS_AUTOSAVE_save(
-                "page-leave"
+                reason
             );
 
         } catch (error) {
@@ -6740,7 +7836,7 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.14 — VISIBILITÉ DE LA PAGE
+       10.25 — VISIBILITÉ
     ============================================================ */
 
     function FOBAS_AUTOSAVE_handleVisibility() {
@@ -6750,37 +7846,162 @@ function applyComponentVisualState(
             "hidden"
         ) {
 
-            FOBAS_AUTOSAVE_save(
+            /*
+             * Le laboratoire passe en arrière-plan.
+             * Sauvegarde immédiate.
+             */
+            FOBAS_AUTOSAVE_saveBeforeLeave(
                 "page-hidden"
             );
 
-        } else if (
+
+            return;
+        }
+
+
+        if (
             document.visibilityState ===
             "visible"
         ) {
 
             /*
-             * Lorsque l'utilisateur revient,
-             * on prend immédiatement un snapshot
-             * pour détecter un éventuel changement.
+             * L'utilisateur revient.
+             *
+             * On vérifie si le workspace actuel
+             * diffère de la dernière sauvegarde.
              */
-
             const snapshot =
                 FOBAS_AUTOSAVE_buildSnapshot();
 
+
             if (snapshot) {
 
-                FOBAS_AUTOSAVE_STATE.lastHash =
+                const currentHash =
                     FOBAS_AUTOSAVE_createHash(
                         snapshot
                     );
+
+
+                /*
+                 * Ne remplace pas la signature si
+                 * une sauvegarde de sortie vient d'être faite.
+                 */
+                if (
+                    !FOBAS_AUTOSAVE_STATE.lastHash
+                ) {
+
+                    FOBAS_AUTOSAVE_STATE.lastHash =
+                        currentHash;
+                }
             }
         }
     }
 
 
     /* ============================================================
-       10.15 — INITIALISATION
+       10.26 — ÉVÉNEMENTS DE SAUVEGARDE
+       ------------------------------------------------------------
+       Permet aux autres moteurs FOBAS de signaler un changement
+       important sans connaître le fonctionnement interne.
+    ============================================================ */
+
+    function FOBAS_AUTOSAVE_installStateEvents() {
+
+        document.addEventListener(
+            "fobas:wire-added",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+
+                FOBAS_AUTOSAVE_saveIfChanged();
+            }
+        );
+
+
+        document.addEventListener(
+            "fobas:wire-connected",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+
+                FOBAS_AUTOSAVE_saveIfChanged();
+            }
+        );
+
+
+        document.addEventListener(
+            "fobas:wire-wire-connected",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+
+                FOBAS_AUTOSAVE_saveIfChanged();
+            }
+        );
+
+
+        document.addEventListener(
+            "fobas:wire-wire-disconnected",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+
+                FOBAS_AUTOSAVE_saveIfChanged();
+            }
+        );
+
+
+        document.addEventListener(
+            "fobas:wire-disconnected",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+
+                FOBAS_AUTOSAVE_saveIfChanged();
+            }
+        );
+
+
+        document.addEventListener(
+            "fobas:wire-state-changed",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+
+                FOBAS_AUTOSAVE_saveIfChanged();
+            }
+        );
+
+
+        document.addEventListener(
+            "fobas:component-added",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+            }
+        );
+
+
+        document.addEventListener(
+            "fobas:component-moved",
+            function () {
+
+                FOBAS_AUTOSAVE_STATE.hasChanges =
+                    true;
+            }
+        );
+    }
+
+
+    /* ============================================================
+       10.27 — INITIALISATION
     ============================================================ */
 
     function FOBAS_AUTOSAVE_init() {
@@ -6788,16 +8009,20 @@ function applyComponentVisualState(
         if (
             FOBAS_AUTOSAVE_STATE.initialized
         ) {
+
             return;
         }
 
+
         FOBAS_AUTOSAVE_STATE.initAttempts++;
+
 
         /*
          * Le moteur attend que state existe.
          */
         if (
-            typeof state === "undefined" ||
+            typeof state ===
+                "undefined" ||
             !state
         ) {
 
@@ -6806,34 +8031,45 @@ function applyComponentVisualState(
                 FOBAS_AUTOSAVE_CONFIG.maxInitAttempts
             ) {
 
-                setTimeout(
-                    FOBAS_AUTOSAVE_init,
-                    FOBAS_AUTOSAVE_CONFIG.initRetryDelay
-                );
+                FOBAS_AUTOSAVE_STATE.initTimer =
+                    setTimeout(
+                        FOBAS_AUTOSAVE_init,
+                        FOBAS_AUTOSAVE_CONFIG.initRetryDelay
+                    );
             }
+
 
             return;
         }
 
 
         /*
-         * Préparation de state.wires.
-         * Cela permet au futur Wire Engine
-         * de fonctionner avec Auto Save.
+         * Préparation des tableaux.
          */
         if (
-            !Array.isArray(state.wires)
+            !Array.isArray(
+                state.components
+            )
+        ) {
+
+            state.components = [];
+        }
+
+
+        if (
+            !Array.isArray(
+                state.wires
+            )
         ) {
 
             state.wires = [];
         }
 
 
-        /*
-         * Préparation de state.connections.
-         */
         if (
-            !Array.isArray(state.connections)
+            !Array.isArray(
+                state.connections
+            )
         ) {
 
             state.connections = [];
@@ -6845,11 +8081,12 @@ function applyComponentVisualState(
 
 
         /* --------------------------------------------------------
-           Initialisation de la signature
+           Signature initiale
         -------------------------------------------------------- */
 
         const currentSnapshot =
             FOBAS_AUTOSAVE_buildSnapshot();
+
 
         if (currentSnapshot) {
 
@@ -6861,7 +8098,14 @@ function applyComponentVisualState(
 
 
         /* --------------------------------------------------------
-           RESTAURATION AUTOMATIQUE
+           Événements
+        -------------------------------------------------------- */
+
+        FOBAS_AUTOSAVE_installStateEvents();
+
+
+        /* --------------------------------------------------------
+           RESTAURATION
         -------------------------------------------------------- */
 
         FOBAS_AUTOSAVE_autoRestore();
@@ -6887,34 +8131,65 @@ function applyComponentVisualState(
             );
         }
 
+
         FOBAS_AUTOSAVE_STATE.changeTimer =
             setInterval(
-                FOBAS_AUTOSAVE_checkForChanges,
+                function () {
+
+                    FOBAS_AUTOSAVE_checkForChanges();
+
+                    /*
+                     * Si un changement est détecté,
+                     * on sauvegarde sans attendre les 5 minutes.
+                     */
+                    FOBAS_AUTOSAVE_saveIfChanged();
+
+                },
                 FOBAS_AUTOSAVE_CONFIG.changeCheckInterval
             );
 
 
         /* --------------------------------------------------------
-           SAUVEGARDE AVANT SORTIE
+           AVANT SORTIE
         -------------------------------------------------------- */
 
         window.addEventListener(
             "beforeunload",
-            FOBAS_AUTOSAVE_saveBeforeLeave,
+            function () {
+
+                FOBAS_AUTOSAVE_saveBeforeLeave(
+                    "beforeunload"
+                );
+
+            },
             {
                 capture: true
             }
         );
 
+
+        /* --------------------------------------------------------
+           PAGEHIDE
+        -------------------------------------------------------- */
 
         window.addEventListener(
             "pagehide",
-            FOBAS_AUTOSAVE_saveBeforeLeave,
+            function () {
+
+                FOBAS_AUTOSAVE_saveBeforeLeave(
+                    "pagehide"
+                );
+
+            },
             {
                 capture: true
             }
         );
 
+
+        /* --------------------------------------------------------
+           VISIBILITY
+        -------------------------------------------------------- */
 
         document.addEventListener(
             "visibilitychange",
@@ -6925,12 +8200,17 @@ function applyComponentVisualState(
         );
 
 
-        /*
-         * Sauvegarde initiale silencieuse.
-         */
+        /* --------------------------------------------------------
+           SAUVEGARDE INITIALE
+        -------------------------------------------------------- */
+
         setTimeout(
             function () {
 
+                /*
+                 * Cette sauvegarde initialise le backup
+                 * sans attendre 5 minutes.
+                 */
                 FOBAS_AUTOSAVE_save(
                     "initial-state"
                 );
@@ -6938,19 +8218,18 @@ function applyComponentVisualState(
             },
             1000
         );
-
     }
 
 
     /* ============================================================
-       10.16 — API PUBLIQUE
-       ------------------------------------------------------------
-       Ces fonctions sont disponibles uniquement si un autre
-       moteur FOBAS doit communiquer avec Auto Save.
+       10.28 — API PUBLIQUE
     ============================================================ */
 
     window.FOBAS_AUTOSAVE = {
 
+        /*
+         * Sauvegarde immédiate.
+         */
         save:
             function () {
 
@@ -6959,36 +8238,64 @@ function applyComponentVisualState(
                 );
             },
 
+
+        /*
+         * Sauvegarde forcée avant sortie.
+         */
+        saveBeforeLeave:
+            function () {
+
+                return FOBAS_AUTOSAVE_saveBeforeLeave(
+                    "manual-leave-api"
+                );
+            },
+
+
+        /*
+         * Restauration.
+         */
         restore:
             function () {
 
                 const snapshot =
                     FOBAS_AUTOSAVE_loadSnapshot();
 
+
                 if (!snapshot) {
                     return false;
                 }
+
 
                 return FOBAS_AUTOSAVE_restore(
                     snapshot
                 );
             },
 
+
+        /*
+         * Vérification d'un backup.
+         */
         hasBackup:
             function () {
 
                 return !!FOBAS_AUTOSAVE_loadSnapshot();
             },
 
+
+        /*
+         * Suppression complète du backup.
+         */
         clear:
             function () {
 
                 const storage =
                     FOBAS_AUTOSAVE_getStorage();
 
+
                 if (!storage) {
                     return false;
                 }
+
 
                 try {
 
@@ -6996,18 +8303,31 @@ function applyComponentVisualState(
                         FOBAS_AUTOSAVE_CONFIG.storageKey
                     );
 
+
                     storage.removeItem(
                         FOBAS_AUTOSAVE_CONFIG.storageKey +
                         "_META"
                     );
 
+
                     FOBAS_AUTOSAVE_STATE.lastHash =
                         "";
+
 
                     FOBAS_AUTOSAVE_STATE.lastSaveTime =
                         0;
 
+
+                    FOBAS_AUTOSAVE_STATE.hasChanges =
+                        false;
+
+
+                    FOBAS_AUTOSAVE_STATE.lastSnapshot =
+                        null;
+
+
                     return true;
+
 
                 } catch (error) {
 
@@ -7016,35 +8336,71 @@ function applyComponentVisualState(
                         error
                     );
 
+
                     return false;
                 }
             },
 
+
+        /*
+         * Heure de dernière sauvegarde.
+         */
         getLastSaveTime:
             function () {
 
                 return FOBAS_AUTOSAVE_STATE.lastSaveTime;
             },
 
+
+        /*
+         * Clé localStorage.
+         */
         getStorageKey:
             function () {
 
                 return FOBAS_AUTOSAVE_CONFIG.storageKey;
             },
 
+
+        /*
+         * Configuration.
+         */
         getConfig:
             function () {
 
                 return {
                     ...FOBAS_AUTOSAVE_CONFIG
                 };
-            }
+            },
 
+
+        /*
+         * État interne.
+         */
+        getState:
+            function () {
+
+                return {
+                    ...FOBAS_AUTOSAVE_STATE
+                };
+            },
+
+
+        /*
+         * Force une vérification immédiate.
+         */
+        check:
+            function () {
+
+                FOBAS_AUTOSAVE_checkForChanges();
+
+                return FOBAS_AUTOSAVE_STATE.hasChanges;
+            }
     };
 
 
     /* ============================================================
-       10.17 — DÉMARRAGE
+       10.29 — DÉMARRAGE
     ============================================================ */
 
     if (
@@ -7067,7 +8423,6 @@ function applyComponentVisualState(
 
 
 })();
-
 
 
 
@@ -9596,98 +10951,137 @@ function applyComponentVisualState(
 
 
 
-
-
-
 /* ================================================================
    11. WIRE → WIRE CONNECTION EXTENSION
    ---------------------------------------------------------------
    FOBAS ELECTRONIQUE & ROBOTIQUE
    ---------------------------------------------------------------
-   BLOC ISOLÉ / PROTÉGÉ — V1.0.0
+   BLOC ISOLÉ / PROTÉGÉ — V1.1.0
 
    INTÉGRATION :
    - Utilise uniquement window.FOBASWireCableEngine
-   - S'appuie sur Block 10 existant
-   - NE MODIFIE PAS Block 10
-   - NE REMPLACE AUCUNE fonction existante
-   - NE CRÉE AUCUN nouveau système de câble
+   - S'appuie sur le Block 10 existant
+   - NE MODIFIE PAS le Block 10
+   - NE REMPLACE AUCUNE fonction du Block 10
+   - NE CRÉE AUCUN nouveau moteur de câble
 
-   FONCTIONS AJOUTÉES :
+   FONCTIONS :
    - Endpoint WIRE → Endpoint WIRE
    - A → A
    - A → B
    - B → A
    - B → B
    - Connexion bidirectionnelle réelle
-   - Snap automatique des endpoints
-   - Déconnexion si l'endpoint est éloigné
-   - Suivi des endpoints connectés
-   - Déplacement indépendant des câbles
-   - Conservation de WIRE → PIN
-   - Les croisements de câbles ne créent PAS de connexion
+   - Snap endpoint → endpoint
+   - Déconnexion d'un endpoint éloigné
+   - Suivi permanent des endpoints connectés
+   - Les croisements du corps des fils ne créent PAS de connexion
+   - WIRE → PIN conservé
+   - Déplacement des fils conservé
    - Support souris + tactile
-   - Compatible avec l'Auto Save existant
+   - Synchronisation avec Auto Save
+   - Sauvegarde des connexions WIRE → WIRE
+   - Restauration automatique des fils sauvegardés
+   - Restauration des connexions WIRE → WIRE
+   - Compatible localStorage
    - Aucun Three.js
+   - Aucune image externe
 ================================================================ */
 
 (function () {
+
     "use strict";
 
+
     /* ============================================================
-       PROTECTION CONTRE DOUBLE CHARGEMENT
+       11.1 — PROTECTION DOUBLE CHARGEMENT
     ============================================================ */
 
-    if (window.__FOBAS_WIRE_CONNECTION_EXTENSION_V1__) {
+    if (
+        window.__FOBAS_WIRE_CONNECTION_EXTENSION_V1_1__
+    ) {
         return;
     }
 
-    window.__FOBAS_WIRE_CONNECTION_EXTENSION_V1__ = true;
+    window.__FOBAS_WIRE_CONNECTION_EXTENSION_V1_1__ =
+        true;
 
 
     /* ============================================================
-       CONFIGURATION
+       11.2 — CONFIGURATION
     ============================================================ */
 
     const FOBAS_WIRE_CONNECTION_CONFIG = {
-        version: "1.0.0",
 
-        endpointSnapDistance: 34,
+        version:
+            "1.1.0",
 
-        disconnectDistance: 42,
+        endpointSnapDistance:
+            34,
+
+        disconnectDistance:
+            42,
 
         endpointSelector:
             '[data-fobas-wire-handle="A"], [data-fobas-wire-handle="B"]',
 
-        initialized: false,
+        initialized:
+            false,
 
-        observer: null,
+        listenersInstalled:
+            false,
 
-        retryTimer: null,
+        observerTimer:
+            null,
+
+        retryTimer:
+            null,
+
+        restoreTimer:
+            null,
+
+        lastWireCount:
+            -1,
 
         pointerTracking: {
-            active: false,
-            pointerId: null,
-            wireId: null,
-            side: null
+
+            active:
+                false,
+
+            pointerId:
+                null,
+
+            wireId:
+                null,
+
+            side:
+                null
         }
     };
 
 
     /* ============================================================
-       OUTILS DE BASE
+       11.3 — ACCÈS AU MOTEUR BLOCK 10
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_getEngine() {
-        return window.FOBASWireCableEngine || null;
+
+        return (
+            window.FOBASWireCableEngine ||
+            null
+        );
     }
 
 
     function FOBAS_WIRE_CONNECTION_getState() {
 
-        const engine = FOBAS_WIRE_CONNECTION_getEngine();
+        const engine =
+            FOBAS_WIRE_CONNECTION_getEngine();
 
-        if (!engine || !engine.state) {
+        if (
+            !engine ||
+            !engine.state
+        ) {
             return null;
         }
 
@@ -9697,33 +11091,52 @@ function applyComponentVisualState(
 
     function FOBAS_WIRE_CONNECTION_getWires() {
 
-        const state = FOBAS_WIRE_CONNECTION_getState();
+        const engineState =
+            FOBAS_WIRE_CONNECTION_getState();
 
-        if (!state || !state.wires) {
+        if (
+            !engineState ||
+            !engineState.wires
+        ) {
             return null;
         }
 
-        return state.wires;
+        return engineState.wires;
     }
 
 
-    function FOBAS_WIRE_CONNECTION_getWire(wireId) {
+    function FOBAS_WIRE_CONNECTION_getWire(
+        wireId
+    ) {
 
-        const wires = FOBAS_WIRE_CONNECTION_getWires();
+        const wires =
+            FOBAS_WIRE_CONNECTION_getWires();
 
-        if (!wires || !wireId) {
+        if (
+            !wires ||
+            !wireId
+        ) {
             return null;
         }
 
-        if (typeof wires.get === "function") {
-            return wires.get(wireId) || null;
+        if (
+            typeof wires.get ===
+            "function"
+        ) {
+
+            return (
+                wires.get(wireId) ||
+                null
+            );
         }
 
         return null;
     }
 
 
-    function FOBAS_WIRE_CONNECTION_isWireObject(wire) {
+    function FOBAS_WIRE_CONNECTION_isWireObject(
+        wire
+    ) {
 
         return !!(
             wire &&
@@ -9735,17 +11148,28 @@ function applyComponentVisualState(
     }
 
 
-    function FOBAS_WIRE_CONNECTION_getPoint(wire, side) {
+    function FOBAS_WIRE_CONNECTION_getPoint(
+        wire,
+        side
+    ) {
 
-        if (!FOBAS_WIRE_CONNECTION_isWireObject(wire)) {
+        if (
+            !FOBAS_WIRE_CONNECTION_isWireObject(
+                wire
+            )
+        ) {
             return null;
         }
 
-        if (side === "A") {
+        if (
+            side === "A"
+        ) {
             return wire.a;
         }
 
-        if (side === "B") {
+        if (
+            side === "B"
+        ) {
             return wire.b;
         }
 
@@ -9753,14 +11177,44 @@ function applyComponentVisualState(
     }
 
 
-    function FOBAS_WIRE_CONNECTION_distance(a, b) {
+    function FOBAS_WIRE_CONNECTION_clonePoint(
+        point
+    ) {
 
-        if (!a || !b) {
+        if (!point) {
+            return null;
+        }
+
+        return {
+
+            x:
+                Number(point.x) || 0,
+
+            y:
+                Number(point.y) || 0
+        };
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_distance(
+        pointA,
+        pointB
+    ) {
+
+        if (
+            !pointA ||
+            !pointB
+        ) {
             return Infinity;
         }
 
-        const dx = Number(a.x) - Number(b.x);
-        const dy = Number(a.y) - Number(b.y);
+        const dx =
+            Number(pointA.x) -
+            Number(pointB.x);
+
+        const dy =
+            Number(pointA.y) -
+            Number(pointB.y);
 
         return Math.sqrt(
             (dx * dx) +
@@ -9769,39 +11223,39 @@ function applyComponentVisualState(
     }
 
 
-    function FOBAS_WIRE_CONNECTION_clonePoint(point) {
+    function FOBAS_WIRE_CONNECTION_getConnection(
+        wire,
+        side
+    ) {
 
-        if (!point) {
+        if (
+            !FOBAS_WIRE_CONNECTION_isWireObject(
+                wire
+            )
+        ) {
             return null;
         }
 
-        return {
-            x: Number(point.x) || 0,
-            y: Number(point.y) || 0
-        };
-    }
-
-
-    function FOBAS_WIRE_CONNECTION_getConnection(wire, side) {
-
-        if (!FOBAS_WIRE_CONNECTION_isWireObject(wire)) {
+        if (
+            side !== "A" &&
+            side !== "B"
+        ) {
             return null;
         }
 
-        if (side !== "A" && side !== "B") {
-            return null;
-        }
-
-        return wire.connections[side] || null;
+        return (
+            wire.connections[side] ||
+            null
+        );
     }
 
 
     /* ============================================================
-       DÉTECTION DES ENDPOINTS DES AUTRES WIRES
+       11.4 — RECHERCHE UNIQUEMENT DES ENDPOINTS
        ------------------------------------------------------------
        IMPORTANT :
-       On recherche uniquement les endpoints.
-       Le corps d'un câble ne peut jamais provoquer une connexion.
+       Le corps d'un fil n'est JAMAIS considéré comme
+       une zone de connexion.
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_findNearestWireEndpoint(
@@ -9810,76 +11264,125 @@ function applyComponentVisualState(
         point
     ) {
 
-        const wires = FOBAS_WIRE_CONNECTION_getWires();
+        const wires =
+            FOBAS_WIRE_CONNECTION_getWires();
 
-        if (!wires || !point) {
+        if (
+            !wires ||
+            !point
+        ) {
             return null;
         }
 
-        let nearest = null;
+        let nearest =
+            null;
+
         let nearestDistance =
-            FOBAS_WIRE_CONNECTION_CONFIG.endpointSnapDistance;
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .endpointSnapDistance;
 
-        wires.forEach(function (candidateWire) {
 
-            if (!FOBAS_WIRE_CONNECTION_isWireObject(candidateWire)) {
-                return;
-            }
+        wires.forEach(
+            function (candidateWire) {
 
-            if (candidateWire.id === sourceWire.id) {
-                return;
-            }
-
-            ["A", "B"].forEach(function (candidateSide) {
-
-                const candidatePoint =
-                    FOBAS_WIRE_CONNECTION_getPoint(
-                        candidateWire,
-                        candidateSide
-                    );
-
-                if (!candidatePoint) {
+                if (
+                    !FOBAS_WIRE_CONNECTION_isWireObject(
+                        candidateWire
+                    )
+                ) {
                     return;
                 }
 
-                const distance =
-                    FOBAS_WIRE_CONNECTION_distance(
-                        point,
-                        candidatePoint
-                    );
-
-                if (distance <= nearestDistance) {
-
-                    nearestDistance = distance;
-
-                    nearest = {
-                        wire: candidateWire,
-                        wireId: candidateWire.id,
-                        side: candidateSide,
-                        point: candidatePoint,
-                        distance: distance
-                    };
+                if (
+                    candidateWire.id ===
+                    sourceWire.id
+                ) {
+                    return;
                 }
-            });
-        });
+
+
+                ["A", "B"].forEach(
+                    function (candidateSide) {
+
+                        const candidatePoint =
+                            FOBAS_WIRE_CONNECTION_getPoint(
+                                candidateWire,
+                                candidateSide
+                            );
+
+                        if (!candidatePoint) {
+                            return;
+                        }
+
+
+                        const distance =
+                            FOBAS_WIRE_CONNECTION_distance(
+                                point,
+                                candidatePoint
+                            );
+
+
+                        if (
+                            distance <=
+                            nearestDistance
+                        ) {
+
+                            nearestDistance =
+                                distance;
+
+                            nearest = {
+
+                                wire:
+                                    candidateWire,
+
+                                wireId:
+                                    candidateWire.id,
+
+                                side:
+                                    candidateSide,
+
+                                point:
+                                    candidatePoint,
+
+                                distance:
+                                    distance
+                            };
+                        }
+                    }
+                );
+            }
+        );
+
 
         return nearest;
     }
 
 
     /* ============================================================
-       SUPPRESSION D'UNE CONNEXION WIRE → WIRE
+       11.5 — DÉCONNEXION WIRE → WIRE
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_disconnectPair(
         wire,
         side,
-        silent
+        silent = false
     ) {
 
-        if (!FOBAS_WIRE_CONNECTION_isWireObject(wire)) {
+        if (
+            !FOBAS_WIRE_CONNECTION_isWireObject(
+                wire
+            )
+        ) {
             return false;
         }
+
+        if (
+            side !== "A" &&
+            side !== "B"
+        ) {
+            return false;
+        }
+
 
         const connection =
             FOBAS_WIRE_CONNECTION_getConnection(
@@ -9887,59 +11390,49 @@ function applyComponentVisualState(
                 side
             );
 
-        if (!connection) {
+
+        if (
+            !connection ||
+            connection.kind !== "wire"
+        ) {
             return false;
         }
 
-        if (connection.kind !== "wire") {
-
-            return false;
-        }
 
         const targetWire =
             FOBAS_WIRE_CONNECTION_getWire(
                 connection.wireId
             );
 
+
         const targetSide =
             connection.side;
 
-        wire.connections[side] = null;
 
+        wire.connections[side] =
+            null;
+
+
+        /*
+         * Suppression de la connexion inverse.
+         */
         if (
             targetWire &&
             targetSide &&
             targetWire.connections &&
             targetWire.connections[targetSide] &&
-            targetWire.connections[targetSide].kind === "wire" &&
-            targetWire.connections[targetSide].wireId === wire.id &&
-            targetWire.connections[targetSide].side === side
+            targetWire.connections[targetSide].kind ===
+                "wire" &&
+            targetWire.connections[targetSide].wireId ===
+                wire.id &&
+            targetWire.connections[targetSide].side ===
+                side
         ) {
 
-            targetWire.connections[targetSide] = null;
+            targetWire.connections[targetSide] =
+                null;
         }
 
-        try {
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    "fobas:wire-wire-disconnected",
-                    {
-                        detail: {
-                            wireId: wire.id,
-                            side: side,
-                            targetWireId:
-                                connection.wireId,
-                            targetSide:
-                                connection.side
-                        }
-                    }
-                )
-            );
-
-        } catch (error) {
-            /* événement non critique */
-        }
 
         if (!silent) {
 
@@ -9955,180 +11448,26 @@ function applyComponentVisualState(
             }
         }
 
-        return true;
-    }
-
-
-    /* ============================================================
-       CRÉATION D'UNE CONNEXION BIDIRECTIONNELLE
-       ------------------------------------------------------------
-       WIRE A ↔ WIRE B
-    ============================================================ */
-
-    function FOBAS_WIRE_CONNECTION_connectPair(
-        wire,
-        side,
-        targetWire,
-        targetSide
-    ) {
-
-        if (
-            !FOBAS_WIRE_CONNECTION_isWireObject(wire) ||
-            !FOBAS_WIRE_CONNECTION_isWireObject(targetWire)
-        ) {
-            return false;
-        }
-
-        if (
-            side !== "A" &&
-            side !== "B"
-        ) {
-            return false;
-        }
-
-        if (
-            targetSide !== "A" &&
-            targetSide !== "B"
-        ) {
-            return false;
-        }
-
-        if (wire.id === targetWire.id) {
-            return false;
-        }
-
-
-        /* --------------------------------------------------------
-           SI L'ENDPOINT SOURCE EST DÉJÀ CONNECTÉ
-        -------------------------------------------------------- */
-
-        if (wire.connections[side]) {
-
-            FOBAS_WIRE_CONNECTION_disconnectPair(
-                wire,
-                side,
-                true
-            );
-        }
-
-
-        /* --------------------------------------------------------
-           SI L'ENDPOINT CIBLE EST DÉJÀ CONNECTÉ
-        -------------------------------------------------------- */
-
-        if (targetWire.connections[targetSide]) {
-
-            FOBAS_WIRE_CONNECTION_disconnectPair(
-                targetWire,
-                targetSide,
-                true
-            );
-        }
-
-
-        /* --------------------------------------------------------
-           POSITION COMMUNE
-        -------------------------------------------------------- */
-
-        const targetPoint =
-            FOBAS_WIRE_CONNECTION_getPoint(
-                targetWire,
-                targetSide
-            );
-
-        if (!targetPoint) {
-            return false;
-        }
-
-        const commonPoint =
-            FOBAS_WIRE_CONNECTION_clonePoint(
-                targetPoint
-            );
-
-        const sourcePoint =
-            FOBAS_WIRE_CONNECTION_getPoint(
-                wire,
-                side
-            );
-
-        if (!sourcePoint) {
-            return false;
-        }
-
-        sourcePoint.x = commonPoint.x;
-        sourcePoint.y = commonPoint.y;
-
-
-        /* --------------------------------------------------------
-           CONNEXION SOURCE
-        -------------------------------------------------------- */
-
-        wire.connections[side] = {
-            kind: "wire",
-            wireId: targetWire.id,
-            side: targetSide
-        };
-
-
-        /* --------------------------------------------------------
-           CONNEXION CIBLE
-        -------------------------------------------------------- */
-
-        targetWire.connections[targetSide] = {
-            kind: "wire",
-            wireId: wire.id,
-            side: side
-        };
-
-
-        /* --------------------------------------------------------
-           SYNCHRONISATION DE LA POSITION
-        -------------------------------------------------------- */
-
-        const targetPointAfter =
-            FOBAS_WIRE_CONNECTION_getPoint(
-                targetWire,
-                targetSide
-            );
-
-        if (targetPointAfter) {
-
-            sourcePoint.x =
-                targetPointAfter.x;
-
-            sourcePoint.y =
-                targetPointAfter.y;
-        }
-
-
-        /* --------------------------------------------------------
-           RENDU
-        -------------------------------------------------------- */
-
-        FOBAS_WIRE_CONNECTION_renderWire(
-            wire
-        );
-
-        FOBAS_WIRE_CONNECTION_renderWire(
-            targetWire
-        );
-
-
-        /* --------------------------------------------------------
-           ÉVÉNEMENT
-        -------------------------------------------------------- */
 
         try {
 
             document.dispatchEvent(
                 new CustomEvent(
-                    "fobas:wire-wire-connected",
+                    "fobas:wire-wire-disconnected",
                     {
                         detail: {
-                            wireId: wire.id,
-                            side: side,
-                            targetWireId: targetWire.id,
-                            targetSide: targetSide
+
+                            wireId:
+                                wire.id,
+
+                            side:
+                                side,
+
+                            targetWireId:
+                                connection.wireId,
+
+                            targetSide:
+                                connection.side
                         }
                     }
                 )
@@ -10139,20 +11478,255 @@ function applyComponentVisualState(
         }
 
 
-        /* --------------------------------------------------------
-           SYNCHRONISATION AUTOSAVE
-        -------------------------------------------------------- */
-
         FOBAS_WIRE_CONNECTION_syncAutoSave();
+
 
         return true;
     }
 
 
     /* ============================================================
-       SYNCHRONISATION DES CONNEXIONS
-       ------------------------------------------------------------
-       Cette fonction suit les endpoints connectés à d'autres wires.
+       11.6 — CONNEXION BIDIRECTIONNELLE
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_connectPair(
+        wire,
+        side,
+        targetWire,
+        targetSide
+    ) {
+
+        if (
+            !FOBAS_WIRE_CONNECTION_isWireObject(
+                wire
+            ) ||
+            !FOBAS_WIRE_CONNECTION_isWireObject(
+                targetWire
+            )
+        ) {
+            return false;
+        }
+
+
+        if (
+            side !== "A" &&
+            side !== "B"
+        ) {
+            return false;
+        }
+
+
+        if (
+            targetSide !== "A" &&
+            targetSide !== "B"
+        ) {
+            return false;
+        }
+
+
+        if (
+            wire.id ===
+            targetWire.id
+        ) {
+            return false;
+        }
+
+
+        /*
+         * Ne pas connecter un endpoint sur lui-même
+         * si une relation identique existe déjà.
+         */
+        const existing =
+            wire.connections[side];
+
+
+        if (
+            existing &&
+            existing.kind === "wire" &&
+            existing.wireId === targetWire.id &&
+            existing.side === targetSide
+        ) {
+
+            const existingPoint =
+                FOBAS_WIRE_CONNECTION_getPoint(
+                    targetWire,
+                    targetSide
+                );
+
+            const sourcePoint =
+                FOBAS_WIRE_CONNECTION_getPoint(
+                    wire,
+                    side
+                );
+
+            if (
+                existingPoint &&
+                sourcePoint
+            ) {
+
+                sourcePoint.x =
+                    Number(existingPoint.x) || 0;
+
+                sourcePoint.y =
+                    Number(existingPoint.y) || 0;
+            }
+
+            FOBAS_WIRE_CONNECTION_renderWire(
+                wire
+            );
+
+            return true;
+        }
+
+
+        /*
+         * Si l'endpoint source est déjà relié,
+         * on enlève l'ancienne relation.
+         */
+        if (
+            wire.connections[side]
+        ) {
+
+            FOBAS_WIRE_CONNECTION_disconnectPair(
+                wire,
+                side,
+                true
+            );
+        }
+
+
+        /*
+         * Si l'endpoint cible est déjà relié,
+         * on enlève également son ancienne relation.
+         */
+        if (
+            targetWire.connections[targetSide]
+        ) {
+
+            FOBAS_WIRE_CONNECTION_disconnectPair(
+                targetWire,
+                targetSide,
+                true
+            );
+        }
+
+
+        const targetPoint =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                targetWire,
+                targetSide
+            );
+
+        const sourcePoint =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                wire,
+                side
+            );
+
+
+        if (
+            !targetPoint ||
+            !sourcePoint
+        ) {
+            return false;
+        }
+
+
+        /*
+         * Position commune exacte.
+         */
+        sourcePoint.x =
+            Number(targetPoint.x) || 0;
+
+        sourcePoint.y =
+            Number(targetPoint.y) || 0;
+
+
+        /*
+         * Relation source.
+         */
+        wire.connections[side] = {
+
+            kind:
+                "wire",
+
+            wireId:
+                targetWire.id,
+
+            side:
+                targetSide
+        };
+
+
+        /*
+         * Relation inverse.
+         */
+        targetWire.connections[targetSide] = {
+
+            kind:
+                "wire",
+
+            wireId:
+                wire.id,
+
+            side:
+                side
+        };
+
+
+        /*
+         * Rendu.
+         */
+        FOBAS_WIRE_CONNECTION_renderWire(
+            wire
+        );
+
+        FOBAS_WIRE_CONNECTION_renderWire(
+            targetWire
+        );
+
+
+        /*
+         * Événement.
+         */
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "fobas:wire-wire-connected",
+                    {
+                        detail: {
+
+                            wireId:
+                                wire.id,
+
+                            side:
+                                side,
+
+                            targetWireId:
+                                targetWire.id,
+
+                            targetSide:
+                                targetSide
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+            /* événement non critique */
+        }
+
+
+        FOBAS_WIRE_CONNECTION_syncAutoSave();
+
+
+        return true;
+    }
+
+
+    /* ============================================================
+       11.7 — SUIVI DES ENDPOINTS CONNECTÉS
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_updateConnectedEndpoints() {
@@ -10164,157 +11738,170 @@ function applyComponentVisualState(
             return;
         }
 
-        const visited = new Set();
 
-
-        wires.forEach(function (wire) {
-
-            if (
-                !FOBAS_WIRE_CONNECTION_isWireObject(wire)
-            ) {
-                return;
-            }
-
-            ["A", "B"].forEach(function (side) {
-
-                const connection =
-                    wire.connections[side];
+        wires.forEach(
+            function (wire) {
 
                 if (
-                    !connection ||
-                    connection.kind !== "wire"
-                ) {
-                    return;
-                }
-
-                const key =
-                    wire.id +
-                    "::" +
-                    side;
-
-                if (visited.has(key)) {
-                    return;
-                }
-
-                visited.add(key);
-
-
-                const targetWire =
-                    FOBAS_WIRE_CONNECTION_getWire(
-                        connection.wireId
-                    );
-
-                if (!targetWire) {
-
-                    wire.connections[side] = null;
-
-                    return;
-                }
-
-
-                const targetPoint =
-                    FOBAS_WIRE_CONNECTION_getPoint(
-                        targetWire,
-                        connection.side
-                    );
-
-                const sourcePoint =
-                    FOBAS_WIRE_CONNECTION_getPoint(
-                        wire,
-                        side
-                    );
-
-                if (
-                    !targetPoint ||
-                    !sourcePoint
+                    !FOBAS_WIRE_CONNECTION_isWireObject(
+                        wire
+                    )
                 ) {
                     return;
                 }
 
 
-                /* ------------------------------------------------
-                   LE POINT SOURCE SUIT LE POINT CIBLE
-                ------------------------------------------------ */
+                ["A", "B"].forEach(
+                    function (side) {
 
-                sourcePoint.x =
-                    Number(targetPoint.x) || 0;
-
-                sourcePoint.y =
-                    Number(targetPoint.y) || 0;
+                        const connection =
+                            wire.connections[side];
 
 
-                visited.add(
-                    targetWire.id +
-                    "::" +
-                    connection.side
-                );
-            });
-        });
+                        if (
+                            !connection ||
+                            connection.kind !==
+                                "wire"
+                        ) {
+                            return;
+                        }
 
 
-        /* --------------------------------------------------------
-           MISE À JOUR VISUELLE
-        -------------------------------------------------------- */
+                        const targetWire =
+                            FOBAS_WIRE_CONNECTION_getWire(
+                                connection.wireId
+                            );
 
-        wires.forEach(function (wire) {
 
-            if (
-                FOBAS_WIRE_CONNECTION_isWireObject(wire)
-            ) {
+                        if (!targetWire) {
 
-                FOBAS_WIRE_CONNECTION_renderWire(
-                    wire
+                            wire.connections[side] =
+                                null;
+
+                            return;
+                        }
+
+
+                        const targetPoint =
+                            FOBAS_WIRE_CONNECTION_getPoint(
+                                targetWire,
+                                connection.side
+                            );
+
+
+                        const sourcePoint =
+                            FOBAS_WIRE_CONNECTION_getPoint(
+                                wire,
+                                side
+                            );
+
+
+                        if (
+                            !targetPoint ||
+                            !sourcePoint
+                        ) {
+                            return;
+                        }
+
+
+                        /*
+                         * L'endpoint source suit exactement
+                         * l'endpoint cible.
+                         */
+                        sourcePoint.x =
+                            Number(targetPoint.x) || 0;
+
+                        sourcePoint.y =
+                            Number(targetPoint.y) || 0;
+                    }
                 );
             }
-        });
+        );
+
+
+        /*
+         * Rendu de tous les fils.
+         */
+        wires.forEach(
+            function (wire) {
+
+                if (
+                    FOBAS_WIRE_CONNECTION_isWireObject(
+                        wire
+                    )
+                ) {
+
+                    FOBAS_WIRE_CONNECTION_renderWire(
+                        wire
+                    );
+                }
+            }
+        );
     }
 
 
     /* ============================================================
-       RENDU DIRECT DES WIRES EXISTANTS
+       11.8 — RENDU SVG DIRECT
        ------------------------------------------------------------
-       Block 10 possède déjà son moteur de rendu.
-       Ici nous mettons simplement à jour les éléments SVG
-       existants après une connexion WIRE → WIRE.
+       Ne remplace PAS le renderer du Block 10.
+       Il met seulement à jour le SVG déjà créé.
     ============================================================ */
 
-    function FOBAS_WIRE_CONNECTION_renderWire(wire) {
+    function FOBAS_WIRE_CONNECTION_renderWire(
+        wire
+    ) {
 
         if (
-            !FOBAS_WIRE_CONNECTION_isWireObject(wire)
+            !FOBAS_WIRE_CONNECTION_isWireObject(
+                wire
+            )
         ) {
             return;
         }
 
+
         const svg =
             wire.svg;
+
 
         if (!svg) {
             return;
         }
 
-        const a = wire.a;
-        const b = wire.b;
 
-        if (!a || !b) {
+        const a =
+            wire.a;
+
+        const b =
+            wire.b;
+
+
+        if (
+            !a ||
+            !b
+        ) {
             return;
         }
 
 
-        /* --------------------------------------------------------
-           CALCUL DU CHEMIN
-        -------------------------------------------------------- */
+        let pathData =
+            null;
 
-        let pathData = null;
 
+        /*
+         * Si le moteur expose un générateur de chemin,
+         * on peut l'utiliser.
+         */
         try {
 
             const engine =
                 FOBAS_WIRE_CONNECTION_getEngine();
 
+
             if (
                 engine &&
-                typeof engine.createWirePath === "function"
+                typeof engine.createWirePath ===
+                    "function"
             ) {
 
                 pathData =
@@ -10325,19 +11912,33 @@ function applyComponentVisualState(
             }
 
         } catch (error) {
-            pathData = null;
+
+            pathData =
+                null;
         }
 
 
-        /* --------------------------------------------------------
-           CHEMIN DE SECOURS
-        -------------------------------------------------------- */
-
+        /*
+         * Chemin SVG autonome de secours.
+         */
         if (!pathData) {
 
+            const ax =
+                Number(a.x) || 0;
+
+            const ay =
+                Number(a.y) || 0;
+
+            const bx =
+                Number(b.x) || 0;
+
+            const by =
+                Number(b.y) || 0;
+
+
             const dx =
-                Number(b.x) -
-                Number(a.x);
+                bx - ax;
+
 
             const curve =
                 Math.max(
@@ -10345,93 +11946,96 @@ function applyComponentVisualState(
                     Math.abs(dx) * 0.35
                 );
 
+
             pathData =
                 "M " +
-                a.x +
+                ax +
                 " " +
-                a.y +
+                ay +
                 " C " +
-                (a.x + curve) +
+                (ax + curve) +
                 " " +
-                a.y +
+                ay +
                 ", " +
-                (b.x - curve) +
+                (bx - curve) +
                 " " +
-                b.y +
+                by +
                 ", " +
-                b.x +
+                bx +
                 " " +
-                b.y;
+                by;
         }
 
 
-        /* --------------------------------------------------------
-           PATHS SVG
-        -------------------------------------------------------- */
-
+        /*
+         * Mise à jour des paths.
+         */
         const paths =
             svg.querySelectorAll(
                 "path"
             );
 
-        paths.forEach(function (path) {
 
-            path.setAttribute(
-                "d",
-                pathData
-            );
-        });
+        paths.forEach(
+            function (path) {
+
+                path.setAttribute(
+                    "d",
+                    pathData
+                );
+            }
+        );
 
 
-        /* --------------------------------------------------------
-           HANDLE A
-        -------------------------------------------------------- */
-
+        /*
+         * Endpoint A.
+         */
         const handleA =
             svg.querySelector(
                 '[data-fobas-wire-handle="A"]'
             );
 
+
         if (handleA) {
 
             handleA.setAttribute(
                 "cx",
-                a.x
+                Number(a.x) || 0
             );
 
             handleA.setAttribute(
                 "cy",
-                a.y
+                Number(a.y) || 0
             );
         }
 
 
-        /* --------------------------------------------------------
-           HANDLE B
-        -------------------------------------------------------- */
-
+        /*
+         * Endpoint B.
+         */
         const handleB =
             svg.querySelector(
                 '[data-fobas-wire-handle="B"]'
             );
 
+
         if (handleB) {
 
             handleB.setAttribute(
                 "cx",
-                b.x
+                Number(b.x) || 0
             );
 
             handleB.setAttribute(
                 "cy",
-                b.y
+                Number(b.y) || 0
             );
         }
     }
 
 
     /* ============================================================
-       DÉTECTION DU HANDLE ACTUEL
+       11.9 — IDENTIFICATION D'UN HANDLE
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_getHandleFromEvent(
@@ -10442,12 +12046,15 @@ function applyComponentVisualState(
             return null;
         }
 
+
         const target =
             event.target;
+
 
         if (!target) {
             return null;
         }
+
 
         const handle =
             target.closest &&
@@ -10456,129 +12063,65 @@ function applyComponentVisualState(
                     .endpointSelector
             );
 
+
         if (!handle) {
             return null;
         }
+
 
         const svg =
             handle.closest(
                 "[data-fobas-wire-id]"
             );
 
+
         if (!svg) {
             return null;
         }
+
 
         const wireId =
             svg.getAttribute(
                 "data-fobas-wire-id"
             );
 
+
         const side =
             handle.getAttribute(
                 "data-fobas-wire-handle"
             );
 
-        if (!wireId || !side) {
+
+        if (
+            !wireId ||
+            !side
+        ) {
             return null;
         }
 
+
         return {
-            wireId: wireId,
-            side: side,
-            handle: handle,
-            svg: svg
+
+            wireId:
+                wireId,
+
+            side:
+                side,
+
+            handle:
+                handle,
+
+            svg:
+                svg
         };
     }
 
 
     /* ============================================================
-       POINTER MOVE
+       11.10 — POINTER DOWN
        ------------------------------------------------------------
        Block 10 continue de gérer le déplacement.
-       Cette extension surveille seulement la proximité d'un
-       autre endpoint.
-    ============================================================ */
-
-    function FOBAS_WIRE_CONNECTION_onPointerMove(
-        event
-    ) {
-
-        const tracking =
-            FOBAS_WIRE_CONNECTION_CONFIG
-                .pointerTracking;
-
-        if (!tracking.active) {
-            return;
-        }
-
-        if (
-            tracking.pointerId !== null &&
-            event.pointerId !== tracking.pointerId
-        ) {
-            return;
-        }
-
-        const wire =
-            FOBAS_WIRE_CONNECTION_getWire(
-                tracking.wireId
-            );
-
-        if (!wire) {
-            return;
-        }
-
-        const point =
-            FOBAS_WIRE_CONNECTION_getPoint(
-                wire,
-                tracking.side
-            );
-
-        if (!point) {
-            return;
-        }
-
-
-        /* --------------------------------------------------------
-           RECHERCHE D'UN ENDPOINT PROCHÉ
-        -------------------------------------------------------- */
-
-        const nearest =
-            FOBAS_WIRE_CONNECTION_findNearestWireEndpoint(
-                wire,
-                tracking.side,
-                point
-            );
-
-
-        /* --------------------------------------------------------
-           SNAP VISUEL IMMÉDIAT
-           -------------------------------------------------------- */
-
-        if (
-            nearest &&
-            nearest.wire &&
-            nearest.point
-        ) {
-
-            point.x =
-                Number(nearest.point.x) || 0;
-
-            point.y =
-                Number(nearest.point.y) || 0;
-
-            FOBAS_WIRE_CONNECTION_renderWire(
-                wire
-            );
-        }
-    }
-
-
-    /* ============================================================
-       POINTER DOWN
-       ------------------------------------------------------------
-       On surveille uniquement les endpoints.
-       Le déplacement principal reste assuré par Block 10.
+       Nous enregistrons uniquement l'endpoint manipulé.
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_onPointerDown(
@@ -10590,29 +12133,37 @@ function applyComponentVisualState(
                 event
             );
 
+
         if (!info) {
             return;
         }
+
 
         const wire =
             FOBAS_WIRE_CONNECTION_getWire(
                 info.wireId
             );
 
+
         if (!wire) {
             return;
         }
 
+
         FOBAS_WIRE_CONNECTION_CONFIG
-            .pointerTracking.active = true;
+            .pointerTracking.active =
+                true;
+
 
         FOBAS_WIRE_CONNECTION_CONFIG
             .pointerTracking.pointerId =
                 event.pointerId;
 
+
         FOBAS_WIRE_CONNECTION_CONFIG
             .pointerTracking.wireId =
                 info.wireId;
+
 
         FOBAS_WIRE_CONNECTION_CONFIG
             .pointerTracking.side =
@@ -10621,12 +12172,13 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       POINTER UP
+       11.11 — POINTER MOVE
        ------------------------------------------------------------
-       C'est ici que la connexion WIRE → WIRE devient réelle.
+       Le snap visuel se fait uniquement lorsqu'un endpoint
+       d'un AUTRE wire est suffisamment proche.
     ============================================================ */
 
-    function FOBAS_WIRE_CONNECTION_onPointerUp(
+    function FOBAS_WIRE_CONNECTION_onPointerMove(
         event
     ) {
 
@@ -10634,13 +12186,16 @@ function applyComponentVisualState(
             FOBAS_WIRE_CONNECTION_CONFIG
                 .pointerTracking;
 
+
         if (!tracking.active) {
             return;
         }
 
+
         if (
             tracking.pointerId !== null &&
-            event.pointerId !== tracking.pointerId
+            event.pointerId !==
+                tracking.pointerId
         ) {
             return;
         }
@@ -10650,6 +12205,89 @@ function applyComponentVisualState(
             FOBAS_WIRE_CONNECTION_getWire(
                 tracking.wireId
             );
+
+
+        if (!wire) {
+            return;
+        }
+
+
+        const point =
+            FOBAS_WIRE_CONNECTION_getPoint(
+                wire,
+                tracking.side
+            );
+
+
+        if (!point) {
+            return;
+        }
+
+
+        const nearest =
+            FOBAS_WIRE_CONNECTION_findNearestWireEndpoint(
+                wire,
+                tracking.side,
+                point
+            );
+
+
+        if (
+            nearest &&
+            nearest.wire &&
+            nearest.point
+        ) {
+
+            /*
+             * Snap visuel immédiat.
+             */
+            point.x =
+                Number(nearest.point.x) || 0;
+
+            point.y =
+                Number(nearest.point.y) || 0;
+
+
+            FOBAS_WIRE_CONNECTION_renderWire(
+                wire
+            );
+        }
+    }
+
+
+    /* ============================================================
+       11.12 — POINTER UP
+       ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_onPointerUp(
+        event
+    ) {
+
+        const tracking =
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .pointerTracking;
+
+
+        if (!tracking.active) {
+            return;
+        }
+
+
+        if (
+            tracking.pointerId !== null &&
+            event.pointerId !==
+                tracking.pointerId
+        ) {
+
+            return;
+        }
+
+
+        const wire =
+            FOBAS_WIRE_CONNECTION_getWire(
+                tracking.wireId
+            );
+
 
         if (!wire) {
 
@@ -10662,11 +12300,13 @@ function applyComponentVisualState(
         const side =
             tracking.side;
 
+
         const point =
             FOBAS_WIRE_CONNECTION_getPoint(
                 wire,
                 side
             );
+
 
         if (!point) {
 
@@ -10676,10 +12316,9 @@ function applyComponentVisualState(
         }
 
 
-        /* --------------------------------------------------------
-           RECHERCHE DE L'ENDPOINT CIBLE
-        -------------------------------------------------------- */
-
+        /*
+         * Recherche finale d'un endpoint.
+         */
         const nearest =
             FOBAS_WIRE_CONNECTION_findNearestWireEndpoint(
                 wire,
@@ -10687,10 +12326,6 @@ function applyComponentVisualState(
                 point
             );
 
-
-        /* --------------------------------------------------------
-           CONNEXION SI UN ENDPOINT EST À PROXIMITÉ
-        -------------------------------------------------------- */
 
         if (
             nearest &&
@@ -10707,23 +12342,26 @@ function applyComponentVisualState(
 
         } else {
 
-            /* ----------------------------------------------------
-               SI L'ENDPOINT A ÉTÉ DÉPLACÉ LOIN DE SON ANCIEN
-               WIRE → WIRE, ON SUPPRIME LA CONNEXION.
-            ---------------------------------------------------- */
-
+            /*
+             * Aucun nouvel endpoint trouvé.
+             * Si l'ancien endpoint WIRE → WIRE
+             * a été éloigné, on déconnecte.
+             */
             const currentConnection =
                 wire.connections[side];
 
+
             if (
                 currentConnection &&
-                currentConnection.kind === "wire"
+                currentConnection.kind ===
+                    "wire"
             ) {
 
                 const targetWire =
                     FOBAS_WIRE_CONNECTION_getWire(
                         currentConnection.wireId
                     );
+
 
                 if (targetWire) {
 
@@ -10733,6 +12371,7 @@ function applyComponentVisualState(
                             currentConnection.side
                         );
 
+
                     if (targetPoint) {
 
                         const distance =
@@ -10740,6 +12379,7 @@ function applyComponentVisualState(
                                 point,
                                 targetPoint
                             );
+
 
                         if (
                             distance >
@@ -10753,6 +12393,7 @@ function applyComponentVisualState(
                                 false
                             );
                         }
+
                     } else {
 
                         FOBAS_WIRE_CONNECTION_disconnectPair(
@@ -10764,15 +12405,12 @@ function applyComponentVisualState(
 
                 } else {
 
-                    wire.connections[side] = null;
+                    wire.connections[side] =
+                        null;
                 }
             }
         }
 
-
-        /* --------------------------------------------------------
-           SYNCHRONISATION GLOBALE
-        -------------------------------------------------------- */
 
         FOBAS_WIRE_CONNECTION_updateConnectedEndpoints();
 
@@ -10783,7 +12421,7 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       RESET POINTER
+       11.13 — RESET POINTER
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_resetTracking() {
@@ -10792,90 +12430,278 @@ function applyComponentVisualState(
             FOBAS_WIRE_CONNECTION_CONFIG
                 .pointerTracking;
 
-        tracking.active = false;
-        tracking.pointerId = null;
-        tracking.wireId = null;
-        tracking.side = null;
+
+        tracking.active =
+            false;
+
+        tracking.pointerId =
+            null;
+
+        tracking.wireId =
+            null;
+
+        tracking.side =
+            null;
     }
 
 
     /* ============================================================
-       AUTOSAVE
+       11.14 — SERIALISATION PROPRE POUR AUTOSAVE
        ------------------------------------------------------------
-       Le Block 10 conserve les wires dans son Map.
-       Cette extension synchronise les connexions WIRE → WIRE
-       dans le state global lorsqu'il existe.
+       IMPORTANT :
+       On ne sauvegarde JAMAIS :
+       - DOM
+       - SVG
+       - element
+       - fonctions
+       - références circulaires
+       - objets lourds du Block 10
+
+       On conserve uniquement les données nécessaires.
     ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_serializeConnection(
+        connection
+    ) {
+
+        if (!connection) {
+            return null;
+        }
+
+
+        if (
+            connection.kind ===
+            "wire"
+        ) {
+
+            return {
+
+                kind:
+                    "wire",
+
+                wireId:
+                    connection.wireId ||
+                    null,
+
+                side:
+                    connection.side ||
+                    null
+            };
+        }
+
+
+        /*
+         * Connexion vers un PIN.
+         * Nous conservons uniquement les identifiants.
+         */
+        if (
+            connection.componentId ||
+            connection.pinId ||
+            connection.kind ===
+                "pin"
+        ) {
+
+            return {
+
+                kind:
+                    "pin",
+
+                componentId:
+                    connection.componentId ||
+                    null,
+
+                componentType:
+                    connection.componentType ||
+                    null,
+
+                pinId:
+                    connection.pinId ||
+                    null
+            };
+        }
+
+
+        return null;
+    }
+
+
+    function FOBAS_WIRE_CONNECTION_serializeWire(
+        wire
+    ) {
+
+        if (
+            !FOBAS_WIRE_CONNECTION_isWireObject(
+                wire
+            )
+        ) {
+            return null;
+        }
+
+
+        return {
+
+            id:
+                wire.id,
+
+            type:
+                wire.type ||
+                "wire",
+
+            color:
+                wire.color ||
+                null,
+
+            a:
+                FOBAS_WIRE_CONNECTION_clonePoint(
+                    wire.a
+                ),
+
+            b:
+                FOBAS_WIRE_CONNECTION_clonePoint(
+                    wire.b
+                ),
+
+            connections: {
+
+                A:
+                    FOBAS_WIRE_CONNECTION_serializeConnection(
+                        wire.connections.A
+                    ),
+
+                B:
+                    FOBAS_WIRE_CONNECTION_serializeConnection(
+                        wire.connections.B
+                    )
+            }
+        };
+    }
+
+
+    /* ============================================================
+       11.15 — SYNCHRONISATION AVEC STATE + AUTOSAVE
+       ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_syncAutoSave() {
 
         const engine =
             FOBAS_WIRE_CONNECTION_getEngine();
 
-        if (!engine || !engine.state) {
+
+        if (
+            !engine ||
+            !engine.state ||
+            !engine.state.wires
+        ) {
             return;
         }
 
-        const state =
-            engine.state;
+
+        /*
+         * state global du laboratoire.
+         *
+         * IMPORTANT :
+         * On utilise "state" directement lorsqu'il existe,
+         * sans exiger window.state.
+         */
+        let globalState =
+            null;
 
 
-        /* --------------------------------------------------------
-           SI UN STATE GLOBAL EXISTE
-        -------------------------------------------------------- */
+        try {
 
-        if (
-            typeof window.state === "object" &&
-            window.state
-        ) {
+            if (
+                typeof state !==
+                    "undefined" &&
+                state
+            ) {
+
+                globalState =
+                    state;
+            }
+
+        } catch (error) {
+
+            globalState =
+                null;
+        }
+
+
+        if (!globalState) {
 
             try {
 
-                window.state.wires =
-                    Array.from(
-                        state.wires.values()
-                    ).map(function (wire) {
+                if (
+                    window.state &&
+                    typeof window.state ===
+                        "object"
+                ) {
 
-                        return {
-                            id: wire.id,
-                            type: wire.type,
-                            color: wire.color,
-                            a: FOBAS_WIRE_CONNECTION_clonePoint(
-                                wire.a
-                            ),
-                            b: FOBAS_WIRE_CONNECTION_clonePoint(
-                                wire.b
-                            ),
-                            connections: {
-                                A: wire.connections &&
-                                   wire.connections.A
-                                    ? Object.assign(
-                                        {},
-                                        wire.connections.A
-                                    )
-                                    : null,
-
-                                B: wire.connections &&
-                                   wire.connections.B
-                                    ? Object.assign(
-                                        {},
-                                        wire.connections.B
-                                    )
-                                    : null
-                            }
-                        };
-                    });
+                    globalState =
+                        window.state;
+                }
 
             } catch (error) {
-                /* autosave non critique */
+                globalState =
+                    null;
             }
         }
 
 
-        /* --------------------------------------------------------
-           ÉVÉNEMENT POUR LE SYSTÈME AUTOSAVE
-        -------------------------------------------------------- */
+        if (!globalState) {
+            return;
+        }
 
+
+        try {
+
+            const wires =
+                engine.state.wires;
+
+
+            const serializedWires =
+                [];
+
+
+            wires.forEach(
+                function (wire) {
+
+                    const serialized =
+                        FOBAS_WIRE_CONNECTION_serializeWire(
+                            wire
+                        );
+
+
+                    if (serialized) {
+
+                        serializedWires.push(
+                            serialized
+                        );
+                    }
+                }
+            );
+
+
+            /*
+             * Cette copie est destinée au Block 10
+             * Auto Save.
+             */
+            globalState.wires =
+                serializedWires;
+
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS WIRE CONNECTION] Synchronisation Auto Save échouée.",
+                error
+            );
+        }
+
+
+        /*
+         * Événement permettant aux extensions
+         * d'observer le changement.
+         */
         try {
 
             document.dispatchEvent(
@@ -10883,8 +12709,12 @@ function applyComponentVisualState(
                     "fobas:wire-state-changed",
                     {
                         detail: {
+
                             source:
-                                "WIRE_CONNECTION_EXTENSION"
+                                "WIRE_CONNECTION_EXTENSION",
+
+                            timestamp:
+                                Date.now()
                         }
                     }
                 )
@@ -10897,7 +12727,547 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       MISE À JOUR APRÈS MODIFICATION DU DOM
+       11.16 — CRÉATION VISUELLE D'UN WIRE RESTAURÉ
+       ------------------------------------------------------------
+       On utilise le createWire() officiel du Block 10.
+       Aucun renderer concurrent n'est créé.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_createRestoredWire(
+        savedWire
+    ) {
+
+        const engine =
+            FOBAS_WIRE_CONNECTION_getEngine();
+
+
+        if (
+            !engine ||
+            typeof engine.createWire !==
+                "function"
+        ) {
+            return null;
+        }
+
+
+        if (
+            !savedWire ||
+            !savedWire.id
+        ) {
+            return null;
+        }
+
+
+        const existing =
+            FOBAS_WIRE_CONNECTION_getWire(
+                savedWire.id
+            );
+
+
+        if (existing) {
+
+            return existing;
+        }
+
+
+        const pointA =
+            savedWire.a ||
+            {
+                x: 150,
+                y: 150
+            };
+
+
+        const pointB =
+            savedWire.b ||
+            {
+                x:
+                    (Number(pointA.x) || 150) +
+                    130,
+
+                y:
+                    Number(pointA.y) || 150
+            };
+
+
+        let created =
+            null;
+
+
+        try {
+
+            created =
+                engine.createWire(
+                    savedWire.type ||
+                        "wire",
+                    {
+                        x:
+                            Number(pointA.x) || 150,
+
+                        y:
+                            Number(pointA.y) || 150
+                    }
+                );
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS WIRE CONNECTION] Création du wire restauré échouée.",
+                error
+            );
+
+            return null;
+        }
+
+
+        if (!created) {
+            return null;
+        }
+
+
+        /*
+         * Le Block 10 a créé le wire.
+         * Nous remplaçons uniquement ses données
+         * de position par celles sauvegardées.
+         */
+        created.a = {
+
+            x:
+                Number(pointA.x) || 0,
+
+            y:
+                Number(pointA.y) || 0
+        };
+
+
+        created.b = {
+
+            x:
+                Number(pointB.x) || 0,
+
+            y:
+                Number(pointB.y) || 0
+        };
+
+
+        /*
+         * Les connexions sont restaurées plus tard
+         * après que TOUS les wires existent.
+         */
+        created.connections = {
+
+            A:
+                null,
+
+            B:
+                null
+        };
+
+
+        /*
+         * Conservation de l'identifiant sauvegardé.
+         *
+         * Le Block 10 utilise l'id dans le SVG.
+         * Nous mettons donc également à jour l'attribut SVG.
+         */
+        const oldId =
+            created.id;
+
+
+        created.id =
+            savedWire.id;
+
+
+        if (created.svg) {
+
+            created.svg.setAttribute(
+                "data-fobas-wire-id",
+                savedWire.id
+            );
+        }
+
+
+        /*
+         * Si l'ancien id était présent dans la Map,
+         * on remplace l'entrée par l'id sauvegardé.
+         */
+        try {
+
+            const wires =
+                engine.state.wires;
+
+
+            if (
+                wires &&
+                typeof wires.delete ===
+                    "function" &&
+                typeof wires.set ===
+                    "function"
+            ) {
+
+                if (oldId) {
+
+                    wires.delete(
+                        oldId
+                    );
+                }
+
+                wires.set(
+                    savedWire.id,
+                    created
+                );
+            }
+
+        } catch (error) {
+            /* non critique */
+        }
+
+
+        FOBAS_WIRE_CONNECTION_renderWire(
+            created
+        );
+
+
+        return created;
+    }
+
+
+    /* ============================================================
+       11.17 — RESTAURATION DES RELATIONS WIRE → WIRE
+       ------------------------------------------------------------
+       Cette étape intervient APRÈS la création de tous
+       les wires afin que les deux extrémités existent.
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_restoreWireRelations(
+        savedWires
+    ) {
+
+        if (
+            !Array.isArray(savedWires)
+        ) {
+            return;
+        }
+
+
+        savedWires.forEach(
+            function (savedWire) {
+
+                if (
+                    !savedWire ||
+                    !savedWire.id
+                ) {
+                    return;
+                }
+
+
+                const wire =
+                    FOBAS_WIRE_CONNECTION_getWire(
+                        savedWire.id
+                    );
+
+
+                if (!wire) {
+                    return;
+                }
+
+
+                ["A", "B"].forEach(
+                    function (side) {
+
+                        const savedConnection =
+                            savedWire.connections &&
+                            savedWire.connections[side];
+
+
+                        if (
+                            !savedConnection ||
+                            savedConnection.kind !==
+                                "wire"
+                        ) {
+                            return;
+                        }
+
+
+                        const targetWire =
+                            FOBAS_WIRE_CONNECTION_getWire(
+                                savedConnection.wireId
+                            );
+
+
+                        if (!targetWire) {
+                            return;
+                        }
+
+
+                        const targetSide =
+                            savedConnection.side;
+
+
+                        if (
+                            targetSide !== "A" &&
+                            targetSide !== "B"
+                        ) {
+                            return;
+                        }
+
+
+                        /*
+                         * On ne recrée la relation qu'une seule fois.
+                         */
+                        const alreadyConnected =
+                            wire.connections[side] &&
+                            wire.connections[side].kind ===
+                                "wire" &&
+                            wire.connections[side].wireId ===
+                                targetWire.id &&
+                            wire.connections[side].side ===
+                                targetSide;
+
+
+                        if (alreadyConnected) {
+                            return;
+                        }
+
+
+                        FOBAS_WIRE_CONNECTION_connectPair(
+                            wire,
+                            side,
+                            targetWire,
+                            targetSide
+                        );
+                    }
+                );
+            }
+        );
+
+
+        FOBAS_WIRE_CONNECTION_updateConnectedEndpoints();
+    }
+
+
+    /* ============================================================
+       11.18 — RESTAURATION COMPLÈTE DES WIRES
+       ------------------------------------------------------------
+       Cette fonction est appelée par le Block 10 Auto Save :
+       
+       window.FOBAS_WIRE_restore()
+    ============================================================ */
+
+    function FOBAS_WIRE_CONNECTION_restore() {
+
+        const engine =
+            FOBAS_WIRE_CONNECTION_getEngine();
+
+
+        if (
+            !engine ||
+            !engine.state ||
+            !engine.state.wires
+        ) {
+            return false;
+        }
+
+
+        let globalState =
+            null;
+
+
+        try {
+
+            if (
+                typeof state !==
+                    "undefined" &&
+                state
+            ) {
+
+                globalState =
+                    state;
+            }
+
+        } catch (error) {
+
+            globalState =
+                null;
+        }
+
+
+        if (!globalState) {
+
+            try {
+
+                if (
+                    window.state &&
+                    typeof window.state ===
+                        "object"
+                ) {
+
+                    globalState =
+                        window.state;
+                }
+
+            } catch (error) {
+
+                globalState =
+                    null;
+            }
+        }
+
+
+        if (!globalState) {
+            return false;
+        }
+
+
+        const savedWires =
+            Array.isArray(
+                globalState.wires
+            )
+                ? globalState.wires
+                : [];
+
+
+        /*
+         * S'il n'y a aucun wire sauvegardé,
+         * on ne détruit pas un travail actuellement
+         * présent dans le laboratoire.
+         */
+        if (
+            savedWires.length === 0
+        ) {
+
+            return false;
+        }
+
+
+        try {
+
+            const wires =
+                engine.state.wires;
+
+
+            /*
+             * Suppression des anciens wires.
+             * Le Block 10 reste intact :
+             * nous travaillons uniquement avec son Map.
+             */
+            const existingIds =
+                [];
+
+
+            wires.forEach(
+                function (wire) {
+
+                    if (wire && wire.id) {
+
+                        existingIds.push(
+                            wire.id
+                        );
+                    }
+                }
+            );
+
+
+            existingIds.forEach(
+                function (wireId) {
+
+                    try {
+
+                        if (
+                            typeof engine.removeWire ===
+                                "function"
+                        ) {
+
+                            engine.removeWire(
+                                wireId
+                            );
+
+                        } else if (
+                            typeof engine.deleteWire ===
+                                "function"
+                        ) {
+
+                            engine.deleteWire(
+                                wireId
+                            );
+
+                        } else {
+
+                            wires.delete(
+                                wireId
+                            );
+                        }
+
+                    } catch (error) {
+
+                        try {
+
+                            wires.delete(
+                                wireId
+                            );
+
+                        } catch (ignore) {
+                            /* non critique */
+                        }
+                    }
+                }
+            );
+
+
+            /*
+             * Création de tous les wires.
+             */
+            savedWires.forEach(
+                function (savedWire) {
+
+                    FOBAS_WIRE_CONNECTION_createRestoredWire(
+                        savedWire
+                    );
+                }
+            );
+
+
+            /*
+             * Reconstruction des connexions
+             * uniquement après création complète.
+             */
+            FOBAS_WIRE_CONNECTION_restoreWireRelations(
+                savedWires
+            );
+
+
+            /*
+             * Synchronisation finale.
+             */
+            FOBAS_WIRE_CONNECTION_updateConnectedEndpoints();
+
+            FOBAS_WIRE_CONNECTION_syncAutoSave();
+
+
+            return true;
+
+        } catch (error) {
+
+            console.warn(
+                "[FOBAS WIRE CONNECTION] Restauration des wires échouée.",
+                error
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ============================================================
+       11.19 — EXPOSITION DU RESTORE POUR AUTO SAVE
+       ------------------------------------------------------------ */
+
+    window.FOBAS_WIRE_restore =
+        FOBAS_WIRE_CONNECTION_restore;
+
+
+    /* ============================================================
+       11.20 — RAFRAÎCHISSEMENT
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_refresh() {
@@ -10909,90 +13279,85 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       OBSERVATEUR DES WIRES
-       ------------------------------------------------------------
-       Permet de prendre en compte les nouveaux wires créés
-       par Block 10.
-    ============================================================ */
+       11.21 — OBSERVATION DES NOUVEAUX WIRES
+       ------------------------------------------------------------ */
 
     function FOBAS_WIRE_CONNECTION_installObserver() {
 
         if (
-            FOBAS_WIRE_CONNECTION_CONFIG.observer
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .observerTimer
         ) {
             return;
         }
+
 
         const engine =
             FOBAS_WIRE_CONNECTION_getEngine();
 
-        if (!engine || !engine.state) {
-            return;
-        }
-
-        const state =
-            engine.state;
-
-        const wires =
-            state.wires;
 
         if (
-            !wires ||
-            typeof wires.forEach !== "function"
+            !engine ||
+            !engine.state ||
+            !engine.state.wires
         ) {
             return;
         }
 
 
-        /* --------------------------------------------------------
-           PATCH NON INVASIF DE MAP
-           --------------------------------------------------------
-           Aucun remplacement de fonction du Block 10.
-           On utilise simplement un timer léger pour détecter
-           les nouveaux objets du Map.
-        -------------------------------------------------------- */
-
-        let previousCount =
-            typeof wires.size === "number"
-                ? wires.size
-                : 0;
+        const wires =
+            engine.state.wires;
 
 
         FOBAS_WIRE_CONNECTION_CONFIG
-            .observer =
-            setInterval(function () {
+            .lastWireCount =
+                typeof wires.size ===
+                    "number"
+                    ? wires.size
+                    : 0;
 
-                try {
 
-                    const currentCount =
-                        typeof wires.size === "number"
-                            ? wires.size
-                            : 0;
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .observerTimer =
+            setInterval(
+                function () {
 
-                    if (
-                        currentCount !==
-                        previousCount
-                    ) {
+                    try {
 
-                        previousCount =
-                            currentCount;
+                        const currentCount =
+                            typeof wires.size ===
+                                "number"
+                                ? wires.size
+                                : 0;
 
-                        FOBAS_WIRE_CONNECTION_refresh();
+
+                        if (
+                            currentCount !==
+                            FOBAS_WIRE_CONNECTION_CONFIG
+                                .lastWireCount
+                        ) {
+
+                            FOBAS_WIRE_CONNECTION_CONFIG
+                                .lastWireCount =
+                                    currentCount;
+
+
+                            FOBAS_WIRE_CONNECTION_refresh();
+                        }
+
+
+                    } catch (error) {
+                        /* observer non critique */
                     }
 
-                } catch (error) {
-                    /* observer non critique */
-                }
-
-            }, 250);
+                },
+                300
+            );
     }
 
 
     /* ============================================================
-       LISTENERS GLOBAUX
-       ------------------------------------------------------------
-       Capture uniquement pour surveiller les endpoints.
-       Block 10 garde son propre moteur.
+       11.22 — LISTENERS
     ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_installListeners() {
@@ -11004,8 +13369,10 @@ function applyComponentVisualState(
             return;
         }
 
+
         FOBAS_WIRE_CONNECTION_CONFIG
-            .listenersInstalled = true;
+            .listenersInstalled =
+                true;
 
 
         document.addEventListener(
@@ -11038,13 +13405,14 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       API PUBLIQUE DE L'EXTENSION
-       ------------------------------------------------------------ */
+       11.23 — INITIALISATION
+    ============================================================ */
 
     function FOBAS_WIRE_CONNECTION_init() {
 
         const engine =
             FOBAS_WIRE_CONNECTION_getEngine();
+
 
         if (!engine) {
 
@@ -11059,7 +13427,8 @@ function applyComponentVisualState(
                         function () {
 
                             FOBAS_WIRE_CONNECTION_CONFIG
-                                .retryTimer = null;
+                                .retryTimer =
+                                    null;
 
                             FOBAS_WIRE_CONNECTION_init();
 
@@ -11080,15 +13449,58 @@ function applyComponentVisualState(
         }
 
 
+        /*
+         * Les listeners sont installés avant le refresh.
+         */
         FOBAS_WIRE_CONNECTION_installListeners();
 
+
+        /*
+         * Surveillance des nouveaux wires.
+         */
         FOBAS_WIRE_CONNECTION_installObserver();
 
+
+        /*
+         * Synchronisation initiale.
+         */
         FOBAS_WIRE_CONNECTION_refresh();
 
 
+        /*
+         * Le Block 10 Auto Save peut avoir besoin
+         * de quelques instants pour restaurer state.
+         *
+         * Nous effectuons une seconde tentative
+         * après son délai de restauration.
+         */
+        if (
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .restoreTimer
+        ) {
+
+            clearTimeout(
+                FOBAS_WIRE_CONNECTION_CONFIG
+                    .restoreTimer
+            );
+        }
+
+
         FOBAS_WIRE_CONNECTION_CONFIG
-            .initialized = true;
+            .restoreTimer =
+            setTimeout(
+                function () {
+
+                    FOBAS_WIRE_CONNECTION_restore();
+
+                },
+                700
+            );
+
+
+        FOBAS_WIRE_CONNECTION_CONFIG
+            .initialized =
+                true;
 
 
         try {
@@ -11098,6 +13510,7 @@ function applyComponentVisualState(
                     "fobas:wire-wire-engine-ready",
                     {
                         detail: {
+
                             version:
                                 FOBAS_WIRE_CONNECTION_CONFIG
                                     .version
@@ -11113,13 +13526,14 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       API PUBLIQUE
-       ------------------------------------------------------------ */
+       11.24 — API PUBLIQUE
+    ============================================================ */
 
     window.FOBASWireWireConnectionExtension = {
 
         version:
-            FOBAS_WIRE_CONNECTION_CONFIG.version,
+            FOBAS_WIRE_CONNECTION_CONFIG
+                .version,
 
         connect:
             FOBAS_WIRE_CONNECTION_connectPair,
@@ -11133,11 +13547,17 @@ function applyComponentVisualState(
         refresh:
             FOBAS_WIRE_CONNECTION_refresh,
 
+        restore:
+            FOBAS_WIRE_CONNECTION_restore,
+
         findNearest:
             FOBAS_WIRE_CONNECTION_findNearestWireEndpoint,
 
         syncAutoSave:
             FOBAS_WIRE_CONNECTION_syncAutoSave,
+
+        serializeWire:
+            FOBAS_WIRE_CONNECTION_serializeWire,
 
         state:
             FOBAS_WIRE_CONNECTION_CONFIG
@@ -11145,12 +13565,12 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       INITIALISATION
-       ============================================================ */
+       11.25 — DÉMARRAGE
+    ============================================================ */
 
     if (
         document.readyState ===
-        "loading"
+            "loading"
     ) {
 
         document.addEventListener(
@@ -11168,6 +13588,8 @@ function applyComponentVisualState(
 
 
 })();
+
+
 
 
 
