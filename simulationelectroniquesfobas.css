@@ -5309,8 +5309,34 @@ select:focus-visible {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ================================================================
-   04 — ZONE VISUAL / ICÔNE
+   04 — ZONE VISUAL / ICÔNE — SANS CADRE
+   ---------------------------------------------------------------
+   OBJECTIF :
+   - Aucun rectangle derrière les composants
+   - Aucun background derrière les SVG
+   - Aucun border autour de la zone visual
+   - Aucun overflow:hidden qui coupe le composant
+   - Le SVG/objet 3D reste seul et indépendant
+   - Conservation de l'ombre 3D du composant
+   - Compatible drag & drop / Arduino / breadboard
    ================================================================ */
 
 #componentLibraryGrid [class*="visual"],
@@ -5333,27 +5359,43 @@ select:focus-visible {
 
     align-items: center;
 
-    border-radius: 16px;
+    /*
+     * AUCUN CADRE
+     */
+    background: transparent !important;
 
-    overflow: hidden;
+    border: none !important;
 
-    background:
-        radial-gradient(
-            circle at 50% 42%,
-            rgba(40,120,210,.18),
-            rgba(3,12,24,.25) 52%,
-            rgba(0,0,0,.30) 100%
-        );
+    border-radius: 0 !important;
 
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.07),
-        inset 0 -10px 22px rgba(0,0,0,.20);
+    box-shadow: none !important;
+
+    /*
+     * Le composant peut dépasser naturellement
+     * de sa zone visuelle.
+     */
+    overflow: visible !important;
 
     isolation: isolate;
 }
 
 
-/* sol 3D sous le composant */
+/* ------------------------------------------------------------
+   SUPPRESSION DU REFLET / SOL QUI CREAIT UN CADRE VISUEL
+   ------------------------------------------------------------ */
+
+#componentLibraryGrid [class*="visual"]::before,
+#componentLibraryGrid [class*="Visual"]::before,
+#componentLibraryGrid [class*="icon"]::before,
+#componentLibraryGrid [class*="Icon"]::before {
+
+    content: none !important;
+}
+
+
+/* ------------------------------------------------------------
+   OMBRE 3D SOUS LE COMPOSANT
+   ------------------------------------------------------------ */
 
 #componentLibraryGrid [class*="visual"]::after,
 #componentLibraryGrid [class*="Visual"]::after,
@@ -5364,21 +5406,21 @@ select:focus-visible {
 
     position: absolute;
 
-    left: 20%;
+    left: 25%;
 
-    right: 20%;
+    right: 25%;
 
-    bottom: 8px;
+    bottom: 6px;
 
-    height: 12px;
+    height: 10px;
 
     border-radius: 50%;
 
     background:
         radial-gradient(
             ellipse,
-            rgba(0,0,0,.62),
-            transparent 70%
+            rgba(0,0,0,.42),
+            transparent 72%
         );
 
     filter: blur(4px);
@@ -5387,6 +5429,127 @@ select:focus-visible {
 
     pointer-events: none;
 }
+
+
+/* ================================================================
+   SVG — OBJET 3D INDÉPENDANT
+   ================================================================ */
+
+#componentLibraryGrid svg {
+
+    max-width: 92% !important;
+
+    max-height: 108px !important;
+
+    width: auto;
+
+    height: auto;
+
+    display: block;
+
+    overflow: visible !important;
+
+    background: transparent !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+
+    /*
+     * L'ombre appartient à l'objet,
+     * pas à un rectangle autour de lui.
+     */
+    filter:
+        drop-shadow(
+            0 8px 8px rgba(0,0,0,.40)
+        );
+
+    transform:
+        translateZ(0);
+
+    transition:
+        transform .22s ease,
+        filter .22s ease;
+}
+
+
+/* ------------------------------------------------------------
+   HOVER SVG
+   ------------------------------------------------------------ */
+
+#componentLibraryGrid > *:hover svg {
+
+    transform:
+        translateY(-3px)
+        scale(1.045);
+
+    filter:
+        drop-shadow(
+            0 12px 13px rgba(0,0,0,.48)
+        )
+        drop-shadow(
+            0 0 10px rgba(37,135,255,.13)
+        );
+}
+
+
+/* ================================================================
+   IMG — OBJET 3D INDÉPENDANT
+   ================================================================ */
+
+#componentLibraryGrid img {
+
+    max-width: 92% !important;
+
+    max-height: 108px !important;
+
+    width: auto;
+
+    height: auto;
+
+    object-fit: contain;
+
+    display: block;
+
+    background: transparent !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+
+    filter:
+        drop-shadow(
+            0 8px 9px rgba(0,0,0,.42)
+        );
+
+    transition:
+        transform .22s ease,
+        filter .22s ease;
+}
+
+
+/* ------------------------------------------------------------
+   HOVER IMG
+   ------------------------------------------------------------ */
+
+#componentLibraryGrid > *:hover img {
+
+    transform:
+        translateY(-4px)
+        scale(1.05);
+
+    filter:
+        drop-shadow(
+            0 12px 14px rgba(0,0,0,.50)
+        );
+}
+
+
+/* ================================================================
+   FIN — VISUAL SANS CADRE
+   ================================================================ */
+
+
 
 
 /* ================================================================
