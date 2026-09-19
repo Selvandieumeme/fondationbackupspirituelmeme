@@ -3413,1815 +3413,718 @@ function getFOBASElectronicLEDColor(variant) {
 }
 
 
-/* ============================================================
-   09.5 — UNIVERSAL SVG 3D ICON BUILDER
-   ------------------------------------------------------------
-   VERSION CLEAN :
-   - aucune ombre externe
-   - aucun ellipse décoratif sous le composant
-   - aucune carte
-   - composants simples
-============================================================ */
-
-function createFOBAS3DComponentSVG(
-    definition,
-    family
-) {
-
-    const uid =
-        ++FOBAS_ELECTRONIC_3D_UID;
-
-    const variant =
-        family === "led"
-            ? getFOBASElectronicLEDVariant(
-                definition
-            )
-            : "";
-
-    const ledColor =
-        family === "led"
-            ? getFOBASElectronicLEDColor(
-                variant
-            )
-            : "#263238";
-
-    const safeColor =
-        fobas3DSafe(
-            definition?.color ||
-            ledColor ||
-            "#263238"
-        );
-
-    const common = `
-        width="100%"
-        height="100%"
-        viewBox="0 0 160 110"
-        preserveAspectRatio="xMidYMid meet"
-        aria-hidden="true"
-        focusable="false"
-        style="pointer-events:none;overflow:visible;"
-    `;
 
 
-    /* ========================================================
-       LED
-    ======================================================== */
 
-    if (family === "led") {
 
-        let domeFill = safeColor;
 
-        if (variant === "rgb") {
-            domeFill = "#00d9ff";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================
+   ARDUINO UNO — PROFESSIONAL 3D SVG
+   --------------------------------------------------------
+   - Apparence Arduino UNO réaliste
+   - D0 → D13 clairement identifiés
+   - A0 → A5 clairement identifiés
+   - IOREF / RESET / 3V3 / 5V / GND / VIN identifiés
+   - Broches alignées avec leurs positions visuelles
+   - Aucun cadre décoratif
+   - Aucun shadow-card
+   - Aucun changement de définition ou de logique
+======================================================== */
+
+if (family === "arduino") {
+
+    /*
+     * --------------------------------------------------------
+     * DIGITAL PINS — D0 → D13
+     * --------------------------------------------------------
+     * Positionnés sur le côté droit, comme sur une vue
+     * claire d'un Arduino UNO.
+     */
+    const arduinoDigitalPins = [
+        "D0", "D1", "D2", "D3", "D4", "D5", "D6",
+        "D7", "D8", "D9", "D10", "D11", "D12", "D13"
+    ];
+
+    const digitalPinSVG = arduinoDigitalPins.map(
+        (pin, index) => {
+
+            const y = 24 + (index * 4.05);
+
+            return `
+                <g
+                    class="arduino-svg-pin arduino-svg-digital"
+                    data-pin-label="${fobas3DSafe(pin)}"
+                >
+
+                    <!-- Broche métallique -->
+                    <circle
+                        cx="142"
+                        cy="${y}"
+                        r="1.35"
+                        fill="#d7b65c"
+                        stroke="#70561c"
+                        stroke-width=".45"
+                    />
+
+                    <!-- Numéro de la broche -->
+                    <text
+                        x="135.5"
+                        y="${y + 1.35}"
+                        text-anchor="end"
+                        font-size="3.25"
+                        font-weight="700"
+                        font-family="Arial,sans-serif"
+                        fill="#ffffff"
+                    >${pin}</text>
+
+                </g>
+            `;
         }
+    ).join("");
 
-        if (variant === "rgbw") {
-            domeFill = "#ffffff";
+
+    /*
+     * --------------------------------------------------------
+     * ANALOG PINS — A0 → A5
+     * --------------------------------------------------------
+     */
+    const arduinoAnalogPins = [
+        "A0", "A1", "A2", "A3", "A4", "A5"
+    ];
+
+    const analogPinSVG = arduinoAnalogPins.map(
+        (pin, index) => {
+
+            const y = 49 + (index * 5.2);
+
+            return `
+                <g
+                    class="arduino-svg-pin arduino-svg-analog"
+                    data-pin-label="${fobas3DSafe(pin)}"
+                >
+
+                    <!-- Broche métallique -->
+                    <circle
+                        cx="18"
+                        cy="${y}"
+                        r="1.35"
+                        fill="#d7b65c"
+                        stroke="#70561c"
+                        stroke-width=".45"
+                    />
+
+                    <!-- Numéro de la broche -->
+                    <text
+                        x="24"
+                        y="${y + 1.35}"
+                        text-anchor="start"
+                        font-size="3.35"
+                        font-weight="700"
+                        font-family="Arial,sans-serif"
+                        fill="#ffffff"
+                    >${pin}</text>
+
+                </g>
+            `;
         }
+    ).join("");
 
-        if (variant === "ir") {
-            domeFill = "#5b1111";
-        }
-
-        if (variant === "uv") {
-            domeFill = "#7048ff";
-        }
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-led"
-                data-led-variant="${fobas3DSafe(variant)}"
-                data-svg-uid="${uid}"
-            >
-
-                <line
-                    x1="68"
-                    y1="75"
-                    x2="59"
-                    y2="102"
-                    stroke="#bfc5ca"
-                    stroke-width="4"
-                    stroke-linecap="round"
-                />
-
-                <line
-                    x1="92"
-                    y1="75"
-                    x2="101"
-                    y2="102"
-                    stroke="#8d969d"
-                    stroke-width="4"
-                    stroke-linecap="round"
-                />
-
-                <path
-                    d="M58 52
-                       C58 31 67 19 80 19
-                       C93 19 102 31 102 52
-                       L98 68
-                       C94 76 88 80 80 80
-                       C72 80 66 76 62 68Z"
-                    fill="${domeFill}"
-                    stroke="#263238"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M64 49
-                       C66 31 73 24 80 24
-                       C86 24 91 29 94 39"
-                    fill="none"
-                    stroke="#ffffff"
-                    stroke-width="5"
-                    opacity=".7"
-                    stroke-linecap="round"
-                />
-
-                <rect
-                    x="72"
-                    y="59"
-                    width="16"
-                    height="13"
-                    rx="2"
-                    fill="#263238"
-                    opacity=".9"
-                />
-
-                <path
-                    d="M76 58V48
-                       M84 58V43"
-                    stroke="#d7dde2"
-                    stroke-width="2"
-                />
-
-                ${
-                    variant === "rgb"
-                        ? `
-                            <circle
-                                cx="80"
-                                cy="49"
-                                r="8"
-                                fill="#00e5ff"
-                                class="fobas-led-light"
-                            />
-                        `
-                        : ""
-                }
-
-                ${
-                    variant === "rgbw"
-                        ? `
-                            <circle
-                                cx="80"
-                                cy="49"
-                                r="8"
-                                fill="#ffffff"
-                                class="fobas-led-light"
-                            />
-                        `
-                        : ""
-                }
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       BULB
-    ======================================================== */
-
-    if (family === "bulb") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-bulb"
-            >
-
-                <path
-                    d="M58 50
-                       C58 29 68 17 80 17
-                       C92 17 102 29 102 50
-                       C102 62 96 68 92 75
-                       L68 75
-                       C64 68 58 62 58 50Z"
-                    fill="#e9f7ff"
-                    stroke="#8fa1ad"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M69 75H91V84H69Z"
-                    fill="#aeb8bf"
-                    stroke="#66737b"
-                    stroke-width="2"
-                />
-
-                <path
-                    d="M68 84H92
-                       M69 88H91
-                       M71 92H89"
-                    stroke="#69757d"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M72 48
-                       C76 54 84 54 88 48"
-                    fill="none"
-                    stroke="#9b7b42"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M75 39
-                       L80 49
-                       L85 39"
-                    fill="none"
-                    stroke="#d6a94c"
-                    stroke-width="3"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       RESISTOR
-    ======================================================== */
-
-    if (family === "resistor") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-resistor"
-            >
-
-                <line
-                    x1="15"
-                    y1="54"
-                    x2="47"
-                    y2="54"
-                    stroke="#aeb5ba"
-                    stroke-width="5"
-                />
-
-                <line
-                    x1="113"
-                    y1="54"
-                    x2="145"
-                    y2="54"
-                    stroke="#aeb5ba"
-                    stroke-width="5"
-                />
-
-                <path
-                    d="M45 40
-                       L115 40
-                       L115 68
-                       L45 68
-                       Z"
-                    fill="#d8b27c"
-                    stroke="#765d3d"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="56"
-                    y="40"
-                    width="7"
-                    height="28"
-                    fill="#6d2636"
-                />
-
-                <rect
-                    x="72"
-                    y="40"
-                    width="7"
-                    height="28"
-                    fill="#222"
-                />
-
-                <rect
-                    x="88"
-                    y="40"
-                    width="7"
-                    height="28"
-                    fill="#d99b28"
-                />
-
-                <rect
-                    x="103"
-                    y="40"
-                    width="7"
-                    height="28"
-                    fill="#c58b35"
-                />
-
-                <path
-                    d="M49 43H108"
-                    stroke="#fff"
-                    stroke-width="4"
-                    opacity=".45"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       POTENTIOMETER
-    ======================================================== */
-
-    if (family === "potentiometer") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-potentiometer"
-            >
-
-                <rect
-                    x="45"
-                    y="48"
-                    width="70"
-                    height="35"
-                    rx="8"
-                    fill="#333b40"
-                    stroke="#11181c"
-                    stroke-width="3"
-                />
-
-                <circle
-                    cx="80"
-                    cy="48"
-                    r="27"
-                    fill="#606970"
-                    stroke="#1e2529"
-                    stroke-width="4"
-                />
-
-                <circle
-                    cx="80"
-                    cy="48"
-                    r="20"
-                    fill="#89939a"
-                />
-
-                <line
-                    x1="80"
-                    y1="48"
-                    x2="91"
-                    y2="31"
-                    stroke="#f2f4f5"
-                    stroke-width="4"
-                    stroke-linecap="round"
-                />
-
-                <line
-                    x1="58"
-                    y1="84"
-                    x2="53"
-                    y2="103"
-                    stroke="#aaa"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="80"
-                    y1="84"
-                    x2="80"
-                    y2="103"
-                    stroke="#aaa"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="102"
-                    y1="84"
-                    x2="107"
-                    y2="103"
-                    stroke="#aaa"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       CAPACITOR
-    ======================================================== */
-
-    if (family === "capacitor") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-capacitor"
-            >
-
-                <rect
-                    x="57"
-                    y="25"
-                    width="46"
-                    height="62"
-                    rx="8"
-                    fill="#263238"
-                    stroke="#11181c"
-                    stroke-width="3"
-                />
-
-                <ellipse
-                    cx="80"
-                    cy="25"
-                    rx="23"
-                    ry="8"
-                    fill="#39464d"
-                    stroke="#151b1e"
-                    stroke-width="2"
-                />
-
-                <path
-                    d="M65 31V80"
-                    stroke="#65737b"
-                    stroke-width="5"
-                    opacity=".6"
-                />
-
-                <path
-                    d="M72 18H88"
-                    stroke="#d5dadd"
-                    stroke-width="3"
-                />
-
-                <line
-                    x1="70"
-                    y1="87"
-                    x2="66"
-                    y2="104"
-                    stroke="#aeb5ba"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="90"
-                    y1="87"
-                    x2="94"
-                    y2="104"
-                    stroke="#aeb5ba"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       DIODE
-    ======================================================== */
-
-    if (family === "diode") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-diode"
-            >
-
-                <line
-                    x1="15"
-                    y1="53"
-                    x2="55"
-                    y2="53"
-                    stroke="#adb5ba"
-                    stroke-width="5"
-                />
-
-                <line
-                    x1="105"
-                    y1="53"
-                    x2="145"
-                    y2="53"
-                    stroke="#adb5ba"
-                    stroke-width="5"
-                />
-
-                <rect
-                    x="52"
-                    y="36"
-                    width="56"
-                    height="34"
-                    rx="12"
-                    fill="#20272b"
-                    stroke="#0d1113"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="96"
-                    y="36"
-                    width="7"
-                    height="34"
-                    fill="#d9dde0"
-                />
-
-                <path
-                    d="M59 41H89"
-                    stroke="#626e75"
-                    stroke-width="4"
-                    opacity=".7"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       TRANSISTOR / MOSFET
-    ======================================================== */
-
-    if (family === "transistor") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-transistor"
-            >
-
-                <path
-                    d="M57 30
-                       C57 22 64 18 80 18
-                       C96 18 103 22 103 30
-                       V70
-                       H57Z"
-                    fill="#1e2529"
-                    stroke="#0b0f11"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M64 27H91"
-                    stroke="#626d74"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="66"
-                    y1="70"
-                    x2="60"
-                    y2="103"
-                    stroke="#aeb5ba"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="80"
-                    y1="70"
-                    x2="80"
-                    y2="103"
-                    stroke="#aeb5ba"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="94"
-                    y1="70"
-                    x2="100"
-                    y2="103"
-                    stroke="#aeb5ba"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       IC / CHIP
-    ======================================================== */
-
-    if (family === "ic") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-ic"
-            >
-
-                <rect
-                    x="35"
-                    y="25"
-                    width="90"
-                    height="55"
-                    rx="7"
-                    fill="#171d20"
-                    stroke="#090c0d"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M45 31H112"
-                    stroke="#4d5a61"
-                    stroke-width="4"
-                    opacity=".6"
-                />
-
-                <path
-                    d="M74 25
-                       C74 32 86 32 86 25"
-                    fill="none"
-                    stroke="#66737b"
-                    stroke-width="3"
-                />
-
-                ${Array.from(
-                    { length: 7 },
-                    (_, i) => `
-                        <line
-                            x1="${45 + i * 11}"
-                            y1="80"
-                            x2="${45 + i * 11}"
-                            y2="103"
-                            stroke="#b9c0c4"
-                            stroke-width="3"
-                        />
-
-                        <line
-                            x1="${45 + i * 11}"
-                            y1="25"
-                            x2="${45 + i * 11}"
-                            y2="8"
-                            stroke="#b9c0c4"
-                            stroke-width="3"
-                        />
-                    `
-                ).join("")}
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       ARDUINO
-    ======================================================== */
-
-    if (family === "arduino") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-arduino"
-            >
-
-                <rect
-                    x="20"
-                    y="18"
-                    width="120"
-                    height="65"
-                    rx="8"
-                    fill="#177245"
-                    stroke="#0b4329"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="27"
-                    y="25"
-                    width="36"
-                    height="20"
-                    rx="3"
-                    fill="#20272b"
-                />
-
-                <rect
-                    x="93"
-                    y="26"
-                    width="30"
-                    height="18"
-                    rx="3"
-                    fill="#b8c0c5"
-                />
-
-                <rect
-                    x="69"
-                    y="39"
-                    width="25"
-                    height="22"
-                    rx="3"
-                    fill="#172126"
-                />
-
-                <text
-                    x="80"
-                    y="74"
-                    text-anchor="middle"
-                    font-size="10"
-                    font-family="Arial,sans-serif"
-                    fill="#e8fff2"
-                >ARDUINO</text>
-
-                ${Array.from(
-                    { length: 12 },
-                    (_, i) => `
-                        <circle
-                            cx="${28 + i * 9.5}"
-                            cy="18"
-                            r="2.4"
-                            fill="#d6b65c"
-                        />
-
-                        <circle
-                            cx="${28 + i * 9.5}"
-                            cy="83"
-                            r="2.4"
-                            fill="#d6b65c"
-                        />
-                    `
-                ).join("")}
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       ESP
-    ======================================================== */
-
-    if (family === "esp") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-esp"
-            >
-
-                <rect
-                    x="27"
-                    y="22"
-                    width="106"
-                    height="60"
-                    rx="5"
-                    fill="#23814d"
-                    stroke="#104c2d"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="61"
-                    y="31"
-                    width="48"
-                    height="28"
-                    rx="3"
-                    fill="#20272b"
-                />
-
-                <path
-                    d="M67 36H103
-                       M67 42H103
-                       M67 48H103
-                       M67 54H103"
-                    stroke="#65737b"
-                    stroke-width="2"
-                />
-
-                <path
-                    d="M34 28H50V72H34"
-                    fill="#b8c0c5"
-                    opacity=".7"
-                />
-
-                ${Array.from(
-                    { length: 10 },
-                    (_, i) => `
-                        <circle
-                            cx="${34 + i * 10}"
-                            cy="22"
-                            r="2.2"
-                            fill="#d6b65c"
-                        />
-
-                        <circle
-                            cx="${34 + i * 10}"
-                            cy="82"
-                            r="2.2"
-                            fill="#d6b65c"
-                        />
-                    `
-                ).join("")}
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       RASPBERRY PI
-    ======================================================== */
-
-    if (family === "raspberry") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-raspberry"
-            >
-
-                <rect
-                    x="18"
-                    y="20"
-                    width="124"
-                    height="62"
-                    rx="6"
-                    fill="#416d45"
-                    stroke="#214428"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="53"
-                    y="35"
-                    width="40"
-                    height="25"
-                    rx="2"
-                    fill="#1d2428"
-                />
-
-                <rect
-                    x="105"
-                    y="31"
-                    width="28"
-                    height="18"
-                    fill="#777"
-                />
-
-                <rect
-                    x="23"
-                    y="54"
-                    width="28"
-                    height="18"
-                    fill="#777"
-                />
-
-                ${Array.from(
-                    { length: 20 },
-                    (_, i) => `
-                        <circle
-                            cx="${32 + (i % 10) * 10}"
-                            cy="${20 + Math.floor(i / 10) * 62}"
-                            r="2"
-                            fill="#d7b65a"
-                        />
-                    `
-                ).join("")}
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       BREADBOARD
-    ======================================================== */
-
-    if (family === "breadboard") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-breadboard"
-            >
-
-                <rect
-                    x="15"
-                    y="18"
-                    width="130"
-                    height="67"
-                    rx="8"
-                    fill="#f1f2ef"
-                    stroke="#c1c5c2"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="22"
-                    y="26"
-                    width="7"
-                    height="51"
-                    fill="#c62828"
-                    opacity=".7"
-                />
-
-                <rect
-                    x="131"
-                    y="26"
-                    width="7"
-                    height="51"
-                    fill="#1565c0"
-                    opacity=".7"
-                />
-
-                ${Array.from(
-                    { length: 8 },
-                    (_, r) =>
-                        Array.from(
-                            { length: 10 },
-                            (_, c) => `
-                                <circle
-                                    cx="${39 + c * 9.5}"
-                                    cy="${34 + r * 6}"
-                                    r="1.8"
-                                    fill="#6d7478"
-                                />
-                            `
-                        ).join("")
-                ).join("")}
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       PCB
-    ======================================================== */
-
-    if (family === "pcb") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-pcb"
-            >
-
-                <rect
-                    x="17"
-                    y="18"
-                    width="126"
-                    height="65"
-                    rx="5"
-                    fill="#155b3a"
-                    stroke="#0b3523"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M25 35H62V60H105V29H135
-                       M25 69H49V47H82V73H130"
-                    fill="none"
-                    stroke="#d0b84c"
-                    stroke-width="2"
-                    opacity=".8"
-                />
-
-                <circle
-                    cx="30"
-                    cy="28"
-                    r="4"
-                    fill="#d0b84c"
-                />
-
-                <circle
-                    cx="130"
-                    cy="28"
-                    r="4"
-                    fill="#d0b84c"
-                />
-
-                <circle
-                    cx="30"
-                    cy="73"
-                    r="4"
-                    fill="#d0b84c"
-                />
-
-                <circle
-                    cx="130"
-                    cy="73"
-                    r="4"
-                    fill="#d0b84c"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       RELAY
-    ======================================================== */
-
-    if (family === "relay") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-relay"
-            >
-
-                <rect
-                    x="42"
-                    y="25"
-                    width="76"
-                    height="58"
-                    rx="7"
-                    fill="#242c30"
-                    stroke="#111719"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="52"
-                    y="34"
-                    width="56"
-                    height="25"
-                    rx="4"
-                    fill="#536169"
-                />
-
-                <path
-                    d="M61 47H99"
-                    stroke="#d8dde0"
-                    stroke-width="3"
-                />
-
-                <circle
-                    cx="61"
-                    cy="69"
-                    r="3"
-                    fill="#d5b85c"
-                />
-
-                <circle
-                    cx="80"
-                    cy="69"
-                    r="3"
-                    fill="#d5b85c"
-                />
-
-                <circle
-                    cx="99"
-                    cy="69"
-                    r="3"
-                    fill="#d5b85c"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       SWITCH / PUSH BUTTON
-    ======================================================== */
-
-    if (
-        family === "switch" ||
-        family === "push-button"
-    ) {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-switch"
-            >
-
-                <rect
-                    x="40"
-                    y="48"
-                    width="80"
-                    height="32"
-                    rx="7"
-                    fill="#252d31"
-                    stroke="#101416"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="52"
-                    y="32"
-                    width="56"
-                    height="28"
-                    rx="8"
-                    fill="#59656c"
-                    stroke="#20272b"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="59"
-                    y="38"
-                    width="42"
-                    height="14"
-                    rx="6"
-                    fill="#909ba1"
-                />
-
-                <line
-                    x1="55"
-                    y1="80"
-                    x2="50"
-                    y2="101"
-                    stroke="#b5bdc1"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="105"
-                    y1="80"
-                    x2="110"
-                    y2="101"
-                    stroke="#b5bdc1"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       DC MOTOR
-    ======================================================== */
-
-    if (family === "dc-motor") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-motor"
-            >
-
-                <rect
-                    x="39"
-                    y="30"
-                    width="74"
-                    height="47"
-                    rx="22"
-                    fill="#8b969c"
-                    stroke="#485258"
-                    stroke-width="3"
-                />
-
-                <path
-                    d="M50 34V73"
-                    stroke="#d8dde0"
-                    stroke-width="5"
-                    opacity=".65"
-                />
-
-                <circle
-                    cx="76"
-                    cy="53"
-                    r="20"
-                    fill="#59656b"
-                    stroke="#333d42"
-                    stroke-width="3"
-                />
-
-                <circle
-                    cx="76"
-                    cy="53"
-                    r="8"
-                    fill="#c6cdd1"
-                />
-
-                <rect
-                    x="105"
-                    y="46"
-                    width="30"
-                    height="14"
-                    rx="4"
-                    fill="#b9c0c4"
-                />
-
-                <line
-                    x1="135"
-                    y1="53"
-                    x2="151"
-                    y2="53"
-                    stroke="#8c979d"
-                    stroke-width="5"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       SERVO
-    ======================================================== */
-
-    if (family === "servo") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-servo"
-            >
-
-                <rect
-                    x="43"
-                    y="30"
-                    width="74"
-                    height="55"
-                    rx="7"
-                    fill="#263238"
-                    stroke="#11181c"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="51"
-                    y="39"
-                    width="58"
-                    height="29"
-                    rx="4"
-                    fill="#1877a5"
-                />
-
-                <circle
-                    cx="80"
-                    cy="35"
-                    r="15"
-                    fill="#d8dde0"
-                    stroke="#626d73"
-                    stroke-width="3"
-                />
-
-                <line
-                    x1="80"
-                    y1="35"
-                    x2="95"
-                    y2="25"
-                    stroke="#ffffff"
-                    stroke-width="4"
-                    stroke-linecap="round"
-                />
-
-                <line
-                    x1="58"
-                    y1="85"
-                    x2="54"
-                    y2="103"
-                    stroke="#d0b85c"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="80"
-                    y1="85"
-                    x2="80"
-                    y2="103"
-                    stroke="#d0b85c"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="102"
-                    y1="85"
-                    x2="106"
-                    y2="103"
-                    stroke="#d0b85c"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       STEPPER MOTOR
-    ======================================================== */
-
-    if (family === "stepper") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-stepper"
-            >
-
-                <rect
-                    x="40"
-                    y="25"
-                    width="80"
-                    height="57"
-                    rx="7"
-                    fill="#454e53"
-                    stroke="#20272b"
-                    stroke-width="3"
-                />
-
-                <circle
-                    cx="80"
-                    cy="53"
-                    r="24"
-                    fill="#8d979c"
-                    stroke="#343d42"
-                    stroke-width="4"
-                />
-
-                <circle
-                    cx="80"
-                    cy="53"
-                    r="9"
-                    fill="#d0d5d8"
-                />
-
-                <path
-                    d="M54 31H106
-                       M54 75H106"
-                    stroke="#c7cdd0"
-                    stroke-width="3"
-                />
-
-                <line
-                    x1="57"
-                    y1="82"
-                    x2="53"
-                    y2="103"
-                    stroke="#bfc5c8"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="103"
-                    y1="82"
-                    x2="107"
-                    y2="103"
-                    stroke="#bfc5c8"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       BUZZER
-    ======================================================== */
-
-    if (family === "buzzer") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-buzzer"
-            >
-
-                <circle
-                    cx="80"
-                    cy="52"
-                    r="35"
-                    fill="#252d31"
-                    stroke="#111719"
-                    stroke-width="4"
-                />
-
-                <circle
-                    cx="80"
-                    cy="52"
-                    r="24"
-                    fill="#11181b"
-                />
-
-                <circle
-                    cx="80"
-                    cy="52"
-                    r="6"
-                    fill="#4d5a60"
-                />
-
-                <line
-                    x1="64"
-                    y1="80"
-                    x2="59"
-                    y2="103"
-                    stroke="#c1c6c9"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="96"
-                    y1="80"
-                    x2="101"
-                    y2="103"
-                    stroke="#c1c6c9"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       SPEAKER
-    ======================================================== */
-
-    if (family === "speaker") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-speaker"
-            >
-
-                <circle
-                    cx="80"
-                    cy="52"
-                    r="38"
-                    fill="#1c2327"
-                    stroke="#0b0f11"
-                    stroke-width="4"
-                />
-
-                <circle
-                    cx="80"
-                    cy="52"
-                    r="27"
-                    fill="#303b40"
-                />
-
-                <path
-                    d="M66 38
-                       L94 38
-                       L104 67
-                       L56 67
-                       Z"
-                    fill="#111719"
-                />
-
-                <circle
-                    cx="80"
-                    cy="53"
-                    r="7"
-                    fill="#69757a"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       SENSOR
-    ======================================================== */
-
-    if (family === "sensor") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-sensor"
-            >
-
-                <rect
-                    x="37"
-                    y="26"
-                    width="86"
-                    height="58"
-                    rx="6"
-                    fill="#1d6847"
-                    stroke="#0d3927"
-                    stroke-width="3"
-                />
-
-                <circle
-                    cx="62"
-                    cy="51"
-                    r="13"
-                    fill="#8f9ba1"
-                    stroke="#263238"
-                    stroke-width="3"
-                />
-
-                <circle
-                    cx="98"
-                    cy="51"
-                    r="13"
-                    fill="#8f9ba1"
-                    stroke="#263238"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="69"
-                    y="67"
-                    width="22"
-                    height="8"
-                    rx="3"
-                    fill="#20282c"
-                />
-
-                <line
-                    x1="52"
-                    y1="84"
-                    x2="48"
-                    y2="103"
-                    stroke="#c4c9cc"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="80"
-                    y1="84"
-                    x2="80"
-                    y2="103"
-                    stroke="#c4c9cc"
-                    stroke-width="4"
-                />
-
-                <line
-                    x1="108"
-                    y1="84"
-                    x2="112"
-                    y2="103"
-                    stroke="#c4c9cc"
-                    stroke-width="4"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       BATTERY
-    ======================================================== */
-
-    if (family === "battery") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-battery"
-            >
-
-                <rect
-                    x="52"
-                    y="25"
-                    width="56"
-                    height="62"
-                    rx="8"
-                    fill="#303a3f"
-                    stroke="#111719"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="60"
-                    y="39"
-                    width="40"
-                    height="25"
-                    rx="3"
-                    fill="#151b1e"
-                />
-
-                <text
-                    x="80"
-                    y="56"
-                    text-anchor="middle"
-                    font-size="12"
-                    font-family="Arial,sans-serif"
-                    fill="#f4f5f5"
-                >DC</text>
-
-                <circle
-                    cx="66"
-                    cy="20"
-                    r="5"
-                    fill="#bfc5c8"
-                />
-
-                <circle
-                    cx="94"
-                    cy="20"
-                    r="5"
-                    fill="#bfc5c8"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       MULTIMETER
-    ======================================================== */
-
-    if (family === "multimeter") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-multimeter"
-            >
-
-                <rect
-                    x="43"
-                    y="15"
-                    width="74"
-                    height="78"
-                    rx="8"
-                    fill="#333d42"
-                    stroke="#151b1e"
-                    stroke-width="4"
-                />
-
-                <rect
-                    x="53"
-                    y="25"
-                    width="54"
-                    height="25"
-                    rx="3"
-                    fill="#101719"
-                />
-
-                <text
-                    x="80"
-                    y="42"
-                    text-anchor="middle"
-                    font-size="14"
-                    font-family="monospace"
-                    fill="#d7f7dc"
-                >0.00</text>
-
-                <circle
-                    cx="80"
-                    cy="66"
-                    r="13"
-                    fill="#8c979d"
-                    stroke="#20272b"
-                    stroke-width="3"
-                />
-
-                <line
-                    x1="80"
-                    y1="66"
-                    x2="88"
-                    y2="57"
-                    stroke="#ffffff"
-                    stroke-width="3"
-                />
-
-                <circle
-                    cx="62"
-                    cy="85"
-                    r="4"
-                    fill="#c62828"
-                />
-
-                <circle
-                    cx="80"
-                    cy="85"
-                    r="4"
-                    fill="#111"
-                />
-
-                <circle
-                    cx="98"
-                    cy="85"
-                    r="4"
-                    fill="#111"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       LCD
-    ======================================================== */
-
-    if (family === "lcd") {
-
-        return `
-            <svg
-                ${common}
-                class="fobas-svg-3d fobas-svg-lcd"
-            >
-
-                <rect
-                    x="22"
-                    y="22"
-                    width="116"
-                    height="61"
-                    rx="6"
-                    fill="#303a3f"
-                    stroke="#111719"
-                    stroke-width="3"
-                />
-
-                <rect
-                    x="34"
-                    y="33"
-                    width="92"
-                    height="34"
-                    rx="3"
-                    fill="#153f32"
-                />
-
-                <path
-                    d="M41 41H117
-                       M41 49H117
-                       M41 57H117"
-                    stroke="#6ed99b"
-                    stroke-width="2"
-                    opacity=".65"
-                />
-
-                ${Array.from(
-                    { length: 10 },
-                    (_, i) => `
-                        <circle
-                            cx="${30 + i * 11}"
-                            cy="83"
-                            r="2"
-                            fill="#d0b85c"
-                        />
-                    `
-                ).join("")}
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       GENERIC ELECTRONIC COMPONENT
-    ======================================================== */
 
     return `
         <svg
             ${common}
-            class="fobas-svg-3d fobas-svg-generic"
+            class="fobas-svg-3d fobas-svg-arduino"
+            data-svg-uid="${uid}"
         >
 
+            <defs>
+
+                <!-- Corps vert Arduino -->
+                <linearGradient
+                    id="arduinoBoard3D_${uid}"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="1"
+                >
+                    <stop
+                        offset="0%"
+                        stop-color="#238653"
+                    />
+
+                    <stop
+                        offset="52%"
+                        stop-color="#177245"
+                    />
+
+                    <stop
+                        offset="100%"
+                        stop-color="#0a4a2d"
+                    />
+                </linearGradient>
+
+
+                <!-- Épaisseur de la carte -->
+                <linearGradient
+                    id="arduinoEdge3D_${uid}"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                >
+                    <stop
+                        offset="0%"
+                        stop-color="#0d5634"
+                    />
+
+                    <stop
+                        offset="100%"
+                        stop-color="#06351f"
+                    />
+                </linearGradient>
+
+
+                <!-- Métal -->
+                <linearGradient
+                    id="arduinoMetal3D_${uid}"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                >
+                    <stop
+                        offset="0%"
+                        stop-color="#f1f4f5"
+                    />
+
+                    <stop
+                        offset="48%"
+                        stop-color="#b7c0c4"
+                    />
+
+                    <stop
+                        offset="100%"
+                        stop-color="#69747a"
+                    />
+                </linearGradient>
+
+            </defs>
+
+
+            <!-- =================================================
+                 ÉPAISSEUR 3D DE LA CARTE
+            ================================================== -->
+
             <rect
-                x="38"
-                y="28"
-                width="84"
-                height="52"
-                rx="9"
-                fill="${safeColor}"
-                stroke="#111719"
-                stroke-width="3"
+                x="20"
+                y="18"
+                width="120"
+                height="68"
+                rx="5"
+                fill="url(#arduinoEdge3D_${uid})"
+                transform="translate(0,3)"
             />
 
+
+            <!-- =================================================
+                 CORPS PRINCIPAL ARDUINO UNO
+            ================================================== -->
+
+            <rect
+                x="20"
+                y="15"
+                width="120"
+                height="68"
+                rx="5"
+                fill="url(#arduinoBoard3D_${uid})"
+                stroke="#063b23"
+                stroke-width="1.5"
+            />
+
+
+            <!-- Ligne de bord supérieure -->
             <path
-                d="M45 34H109"
-                stroke="#ffffff"
-                stroke-width="5"
-                opacity=".22"
-                stroke-linecap="round"
+                d="M25 17H135"
+                stroke="#66b98b"
+                stroke-width="1"
+                opacity=".45"
+            />
+
+
+            <!-- =================================================
+                 USB TYPE-B
+            ================================================== -->
+
+            <rect
+                x="25"
+                y="25"
+                width="30"
+                height="19"
+                rx="2.5"
+                fill="url(#arduinoMetal3D_${uid})"
+                stroke="#515b60"
+                stroke-width="1"
+            />
+
+            <rect
+                x="29"
+                y="29"
+                width="22"
+                height="11"
+                rx="1.5"
+                fill="#20282c"
+                stroke="#101619"
+                stroke-width=".7"
+            />
+
+            <rect
+                x="32"
+                y="31"
+                width="16"
+                height="1.5"
+                rx=".5"
+                fill="#5c686e"
+            />
+
+            <text
+                x="40"
+                y="48"
+                text-anchor="middle"
+                font-size="3"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#dcefe4"
+            >USB</text>
+
+
+            <!-- =================================================
+                 JACK D'ALIMENTATION
+            ================================================== -->
+
+            <circle
+                cx="31"
+                cy="63"
+                r="8"
+                fill="#151c20"
+                stroke="#657077"
+                stroke-width="2"
             />
 
             <circle
-                cx="80"
-                cy="53"
-                r="12"
+                cx="31"
+                cy="63"
+                r="4"
+                fill="#080d0f"
+                stroke="#9ca5a9"
+                stroke-width="1"
+            />
+
+            <circle
+                cx="31"
+                cy="63"
+                r="1.3"
+                fill="#bfc6c9"
+            />
+
+
+            <!-- =================================================
+                 ATMEGA328P
+            ================================================== -->
+
+            <rect
+                x="61"
+                y="39"
+                width="30"
+                height="24"
+                rx="2"
+                fill="#151c20"
+                stroke="#080c0e"
+                stroke-width="1"
+            />
+
+            <path
+                d="
+                    M66 43H86
+                    M66 48H86
+                    M66 53H86
+                    M66 58H86
+                "
+                stroke="#4d5a60"
+                stroke-width=".9"
+                opacity=".8"
+            />
+
+            <text
+                x="76"
+                y="68"
+                text-anchor="middle"
+                font-size="3"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#dce6e9"
+            >ATmega328P</text>
+
+
+            <!-- =================================================
+                 CRYSTAL 16 MHz
+            ================================================== -->
+
+            <rect
+                x="96"
+                y="39"
+                width="17"
+                height="7"
+                rx="2"
+                fill="#b7c0c4"
+                stroke="#68747a"
+                stroke-width=".8"
+            />
+
+            <text
+                x="104.5"
+                y="50"
+                text-anchor="middle"
+                font-size="2.8"
+                font-family="Arial,sans-serif"
+                fill="#d9eee2"
+            >16 MHz</text>
+
+
+            <!-- =================================================
+                 RESET BUTTON
+            ================================================== -->
+
+            <rect
+                x="116"
+                y="50"
+                width="14"
+                height="11"
+                rx="2"
+                fill="#263238"
+                stroke="#101619"
+                stroke-width="1"
+            />
+
+            <rect
+                x="119"
+                y="52"
+                width="8"
+                height="7"
+                rx="2"
+                fill="#9ba5a9"
+            />
+
+            <text
+                x="123"
+                y="66"
+                text-anchor="middle"
+                font-size="3"
+                font-weight="700"
+                font-family="Arial,sans-serif"
                 fill="#ffffff"
-                opacity=".13"
+            >RESET</text>
+
+
+            <!-- =================================================
+                 ARDUINO UNO
+            ================================================== -->
+
+            <text
+                x="105"
+                y="28"
+                text-anchor="middle"
+                font-size="7"
+                font-weight="800"
+                font-family="Arial,sans-serif"
+                fill="#f1fff6"
+            >ARDUINO</text>
+
+            <text
+                x="105"
+                y="36"
+                text-anchor="middle"
+                font-size="6.5"
+                font-weight="800"
+                font-family="Arial,sans-serif"
+                fill="#f1fff6"
+            >UNO</text>
+
+
+            <!-- =================================================
+                 DIGITAL HEADER — D0 → D13
+                 LES NUMÉROS SONT DIRECTEMENT À CÔTÉ
+                 DES BROCHES.
+            ================================================== -->
+
+            <g aria-label="Digital pins D0 to D13">
+
+                <!-- Rail numérique -->
+                <rect
+                    x="137"
+                    y="20"
+                    width="7"
+                    height="58"
+                    rx="2"
+                    fill="#0d5634"
+                    opacity=".7"
+                />
+
+                ${digitalPinSVG}
+
+            </g>
+
+
+            <!-- =================================================
+                 ANALOG HEADER — A0 → A5
+            ================================================== -->
+
+            <g aria-label="Analog pins A0 to A5">
+
+                <!-- Rail analogique -->
+                <rect
+                    x="16"
+                    y="45"
+                    width="7"
+                    height="34"
+                    rx="2"
+                    fill="#0d5634"
+                    opacity=".7"
+                />
+
+                ${analogPinSVG}
+
+            </g>
+
+
+            <!-- =================================================
+                 POWER HEADER — VRAIES IDENTIFICATIONS
+            ================================================== -->
+
+            <!-- IOREF -->
+            <circle
+                cx="50"
+                cy="82"
+                r="1.35"
+                fill="#d7b65c"
             />
 
-            <line
-                x1="48"
-                y1="80"
-                x2="43"
-                y2="103"
-                stroke="#b8c0c4"
-                stroke-width="4"
+            <text
+                x="50"
+                y="91"
+                text-anchor="middle"
+                font-size="3"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#ffffff"
+            >IOREF</text>
+
+
+            <!-- RESET -->
+            <circle
+                cx="64"
+                cy="82"
+                r="1.35"
+                fill="#d7b65c"
             />
 
-            <line
-                x1="112"
-                y1="80"
-                x2="117"
-                y2="103"
-                stroke="#b8c0c4"
-                stroke-width="4"
+            <text
+                x="64"
+                y="91"
+                text-anchor="middle"
+                font-size="3"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#ffffff"
+            >RST</text>
+
+
+            <!-- 3V3 -->
+            <circle
+                cx="78"
+                cy="82"
+                r="1.35"
+                fill="#d7b65c"
             />
+
+            <text
+                x="78"
+                y="91"
+                text-anchor="middle"
+                font-size="3.1"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#ffffff"
+            >3V3</text>
+
+
+            <!-- 5V -->
+            <circle
+                cx="91"
+                cy="82"
+                r="1.35"
+                fill="#d7b65c"
+            />
+
+            <text
+                x="91"
+                y="91"
+                text-anchor="middle"
+                font-size="3.2"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#ffffff"
+            >5V</text>
+
+
+            <!-- GND -->
+            <circle
+                cx="105"
+                cy="82"
+                r="1.35"
+                fill="#d7b65c"
+            />
+
+            <text
+                x="105"
+                y="91"
+                text-anchor="middle"
+                font-size="3.2"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#ffffff"
+            >GND</text>
+
+
+            <!-- GND 2 -->
+            <circle
+                cx="118"
+                cy="82"
+                r="1.35"
+                fill="#d7b65c"
+            />
+
+            <text
+                x="118"
+                y="91"
+                text-anchor="middle"
+                font-size="3.2"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#ffffff"
+            >GND</text>
+
+
+            <!-- VIN -->
+            <circle
+                cx="132"
+                cy="82"
+                r="1.35"
+                fill="#d7b65c"
+            />
+
+            <text
+                x="132"
+                y="91"
+                text-anchor="middle"
+                font-size="3.2"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#ffffff"
+            >VIN</text>
+
+
+            <!-- =================================================
+                 LED INDICATEURS
+            ================================================== -->
+
+            <!-- ON -->
+            <circle
+                cx="116"
+                cy="34"
+                r="2"
+                fill="#35d66f"
+                stroke="#0b4329"
+                stroke-width=".6"
+            />
+
+            <text
+                x="122"
+                y="35.3"
+                font-size="2.8"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#dfffea"
+            >ON</text>
+
+
+            <!-- L -->
+            <circle
+                cx="128"
+                cy="34"
+                r="2"
+                fill="#d6b65c"
+                stroke="#70561c"
+                stroke-width=".6"
+            />
+
+            <text
+                x="134"
+                y="35.3"
+                font-size="2.8"
+                font-weight="700"
+                font-family="Arial,sans-serif"
+                fill="#fff8d7"
+            >L</text>
+
+
+            <!-- =================================================
+                 IDENTIFICATION FOBAS
+            ================================================== -->
+
+            <text
+                x="76"
+                y="78"
+                text-anchor="middle"
+                font-size="2.8"
+                font-family="Arial,sans-serif"
+                fill="#bce7cc"
+                opacity=".8"
+            >FOBAS ELECTRONIQUE &amp; ROBOTIQUE</text>
 
         </svg>
     `;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ============================================================
