@@ -4910,8 +4910,24 @@ function createFOBAS3DComponentSVG(definition, family) {
 }
 
 
+
+
+
 /* ============================================================
    09.6 — MAIN VISUAL HTML
+   ------------------------------------------------------------
+   VERSION — CLEAN VISUAL
+   ------------------------------------------------------------
+   OBJECTIF :
+   - Visual component uniquement
+   - Aucun élément sous le composant
+   - Suppression de la catégorie visuelle
+   - Conservation du SVG 3D
+   - Conservation de l'icône originale
+   - Conservation du nom du composant
+   - Conservation des dimensions
+   - Conservation de la famille visuelle
+   - Aucun changement du moteur électronique
 ============================================================ */
 
 function createComponentVisualHTML(definition, libraryMode = false) {
@@ -4942,11 +4958,6 @@ function createComponentVisualHTML(definition, libraryMode = false) {
     const componentName =
         fobas3DSafe(
             safeDefinition.name || ""
-        );
-
-    const componentCategory =
-        fobas3DSafe(
-            safeDefinition.category || ""
         );
 
     const componentColor =
@@ -5009,19 +5020,18 @@ function createComponentVisualHTML(definition, libraryMode = false) {
 
             </div>
 
-            ${
-                componentCategory
-                    ? `
-                        <div class="component-3d-category">
-                            ${componentCategory}
-                        </div>
-                    `
-                    : ""
-            }
-
         </div>
     `;
 }
+
+
+
+
+
+
+
+
+
 
 
 /* ============================================================
@@ -5755,268 +5765,6 @@ function applyComponentVisualState(
 }
 
 
-
-
-/* ================================================================
-   09.B — FOBAS UNIVERSAL COMPONENT CARD BRIDGE
-   ---------------------------------------------------------------
-   V1.0.0
-   ISOLATED / INDEPENDENT / PROTECTED
-
-   OBJECTIF :
-   - Retire vizyèl "card" anba component yo
-   - Travay dinamikman pou TOUS les composants
-   - Travay sou bibliothèque + composants ajoutés dynamiquement
-   - Ne modifie PAS les fonctions existantes
-   - Ne modifie PAS COMPONENTS
-   - Ne modifie PAS createComponentVisualHTML()
-   - Ne modifie PAS renderComponent()
-   - Ne modifie PAS Block 10
-   - Conserve :
-       • visual SVG / 3D
-       • icône
-       • nom du composant
-       • pins
-       • interaction
-       • drag / touch
-       • état visuel
-   ================================================================ */
-
-(() => {
-    "use strict";
-
-    const BRIDGE_NAME = "FOBAS_COMPONENT_CARD_BRIDGE";
-    const BRIDGE_VERSION = "1.0.0";
-
-    /* ------------------------------------------------------------
-       PROTECTION
-       ------------------------------------------------------------ */
-
-    if (window.__FOBAS_COMPONENT_CARD_BRIDGE__) {
-        return;
-    }
-
-    window.__FOBAS_COMPONENT_CARD_BRIDGE__ = {
-        name: BRIDGE_NAME,
-        version: BRIDGE_VERSION,
-        active: true
-    };
-
-
-    /* ------------------------------------------------------------
-       SELECTEURS UNIVERSAUX
-       ------------------------------------------------------------ */
-
-    const CARD_SELECTORS = [
-        ".component-3d-category",
-        ".electronic-component-state"
-    ];
-
-
-    /* ------------------------------------------------------------
-       MASQUAGE PROTÉGÉ
-       ------------------------------------------------------------ */
-
-    function protectAndHideCard(element) {
-        if (!element || element.nodeType !== 1) {
-            return;
-        }
-
-        if (!CARD_SELECTORS.some(selector => element.matches(selector))) {
-            return;
-        }
-
-        /*
-         * Marque interne du Bridge.
-         * Aucun changement du composant lui-même.
-         */
-        element.dataset.fobasCardBridge = "hidden";
-
-        /*
-         * Masquage direct et prioritaire.
-         */
-        element.style.setProperty("display", "none", "important");
-        element.style.setProperty("visibility", "hidden", "important");
-        element.style.setProperty("opacity", "0", "important");
-        element.style.setProperty("width", "0", "important");
-        element.style.setProperty("height", "0", "important");
-        element.style.setProperty("min-width", "0", "important");
-        element.style.setProperty("min-height", "0", "important");
-        element.style.setProperty("max-width", "0", "important");
-        element.style.setProperty("max-height", "0", "important");
-        element.style.setProperty("margin", "0", "important");
-        element.style.setProperty("padding", "0", "important");
-        element.style.setProperty("border", "0", "important");
-        element.style.setProperty("box-shadow", "none", "important");
-        element.style.setProperty("background", "transparent", "important");
-        element.style.setProperty("overflow", "hidden", "important");
-        element.style.setProperty("pointer-events", "none", "important");
-    }
-
-
-    /* ------------------------------------------------------------
-       SCAN DYNAMIQUE
-       ------------------------------------------------------------ */
-
-    function scanRoot(root) {
-        if (!root || root.nodeType !== 1 && root.nodeType !== 9) {
-            return;
-        }
-
-        /*
-         * Le root lui-même peut être une card.
-         */
-        if (root.nodeType === 1) {
-            protectAndHideCard(root);
-        }
-
-        /*
-         * Recherche universelle de toutes les cards
-         * présentes dans le sous-arbre.
-         */
-        CARD_SELECTORS.forEach(selector => {
-            root.querySelectorAll(selector).forEach(protectAndHideCard);
-        });
-    }
-
-
-    /* ------------------------------------------------------------
-       STYLE DE SECOURS
-       ------------------------------------------------------------ */
-
-    function installProtectedCSS() {
-
-        if (document.getElementById("fobasUniversalComponentCardBridgeCSS")) {
-            return;
-        }
-
-        const style = document.createElement("style");
-
-        style.id = "fobasUniversalComponentCardBridgeCSS";
-
-        style.textContent = `
-            /*
-             * FOBAS UNIVERSAL COMPONENT CARD BRIDGE
-             * Protection CSS dynamique
-             */
-
-            .component-3d-category[data-fobas-card-bridge="hidden"],
-            .electronic-component-state[data-fobas-card-bridge="hidden"] {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-
-                width: 0 !important;
-                height: 0 !important;
-
-                min-width: 0 !important;
-                min-height: 0 !important;
-
-                max-width: 0 !important;
-                max-height: 0 !important;
-
-                margin: 0 !important;
-                padding: 0 !important;
-
-                border: 0 !important;
-                box-shadow: none !important;
-
-                background: transparent !important;
-
-                overflow: hidden !important;
-                pointer-events: none !important;
-            }
-        `;
-
-        document.head.appendChild(style);
-    }
-
-
-    /* ------------------------------------------------------------
-       MUTATION OBSERVER
-       ------------------------------------------------------------ */
-
-    function startObserver() {
-
-        if (window.__FOBAS_COMPONENT_CARD_BRIDGE_OBSERVER__) {
-            return;
-        }
-
-        const observer = new MutationObserver(mutations => {
-
-            mutations.forEach(mutation => {
-
-                mutation.addedNodes.forEach(node => {
-
-                    if (node.nodeType !== 1) {
-                        return;
-                    }
-
-                    /*
-                     * Scan du nouveau contenu.
-                     *
-                     * Cela permet au Bridge de fonctionner
-                     * même lorsque la bibliothèque recrée
-                     * complètement ses composants.
-                     */
-                    scanRoot(node);
-                });
-
-            });
-
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
-
-        window.__FOBAS_COMPONENT_CARD_BRIDGE_OBSERVER__ = observer;
-    }
-
-
-    /* ------------------------------------------------------------
-       INITIALISATION
-       ------------------------------------------------------------ */
-
-    function initializeBridge() {
-
-        installProtectedCSS();
-
-        /*
-         * Premier scan :
-         * couvre les composants déjà présents.
-         */
-        scanRoot(document.body);
-
-        /*
-         * Surveillance permanente :
-         * couvre les composants créés plus tard.
-         */
-        startObserver();
-
-    }
-
-
-    /* ------------------------------------------------------------
-       DÉMARRAGE SÉCURISÉ
-       ------------------------------------------------------------ */
-
-    if (document.readyState === "loading") {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initializeBridge,
-            { once: true }
-        );
-
-    } else {
-
-        initializeBridge();
-
-    }
-
-})();
 
 
 
