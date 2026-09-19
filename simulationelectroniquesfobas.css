@@ -4910,7 +4910,135 @@ select:focus-visible {
 
 
 
+/* ================================================================
+   FOBAS ELECTRONIQUE
+   MOBILE PROJECT ACTIONS FIX
+   ---------------------------------------------------------------
+   OBJECTIF :
+   - Fè panel Projet orijinal la vizib sou Android
+   - Fè bouton Sauvegarder vizib
+   - Fè bouton Vider le laboratoire vizib
+   - Pa kreye okenn nouvo bouton
+   - Pa chanje ID ki egziste yo
+   - Pa afekte bouton Reset Circuit la
+   ================================================================ */
 
+@media screen and (max-width: 768px) {
+
+    /* ------------------------------------------------------------
+       1. RE-AFFICHE LE PANNEAU DE CONTROLE QUI EST
+          CACHE PAR LE MEDIA QUERY <= 1050px
+       ------------------------------------------------------------ */
+    #electronicControlPanel {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        max-height: 240px !important;
+
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+
+        box-sizing: border-box !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       2. CACHE LES AUTRES SECTIONS DU PANNEAU
+          POUR NE LAISSER QUE LE BLOC PROJET
+       ------------------------------------------------------------ */
+    #electronicControlPanel > .control-section {
+        display: none !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       3. AFFICHE UNIQUEMENT LE BLOC PROJET
+       ------------------------------------------------------------ */
+    #electronicControlPanel > #projectControlPanel {
+        display: block !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        height: auto !important;
+        max-height: none !important;
+
+        overflow: visible !important;
+
+        box-sizing: border-box !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       4. CONTENEUR DES BOUTONS DU PROJET
+       ------------------------------------------------------------ */
+    #projectControlPanel {
+        padding: 10px !important;
+        box-sizing: border-box !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       5. BOUTON SAUVEGARDER
+       ------------------------------------------------------------ */
+    #projectControlPanel #saveProjectBtn {
+        display: block !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        min-height: 46px !important;
+        height: auto !important;
+
+        box-sizing: border-box !important;
+
+        flex-shrink: 0 !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       6. BOUTON VIDER LE LABORATOIRE
+       ------------------------------------------------------------ */
+    #projectControlPanel #clearWorkspaceBtn {
+        display: block !important;
+
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+
+        min-height: 46px !important;
+        height: auto !important;
+
+        box-sizing: border-box !important;
+
+        flex-shrink: 0 !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       7. LE BOUTON CHARGER RESTE CACHE
+          POUR GARDER UNIQUEMENT LES 2 BOUTONS DEMANDES
+       ------------------------------------------------------------ */
+    #projectControlPanel #loadProjectBtn {
+        display: none !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       8. EVITE QU'UN ANCIEN STYLE FLEX/GRID CACHE LES BOUTONS
+       ------------------------------------------------------------ */
+    #projectControlPanel button#saveProjectBtn,
+    #projectControlPanel button#clearWorkspaceBtn {
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+    }
+}
 
 
 
