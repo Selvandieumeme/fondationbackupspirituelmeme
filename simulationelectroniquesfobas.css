@@ -5867,78 +5867,104 @@ select:focus-visible {
 
 
 
+
+
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   ANDROID / MOBILE CONTROL PANEL VISIBILITY FIX
+   MOBILE ANDROID — CONTROL PANEL NOT CUT OFF
    ---------------------------------------------------------------
    OBJECTIF :
-   - Rendre #resetCircuitBtn visible sur petit écran
-   - Rendre #saveProjectBtn visible sur petit écran
-   - Ne modifie PAS le HTML
-   - Ne modifie PAS le JavaScript
-   - Ne modifie PAS le comportement des boutons
-   - Ne touche PAS au desktop
+   Corriger uniquement le découpage du panneau de contrôle
+   sur les petits écrans.
 ================================================================ */
 
 @media screen and (max-width: 768px) {
 
-    /* Le conteneur principal doit pouvoir s'adapter
-       à la largeur réelle de l'écran Android */
+    html,
+    body {
+        width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
     #fobasElectronicApp {
         width: 100%;
+        min-width: 0;
         max-width: 100%;
+        height: auto;
+        min-height: 100vh;
         overflow-x: hidden;
+        overflow-y: visible;
     }
 
     #electronicMain {
         width: 100%;
-        max-width: 100%;
         min-width: 0;
-        display: flex;
-        flex-direction: column;
+        max-width: 100%;
+        height: auto;
+        min-height: 0;
         overflow: visible;
     }
 
-    /* Le panneau de contrôle droit devient un panneau
-       mobile normal, au lieu de rester hors écran */
     #electronicControlPanel {
         width: 100%;
-        max-width: 100%;
         min-width: 0;
+        max-width: 100%;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
         box-sizing: border-box;
-        overflow: visible;
-        position: relative;
-        display: block;
     }
 
-    /* Chaque section du panneau doit pouvoir occuper
-       toute la largeur disponible */
     #electronicControlPanel .control-section {
         width: 100%;
-        max-width: 100%;
         min-width: 0;
+        max-width: 100%;
+        height: auto;
+        max-height: none;
+        overflow: visible !important;
         box-sizing: border-box;
-        overflow: visible;
     }
 
-    /* FORCE la visibilité des deux boutons concernés */
-    #resetCircuitBtn,
-    #saveProjectBtn {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+    /*
+       IMPORTANT :
+       Le panneau Projet doit rester entièrement accessible
+       sur Android, notamment Sauvegarder et Charger.
+    */
+    #projectControlPanel {
+        display: block !important;
+        width: 100%;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #saveProjectBtn,
+    #loadProjectBtn,
+    #clearWorkspaceBtn {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
+        flex-shrink: 0;
     }
+
+    /*
+       Le panneau Contrôle du circuit ne doit pas être coupé.
+    */
+    #circuitControlPanel {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #circuitControlPanel button {
+        max-width: 100%;
+        box-sizing: border-box;
+        flex-shrink: 0;
+    }
+
 }
-
-
-
-
-
-
-
 
 
 
