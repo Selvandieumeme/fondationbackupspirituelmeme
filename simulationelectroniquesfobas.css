@@ -6178,6 +6178,40 @@ select:focus-visible {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+/* ================================================================
+   47 — FOBAS — AGRANDISSEMENT DES COMPOSANTS DU LABORATOIRE
+   ---------------------------------------------------------------
+   BLOC ISOLÉ ET PROTÉGÉ
+
+   OBJECTIF :
+   - Rendre les composants ajoutés au laboratoire plus grands
+   - Conserver leurs pins visibles
+   - Ne modifier aucun data-name / data-*
+   - Ne modifier aucun ID
+   - Ne modifier aucun JavaScript
+   - Ne modifier aucune connexion
+   - Ne modifier aucun système de drag
+   - Ne modifier aucune position enregistrée
+   - Ne modifier aucun composant de la bibliothèque
+================================================================ */
+
+#componentLayer .fobas-electronic-3d {
+    transform: scale(1.35);
+    transform-origin: center center;
+}
+
+
 /* ================================================================
    FIN DU CSS
 ================================================================ */
