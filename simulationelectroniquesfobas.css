@@ -5870,103 +5870,68 @@ select:focus-visible {
 
 
 
+
+
+
+
+
 /* ================================================================
    FOBAS ELECTRONIQUE
-   MOBILE ANDROID — CONTROL PANEL NOT CUT OFF
+   MOBILE ANDROID — SAVE / CLEAR BUTTON PROTECTION
    ---------------------------------------------------------------
    OBJECTIF :
-   Corriger uniquement le découpage du panneau de contrôle
-   sur les petits écrans.
+   - Garantir l'affichage de Sauvegarder
+   - Garantir l'affichage de Vider le laboratoire
+   - Empêcher leur découpage sur petit écran
+   - Ne modifie pas les autres boutons
+   - Bloc isolé et indépendant
 ================================================================ */
 
 @media screen and (max-width: 768px) {
 
-    html,
-    body {
-        width: 100%;
-        min-width: 0;
-        overflow-x: hidden;
-    }
-
-    #fobasElectronicApp {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        height: auto;
-        min-height: 100vh;
-        overflow-x: hidden;
-        overflow-y: visible;
-    }
-
-    #electronicMain {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        height: auto;
-        min-height: 0;
-        overflow: visible;
-    }
-
-    #electronicControlPanel {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        box-sizing: border-box;
-    }
-
-    #electronicControlPanel .control-section {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        height: auto;
-        max-height: none;
-        overflow: visible !important;
-        box-sizing: border-box;
-    }
-
-    /*
-       IMPORTANT :
-       Le panneau Projet doit rester entièrement accessible
-       sur Android, notamment Sauvegarder et Charger.
-    */
+    /* Zone Projet */
     #projectControlPanel {
         display: block !important;
-        width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
         height: auto !important;
         max-height: none !important;
         overflow: visible !important;
+        box-sizing: border-box !important;
+        position: relative !important;
     }
 
-    #saveProjectBtn,
-    #loadProjectBtn,
+    /* Sauvegarder */
+    #saveProjectBtn {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 44px !important;
+        height: auto !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+        z-index: 10 !important;
+        overflow: visible !important;
+    }
+
+    /* Vider le laboratoire */
     #clearWorkspaceBtn {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-        flex-shrink: 0;
-    }
-
-    /*
-       Le panneau Contrôle du circuit ne doit pas être coupé.
-    */
-    #circuitControlPanel {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 44px !important;
         height: auto !important;
-        max-height: none !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+        z-index: 10 !important;
         overflow: visible !important;
-    }
-
-    #circuitControlPanel button {
-        max-width: 100%;
-        box-sizing: border-box;
-        flex-shrink: 0;
     }
 
 }
-
-
 
 
 /* ================================================================
