@@ -2709,22 +2709,36 @@ void loop() {
 
 
 
+
+
 /* ============================================================
    09. COMPONENT VISUAL ENGINE
    ------------------------------------------------------------
    FOBAS ELECTRONIQUE & ROBOTIQUE
-   VISUAL ENGINE V2.0
+   VISUAL ENGINE V2.0 — CLEAN COMPONENT EDITION
    ------------------------------------------------------------
-   IMPORTANT:
-   - CONSERVE les IDs existants
-   - CONSERVE data-component-id
-   - CONSERVE data-component-type
-   - CONSERVE data-visual-type
-   - CONSERVE les pins existantes
-   - CONSERVE les propriétés de component existantes
-   - NE MODIFIE PAS Block 08
+   OBJECTIF :
+   - Même IDs
+   - Même data-component-id
+   - Même data-component-type
+   - Même data-visual-type
+   - Même pins
+   - Même propriétés
+   - Même interactions
+   - Même logique électronique
+   - Visualisations 3D HTML/SVG légères
    - Aucun Three.js
+   - Aucun cadre décoratif
+   - Aucun shadow-card sous les composants
+   - Bibliothèque visuelle propre et simple
+   - Arduino UNO garanti dans COMPONENTS
+   ------------------------------------------------------------
+   IMPORTANT :
+   - NE MODIFIE PAS Block 08
+   - NE MODIFIE PAS Block 10
+   - NE MODIFIE PAS Block 11
 ============================================================ */
+
 
 /* ============================================================
    09.1 — INTERNAL 3D VISUAL ENGINE
@@ -2733,6 +2747,7 @@ void loop() {
 let FOBAS_ELECTRONIC_3D_UID = 0;
 
 function fobas3DSafe(value) {
+
     if (typeof escapeHTML === "function") {
         return escapeHTML(String(value ?? ""));
     }
@@ -2747,18 +2762,215 @@ function fobas3DSafe(value) {
 
 
 /* ============================================================
+   09.1.1 — CLEAN SVG DECORATION FILTER
+   ------------------------------------------------------------
+   Supprime uniquement les ellipses utilisées comme ombres
+   décoratives par l'ancien moteur visuel.
+
+   IMPORTANT :
+   - Ne supprime pas les vraies pièces électroniques.
+   - Ne supprime pas les ellipses internes des composants.
+   - Ne modifie pas les pins.
+   - Ne modifie pas le SVG principal.
+============================================================ */
+
+function cleanFOBAS3DDecorativeShadows(svg) {
+
+    if (!svg) return "";
+
+    return String(svg).replace(
+        /<ellipse\b(?=[^>]*\bfill=["']#000["'])(?=[^>]*\bopacity=["'](?:0?\.2[2-9]|0?\.3)["'])[^>]*\/?>/gi,
+        ""
+    );
+}
+
+
+/* ============================================================
+   09.1.2 — GUARANTEE REQUIRED LIBRARY COMPONENTS
+   ------------------------------------------------------------
+   Arduino UNO est ajouté uniquement s'il est réellement absent.
+
+   Aucun doublon si arduino-uno existe déjà dans COMPONENTS.
+   Les composants existants ne sont jamais remplacés.
+============================================================ */
+
+function ensureFOBASRequiredLibraryComponents() {
+
+    if (
+        typeof COMPONENTS === "undefined" ||
+        !Array.isArray(COMPONENTS)
+    ) {
+        return;
+    }
+
+    const hasArduinoUNO =
+        COMPONENTS.some(component =>
+            String(component?.id || "").toLowerCase() ===
+            "arduino-uno"
+        );
+
+    if (!hasArduinoUNO) {
+
+        COMPONENTS.push({
+            id: "arduino-uno",
+            type: "arduino-uno",
+            name: "Arduino UNO",
+            category: "controllers",
+            icon: "UNO",
+            color: "#177245",
+            width: 150,
+            height: 95,
+            state: "off",
+            value: null,
+            pins: [
+                {
+                    id: "arduino-uno-5v",
+                    name: "5V",
+                    side: "right"
+                },
+                {
+                    id: "arduino-uno-gnd",
+                    name: "GND",
+                    side: "right"
+                },
+                {
+                    id: "arduino-uno-d0",
+                    name: "D0",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d1",
+                    name: "D1",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d2",
+                    name: "D2",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d3",
+                    name: "D3",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d4",
+                    name: "D4",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d5",
+                    name: "D5",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d6",
+                    name: "D6",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d7",
+                    name: "D7",
+                    side: "top"
+                },
+                {
+                    id: "arduino-uno-d8",
+                    name: "D8",
+                    side: "bottom"
+                },
+                {
+                    id: "arduino-uno-d9",
+                    name: "D9",
+                    side: "bottom"
+                },
+                {
+                    id: "arduino-uno-d10",
+                    name: "D10",
+                    side: "bottom"
+                },
+                {
+                    id: "arduino-uno-d11",
+                    name: "D11",
+                    side: "bottom"
+                },
+                {
+                    id: "arduino-uno-d12",
+                    name: "D12",
+                    side: "bottom"
+                },
+                {
+                    id: "arduino-uno-d13",
+                    name: "D13",
+                    side: "bottom"
+                },
+                {
+                    id: "arduino-uno-a0",
+                    name: "A0",
+                    side: "left"
+                },
+                {
+                    id: "arduino-uno-a1",
+                    name: "A1",
+                    side: "left"
+                },
+                {
+                    id: "arduino-uno-a2",
+                    name: "A2",
+                    side: "left"
+                },
+                {
+                    id: "arduino-uno-a3",
+                    name: "A3",
+                    side: "left"
+                },
+                {
+                    id: "arduino-uno-a4",
+                    name: "A4",
+                    side: "left"
+                },
+                {
+                    id: "arduino-uno-a5",
+                    name: "A5",
+                    side: "left"
+                }
+            ]
+        });
+    }
+}
+
+
+/*
+   Exécution après disponibilité du moteur COMPONENTS.
+   Si COMPONENTS existe déjà à cet endroit, aucune modification
+   des définitions existantes n'est effectuée.
+*/
+ensureFOBASRequiredLibraryComponents();
+
+
+/* ============================================================
    09.2 — DETECT COMPONENT VISUAL FAMILY
 ============================================================ */
 
 function getFOBASComponentVisualFamily(definition) {
-    const type = String(definition?.type || "").toLowerCase();
-    const id = String(definition?.id || "").toLowerCase();
-    const name = String(definition?.name || "").toLowerCase();
-    const category = String(definition?.category || "").toLowerCase();
 
-    const text = `${type} ${id} ${name} ${category}`;
+    const type =
+        String(definition?.type || "").toLowerCase();
+
+    const id =
+        String(definition?.id || "").toLowerCase();
+
+    const name =
+        String(definition?.name || "").toLowerCase();
+
+    const category =
+        String(definition?.category || "").toLowerCase();
+
+    const text =
+        `${type} ${id} ${name} ${category}`;
+
 
     /* LED */
+
     if (
         type === "led" ||
         text.includes("led-") ||
@@ -2767,7 +2979,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "led";
     }
 
+
     /* Bulb */
+
     if (
         type === "bulb" ||
         text.includes("ampoule") ||
@@ -2777,7 +2991,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "bulb";
     }
 
+
     /* Resistor */
+
     if (
         type === "resistor" ||
         text.includes("resistance") ||
@@ -2787,7 +3003,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "resistor";
     }
 
+
     /* Potentiometer */
+
     if (
         type === "potentiometer" ||
         text.includes("potentiometre") ||
@@ -2796,7 +3014,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "potentiometer";
     }
 
+
     /* Capacitor */
+
     if (
         type === "capacitor" ||
         text.includes("condensateur") ||
@@ -2805,7 +3025,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "capacitor";
     }
 
+
     /* Diode */
+
     if (
         type === "diode" ||
         text.includes("diode") ||
@@ -2815,7 +3037,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "diode";
     }
 
-    /* Transistor */
+
+    /* Transistor / MOSFET */
+
     if (
         type === "transistor" ||
         text.includes("transistor") ||
@@ -2825,7 +3049,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "transistor";
     }
 
-    /* IC / Chip */
+
+    /* IC / CHIP */
+
     if (
         type === "ic" ||
         type === "chip" ||
@@ -2838,25 +3064,42 @@ function getFOBASComponentVisualFamily(definition) {
         return "ic";
     }
 
+
     /* Arduino */
-    if (text.includes("arduino")) {
+
+    if (
+        type === "arduino" ||
+        text.includes("arduino")
+    ) {
         return "arduino";
     }
 
+
     /* ESP */
-    if (text.includes("esp32") || text.includes("esp8266")) {
+
+    if (
+        type === "esp32" ||
+        type === "esp8266" ||
+        text.includes("esp32") ||
+        text.includes("esp8266")
+    ) {
         return "esp";
     }
 
+
     /* Raspberry Pi */
+
     if (
+        type === "raspberry-pi" ||
         text.includes("raspberry") ||
         text.includes("raspberry pi")
     ) {
         return "raspberry";
     }
 
+
     /* Breadboard */
+
     if (
         type === "breadboard" ||
         text.includes("breadboard") ||
@@ -2865,7 +3108,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "breadboard";
     }
 
+
     /* PCB */
+
     if (
         type === "pcb" ||
         text.includes("pcb") ||
@@ -2875,7 +3120,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "pcb";
     }
 
+
     /* Relay */
+
     if (
         type === "relay" ||
         text.includes("relais") ||
@@ -2884,7 +3131,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "relay";
     }
 
+
     /* Switch */
+
     if (
         type === "switch" ||
         text.includes("interrupteur") ||
@@ -2893,7 +3142,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "switch";
     }
 
+
     /* Push button */
+
     if (
         type === "push-button" ||
         text.includes("push-button") ||
@@ -2904,7 +3155,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "push-button";
     }
 
-    /* DC Motor */
+
+    /* DC MOTOR */
+
     if (
         type === "dc-motor" ||
         text.includes("dc motor") ||
@@ -2914,9 +3167,12 @@ function getFOBASComponentVisualFamily(definition) {
         return "dc-motor";
     }
 
-    /* Stepper */
+
+    /* STEPPER */
+
     if (
         type === "stepper" ||
+        type === "stepper-motor" ||
         text.includes("stepper") ||
         text.includes("pas-à-pas") ||
         text.includes("pas a pas")
@@ -2924,15 +3180,20 @@ function getFOBASComponentVisualFamily(definition) {
         return "stepper";
     }
 
-    /* Servo */
+
+    /* SERVO */
+
     if (
         type === "servo" ||
+        type === "micro-servo" ||
         text.includes("servo")
     ) {
         return "servo";
     }
 
-    /* Buzzer */
+
+    /* BUZZER */
+
     if (
         type === "buzzer" ||
         text.includes("buzzer") ||
@@ -2941,7 +3202,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "buzzer";
     }
 
-    /* Speaker */
+
+    /* SPEAKER */
+
     if (
         type === "speaker" ||
         text.includes("speaker") ||
@@ -2950,7 +3213,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "speaker";
     }
 
-    /* Sensors */
+
+    /* SENSORS */
+
     if (
         type === "sensor" ||
         text.includes("sensor") ||
@@ -2959,13 +3224,18 @@ function getFOBASComponentVisualFamily(definition) {
         text.includes("thermistor") ||
         text.includes("thermistance") ||
         text.includes("ultrason") ||
+        text.includes("ultrasonic") ||
+        text.includes("hc-sr04") ||
         text.includes("infrared") ||
-        text.includes("infrarouge")
+        text.includes("infrarouge") ||
+        text.includes("pir")
     ) {
         return "sensor";
     }
 
-    /* Battery */
+
+    /* BATTERY */
+
     if (
         type === "battery" ||
         text.includes("battery") ||
@@ -2975,7 +3245,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "battery";
     }
 
-    /* Multimeter */
+
+    /* MULTIMETER */
+
     if (
         type === "multimeter" ||
         text.includes("multimètre") ||
@@ -2984,7 +3256,9 @@ function getFOBASComponentVisualFamily(definition) {
         return "multimeter";
     }
 
-    /* LCD / Display */
+
+    /* LCD / DISPLAY */
+
     if (
         type === "lcd" ||
         text.includes("lcd") ||
@@ -2995,6 +3269,7 @@ function getFOBASComponentVisualFamily(definition) {
         return "lcd";
     }
 
+
     return "generic";
 }
 
@@ -3004,79 +3279,109 @@ function getFOBASComponentVisualFamily(definition) {
 ============================================================ */
 
 function getFOBASElectronicLEDVariant(definition) {
-    const type = String(definition?.type || "").toLowerCase();
-    const id = String(definition?.id || "").toLowerCase();
-    const name = String(definition?.name || "").toLowerCase();
-    const color = String(definition?.color || "").toLowerCase();
 
-    const value = `${type} ${id} ${name} ${color}`;
+    const type =
+        String(definition?.type || "").toLowerCase();
 
-    if (
-        value.includes("rgbw")
-    ) return "rgbw";
+    const id =
+        String(definition?.id || "").toLowerCase();
 
-    if (
-        value.includes("rgb")
-    ) return "rgb";
+    const name =
+        String(definition?.name || "").toLowerCase();
+
+    const color =
+        String(definition?.color || "").toLowerCase();
+
+    const value =
+        `${type} ${id} ${name} ${color}`;
+
+
+    if (value.includes("rgbw")) {
+        return "rgbw";
+    }
+
+    if (value.includes("rgb")) {
+        return "rgb";
+    }
 
     if (
         value.includes("infrared") ||
         value.includes("infrarouge") ||
         value.includes("led-ir") ||
         value.includes("-ir")
-    ) return "ir";
+    ) {
+        return "ir";
+    }
 
     if (
         value.includes("ultraviolet") ||
         value.includes("ultraviolet") ||
         value.includes("led-uv") ||
         value.includes("-uv")
-    ) return "uv";
+    ) {
+        return "uv";
+    }
 
     if (
         value.includes("red") ||
         value.includes("rouge")
-    ) return "red";
+    ) {
+        return "red";
+    }
 
     if (
         value.includes("blue") ||
         value.includes("bleu")
-    ) return "blue";
+    ) {
+        return "blue";
+    }
 
     if (
         value.includes("yellow") ||
         value.includes("jaune")
-    ) return "yellow";
+    ) {
+        return "yellow";
+    }
 
     if (
         value.includes("white") ||
         value.includes("blanc")
-    ) return "white";
+    ) {
+        return "white";
+    }
 
     if (
         value.includes("green") ||
         value.includes("vert")
-    ) return "green";
+    ) {
+        return "green";
+    }
 
     if (
         value.includes("brown") ||
         value.includes("marron")
-    ) return "brown";
+    ) {
+        return "brown";
+    }
 
-    if (
-        value.includes("orange")
-    ) return "orange";
+    if (value.includes("orange")) {
+        return "orange";
+    }
 
     if (
         value.includes("violet") ||
         value.includes("purple")
-    ) return "violet";
+    ) {
+        return "violet";
+    }
 
     if (
         value.includes("gray") ||
         value.includes("grey") ||
         value.includes("gris")
-    ) return "gray";
+    ) {
+        return "gray";
+    }
 
     return "red";
 }
@@ -3087,6 +3392,7 @@ function getFOBASElectronicLEDVariant(definition) {
 ============================================================ */
 
 function getFOBASElectronicLEDColor(variant) {
+
     const colors = {
         red: "#ff1744",
         blue: "#2979ff",
@@ -3109,19 +3415,34 @@ function getFOBASElectronicLEDColor(variant) {
 
 /* ============================================================
    09.5 — UNIVERSAL SVG 3D ICON BUILDER
+   ------------------------------------------------------------
+   VERSION CLEAN :
+   - aucune ombre externe
+   - aucun ellipse décoratif sous le composant
+   - aucune carte
+   - composants simples
 ============================================================ */
 
-function createFOBAS3DComponentSVG(definition, family) {
-    const uid = ++FOBAS_ELECTRONIC_3D_UID;
+function createFOBAS3DComponentSVG(
+    definition,
+    family
+) {
+
+    const uid =
+        ++FOBAS_ELECTRONIC_3D_UID;
 
     const variant =
         family === "led"
-            ? getFOBASElectronicLEDVariant(definition)
+            ? getFOBASElectronicLEDVariant(
+                definition
+            )
             : "";
 
     const ledColor =
         family === "led"
-            ? getFOBASElectronicLEDColor(variant)
+            ? getFOBASElectronicLEDColor(
+                variant
+            )
             : "#263238";
 
     const safeColor =
@@ -3140,6 +3461,7 @@ function createFOBAS3DComponentSVG(definition, family) {
         focusable="false"
         style="pointer-events:none;overflow:visible;"
     `;
+
 
     /* ========================================================
        LED
@@ -3166,19 +3488,12 @@ function createFOBAS3DComponentSVG(definition, family) {
         }
 
         return `
-            <svg ${common}
+            <svg
+                ${common}
                 class="fobas-svg-3d fobas-svg-led"
                 data-led-variant="${fobas3DSafe(variant)}"
                 data-svg-uid="${uid}"
             >
-                <ellipse
-                    cx="80"
-                    cy="92"
-                    rx="43"
-                    ry="8"
-                    fill="#000"
-                    opacity=".28"
-                />
 
                 <line
                     x1="68"
@@ -3242,31 +3557,32 @@ function createFOBAS3DComponentSVG(definition, family) {
 
                 ${
                     variant === "rgb"
-                    ? `
-                        <circle
-                            cx="80"
-                            cy="49"
-                            r="8"
-                            fill="#00e5ff"
-                            class="fobas-led-light"
-                        />
-                    `
-                    : ""
+                        ? `
+                            <circle
+                                cx="80"
+                                cy="49"
+                                r="8"
+                                fill="#00e5ff"
+                                class="fobas-led-light"
+                            />
+                        `
+                        : ""
                 }
 
                 ${
                     variant === "rgbw"
-                    ? `
-                        <circle
-                            cx="80"
-                            cy="49"
-                            r="8"
-                            fill="#ffffff"
-                            class="fobas-led-light"
-                        />
-                    `
-                    : ""
+                        ? `
+                            <circle
+                                cx="80"
+                                cy="49"
+                                r="8"
+                                fill="#ffffff"
+                                class="fobas-led-light"
+                            />
+                        `
+                        : ""
                 }
+
             </svg>
         `;
     }
@@ -3277,17 +3593,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "bulb") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-bulb">
 
-                <ellipse
-                    cx="80"
-                    cy="96"
-                    rx="45"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-bulb"
+            >
 
                 <path
                     d="M58 50
@@ -3332,6 +3643,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#d6a94c"
                     stroke-width="3"
                 />
+
             </svg>
         `;
     }
@@ -3342,17 +3654,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "resistor") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-resistor">
 
-                <ellipse
-                    cx="80"
-                    cy="83"
-                    rx="55"
-                    ry="7"
-                    fill="#000"
-                    opacity=".24"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-resistor"
+            >
 
                 <line
                     x1="15"
@@ -3378,7 +3685,6 @@ function createFOBAS3DComponentSVG(definition, family) {
                        L115 68
                        L45 68
                        Z"
-                    rx="12"
                     fill="#d8b27c"
                     stroke="#765d3d"
                     stroke-width="3"
@@ -3422,6 +3728,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke-width="4"
                     opacity=".45"
                 />
+
             </svg>
         `;
     }
@@ -3432,17 +3739,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "potentiometer") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-potentiometer">
 
-                <ellipse
-                    cx="80"
-                    cy="91"
-                    rx="45"
-                    ry="8"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-potentiometer"
+            >
 
                 <rect
                     x="45"
@@ -3507,6 +3809,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#aaa"
                     stroke-width="4"
                 />
+
             </svg>
         `;
     }
@@ -3517,17 +3820,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "capacitor") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-capacitor">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="30"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-capacitor"
+            >
 
                 <rect
                     x="57"
@@ -3580,6 +3878,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#aeb5ba"
                     stroke-width="4"
                 />
+
             </svg>
         `;
     }
@@ -3590,17 +3889,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "diode") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-diode">
 
-                <ellipse
-                    cx="80"
-                    cy="78"
-                    rx="55"
-                    ry="6"
-                    fill="#000"
-                    opacity=".22"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-diode"
+            >
 
                 <line
                     x1="15"
@@ -3645,27 +3939,23 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke-width="4"
                     opacity=".7"
                 />
+
             </svg>
         `;
     }
 
 
     /* ========================================================
-       TRANSISTOR
+       TRANSISTOR / MOSFET
     ======================================================== */
 
     if (family === "transistor") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-transistor">
 
-                <ellipse
-                    cx="80"
-                    cy="92"
-                    rx="35"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-transistor"
+            >
 
                 <path
                     d="M57 30
@@ -3710,6 +4000,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#aeb5ba"
                     stroke-width="4"
                 />
+
             </svg>
         `;
     }
@@ -3720,17 +4011,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "ic") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-ic">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="55"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-ic"
+            >
 
                 <rect
                     x="35"
@@ -3758,24 +4044,29 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke-width="3"
                 />
 
-                ${Array.from({ length: 7 }, (_, i) => `
-                    <line
-                        x1="${45 + i * 11}"
-                        y1="80"
-                        x2="${45 + i * 11}"
-                        y2="103"
-                        stroke="#b9c0c4"
-                        stroke-width="3"
-                    />
-                    <line
-                        x1="${45 + i * 11}"
-                        y1="25"
-                        x2="${45 + i * 11}"
-                        y2="8"
-                        stroke="#b9c0c4"
-                        stroke-width="3"
-                    />
-                `).join("")}
+                ${Array.from(
+                    { length: 7 },
+                    (_, i) => `
+                        <line
+                            x1="${45 + i * 11}"
+                            y1="80"
+                            x2="${45 + i * 11}"
+                            y2="103"
+                            stroke="#b9c0c4"
+                            stroke-width="3"
+                        />
+
+                        <line
+                            x1="${45 + i * 11}"
+                            y1="25"
+                            x2="${45 + i * 11}"
+                            y2="8"
+                            stroke="#b9c0c4"
+                            stroke-width="3"
+                        />
+                    `
+                ).join("")}
+
             </svg>
         `;
     }
@@ -3786,17 +4077,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "arduino") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-arduino">
 
-                <ellipse
-                    cx="80"
-                    cy="92"
-                    rx="65"
-                    ry="8"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-arduino"
+            >
 
                 <rect
                     x="20"
@@ -3845,20 +4131,25 @@ function createFOBAS3DComponentSVG(definition, family) {
                     fill="#e8fff2"
                 >ARDUINO</text>
 
-                ${Array.from({ length: 12 }, (_, i) => `
-                    <circle
-                        cx="${28 + i * 9.5}"
-                        cy="18"
-                        r="2.4"
-                        fill="#d6b65c"
-                    />
-                    <circle
-                        cx="${28 + i * 9.5}"
-                        cy="83"
-                        r="2.4"
-                        fill="#d6b65c"
-                    />
-                `).join("")}
+                ${Array.from(
+                    { length: 12 },
+                    (_, i) => `
+                        <circle
+                            cx="${28 + i * 9.5}"
+                            cy="18"
+                            r="2.4"
+                            fill="#d6b65c"
+                        />
+
+                        <circle
+                            cx="${28 + i * 9.5}"
+                            cy="83"
+                            r="2.4"
+                            fill="#d6b65c"
+                        />
+                    `
+                ).join("")}
+
             </svg>
         `;
     }
@@ -3869,17 +4160,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "esp") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-esp">
 
-                <ellipse
-                    cx="80"
-                    cy="92"
-                    rx="60"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-esp"
+            >
 
                 <rect
                     x="27"
@@ -3916,20 +4202,25 @@ function createFOBAS3DComponentSVG(definition, family) {
                     opacity=".7"
                 />
 
-                ${Array.from({ length: 10 }, (_, i) => `
-                    <circle
-                        cx="${34 + i * 10}"
-                        cy="22"
-                        r="2.2"
-                        fill="#d6b65c"
-                    />
-                    <circle
-                        cx="${34 + i * 10}"
-                        cy="82"
-                        r="2.2"
-                        fill="#d6b65c"
-                    />
-                `).join("")}
+                ${Array.from(
+                    { length: 10 },
+                    (_, i) => `
+                        <circle
+                            cx="${34 + i * 10}"
+                            cy="22"
+                            r="2.2"
+                            fill="#d6b65c"
+                        />
+
+                        <circle
+                            cx="${34 + i * 10}"
+                            cy="82"
+                            r="2.2"
+                            fill="#d6b65c"
+                        />
+                    `
+                ).join("")}
+
             </svg>
         `;
     }
@@ -3940,17 +4231,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "raspberry") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-raspberry">
 
-                <ellipse
-                    cx="80"
-                    cy="92"
-                    rx="63"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-raspberry"
+            >
 
                 <rect
                     x="18"
@@ -3988,14 +4274,18 @@ function createFOBAS3DComponentSVG(definition, family) {
                     fill="#777"
                 />
 
-                ${Array.from({ length: 20 }, (_, i) => `
-                    <circle
-                        cx="${32 + (i % 10) * 10}"
-                        cy="${20 + Math.floor(i / 10) * 62}"
-                        r="2"
-                        fill="#d7b65a"
-                    />
-                `).join("")}
+                ${Array.from(
+                    { length: 20 },
+                    (_, i) => `
+                        <circle
+                            cx="${32 + (i % 10) * 10}"
+                            cy="${20 + Math.floor(i / 10) * 62}"
+                            r="2"
+                            fill="#d7b65a"
+                        />
+                    `
+                ).join("")}
+
             </svg>
         `;
     }
@@ -4006,17 +4296,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "breadboard") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-breadboard">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="66"
-                    ry="8"
-                    fill="#000"
-                    opacity=".22"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-breadboard"
+            >
 
                 <rect
                     x="15"
@@ -4047,16 +4332,22 @@ function createFOBAS3DComponentSVG(definition, family) {
                     opacity=".7"
                 />
 
-                ${Array.from({ length: 8 }, (_, r) =>
-                    Array.from({ length: 10 }, (_, c) => `
-                        <circle
-                            cx="${39 + c * 9.5}"
-                            cy="${34 + r * 6}"
-                            r="1.8"
-                            fill="#6d7478"
-                        />
-                    `).join("")
+                ${Array.from(
+                    { length: 8 },
+                    (_, r) =>
+                        Array.from(
+                            { length: 10 },
+                            (_, c) => `
+                                <circle
+                                    cx="${39 + c * 9.5}"
+                                    cy="${34 + r * 6}"
+                                    r="1.8"
+                                    fill="#6d7478"
+                                />
+                            `
+                        ).join("")
                 ).join("")}
+
             </svg>
         `;
     }
@@ -4067,17 +4358,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "pcb") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-pcb">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="65"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-pcb"
+            >
 
                 <rect
                     x="17"
@@ -4099,10 +4385,34 @@ function createFOBAS3DComponentSVG(definition, family) {
                     opacity=".8"
                 />
 
-                <circle cx="30" cy="28" r="4" fill="#d0b84c"/>
-                <circle cx="130" cy="28" r="4" fill="#d0b84c"/>
-                <circle cx="30" cy="73" r="4" fill="#d0b84c"/>
-                <circle cx="130" cy="73" r="4" fill="#d0b84c"/>
+                <circle
+                    cx="30"
+                    cy="28"
+                    r="4"
+                    fill="#d0b84c"
+                />
+
+                <circle
+                    cx="130"
+                    cy="28"
+                    r="4"
+                    fill="#d0b84c"
+                />
+
+                <circle
+                    cx="30"
+                    cy="73"
+                    r="4"
+                    fill="#d0b84c"
+                />
+
+                <circle
+                    cx="130"
+                    cy="73"
+                    r="4"
+                    fill="#d0b84c"
+                />
+
             </svg>
         `;
     }
@@ -4113,17 +4423,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "relay") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-relay">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="45"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-relay"
+            >
 
                 <rect
                     x="42"
@@ -4151,30 +4456,46 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke-width="3"
                 />
 
-                <circle cx="61" cy="69" r="3" fill="#d5b85c"/>
-                <circle cx="80" cy="69" r="3" fill="#d5b85c"/>
-                <circle cx="99" cy="69" r="3" fill="#d5b85c"/>
+                <circle
+                    cx="61"
+                    cy="69"
+                    r="3"
+                    fill="#d5b85c"
+                />
+
+                <circle
+                    cx="80"
+                    cy="69"
+                    r="3"
+                    fill="#d5b85c"
+                />
+
+                <circle
+                    cx="99"
+                    cy="69"
+                    r="3"
+                    fill="#d5b85c"
+                />
+
             </svg>
         `;
     }
 
 
     /* ========================================================
-       SWITCH
+       SWITCH / PUSH BUTTON
     ======================================================== */
 
-    if (family === "switch" || family === "push-button") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-switch">
+    if (
+        family === "switch" ||
+        family === "push-button"
+    ) {
 
-                <ellipse
-                    cx="80"
-                    cy="91"
-                    rx="42"
-                    ry="7"
-                    fill="#000"
-                    opacity=".24"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-switch"
+            >
 
                 <rect
                     x="40"
@@ -4224,6 +4545,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#b5bdc1"
                     stroke-width="4"
                 />
+
             </svg>
         `;
     }
@@ -4234,17 +4556,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "dc-motor") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-motor">
 
-                <ellipse
-                    cx="80"
-                    cy="91"
-                    rx="53"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-motor"
+            >
 
                 <rect
                     x="39"
@@ -4297,6 +4614,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#8c979d"
                     stroke-width="5"
                 />
+
             </svg>
         `;
     }
@@ -4307,17 +4625,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "servo") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-servo">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="43"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-servo"
+            >
 
                 <rect
                     x="43"
@@ -4384,6 +4697,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#d0b85c"
                     stroke-width="4"
                 />
+
             </svg>
         `;
     }
@@ -4394,17 +4708,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "stepper") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-stepper">
 
-                <ellipse
-                    cx="80"
-                    cy="93"
-                    rx="52"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-stepper"
+            >
 
                 <rect
                     x="40"
@@ -4440,10 +4749,24 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke-width="3"
                 />
 
-                <line x1="57" y1="82" x2="53" y2="103"
-                      stroke="#bfc5c8" stroke-width="4"/>
-                <line x1="103" y1="82" x2="107" y2="103"
-                      stroke="#bfc5c8" stroke-width="4"/>
+                <line
+                    x1="57"
+                    y1="82"
+                    x2="53"
+                    y2="103"
+                    stroke="#bfc5c8"
+                    stroke-width="4"
+                />
+
+                <line
+                    x1="103"
+                    y1="82"
+                    x2="107"
+                    y2="103"
+                    stroke="#bfc5c8"
+                    stroke-width="4"
+                />
+
             </svg>
         `;
     }
@@ -4454,17 +4777,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "buzzer") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-buzzer">
 
-                <ellipse
-                    cx="80"
-                    cy="91"
-                    rx="34"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-buzzer"
+            >
 
                 <circle
                     cx="80"
@@ -4506,6 +4824,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#c1c6c9"
                     stroke-width="4"
                 />
+
             </svg>
         `;
     }
@@ -4516,17 +4835,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "speaker") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-speaker">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="48"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-speaker"
+            >
 
                 <circle
                     cx="80"
@@ -4559,6 +4873,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     r="7"
                     fill="#69757a"
                 />
+
             </svg>
         `;
     }
@@ -4569,17 +4884,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "sensor") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-sensor">
 
-                <ellipse
-                    cx="80"
-                    cy="93"
-                    rx="48"
-                    ry="7"
-                    fill="#000"
-                    opacity=".24"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-sensor"
+            >
 
                 <rect
                     x="37"
@@ -4645,6 +4955,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke="#c4c9cc"
                     stroke-width="4"
                 />
+
             </svg>
         `;
     }
@@ -4655,17 +4966,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "battery") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-battery">
 
-                <ellipse
-                    cx="80"
-                    cy="93"
-                    rx="30"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-battery"
+            >
 
                 <rect
                     x="52"
@@ -4709,6 +5015,7 @@ function createFOBAS3DComponentSVG(definition, family) {
                     r="5"
                     fill="#bfc5c8"
                 />
+
             </svg>
         `;
     }
@@ -4719,17 +5026,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "multimeter") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-multimeter">
 
-                <ellipse
-                    cx="80"
-                    cy="94"
-                    rx="42"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-multimeter"
+            >
 
                 <rect
                     x="43"
@@ -4778,9 +5080,27 @@ function createFOBAS3DComponentSVG(definition, family) {
                     stroke-width="3"
                 />
 
-                <circle cx="62" cy="85" r="4" fill="#c62828"/>
-                <circle cx="80" cy="85" r="4" fill="#111"/>
-                <circle cx="98" cy="85" r="4" fill="#111"/>
+                <circle
+                    cx="62"
+                    cy="85"
+                    r="4"
+                    fill="#c62828"
+                />
+
+                <circle
+                    cx="80"
+                    cy="85"
+                    r="4"
+                    fill="#111"
+                />
+
+                <circle
+                    cx="98"
+                    cy="85"
+                    r="4"
+                    fill="#111"
+                />
+
             </svg>
         `;
     }
@@ -4791,17 +5111,12 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     if (family === "lcd") {
-        return `
-            <svg ${common} class="fobas-svg-3d fobas-svg-lcd">
 
-                <ellipse
-                    cx="80"
-                    cy="91"
-                    rx="54"
-                    ry="7"
-                    fill="#000"
-                    opacity=".25"
-                />
+        return `
+            <svg
+                ${common}
+                class="fobas-svg-3d fobas-svg-lcd"
+            >
 
                 <rect
                     x="22"
@@ -4832,14 +5147,18 @@ function createFOBAS3DComponentSVG(definition, family) {
                     opacity=".65"
                 />
 
-                ${Array.from({ length: 10 }, (_, i) => `
-                    <circle
-                        cx="${30 + i * 11}"
-                        cy="83"
-                        r="2"
-                        fill="#d0b85c"
-                    />
-                `).join("")}
+                ${Array.from(
+                    { length: 10 },
+                    (_, i) => `
+                        <circle
+                            cx="${30 + i * 11}"
+                            cy="83"
+                            r="2"
+                            fill="#d0b85c"
+                        />
+                    `
+                ).join("")}
+
             </svg>
         `;
     }
@@ -4850,16 +5169,10 @@ function createFOBAS3DComponentSVG(definition, family) {
     ======================================================== */
 
     return `
-        <svg ${common} class="fobas-svg-3d fobas-svg-generic">
-
-            <ellipse
-                cx="80"
-                cy="92"
-                rx="48"
-                ry="7"
-                fill="#000"
-                opacity=".25"
-            />
+        <svg
+            ${common}
+            class="fobas-svg-3d fobas-svg-generic"
+        >
 
             <rect
                 x="38"
@@ -4905,34 +5218,37 @@ function createFOBAS3DComponentSVG(definition, family) {
                 stroke="#b8c0c4"
                 stroke-width="4"
             />
+
         </svg>
     `;
 }
 
 
-
-
-
 /* ============================================================
    09.6 — MAIN VISUAL HTML
    ------------------------------------------------------------
-   VERSION — CLEAN VISUAL
+   CLEAN COMPONENT ONLY
    ------------------------------------------------------------
-   OBJECTIF :
-   - Visual component uniquement
-   - Aucun élément sous le composant
-   - Suppression de la catégorie visuelle
-   - Conservation du SVG 3D
-   - Conservation de l'icône originale
-   - Conservation du nom du composant
-   - Conservation des dimensions
-   - Conservation de la famille visuelle
-   - Aucun changement du moteur électronique
+   IMPORTANT :
+   Le composant n'a plus :
+   - shadow wrapper
+   - highlight wrapper
+   - carte interne
+   - décoration sous le SVG
+   - catégorie visuelle
+
+   Le .component-3d-body reste volontairement présent,
+   car applyComponentVisualState() l'utilise pour les états
+   LED / moteur / servo etc.
 ============================================================ */
 
-function createComponentVisualHTML(definition, libraryMode = false) {
+function createComponentVisualHTML(
+    definition,
+    libraryMode = false
+) {
 
-    const safeDefinition = definition || {};
+    const safeDefinition =
+        definition || {};
 
     const icon =
         fobas3DSafe(
@@ -4944,10 +5260,19 @@ function createComponentVisualHTML(definition, libraryMode = false) {
             safeDefinition
         );
 
-    const visualSVG =
+    let visualSVG =
         createFOBAS3DComponentSVG(
             safeDefinition,
             family
+        );
+
+    /*
+       Sécurité supplémentaire :
+       supprime uniquement les anciens shadows SVG.
+    */
+    visualSVG =
+        cleanFOBAS3DDecorativeShadows(
+            visualSVG
         );
 
     const componentId =
@@ -4962,7 +5287,8 @@ function createComponentVisualHTML(definition, libraryMode = false) {
 
     const componentColor =
         fobas3DSafe(
-            safeDefinition.color || "#263238"
+            safeDefinition.color ||
+            "#263238"
         );
 
     const width =
@@ -4977,6 +5303,19 @@ function createComponentVisualHTML(definition, libraryMode = false) {
             Number(safeDefinition.height) || 70
         );
 
+    /*
+       Dans la bibliothèque :
+       le nom est déjà affiché par Block 08.
+       On évite donc le doublon visuel.
+
+       Dans le laboratoire :
+       le label reste disponible pour le moteur.
+    */
+    const labelStyle =
+        libraryMode
+            ? "display:none;"
+            : "";
+
     return `
         <div
             class="fobas-electronic-3d fobas-component-family-${fobas3DSafe(family)}"
@@ -4986,18 +5325,44 @@ function createComponentVisualHTML(definition, libraryMode = false) {
                 --component-color:${componentColor};
                 --component-width:${width}px;
                 --component-height:${height}px;
+                background:transparent;
+                border:none;
+                box-shadow:none;
+                outline:none;
+                filter:none;
+                padding:0;
+                margin:0;
+                overflow:visible;
             "
         >
 
-            <div class="component-3d-shadow"></div>
-
-            <div class="component-3d-body">
-
-                <div class="component-3d-highlight"></div>
+            <div
+                class="component-3d-body"
+                style="
+                    background:transparent;
+                    border:none;
+                    box-shadow:none;
+                    outline:none;
+                    filter:none;
+                    padding:0;
+                    margin:0;
+                    overflow:visible;
+                "
+            >
 
                 <div
                     class="component-3d-icon"
                     data-component-icon="${componentId}"
+                    style="
+                        background:transparent;
+                        border:none;
+                        box-shadow:none;
+                        outline:none;
+                        filter:none;
+                        padding:0;
+                        margin:0;
+                        overflow:visible;
+                    "
                 >
                     ${visualSVG}
                 </div>
@@ -5014,6 +5379,7 @@ function createComponentVisualHTML(definition, libraryMode = false) {
                     class="component-3d-label"
                     data-component-label="${componentId}"
                     title="${componentName}"
+                    style="${labelStyle}"
                 >
                     ${componentName}
                 </div>
@@ -5025,22 +5391,14 @@ function createComponentVisualHTML(definition, libraryMode = false) {
 }
 
 
-
-
-
-
-
-
-
-
-
 /* ============================================================
    09.7 — PIN HTML
    ------------------------------------------------------------
-   CONSERVÉ : aucune modification de la structure des pins.
+   CONSERVÉ INTÉGRALEMENT
 ============================================================ */
 
 function createComponentPinHTML(pin) {
+
     return `
         <button
             type="button"
@@ -5051,7 +5409,9 @@ function createComponentPinHTML(pin) {
             title="${fobas3DSafe(pin.name)}"
             aria-label="Pin ${fobas3DSafe(pin.name)}"
         >
-            <span>${fobas3DSafe(pin.name)}</span>
+            <span>
+                ${fobas3DSafe(pin.name)}
+            </span>
         </button>
     `;
 }
@@ -5060,18 +5420,26 @@ function createComponentPinHTML(pin) {
 /* ============================================================
    09.8 — CREATE COMPONENT INSTANCE
    ------------------------------------------------------------
-   CONSERVÉ.
+   CONSERVÉ
 ============================================================ */
 
-function createComponentInstance(type, options = {}) {
-    const definition = getComponentDefinition(type);
+function createComponentInstance(
+    type,
+    options = {}
+) {
+
+    const definition =
+        getComponentDefinition(type);
 
     if (!definition) {
-        console.warn(`Composant inconnu : ${type}`);
+        console.warn(
+            `Composant inconnu : ${type}`
+        );
         return null;
     }
 
-    const index = state.components.length;
+    const index =
+        state.components.length;
 
     const viewportRect =
         dom.viewport?.getBoundingClientRect();
@@ -5095,25 +5463,40 @@ function createComponentInstance(type, options = {}) {
         );
 
     const component = {
-        id: options.id || uid(type),
-        type: definition.id,
-        name: definition.name,
-        category: definition.category,
 
-        x: Number.isFinite(options.x)
-            ? options.x
-            : defaultX,
+        id:
+            options.id ||
+            uid(type),
 
-        y: Number.isFinite(options.y)
-            ? options.y
-            : defaultY,
+        type:
+            definition.id,
 
-        width: definition.width || 110,
-        height: definition.height || 70,
+        name:
+            definition.name,
 
-        rotation: Number.isFinite(options.rotation)
-            ? options.rotation
-            : 0,
+        category:
+            definition.category,
+
+        x:
+            Number.isFinite(options.x)
+                ? options.x
+                : defaultX,
+
+        y:
+            Number.isFinite(options.y)
+                ? options.y
+                : defaultY,
+
+        width:
+            definition.width || 110,
+
+        height:
+            definition.height || 70,
+
+        rotation:
+            Number.isFinite(options.rotation)
+                ? options.rotation
+                : 0,
 
         state:
             options.state ??
@@ -5128,17 +5511,23 @@ function createComponentInstance(type, options = {}) {
         angle:
             Number.isFinite(options.angle)
                 ? options.angle
-                : Number(definition.angle || 0),
+                : Number(
+                    definition.angle || 0
+                ),
 
         speed:
             Number.isFinite(options.speed)
                 ? options.speed
-                : Number(definition.speed || 0),
+                : Number(
+                    definition.speed || 0
+                ),
 
         frequency:
             Number.isFinite(options.frequency)
                 ? options.frequency
-                : Number(definition.frequency || 0),
+                : Number(
+                    definition.frequency || 0
+                ),
 
         displayText:
             options.displayText ??
@@ -5176,9 +5565,13 @@ function createComponentInstance(type, options = {}) {
                 }
     };
 
-    state.components.push(component);
+    state.components.push(
+        component
+    );
 
-    renderComponent(component);
+    renderComponent(
+        component
+    );
 
     updateWorkspaceState();
 
@@ -5186,148 +5579,168 @@ function createComponentInstance(type, options = {}) {
 }
 
 
+/* ============================================================
+   09.9 — RENDER COMPONENT
+   ------------------------------------------------------------
+   CONSERVÉ :
+   - IDs
+   - data attributes
+   - shell
+   - pins
+   - drag
+   - touch
+   - interaction
+============================================================ */
+
+function renderComponent(component) {
+
+    if (
+        !dom.componentLayer ||
+        !component
+    ) {
+        return;
+    }
+
+    let element =
+        document.getElementById(
+            component.id
+        );
+
+    if (!element) {
+
+        element =
+            document.createElement(
+                "div"
+            );
+
+        element.id =
+            component.id;
+
+        element.className =
+            "electronic-component";
+
+        element.dataset.componentId =
+            component.id;
+
+        element.dataset.componentType =
+            component.type;
+
+        element.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+        dom.componentLayer.appendChild(
+            element
+        );
+    }
+
+    const definition =
+        getComponentDefinition(
+            component.type
+        );
+
+    if (!definition) {
+        return;
+    }
+
+    element.style.position =
+        "absolute";
+
+    element.style.left =
+        `${component.x}px`;
+
+    element.style.top =
+        `${component.y}px`;
+
+    element.style.width =
+        `${component.width}px`;
+
+    element.style.height =
+        `${component.height}px`;
+
+    element.style.transform =
+        `rotate(${component.rotation}deg)`;
+
+    element.style.touchAction =
+        "none";
+
+    element.style.userSelect =
+        "none";
 
 
+    const selected =
+        component.id ===
+        state.selectedComponentId;
+
+    element.classList.toggle(
+        "selected",
+        selected
+    );
+
+    element.classList.toggle(
+        "component-running",
+        state.circuitRunning
+    );
+
+    element.dataset.state =
+        String(
+            component.state || "off"
+        );
 
 
+    const pins =
+        definition.pins || [];
 
 
+    element.innerHTML = `
+        <div class="electronic-component-shell">
 
- /* ============================================================
-    09.9 — RENDER COMPONENT
-    ------------------------------------------------------------
-    CLEAN VISUAL VERSION
-    ------------------------------------------------------------
-    - Aucun état affiché sous le composant
-    - Visual 3D conservé
-    - Pins conservés
-    - Drag / Touch conservés
-    - Interaction conservée
-    - Logique électronique conservée
- ============================================================ */
+            <div class="electronic-component-visual">
+                ${createComponentVisualHTML(
+                    definition
+                )}
+            </div>
 
- function renderComponent(component) {
-     if (!dom.componentLayer || !component) return;
+            <div class="electronic-component-pins">
+                ${pins
+                    .map(
+                        createComponentPinHTML
+                    )
+                    .join("")}
+            </div>
 
-     let element =
-         document.getElementById(component.id);
-
-     if (!element) {
-         element = document.createElement("div");
-
-         element.id = component.id;
-
-         element.className =
-             "electronic-component";
-
-         element.dataset.componentId =
-             component.id;
-
-         element.dataset.componentType =
-             component.type;
-
-         element.setAttribute(
-             "tabindex",
-             "0"
-         );
-
-         dom.componentLayer.appendChild(element);
-     }
-
-     const definition =
-         getComponentDefinition(
-             component.type
-         );
-
-     if (!definition) return;
-
-     element.style.position = "absolute";
-
-     element.style.left =
-         `${component.x}px`;
-
-     element.style.top =
-         `${component.y}px`;
-
-     element.style.width =
-         `${component.width}px`;
-
-     element.style.height =
-         `${component.height}px`;
-
-     element.style.transform =
-         `rotate(${component.rotation}deg)`;
-
-     element.style.touchAction =
-         "none";
-
-     element.style.userSelect =
-         "none";
-
-     const selected =
-         component.id ===
-         state.selectedComponentId;
-
-     element.classList.toggle(
-         "selected",
-         selected
-     );
-
-     element.classList.toggle(
-         "component-running",
-         state.circuitRunning
-     );
-
-     element.dataset.state =
-         String(
-             component.state || "off"
-         );
-
-     const pins =
-         definition.pins || [];
-
-     element.innerHTML = `
-         <div class="electronic-component-shell">
-
-             <div class="electronic-component-visual">
-                 ${createComponentVisualHTML(definition)}
-             </div>
-
-             <div class="electronic-component-pins">
-                 ${pins
-                     .map(createComponentPinHTML)
-                     .join("")}
-             </div>
-
-         </div>
-     `;
-
-     applyComponentVisualState(
-         element,
-         component
-     );
-
-     positionComponentPins(
-         element,
-         definition
-     );
-
-     attachComponentEvents(
-         element,
-         component
-     );
- }
+        </div>
+    `;
 
 
+    applyComponentVisualState(
+        element,
+        component
+    );
+
+    positionComponentPins(
+        element,
+        definition
+    );
+
+    attachComponentEvents(
+        element,
+        component
+    );
+}
 
 
 /* ============================================================
    09.10 — POSITION PINS
    ------------------------------------------------------------
-   CONSERVÉ.
+   CONSERVÉ
 ============================================================ */
 
-function positionComponentPins(element, definition) {
+function positionComponentPins(
+    element,
+    definition
+) {
 
     const pinElements =
         Array.from(
@@ -5343,26 +5756,35 @@ function positionComponentPins(element, definition) {
         bottom: []
     };
 
-    pinElements.forEach(pinElement => {
 
-        const side =
-            pinElement.dataset.pinSide ||
-            "right";
+    pinElements.forEach(
+        pinElement => {
 
-        if (!sideGroups[side]) {
-            sideGroups[side] = [];
+            const side =
+                pinElement.dataset.pinSide ||
+                "right";
+
+            if (!sideGroups[side]) {
+                sideGroups[side] = [];
+            }
+
+            sideGroups[side].push(
+                pinElement
+            );
         }
+    );
 
-        sideGroups[side].push(
-            pinElement
-        );
-    });
 
-    Object.entries(sideGroups)
-        .forEach(([side, elements]) => {
+    Object.entries(
+        sideGroups
+    ).forEach(
+        ([side, elements]) => {
 
             elements.forEach(
-                (pinElement, index) => {
+                (
+                    pinElement,
+                    index
+                ) => {
 
                     const total =
                         elements.length;
@@ -5374,7 +5796,9 @@ function positionComponentPins(element, definition) {
                     pinElement.style.position =
                         "absolute";
 
+
                     if (side === "left") {
+
                         pinElement.style.left =
                             "-8px";
 
@@ -5385,7 +5809,9 @@ function positionComponentPins(element, definition) {
                             "translateY(-50%)";
                     }
 
+
                     if (side === "right") {
+
                         pinElement.style.right =
                             "-8px";
 
@@ -5396,7 +5822,9 @@ function positionComponentPins(element, definition) {
                             "translateY(-50%)";
                     }
 
+
                     if (side === "top") {
+
                         pinElement.style.top =
                             "-8px";
 
@@ -5407,7 +5835,9 @@ function positionComponentPins(element, definition) {
                             "translateX(-50%)";
                     }
 
+
                     if (side === "bottom") {
+
                         pinElement.style.bottom =
                             "-8px";
 
@@ -5417,9 +5847,11 @@ function positionComponentPins(element, definition) {
                         pinElement.style.transform =
                             "translateX(-50%)";
                     }
+
                 }
             );
-        });
+        }
+    );
 }
 
 
@@ -5427,40 +5859,57 @@ function positionComponentPins(element, definition) {
    09.11 — STATE LABEL
 ============================================================ */
 
-function getComponentStateLabel(component) {
-    if (!component) return "";
+function getComponentStateLabel(
+    component
+) {
+
+    if (!component) {
+        return "";
+    }
+
 
     if (component.type === "led") {
+
         return component.state === "on"
             ? "● ON"
             : "○ OFF";
     }
 
+
     if (component.type === "bulb") {
+
         return component.state === "on"
             ? "● ALLUMÉE"
             : "○ ÉTEINTE";
     }
 
+
     if (component.type === "switch") {
+
         return component.state === "closed"
             ? "FERMÉ"
             : "OUVERT";
     }
 
+
     if (component.type === "push-button") {
+
         return component.state === "pressed"
             ? "PRESSÉ"
             : "LIBRE";
     }
 
+
     if (component.type === "servo") {
+
         return `ANGLE ${Math.round(
             component.angle || 0
         )}°`;
     }
 
+
     if (component.type === "dc-motor") {
+
         return component.speed
             ? `VITESSE ${Math.round(
                 component.speed
@@ -5468,18 +5917,23 @@ function getComponentStateLabel(component) {
             : "ARRÊT";
     }
 
+
     if (component.type === "buzzer") {
+
         return component.state === "on"
             ? `${component.frequency || 0} Hz`
             : "OFF";
     }
 
+
     if (component.type === "lcd") {
+
         return (
             component.displayText ||
             "LCD"
         );
     }
+
 
     return component.name;
 }
@@ -5488,16 +5942,22 @@ function getComponentStateLabel(component) {
 /* ============================================================
    09.12 — APPLY VISUAL STATE
    ------------------------------------------------------------
-   IMPORTANT:
+   CONSERVÉ :
    Le type reste la référence de simulation.
-   La variante LED est détectée uniquement pour le visuel.
 ============================================================ */
 
 function applyComponentVisualState(
     element,
     component
 ) {
-    if (!element || !component) return;
+
+    if (
+        !element ||
+        !component
+    ) {
+        return;
+    }
+
 
     const visual =
         element.querySelector(
@@ -5509,7 +5969,12 @@ function applyComponentVisualState(
             ".component-3d-body"
         );
 
-    if (!visual || !body) return;
+    if (
+        !visual ||
+        !body
+    ) {
+        return;
+    }
 
 
     /* ========================================================
@@ -5526,7 +5991,9 @@ function applyComponentVisualState(
        LED
     ======================================================== */
 
-    if (component.type === "led") {
+    if (
+        component.type === "led"
+    ) {
 
         const isLit =
             component.state === "on";
@@ -5546,6 +6013,7 @@ function applyComponentVisualState(
             !isLit
         );
 
+
         const variant =
             getFOBASElectronicLEDVariant(
                 getComponentDefinition(
@@ -5553,8 +6021,10 @@ function applyComponentVisualState(
                 ) || component
             );
 
+
         visual.dataset.ledVariant =
             variant;
+
 
         body.style.setProperty(
             "--led-color",
@@ -5569,7 +6039,9 @@ function applyComponentVisualState(
        BULB
     ======================================================== */
 
-    if (component.type === "bulb") {
+    if (
+        component.type === "bulb"
+    ) {
 
         const isLit =
             component.state === "on";
@@ -5595,7 +6067,9 @@ function applyComponentVisualState(
        BUZZER
     ======================================================== */
 
-    if (component.type === "buzzer") {
+    if (
+        component.type === "buzzer"
+    ) {
 
         const active =
             component.state === "on";
@@ -5616,15 +6090,20 @@ function applyComponentVisualState(
        DC MOTOR
     ======================================================== */
 
-    if (component.type === "dc-motor") {
+    if (
+        component.type === "dc-motor"
+    ) {
 
         const active =
-            Number(component.speed || 0) > 0;
+            Number(
+                component.speed || 0
+            ) > 0;
 
         visual.dataset.active =
             active
                 ? "true"
                 : "false";
+
 
         body.style.setProperty(
             "--motor-speed",
@@ -5632,10 +6111,13 @@ function applyComponentVisualState(
                 0,
                 Math.min(
                     100,
-                    Number(component.speed || 0)
+                    Number(
+                        component.speed || 0
+                    )
                 )
             )}`
         );
+
 
         visual.classList.toggle(
             "is-active",
@@ -5648,10 +6130,14 @@ function applyComponentVisualState(
        STEPPER
     ======================================================== */
 
-    if (component.type === "stepper") {
+    if (
+        component.type === "stepper"
+    ) {
 
         const active =
-            Number(component.speed || 0) > 0 ||
+            Number(
+                component.speed || 0
+            ) > 0 ||
             component.state === "on";
 
         visual.dataset.active =
@@ -5670,13 +6156,18 @@ function applyComponentVisualState(
        SERVO
     ======================================================== */
 
-    if (component.type === "servo") {
+    if (
+        component.type === "servo"
+    ) {
 
         const angle =
-            Number(component.angle || 0);
+            Number(
+                component.angle || 0
+            );
 
         visual.dataset.angle =
             String(angle);
+
 
         body.style.setProperty(
             "--servo-angle",
@@ -5695,7 +6186,9 @@ function applyComponentVisualState(
        RELAY
     ======================================================== */
 
-    if (component.type === "relay") {
+    if (
+        component.type === "relay"
+    ) {
 
         const active =
             component.state === "on";
@@ -5741,7 +6234,9 @@ function applyComponentVisualState(
        SWITCH
     ======================================================== */
 
-    if (component.type === "switch") {
+    if (
+        component.type === "switch"
+    ) {
 
         const closed =
             component.state ===
@@ -5763,7 +6258,9 @@ function applyComponentVisualState(
        LCD
     ======================================================== */
 
-    if (component.type === "lcd") {
+    if (
+        component.type === "lcd"
+    ) {
 
         const label =
             element.querySelector(
@@ -5771,12 +6268,31 @@ function applyComponentVisualState(
             );
 
         if (label) {
+
             label.textContent =
                 component.displayText ||
                 component.name;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
