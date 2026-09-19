@@ -13602,310 +13602,355 @@ function applyComponentVisualState(
 
 
 
-
-
-
-
-
 /* ================================================================
-   FOBAS ELECTRONIQUE & ROBOTIQUE
-   WIRE DELETE ISOLATED ENGINE — V1.0.0
-   ----------------------------------------------------------------
-   BLOC TOTALLEMENT ISOLÉ / PROTÉGÉ
-
+   BLOCK 12
+   FOBAS WIRE DELETE ENGINE — V2.0.0
+   ---------------------------------------------------------------
    OBJECTIF :
-   - Gérer uniquement la suppression des WIRE
-   - Utiliser le bouton existant "Supprimer"
-   - Aucun nouveau bouton
-   - Aucun remplacement du système existant
-   - NE MODIFIE PAS Block 10
-   - NE MODIFIE PAS Block 11
-   - NE MODIFIE PAS la sélection des composants
-   - NE MODIFIE PAS Déplacer
-   - Suppression immédiate du WIRE au toucher/clic
-   - Compatible souris + tactile
+   - Utiliser exclusivement #deleteToolBtn
+   - Activer le mode suppression des fils
+   - Supprimer immédiatement un WIRE au toucher/clic
+   - Compatible souris + tactile Android
    - Compatible WIRE → PIN
    - Compatible WIRE → WIRE
-   - Aucun Three.js
+   - Ne modifie pas la suppression des composants
+   - Ne modifie pas Block 10
+   - Ne modifie pas Block 11
+   - Extension totalement isolée
 ================================================================ */
 
-(function () {
+(function FOBAS_WIRE_DELETE_ENGINE_V2() {
+
     "use strict";
 
-    if (window.__FOBAS_WIRE_DELETE_ISOLATED_V1__) {
+    /* ------------------------------------------------------------
+       PROTECTION CONTRE DOUBLE INSTALLATION
+    ------------------------------------------------------------ */
+
+    if (window.__FOBAS_WIRE_DELETE_ENGINE_V2__) {
         return;
     }
 
-    window.__FOBAS_WIRE_DELETE_ISOLATED_V1__ = true;
+    window.__FOBAS_WIRE_DELETE_ENGINE_V2__ = true;
 
-    const CONFIG = {
-        version: "1.0.0",
-        deleteMode: false,
-        button: null,
-        initialized: false
-    };
 
-    /* ============================================================
-       01. GET WIRE ENGINE
-    ============================================================ */
+    /* ------------------------------------------------------------
+       ÉTAT LOCAL
+    ------------------------------------------------------------ */
+
+    let deleteMode = false;
+    let initialized = false;
+
+
+    /* ------------------------------------------------------------
+       RÉCUPÉRATION DU MOTEUR WIRE
+    ------------------------------------------------------------ */
 
     function getWireEngine() {
-        return window.FOBASWireCableEngine || null;
-    }
 
-    /* ============================================================
-       02. GET WIRE ID FROM EVENT
-    ============================================================ */
+        const engine = window.FOBASWireCableEngine;
 
-    function getWireIdFromEvent(event) {
-        if (!event || !event.target) {
+        if (
+            !engine ||
+            typeof engine.removeWire !== "function"
+        ) {
             return null;
         }
 
-        let element = event.target;
+        return engine;
+    }
+
+
+    /* ------------------------------------------------------------
+       RÉCUPÉRATION DU BOUTON SUPPRIMER
+       ID EXACT FOURNI PAR LE HTML :
+       #deleteToolBtn
+    ------------------------------------------------------------ */
+
+    function getDeleteButton() {
+
+        return document.getElementById("deleteToolBtn");
+
+    }
+
+
+    /* ------------------------------------------------------------
+       RÉCUPÉRATION DU WIRE À PARTIR DE L'ÉLÉMENT TOUCHÉ
+    ------------------------------------------------------------ */
+
+    function getWireElementFromTarget(target) {
+
+        if (!target) {
+            return null;
+        }
+
+        /*
+         * Cas normal :
+         * <path class="fobas-wire-object"
+         *       data-fobas-wire-id="...">
+         */
 
         if (
-            element.nodeType === 3 &&
-            element.parentElement
+            target instanceof Element &&
+            target.matches(".fobas-wire-object[data-fobas-wire-id]")
         ) {
-            element = element.parentElement;
+            return target;
         }
 
-        let wireElement = null;
 
-        try {
-            if (
-                element.closest &&
-                typeof element.closest === "function"
-            ) {
-                wireElement = element.closest(
+        /*
+         * Cas où le point touché est un élément enfant
+         * du SVG du wire.
+         */
+
+        if (
+            target instanceof Element
+        ) {
+
+            const parentWire =
+                target.closest(
                     ".fobas-wire-object[data-fobas-wire-id]"
                 );
+
+            if (parentWire) {
+                return parentWire;
             }
-        } catch (error) {
-            wireElement = null;
+
         }
+
+
+        return null;
+
+    }
+
+
+    /* ------------------------------------------------------------
+       RÉCUPÉRATION DE L'ID DU WIRE
+    ------------------------------------------------------------ */
+
+    function getWireId(wireElement) {
 
         if (!wireElement) {
             return null;
         }
 
-        const wireId =
+        const id =
             wireElement.getAttribute(
                 "data-fobas-wire-id"
             );
 
-        return wireId || null;
+        return id || null;
+
     }
 
-    /* ============================================================
-       03. DELETE WIRE
-    ============================================================ */
 
-    function deleteWire(wireId) {
-        if (!wireId) {
-            return false;
+    /* ------------------------------------------------------------
+       RAFRAÎCHISSEMENT DES EXTENSIONS WIRE
+       APRÈS SUPPRESSION
+    ------------------------------------------------------------ */
+
+    function refreshWireExtensions() {
+
+        try {
+
+            const extension =
+                window.FOBASWireWireConnectionExtension;
+
+            if (
+                extension &&
+                typeof extension.refresh === "function"
+            ) {
+                extension.refresh();
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "FOBAS Wire Delete : refresh extension ignoré.",
+                error
+            );
+
         }
+
+
+        /*
+         * Synchronisation éventuelle de l'état.
+         */
+
+        try {
+
+            const extension =
+                window.FOBASWireWireConnectionExtension;
+
+            if (
+                extension &&
+                typeof extension.syncAutoSave === "function"
+            ) {
+                extension.syncAutoSave();
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "FOBAS Wire Delete : synchronisation ignorée.",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* ------------------------------------------------------------
+       SUPPRESSION RÉELLE DU WIRE
+    ------------------------------------------------------------ */
+
+    function deleteWireFromElement(wireElement) {
 
         const engine = getWireEngine();
 
         if (!engine) {
-            return false;
-        }
 
-        try {
-            if (
-                typeof engine.removeWire === "function"
-            ) {
-                const result =
-                    engine.removeWire(wireId);
-
-                if (result !== false) {
-                    return true;
-                }
-            }
-        } catch (error) {
             console.warn(
-                "[FOBAS WIRE DELETE] Suppression échouée:",
-                error
-            );
-        }
-
-        return false;
-    }
-
-    /* ============================================================
-       04. DETECT SUPPRIMER BUTTON
-       ------------------------------------------------------------
-       Recherche uniquement le bouton dont le texte visible
-       correspond à "Supprimer".
-    ============================================================ */
-
-    function findDeleteButton() {
-        const candidates =
-            document.querySelectorAll(
-                "button, [role='button'], input[type='button'], input[type='submit']"
+                "FOBAS Wire Delete : FOBASWireCableEngine introuvable."
             );
 
-        for (
-            let i = 0;
-            i < candidates.length;
-            i++
-        ) {
-            const element = candidates[i];
+            return false;
 
-            if (!element) {
-                continue;
-            }
-
-            const text =
-                (
-                    element.innerText ||
-                    element.textContent ||
-                    element.value ||
-                    ""
-                )
-                .trim()
-                .toLowerCase();
-
-            if (
-                text === "supprimer" ||
-                text === "delete"
-            ) {
-                return element;
-            }
         }
 
-        return null;
-    }
-
-    /* ============================================================
-       05. DELETE MODE
-    ============================================================ */
-
-    function enableDeleteMode() {
-        CONFIG.deleteMode = true;
-
-        if (CONFIG.button) {
-            CONFIG.button.setAttribute(
-                "data-fobas-wire-delete-active",
-                "true"
-            );
-
-            CONFIG.button.classList.add(
-                "fobas-wire-delete-active"
-            );
-        }
-
-        try {
-            document.dispatchEvent(
-                new CustomEvent(
-                    "fobas:wire-delete-mode",
-                    {
-                        detail: {
-                            active: true
-                        }
-                    }
-                )
-            );
-        } catch (error) {}
-    }
-
-    /* ============================================================
-       06. INTERCEPT SUPPRIMER BUTTON
-       ------------------------------------------------------------
-       Important :
-       Le bouton continue son comportement normal.
-       Nous activons seulement notre mode WIRE.
-    ============================================================ */
-
-    function onDeleteButtonPointerDown(event) {
-        const button = CONFIG.button;
-
-        if (!button) {
-            return;
-        }
-
-        if (
-            event.target !== button &&
-            !button.contains(event.target)
-        ) {
-            return;
-        }
-
-        enableDeleteMode();
-    }
-
-    function onDeleteButtonClick(event) {
-        const button = CONFIG.button;
-
-        if (!button) {
-            return;
-        }
-
-        if (
-            event.target !== button &&
-            !button.contains(event.target)
-        ) {
-            return;
-        }
-
-        enableDeleteMode();
-    }
-
-    /* ============================================================
-       07. WIRE TOUCH / CLICK
-       ------------------------------------------------------------
-       Capture uniquement les WIRE.
-       Les composants ne sont jamais supprimés ici.
-    ============================================================ */
-
-    function onWirePointerDown(event) {
-        if (!CONFIG.deleteMode) {
-            return;
-        }
 
         const wireId =
-            getWireIdFromEvent(event);
+            getWireId(wireElement);
 
         if (!wireId) {
-            return;
+
+            console.warn(
+                "FOBAS Wire Delete : ID du wire introuvable."
+            );
+
+            return false;
+
         }
 
-        const deleted =
-            deleteWire(wireId);
-
-        if (!deleted) {
-            return;
-        }
 
         /*
-         * Empêche uniquement le traitement normal
-         * du WIRE après sa suppression.
-         *
-         * Aucun bloc composant n'est touché.
+         * Vérification supplémentaire :
+         * le wire doit réellement exister dans le moteur.
          */
-        try {
-            event.preventDefault();
-        } catch (error) {}
+
+        let existingWire = null;
 
         try {
-            event.stopImmediatePropagation();
-        } catch (error) {}
 
-        CONFIG.deleteMode = false;
+            if (
+                typeof engine.getWire === "function"
+            ) {
+                existingWire =
+                    engine.getWire(wireId);
+            }
 
-        if (CONFIG.button) {
-            CONFIG.button.removeAttribute(
-                "data-fobas-wire-delete-active"
-            );
+        } catch (error) {
 
-            CONFIG.button.classList.remove(
-                "fobas-wire-delete-active"
-            );
+            existingWire = null;
+
         }
 
+
+        /*
+         * Si getWire() existe mais retourne null,
+         * on vérifie directement la Map du moteur.
+         */
+
+        if (!existingWire) {
+
+            try {
+
+                if (
+                    engine.state &&
+                    engine.state.wires instanceof Map
+                ) {
+                    existingWire =
+                        engine.state.wires.get(wireId);
+                }
+
+            } catch (error) {
+
+                existingWire = null;
+
+            }
+
+        }
+
+
+        /*
+         * Appel du véritable moteur de suppression.
+         */
+
+        let removed = false;
+
         try {
+
+            removed =
+                engine.removeWire(wireId) === true;
+
+        } catch (error) {
+
+            console.error(
+                "FOBAS Wire Delete : erreur pendant removeWire().",
+                error
+            );
+
+            return false;
+
+        }
+
+
+        /*
+         * Certains moteurs de suppression ne retournent pas
+         * forcément true. On vérifie donc si le wire existe
+         * encore dans le DOM.
+         */
+
+        const stillExists =
+            document.querySelector(
+                '.fobas-wire-object[data-fobas-wire-id="' +
+                CSS.escape(wireId) +
+                '"]'
+            );
+
+
+        if (stillExists) {
+
+            console.warn(
+                "FOBAS Wire Delete : le wire existe encore après removeWire()."
+            );
+
+            return false;
+
+        }
+
+
+        /*
+         * Suppression réussie.
+         */
+
+        deleteMode = false;
+
+
+        /*
+         * Synchronisation Block 11 si disponible.
+         */
+
+        refreshWireExtensions();
+
+
+        /*
+         * Notification interne non destructive.
+         */
+
+        try {
+
             document.dispatchEvent(
                 new CustomEvent(
                     "fobas:wire-deleted-by-user",
@@ -13916,203 +13961,316 @@ function applyComponentVisualState(
                     }
                 )
             );
-        } catch (error) {}
+
+        } catch (error) {
+            /* Aucun impact si CustomEvent indisponible. */
+        }
+
+
+        return true;
+
     }
 
-    /* ============================================================
-       08. RESET DELETE MODE
-       ------------------------------------------------------------
-       Si l'utilisateur active Supprimer puis touche ailleurs
-       qu'un WIRE, on quitte simplement le mode WIRE.
-    ============================================================ */
 
-    function onDocumentPointerDown(event) {
-        if (!CONFIG.deleteMode) {
-            return;
-        }
+    /* ------------------------------------------------------------
+       ACTIVATION DU MODE SUPPRESSION
+    ------------------------------------------------------------ */
 
-        const wireId =
-            getWireIdFromEvent(event);
-
-        if (wireId) {
-            return;
-        }
+    function activateDeleteMode(event) {
 
         /*
-         * Ne pas bloquer les composants.
-         * On quitte seulement notre mode WIRE.
+         * Ne bloque pas le fonctionnement normal du bouton.
          */
-        CONFIG.deleteMode = false;
 
-        if (CONFIG.button) {
-            CONFIG.button.removeAttribute(
-                "data-fobas-wire-delete-active"
+        deleteMode = true;
+
+
+        /*
+         * Marquage visuel léger.
+         */
+
+        const button =
+            getDeleteButton();
+
+        if (button) {
+
+            button.setAttribute(
+                "data-fobas-wire-delete-mode",
+                "active"
             );
 
-            CONFIG.button.classList.remove(
-                "fobas-wire-delete-active"
-            );
         }
+
     }
 
-    /* ============================================================
-       09. FIND BUTTON
-    ============================================================ */
 
-    function installDeleteButton() {
+    /* ------------------------------------------------------------
+       DÉSACTIVATION
+    ------------------------------------------------------------ */
+
+    function deactivateDeleteMode() {
+
+        deleteMode = false;
+
         const button =
-            findDeleteButton();
+            getDeleteButton();
 
-        if (!button) {
-            return false;
+        if (button) {
+
+            button.removeAttribute(
+                "data-fobas-wire-delete-mode"
+            );
+
         }
 
-        CONFIG.button = button;
+    }
+
+
+    /* ------------------------------------------------------------
+       INTERCEPTION DES TOUCHES SUR LES WIRES
+       CAPTURE = true
+       ------------------------------------------------------------
+       Important :
+       Block 10 peut également écouter pointerdown.
+       Nous interceptons donc au niveau document/capture avant
+       que les autres handlers essaient de déplacer le wire.
+    ------------------------------------------------------------ */
+
+    function handleWirePointerDown(event) {
+
+        if (!deleteMode) {
+            return;
+        }
+
+
+        const wireElement =
+            getWireElementFromTarget(
+                event.target
+            );
+
+
+        /*
+         * Si ce n'est pas un wire :
+         * on laisse les autres éléments fonctionner normalement.
+         */
+
+        if (!wireElement) {
+            return;
+        }
+
+
+        /*
+         * Suppression immédiate.
+         */
+
+        const deleted =
+            deleteWireFromElement(
+                wireElement
+            );
+
+
+        if (deleted) {
+
+            /*
+             * Empêche Block 10/11 de commencer un déplacement
+             * ou une interaction avec ce wire déjà supprimé.
+             */
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+        }
+
+    }
+
+
+    /* ------------------------------------------------------------
+       CLICK FALLBACK
+       Pour les navigateurs/touch qui génèrent click après touch.
+       On vérifie seulement si le wire existe encore.
+    ------------------------------------------------------------ */
+
+    function handleWireClick(event) {
+
+        if (!deleteMode) {
+            return;
+        }
+
+
+        const wireElement =
+            getWireElementFromTarget(
+                event.target
+            );
+
+
+        if (!wireElement) {
+            return;
+        }
+
+
+        const deleted =
+            deleteWireFromElement(
+                wireElement
+            );
+
+
+        if (deleted) {
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+        }
+
+    }
+
+
+    /* ------------------------------------------------------------
+       CLICK SUR LE BOUTON SUPPRIMER
+    ------------------------------------------------------------ */
+
+    function handleDeleteButtonClick(event) {
+
+        /*
+         * Le bouton #deleteToolBtn est explicitement identifié.
+         */
+
+        activateDeleteMode(event);
+
+    }
+
+
+    /* ------------------------------------------------------------
+       INITIALISATION
+    ------------------------------------------------------------ */
+
+    function initialize() {
+
+        if (initialized) {
+            return;
+        }
+
+
+        const button =
+            getDeleteButton();
+
+
+        if (!button) {
+
+            console.warn(
+                "FOBAS Wire Delete V2 : #deleteToolBtn introuvable."
+            );
+
+            return;
+
+        }
+
+
+        initialized = true;
+
+
+        /*
+         * Activation avec souris + tactile.
+         */
 
         button.addEventListener(
             "pointerdown",
-            onDeleteButtonPointerDown,
+            activateDeleteMode,
             false
         );
+
 
         button.addEventListener(
             "click",
-            onDeleteButtonClick,
+            handleDeleteButtonClick,
             false
         );
 
-        return true;
-    }
 
-    /* ============================================================
-       10. INSTALL WIRE LISTENER
-    ============================================================ */
-
-    function installWireListener() {
         /*
-         * Capture = true uniquement pour garantir que
-         * le WIRE est supprimé immédiatement.
-         *
-         * Le filtre getWireIdFromEvent() empêche ce bloc
-         * de toucher aux composants.
+         * Capture globale :
+         * le wire est supprimé immédiatement dès le toucher.
          */
 
         document.addEventListener(
             "pointerdown",
-            onWirePointerDown,
+            handleWirePointerDown,
             true
         );
-    }
 
-    /* ============================================================
-       11. DOCUMENT LISTENER
-    ============================================================ */
 
-    function installDocumentListener() {
+        /*
+         * Fallback click.
+         */
+
         document.addEventListener(
-            "pointerdown",
-            onDocumentPointerDown,
-            false
+            "click",
+            handleWireClick,
+            true
         );
+
+
+        /*
+         * API publique.
+         */
+
+        window.FOBASWireDeleteIsolated = {
+
+            version: "2.0.0",
+
+            activate: function () {
+                deleteMode = true;
+            },
+
+            deactivate: function () {
+                deactivateDeleteMode();
+            },
+
+            isActive: function () {
+                return deleteMode;
+            },
+
+            deleteWire: function (wireElement) {
+                return deleteWireFromElement(
+                    wireElement
+                );
+            }
+
+        };
+
+
+        console.log(
+            "FOBAS Wire Delete Engine V2.0.0 — READY"
+        );
+
     }
 
-    /* ============================================================
-       12. BUTTON RETRY
-       ------------------------------------------------------------ */
 
-    function waitForDeleteButton() {
-        if (CONFIG.button) {
-            return;
-        }
-
-        installDeleteButton();
-
-        if (!CONFIG.button) {
-            setTimeout(
-                waitForDeleteButton,
-                500
-            );
-        }
-    }
-
-    /* ============================================================
-       13. INIT
-    ============================================================ */
-
-    function init() {
-        if (CONFIG.initialized) {
-            return;
-        }
-
-        installWireListener();
-        installDocumentListener();
-
-        installDeleteButton();
-        waitForDeleteButton();
-
-        CONFIG.initialized = true;
-
-        try {
-            document.dispatchEvent(
-                new CustomEvent(
-                    "fobas:wire-delete-engine-ready",
-                    {
-                        detail: {
-                            version:
-                                CONFIG.version
-                        }
-                    }
-                )
-            );
-        } catch (error) {}
-    }
-
-    /* ============================================================
-       14. PUBLIC API
-    ============================================================ */
-
-    window.FOBASWireDeleteIsolated = {
-        version: CONFIG.version,
-
-        enable: enableDeleteMode,
-
-        delete: deleteWire,
-
-        getMode: function () {
-            return CONFIG.deleteMode;
-        },
-
-        getButton: function () {
-            return CONFIG.button;
-        },
-
-        state: CONFIG
-    };
-
-    /* ============================================================
-       15. START
-    ============================================================ */
+    /* ------------------------------------------------------------
+       DOM READY
+    ------------------------------------------------------------ */
 
     if (
         document.readyState === "loading"
     ) {
+
         document.addEventListener(
             "DOMContentLoaded",
-            init,
+            initialize,
             {
                 once: true
             }
         );
+
     } else {
-        init();
+
+        initialize();
+
     }
 
+
 })();
-
-
-
-
-
 
 
 
