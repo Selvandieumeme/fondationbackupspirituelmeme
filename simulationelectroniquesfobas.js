@@ -230,6 +230,12 @@
 
 
 
+
+
+
+
+
+
 /* ============================================================
    02.1 — BOUTON PÉDAGOGIQUE DYNAMIQUE — FOOTER
    ------------------------------------------------------------
@@ -239,14 +245,12 @@
 
 (function createPedagogicalFooterButton() {
 
-    // Cherche le footer existant de l'application
-    const footer =
-        app.querySelector("footer") ||
-        document.querySelector("footer");
+    // Récupère exactement le footer de l'application FOBAS
+    const footer = document.getElementById("electronicFooter");
 
     if (!footer) {
         console.warn(
-            "FOBAS : aucun footer trouvé pour le bouton Pédagogique."
+            "FOBAS : #electronicFooter introuvable."
         );
         return;
     }
@@ -265,17 +269,15 @@
     pedagogicalBtn.textContent = "📚 Pédagogique";
 
     // Navigation vers la page pédagogique
-    pedagogicalBtn.addEventListener("click", () => {
+    pedagogicalBtn.addEventListener("click", function () {
         window.location.href =
             "https://fondationbackupspirituel.com/pedagogiqueselectroniquesfobas.html";
     });
 
-    // Ajout uniquement dans le footer
+    // Ajoute le bouton uniquement dans le footer FOBAS
     footer.appendChild(pedagogicalBtn);
 
 })();
-
-
 
 
 
