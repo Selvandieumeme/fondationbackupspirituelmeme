@@ -7454,6 +7454,14 @@ function applyComponentVisualState(
 
 
 
+
+
+
+
+
+
+
+
 /* ================================================================
    10. WIRE & CABLE INTERACTION ENGINE
    ---------------------------------------------------------------
@@ -8083,9 +8091,6 @@ function applyComponentVisualState(
             group.style.pointerEvents =
                 "all";
 
-            group.style.cursor =
-                "move";
-
 
             /* HIT AREA */
 
@@ -8444,8 +8449,12 @@ function applyComponentVisualState(
        - sélection du wire
        - redimensionnement par poignée A/B
 
-       Le déplacement du wire entier est maintenant géré
-       par le mécanisme général Deplacer.
+       IMPORTANT :
+       Le corps du wire ne bloque plus la propagation
+       des événements Pointer Events.
+
+       Le déplacement du wire entier appartient exclusivement
+       au mécanisme général Deplacer / Block 12.
     ============================================================ */
 
     function attachFOBASWireEvents(
@@ -8456,10 +8465,6 @@ function applyComponentVisualState(
             "pointerdown",
             function (event) {
 
-                event.preventDefault();
-                event.stopPropagation();
-
-
                 const handle =
                     event.target.closest
                         ? event.target.closest(
@@ -8469,6 +8474,10 @@ function applyComponentVisualState(
 
 
                 if (handle) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
 
                     const side =
                         handle.getAttribute(
@@ -8485,6 +8494,17 @@ function applyComponentVisualState(
                 }
 
 
+                /*
+                 * CORPS DU WIRE :
+                 * aucune capture de pointer,
+                 * aucun preventDefault(),
+                 * aucun stopPropagation(),
+                 * aucun drag local.
+                 *
+                 * Le Block 12 / Deplacer reste libre
+                 * de prendre en charge le déplacement.
+                 */
+
                 selectFOBASWire(
                     wire
                 );
@@ -8494,10 +8514,10 @@ function applyComponentVisualState(
 
 
     /* ============================================================
-       10.15 — ANCIEN MOVE SUPPRIMÉ
+       10.15 — AUCUN DRAG / MOVE DU WIRE
        ------------------------------------------------------------
-       Le déplacement du wire entier n'est plus géré ici.
-       Il est pris en charge par le mécanisme général Deplacer.
+       Aucun ancien mécanisme de déplacement du wire
+       n'est conservé dans ce bloc.
     ============================================================ */
 
 
@@ -9823,6 +9843,14 @@ function applyComponentVisualState(
     }
 
 })();
+
+
+
+
+
+
+
+
 
 
 
