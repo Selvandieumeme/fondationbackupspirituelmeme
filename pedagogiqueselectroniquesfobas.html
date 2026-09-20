@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS — Plateforme pédagogique professionnelle dédiée à l'Électronique et à la Robotique."
+    >
+
+    <meta
+        name="theme-color"
+        content="#071426"
+    >
+
+    <title>FOBAS — Pédagogique Électronique & Robotique</title>
+
+    <!-- ============================================================
+         FOBAS — STYLE PRINCIPAL
+    ============================================================ -->
+    <link
+        rel="stylesheet"
+        href="pedagogiqueselectroniquesfobas.css"
+    >
+
+</head>
+
+<body>
+
+    <!-- ============================================================
+         APPLICATION PRINCIPALE
+    ============================================================ -->
+    <div
+        id="fobasPedagogicalApp"
+        class="fobas-pedagogical-app"
+    >
+
+        <!-- ========================================================
+             HEADER PROFESSIONNEL
+        ======================================================== -->
+        <header
+            id="fobasPedagogicalHeader"
+            class="fobas-pedagogical-header"
+        >
+
+            <div class="header-brand">
+
+                <div class="brand-logo">
+                    <span class="brand-logo-main">FOBAS</span>
+                    <span class="brand-logo-sub">TECH</span>
+                </div>
+
+                <div class="brand-information">
+                    <h1>
+                        Électronique & Robotique
+                    </h1>
+
+                    <p>
+                        Plateforme pédagogique professionnelle
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="header-status">
+
+                <div
+                    id="chapterCounter"
+                    class="header-status-item"
+                >
+                    Chapitres : <strong>0</strong>
+                </div>
+
+                <div
+                    id="learningStatus"
+                    class="header-status-item"
+                >
+                    Parcours pédagogique
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ========================================================
+             BARRE DE NAVIGATION
+        ======================================================== -->
+        <nav
+            id="pedagogicalToolbar"
+            class="pedagogical-toolbar"
+            aria-label="Navigation pédagogique"
+        >
+
+            <button
+                id="homeBtn"
+                class="toolbar-action-btn active"
+                type="button"
+            >
+                Accueil
+            </button>
+
+            <button
+                id="chaptersBtn"
+                class="toolbar-action-btn"
+                type="button"
+            >
+                Chapitres
+            </button>
+
+            <button
+                id="backToSimulationBtn"
+                class="toolbar-action-btn"
+                type="button"
+            >
+                Simulation
+            </button>
+
+        </nav>
+
+
+        <!-- ========================================================
+             ZONE PRINCIPALE
+        ======================================================== -->
+        <main
+            id="pedagogicalMain"
+            class="pedagogical-main"
+        >
+
+            <!-- ====================================================
+                 INTRODUCTION
+            ==================================================== -->
+            <section
+                id="pedagogicalWelcome"
+                class="pedagogical-welcome"
+            >
+
+                <div class="welcome-content">
+
+                    <div class="welcome-badge">
+                        FOBAS • FORMATION PROFESSIONNELLE
+                    </div>
+
+                    <h2>
+                        Laboratoire pédagogique
+                        <span>Électronique & Robotique</span>
+                    </h2>
+
+                    <p>
+                        Découvrez progressivement les principes fondamentaux
+                        de l'électronique, des systèmes électriques,
+                        des composants, des capteurs, des actionneurs,
+                        des microcontrôleurs et de la robotique.
+                    </p>
+
+                    <p>
+                        Chaque chapitre présente son contenu de manière
+                        structurée : <strong>Théorie</strong>,
+                        <strong>Pratique</strong>,
+                        <strong>Exercice</strong> et
+                        <strong>Devoir</strong>.
+                    </p>
+
+                    <button
+                        id="startLearningBtn"
+                        class="primary-learning-btn"
+                        type="button"
+                    >
+                        Commencer la formation
+                    </button>
+
+                </div>
+
+
+                <!-- ==================================================
+                     GRANDE ZONE SVG 3D
+                     Le SVG réel sera injecté dynamiquement par JS.
+                ================================================== -->
+                <div
+                    id="welcomeVisual"
+                    class="large-svg-visual welcome-visual"
+                    aria-label="Illustration 3D électronique et robotique"
+                >
+
+                    <div class="svg-loading-state">
+                        Préparation du laboratoire...
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 ESPACE DES CHAPITRES
+            ==================================================== -->
+            <section
+                id="chaptersWorkspace"
+                class="chapters-workspace"
+                hidden
+            >
+
+                <div class="workspace-heading">
+
+                    <div>
+                        <span class="section-kicker">
+                            PARCOURS DE FORMATION
+                        </span>
+
+                        <h2>
+                            Chapitres Électronique & Robotique
+                        </h2>
+
+                        <p>
+                            Sélectionnez un chapitre pour afficher
+                            l'ensemble de son contenu pédagogique.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     LISTE DYNAMIQUE DES CHAPITRES
+                ================================================== -->
+                <div
+                    id="chaptersList"
+                    class="chapters-list"
+                    aria-label="Liste des chapitres"
+                >
+                    <!-- Généré dynamiquement par JavaScript -->
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 CONTENU DYNAMIQUE D'UN CHAPITRE
+            ==================================================== -->
+            <section
+                id="chapterContentWorkspace"
+                class="chapter-content-workspace"
+                hidden
+            >
+
+                <!-- ==================================================
+                     EN-TÊTE DU CHAPITRE
+                ================================================== -->
+                <div
+                    id="chapterHeader"
+                    class="chapter-header"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+
+                <!-- ==================================================
+                     GRANDE ILLUSTRATION SVG 3D
+                ================================================== -->
+                <div
+                    id="chapterVisual"
+                    class="large-svg-visual chapter-visual"
+                    aria-label="Illustration technique du chapitre"
+                >
+                    <!-- SVG 3D généré dynamiquement -->
+                </div>
+
+
+                <!-- ==================================================
+                     CONTENU PÉDAGOGIQUE
+                     Les quatre parties restent verticales.
+                ================================================== -->
+                <div
+                    id="chapterSections"
+                    class="chapter-sections"
+                >
+
+                    <!-- =================================================
+                         THÉORIE
+                    ================================================= -->
+                    <article
+                        id="theorieSection"
+                        class="pedagogical-section theorie-section"
+                    >
+
+                        <div class="section-header">
+
+                            <div class="section-number">
+                                01
+                            </div>
+
+                            <div>
+                                <span class="section-kicker">
+                                    FONDAMENTAUX
+                                </span>
+
+                                <h3>
+                                    Théorie
+                                </h3>
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="theorieContent"
+                            class="section-content"
+                        >
+                            <!-- Généré dynamiquement -->
+                        </div>
+
+                    </article>
+
+
+                    <!-- =================================================
+                         PRATIQUE
+                    ================================================= -->
+                    <article
+                        id="pratiqueSection"
+                        class="pedagogical-section pratique-section"
+                    >
+
+                        <div class="section-header">
+
+                            <div class="section-number">
+                                02
+                            </div>
+
+                            <div>
+                                <span class="section-kicker">
+                                    APPLICATION
+                                </span>
+
+                                <h3>
+                                    Pratique
+                                </h3>
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="pratiqueContent"
+                            class="section-content"
+                        >
+                            <!-- Généré dynamiquement -->
+                        </div>
+
+                    </article>
+
+
+                    <!-- =================================================
+                         EXERCICE
+                    ================================================= -->
+                    <article
+                        id="exerciceSection"
+                        class="pedagogical-section exercice-section"
+                    >
+
+                        <div class="section-header">
+
+                            <div class="section-number">
+                                03
+                            </div>
+
+                            <div>
+                                <span class="section-kicker">
+                                    ENTRAÎNEMENT
+                                </span>
+
+                                <h3>
+                                    Exercice
+                                </h3>
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="exerciceContent"
+                            class="section-content"
+                        >
+                            <!-- Généré dynamiquement -->
+                        </div>
+
+                    </article>
+
+
+                    <!-- =================================================
+                         DEVOIR
+                    ================================================= -->
+                    <article
+                        id="devoirSection"
+                        class="pedagogical-section devoir-section"
+                    >
+
+                        <div class="section-header">
+
+                            <div class="section-number">
+                                04
+                            </div>
+
+                            <div>
+                                <span class="section-kicker">
+                                    ÉVALUATION
+                                </span>
+
+                                <h3>
+                                    Devoir
+                                </h3>
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="devoirContent"
+                            class="section-content"
+                        >
+                            <!-- Généré dynamiquement -->
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- ==================================================
+                     NAVIGATION ENTRE CHAPITRES
+                ================================================== -->
+                <div
+                    id="chapterNavigation"
+                    class="chapter-navigation"
+                >
+
+                    <button
+                        id="previousChapterBtn"
+                        class="chapter-nav-btn"
+                        type="button"
+                    >
+                        ← Chapitre précédent
+                    </button>
+
+                    <button
+                        id="allChaptersBtn"
+                        class="chapter-nav-btn primary"
+                        type="button"
+                    >
+                        Tous les chapitres
+                    </button>
+
+                    <button
+                        id="nextChapterBtn"
+                        class="chapter-nav-btn"
+                        type="button"
+                    >
+                        Chapitre suivant →
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ====================================================
+                 ÉTAT DE CHARGEMENT
+            ==================================================== -->
+            <div
+                id="pedagogicalLoading"
+                class="pedagogical-loading"
+                hidden
+            >
+
+                <div class="loading-spinner"></div>
+
+                <p>
+                    Chargement du contenu pédagogique...
+                </p>
+
+            </div>
+
+
+            <!-- ====================================================
+                 ÉTAT D'ERREUR
+            ==================================================== -->
+            <div
+                id="pedagogicalError"
+                class="pedagogical-error"
+                hidden
+            >
+
+                <h3>
+                    Contenu temporairement indisponible
+                </h3>
+
+                <p id="pedagogicalErrorMessage">
+                    Une erreur est survenue lors du chargement
+                    du contenu pédagogique.
+                </p>
+
+                <button
+                    id="retryPedagogicalBtn"
+                    class="primary-learning-btn"
+                    type="button"
+                >
+                    Réessayer
+                </button>
+
+            </div>
+
+        </main>
+
+
+        <!-- ========================================================
+             FOOTER
+        ======================================================== -->
+        <footer
+            id="fobasPedagogicalFooter"
+            class="fobas-pedagogical-footer"
+        >
+
+            <div class="footer-brand">
+                <strong>FOBAS</strong>
+                <span>Électronique & Robotique</span>
+            </div>
+
+            <div class="footer-information">
+                Formation numérique professionnelle
+            </div>
+
+            <div class="footer-version">
+                Pédagogique Web
+            </div>
+
+        </footer>
+
+    </div>
+
+
+    <!-- ============================================================
+         JAVASCRIPT PRINCIPAL
+         Toute la génération dynamique sera effectuée ici.
+    ============================================================ -->
+    <script
+        src="pedagogiqueselectroniquesfobas.js"
+        defer
+    ></script>
+
+</body>
+</html>
