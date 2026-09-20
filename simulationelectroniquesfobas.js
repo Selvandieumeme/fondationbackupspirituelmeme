@@ -6002,12 +6002,20 @@ function createComponentVisualHTML(
 
 
 
-  const wireColor =
+const wireColor =
     fobas3DSafe(
-        safeDefinition.wireColor ||
-        safeDefinition.color ||
-        "#263238"
-    );         
+        componentType === "wire-red"
+            ? "#d32f2f"
+            : componentType === "wire-green"
+                ? "#2e7d32"
+                : componentType === "wire-black"
+                    ? "#212121"
+                    : (
+                        safeDefinition.wireColor ||
+                        safeDefinition.color ||
+                        "#263238"
+                    )
+    );
 
 
 
@@ -6842,10 +6850,10 @@ function renderComponent(component) {
             "absolute";
 
         resizePoint.style.width =
-            "34px";
+            "28px";
 
         resizePoint.style.height =
-            "34px";
+            "28px";
 
         resizePoint.style.right =
             "-17px";
