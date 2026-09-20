@@ -227,6 +227,61 @@
         engineVersion: $("engineVersion")
     };
 
+
+
+
+/* ============================================================
+   02.1 — BOUTON PÉDAGOGIQUE DYNAMIQUE — FOOTER
+   ------------------------------------------------------------
+   AJOUT UNIQUEMENT LE BOUTON PÉDAGOGIQUE AU FOOTER.
+   NE MODIFIE PAS LES AUTRES BOUTONS NI LE MOTEUR.
+   ============================================================ */
+
+(function createPedagogicalFooterButton() {
+
+    // Cherche le footer existant de l'application
+    const footer =
+        app.querySelector("footer") ||
+        document.querySelector("footer");
+
+    if (!footer) {
+        console.warn(
+            "FOBAS : aucun footer trouvé pour le bouton Pédagogique."
+        );
+        return;
+    }
+
+    // Évite toute création en double
+    if (document.getElementById("pedagogicalBtn")) {
+        return;
+    }
+
+    // Création du bouton
+    const pedagogicalBtn = document.createElement("button");
+
+    pedagogicalBtn.id = "pedagogicalBtn";
+    pedagogicalBtn.className = "top-tool-btn";
+    pedagogicalBtn.type = "button";
+    pedagogicalBtn.textContent = "📚 Pédagogique";
+
+    // Navigation vers la page pédagogique
+    pedagogicalBtn.addEventListener("click", () => {
+        window.location.href =
+            "https://fondationbackupspirituel.com/pedagogiqueselectroniquesfobas.html";
+    });
+
+    // Ajout uniquement dans le footer
+    footer.appendChild(pedagogicalBtn);
+
+})();
+
+
+
+
+
+
+
+
     /* ============================================================
        03. ENGINE STATE
     ============================================================ */
