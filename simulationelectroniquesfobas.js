@@ -13812,6 +13812,412 @@ const handleB =
         );
     }
 
+
+
+
+
+
+
+/* ============================================================
+   12.1 — WIRE → GENERAL MOVE BRIDGE
+   ------------------------------------------------------------
+   OBJECTIF :
+   - Konekte WIRE dinamik yo ak bouton Deplacer existant lan.
+   - Pa crée aucun nouveau bouton.
+   - Utilise state.activeTool === "move".
+   - Compatible souris + tactile.
+   - Ne modifie pas Block 10/11.
+============================================================ */
+
+(function FOBAS_WIRE_GENERAL_MOVE_BRIDGE() {
+
+    "use strict";
+
+    if (window.__FOBAS_WIRE_GENERAL_MOVE_BRIDGE__) {
+        return;
+    }
+
+    window.__FOBAS_WIRE_GENERAL_MOVE_BRIDGE__ = true;
+
+
+    let active = false;
+    let wireId = null;
+    let pointerId = null;
+
+    let startX = 0;
+    let startY = 0;
+
+    let startAX = 0;
+    let startAY = 0;
+    let startBX = 0;
+    let startBY = 0;
+
+
+    function getWireEngine() {
+
+        return window.FOBASWireCableEngine || null;
+
+    }
+
+
+    function getWireFromElement(element) {
+
+        if (!element) {
+            return null;
+        }
+
+        const id =
+            element.getAttribute(
+                "data-fobas-wire-id"
+            );
+
+        if (!id) {
+            return null;
+        }
+
+        const engine =
+            getWireEngine();
+
+        if (
+            !engine ||
+            !engine.state ||
+            !(engine.state.wires instanceof Map)
+        ) {
+            return null;
+        }
+
+        return engine.state.wires.get(id) || null;
+
+    }
+
+
+    function beginWireMove(event, element) {
+
+        if (state.activeTool !== "move") {
+            return;
+        }
+
+        const wire =
+            getWireFromElement(element);
+
+        if (!wire) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        active = true;
+
+        wireId =
+            wire.id;
+
+        pointerId =
+            event.pointerId;
+
+        startX =
+            event.clientX;
+
+        startY =
+            event.clientY;
+
+        startAX =
+            Number(wire.a?.x) || 0;
+
+        startAY =
+            Number(wire.a?.y) || 0;
+
+        startBX =
+            Number(wire.b?.x) || 0;
+
+        startBY =
+            Number(wire.b?.y) || 0;
+
+
+        try {
+            element.setPointerCapture(
+                event.pointerId
+            );
+        } catch (_) {}
+
+
+        document.addEventListener(
+            "pointermove",
+            moveWire,
+            true
+        );
+
+        document.addEventListener(
+            "pointerup",
+            finishWireMove,
+            true
+        );
+
+        document.addEventListener(
+            "pointercancel",
+            finishWireMove,
+            true
+        );
+
+        setStatus(
+            "Déplacement du composant",
+            "working"
+        );
+
+    }
+
+
+    function moveWire(event) {
+
+        if (!active) {
+            return;
+        }
+
+        if (
+            event.pointerId !== pointerId
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const engine =
+            getWireEngine();
+
+        if (
+            !engine ||
+            !engine.state ||
+            !(engine.state.wires instanceof Map)
+        ) {
+            finishWireMove(event);
+            return;
+        }
+
+        const wire =
+            engine.state.wires.get(
+                wireId
+            );
+
+        if (!wire) {
+            finishWireMove(event);
+            return;
+        }
+
+
+        const dx =
+            event.clientX -
+            startX;
+
+        const dy =
+            event.clientY -
+            startY;
+
+
+        const zoom =
+            Number(state.zoom) || 1;
+
+
+        const moveX =
+            dx / zoom;
+
+        const moveY =
+            dy / zoom;
+
+
+        wire.a.x =
+            startAX + moveX;
+
+        wire.a.y =
+            startAY + moveY;
+
+        wire.b.x =
+            startBX + moveX;
+
+        wire.b.y =
+            startBY + moveY;
+
+
+        if (
+            typeof engine.renderWire ===
+            "function"
+        ) {
+
+            engine.renderWire(
+                wire
+            );
+
+        } else if (
+            typeof engine.render ===
+            "function"
+        ) {
+
+            engine.render(
+                wire
+            );
+
+        }
+
+
+        try {
+
+            if (
+                window.FOBASWireWireConnectionExtension &&
+                typeof
+                    window.FOBASWireWireConnectionExtension
+                        .update ===
+                    "function"
+            ) {
+
+                window.FOBASWireWireConnectionExtension
+                    .update();
+
+            }
+
+        } catch (_) {}
+
+
+        try {
+
+            if (
+                typeof window.FOBAS_WIRE_syncState ===
+                "function"
+            ) {
+
+                window.FOBAS_WIRE_syncState();
+
+            }
+
+        } catch (_) {}
+
+    }
+
+
+    function finishWireMove(event) {
+
+        if (!active) {
+            return;
+        }
+
+        if (
+            event &&
+            event.pointerId !== undefined &&
+            event.pointerId !== pointerId
+        ) {
+            return;
+        }
+
+
+        active = false;
+
+
+        document.removeEventListener(
+            "pointermove",
+            moveWire,
+            true
+        );
+
+        document.removeEventListener(
+            "pointerup",
+            finishWireMove,
+            true
+        );
+
+        document.removeEventListener(
+            "pointercancel",
+            finishWireMove,
+            true
+        );
+
+
+        wireId = null;
+        pointerId = null;
+
+
+        try {
+
+            if (
+                window.FOBASWireWireConnectionExtension &&
+                typeof
+                    window.FOBASWireWireConnectionExtension
+                        .refresh ===
+                    "function"
+            ) {
+
+                window.FOBASWireWireConnectionExtension
+                    .refresh();
+
+            }
+
+        } catch (_) {}
+
+
+        updateWorkspaceState();
+
+        setStatus(
+            "Simulation prête",
+            "ready"
+        );
+
+    }
+
+
+    document.addEventListener(
+        "pointerdown",
+        function (event) {
+
+            if (
+                state.activeTool !== "move"
+            ) {
+                return;
+            }
+
+
+            const element =
+                event.target.closest?.(
+                    ".fobas-wire-object[data-fobas-wire-id]"
+                );
+
+
+            if (!element) {
+                return;
+            }
+
+
+            beginWireMove(
+                event,
+                element
+            );
+
+        },
+        true
+    );
+
+
+    window.FOBASWireGeneralMoveBridge = {
+
+        version: "1.0.0",
+
+        isMoving: function () {
+            return active;
+        }
+
+    };
+
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* ============================================================
        13. POINTER COORDINATE CONVERSION
     ============================================================ */
@@ -13832,6 +14238,8 @@ const handleB =
                 state.zoom
         };
     }
+
+
 
     /* ============================================================
        14. TOOL MANAGEMENT
