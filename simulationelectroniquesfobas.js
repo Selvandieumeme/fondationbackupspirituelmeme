@@ -5999,13 +5999,21 @@ function createComponentVisualHTML(
 
     if (isWire) {
 
-        const wireColor =
-            fobas3DSafe(
-                safeDefinition.wireColor ||
-                safeDefinition.color ||
-                "#263238"
-            );
 
+
+
+  const wireColor =
+    fobas3DSafe(
+        safeDefinition.wireColor ||
+        safeDefinition.color ||
+        "#263238"
+    );         
+
+
+
+
+
+        
         const componentId =
             fobas3DSafe(
                 safeDefinition.id || "wire"
