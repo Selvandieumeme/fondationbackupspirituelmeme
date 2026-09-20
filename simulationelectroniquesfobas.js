@@ -6303,6 +6303,13 @@ function createComponentInstance(
 }
 
 
+
+
+
+
+
+
+
 /* ============================================================
    09.9 — RENDER COMPONENT
    ------------------------------------------------------------
@@ -6314,6 +6321,11 @@ function createComponentInstance(
    - drag
    - touch
    - interaction
+
+   AJOUT :
+   - UN SEUL POINT JAUNE DE RESIZE
+   - RESIZE DYNAMIQUE DIRECT
+   - AUCUN WIRE
 ============================================================ */
 
 function renderComponent(component) {
@@ -6325,10 +6337,12 @@ function renderComponent(component) {
         return;
     }
 
+
     let element =
         document.getElementById(
             component.id
         );
+
 
     if (!element) {
 
@@ -6359,14 +6373,21 @@ function renderComponent(component) {
         );
     }
 
+
     const definition =
         getComponentDefinition(
             component.type
         );
 
+
     if (!definition) {
         return;
     }
+
+
+    /* ========================================================
+       DIMENSIONS / POSITION
+    ======================================================== */
 
     element.style.position =
         "absolute";
@@ -6392,20 +6413,34 @@ function renderComponent(component) {
     element.style.userSelect =
         "none";
 
+    /*
+     * Nécessaire pour que le point jaune puisse
+     * dépasser légèrement du coin inférieur droit.
+     */
+    element.style.overflow =
+        "visible";
+
+
+    /* ========================================================
+       SÉLECTION
+    ======================================================== */
 
     const selected =
         component.id ===
         state.selectedComponentId;
+
 
     element.classList.toggle(
         "selected",
         selected
     );
 
+
     element.classList.toggle(
         "component-running",
         state.circuitRunning
     );
+
 
     element.dataset.state =
         String(
@@ -6413,9 +6448,20 @@ function renderComponent(component) {
         );
 
 
+    /* ========================================================
+       PINS
+    ======================================================== */
+
     const pins =
         definition.pins || [];
 
+
+    /* ========================================================
+       HTML DU COMPOSANT
+       --------------------------------------------------------
+       Le point jaune est directement dans le component.
+       Il n'existe donc qu'un seul point.
+    ======================================================== */
 
     element.innerHTML = `
         <div class="electronic-component-shell">
@@ -6435,24 +6481,420 @@ function renderComponent(component) {
             </div>
 
         </div>
+
+        <div
+            class="fobas-component-resize-point"
+            data-fobas-resize="true"
+            aria-label="Redimensionner le composant"
+            title="Redimensionner"
+        ></div>
     `;
 
+
+    /* ========================================================
+       POINT JAUNE — STYLE DIRECT
+       --------------------------------------------------------
+       Aucun CSS externe nécessaire.
+    ======================================================== */
+
+    const resizePoint =
+        element.querySelector(
+            ".fobas-component-resize-point"
+        );
+
+
+    if (resizePoint) {
+
+        resizePoint.style.position =
+            "absolute";
+
+        resizePoint.style.width =
+            "34px";
+
+        resizePoint.style.height =
+            "34px";
+
+        resizePoint.style.right =
+            "-17px";
+
+        resizePoint.style.bottom =
+            "-17px";
+
+        resizePoint.style.left =
+            "auto";
+
+        resizePoint.style.top =
+            "auto";
+
+        resizePoint.style.display =
+            selected
+                ? "block"
+                : "none";
+
+        resizePoint.style.boxSizing =
+            "border-box";
+
+        resizePoint.style.background =
+            "#FFD400";
+
+        resizePoint.style.border =
+            "3px solid #111";
+
+        resizePoint.style.borderRadius =
+            "50%";
+
+        resizePoint.style.zIndex =
+            "999999";
+
+        resizePoint.style.pointerEvents =
+            "auto";
+
+        resizePoint.style.touchAction =
+            "none";
+
+        resizePoint.style.userSelect =
+            "none";
+
+        resizePoint.style.webkitUserSelect =
+            "none";
+
+        resizePoint.style.cursor =
+            "nwse-resize";
+
+        resizePoint.style.boxShadow =
+            "0 0 0 2px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.55)";
+
+
+        /* ====================================================
+           RESIZE POINTER DOWN
+        ==================================================== */
+
+        resizePoint.addEventListener(
+            "pointerdown",
+            function (event) {
+
+                /*
+                 * EXCLUSION ABSOLUE DES WIRES.
+                 */
+                if (
+                    component.category ===
+                    "wires"
+                ) {
+                    return;
+                }
+
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                if (
+                    typeof event.stopImmediatePropagation ===
+                    "function"
+                ) {
+                    event.stopImmediatePropagation();
+                }
+
+
+                const startPointerX =
+                    event.clientX;
+
+                const startPointerY =
+                    event.clientY;
+
+
+                const startWidth =
+                    Number(
+                        component.width
+                    ) || 100;
+
+
+                const startHeight =
+                    Number(
+                        component.height
+                    ) || 70;
+
+
+                const pointerId =
+                    event.pointerId;
+
+
+                try {
+
+                    resizePoint.setPointerCapture(
+                        pointerId
+                    );
+
+                } catch (_) {}
+
+
+                element.dataset.resizing =
+                    "true";
+
+
+                resizePoint.style.background =
+                    "#FFCC00";
+
+
+                /* ==========================================
+                   MOVE
+                ========================================== */
+
+                const onMove =
+                    function (moveEvent) {
+
+                        if (
+                            moveEvent.pointerId !==
+                            pointerId
+                        ) {
+                            return;
+                        }
+
+
+                        moveEvent.preventDefault();
+                        moveEvent.stopPropagation();
+
+
+                        const dx =
+                            moveEvent.clientX -
+                            startPointerX;
+
+
+                        const dy =
+                            moveEvent.clientY -
+                            startPointerY;
+
+
+                        let newWidth =
+                            startWidth + dx;
+
+
+                        let newHeight =
+                            startHeight + dy;
+
+
+                        newWidth =
+                            Math.max(
+                                40,
+                                Math.min(
+                                    1200,
+                                    newWidth
+                                )
+                            );
+
+
+                        newHeight =
+                            Math.max(
+                                30,
+                                Math.min(
+                                    900,
+                                    newHeight
+                                )
+                            );
+
+
+                        component.width =
+                            Math.round(
+                                newWidth
+                            );
+
+
+                        component.height =
+                            Math.round(
+                                newHeight
+                            );
+
+
+                        /*
+                         * Mise à jour immédiate.
+                         */
+                        element.style.width =
+                            `${component.width}px`;
+
+                        element.style.height =
+                            `${component.height}px`;
+
+
+                        /*
+                         * Pins.
+                         */
+                        try {
+
+                            positionComponentPins(
+                                element,
+                                definition
+                            );
+
+                        } catch (_) {}
+
+
+                    };
+
+
+                /* ==========================================
+                   FIN
+                ========================================== */
+
+                const onFinish =
+                    function (finishEvent) {
+
+                        if (
+                            finishEvent.pointerId !==
+                            pointerId
+                        ) {
+                            return;
+                        }
+
+
+                        finishEvent.preventDefault();
+                        finishEvent.stopPropagation();
+
+
+                        document.removeEventListener(
+                            "pointermove",
+                            onMove,
+                            true
+                        );
+
+
+                        document.removeEventListener(
+                            "pointerup",
+                            onFinish,
+                            true
+                        );
+
+
+                        document.removeEventListener(
+                            "pointercancel",
+                            onFinish,
+                            true
+                        );
+
+
+                        element.dataset.resizing =
+                            "false";
+
+
+                        resizePoint.style.background =
+                            "#FFD400";
+
+
+                        /*
+                         * Sauvegarde de l'état réel.
+                         */
+                        try {
+
+                            if (
+                                typeof updateWorkspaceState ===
+                                "function"
+                            ) {
+
+                                updateWorkspaceState();
+                            }
+
+                        } catch (_) {}
+
+
+                        /*
+                         * Les fils existants peuvent lire
+                         * les nouvelles dimensions sans
+                         * recréer le composant.
+                         */
+                        try {
+
+                            if (
+                                typeof updateAllFOBASWires ===
+                                "function"
+                            ) {
+
+                                updateAllFOBASWires();
+                            }
+
+                        } catch (_) {}
+
+                    };
+
+
+                document.addEventListener(
+                    "pointermove",
+                    onMove,
+                    {
+                        capture: true,
+                        passive: false
+                    }
+                );
+
+
+                document.addEventListener(
+                    "pointerup",
+                    onFinish,
+                    true
+                );
+
+
+                document.addEventListener(
+                    "pointercancel",
+                    onFinish,
+                    true
+                );
+
+            },
+            {
+                capture: true,
+                passive: false
+            }
+        );
+    }
+
+
+    /* ========================================================
+       VISUAL STATE
+    ======================================================== */
 
     applyComponentVisualState(
         element,
         component
     );
 
+
+    /* ========================================================
+       POSITION PINS
+    ======================================================== */
+
     positionComponentPins(
         element,
         definition
     );
+
+
+    /* ========================================================
+       EVENTS NORMAUX
+       --------------------------------------------------------
+       Conservé.
+    ======================================================== */
 
     attachComponentEvents(
         element,
         component
     );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ============================================================
@@ -18015,824 +18457,6 @@ function applyComponentVisualState(
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ================================================================
-   12. UNIVERSAL COMPONENT RESIZE ENGINE
-   ---------------------------------------------------------------
-   FOBAS ÉLECTRONIQUE & ROBOTIQUE
-   ---------------------------------------------------------------
-   - UN SEUL GROS POINT JAUNE
-   - BAS / DROITE DU COMPOSANT
-   - VISIBLE UNIQUEMENT SUR LE COMPOSANT SÉLECTIONNÉ
-   - SOURIS + TOUCH ANDROID
-   - RESIZE DYNAMIQUE
-   - PINS MIS À JOUR
-   - WIRES EXCLUS ABSOLUMENT
-   - AUCUN CADRE DÉCORATIF
-   - AUCUNE MODIFICATION DES BLOCKS 10 / 11
-   ================================================================ */
-
-(function () {
-
-    "use strict";
-
-    /* ============================================================
-       12.1 — PROTECTION
-    ============================================================ */
-
-    if (window.__FOBAS_RESIZE_FINAL_V1__) {
-        return;
-    }
-
-    window.__FOBAS_RESIZE_FINAL_V1__ = true;
-
-
-    /* ============================================================
-       12.2 — CONFIGURATION
-    ============================================================ */
-
-    const HANDLE_CLASS =
-        "fobas-universal-resize-handle";
-
-    const HANDLE_SIZE = 34;
-
-    const MIN_WIDTH = 40;
-    const MIN_HEIGHT = 30;
-
-    const MAX_WIDTH = 1200;
-    const MAX_HEIGHT = 900;
-
-
-    /* ============================================================
-       12.3 — CSS RÉEL DU POINT JAUNE
-       ------------------------------------------------------------
-       C'EST CETTE PARTIE QUI REND LE POINT VISIBLE.
-    ============================================================ */
-
-    const STYLE_ID =
-        "fobas-universal-resize-final-style";
-
-    if (!document.getElementById(STYLE_ID)) {
-
-        const style =
-            document.createElement("style");
-
-        style.id = STYLE_ID;
-
-        style.textContent = `
-
-            .electronic-component {
-                overflow: visible !important;
-            }
-
-            .${HANDLE_CLASS} {
-
-                position: absolute !important;
-
-                width: ${HANDLE_SIZE}px !important;
-                height: ${HANDLE_SIZE}px !important;
-
-                min-width: ${HANDLE_SIZE}px !important;
-                min-height: ${HANDLE_SIZE}px !important;
-
-                right: -17px !important;
-                bottom: -17px !important;
-
-                left: auto !important;
-                top: auto !important;
-
-                display: none;
-
-                box-sizing: border-box !important;
-
-                background: #FFD400 !important;
-
-                border: 3px solid #111111 !important;
-
-                border-radius: 50% !important;
-
-                padding: 0 !important;
-                margin: 0 !important;
-
-                opacity: 1 !important;
-
-                visibility: visible !important;
-
-                pointer-events: auto !important;
-
-                touch-action: none !important;
-
-                user-select: none !important;
-
-                -webkit-user-select: none !important;
-
-                -webkit-touch-callout: none !important;
-
-                -webkit-tap-highlight-color: transparent !important;
-
-                z-index: 2147483647 !important;
-
-                cursor: nwse-resize !important;
-
-                box-shadow:
-                    0 0 0 2px rgba(255,255,255,.9),
-                    0 2px 8px rgba(0,0,0,.55) !important;
-            }
-
-            .electronic-component.selected
-            > .${HANDLE_CLASS} {
-
-                display: block !important;
-            }
-
-            .electronic-component.fobas-resizing
-            > .${HANDLE_CLASS} {
-
-                display: block !important;
-
-                background: #FFCC00 !important;
-            }
-        `;
-
-        document.head.appendChild(style);
-    }
-
-
-    /* ============================================================
-       12.4 — RÉCUPÉRER LE LAYER
-    ============================================================ */
-
-    function getLayer() {
-
-        if (
-            typeof dom !== "undefined" &&
-            dom &&
-            dom.componentLayer
-        ) {
-            return dom.componentLayer;
-        }
-
-        return null;
-    }
-
-
-    /* ============================================================
-       12.5 — RÉCUPÉRER LE COMPOSANT
-    ============================================================ */
-
-    function getComponent(id) {
-
-        if (!id) {
-            return null;
-        }
-
-        if (
-            typeof findComponent === "function"
-        ) {
-
-            try {
-                return findComponent(id) || null;
-            } catch (_) {}
-        }
-
-        if (
-            typeof state !== "undefined" &&
-            state &&
-            Array.isArray(state.components)
-        ) {
-
-            return state.components.find(
-                item => item.id === id
-            ) || null;
-        }
-
-        return null;
-    }
-
-
-    /* ============================================================
-       12.6 — EXCLURE LES WIRES
-    ============================================================ */
-
-    function isWire(element) {
-
-        if (!element) {
-            return true;
-        }
-
-        const type =
-            String(
-                element.dataset.componentType || ""
-            ).toLowerCase();
-
-        if (
-            type === "wire" ||
-            type === "wire-red" ||
-            type === "wire-black" ||
-            type === "wire-yellow" ||
-            type === "wire-blue" ||
-            type === "wire-green" ||
-            type === "wire-orange" ||
-            type === "wire-white" ||
-            type === "wire-violet"
-        ) {
-            return true;
-        }
-
-        const component =
-            getComponent(
-                element.dataset.componentId
-            );
-
-        return !!(
-            component &&
-            String(
-                component.category || ""
-            ).toLowerCase() === "wires"
-        );
-    }
-
-
-    /* ============================================================
-       12.7 — VÉRIFIER COMPONENT
-    ============================================================ */
-
-    function isComponent(element) {
-
-        return !!(
-            element &&
-            element.classList.contains(
-                "electronic-component"
-            ) &&
-            element.dataset.componentId &&
-            !isWire(element)
-        );
-    }
-
-
-    /* ============================================================
-       12.8 — CRÉER LE SEUL POINT JAUNE
-    ============================================================ */
-
-    function ensureHandle(element) {
-
-        if (!isComponent(element)) {
-            return null;
-        }
-
-        let handle =
-            element.querySelector(
-                `:scope > .${HANDLE_CLASS}`
-            );
-
-        if (handle) {
-            return handle;
-        }
-
-        handle =
-            document.createElement("div");
-
-        handle.className =
-            HANDLE_CLASS;
-
-        handle.dataset.resize =
-            "true";
-
-        handle.setAttribute(
-            "aria-label",
-            "Redimensionner le composant"
-        );
-
-        handle.setAttribute(
-            "title",
-            "Redimensionner"
-        );
-
-        handle.setAttribute(
-            "draggable",
-            "false"
-        );
-
-        element.appendChild(handle);
-
-        return handle;
-    }
-
-
-    /* ============================================================
-       12.9 — INSTALLER SUR TOUS LES COMPONENTS
-    ============================================================ */
-
-    function installHandles() {
-
-        const layer = getLayer();
-
-        if (!layer) {
-            return;
-        }
-
-        layer
-            .querySelectorAll(
-                ".electronic-component[data-component-id]"
-            )
-            .forEach(ensureHandle);
-    }
-
-
-    /* ============================================================
-       12.10 — AFFICHAGE SELON SÉLECTION
-    ============================================================ */
-
-    function updateVisibility() {
-
-        const layer = getLayer();
-
-        if (!layer) {
-            return;
-        }
-
-        layer
-            .querySelectorAll(
-                ".electronic-component[data-component-id]"
-            )
-            .forEach(element => {
-
-                if (!isComponent(element)) {
-                    return;
-                }
-
-                const handle =
-                    ensureHandle(element);
-
-                if (!handle) {
-                    return;
-                }
-
-                handle.style.display =
-                    element.classList.contains("selected")
-                        ? "block"
-                        : "none";
-            });
-    }
-
-
-    /* ============================================================
-       12.11 — ÉTAT RESIZE
-    ============================================================ */
-
-    let resize = null;
-
-
-    /* ============================================================
-       12.12 — DÉBUT DU RESIZE
-    ============================================================ */
-
-    function startResize(event, handle) {
-
-        const element =
-            handle.closest(
-                ".electronic-component[data-component-id]"
-            );
-
-        if (!isComponent(element)) {
-            return;
-        }
-
-        const component =
-            getComponent(
-                element.dataset.componentId
-            );
-
-        if (!component) {
-            return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (
-            typeof event.stopImmediatePropagation ===
-            "function"
-        ) {
-            event.stopImmediatePropagation();
-        }
-
-        resize = {
-
-            pointerId:
-                event.pointerId,
-
-            element:
-                element,
-
-            component:
-                component,
-
-            startX:
-                event.clientX,
-
-            startY:
-                event.clientY,
-
-            width:
-                Number(component.width) ||
-                element.offsetWidth ||
-                100,
-
-            height:
-                Number(component.height) ||
-                element.offsetHeight ||
-                70
-        };
-
-        element.classList.add(
-            "fobas-resizing"
-        );
-
-        try {
-            handle.setPointerCapture(
-                event.pointerId
-            );
-        } catch (_) {}
-
-        document.body.style.userSelect =
-            "none";
-
-        document.body.style.webkitUserSelect =
-            "none";
-    }
-
-
-    /* ============================================================
-       12.13 — RESIZE EN DIRECT
-    ============================================================ */
-
-    function moveResize(event) {
-
-        if (!resize) {
-            return;
-        }
-
-        if (
-            event.pointerId !==
-            resize.pointerId
-        ) {
-            return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const dx =
-            event.clientX -
-            resize.startX;
-
-        const dy =
-            event.clientY -
-            resize.startY;
-
-        const width =
-            Math.max(
-                MIN_WIDTH,
-                Math.min(
-                    MAX_WIDTH,
-                    resize.width + dx
-                )
-            );
-
-        const height =
-            Math.max(
-                MIN_HEIGHT,
-                Math.min(
-                    MAX_HEIGHT,
-                    resize.height + dy
-                )
-            );
-
-        resize.component.width =
-            Math.round(width);
-
-        resize.component.height =
-            Math.round(height);
-
-        resize.element.style.width =
-            resize.component.width + "px";
-
-        resize.element.style.height =
-            resize.component.height + "px";
-
-
-        /* --------------------------------------------------------
-           PINS
-        -------------------------------------------------------- */
-
-        if (
-            typeof positionComponentPins ===
-            "function"
-        ) {
-
-            try {
-
-                const definition =
-                    typeof getComponentDefinition ===
-                    "function"
-                        ? getComponentDefinition(
-                            resize.component.type
-                        )
-                        : null;
-
-                if (definition) {
-
-                    positionComponentPins(
-                        resize.element,
-                        definition
-                    );
-                }
-
-            } catch (_) {}
-        }
-    }
-
-
-    /* ============================================================
-       12.14 — FIN DU RESIZE
-    ============================================================ */
-
-    function finishResize() {
-
-        if (!resize) {
-            return;
-        }
-
-        resize.element.classList.remove(
-            "fobas-resizing"
-        );
-
-        resize.element.style.width =
-            resize.component.width + "px";
-
-        resize.element.style.height =
-            resize.component.height + "px";
-
-        document.body.style.userSelect =
-            "";
-
-        document.body.style.webkitUserSelect =
-            "";
-
-        try {
-
-            if (
-                typeof updateWorkspaceState ===
-                "function"
-            ) {
-                updateWorkspaceState();
-            }
-
-        } catch (_) {}
-
-        resize = null;
-
-        updateVisibility();
-    }
-
-
-    /* ============================================================
-       12.15 — POINTER DOWN
-    ============================================================ */
-
-    document.addEventListener(
-        "pointerdown",
-        function (event) {
-
-            const target =
-                event.target instanceof Element
-                    ? event.target
-                    : null;
-
-            if (!target) {
-                return;
-            }
-
-            const handle =
-                target.closest(
-                    `.${HANDLE_CLASS}`
-                );
-
-            if (!handle) {
-                return;
-            }
-
-            startResize(
-                event,
-                handle
-            );
-        },
-        true
-    );
-
-
-    /* ============================================================
-       12.16 — POINTER MOVE
-    ============================================================ */
-
-    document.addEventListener(
-        "pointermove",
-        function (event) {
-
-            if (!resize) {
-                return;
-            }
-
-            moveResize(event);
-        },
-        {
-            capture: true,
-            passive: false
-        }
-    );
-
-
-    /* ============================================================
-       12.17 — POINTER UP
-    ============================================================ */
-
-    document.addEventListener(
-        "pointerup",
-        function () {
-
-            if (!resize) {
-                return;
-            }
-
-            finishResize();
-        },
-        true
-    );
-
-
-    /* ============================================================
-       12.18 — POINTER CANCEL
-    ============================================================ */
-
-    document.addEventListener(
-        "pointercancel",
-        function () {
-
-            if (!resize) {
-                return;
-            }
-
-            finishResize();
-        },
-        true
-    );
-
-
-    /* ============================================================
-       12.19 — OBSERVER COMPONENTS DYNAMIQUES
-    ============================================================ */
-
-    function installObserver() {
-
-        const layer = getLayer();
-
-        if (
-            !layer ||
-            typeof MutationObserver ===
-            "undefined"
-        ) {
-            return;
-        }
-
-        const observer =
-            new MutationObserver(
-                function () {
-
-                    installHandles();
-                    updateVisibility();
-                }
-            );
-
-        observer.observe(
-            layer,
-            {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeFilter: ["class"]
-            }
-        );
-    }
-
-
-    /* ============================================================
-       12.20 — INITIALISATION
-    ============================================================ */
-
-    function initialize() {
-
-        const layer = getLayer();
-
-        if (!layer) {
-
-            setTimeout(
-                initialize,
-                300
-            );
-
-            return;
-        }
-
-        installHandles();
-        updateVisibility();
-        installObserver();
-
-        console.log(
-            "FOBAS — Universal Yellow Resize Handle : READY"
-        );
-    }
-
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initialize,
-            { once: true }
-        );
-
-    } else {
-
-        initialize();
-    }
-
-
-    /* ============================================================
-       12.21 — API
-    ============================================================ */
-
-    window.FOBASUniversalComponentResize = {
-
-        refresh: function () {
-
-            installHandles();
-            updateVisibility();
-        },
-
-        isResizing: function () {
-
-            return !!resize;
-        }
-    };
-
-})();
 
 
 
