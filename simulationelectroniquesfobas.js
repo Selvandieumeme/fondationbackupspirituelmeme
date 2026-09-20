@@ -18058,196 +18058,185 @@ function applyComponentVisualState(
 
 
 
+
 /* ================================================================
-   12. UNIVERSAL DYNAMIC COMPONENT RESIZE ENGINE
+   12. UNIVERSAL COMPONENT RESIZE ENGINE
    ---------------------------------------------------------------
-   FOBAS ELECTRONIQUE & ROBOTIQUE
+   FOBAS ÉLECTRONIQUE & ROBOTIQUE
    ---------------------------------------------------------------
-   BLOC ISOLÉ / INDÉPENDANT / PROTÉGÉ — V1.0.0
-
-   FONCTION :
-   - Redimensionnement universel des composants
-   - Un seul gros point jaune
-   - Point jaune en bas à droite du composant
-   - Apparition uniquement lorsque le composant est sélectionné
-   - Support souris
-   - Support tactile Android
-   - Drag du point jaune pour agrandir/réduire
-   - Mise à jour dynamique de component.width
-   - Mise à jour dynamique de component.height
-   - Repositionnement automatique des PIN
-   - Compatible avec renderComponent()
-   - Compatible avec les composants recréés dynamiquement
-
-   EXCLUSION ABSOLUE :
-   - Aucun WIRE
-   - Aucun câble
-   - Aucun handle de WIRE
-   - Aucun resize du Block 10
-   - Aucun resize du Block 11
-
-   NE MODIFIE PAS :
-   - COMPONENTS
-   - state.wires
-   - FOBASWireCableEngine
-   - Block 10
-   - Block 11
-   - drag normal des composants
-   - rotation
-   - sélection
-   - simulation
-   - bibliothèque des composants
-
-   AUCUN :
-   - Three.js
-   - module externe
-   - image externe
-   - dépendance externe
-   - 8 poignées
-   - cadre décoratif
-================================================================ */
+   - UN SEUL GROS POINT JAUNE
+   - BAS / DROITE DU COMPOSANT
+   - VISIBLE UNIQUEMENT SUR LE COMPOSANT SÉLECTIONNÉ
+   - SOURIS + TOUCH ANDROID
+   - RESIZE DYNAMIQUE
+   - PINS MIS À JOUR
+   - WIRES EXCLUS ABSOLUMENT
+   - AUCUN CADRE DÉCORATIF
+   - AUCUNE MODIFICATION DES BLOCKS 10 / 11
+   ================================================================ */
 
 (function () {
 
     "use strict";
 
-
     /* ============================================================
-       12.1 — PROTECTION DOUBLE CHARGEMENT
+       12.1 — PROTECTION
     ============================================================ */
 
-    if (
-        window.__FOBAS_UNIVERSAL_COMPONENT_RESIZE_V1__
-    ) {
+    if (window.__FOBAS_RESIZE_FINAL_V1__) {
         return;
     }
 
-    window.__FOBAS_UNIVERSAL_COMPONENT_RESIZE_V1__ =
-        true;
+    window.__FOBAS_RESIZE_FINAL_V1__ = true;
 
 
     /* ============================================================
        12.2 — CONFIGURATION
     ============================================================ */
 
-    const FOBAS_RESIZE_CONFIG = {
+    const HANDLE_CLASS =
+        "fobas-universal-resize-handle";
 
-        version: "1.0.0",
+    const HANDLE_SIZE = 34;
 
-        handleClass:
-            "fobas-universal-resize-handle",
+    const MIN_WIDTH = 40;
+    const MIN_HEIGHT = 30;
 
-        handleAttribute:
-            "data-fobas-universal-resize",
-
-        minimumWidth:
-            40,
-
-        minimumHeight:
-            30,
-
-        maximumWidth:
-            1200,
-
-        maximumHeight:
-            900,
-
-        handleSize:
-            34,
-
-        initialized:
-            false,
-
-        observer:
-            null,
-
-        resize: {
-
-            active:
-                false,
-
-            pointerId:
-                null,
-
-            componentId:
-                null,
-
-            element:
-                null,
-
-            component:
-                null,
-
-            startPointerX:
-                0,
-
-            startPointerY:
-                0,
-
-            startWidth:
-                0,
-
-            startHeight:
-                0
-        }
-    };
+    const MAX_WIDTH = 1200;
+    const MAX_HEIGHT = 900;
 
 
     /* ============================================================
-       12.3 — SAFE COMPONENT LAYER
+       12.3 — CSS RÉEL DU POINT JAUNE
+       ------------------------------------------------------------
+       C'EST CETTE PARTIE QUI REND LE POINT VISIBLE.
     ============================================================ */
 
-    function FOBAS_RESIZE_getComponentLayer() {
+    const STYLE_ID =
+        "fobas-universal-resize-final-style";
+
+    if (!document.getElementById(STYLE_ID)) {
+
+        const style =
+            document.createElement("style");
+
+        style.id = STYLE_ID;
+
+        style.textContent = `
+
+            .electronic-component {
+                overflow: visible !important;
+            }
+
+            .${HANDLE_CLASS} {
+
+                position: absolute !important;
+
+                width: ${HANDLE_SIZE}px !important;
+                height: ${HANDLE_SIZE}px !important;
+
+                min-width: ${HANDLE_SIZE}px !important;
+                min-height: ${HANDLE_SIZE}px !important;
+
+                right: -17px !important;
+                bottom: -17px !important;
+
+                left: auto !important;
+                top: auto !important;
+
+                display: none;
+
+                box-sizing: border-box !important;
+
+                background: #FFD400 !important;
+
+                border: 3px solid #111111 !important;
+
+                border-radius: 50% !important;
+
+                padding: 0 !important;
+                margin: 0 !important;
+
+                opacity: 1 !important;
+
+                visibility: visible !important;
+
+                pointer-events: auto !important;
+
+                touch-action: none !important;
+
+                user-select: none !important;
+
+                -webkit-user-select: none !important;
+
+                -webkit-touch-callout: none !important;
+
+                -webkit-tap-highlight-color: transparent !important;
+
+                z-index: 2147483647 !important;
+
+                cursor: nwse-resize !important;
+
+                box-shadow:
+                    0 0 0 2px rgba(255,255,255,.9),
+                    0 2px 8px rgba(0,0,0,.55) !important;
+            }
+
+            .electronic-component.selected
+            > .${HANDLE_CLASS} {
+
+                display: block !important;
+            }
+
+            .electronic-component.fobas-resizing
+            > .${HANDLE_CLASS} {
+
+                display: block !important;
+
+                background: #FFCC00 !important;
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
+
+    /* ============================================================
+       12.4 — RÉCUPÉRER LE LAYER
+    ============================================================ */
+
+    function getLayer() {
 
         if (
             typeof dom !== "undefined" &&
             dom &&
             dom.componentLayer
         ) {
-
             return dom.componentLayer;
         }
 
-        return document.querySelector(
-            "#fobasElectronicApp .component-layer"
-        ) || document.querySelector(
-            ".component-layer"
-        );
+        return null;
     }
 
 
     /* ============================================================
-       12.4 — SAFE COMPONENT SEARCH
+       12.5 — RÉCUPÉRER LE COMPOSANT
     ============================================================ */
 
-    function FOBAS_RESIZE_getComponent(
-        componentId
-    ) {
+    function getComponent(id) {
 
-        if (
-            !componentId
-        ) {
+        if (!id) {
             return null;
         }
 
         if (
-            typeof findComponent ===
-            "function"
+            typeof findComponent === "function"
         ) {
 
             try {
-
-                return (
-                    findComponent(
-                        componentId
-                    ) || null
-                );
-
-            } catch (error) {
-                return null;
-            }
+                return findComponent(id) || null;
+            } catch (_) {}
         }
-
 
         if (
             typeof state !== "undefined" &&
@@ -18255,41 +18244,29 @@ function applyComponentVisualState(
             Array.isArray(state.components)
         ) {
 
-            return (
-                state.components.find(
-                    component =>
-                        component.id ===
-                        componentId
-                ) || null
-            );
+            return state.components.find(
+                item => item.id === id
+            ) || null;
         }
-
 
         return null;
     }
 
 
     /* ============================================================
-       12.5 — EXCLUSION ABSOLUE DES WIRES
+       12.6 — EXCLURE LES WIRES
     ============================================================ */
 
-    function FOBAS_RESIZE_isWire(
-        element
-    ) {
+    function isWire(element) {
 
         if (!element) {
             return true;
         }
 
-
         const type =
             String(
-                element.dataset.componentType ||
-                ""
-            )
-                .toLowerCase()
-                .trim();
-
+                element.dataset.componentType || ""
+            ).toLowerCase();
 
         if (
             type === "wire" ||
@@ -18302,262 +18279,191 @@ function applyComponentVisualState(
             type === "wire-white" ||
             type === "wire-violet"
         ) {
-
             return true;
         }
 
-
         const component =
-            FOBAS_RESIZE_getComponent(
+            getComponent(
                 element.dataset.componentId
             );
 
-
-        if (
+        return !!(
             component &&
             String(
-                component.category ||
-                ""
-            )
-                .toLowerCase()
-                .trim() ===
-                "wires"
-        ) {
-
-            return true;
-        }
-
-
-        return false;
+                component.category || ""
+            ).toLowerCase() === "wires"
+        );
     }
 
 
     /* ============================================================
-       12.6 — VALID COMPONENT
+       12.7 — VÉRIFIER COMPONENT
     ============================================================ */
 
-    function FOBAS_RESIZE_isValidComponent(
-        element
-    ) {
+    function isComponent(element) {
 
-        if (!element) {
-            return false;
-        }
-
-
-        if (
-            !element.classList.contains(
+        return !!(
+            element &&
+            element.classList.contains(
                 "electronic-component"
-            )
-        ) {
-
-            return false;
-        }
-
-
-        if (
-            !element.dataset.componentId
-        ) {
-
-            return false;
-        }
-
-
-        if (
-            FOBAS_RESIZE_isWire(
-                element
-            )
-        ) {
-
-            return false;
-        }
-
-
-        return true;
+            ) &&
+            element.dataset.componentId &&
+            !isWire(element)
+        );
     }
 
 
     /* ============================================================
-       12.7 — CREATE HANDLE
-       ------------------------------------------------------------
-       UN SEUL POINT JAUNE.
+       12.8 — CRÉER LE SEUL POINT JAUNE
     ============================================================ */
 
-    function FOBAS_RESIZE_createHandle(
-        element
-    ) {
+    function ensureHandle(element) {
 
-        if (
-            !FOBAS_RESIZE_isValidComponent(
-                element
-            )
-        ) {
-
+        if (!isComponent(element)) {
             return null;
         }
 
-
         let handle =
             element.querySelector(
-                "." +
-                FOBAS_RESIZE_CONFIG.handleClass
+                `:scope > .${HANDLE_CLASS}`
             );
-
 
         if (handle) {
             return handle;
         }
 
-
         handle =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         handle.className =
-            FOBAS_RESIZE_CONFIG.handleClass;
+            HANDLE_CLASS;
 
-
-        handle.setAttribute(
-            FOBAS_RESIZE_CONFIG.handleAttribute,
-            "true"
-        );
-
+        handle.dataset.resize =
+            "true";
 
         handle.setAttribute(
             "aria-label",
             "Redimensionner le composant"
         );
 
-
         handle.setAttribute(
             "title",
             "Redimensionner"
         );
 
-
-        element.appendChild(
-            handle
+        handle.setAttribute(
+            "draggable",
+            "false"
         );
 
+        element.appendChild(handle);
 
         return handle;
     }
 
 
     /* ============================================================
-       12.8 — INSTALL HANDLE SUR TOUS LES COMPOSANTS
+       12.9 — INSTALLER SUR TOUS LES COMPONENTS
     ============================================================ */
 
-    function FOBAS_RESIZE_installHandles() {
+    function installHandles() {
 
-        const layer =
-            FOBAS_RESIZE_getComponentLayer();
-
+        const layer = getLayer();
 
         if (!layer) {
             return;
         }
 
-
-        const components =
-            layer.querySelectorAll(
+        layer
+            .querySelectorAll(
                 ".electronic-component[data-component-id]"
-            );
-
-
-        components.forEach(
-            function (element) {
-
-                if (
-                    FOBAS_RESIZE_isValidComponent(
-                        element
-                    )
-                ) {
-
-                    FOBAS_RESIZE_createHandle(
-                        element
-                    );
-                }
-            }
-        );
+            )
+            .forEach(ensureHandle);
     }
 
 
     /* ============================================================
-       12.9 — START RESIZE
+       12.10 — AFFICHAGE SELON SÉLECTION
     ============================================================ */
 
-    function FOBAS_RESIZE_start(
-        event,
-        handle
-    ) {
+    function updateVisibility() {
 
-        if (
-            !event ||
-            !handle
-        ) {
+        const layer = getLayer();
+
+        if (!layer) {
             return;
         }
 
+        layer
+            .querySelectorAll(
+                ".electronic-component[data-component-id]"
+            )
+            .forEach(element => {
+
+                if (!isComponent(element)) {
+                    return;
+                }
+
+                const handle =
+                    ensureHandle(element);
+
+                if (!handle) {
+                    return;
+                }
+
+                handle.style.display =
+                    element.classList.contains("selected")
+                        ? "block"
+                        : "none";
+            });
+    }
+
+
+    /* ============================================================
+       12.11 — ÉTAT RESIZE
+    ============================================================ */
+
+    let resize = null;
+
+
+    /* ============================================================
+       12.12 — DÉBUT DU RESIZE
+    ============================================================ */
+
+    function startResize(event, handle) {
 
         const element =
             handle.closest(
                 ".electronic-component[data-component-id]"
             );
 
-
-        if (
-            !FOBAS_RESIZE_isValidComponent(
-                element
-            )
-        ) {
-
+        if (!isComponent(element)) {
             return;
         }
 
-
         const component =
-            FOBAS_RESIZE_getComponent(
+            getComponent(
                 element.dataset.componentId
             );
-
 
         if (!component) {
             return;
         }
 
-
-        /*
-         * Empêche le pointerdown du handle
-         * d'être interprété comme un déplacement
-         * normal du composant.
-         */
-
         event.preventDefault();
         event.stopPropagation();
-
 
         if (
             typeof event.stopImmediatePropagation ===
             "function"
         ) {
-
             event.stopImmediatePropagation();
         }
 
-
-        FOBAS_RESIZE_CONFIG.resize = {
-
-            active:
-                true,
+        resize = {
 
             pointerId:
                 event.pointerId,
-
-            componentId:
-                component.id,
 
             element:
                 element,
@@ -18565,583 +18471,331 @@ function applyComponentVisualState(
             component:
                 component,
 
-            startPointerX:
+            startX:
                 event.clientX,
 
-            startPointerY:
+            startY:
                 event.clientY,
 
-            startWidth:
+            width:
                 Number(component.width) ||
                 element.offsetWidth ||
                 100,
 
-            startHeight:
+            height:
                 Number(component.height) ||
                 element.offsetHeight ||
                 70
         };
 
+        element.classList.add(
+            "fobas-resizing"
+        );
 
         try {
-
             handle.setPointerCapture(
                 event.pointerId
             );
-
-        } catch (error) {
-            /* Pointer capture non disponible */
-        }
-
+        } catch (_) {}
 
         document.body.style.userSelect =
             "none";
 
-
         document.body.style.webkitUserSelect =
             "none";
-
-
-        document.addEventListener(
-            "pointermove",
-            FOBAS_RESIZE_move,
-            true
-        );
-
-
-        document.addEventListener(
-            "pointerup",
-            FOBAS_RESIZE_finish,
-            true
-        );
-
-
-        document.addEventListener(
-            "pointercancel",
-            FOBAS_RESIZE_finish,
-            true
-        );
     }
 
 
     /* ============================================================
-       12.10 — MOVE / RESIZE
+       12.13 — RESIZE EN DIRECT
     ============================================================ */
 
-    function FOBAS_RESIZE_move(
-        event
-    ) {
+    function moveResize(event) {
 
-        const resize =
-            FOBAS_RESIZE_CONFIG.resize;
-
-
-        if (
-            !resize.active
-        ) {
+        if (!resize) {
             return;
         }
 
-
         if (
-            resize.pointerId !==
-            event.pointerId
+            event.pointerId !==
+            resize.pointerId
         ) {
-
             return;
         }
-
-
-        const element =
-            resize.element;
-
-
-        const component =
-            resize.component;
-
-
-        if (
-            !element ||
-            !component
-        ) {
-
-            return;
-        }
-
 
         event.preventDefault();
-
+        event.stopPropagation();
 
         const dx =
             event.clientX -
-            resize.startPointerX;
-
+            resize.startX;
 
         const dy =
             event.clientY -
-            resize.startPointerY;
+            resize.startY;
 
-
-        let newWidth =
-            resize.startWidth +
-            dx;
-
-
-        let newHeight =
-            resize.startHeight +
-            dy;
-
-
-        newWidth =
+        const width =
             Math.max(
-                FOBAS_RESIZE_CONFIG.minimumWidth,
+                MIN_WIDTH,
                 Math.min(
-                    FOBAS_RESIZE_CONFIG.maximumWidth,
-                    newWidth
+                    MAX_WIDTH,
+                    resize.width + dx
                 )
             );
 
-
-        newHeight =
+        const height =
             Math.max(
-                FOBAS_RESIZE_CONFIG.minimumHeight,
+                MIN_HEIGHT,
                 Math.min(
-                    FOBAS_RESIZE_CONFIG.maximumHeight,
-                    newHeight
+                    MAX_HEIGHT,
+                    resize.height + dy
                 )
             );
 
+        resize.component.width =
+            Math.round(width);
 
-        /*
-         * Mise à jour de l'état réel.
-         */
+        resize.component.height =
+            Math.round(height);
 
-        component.width =
-            Math.round(
-                newWidth
-            );
+        resize.element.style.width =
+            resize.component.width + "px";
 
-
-        component.height =
-            Math.round(
-                newHeight
-            );
+        resize.element.style.height =
+            resize.component.height + "px";
 
 
-        /*
-         * Mise à jour visuelle immédiate.
-         * Aucun renderComponent() ici :
-         * cela évite de détruire le handle
-         * pendant le drag.
-         */
-
-        element.style.width =
-            component.width +
-            "px";
-
-
-        element.style.height =
-            component.height +
-            "px";
-
-
-        /*
-         * Repositionnement des PIN.
-         */
-
-        const definition =
-            typeof getComponentDefinition ===
-            "function"
-                ? getComponentDefinition(
-                    component.type
-                )
-                : null;
-
+        /* --------------------------------------------------------
+           PINS
+        -------------------------------------------------------- */
 
         if (
             typeof positionComponentPins ===
-            "function" &&
-            definition
+            "function"
         ) {
 
             try {
 
-                positionComponentPins(
-                    element,
-                    definition
-                );
+                const definition =
+                    typeof getComponentDefinition ===
+                    "function"
+                        ? getComponentDefinition(
+                            resize.component.type
+                        )
+                        : null;
 
-            } catch (error) {
-                /* Les pins restent fonctionnels même si
-                   le repositionnement externe échoue. */
-            }
+                if (definition) {
+
+                    positionComponentPins(
+                        resize.element,
+                        definition
+                    );
+                }
+
+            } catch (_) {}
         }
     }
 
 
     /* ============================================================
-       12.11 — FINISH RESIZE
+       12.14 — FIN DU RESIZE
     ============================================================ */
 
-    function FOBAS_RESIZE_finish(
-        event
-    ) {
+    function finishResize() {
 
-        const resize =
-            FOBAS_RESIZE_CONFIG.resize;
-
-
-        if (
-            !resize.active
-        ) {
+        if (!resize) {
             return;
         }
 
+        resize.element.classList.remove(
+            "fobas-resizing"
+        );
 
-        if (
-            event &&
-            resize.pointerId !==
-            event.pointerId
-        ) {
+        resize.element.style.width =
+            resize.component.width + "px";
 
-            return;
-        }
-
-
-        /*
-         * Dernière synchronisation des dimensions.
-         */
-
-        if (
-            resize.component &&
-            resize.element
-        ) {
-
-            resize.element.style.width =
-                Math.round(
-                    Number(
-                        resize.component.width
-                    ) || 0
-                ) +
-                "px";
-
-
-            resize.element.style.height =
-                Math.round(
-                    Number(
-                        resize.component.height
-                    ) || 0
-                ) +
-                "px";
-        }
-
-
-        FOBAS_RESIZE_configureNormalSelectionState();
-
+        resize.element.style.height =
+            resize.component.height + "px";
 
         document.body.style.userSelect =
             "";
 
-
         document.body.style.webkitUserSelect =
             "";
 
+        try {
 
-        document.removeEventListener(
-            "pointermove",
-            FOBAS_RESIZE_move,
-            true
-        );
-
-
-        document.removeEventListener(
-            "pointerup",
-            FOBAS_RESIZE_finish,
-            true
-        );
-
-
-        document.removeEventListener(
-            "pointercancel",
-            FOBAS_RESIZE_finish,
-            true
-        );
-
-
-        FOBAS_RESIZE_CONFIG.resize = {
-
-            active:
-                false,
-
-            pointerId:
-                null,
-
-            componentId:
-                null,
-
-            element:
-                null,
-
-            component:
-                null,
-
-            startPointerX:
-                0,
-
-            startPointerY:
-                0,
-
-            startWidth:
-                0,
-
-            startHeight:
-                0
-        };
-    }
-
-
-    /* ============================================================
-       12.12 — HANDLE POINTER DOWN
-       ------------------------------------------------------------
-       Capture en phase CAPTURE pour passer avant le drag
-       normal du composant.
-    ============================================================ */
-
-    function FOBAS_RESIZE_onPointerDown(
-        event
-    ) {
-
-        const target =
-            event.target;
-
-
-        if (!target) {
-            return;
-        }
-
-
-        const handle =
-            target.closest
-                ? target.closest(
-                    "." +
-                    FOBAS_RESIZE_CONFIG.handleClass
-                )
-                : null;
-
-
-        if (!handle) {
-            return;
-        }
-
-
-        FOBAS_RESIZE_start(
-            event,
-            handle
-        );
-    }
-
-
-    /* ============================================================
-       12.13 — SELECTION / VISIBILITÉ
-       ------------------------------------------------------------ */
-
-    function FOBAS_RESIZE_updateHandleVisibility() {
-
-        const layer =
-            FOBAS_RESIZE_getComponentLayer();
-
-
-        if (!layer) {
-            return;
-        }
-
-
-        const components =
-            layer.querySelectorAll(
-                ".electronic-component[data-component-id]"
-            );
-
-
-        components.forEach(
-            function (element) {
-
-                if (
-                    !FOBAS_RESIZE_isValidComponent(
-                        element
-                    )
-                ) {
-
-                    return;
-                }
-
-
-                const handle =
-                    FOBAS_RESIZE_createHandle(
-                        element
-                    );
-
-
-                if (!handle) {
-                    return;
-                }
-
-
-                if (
-                    element.classList.contains(
-                        "selected"
-                    )
-                ) {
-
-                    handle.style.display =
-                        "block";
-
-                } else {
-
-                    handle.style.display =
-                        "none";
-                }
+            if (
+                typeof updateWorkspaceState ===
+                "function"
+            ) {
+                updateWorkspaceState();
             }
-        );
+
+        } catch (_) {}
+
+        resize = null;
+
+        updateVisibility();
     }
 
 
     /* ============================================================
-       12.14 — OBSERVER DOM
-       ------------------------------------------------------------
-       renderComponent() reconstruit innerHTML.
-       Cet observer remet automatiquement le point jaune
-       après chaque reconstruction du composant.
+       12.15 — POINTER DOWN
     ============================================================ */
 
-    function FOBAS_RESIZE_installObserver() {
+    document.addEventListener(
+        "pointerdown",
+        function (event) {
 
-        const layer =
-            FOBAS_RESIZE_getComponentLayer();
+            const target =
+                event.target instanceof Element
+                    ? event.target
+                    : null;
 
+            if (!target) {
+                return;
+            }
+
+            const handle =
+                target.closest(
+                    `.${HANDLE_CLASS}`
+                );
+
+            if (!handle) {
+                return;
+            }
+
+            startResize(
+                event,
+                handle
+            );
+        },
+        true
+    );
+
+
+    /* ============================================================
+       12.16 — POINTER MOVE
+    ============================================================ */
+
+    document.addEventListener(
+        "pointermove",
+        function (event) {
+
+            if (!resize) {
+                return;
+            }
+
+            moveResize(event);
+        },
+        {
+            capture: true,
+            passive: false
+        }
+    );
+
+
+    /* ============================================================
+       12.17 — POINTER UP
+    ============================================================ */
+
+    document.addEventListener(
+        "pointerup",
+        function () {
+
+            if (!resize) {
+                return;
+            }
+
+            finishResize();
+        },
+        true
+    );
+
+
+    /* ============================================================
+       12.18 — POINTER CANCEL
+    ============================================================ */
+
+    document.addEventListener(
+        "pointercancel",
+        function () {
+
+            if (!resize) {
+                return;
+            }
+
+            finishResize();
+        },
+        true
+    );
+
+
+    /* ============================================================
+       12.19 — OBSERVER COMPONENTS DYNAMIQUES
+    ============================================================ */
+
+    function installObserver() {
+
+        const layer = getLayer();
 
         if (
             !layer ||
             typeof MutationObserver ===
             "undefined"
         ) {
-
-            return false;
-        }
-
-
-        if (
-            FOBAS_RESIZE_CONFIG.observer
-        ) {
-
-            return true;
-        }
-
-
-        FOBAS_RESIZE_CONFIG.observer =
-            new MutationObserver(
-                function () {
-
-                    FOBAS_RESIZE_installHandles();
-
-                    FOBAS_RESIZE_updateHandleVisibility();
-                }
-            );
-
-
-        FOBAS_RESIZE_CONFIG.observer.observe(
-            layer,
-            {
-                childList:
-                    true,
-
-                subtree:
-                    true,
-
-                attributes:
-                    true,
-
-                attributeFilter:
-                    [
-                        "class"
-                    ]
-            }
-        );
-
-
-        return true;
-    }
-
-
-    /* ============================================================
-       12.15 — CONFIGURATION SÉLECTION NORMALE
-    ============================================================ */
-
-    function FOBAS_RESIZE_configureNormalSelectionState() {
-
-        FOBAS_RESIZE_installHandles();
-
-        FOBAS_RESIZE_updateHandleVisibility();
-    }
-
-
-    /* ============================================================
-       12.16 — INITIALISATION
-    ============================================================ */
-
-    function FOBAS_RESIZE_initialize() {
-
-        if (
-            FOBAS_RESIZE_CONFIG.initialized
-        ) {
-
             return;
         }
 
+        const observer =
+            new MutationObserver(
+                function () {
 
-        const layer =
-            FOBAS_RESIZE_getComponentLayer();
+                    installHandles();
+                    updateVisibility();
+                }
+            );
 
+        observer.observe(
+            layer,
+            {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                attributeFilter: ["class"]
+            }
+        );
+    }
+
+
+    /* ============================================================
+       12.20 — INITIALISATION
+    ============================================================ */
+
+    function initialize() {
+
+        const layer = getLayer();
 
         if (!layer) {
 
             setTimeout(
-                FOBAS_RESIZE_initialize,
-                400
+                initialize,
+                300
             );
 
             return;
         }
 
+        installHandles();
+        updateVisibility();
+        installObserver();
 
-        FOBAS_RESIZE_installHandles();
-
-
-        FOBAS_RESIZE_updateHandleVisibility();
-
-
-        FOBAS_RESIZE_installObserver();
-
-
-        /*
-         * Le listener est global mais ne réagit
-         * qu'au seul handle du moteur.
-         */
-
-        document.addEventListener(
-            "pointerdown",
-            FOBAS_RESIZE_onPointerDown,
-            true
+        console.log(
+            "FOBAS — Universal Yellow Resize Handle : READY"
         );
-
-
-        FOBAS_RESIZE_CONFIG.initialized =
-            true;
     }
 
-
-    /* ============================================================
-       12.17 — DÉMARRAGE
-    ============================================================ */
 
     if (
         document.readyState ===
@@ -19150,46 +18804,41 @@ function applyComponentVisualState(
 
         document.addEventListener(
             "DOMContentLoaded",
-            FOBAS_RESIZE_initialize,
-            {
-                once:
-                    true
-            }
+            initialize,
+            { once: true }
         );
 
     } else {
 
-        FOBAS_RESIZE_initialize();
+        initialize();
     }
 
 
     /* ============================================================
-       12.18 — PUBLIC API MINIMALE
-       ------------------------------------------------------------
-       Aucun conflit avec les autres moteurs.
+       12.21 — API
     ============================================================ */
 
     window.FOBASUniversalComponentResize = {
 
-        version:
-            FOBAS_RESIZE_CONFIG.version,
+        refresh: function () {
 
-        refresh:
-            function () {
+            installHandles();
+            updateVisibility();
+        },
 
-                FOBAS_RESIZE_installHandles();
+        isResizing: function () {
 
-                FOBAS_RESIZE_updateHandleVisibility();
-            },
-
-        isResizing:
-            function () {
-
-                return FOBAS_RESIZE_CONFIG
-                    .resize
-                    .active;
-            }
+            return !!resize;
+        }
     };
 
-
 })();
+
+
+
+
+
+
+
+
+
