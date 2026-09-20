@@ -5943,27 +5943,20 @@ function createFOBAS3DComponentSVG(
 
 
 
-
-
-
-
-
 /* ============================================================
    09.6 — MAIN VISUAL HTML
    ------------------------------------------------------------
    CLEAN COMPONENT ONLY
    ------------------------------------------------------------
    IMPORTANT :
-   Le composant n'a plus :
-   - shadow wrapper
-   - highlight wrapper
-   - carte interne
-   - décoration sous le SVG
-   - catégorie visuelle
-
-   Le .component-3d-body reste volontairement présent,
-   car applyComponentVisualState() l'utilise pour les états
-   LED / moteur / servo etc.
+   - Wire possède son propre visuel câble
+   - Tous les autres composants gardent exactement
+     leur renderer existant
+   - Aucun changement aux pins
+   - Aucun changement au resize
+   - Aucun changement drag / delete / duplicate
+   - Aucun changement undo / redo
+   - Aucun Three.js
 ============================================================ */
 
 function createComponentVisualHTML(
@@ -5973,6 +5966,340 @@ function createComponentVisualHTML(
 
     const safeDefinition =
         definition || {};
+
+    const componentType =
+        String(
+            safeDefinition.id || ""
+        ).toLowerCase();
+
+    const componentCategory =
+        String(
+            safeDefinition.category || ""
+        ).toLowerCase();
+
+
+    /* ========================================================
+       09.6.W — WIRE VISUAL
+       --------------------------------------------------------
+       IMPORTANT :
+       Ce bloc est exécuté directement par
+       createComponentVisualHTML().
+       
+       Il remplace donc réellement l'ancien SVG générique
+       des Wire.
+    ======================================================== */
+
+    const isWire =
+        componentCategory === "wires" ||
+        componentType === "wire" ||
+        componentType === "wire-red" ||
+        componentType === "wire-black" ||
+        componentType === "wire-green";
+
+
+    if (isWire) {
+
+        const wireColor =
+            fobas3DSafe(
+                safeDefinition.wireColor ||
+                safeDefinition.color ||
+                "#263238"
+            );
+
+        const componentId =
+            fobas3DSafe(
+                safeDefinition.id || "wire"
+            );
+
+        const componentName =
+            fobas3DSafe(
+                safeDefinition.name ||
+                "Fil de connexion"
+            );
+
+        const labelStyle =
+            libraryMode
+                ? "display:none;"
+                : "";
+
+
+        return `
+            <div
+                class="fobas-electronic-3d fobas-component-family-wire"
+                data-visual-type="${componentId}"
+                data-visual-family="wire"
+                style="
+                    width:100%;
+                    height:100%;
+                    background:transparent;
+                    border:none;
+                    box-shadow:none;
+                    outline:none;
+                    filter:none;
+                    padding:0;
+                    margin:0;
+                    overflow:visible;
+                "
+            >
+
+                <div
+                    class="component-3d-body fobas-wire-body"
+                    style="
+                        width:100%;
+                        height:100%;
+                        background:transparent;
+                        border:none;
+                        box-shadow:none;
+                        outline:none;
+                        filter:none;
+                        padding:0;
+                        margin:0;
+                        overflow:visible;
+                    "
+                >
+
+                    <div
+                        class="component-3d-icon fobas-wire-icon"
+                        data-component-icon="${componentId}"
+                        style="
+                            width:100%;
+                            height:100%;
+                            background:transparent;
+                            border:none;
+                            box-shadow:none;
+                            outline:none;
+                            filter:none;
+                            padding:0;
+                            margin:0;
+                            overflow:visible;
+                        "
+                    >
+
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="100%"
+                            height="100%"
+                            viewBox="0 0 160 110"
+                            preserveAspectRatio="none"
+                            aria-hidden="true"
+                            focusable="false"
+                            style="
+                                width:100%;
+                                height:100%;
+                                display:block;
+                                overflow:visible;
+                                pointer-events:none;
+                            "
+                        >
+
+                            <defs>
+
+                                <linearGradient
+                                    id="wireBody_${componentId}"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                >
+                                    <stop
+                                        offset="0%"
+                                        stop-color="#ffffff"
+                                        stop-opacity=".32"
+                                    />
+
+                                    <stop
+                                        offset="28%"
+                                        stop-color="${wireColor}"
+                                        stop-opacity="1"
+                                    />
+
+                                    <stop
+                                        offset="72%"
+                                        stop-color="${wireColor}"
+                                        stop-opacity="1"
+                                    />
+
+                                    <stop
+                                        offset="100%"
+                                        stop-color="#000000"
+                                        stop-opacity=".30"
+                                    />
+                                </linearGradient>
+
+                                <radialGradient
+                                    id="wirePin_${componentId}"
+                                    cx="32%"
+                                    cy="28%"
+                                    r="72%"
+                                >
+                                    <stop
+                                        offset="0%"
+                                        stop-color="#ffffff"
+                                    />
+
+                                    <stop
+                                        offset="25%"
+                                        stop-color="#dddddd"
+                                    />
+
+                                    <stop
+                                        offset="65%"
+                                        stop-color="#969696"
+                                    />
+
+                                    <stop
+                                        offset="100%"
+                                        stop-color="#303030"
+                                    />
+                                </radialGradient>
+
+                            </defs>
+
+
+                            <!-- ================================
+                                 OMBRE DU CÂBLE
+                            ================================= -->
+
+                            <line
+                                x1="15"
+                                y1="57"
+                                x2="145"
+                                y2="57"
+                                stroke="#000000"
+                                stroke-width="11"
+                                stroke-linecap="round"
+                                opacity=".16"
+                            />
+
+
+                            <!-- ================================
+                                 VRAI CORPS DU CÂBLE
+                                 Long + fin
+                            ================================= -->
+
+                            <line
+                                x1="15"
+                                y1="53"
+                                x2="145"
+                                y2="53"
+                                stroke="url(#wireBody_${componentId})"
+                                stroke-width="7"
+                                stroke-linecap="round"
+                            />
+
+
+                            <!-- ================================
+                                 REFLET DU CÂBLE
+                            ================================= -->
+
+                            <line
+                                x1="18"
+                                y1="50.8"
+                                x2="142"
+                                y2="50.8"
+                                stroke="#ffffff"
+                                stroke-width="1.4"
+                                stroke-linecap="round"
+                                opacity=".28"
+                            />
+
+
+                            <!-- ================================
+                                 CONNECTEUR A
+                            ================================= -->
+
+                            <circle
+                                cx="12"
+                                cy="53"
+                                r="8"
+                                fill="#000000"
+                                opacity=".18"
+                            />
+
+                            <circle
+                                cx="12"
+                                cy="50.5"
+                                r="6.5"
+                                fill="url(#wirePin_${componentId})"
+                                stroke="#252525"
+                                stroke-width="1.5"
+                            />
+
+                            <circle
+                                cx="10"
+                                cy="48.5"
+                                r="1.7"
+                                fill="#ffffff"
+                                opacity=".72"
+                            />
+
+
+                            <!-- ================================
+                                 CONNECTEUR B
+                            ================================= -->
+
+                            <circle
+                                cx="148"
+                                cy="53"
+                                r="8"
+                                fill="#000000"
+                                opacity=".18"
+                            />
+
+                            <circle
+                                cx="148"
+                                cy="50.5"
+                                r="6.5"
+                                fill="url(#wirePin_${componentId})"
+                                stroke="#252525"
+                                stroke-width="1.5"
+                            />
+
+                            <circle
+                                cx="146"
+                                cy="48.5"
+                                r="1.7"
+                                fill="#ffffff"
+                                opacity=".72"
+                            />
+
+                        </svg>
+
+                    </div>
+
+
+                    <div
+                        class="component-3d-original-icon"
+                        aria-hidden="true"
+                        style="display:none;"
+                    >
+                        ${fobas3DSafe(
+                            safeDefinition.icon || "━"
+                        )}
+                    </div>
+
+
+                    <div
+                        class="component-3d-label"
+                        data-component-label="${componentId}"
+                        title="${componentName}"
+                        style="${labelStyle}"
+                    >
+                        ${componentName}
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+    }
+
+
+    /* ========================================================
+       09.6 — RENDERER ORIGINAL
+       --------------------------------------------------------
+       AUCUN changement pour les autres composants.
+    ======================================================== */
 
     const icon =
         fobas3DSafe(
@@ -5990,10 +6317,6 @@ function createComponentVisualHTML(
             family
         );
 
-    /*
-       Sécurité supplémentaire :
-       supprime uniquement les anciens shadows SVG.
-    */
     visualSVG =
         cleanFOBAS3DDecorativeShadows(
             visualSVG
@@ -6027,14 +6350,6 @@ function createComponentVisualHTML(
             Number(safeDefinition.height) || 70
         );
 
-    /*
-       Dans la bibliothèque :
-       le nom est déjà affiché par Block 08.
-       On évite donc le doublon visuel.
-
-       Dans le laboratoire :
-       le label reste disponible pour le moteur.
-    */
     const labelStyle =
         libraryMode
             ? "display:none;"
@@ -6115,575 +6430,6 @@ function createComponentVisualHTML(
 }
 
 
-
-
-
-
-
-/* ============================================================
-   09.W — FOBAS WIRE VISUAL BRIDGE
-   ------------------------------------------------------------
-   ISOLATED / PROTECTED / INDEPENDENT
-   ------------------------------------------------------------
-   OBJECTIF :
-   - Remplace uniquement le visuel des composants Wire
-   - Ne modifie aucun autre composant
-   - Ne modifie pas les pins
-   - Ne modifie pas le resize
-   - Ne modifie pas drag / delete / duplicate
-   - Ne modifie pas undo / redo
-   - Ne modifie pas Block 08
-   - Ne modifie pas Block 10 / 11
-   - Aucun Three.js
-   - Aucun cadre décoratif
-   - Câble 3D simple et professionnel
-   - Deux connecteurs ronds A / B
-   - Compatible wire / wire-red / wire-black / wire-green
-   - Compatible bibliothèque + laboratoire
-============================================================ */
-
-(function FOBAS_WIRE_VISUAL_BRIDGE() {
-
-    "use strict";
-
-
-    /* ========================================================
-       PROTECTION
-       --------------------------------------------------------
-       Le bridge ne s'installe qu'une seule fois.
-    ======================================================== */
-
-    if (
-        window.__FOBAS_WIRE_VISUAL_BRIDGE_INSTALLED__
-    ) {
-        return;
-    }
-
-    window.__FOBAS_WIRE_VISUAL_BRIDGE_INSTALLED__ =
-        true;
-
-
-    /* ========================================================
-       SAUVEGARDE DU RENDERER ORIGINAL
-       --------------------------------------------------------
-       Tous les autres composants continuent d'utiliser
-       exactement leur renderer existant.
-    ======================================================== */
-
-    const originalCreateComponentVisualHTML =
-        window.createComponentVisualHTML;
-
-
-    if (
-        typeof originalCreateComponentVisualHTML !==
-        "function"
-    ) {
-        console.error(
-            "FOBAS Wire Bridge : createComponentVisualHTML introuvable."
-        );
-
-        return;
-    }
-
-
-    /* ========================================================
-       SAFE COLOR
-    ======================================================== */
-
-    function wireSafeColor(value) {
-
-        const color =
-            String(
-                value ||
-                "#263238"
-            ).trim();
-
-
-        /*
-         * Accepte uniquement les formats couleur simples
-         * utilisés par les définitions FOBAS.
-         */
-
-        if (
-            /^#[0-9a-fA-F]{3,8}$/.test(
-                color
-            )
-        ) {
-            return color;
-        }
-
-
-        if (
-            /^rgb(a)?\([\d\s.,%]+\)$/.test(
-                color
-            )
-        ) {
-            return color;
-        }
-
-
-        if (
-            /^hsl(a)?\([\d\s.,%]+\)$/.test(
-                color
-            )
-        ) {
-            return color;
-        }
-
-
-        return "#263238";
-    }
-
-
-    /* ========================================================
-       WIRE TYPE DETECTOR
-       --------------------------------------------------------
-       Aucun changement dans COMPONENTS.
-    ======================================================== */
-
-    function isFOBASWireDefinition(
-        definition
-    ) {
-
-        if (!definition) {
-            return false;
-        }
-
-
-        const type =
-            String(
-                definition.id ||
-                ""
-            ).toLowerCase();
-
-
-        const category =
-            String(
-                definition.category ||
-                ""
-            ).toLowerCase();
-
-
-        return (
-            category === "wires" ||
-            type === "wire" ||
-            type === "wire-red" ||
-            type === "wire-black" ||
-            type === "wire-green"
-        );
-    }
-
-
-    /* ========================================================
-       WIRE SVG
-       --------------------------------------------------------
-       Le câble reste horizontal.
-       Les connecteurs restent ronds.
-       Le corps est visuellement fin même lorsque le composant
-       est redimensionné.
-    ======================================================== */
-
-    function createFOBASWireSVG(
-        definition
-    ) {
-
-        const wireColor =
-            wireSafeColor(
-                definition.wireColor ||
-                definition.color ||
-                "#263238"
-            );
-
-
-        /*
-         * Couleurs dérivées pour donner un petit effet 3D
-         * sans bibliothèque externe.
-         */
-
-        const darkColor =
-            wireColor;
-
-
-        const highlightColor =
-            "#ffffff";
-
-
-        const pinColor =
-            "#d7b85a";
-
-
-        const pinDarkColor =
-            "#6d5319";
-
-
-        return `
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="100%"
-                height="100%"
-                viewBox="0 0 160 110"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-                focusable="false"
-                class="fobas-wire-svg"
-                style="
-                    width:100%;
-                    height:100%;
-                    display:block;
-                    overflow:visible;
-                    pointer-events:none;
-                "
-            >
-
-                <defs>
-
-                    <linearGradient
-                        id="fobasWireBodyGradient"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                    >
-                        <stop
-                            offset="0%"
-                            stop-color="${highlightColor}"
-                            stop-opacity=".28"
-                        />
-
-                        <stop
-                            offset="32%"
-                            stop-color="${darkColor}"
-                            stop-opacity="1"
-                        />
-
-                        <stop
-                            offset="70%"
-                            stop-color="${darkColor}"
-                            stop-opacity="1"
-                        />
-
-                        <stop
-                            offset="100%"
-                            stop-color="#000000"
-                            stop-opacity=".28"
-                        />
-                    </linearGradient>
-
-                    <radialGradient
-                        id="fobasWirePinGradient"
-                        cx="35%"
-                        cy="30%"
-                        r="70%"
-                    >
-                        <stop
-                            offset="0%"
-                            stop-color="#fff4ad"
-                        />
-
-                        <stop
-                            offset="38%"
-                            stop-color="${pinColor}"
-                        />
-
-                        <stop
-                            offset="100%"
-                            stop-color="${pinDarkColor}"
-                        />
-                    </radialGradient>
-
-                </defs>
-
-
-                <!-- =================================================
-                     OMBRE TRÈS LÉGÈRE DU CÂBLE
-                ================================================== -->
-
-                <line
-                    x1="18"
-                    y1="56"
-                    x2="142"
-                    y2="56"
-                    stroke="#000000"
-                    stroke-width="12"
-                    stroke-linecap="round"
-                    opacity=".16"
-                />
-
-
-                <!-- =================================================
-                     CORPS PRINCIPAL DU CÂBLE
-                ================================================== -->
-
-                <line
-                    x1="18"
-                    y1="53"
-                    x2="142"
-                    y2="53"
-                    stroke="url(#fobasWireBodyGradient)"
-                    stroke-width="9"
-                    stroke-linecap="round"
-                />
-
-
-                <!-- =================================================
-                     REFLET CENTRAL
-                ================================================== -->
-
-                <line
-                    x1="20"
-                    y1="50.5"
-                    x2="140"
-                    y2="50.5"
-                    stroke="#ffffff"
-                    stroke-width="1.7"
-                    stroke-linecap="round"
-                    opacity=".24"
-                />
-
-
-                <!-- =================================================
-                     CONNECTEUR A
-                ================================================== -->
-
-                <circle
-                    cx="14"
-                    cy="53"
-                    r="7"
-                    fill="#000000"
-                    opacity=".18"
-                />
-
-                <circle
-                    cx="14"
-                    cy="50.5"
-                    r="6"
-                    fill="url(#fobasWirePinGradient)"
-                    stroke="${pinDarkColor}"
-                    stroke-width="1.3"
-                />
-
-                <circle
-                    cx="12.3"
-                    cy="48.8"
-                    r="1.5"
-                    fill="#ffffff"
-                    opacity=".62"
-                />
-
-
-                <!-- =================================================
-                     CONNECTEUR B
-                ================================================== -->
-
-                <circle
-                    cx="146"
-                    cy="53"
-                    r="7"
-                    fill="#000000"
-                    opacity=".18"
-                />
-
-                <circle
-                    cx="146"
-                    cy="50.5"
-                    r="6"
-                    fill="url(#fobasWirePinGradient)"
-                    stroke="${pinDarkColor}"
-                    stroke-width="1.3"
-                />
-
-                <circle
-                    cx="144.3"
-                    cy="48.8"
-                    r="1.5"
-                    fill="#ffffff"
-                    opacity=".62"
-                />
-
-            </svg>
-        `;
-    }
-
-
-    /* ========================================================
-       WIRE HTML
-       --------------------------------------------------------
-       IMPORTANT :
-       Les vrais .electronic-pin restent créés par 09.9.
-       Ici nous créons uniquement le VISUEL.
-    ======================================================== */
-
-    function createFOBASWireVisualHTML(
-        definition,
-        libraryMode
-    ) {
-
-        const safeDefinition =
-            definition || {};
-
-
-        const componentId =
-            typeof fobas3DSafe === "function"
-                ? fobas3DSafe(
-                    safeDefinition.id || "wire"
-                )
-                : String(
-                    safeDefinition.id || "wire"
-                );
-
-
-        const componentName =
-            typeof fobas3DSafe === "function"
-                ? fobas3DSafe(
-                    safeDefinition.name ||
-                    "Fil de connexion"
-                )
-                : String(
-                    safeDefinition.name ||
-                    "Fil de connexion"
-                );
-
-
-        const wireColor =
-            wireSafeColor(
-                safeDefinition.wireColor ||
-                safeDefinition.color ||
-                "#263238"
-            );
-
-
-        const labelStyle =
-            libraryMode
-                ? "display:none;"
-                : "";
-
-
-        return `
-            <div
-                class="fobas-electronic-3d fobas-wire-component"
-                data-visual-type="${componentId}"
-                data-visual-family="wire"
-                data-wire-type="${componentId}"
-                style="
-                    width:100%;
-                    height:100%;
-                    background:transparent;
-                    border:none;
-                    box-shadow:none;
-                    outline:none;
-                    filter:none;
-                    padding:0;
-                    margin:0;
-                    overflow:visible;
-                    --wire-color:${wireColor};
-                "
-            >
-
-                <div
-                    class="component-3d-body fobas-wire-body"
-                    style="
-                        width:100%;
-                        height:100%;
-                        background:transparent;
-                        border:none;
-                        box-shadow:none;
-                        outline:none;
-                        filter:none;
-                        padding:0;
-                        margin:0;
-                        overflow:visible;
-                    "
-                >
-
-                    <div
-                        class="component-3d-icon fobas-wire-icon"
-                        data-component-icon="${componentId}"
-                        style="
-                            width:100%;
-                            height:100%;
-                            background:transparent;
-                            border:none;
-                            box-shadow:none;
-                            outline:none;
-                            filter:none;
-                            padding:0;
-                            margin:0;
-                            overflow:visible;
-                        "
-                    >
-                        ${createFOBASWireSVG(
-                            safeDefinition
-                        )}
-                    </div>
-
-
-                    <div
-                        class="component-3d-original-icon"
-                        aria-hidden="true"
-                        style="display:none;"
-                    >
-                        ${componentId}
-                    </div>
-
-
-                    <div
-                        class="component-3d-label"
-                        data-component-label="${componentId}"
-                        title="${componentName}"
-                        style="${labelStyle}"
-                    >
-                        ${componentName}
-                    </div>
-
-                </div>
-
-            </div>
-        `;
-    }
-
-
-    /* ========================================================
-       PROTECTED OVERRIDE
-       --------------------------------------------------------
-       Wire → nouveau visuel.
-       Tout le reste → renderer original.
-    ======================================================== */
-
-    window.createComponentVisualHTML =
-        function FOBASProtectedComponentVisualHTML(
-            definition,
-            libraryMode = false
-        ) {
-
-            if (
-                isFOBASWireDefinition(
-                    definition
-                )
-            ) {
-
-                return createFOBASWireVisualHTML(
-                    definition,
-                    libraryMode
-                );
-            }
-
-
-            return originalCreateComponentVisualHTML(
-                definition,
-                libraryMode
-            );
-        };
-
-
-    /* ========================================================
-       FIN BRIDGE
-    ======================================================== */
-
-    console.log(
-        "FOBAS Wire Visual Bridge : installé avec succès."
-    );
-
-})();
 
 
 
