@@ -233,52 +233,23 @@
 
 
 
-
-
-
 /* ============================================================
-   02.1 — BOUTON PÉDAGOGIQUE DYNAMIQUE — FOOTER
-   ------------------------------------------------------------
-   AJOUT UNIQUEMENT LE BOUTON PÉDAGOGIQUE AU FOOTER.
-   NE MODIFIE PAS LES AUTRES BOUTONS NI LE MOTEUR.
-   ============================================================ */
+   02.1 — BOUTON PÉDAGOGIQUE
+============================================================= */
 
-(function createPedagogicalFooterButton() {
+const pedagogicalBtn = document.createElement("button");
 
-    // Récupère exactement le footer de l'application FOBAS
-    const footer = document.getElementById("electronicFooter");
+pedagogicalBtn.id = "pedagogicalBtn";
+pedagogicalBtn.className = "level-btn";
+pedagogicalBtn.type = "button";
+pedagogicalBtn.textContent = "📚 Pédagogique";
 
-    if (!footer) {
-        console.warn(
-            "FOBAS : #electronicFooter introuvable."
-        );
-        return;
-    }
+pedagogicalBtn.onclick = function () {
+    window.location.href =
+        "https://fondationbackupspirituel.com/pedagogiqueselectroniquesfobas.html";
+};
 
-    // Évite toute création en double
-    if (document.getElementById("pedagogicalBtn")) {
-        return;
-    }
-
-    // Création du bouton
-    const pedagogicalBtn = document.createElement("button");
-
-    pedagogicalBtn.id = "pedagogicalBtn";
-    pedagogicalBtn.className = "top-tool-btn";
-    pedagogicalBtn.type = "button";
-    pedagogicalBtn.textContent = "📚 Pédagogique";
-
-    // Navigation vers la page pédagogique
-    pedagogicalBtn.addEventListener("click", function () {
-        window.location.href =
-            "https://fondationbackupspirituel.com/pedagogiqueselectroniquesfobas.html";
-    });
-
-    // Ajoute le bouton uniquement dans le footer FOBAS
-    footer.appendChild(pedagogicalBtn);
-
-})();
-
+document.getElementById("levelSelector").appendChild(pedagogicalBtn);
 
 
 
