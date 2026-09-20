@@ -8175,30 +8175,35 @@ function applyComponentVisualState(
                 );
 
 
-            /* HANDLE A */
-
-            const handleA =
-                createWireSVGElement(
-                    "circle",
-                    {
-                        r: "8",
-                        "data-fobas-wire-handle":
-                            "A"
-                    }
-                );
 
 
-            /* HANDLE B */
 
-            const handleB =
-                createWireSVGElement(
-                    "circle",
-                    {
-                        r: "8",
-                        "data-fobas-wire-handle":
-                            "B"
-                    }
-                );
+
+
+const handleA =
+    createWireSVGElement(
+        "circle",
+        {
+            r: "5",
+            "data-fobas-wire-handle": "A",
+            class: "fobas-wire-terminal"
+        }
+    );
+
+const handleB =
+    createWireSVGElement(
+        "circle",
+        {
+            r: "5",
+            "data-fobas-wire-handle": "B",
+            class: "fobas-wire-terminal"
+        }
+    );
+
+
+
+
+
 
 
             handleA.style.cursor =
