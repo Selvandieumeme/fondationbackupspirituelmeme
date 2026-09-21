@@ -1,0 +1,3689 @@
+/* ================================================================
+   FOBAS — CALCULATRICE CHIMIE & PHYSIQUE
+   ---------------------------------------------------------------
+   Fichier : simulationcalculatricefobas.css
+   Version : 1.0.0
+   Compatible avec :
+   simulationcalculatricefobas.html
+
+   OBJECTIFS :
+   - Véritable apparence de calculatrice scientifique 3D
+   - Chimie + Physique
+   - Responsive Android / tablette / ordinateur
+   - Touch friendly
+   - Préparé pour les interactions JavaScript
+   - Aucun Three.js
+   - Aucun framework externe
+================================================================ */
+
+
+/* ================================================================
+   01 — VARIABLES GLOBALES
+================================================================ */
+
+:root {
+
+    --fobas-bg:
+        #020812;
+
+    --fobas-bg-secondary:
+        #071321;
+
+    --fobas-panel:
+        #0b1726;
+
+    --fobas-panel-light:
+        #102236;
+
+    --fobas-device:
+        #111b27;
+
+    --fobas-device-light:
+        #1a2939;
+
+    --fobas-device-dark:
+        #070d15;
+
+    --fobas-screen:
+        #06131b;
+
+    --fobas-screen-light:
+        #0b2228;
+
+    --fobas-text:
+        #f4f8ff;
+
+    --fobas-text-soft:
+        #aebed1;
+
+    --fobas-text-dim:
+        #718398;
+
+    --fobas-border:
+        rgba(255, 255, 255, 0.10);
+
+    --fobas-border-strong:
+        rgba(255, 255, 255, 0.18);
+
+    --fobas-blue:
+        #1d8cff;
+
+    --fobas-blue-light:
+        #55b5ff;
+
+    --fobas-blue-dark:
+        #0756a6;
+
+    --fobas-cyan:
+        #23d7e8;
+
+    --fobas-yellow:
+        #ffc928;
+
+    --fobas-yellow-light:
+        #ffe26b;
+
+    --fobas-green:
+        #37dc9a;
+
+    --fobas-red:
+        #ff5d6c;
+
+    --fobas-purple:
+        #9b7cff;
+
+    --fobas-key:
+        #172434;
+
+    --fobas-key-light:
+        #213449;
+
+    --fobas-key-dark:
+        #0b121c;
+
+    --fobas-radius:
+        18px;
+
+    --fobas-small-radius:
+        11px;
+
+    --fobas-device-depth:
+        14px;
+
+    --fobas-transition:
+        180ms ease;
+
+    --fobas-fast:
+        110ms ease;
+
+    --fobas-shadow:
+        0 22px 55px rgba(0, 0, 0, 0.45);
+
+    --fobas-shadow-deep:
+        0 35px 90px rgba(0, 0, 0, 0.65);
+
+}
+
+
+/* ================================================================
+   02 — RESET
+================================================================ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+
+html {
+    width: 100%;
+    min-height: 100%;
+    background: var(--fobas-bg);
+    color-scheme: dark;
+}
+
+
+body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+
+    background:
+        radial-gradient(
+            circle at 20% 10%,
+            rgba(29, 140, 255, 0.10),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(35, 215, 232, 0.07),
+            transparent 25%
+        ),
+        linear-gradient(
+            145deg,
+            #020812 0%,
+            #06101c 48%,
+            #020711 100%
+        );
+
+    color: var(--fobas-text);
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+button:focus-visible,
+[tabindex]:focus-visible {
+    outline:
+        2px solid var(--fobas-cyan);
+
+    outline-offset: 3px;
+}
+
+
+/* ================================================================
+   03 — APPLICATION
+================================================================ */
+
+.fobas-calculator-app {
+
+    width: min(
+        1500px,
+        calc(100% - 28px)
+    );
+
+    margin:
+        0 auto;
+
+    padding:
+        18px 0 28px;
+
+    position: relative;
+}
+
+
+/* ================================================================
+   04 — HEADER
+================================================================ */
+
+.calculator-header {
+
+    min-height:
+        76px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        20px;
+
+    padding:
+        14px 18px;
+
+    margin-bottom:
+        18px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 34, 52, 0.94),
+            rgba(5, 13, 23, 0.94)
+        );
+
+    box-shadow:
+        0 16px 42px rgba(0, 0, 0, 0.30);
+
+    backdrop-filter:
+        blur(14px);
+
+    -webkit-backdrop-filter:
+        blur(14px);
+}
+
+
+.brand-block {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        13px;
+
+    min-width:
+        0;
+}
+
+
+.brand-symbol {
+
+    width:
+        50px;
+
+    height:
+        50px;
+
+    flex:
+        0 0 50px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #173b5e,
+            #071321
+        );
+
+    border:
+        1px solid rgba(85, 181, 255, 0.25);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        0 8px 22px rgba(0,0,0,0.32);
+
+    font-size:
+        25px;
+}
+
+
+.brand-text {
+    min-width:
+        0;
+}
+
+
+.brand-text h1 {
+
+    margin:
+        0;
+
+    font-size:
+        clamp(18px, 2.5vw, 28px);
+
+    line-height:
+        1;
+
+    letter-spacing:
+        0.14em;
+}
+
+
+.brand-text p {
+
+    margin:
+        5px 0 0;
+
+    color:
+        var(--fobas-blue-light);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.20em;
+}
+
+
+.brand-text span {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        11px;
+}
+
+
+.header-status {
+
+    flex:
+        0 0 auto;
+}
+
+
+.status-indicator {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    min-height:
+        32px;
+
+    padding:
+        0 11px;
+
+    border:
+        1px solid rgba(55, 220, 154, 0.20);
+
+    border-radius:
+        999px;
+
+    color:
+        var(--fobas-green);
+
+    background:
+        rgba(55, 220, 154, 0.07);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.12em;
+}
+
+
+/* ================================================================
+   05 — MAIN LAYOUT
+================================================================ */
+
+.calculator-main {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(0, 1.35fr)
+        minmax(300px, 0.65fr);
+
+    gap:
+        22px;
+
+    align-items:
+        start;
+}
+
+
+/* ================================================================
+   06 — 3D CALCULATOR DEVICE
+================================================================ */
+
+.calculator-3d-device {
+
+    min-width:
+        0;
+
+    perspective:
+        1400px;
+}
+
+
+.calculator-body {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+    min-width:
+        0;
+
+    padding:
+        18px;
+
+    border:
+        1px solid rgba(255,255,255,0.13);
+
+    border-radius:
+        27px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #1b2938 0%,
+            #111b28 38%,
+            #0a111b 72%,
+            #050b13 100%
+        );
+
+    box-shadow:
+        var(--fobas-shadow-deep);
+
+    transform:
+        rotateX(1deg);
+
+    transform-style:
+        preserve-3d;
+
+    isolation:
+        isolate;
+}
+
+
+/* Faux 3D thickness */
+
+.calculator-body::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    z-index:
+        -2;
+
+    left:
+        7px;
+
+    right:
+        -7px;
+
+    top:
+        10px;
+
+    bottom:
+        -12px;
+
+    border-radius:
+        29px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #101a26,
+            #03070c
+        );
+
+    box-shadow:
+        0 25px 35px rgba(0,0,0,0.55);
+}
+
+
+.calculator-body::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        1px;
+
+    pointer-events:
+        none;
+
+    border-radius:
+        26px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.08),
+            transparent 22%,
+            transparent 78%,
+            rgba(0,0,0,0.18)
+        );
+
+    z-index:
+        20;
+}
+
+
+/* ================================================================
+   07 — DEVICE TOP
+================================================================ */
+
+.calculator-top {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 3px 12px;
+}
+
+
+.device-label {
+
+    color:
+        #dcecff;
+
+    font-size:
+        13px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        0.28em;
+}
+
+
+.device-model {
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.18em;
+}
+
+
+/* ================================================================
+   08 — DISPLAY
+================================================================ */
+
+.calculator-display {
+
+    position:
+        relative;
+
+    min-height:
+        145px;
+
+    padding:
+        15px 17px;
+
+    overflow:
+        hidden;
+
+    border:
+        2px solid #172f39;
+
+    border-radius:
+        15px;
+
+    background:
+        linear-gradient(
+            150deg,
+            #0b252b,
+            #041015 75%
+        );
+
+    box-shadow:
+        inset 0 5px 14px rgba(0,0,0,0.55),
+        inset 0 -2px 0 rgba(255,255,255,0.04),
+        0 8px 18px rgba(0,0,0,0.35);
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+}
+
+
+.calculator-display::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    pointer-events:
+        none;
+
+    background:
+        linear-gradient(
+            115deg,
+            rgba(255,255,255,0.07),
+            transparent 22%,
+            transparent 80%
+        );
+}
+
+
+.display-mode {
+
+    color:
+        var(--fobas-cyan);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.16em;
+}
+
+
+.display-expression {
+
+    margin-top:
+        12px;
+
+    min-height:
+        24px;
+
+    color:
+        #b9cbd0;
+
+    font-size:
+        clamp(12px, 2vw, 17px);
+
+    text-align:
+        right;
+
+    overflow-wrap:
+        anywhere;
+}
+
+
+.display-result {
+
+    margin-top:
+        3px;
+
+    color:
+        #f4ffff;
+
+    font-size:
+        clamp(28px, 5vw, 43px);
+
+    font-weight:
+        700;
+
+    line-height:
+        1.05;
+
+    text-align:
+        right;
+
+    overflow-wrap:
+        anywhere;
+
+    text-shadow:
+        0 0 18px rgba(35,215,232,0.14);
+}
+
+
+.display-unit {
+
+    margin-top:
+        7px;
+
+    color:
+        var(--fobas-green);
+
+    font-size:
+        11px;
+
+    text-align:
+        right;
+
+    min-height:
+        14px;
+}
+
+
+/* ================================================================
+   09 — SCIENCE MODE SELECTOR
+================================================================ */
+
+.science-mode-selector {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        9px;
+
+    margin-top:
+        14px;
+}
+
+
+.science-mode-btn {
+
+    position:
+        relative;
+
+    min-height:
+        54px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        9px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        13px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #172636,
+            #0b141f
+        );
+
+    color:
+        var(--fobas-text-soft);
+
+    cursor:
+        pointer;
+
+    transition:
+        transform var(--fobas-fast),
+        border-color var(--fobas-transition),
+        background var(--fobas-transition),
+        color var(--fobas-transition),
+        box-shadow var(--fobas-transition);
+
+    box-shadow:
+        0 7px 15px rgba(0,0,0,0.25);
+}
+
+
+.science-mode-btn:hover {
+
+    border-color:
+        rgba(85,181,255,0.40);
+
+    transform:
+        translateY(-1px);
+}
+
+
+.science-mode-btn:active {
+
+    transform:
+        translateY(2px);
+}
+
+
+.science-mode-btn.active {
+
+    color:
+        #ffffff;
+
+    border-color:
+        rgba(85,181,255,0.65);
+
+    background:
+        linear-gradient(
+            145deg,
+            #15446a,
+            #0b1b2d
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        0 0 0 1px rgba(29,140,255,0.10),
+        0 10px 22px rgba(0,0,0,0.32);
+}
+
+
+.physics-mode.active {
+
+    border-color:
+        rgba(255,201,40,0.65);
+
+    background:
+        linear-gradient(
+            145deg,
+            #55420f,
+            #191307
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        0 0 0 1px rgba(255,201,40,0.10),
+        0 10px 22px rgba(0,0,0,0.32);
+}
+
+
+.mode-icon {
+
+    font-size:
+        20px;
+}
+
+
+.mode-label {
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        0.12em;
+}
+
+
+/* ================================================================
+   10 — SCIENCE PANELS
+================================================================ */
+
+.science-panel {
+
+    margin-top:
+        13px;
+
+    padding:
+        13px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        15px;
+
+    background:
+        rgba(7,17,29,0.68);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+
+.science-panel[hidden] {
+    display:
+        none;
+}
+
+
+.panel-heading {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        11px;
+}
+
+
+.panel-heading-icon {
+
+    width:
+        35px;
+
+    height:
+        35px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(29,140,255,0.10);
+
+    font-size:
+        18px;
+}
+
+
+.panel-heading strong {
+
+    display:
+        block;
+
+    font-size:
+        12px;
+
+    letter-spacing:
+        0.13em;
+}
+
+
+.panel-heading small {
+
+    display:
+        block;
+
+    margin-top:
+        3px;
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        10px;
+}
+
+
+/* ================================================================
+   11 — FUNCTION GRID
+================================================================ */
+
+.function-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap:
+        8px;
+}
+
+
+.function-btn {
+
+    min-width:
+        0;
+
+    min-height:
+        63px;
+
+    padding:
+        7px 5px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        5px;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #172638,
+            #0d1723
+        );
+
+    color:
+        var(--fobas-text-soft);
+
+    cursor:
+        pointer;
+
+    transition:
+        transform var(--fobas-fast),
+        background var(--fobas-transition),
+        border-color var(--fobas-transition),
+        color var(--fobas-transition);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.045),
+        0 4px 9px rgba(0,0,0,0.20);
+}
+
+
+.function-btn strong {
+
+    color:
+        #ffffff;
+
+    font-size:
+        14px;
+
+    line-height:
+        1;
+}
+
+
+.function-btn span {
+
+    max-width:
+        100%;
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        8px;
+
+    line-height:
+        1.15;
+
+    text-align:
+        center;
+}
+
+
+.function-btn:hover {
+
+    color:
+        #ffffff;
+
+    border-color:
+        rgba(85,181,255,0.38);
+
+    background:
+        linear-gradient(
+            145deg,
+            #1d3851,
+            #102033
+        );
+
+    transform:
+        translateY(-1px);
+}
+
+
+.function-btn:hover span {
+    color:
+        #a8d9ff;
+}
+
+
+.function-btn:active {
+
+    transform:
+        translateY(2px) scale(0.985);
+}
+
+
+.physics-functions .function-btn:hover {
+
+    border-color:
+        rgba(255,201,40,0.35);
+
+    background:
+        linear-gradient(
+            145deg,
+            #3a3117,
+            #17150c
+        );
+}
+
+
+/* ================================================================
+   12 — SCIENTIFIC KEYPAD
+================================================================ */
+
+.scientific-keypad {
+
+    display:
+        grid;
+
+    gap:
+        8px;
+
+    margin-top:
+        14px;
+
+    padding:
+        11px;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    border-radius:
+        15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0e1824,
+            #070e17
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.035),
+        0 10px 24px rgba(0,0,0,0.25);
+}
+
+
+.key-row {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap:
+        8px;
+}
+
+
+.calculator-key {
+
+    position:
+        relative;
+
+    min-width:
+        0;
+
+    min-height:
+        50px;
+
+    border:
+        1px solid rgba(255,255,255,0.09);
+
+    border-radius:
+        10px;
+
+    color:
+        #edf5ff;
+
+    cursor:
+        pointer;
+
+    user-select:
+        none;
+
+    touch-action:
+        manipulation;
+
+    transition:
+        transform var(--fobas-fast),
+        box-shadow var(--fobas-fast),
+        background var(--fobas-transition),
+        border-color var(--fobas-transition);
+}
+
+
+.calculator-key::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        7px;
+
+    right:
+        7px;
+
+    top:
+        4px;
+
+    height:
+        1px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255,255,255,0.09);
+
+    pointer-events:
+        none;
+}
+
+
+.calculator-key:active {
+
+    transform:
+        translateY(3px);
+
+    box-shadow:
+        inset 0 4px 7px rgba(0,0,0,0.35);
+}
+
+
+.number-key {
+
+    background:
+        linear-gradient(
+            145deg,
+            #25374a,
+            #111c29
+        );
+
+    font-size:
+        17px;
+
+    font-weight:
+        700;
+
+    box-shadow:
+        0 5px 0 #080e16,
+        0 8px 12px rgba(0,0,0,0.25);
+}
+
+
+.number-key:hover {
+
+    border-color:
+        rgba(85,181,255,0.28);
+
+    background:
+        linear-gradient(
+            145deg,
+            #2e4962,
+            #162638
+        );
+}
+
+
+.operator-key {
+
+    background:
+        linear-gradient(
+            145deg,
+            #19456b,
+            #0d2741
+        );
+
+    color:
+        #8ed0ff;
+
+    font-size:
+        20px;
+
+    font-weight:
+        800;
+
+    box-shadow:
+        0 5px 0 #071626,
+        0 8px 12px rgba(0,0,0,0.25);
+}
+
+
+.operator-key:hover {
+
+    background:
+        linear-gradient(
+            145deg,
+            #225b88,
+            #103653
+        );
+}
+
+
+.scientific-key {
+
+    background:
+        linear-gradient(
+            145deg,
+            #27303c,
+            #111821
+        );
+
+    color:
+        #cbd8e6;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+    box-shadow:
+        0 5px 0 #080d13,
+        0 8px 12px rgba(0,0,0,0.20);
+}
+
+
+.scientific-key:hover {
+
+    border-color:
+        rgba(155,124,255,0.38);
+
+    color:
+        #e6dcff;
+}
+
+
+.function-key {
+
+    background:
+        linear-gradient(
+            145deg,
+            #3a2730,
+            #1d1318
+        );
+
+    color:
+        #ffb9c0;
+
+    font-size:
+        11px;
+
+    font-weight:
+        900;
+
+    box-shadow:
+        0 5px 0 #0e080b,
+        0 8px 12px rgba(0,0,0,0.20);
+}
+
+
+.function-key:hover {
+
+    border-color:
+        rgba(255,93,108,0.38);
+
+    background:
+        linear-gradient(
+            145deg,
+            #4d3038,
+            #24171c
+        );
+}
+
+
+.equals-key {
+
+    background:
+        linear-gradient(
+            145deg,
+            #137a61,
+            #073c31
+        );
+
+    color:
+        #a7ffe4;
+
+    font-size:
+        20px;
+
+    font-weight:
+        900;
+
+    box-shadow:
+        0 5px 0 #04251e,
+        0 8px 12px rgba(0,0,0,0.28);
+}
+
+
+.equals-key:hover {
+
+    background:
+        linear-gradient(
+            145deg,
+            #199b7b,
+            #095343
+        );
+}
+
+
+/* ================================================================
+   13 — CALCULATION DETAILS
+================================================================ */
+
+.calculation-details {
+
+    margin-top:
+        13px;
+
+    padding:
+        12px 14px;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    border-radius:
+        13px;
+
+    background:
+        rgba(5,12,20,0.72);
+}
+
+
+.detail-header {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        9px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        0.15em;
+}
+
+
+.detail-header span:last-child {
+
+    color:
+        var(--fobas-green);
+}
+
+
+.formula-display {
+
+    margin-top:
+        9px;
+
+    color:
+        #dbe9f7;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size:
+        12px;
+}
+
+
+.calculation-steps {
+
+    margin-top:
+        5px;
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        10px;
+
+    line-height:
+        1.5;
+}
+
+
+/* ================================================================
+   14 — VISUAL 3D PANEL
+================================================================ */
+
+.scientific-visual-panel {
+
+    min-width:
+        0;
+
+    padding:
+        17px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(15,31,47,0.96),
+            rgba(4,10,17,0.96)
+        );
+
+    box-shadow:
+        var(--fobas-shadow);
+
+    overflow:
+        hidden;
+}
+
+
+.visual-panel-header {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    margin-bottom:
+        13px;
+}
+
+
+.visual-eyebrow {
+
+    display:
+        block;
+
+    color:
+        var(--fobas-blue-light);
+
+    font-size:
+        8px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        0.20em;
+}
+
+
+.visual-panel-header h2 {
+
+    margin:
+        4px 0 0;
+
+    font-size:
+        20px;
+
+    letter-spacing:
+        0.02em;
+}
+
+
+.visual-mode-badge {
+
+    min-height:
+        28px;
+
+    padding:
+        0 9px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    border:
+        1px solid rgba(85,181,255,0.25);
+
+    border-radius:
+        999px;
+
+    color:
+        var(--fobas-cyan);
+
+    background:
+        rgba(35,215,232,0.06);
+
+    font-size:
+        8px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        0.12em;
+}
+
+
+/* ================================================================
+   15 — 3D VIEWPORT
+================================================================ */
+
+.scientific-3d-viewport {
+
+    position:
+        relative;
+
+    min-height:
+        475px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    border-radius:
+        18px;
+
+    background:
+        radial-gradient(
+            circle at 50% 44%,
+            rgba(29,140,255,0.13),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(35,215,232,0.05),
+            transparent 55%
+        ),
+        linear-gradient(
+            145deg,
+            #091521,
+            #02070d
+        );
+
+    perspective:
+        1100px;
+
+    cursor:
+        grab;
+
+    touch-action:
+        none;
+}
+
+
+.scientific-3d-viewport:active {
+    cursor:
+        grabbing;
+}
+
+
+.scientific-3d-viewport::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    pointer-events:
+        none;
+
+    opacity:
+        0.32;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,0.025) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,0.025) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        28px 28px;
+
+    mask-image:
+        radial-gradient(
+            ellipse at center,
+            black,
+            transparent 78%
+        );
+
+    -webkit-mask-image:
+        radial-gradient(
+            ellipse at center,
+            black,
+            transparent 78%
+        );
+}
+
+
+.three-d-scene {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    transform-style:
+        preserve-3d;
+
+    transform:
+        translateZ(0);
+}
+
+
+/* ================================================================
+   16 — 3D CALCULATOR VISUAL
+================================================================ */
+
+.calculator-visual-object {
+
+    position:
+        relative;
+
+    width:
+        min(70%, 270px);
+
+    aspect-ratio:
+        0.70;
+
+    border:
+        2px solid #2c4054;
+
+    border-radius:
+        22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #26394d,
+            #101a26 48%,
+            #070d14
+        );
+
+    box-shadow:
+        22px 28px 35px rgba(0,0,0,0.58),
+        -8px -8px 25px rgba(85,181,255,0.04),
+        inset 3px 3px 0 rgba(255,255,255,0.07),
+        inset -5px -6px 0 rgba(0,0,0,0.25);
+
+    transform:
+        rotateX(8deg)
+        rotateY(-12deg)
+        translateZ(30px);
+
+    transform-style:
+        preserve-3d;
+
+    transition:
+        transform 300ms ease;
+}
+
+
+.calculator-visual-object::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        12px;
+
+    right:
+        -13px;
+
+    top:
+        13px;
+
+    bottom:
+        -16px;
+
+    z-index:
+        -1;
+
+    border-radius:
+        22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #111c29,
+            #03070c
+        );
+
+    transform:
+        translateZ(-12px);
+
+    box-shadow:
+        14px 19px 22px rgba(0,0,0,0.45);
+}
+
+
+.visual-screen {
+
+    position:
+        absolute;
+
+    left:
+        10%;
+
+    right:
+        10%;
+
+    top:
+        9%;
+
+    height:
+        25%;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        flex-end;
+
+    justify-content:
+        center;
+
+    padding:
+        9px;
+
+    border:
+        2px solid #18353a;
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #0a282d,
+            #031114
+        );
+
+    box-shadow:
+        inset 0 5px 12px rgba(0,0,0,0.55);
+}
+
+
+.visual-screen span {
+
+    color:
+        var(--fobas-cyan);
+
+    font-size:
+        7px;
+
+    letter-spacing:
+        0.12em;
+}
+
+
+.visual-screen strong {
+
+    margin-top:
+        5px;
+
+    color:
+        #efffff;
+
+    font-size:
+        11px;
+
+    letter-spacing:
+        0.05em;
+}
+
+
+.visual-keyboard {
+
+    position:
+        absolute;
+
+    left:
+        11%;
+
+    right:
+        11%;
+
+    top:
+        41%;
+
+    bottom:
+        9%;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    grid-template-rows:
+        repeat(4, 1fr);
+
+    gap:
+        6px;
+
+    transform:
+        translateZ(5px);
+}
+
+
+.visual-keyboard span {
+
+    border:
+        1px solid rgba(255,255,255,0.09);
+
+    border-radius:
+        5px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #34485c,
+            #101923
+        );
+
+    box-shadow:
+        0 3px 0 #060b11,
+        inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+
+.visual-keyboard span:nth-child(3n) {
+
+    background:
+        linear-gradient(
+            145deg,
+            #1a5077,
+            #0c263c
+        );
+}
+
+
+.visual-depth-edge {
+
+    position:
+        absolute;
+
+    left:
+        3%;
+
+    right:
+        3%;
+
+    bottom:
+        4%;
+
+    height:
+        3px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255,255,255,0.05);
+}
+
+
+/* ================================================================
+   17 — CHEMISTRY 3D MOLECULE
+================================================================ */
+
+.chemistry-molecule-visual {
+
+    position:
+        absolute;
+
+    width:
+        110px;
+
+    height:
+        80px;
+
+    right:
+        9%;
+
+    top:
+        13%;
+
+    transform:
+        translateZ(80px)
+        rotateY(-12deg);
+
+    transform-style:
+        preserve-3d;
+}
+
+
+.atom {
+
+    position:
+        absolute;
+
+    width:
+        27px;
+
+    height:
+        27px;
+
+    border-radius:
+        50%;
+
+    box-shadow:
+        inset -5px -5px 8px rgba(0,0,0,0.30),
+        inset 4px 4px 7px rgba(255,255,255,0.18),
+        0 5px 12px rgba(0,0,0,0.38);
+}
+
+
+.atom-center {
+
+    left:
+        42px;
+
+    top:
+        24px;
+
+    background:
+        radial-gradient(
+            circle at 32% 28%,
+            #ffffff,
+            #55b5ff 26%,
+            #1267ad 65%,
+            #06335c
+        );
+
+    transform:
+        translateZ(25px);
+}
+
+
+.atom-left {
+
+    left:
+        9px;
+
+    top:
+        8px;
+
+    width:
+        21px;
+
+    height:
+        21px;
+
+    background:
+        radial-gradient(
+            circle at 32% 28%,
+            #ffffff,
+            #37dc9a 27%,
+            #087a54 70%,
+            #03432f
+        );
+}
+
+
+.atom-right {
+
+    right:
+        8px;
+
+    bottom:
+        7px;
+
+    width:
+        23px;
+
+    height:
+        23px;
+
+    background:
+        radial-gradient(
+            circle at 32% 28%,
+            #ffffff,
+            #ffc928 27%,
+            #b27600 70%,
+            #5c3b00
+        );
+}
+
+
+.bond {
+
+    position:
+        absolute;
+
+    height:
+        6px;
+
+    border-radius:
+        999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #4b6276,
+            #b4c6d6,
+            #4b6276
+        );
+
+    box-shadow:
+        0 3px 5px rgba(0,0,0,0.35);
+}
+
+
+.bond-left {
+
+    width:
+        42px;
+
+    left:
+        27px;
+
+    top:
+        27px;
+
+    transform:
+        rotate(24deg);
+}
+
+
+.bond-right {
+
+    width:
+        39px;
+
+    left:
+        61px;
+
+    top:
+        45px;
+
+    transform:
+        rotate(-33deg);
+}
+
+
+/* ================================================================
+   18 — PHYSICS VECTOR VISUAL
+================================================================ */
+
+.physics-vector-visual {
+
+    position:
+        absolute;
+
+    width:
+        170px;
+
+    height:
+        170px;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    transform:
+        translate(-50%, -50%)
+        rotateX(58deg)
+        rotateZ(-16deg);
+
+    transform-style:
+        preserve-3d;
+}
+
+
+.physics-vector-visual[hidden] {
+    display:
+        none;
+}
+
+
+.vector-axis {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    transform-origin:
+        left center;
+
+    height:
+        2px;
+
+    background:
+        rgba(255,255,255,0.35);
+}
+
+
+.x-axis {
+
+    width:
+        115px;
+
+    transform:
+        rotate(0deg);
+}
+
+
+.y-axis {
+
+    width:
+        105px;
+
+    transform:
+        rotate(120deg);
+}
+
+
+.z-axis {
+
+    width:
+        105px;
+
+    transform:
+        rotate(240deg);
+}
+
+
+.vector-arrow {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        82px;
+
+    height:
+        4px;
+
+    border-radius:
+        999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--fobas-yellow)
+        );
+
+    transform-origin:
+        left center;
+
+    transform:
+        rotate(-25deg)
+        translateZ(25px);
+
+    box-shadow:
+        0 0 15px rgba(255,201,40,0.30);
+}
+
+
+.vector-arrow::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    right:
+        -1px;
+
+    top:
+        50%;
+
+    width:
+        0;
+
+    height:
+        0;
+
+    border-top:
+        7px solid transparent;
+
+    border-bottom:
+        7px solid transparent;
+
+    border-left:
+        13px solid var(--fobas-yellow);
+
+    transform:
+        translateY(-50%);
+}
+
+
+/* ================================================================
+   19 — VISUAL HINT
+================================================================ */
+
+.visual-hint {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    bottom:
+        12px;
+
+    transform:
+        translateX(-50%);
+
+    padding:
+        6px 9px;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(2,8,15,0.68);
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        8px;
+
+    white-space:
+        nowrap;
+
+    pointer-events:
+        none;
+}
+
+
+/* ================================================================
+   20 — VISUAL CONTROLS
+================================================================ */
+
+.visual-controls {
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+    margin-top:
+        12px;
+}
+
+
+.visual-control-btn {
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border:
+        1px solid rgba(255,255,255,0.10);
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #1a2a3c,
+            #0b131d
+        );
+
+    color:
+        #dcecff;
+
+    font-size:
+        19px;
+
+    cursor:
+        pointer;
+
+    touch-action:
+        manipulation;
+
+    transition:
+        transform var(--fobas-fast),
+        border-color var(--fobas-transition);
+}
+
+
+.visual-control-btn:hover {
+
+    border-color:
+        rgba(85,181,255,0.42);
+
+    transform:
+        translateY(-1px);
+}
+
+
+.visual-control-btn:active {
+
+    transform:
+        translateY(2px);
+}
+
+
+/* ================================================================
+   21 — VISUAL INFORMATION
+================================================================ */
+
+.visual-information {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        7px;
+
+    margin-top:
+        10px;
+}
+
+
+.visual-info-item {
+
+    min-width:
+        0;
+
+    padding:
+        9px;
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(255,255,255,0.025);
+}
+
+
+.visual-info-item span {
+
+    display:
+        block;
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        7px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.12em;
+}
+
+
+.visual-info-item strong {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    color:
+        #dcecff;
+
+    font-size:
+        9px;
+
+    overflow-wrap:
+        anywhere;
+}
+
+
+/* ================================================================
+   22 — UTILITY PANEL
+================================================================ */
+
+.formula-utility-panel {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap:
+        10px;
+
+    margin-top:
+        20px;
+
+    padding:
+        12px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        16px;
+
+    background:
+        rgba(7,16,27,0.72);
+}
+
+
+.utility-btn {
+
+    min-height:
+        48px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        8px;
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #152537,
+            #0a121d
+        );
+
+    color:
+        #cbd9e8;
+
+    cursor:
+        pointer;
+
+    font-size:
+        12px;
+
+    transition:
+        transform var(--fobas-fast),
+        border-color var(--fobas-transition);
+}
+
+
+.utility-btn:first-letter {
+
+    color:
+        var(--fobas-cyan);
+}
+
+
+.utility-btn:hover {
+
+    border-color:
+        rgba(85,181,255,0.32);
+
+    transform:
+        translateY(-1px);
+}
+
+
+.utility-btn:active {
+
+    transform:
+        translateY(2px);
+}
+
+
+.utility-btn span {
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        10px;
+}
+
+
+/* ================================================================
+   23 — FOOTER
+================================================================ */
+
+.calculator-footer {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    flex-wrap:
+        wrap;
+
+    margin-top:
+        15px;
+
+    padding:
+        4px 4px;
+
+    color:
+        var(--fobas-text-dim);
+
+    font-size:
+        9px;
+
+    letter-spacing:
+        0.04em;
+}
+
+
+/* ================================================================
+   24 — RESPONSIVE TABLET
+================================================================ */
+
+@media (max-width: 1050px) {
+
+    .calculator-main {
+
+        grid-template-columns:
+            minmax(0, 1fr);
+
+    }
+
+
+    .scientific-visual-panel {
+
+        min-height:
+            0;
+    }
+
+
+    .scientific-3d-viewport {
+
+        min-height:
+            390px;
+    }
+
+
+    .calculator-visual-object {
+
+        width:
+            min(48%, 260px);
+    }
+
+}
+
+
+/* ================================================================
+   25 — RESPONSIVE PETIT ÉCRAN
+================================================================ */
+
+@media (max-width: 700px) {
+
+    .fobas-calculator-app {
+
+        width:
+            min(
+                100% - 14px,
+                680px
+            );
+
+        padding-top:
+            7px;
+
+    }
+
+
+    .calculator-header {
+
+        min-height:
+            65px;
+
+        padding:
+            10px 12px;
+
+        margin-bottom:
+            10px;
+
+        border-radius:
+            14px;
+    }
+
+
+    .brand-symbol {
+
+        width:
+            40px;
+
+        height:
+            40px;
+
+        flex-basis:
+            40px;
+
+        font-size:
+            20px;
+    }
+
+
+    .brand-text h1 {
+
+        font-size:
+            18px;
+    }
+
+
+    .brand-text p {
+
+        font-size:
+            8px;
+    }
+
+
+    .brand-text span {
+
+        font-size:
+            9px;
+    }
+
+
+    .header-status {
+
+        display:
+            none;
+    }
+
+
+    .calculator-body {
+
+        padding:
+            11px;
+
+        border-radius:
+            20px;
+    }
+
+
+    .calculator-body::before {
+
+        left:
+            5px;
+
+        right:
+            -5px;
+
+        bottom:
+            -9px;
+
+        border-radius:
+            22px;
+    }
+
+
+    .calculator-top {
+
+        padding-bottom:
+            8px;
+    }
+
+
+    .calculator-display {
+
+        min-height:
+            126px;
+
+        padding:
+            12px;
+    }
+
+
+    .display-result {
+
+        font-size:
+            clamp(
+                25px,
+                8vw,
+                36px
+            );
+    }
+
+
+    .science-mode-btn {
+
+        min-height:
+            49px;
+    }
+
+
+    .function-grid {
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap:
+            6px;
+    }
+
+
+    .function-btn {
+
+        min-height:
+            58px;
+    }
+
+
+    .function-btn strong {
+
+        font-size:
+            12px;
+    }
+
+
+    .function-btn span {
+
+        font-size:
+            7px;
+    }
+
+
+    .scientific-keypad {
+
+        padding:
+            8px;
+
+        gap:
+            6px;
+    }
+
+
+    .key-row {
+
+        gap:
+            6px;
+    }
+
+
+    .calculator-key {
+
+        min-height:
+            48px;
+    }
+
+
+    .scientific-visual-panel {
+
+        padding:
+            12px;
+
+        border-radius:
+            18px;
+    }
+
+
+    .scientific-3d-viewport {
+
+        min-height:
+            350px;
+
+        border-radius:
+            15px;
+    }
+
+
+    .calculator-visual-object {
+
+        width:
+            min(58%, 230px);
+    }
+
+
+    .chemistry-molecule-visual {
+
+        transform:
+            scale(0.78)
+            translateZ(50px);
+    }
+
+
+    .visual-information {
+
+        grid-template-columns:
+            1fr 1fr 1fr;
+    }
+
+
+    .formula-utility-panel {
+
+        gap:
+            6px;
+
+        padding:
+            8px;
+    }
+
+
+    .utility-btn {
+
+        min-height:
+            44px;
+
+        padding:
+            5px;
+
+        gap:
+            4px;
+
+        flex-direction:
+            column;
+
+        font-size:
+            15px;
+    }
+
+
+    .utility-btn span {
+
+        font-size:
+            8px;
+    }
+
+
+    .calculator-footer {
+
+        justify-content:
+            center;
+
+        text-align:
+            center;
+
+    }
+
+}
+
+
+/* ================================================================
+   26 — TRÈS PETIT ANDROID
+================================================================ */
+
+@media (max-width: 430px) {
+
+    .fobas-calculator-app {
+
+        width:
+            calc(100% - 8px);
+
+        padding-bottom:
+            15px;
+    }
+
+
+    .calculator-header {
+
+        padding:
+            8px 9px;
+    }
+
+
+    .brand-symbol {
+
+        width:
+            36px;
+
+        height:
+            36px;
+
+        flex-basis:
+            36px;
+
+        border-radius:
+            10px;
+
+        font-size:
+            18px;
+    }
+
+
+    .brand-text h1 {
+
+        font-size:
+            16px;
+    }
+
+
+    .brand-text p {
+
+        font-size:
+            7px;
+    }
+
+
+    .brand-text span {
+
+        display:
+            none;
+    }
+
+
+    .calculator-body {
+
+        padding:
+            8px;
+
+        border-radius:
+            17px;
+    }
+
+
+    .device-label {
+
+        font-size:
+            10px;
+    }
+
+
+    .device-model {
+
+        font-size:
+            7px;
+    }
+
+
+    .calculator-display {
+
+        min-height:
+            112px;
+
+        padding:
+            10px;
+    }
+
+
+    .display-mode {
+
+        font-size:
+            8px;
+    }
+
+
+    .display-expression {
+
+        margin-top:
+            8px;
+
+        font-size:
+            11px;
+    }
+
+
+    .display-result {
+
+        font-size:
+            clamp(
+                23px,
+                9vw,
+                31px
+            );
+    }
+
+
+    .display-unit {
+
+        font-size:
+            9px;
+    }
+
+
+    .science-mode-btn {
+
+        min-height:
+            46px;
+
+        gap:
+            6px;
+    }
+
+
+    .mode-icon {
+
+        font-size:
+            17px;
+    }
+
+
+    .mode-label {
+
+        font-size:
+            9px;
+    }
+
+
+    .science-panel {
+
+        padding:
+            9px;
+    }
+
+
+    .function-grid {
+
+        gap:
+            5px;
+    }
+
+
+    .function-btn {
+
+        min-height:
+            55px;
+
+        border-radius:
+            8px;
+    }
+
+
+    .function-btn strong {
+
+        font-size:
+            11px;
+    }
+
+
+    .function-btn span {
+
+        font-size:
+            6.5px;
+    }
+
+
+    .scientific-keypad {
+
+        margin-top:
+            10px;
+
+        padding:
+            6px;
+
+        gap:
+            5px;
+
+        border-radius:
+            11px;
+    }
+
+
+    .key-row {
+
+        gap:
+            5px;
+    }
+
+
+    .calculator-key {
+
+        min-height:
+            45px;
+
+        border-radius:
+            8px;
+    }
+
+
+    .number-key {
+
+        font-size:
+            15px;
+    }
+
+
+    .operator-key {
+
+        font-size:
+            18px;
+    }
+
+
+    .scientific-key {
+
+        font-size:
+            10px;
+    }
+
+
+    .function-key {
+
+        font-size:
+            9px;
+    }
+
+
+    .equals-key {
+
+        font-size:
+            18px;
+    }
+
+
+    .calculation-details {
+
+        padding:
+            9px 10px;
+    }
+
+
+    .scientific-3d-viewport {
+
+        min-height:
+            310px;
+    }
+
+
+    .calculator-visual-object {
+
+        width:
+            57%;
+
+        transform:
+            rotateX(8deg)
+            rotateY(-10deg)
+            translateZ(20px);
+    }
+
+
+    .visual-screen strong {
+
+        font-size:
+            8px;
+    }
+
+
+    .chemistry-molecule-visual {
+
+        right:
+            2%;
+
+        transform:
+            scale(0.62)
+            translateZ(40px);
+    }
+
+
+    .visual-hint {
+
+        max-width:
+            90%;
+
+        overflow:
+            hidden;
+
+        text-overflow:
+            ellipsis;
+    }
+
+
+    .visual-control-btn {
+
+        width:
+            40px;
+
+        height:
+            40px;
+    }
+
+
+    .visual-info-item {
+
+        padding:
+            7px 5px;
+    }
+
+
+    .visual-info-item strong {
+
+        font-size:
+            8px;
+    }
+
+
+    .formula-utility-panel {
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap:
+            4px;
+
+        padding:
+            6px;
+    }
+
+
+    .utility-btn {
+
+        min-height:
+            42px;
+
+        border-radius:
+            8px;
+    }
+
+}
+
+
+/* ================================================================
+   27 — MODE PAYSAGE MOBILE
+================================================================ */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    .calculator-main {
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            minmax(260px, 0.65fr);
+
+    }
+
+
+    .scientific-3d-viewport {
+
+        min-height:
+            390px;
+    }
+
+
+    .calculator-visual-object {
+
+        width:
+            min(50%, 220px);
+    }
+
+}
+
+
+/* ================================================================
+   28 — ACCESSIBILITÉ / MOTION REDUITE
+================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        scroll-behavior:
+            auto !important;
+
+        transition-duration:
+            0.01ms !important;
+
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+    }
+
+
+    .calculator-body,
+    .calculator-visual-object {
+
+        transform:
+            none !important;
+    }
+
+}
+
+
+/* ================================================================
+   29 — TOUCH DEVICES
+================================================================ */
+
+@media (pointer: coarse) {
+
+    .calculator-key,
+    .function-btn,
+    .science-mode-btn,
+    .visual-control-btn,
+    .utility-btn {
+
+        min-height:
+            44px;
+    }
+
+
+    .calculator-key:hover,
+    .function-btn:hover,
+    .science-mode-btn:hover,
+    .visual-control-btn:hover,
+    .utility-btn:hover {
+
+        transform:
+            none;
+    }
+
+}
+
+
+/* ================================================================
+   30 — ÉCRANS TRÈS LARGES
+================================================================ */
+
+@media (min-width: 1500px) {
+
+    .fobas-calculator-app {
+
+        width:
+            min(
+                1600px,
+                calc(100% - 60px)
+            );
+    }
+
+
+    .calculator-body {
+
+        padding:
+            22px;
+    }
+
+
+    .scientific-3d-viewport {
+
+        min-height:
+            560px;
+    }
+
+}
+
+
+/* ================================================================
+   31 — ÉTATS JS PRÉPARÉS
+================================================================ */
+
+/*
+   Le JavaScript pourra utiliser ces classes sans modifier
+   la structure HTML.
+*/
+
+
+.is-calculating {
+
+    pointer-events:
+        none;
+
+    opacity:
+        0.72;
+}
+
+
+.is-error {
+
+    border-color:
+        rgba(255,93,108,0.55) !important;
+
+    color:
+        #ffb2bb !important;
+}
+
+
+.is-success {
+
+    border-color:
+        rgba(55,220,154,0.55) !important;
+
+    color:
+        #a7ffe4 !important;
+}
+
+
+.is-active {
+
+    border-color:
+        rgba(85,181,255,0.55) !important;
+}
+
+
+/* ================================================================
+   32 — UTILITAIRES
+================================================================ */
+
+[hidden] {
+    display:
+        none !important;
+}
+
+
+.no-select {
+
+    user-select:
+        none;
+
+    -webkit-user-select:
+        none;
+}
+
+
+.overflow-safe {
+
+    min-width:
+        0;
+
+    overflow-wrap:
+        anywhere;
+}
+
+
+/* ================================================================
+   FIN — FOBAS CALCULATRICE CHIMIE & PHYSIQUE CSS
+================================================================ */
