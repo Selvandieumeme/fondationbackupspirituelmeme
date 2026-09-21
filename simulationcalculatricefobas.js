@@ -1215,333 +1215,1137 @@
         };
     }
 
-    /* ============================================================
-       ÉQUILIBRAGE CHIMIQUE — ALGÈBRE LINÉAIRE RATIONNELLE
-       ============================================================ */
 
-    function gcd(a, b) {
-        a = Math.abs(a);
-        b = Math.abs(b);
 
-        while (b) {
-            [a, b] = [b, a % b];
-        }
 
-        return a || 1;
+/* ============================================================
+   ÉQUILIBRAGE CHIMIQUE — MOTEUR ALGÉBRIQUE EXACT
+   ------------------------------------------------------------
+   VERSION CORRIGÉE
+   - Arithmétique rationnelle exacte avec BigInt
+   - RREF exact sans erreurs de flottants
+   - Calcul exact du noyau de la matrice
+   - Conversion automatique en coefficients entiers minimaux
+   - Vérification obligatoire de conservation des atomes
+   - Refus d'un résultat faux ou ambigu
+   - Compatible avec parseChemicalFormula() existant
+   ============================================================ */
+
+
+/* ============================================================
+   01 — OUTILS ENTIERS EXACTS
+   ============================================================ */
+
+function bigIntAbs(value) {
+    return value < 0n ? -value : value;
+}
+
+
+function bigIntGcd(a, b) {
+    a = bigIntAbs(a);
+    b = bigIntAbs(b);
+
+    while (b !== 0n) {
+        const remainder = a % b;
+        a = b;
+        b = remainder;
     }
 
-    function lcm(a, b) {
-        return Math.abs(a * b) / gcd(a, b);
+    return a;
+}
+
+
+function bigIntLcm(a, b) {
+    a = bigIntAbs(a);
+    b = bigIntAbs(b);
+
+    if (a === 0n || b === 0n) {
+        return 0n;
     }
 
-    function parseEquationSide(side) {
-        return side
-            .split('+')
-            .map(part => part.trim())
-            .filter(Boolean)
-            .map(part => {
-                const match = part.match(
-                    /^(\d+)?\s*([A-Za-z][A-Za-z0-9()\[\]]*)$/
-                );
+    return (a / bigIntGcd(a, b)) * b;
+}
 
-                if (!match) {
-                    throw new Error(
-                        `Espèce chimique invalide : ${part}`
-                    );
-                }
 
-                return {
-                    formula: match[2],
-                    coefficient: match[1]
-                        ? Number(match[1])
-                        : 1,
-                    atoms: parseChemicalFormula(match[2])
-                };
-            });
-    }
+/* ============================================================
+   02 — FRACTIONS EXACTES
+   ------------------------------------------------------------
+   Une fraction est toujours stockée sous la forme :
+   { n: numérateur BigInt, d: dénominateur BigInt }
+   avec d > 0 et fraction réduite.
+   ============================================================ */
 
-    function rref(matrix) {
-        const m = matrix.map(
-            row => row.map(Number)
+function makeFraction(numerator, denominator = 1n) {
+
+    numerator = BigInt(numerator);
+    denominator = BigInt(denominator);
+
+    if (denominator === 0n) {
+        throw new Error(
+            'Erreur mathématique : dénominateur nul.'
         );
-
-        const rows = m.length;
-        const cols = rows ? m[0].length : 0;
-
-        let lead = 0;
-
-        for (
-            let r = 0;
-            r < rows && lead < cols;
-            r++
-        ) {
-            let i = r;
-
-            while (
-                i < rows &&
-                Math.abs(m[i][lead]) < 1e-12
-            ) {
-                i++;
-            }
-
-            if (i === rows) {
-                lead++;
-                r--;
-                continue;
-            }
-
-            [m[i], m[r]] =
-                [m[r], m[i]];
-
-            const pivot = m[r][lead];
-
-            for (let j = 0; j < cols; j++) {
-                m[r][j] /= pivot;
-            }
-
-            for (i = 0; i < rows; i++) {
-                if (i === r) continue;
-
-                const factor = m[i][lead];
-
-                if (Math.abs(factor) < 1e-12) {
-                    continue;
-                }
-
-                for (let j = 0; j < cols; j++) {
-                    m[i][j] -= factor * m[r][j];
-                }
-            }
-
-            lead++;
-        }
-
-        return m;
     }
 
-    function nullspaceVector(matrix) {
-        const reduced = rref(matrix);
-        const rows = reduced.length;
-        const cols = reduced[0]?.length || 0;
-
-        const pivotCols = [];
-
-        for (let r = 0; r < rows; r++) {
-            const pivot =
-                reduced[r].findIndex(
-                    v => Math.abs(v) > 1e-10
-                );
-
-            if (pivot >= 0) {
-                pivotCols.push(pivot);
-            }
-        }
-
-        const freeCols = [];
-
-        for (let c = 0; c < cols; c++) {
-            if (!pivotCols.includes(c)) {
-                freeCols.push(c);
-            }
-        }
-
-        if (!freeCols.length) {
-            throw new Error(
-                'Cette équation ne possède pas de solution d’équilibrage non triviale.'
-            );
-        }
-
-        const free = freeCols[0];
-        const vector = Array(cols).fill(0);
-
-        vector[free] = 1;
-
-        for (
-            let r = pivotCols.length - 1;
-            r >= 0;
-            r--
-        ) {
-            const pivot = pivotCols[r];
-
-            let sum = 0;
-
-            for (
-                let c = pivot + 1;
-                c < cols;
-                c++
-            ) {
-                sum +=
-                    reduced[r][c] *
-                    vector[c];
-            }
-
-            vector[pivot] = -sum;
-        }
-
-        return vector;
-    }
-
-    function rationalize(
-        value,
-        maxDenominator = 10000
-    ) {
-        if (Math.abs(value) < 1e-12) {
-            return { n: 0, d: 1 };
-        }
-
-        let bestN = Math.round(value);
-        let bestD = 1;
-        let bestError =
-            Math.abs(value - bestN);
-
-        for (
-            let d = 1;
-            d <= maxDenominator;
-            d++
-        ) {
-            const n = Math.round(value * d);
-            const error =
-                Math.abs(value - n / d);
-
-            if (error < bestError) {
-                bestError = error;
-                bestN = n;
-                bestD = d;
-
-                if (error < 1e-10) {
-                    break;
-                }
-            }
-        }
-
-        const g = gcd(bestN, bestD);
-
+    if (numerator === 0n) {
         return {
-            n: bestN / g,
-            d: bestD / g
+            n: 0n,
+            d: 1n
         };
     }
 
-    function balanceEquation(equation) {
-        const arrowMatch =
-            equation.match(
-                /(.+?)(?:->|→|=)(.+)/
+    if (denominator < 0n) {
+        numerator = -numerator;
+        denominator = -denominator;
+    }
+
+    const divisor =
+        bigIntGcd(
+            bigIntAbs(numerator),
+            denominator
+        );
+
+    return {
+        n: numerator / divisor,
+        d: denominator / divisor
+    };
+}
+
+
+function fractionZero() {
+    return {
+        n: 0n,
+        d: 1n
+    };
+}
+
+
+function fractionOne() {
+    return {
+        n: 1n,
+        d: 1n
+    };
+}
+
+
+function fractionIsZero(value) {
+    return value.n === 0n;
+}
+
+
+function fractionNeg(value) {
+    return makeFraction(
+        -value.n,
+        value.d
+    );
+}
+
+
+function fractionAdd(a, b) {
+    return makeFraction(
+        (a.n * b.d) + (b.n * a.d),
+        a.d * b.d
+    );
+}
+
+
+function fractionSub(a, b) {
+    return makeFraction(
+        (a.n * b.d) - (b.n * a.d),
+        a.d * b.d
+    );
+}
+
+
+function fractionMul(a, b) {
+    return makeFraction(
+        a.n * b.n,
+        a.d * b.d
+    );
+}
+
+
+function fractionDiv(a, b) {
+
+    if (fractionIsZero(b)) {
+        throw new Error(
+            'Erreur mathématique : division par zéro.'
+        );
+    }
+
+    return makeFraction(
+        a.n * b.d,
+        a.d * b.n
+    );
+}
+
+
+/* ============================================================
+   03 — PARSAGE D'UN CÔTÉ DE L'ÉQUATION
+   ============================================================ */
+
+function parseEquationSide(side) {
+
+    const parts =
+        side
+            .split('+')
+            .map(part => part.trim())
+            .filter(Boolean);
+
+    if (!parts.length) {
+        throw new Error(
+            'Un côté de l’équation est vide.'
+        );
+    }
+
+    return parts.map(part => {
+
+        const match =
+            part.match(
+                /^(\d+)?\s*([A-Za-z][A-Za-z0-9()\[\]]*)$/
             );
 
-        if (!arrowMatch) {
+        if (!match) {
             throw new Error(
-                'Utilisez une flèche -> entre réactifs et produits.'
+                `Espèce chimique invalide : ${part}`
             );
         }
 
-        const left =
-            parseEquationSide(arrowMatch[1]);
+        const formula =
+            match[2];
 
-        const right =
-            parseEquationSide(arrowMatch[2]);
+        let atoms;
 
-        const species = [
-            ...left,
-            ...right
-        ];
+        try {
+            atoms =
+                parseChemicalFormula(formula);
+        } catch (error) {
+            throw new Error(
+                `Formule chimique invalide : ${formula}`
+            );
+        }
 
-        const elements = [
+        if (
+            !atoms ||
+            typeof atoms !== 'object' ||
+            !Object.keys(atoms).length
+        ) {
+            throw new Error(
+                `Impossible d’analyser la formule : ${formula}`
+            );
+        }
+
+        return {
+            formula,
+            coefficient:
+                match[1]
+                    ? Number(match[1])
+                    : 1,
+            atoms
+        };
+    });
+}
+
+
+/* ============================================================
+   04 — CONSTRUCTION DE LA MATRICE ATOMIQUE
+   ------------------------------------------------------------
+   Réactifs  : valeurs positives
+   Produits  : valeurs négatives
+   ============================================================ */
+
+function buildChemicalBalanceMatrix(
+    left,
+    right,
+    elements
+) {
+
+    const species = [
+        ...left,
+        ...right
+    ];
+
+    return elements.map(element => {
+
+        return species.map(
+            (speciesItem, index) => {
+
+                const atomCount =
+                    speciesItem.atoms[element] || 0;
+
+                const value =
+                    BigInt(
+                        Number.isFinite(atomCount)
+                            ? Math.trunc(atomCount)
+                            : 0
+                    );
+
+                return makeFraction(
+                    index < left.length
+                        ? value
+                        : -value,
+                    1n
+                );
+            }
+        );
+    });
+}
+
+
+/* ============================================================
+   05 — RREF EXACT
+   ------------------------------------------------------------
+   Réduction de Gauss-Jordan entièrement rationnelle.
+   Aucun calcul flottant.
+   ============================================================ */
+
+function exactRref(matrix) {
+
+    const rows =
+        matrix.length;
+
+    const cols =
+        rows
+            ? matrix[0].length
+            : 0;
+
+    const result =
+        matrix.map(
+            row =>
+                row.map(
+                    value =>
+                        makeFraction(
+                            value.n,
+                            value.d
+                        )
+                )
+        );
+
+    let pivotRow = 0;
+
+    const pivotColumns = [];
+
+    for (
+        let column = 0;
+        column < cols &&
+        pivotRow < rows;
+        column++
+    ) {
+
+        let selectedRow = -1;
+
+        for (
+            let row = pivotRow;
+            row < rows;
+            row++
+        ) {
+
+            if (
+                !fractionIsZero(
+                    result[row][column]
+                )
+            ) {
+                selectedRow = row;
+                break;
+            }
+        }
+
+        if (selectedRow === -1) {
+            continue;
+        }
+
+
+        /* ----------------------------------------------------
+           Échange des lignes
+           ---------------------------------------------------- */
+
+        if (selectedRow !== pivotRow) {
+            [
+                result[selectedRow],
+                result[pivotRow]
+            ] = [
+                result[pivotRow],
+                result[selectedRow]
+            ];
+        }
+
+
+        /* ----------------------------------------------------
+           Normalisation du pivot à 1
+           ---------------------------------------------------- */
+
+        const pivot =
+            result[pivotRow][column];
+
+        for (
+            let c = 0;
+            c < cols;
+            c++
+        ) {
+
+            result[pivotRow][c] =
+                fractionDiv(
+                    result[pivotRow][c],
+                    pivot
+                );
+        }
+
+
+        /* ----------------------------------------------------
+           Élimination de la colonne dans toutes les autres
+           lignes
+           ---------------------------------------------------- */
+
+        for (
+            let row = 0;
+            row < rows;
+            row++
+        ) {
+
+            if (row === pivotRow) {
+                continue;
+            }
+
+            const factor =
+                result[row][column];
+
+            if (
+                fractionIsZero(factor)
+            ) {
+                continue;
+            }
+
+            for (
+                let c = 0;
+                c < cols;
+                c++
+            ) {
+
+                result[row][c] =
+                    fractionSub(
+                        result[row][c],
+                        fractionMul(
+                            factor,
+                            result[pivotRow][c]
+                        )
+                    );
+            }
+        }
+
+
+        pivotColumns.push(column);
+
+        pivotRow++;
+    }
+
+    return {
+        matrix: result,
+        pivotColumns
+    };
+}
+
+
+/* ============================================================
+   06 — CALCUL EXACT DU VECTEUR DU NOYAU
+   ------------------------------------------------------------
+   Pour une équation chimique classique, la matrice doit
+   normalement posséder un seul degré de liberté.
+
+   Exemple :
+       H2 + O2 -> H2O
+
+   donne :
+       [ 2  0 -2 ]
+       [ 0  2 -1 ]
+
+   Le noyau produit :
+       [ 1, 1/2, 1 ]
+
+   puis devient :
+       [ 2, 1, 2 ]
+   ============================================================ */
+
+function exactNullspaceVector(matrix) {
+
+    const rrefData =
+        exactRref(matrix);
+
+    const reduced =
+        rrefData.matrix;
+
+    const pivotColumns =
+        rrefData.pivotColumns;
+
+    const rows =
+        reduced.length;
+
+    const cols =
+        rows
+            ? reduced[0].length
+            : 0;
+
+
+    if (!cols) {
+        throw new Error(
+            'Matrice atomique vide.'
+        );
+    }
+
+
+    /* --------------------------------------------------------
+       Recherche des colonnes libres
+       -------------------------------------------------------- */
+
+    const pivotSet =
+        new Set(pivotColumns);
+
+    const freeColumns = [];
+
+    for (
+        let column = 0;
+        column < cols;
+        column++
+    ) {
+
+        if (
+            !pivotSet.has(column)
+        ) {
+            freeColumns.push(column);
+        }
+    }
+
+
+    if (!freeColumns.length) {
+
+        throw new Error(
+            'Cette équation ne possède pas de solution d’équilibrage non triviale.'
+        );
+    }
+
+
+    /* --------------------------------------------------------
+       Plusieurs degrés de liberté :
+       on refuse de choisir arbitrairement une solution.
+       Cela évite de produire un résultat chimiquement faux.
+       -------------------------------------------------------- */
+
+    if (freeColumns.length > 1) {
+
+        throw new Error(
+            'Équation ambiguë : plusieurs solutions d’équilibrage sont possibles. Vérifiez les espèces chimiques saisies.'
+        );
+    }
+
+
+    const freeColumn =
+        freeColumns[0];
+
+    const vector =
+        Array.from(
+            { length: cols },
+            () => fractionZero()
+        );
+
+
+    /* --------------------------------------------------------
+       Variable libre = 1
+       -------------------------------------------------------- */
+
+    vector[freeColumn] =
+        fractionOne();
+
+
+    /* --------------------------------------------------------
+       Résolution exacte des variables pivots
+       -------------------------------------------------------- */
+
+    for (
+        let pivotIndex =
+            pivotColumns.length - 1;
+        pivotIndex >= 0;
+        pivotIndex--
+    ) {
+
+        const pivotColumn =
+            pivotColumns[pivotIndex];
+
+        const row =
+            pivotIndex;
+
+        let sum =
+            fractionZero();
+
+        for (
+            let column = 0;
+            column < cols;
+            column++
+        ) {
+
+            if (
+                column === pivotColumn
+            ) {
+                continue;
+            }
+
+            const coefficient =
+                reduced[row][column];
+
+            if (
+                fractionIsZero(
+                    coefficient
+                )
+            ) {
+                continue;
+            }
+
+            sum =
+                fractionAdd(
+                    sum,
+                    fractionMul(
+                        coefficient,
+                        vector[column]
+                    )
+                );
+        }
+
+        vector[pivotColumn] =
+            fractionNeg(sum);
+    }
+
+    return vector;
+}
+
+
+/* ============================================================
+   07 — CONVERSION EXACTE FRACTIONS → ENTIERS
+   ============================================================ */
+
+function fractionsToMinimalIntegers(
+    fractions
+) {
+
+    if (!fractions.length) {
+        throw new Error(
+            'Aucun coefficient calculé.'
+        );
+    }
+
+
+    /* --------------------------------------------------------
+       PPCM des dénominateurs
+       -------------------------------------------------------- */
+
+    let commonDenominator =
+        1n;
+
+    for (
+        const fraction of fractions
+    ) {
+
+        commonDenominator =
+            bigIntLcm(
+                commonDenominator,
+                fraction.d
+            );
+    }
+
+
+    /* --------------------------------------------------------
+       Suppression des dénominateurs
+       -------------------------------------------------------- */
+
+    let integers =
+        fractions.map(
+            fraction =>
+                fraction.n *
+                (
+                    commonDenominator /
+                    fraction.d
+                )
+        );
+
+
+    /* --------------------------------------------------------
+       Si nécessaire, changement de signe global
+       -------------------------------------------------------- */
+
+    const firstNonZero =
+        integers.find(
+            value =>
+                value !== 0n
+        );
+
+    if (
+        firstNonZero === undefined
+    ) {
+        throw new Error(
+            'Le système atomique produit uniquement la solution nulle.'
+        );
+    }
+
+    if (
+        firstNonZero < 0n
+    ) {
+        integers =
+            integers.map(
+                value =>
+                    -value
+            );
+    }
+
+
+    /* --------------------------------------------------------
+       Réduction par le PGCD commun
+       -------------------------------------------------------- */
+
+    let commonGcd =
+        0n;
+
+    for (
+        const value of integers
+    ) {
+
+        if (value === 0n) {
+            continue;
+        }
+
+        commonGcd =
+            commonGcd === 0n
+                ? bigIntAbs(value)
+                : bigIntGcd(
+                    commonGcd,
+                    bigIntAbs(value)
+                );
+    }
+
+
+    if (commonGcd === 0n) {
+        throw new Error(
+            'Impossible de déterminer les coefficients chimiques.'
+        );
+    }
+
+
+    integers =
+        integers.map(
+            value =>
+                value / commonGcd
+        );
+
+
+    /* --------------------------------------------------------
+       Tous les coefficients doivent être strictement positifs
+       -------------------------------------------------------- */
+
+    if (
+        integers.some(
+            value =>
+                value <= 0n
+        )
+    ) {
+
+        throw new Error(
+            'Impossible d’obtenir des coefficients chimiques tous positifs. Vérifiez l’équation.'
+        );
+    }
+
+
+    return integers;
+}
+
+
+/* ============================================================
+   08 — VÉRIFICATION ATOMIQUE INDÉPENDANTE
+   ------------------------------------------------------------
+   IMPORTANT :
+   Le moteur ne fait PAS confiance uniquement au calcul
+   algébrique. Il recalcule chaque élément après avoir trouvé
+   les coefficients.
+
+   Une équation n'est acceptée que si :
+       quantité totale réactifs
+       ===
+       quantité totale produits
+
+   pour CHAQUE élément.
+   ============================================================ */
+
+function verifyChemicalBalance(
+    left,
+    right,
+    coefficients,
+    elements
+) {
+
+    const leftCount =
+        left.length;
+
+    for (
+        const element of elements
+    ) {
+
+        let reactantAtoms =
+            0n;
+
+        let productAtoms =
+            0n;
+
+
+        /* ----------------------------------------------------
+           Réactifs
+           ---------------------------------------------------- */
+
+        for (
+            let i = 0;
+            i < left.length;
+            i++
+        ) {
+
+            const atoms =
+                left[i].atoms[element] || 0;
+
+            const coefficient =
+                coefficients[i];
+
+            reactantAtoms +=
+                BigInt(
+                    Math.trunc(atoms)
+                ) *
+                coefficient;
+        }
+
+
+        /* ----------------------------------------------------
+           Produits
+           ---------------------------------------------------- */
+
+        for (
+            let i = 0;
+            i < right.length;
+            i++
+        ) {
+
+            const atoms =
+                right[i].atoms[element] || 0;
+
+            const coefficient =
+                coefficients[
+                    leftCount + i
+                ];
+
+            productAtoms +=
+                BigInt(
+                    Math.trunc(atoms)
+                ) *
+                coefficient;
+        }
+
+
+        /* ----------------------------------------------------
+           Contrôle absolu
+           ---------------------------------------------------- */
+
+        if (
+            reactantAtoms !==
+            productAtoms
+        ) {
+
+            throw new Error(
+                `Équilibrage invalide pour l’élément ${element} : ${reactantAtoms.toString()} atome(s) côté réactifs contre ${productAtoms.toString()} côté produits.`
+            );
+        }
+    }
+
+    return true;
+}
+
+
+/* ============================================================
+   09 — CONTRÔLE DES COEFFICIENTS JAVASCRIPT
+   ------------------------------------------------------------
+   calculateChemistry() conserve une structure classique
+   avec des nombres JavaScript.
+   Nous convertissons donc BigInt → Number uniquement APRÈS
+   toutes les vérifications exactes.
+   ============================================================ */
+
+function convertChemicalCoefficientsToNumbers(
+    coefficients
+) {
+
+    return coefficients.map(
+        coefficient => {
+
+            if (
+                coefficient >
+                BigInt(Number.MAX_SAFE_INTEGER)
+            ) {
+
+                throw new Error(
+                    'Les coefficients calculés sont trop grands pour être représentés de manière sûre dans cette interface.'
+                );
+            }
+
+            return Number(
+                coefficient
+            );
+        }
+    );
+}
+
+
+/* ============================================================
+   10 — MOTEUR PRINCIPAL D'ÉQUILIBRAGE
+   ============================================================ */
+
+function balanceEquation(equation) {
+
+    if (
+        typeof equation !== 'string' ||
+        !equation.trim()
+    ) {
+
+        throw new Error(
+            'Veuillez saisir une équation chimique.'
+        );
+    }
+
+
+    /* --------------------------------------------------------
+       Recherche de la flèche
+       -------------------------------------------------------- */
+
+    const arrowMatch =
+        equation.match(
+            /(.+?)(?:->|→|=)(.+)/
+        );
+
+    if (!arrowMatch) {
+
+        throw new Error(
+            'Utilisez une flèche -> entre réactifs et produits.'
+        );
+    }
+
+
+    const leftText =
+        arrowMatch[1].trim();
+
+    const rightText =
+        arrowMatch[2].trim();
+
+
+    if (
+        !leftText ||
+        !rightText
+    ) {
+
+        throw new Error(
+            'Les réactifs et les produits doivent être renseignés des deux côtés de l’équation.'
+        );
+    }
+
+
+    /* --------------------------------------------------------
+       Analyse des deux côtés
+       -------------------------------------------------------- */
+
+    const left =
+        parseEquationSide(
+            leftText
+        );
+
+    const right =
+        parseEquationSide(
+            rightText
+        );
+
+
+    if (!left.length) {
+        throw new Error(
+            'Aucun réactif détecté.'
+        );
+    }
+
+    if (!right.length) {
+        throw new Error(
+            'Aucun produit détecté.'
+        );
+    }
+
+
+    const species = [
+        ...left,
+        ...right
+    ];
+
+
+    /* --------------------------------------------------------
+       Liste unique des éléments
+       -------------------------------------------------------- */
+
+    const elements =
+        [
             ...new Set(
                 species.flatMap(
-                    s => Object.keys(s.atoms)
+                    speciesItem =>
+                        Object.keys(
+                            speciesItem.atoms
+                        )
                 )
             )
         ];
 
-        const matrix =
-            elements.map(element =>
-                species.map((s, index) => {
-                    const value =
-                        s.atoms[element] || 0;
 
-                    return index < left.length
-                        ? value
-                        : -value;
-                })
-            );
+    if (!elements.length) {
 
-        const vector =
-            nullspaceVector(matrix);
-
-        const rationals =
-            vector.map(rationalize);
-
-        let commonDen =
-            rationals.reduce(
-                (acc, r) =>
-                    lcm(acc, r.d),
-                1
-            );
-
-        let ints =
-            rationals.map(
-                r =>
-                    r.n *
-                    (commonDen / r.d)
-            );
-
-        const sign =
-            ints.find(
-                v => Math.abs(v) > 0
-            ) < 0
-                ? -1
-                : 1;
-
-        ints =
-            ints.map(
-                v => v * sign
-            );
-
-        const common =
-            ints.reduce(
-                (acc, v) =>
-                    gcd(
-                        acc,
-                        Math.round(v)
-                    ),
-                0
-            ) || 1;
-
-        ints =
-            ints.map(
-                v =>
-                    Math.round(
-                        v / common
-                    )
-            );
-
-        if (ints.some(v => v <= 0)) {
-            throw new Error(
-                'Impossible d’obtenir des coefficients positifs. Vérifiez l’équation.'
-            );
-        }
-
-        const leftText =
-            left.map(
-                (s, i) =>
-                    `${ints[i] === 1 ? '' : ints[i] + ' '}${s.formula}`
-            ).join(' + ');
-
-        const rightText =
-            right.map(
-                (s, i) =>
-                    `${ints[left.length + i] === 1 ? '' : ints[left.length + i] + ' '}${s.formula}`
-            ).join(' + ');
-
-        return {
-            equation:
-                `${leftText} → ${rightText}`,
-            coefficients: ints,
-            elements,
-            reactants: left,
-            products: right
-        };
+        throw new Error(
+            'Aucun élément chimique valide n’a été détecté.'
+        );
     }
+
+
+    /* --------------------------------------------------------
+       Construction de la matrice atomique
+       -------------------------------------------------------- */
+
+    const matrix =
+        buildChemicalBalanceMatrix(
+            left,
+            right,
+            elements
+        );
+
+
+    /* --------------------------------------------------------
+       Calcul exact du noyau
+       -------------------------------------------------------- */
+
+    const vector =
+        exactNullspaceVector(
+            matrix
+        );
+
+
+    /* --------------------------------------------------------
+       Conversion exacte en entiers minimaux
+       -------------------------------------------------------- */
+
+    const integerCoefficients =
+        fractionsToMinimalIntegers(
+            vector
+        );
+
+
+    /* --------------------------------------------------------
+       Conversion vers Number uniquement maintenant
+       -------------------------------------------------------- */
+
+    const coefficients =
+        convertChemicalCoefficientsToNumbers(
+            integerCoefficients
+        );
+
+
+    /* --------------------------------------------------------
+       VÉRIFICATION ATOMIQUE OBLIGATOIRE
+       -------------------------------------------------------- */
+
+    verifyChemicalBalance(
+        left,
+        right,
+        integerCoefficients,
+        elements
+    );
+
+
+    /* --------------------------------------------------------
+       Construction de l'équation finale
+       -------------------------------------------------------- */
+
+    const formattedLeft =
+        left.map(
+            (speciesItem, index) => {
+
+                const coefficient =
+                    coefficients[index];
+
+                return (
+                    coefficient === 1
+                        ? speciesItem.formula
+                        : `${coefficient} ${speciesItem.formula}`
+                );
+            }
+        ).join(' + ');
+
+
+    const formattedRight =
+        right.map(
+            (speciesItem, index) => {
+
+                const coefficient =
+                    coefficients[
+                        left.length + index
+                    ];
+
+                return (
+                    coefficient === 1
+                        ? speciesItem.formula
+                        : `${coefficient} ${speciesItem.formula}`
+                );
+            }
+        ).join(' + ');
+
+
+    const balancedEquation =
+        `${formattedLeft} → ${formattedRight}`;
+
+
+    /* --------------------------------------------------------
+       Dernière sécurité :
+       l'équation affichée doit être non vide.
+       -------------------------------------------------------- */
+
+    if (
+        !balancedEquation.trim()
+    ) {
+
+        throw new Error(
+            'Erreur interne : impossible de construire l’équation équilibrée.'
+        );
+    }
+
+
+    return {
+        equation:
+            balancedEquation,
+
+        coefficients,
+
+        elements,
+
+        reactants:
+            left,
+
+        products:
+            right
+    };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /* ============================================================
        CONVERSIONS
