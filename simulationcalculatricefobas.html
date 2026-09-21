@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS 3D Scientific Calculator — Calculatrice avancée Chimie et Physique"
+    >
+
+    <meta
+        name="theme-color"
+        content="#07111f"
+    >
+
+    <title>FOBAS — Calculatrice Chimie & Physique 3D</title>
+
+    <!-- =========================================================
+         CSS EXTERNE — PRÉPARÉ POUR LE PROJET
+         ========================================================= -->
+    <link
+        rel="stylesheet"
+        href="simulationcalculatricefobas.css"
+    >
+</head>
+
+<body>
+
+    <!-- =========================================================
+         APPLICATION PRINCIPALE
+         ========================================================= -->
+    <main
+        id="fobasCalculatorApp"
+        class="fobas-calculator-app"
+        aria-label="FOBAS Calculatrice Scientifique Chimie et Physique"
+    >
+
+        <!-- =====================================================
+             EN-TÊTE
+             ===================================================== -->
+        <header
+            id="calculatorHeader"
+            class="calculator-header"
+        >
+
+            <div class="brand-block">
+
+                <div
+                    class="brand-symbol"
+                    aria-hidden="true"
+                >
+                    ⚗️
+                </div>
+
+                <div class="brand-text">
+
+                    <h1>FOBAS</h1>
+
+                    <p>
+                        SCIENTIFIC CALCULATOR
+                    </p>
+
+                    <span>
+                        Chimie &amp; Physique
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="header-status">
+
+                <span
+                    id="calculatorStatus"
+                    class="status-indicator"
+                >
+                    ● READY
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             CORPS PRINCIPAL
+             ===================================================== -->
+        <section
+            id="calculatorMain"
+            class="calculator-main"
+        >
+
+            <!-- =================================================
+                 CALCULATRICE 3D CENTRALE
+                 ================================================= -->
+            <section
+                id="calculator3DDevice"
+                class="calculator-3d-device"
+                aria-label="Calculatrice scientifique 3D"
+            >
+
+                <!-- =============================================
+                     CORPS 3D DE LA CALCULATRICE
+                     ============================================= -->
+                <div
+                    id="calculatorBody"
+                    class="calculator-body"
+                >
+
+                    <!-- =========================================
+                         ZONE SUPÉRIEURE
+                         ========================================= -->
+                    <div
+                        id="calculatorTop"
+                        class="calculator-top"
+                    >
+
+                        <div class="device-label">
+                            FOBAS
+                        </div>
+
+                        <div class="device-model">
+                            SCIENTIFIC X
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         ÉCRAN SCIENTIFIQUE
+                         ========================================= -->
+                    <section
+                        id="calculatorDisplay"
+                        class="calculator-display"
+                        aria-label="Écran de calcul"
+                    >
+
+                        <div
+                            id="displayMode"
+                            class="display-mode"
+                        >
+                            SCIENTIFIC
+                        </div>
+
+                        <div
+                            id="displayExpression"
+                            class="display-expression"
+                            aria-live="polite"
+                        >
+                            0
+                        </div>
+
+                        <div
+                            id="displayResult"
+                            class="display-result"
+                            aria-live="polite"
+                        >
+                            0
+                        </div>
+
+                        <div
+                            id="displayUnit"
+                            class="display-unit"
+                            aria-live="polite"
+                        >
+                            —
+                        </div>
+
+                    </section>
+
+
+                    <!-- =========================================
+                         MODE CHIMIE / PHYSIQUE
+                         ========================================= -->
+                    <nav
+                        id="scienceModeSelector"
+                        class="science-mode-selector"
+                        aria-label="Choix du domaine scientifique"
+                    >
+
+                        <button
+                            id="chemistryModeBtn"
+                            class="science-mode-btn chemistry-mode active"
+                            type="button"
+                            data-mode="chemistry"
+                            aria-pressed="true"
+                        >
+                            <span
+                                class="mode-icon"
+                                aria-hidden="true"
+                            >
+                                ⚗️
+                            </span>
+
+                            <span class="mode-label">
+                                CHIMIE
+                            </span>
+                        </button>
+
+
+                        <button
+                            id="physicsModeBtn"
+                            class="science-mode-btn physics-mode"
+                            type="button"
+                            data-mode="physics"
+                            aria-pressed="false"
+                        >
+                            <span
+                                class="mode-icon"
+                                aria-hidden="true"
+                            >
+                                ⚡
+                            </span>
+
+                            <span class="mode-label">
+                                PHYSIQUE
+                            </span>
+                        </button>
+
+                    </nav>
+
+
+                    <!-- =========================================
+                         PANNEAU CHIMIE
+                         ========================================= -->
+                    <section
+                        id="chemistryPanel"
+                        class="science-panel chemistry-panel active"
+                        data-panel="chemistry"
+                        aria-label="Fonctions de chimie"
+                    >
+
+                        <div class="panel-heading">
+
+                            <span class="panel-heading-icon">
+                                ⚗️
+                            </span>
+
+                            <div>
+                                <strong>
+                                    CHIMIE
+                                </strong>
+
+                                <small>
+                                    Calculs chimiques
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="chemistryFunctions"
+                            class="function-grid chemistry-functions"
+                        >
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="molarMass"
+                            >
+                                <strong>M</strong>
+                                <span>Masse molaire</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="moles"
+                            >
+                                <strong>n</strong>
+                                <span>Moles</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="mass"
+                            >
+                                <strong>m</strong>
+                                <span>Masse</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="volume"
+                            >
+                                <strong>V</strong>
+                                <span>Volume</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="molarity"
+                            >
+                                <strong>C</strong>
+                                <span>Molarité</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="dilution"
+                            >
+                                <strong>C₁V₁</strong>
+                                <span>Dilution</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="concentration"
+                            >
+                                <strong>C</strong>
+                                <span>Concentration</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="density"
+                            >
+                                <strong>ρ</strong>
+                                <span>Densité</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="ph"
+                            >
+                                <strong>pH</strong>
+                                <span>pH / pOH</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="stoichiometry"
+                            >
+                                <strong>ν</strong>
+                                <span>Stœchiométrie</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="yield"
+                            >
+                                <strong>η</strong>
+                                <span>Rendement</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="idealGas"
+                            >
+                                <strong>PV=nRT</strong>
+                                <span>Gaz parfaits</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="chemicalEquation"
+                            >
+                                <strong>⚗</strong>
+                                <span>Équation chimique</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="chemistryUnits"
+                            >
+                                <strong>⇄</strong>
+                                <span>Unités chimiques</span>
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =========================================
+                         PANNEAU PHYSIQUE
+                         ========================================= -->
+                    <section
+                        id="physicsPanel"
+                        class="science-panel physics-panel"
+                        data-panel="physics"
+                        aria-label="Fonctions de physique"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+
+                            <span class="panel-heading-icon">
+                                ⚡
+                            </span>
+
+                            <div>
+                                <strong>
+                                    PHYSIQUE
+                                </strong>
+
+                                <small>
+                                    Calculs physiques
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="physicsFunctions"
+                            class="function-grid physics-functions"
+                        >
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="speed"
+                            >
+                                <strong>v</strong>
+                                <span>Vitesse</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="acceleration"
+                            >
+                                <strong>a</strong>
+                                <span>Accélération</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="force"
+                            >
+                                <strong>F</strong>
+                                <span>Force</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="work"
+                            >
+                                <strong>W</strong>
+                                <span>Travail</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="energy"
+                            >
+                                <strong>E</strong>
+                                <span>Énergie</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="power"
+                            >
+                                <strong>P</strong>
+                                <span>Puissance</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="pressure"
+                            >
+                                <strong>P</strong>
+                                <span>Pression</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="physicalDensity"
+                            >
+                                <strong>ρ</strong>
+                                <span>Densité</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="ohmLaw"
+                            >
+                                <strong>V=IR</strong>
+                                <span>Loi d'Ohm</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="electricPower"
+                            >
+                                <strong>P=VI</strong>
+                                <span>Puissance électrique</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="resistance"
+                            >
+                                <strong>R</strong>
+                                <span>Résistance</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="electricCharge"
+                            >
+                                <strong>Q</strong>
+                                <span>Charge électrique</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="frequency"
+                            >
+                                <strong>f</strong>
+                                <span>Fréquence</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="wave"
+                            >
+                                <strong>λ</strong>
+                                <span>Ondes</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="temperature"
+                            >
+                                <strong>T</strong>
+                                <span>Température</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="function-btn"
+                                data-function="physicsUnits"
+                            >
+                                <strong>⇄</strong>
+                                <span>Unités physiques</span>
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =========================================
+                         CLAVIER SCIENTIFIQUE
+                         ========================================= -->
+                    <section
+                        id="scientificKeypad"
+                        class="scientific-keypad"
+                        aria-label="Clavier de calculatrice"
+                    >
+
+                        <div class="key-row key-row-functions">
+
+                            <button
+                                type="button"
+                                class="calculator-key function-key"
+                                data-key="clear"
+                            >
+                                AC
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key function-key"
+                                data-key="delete"
+                            >
+                                DEL
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key function-key"
+                                data-key="openParen"
+                            >
+                                (
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key function-key"
+                                data-key="closeParen"
+                            >
+                                )
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key function-key"
+                                data-key="percent"
+                            >
+                                %
+                            </button>
+
+                        </div>
+
+
+                        <div class="key-row">
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="sin"
+                            >
+                                sin
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="cos"
+                            >
+                                cos
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="tan"
+                            >
+                                tan
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="sqrt"
+                            >
+                                √
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="power"
+                            >
+                                xʸ
+                            </button>
+
+                        </div>
+
+
+                        <div class="key-row">
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="7"
+                            >
+                                7
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="8"
+                            >
+                                8
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="9"
+                            >
+                                9
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key operator-key"
+                                data-key="divide"
+                            >
+                                ÷
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="log"
+                            >
+                                log
+                            </button>
+
+                        </div>
+
+
+                        <div class="key-row">
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="4"
+                            >
+                                4
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="5"
+                            >
+                                5
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="6"
+                            >
+                                6
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key operator-key"
+                                data-key="multiply"
+                            >
+                                ×
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="ln"
+                            >
+                                ln
+                            </button>
+
+                        </div>
+
+
+                        <div class="key-row">
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="1"
+                            >
+                                1
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="2"
+                            >
+                                2
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="3"
+                            >
+                                3
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key operator-key"
+                                data-key="subtract"
+                            >
+                                −
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="pi"
+                            >
+                                π
+                            </button>
+
+                        </div>
+
+
+                        <div class="key-row">
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="0"
+                            >
+                                0
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key number-key"
+                                data-key="decimal"
+                            >
+                                .
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key operator-key"
+                                data-key="add"
+                            >
+                                +
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key equals-key"
+                                data-key="equals"
+                            >
+                                =
+                            </button>
+
+                            <button
+                                type="button"
+                                class="calculator-key scientific-key"
+                                data-key="e"
+                            >
+                                e
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =========================================
+                         ZONE DE RÉSULTAT DÉTAILLÉ
+                         ========================================= -->
+                    <section
+                        id="calculationDetails"
+                        class="calculation-details"
+                        aria-label="Détails du calcul"
+                    >
+
+                        <div class="detail-header">
+                            <span>CALCULATION</span>
+                            <span id="calculationState">READY</span>
+                        </div>
+
+                        <div
+                            id="formulaDisplay"
+                            class="formula-display"
+                        >
+                            Formula — —
+                        </div>
+
+                        <div
+                            id="calculationSteps"
+                            class="calculation-steps"
+                            aria-live="polite"
+                        >
+                            Entrez une valeur ou sélectionnez une fonction scientifique.
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 VISUALISATION 3D
+                 ================================================= -->
+            <aside
+                id="scientificVisualPanel"
+                class="scientific-visual-panel"
+                aria-label="Visualisation scientifique 3D"
+            >
+
+                <div class="visual-panel-header">
+
+                    <div>
+                        <span class="visual-eyebrow">
+                            FOBAS VISUAL ENGINE
+                        </span>
+
+                        <h2>
+                            Scientific 3D
+                        </h2>
+                    </div>
+
+                    <span
+                        id="visualModeBadge"
+                        class="visual-mode-badge"
+                    >
+                        CHIMIE
+                    </span>
+
+                </div>
+
+
+                <!-- =============================================
+                     SCÈNE 3D SANS THREE.JS
+                     ============================================= -->
+                <div
+                    id="scientific3DViewport"
+                    class="scientific-3d-viewport"
+                    tabindex="0"
+                    aria-label="Zone de visualisation 3D interactive"
+                >
+
+                    <div
+                        id="threeDScene"
+                        class="three-d-scene"
+                    >
+
+                        <div
+                            class="calculator-visual-object"
+                            id="calculatorVisualObject"
+                        >
+
+                            <div class="visual-screen">
+                                <span>
+                                    FOBAS
+                                </span>
+
+                                <strong>
+                                    SCIENTIFIC
+                                </strong>
+                            </div>
+
+                            <div class="visual-keyboard">
+
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+
+                            </div>
+
+                            <div class="visual-depth-edge"></div>
+
+                        </div>
+
+
+                        <div
+                            id="chemistryMoleculeVisual"
+                            class="chemistry-molecule-visual"
+                            aria-hidden="true"
+                        >
+
+                            <span class="atom atom-center"></span>
+                            <span class="atom atom-left"></span>
+                            <span class="atom atom-right"></span>
+
+                            <span class="bond bond-left"></span>
+                            <span class="bond bond-right"></span>
+
+                        </div>
+
+
+                        <div
+                            id="physicsVectorVisual"
+                            class="physics-vector-visual"
+                            aria-hidden="true"
+                            hidden
+                        >
+
+                            <span class="vector-axis x-axis"></span>
+                            <span class="vector-axis y-axis"></span>
+                            <span class="vector-axis z-axis"></span>
+
+                            <span class="vector-arrow"></span>
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="visualHint"
+                        class="visual-hint"
+                    >
+                        Touchez / faites glisser pour explorer
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     CONTRÔLES VISUELS
+                     ============================================= -->
+                <div
+                    id="visualControls"
+                    class="visual-controls"
+                >
+
+                    <button
+                        type="button"
+                        id="zoomOutBtn"
+                        class="visual-control-btn"
+                        aria-label="Zoom arrière"
+                    >
+                        −
+                    </button>
+
+                    <button
+                        type="button"
+                        id="resetViewBtn"
+                        class="visual-control-btn"
+                        aria-label="Réinitialiser la vue"
+                    >
+                        ⟳
+                    </button>
+
+                    <button
+                        type="button"
+                        id="zoomInBtn"
+                        class="visual-control-btn"
+                        aria-label="Zoom avant"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+
+                <!-- =============================================
+                     INFORMATIONS SCIENTIFIQUES
+                     ============================================= -->
+                <div
+                    id="visualInformation"
+                    class="visual-information"
+                >
+
+                    <div class="visual-info-item">
+
+                        <span>
+                            MODE
+                        </span>
+
+                        <strong id="visualInfoMode">
+                            CHIMIE
+                        </strong>
+
+                    </div>
+
+                    <div class="visual-info-item">
+
+                        <span>
+                            ENGINE
+                        </span>
+
+                        <strong>
+                            FOBAS 3D
+                        </strong>
+
+                    </div>
+
+                    <div class="visual-info-item">
+
+                        <span>
+                            STATUS
+                        </span>
+
+                        <strong id="visualInfoStatus">
+                            READY
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+
+        <!-- =====================================================
+             PANNEAU FORMULE / UNITÉS
+             ===================================================== -->
+        <section
+            id="formulaUtilityPanel"
+            class="formula-utility-panel"
+            aria-label="Outils scientifiques"
+        >
+
+            <button
+                type="button"
+                id="formulaBtn"
+                class="utility-btn"
+            >
+                ∑
+                <span>Formules</span>
+            </button>
+
+            <button
+                type="button"
+                id="unitsBtn"
+                class="utility-btn"
+            >
+                ⇄
+                <span>Unités</span>
+            </button>
+
+            <button
+                type="button"
+                id="historyBtn"
+                class="utility-btn"
+            >
+                ◷
+                <span>Historique</span>
+            </button>
+
+            <button
+                type="button"
+                id="clearHistoryBtn"
+                class="utility-btn"
+            >
+                ⌫
+                <span>Effacer</span>
+            </button>
+
+        </section>
+
+
+        <!-- =====================================================
+             PIED DE PAGE
+             ===================================================== -->
+        <footer
+            id="calculatorFooter"
+            class="calculator-footer"
+        >
+
+            <span>
+                FOBAS © 2026
+            </span>
+
+            <span>
+                Calculatrice Scientifique Chimie &amp; Physique
+            </span>
+
+            <span>
+                HTML • CSS • JavaScript
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- =========================================================
+         JAVASCRIPT EXTERNE — PRÉPARÉ POUR LE PROJET
+         ========================================================= -->
+    <script
+        src="simulationcalculatricefobas.js"
+        defer
+    ></script>
+
+</body>
+</html>
