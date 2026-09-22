@@ -4920,7 +4920,7 @@ function balanceEquation(equation) {
                     'Fonction physique non implémentée.'
                 );
         }
-    }
+    
 
 
 
