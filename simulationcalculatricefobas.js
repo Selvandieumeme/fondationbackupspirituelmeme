@@ -2349,23 +2349,7 @@ function balanceEquation(equation) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /* ============================================================
+/* ============================================================
        CONVERSIONS
        ============================================================ */
 
@@ -2691,159 +2675,6 @@ function balanceEquation(equation) {
         return modal;
     }
 
-    /* ============================================================
-       CHAMPS SPÉCIAUX — DENSITÉ PHYSIQUE
-       ============================================================ */
-
-    function getScientificFields(
-        name,
-        definition
-    ) {
-        if (
-            name !== 'physicalDensity'
-        ) {
-            return definition.fields;
-        }
-
-        return [
-            {
-                id:
-                    'mass',
-
-                label:
-                    'Masse m',
-
-                type:
-                    'number',
-
-                placeholder:
-                    'Ex. 540',
-
-                step:
-                    'any',
-
-                defaultValue:
-                    ''
-            },
-
-            {
-                id:
-                    'massUnit',
-
-                label:
-                    'Unité de masse',
-
-                type:
-                    'select',
-
-                options: [
-                    {
-                        value:
-                            'mg',
-
-                        label:
-                            'mg'
-                    },
-
-                    {
-                        value:
-                            'g',
-
-                        label:
-                            'g'
-                    },
-
-                    {
-                        value:
-                            'kg',
-
-                        label:
-                            'kg'
-                    }
-                ],
-
-                defaultValue:
-                    'g'
-            },
-
-            {
-                id:
-                    'volume',
-
-                label:
-                    'Volume V',
-
-                type:
-                    'number',
-
-                placeholder:
-                    'Ex. 200',
-
-                step:
-                    'any',
-
-                defaultValue:
-                    ''
-            },
-
-            {
-                id:
-                    'volumeUnit',
-
-                label:
-                    'Unité de volume',
-
-                type:
-                    'select',
-
-                options: [
-                    {
-                        value:
-                            'mL',
-
-                        label:
-                            'mL'
-                    },
-
-                    {
-                        value:
-                            'cm3',
-
-                        label:
-                            'cm³'
-                    },
-
-                    {
-                        value:
-                            'L',
-
-                        label:
-                            'L'
-                    },
-
-                    {
-                        value:
-                            'dm3',
-
-                        label:
-                            'dm³'
-                    },
-
-                    {
-                        value:
-                            'm3',
-
-                        label:
-                            'm³'
-                    }
-                ],
-
-                defaultValue:
-                    'cm3'
-            }
-        ];
-    }
-
     function openScientificFunction(name) {
         const library =
             state.mode === 'chemistry'
@@ -2888,13 +2719,7 @@ function balanceEquation(equation) {
             'Entrez les données puis lancez le calcul.'
         );
 
-        const fields =
-            getScientificFields(
-                name,
-                definition
-            );
-
-        fields.forEach(
+        definition.fields.forEach(
             field => {
                 const wrap =
                     document.createElement('label');
@@ -2925,9 +2750,7 @@ function balanceEquation(equation) {
 
                 let input;
 
-                if (
-                    field.type === 'select'
-                ) {
+                if (field.type === 'select') {
                     input =
                         document.createElement('select');
 
@@ -2971,9 +2794,7 @@ function balanceEquation(equation) {
                             field.step;
                     }
 
-                    if (
-                        field.type === 'number'
-                    ) {
+                    if (field.type === 'number') {
                         input.inputMode =
                             'decimal';
                     }
@@ -3007,8 +2828,7 @@ function balanceEquation(equation) {
             }
         );
 
-        form.dataset.function =
-            name;
+        form.dataset.function = name;
 
         modal.hidden = false;
         modal.style.display = 'flex';
@@ -3050,18 +2870,7 @@ function balanceEquation(equation) {
     function getModalValues(definition) {
         const values = {};
 
-        const name =
-            $('fobasScientificForm')
-                ?.dataset
-                .function || '';
-
-        const fields =
-            getScientificFields(
-                name,
-                definition
-            );
-
-        fields.forEach(
+        definition.fields.forEach(
             field => {
                 const input =
                     $(`fobasField_${field.id}`);
@@ -3541,7 +3350,7 @@ function balanceEquation(equation) {
                         'L';
 
                     expression =
-                        `${c1}×${v2}/${c2}`;
+                        `${c1}×${v1}/${c2}`;
                 }
 
                 return {
@@ -4392,535 +4201,47 @@ function balanceEquation(equation) {
                         'Volume'
                     );
 
-                if (m < 0) {
-                    throw new Error(
-                        'La masse ne peut pas être négative.'
-                    );
-                }
-
                 if (V <= 0) {
                     throw new Error(
                         'Le volume doit être supérieur à 0.'
                     );
                 }
 
-                const massUnit =
-                    v.massUnit || 'g';
-
-                const volumeUnit =
-                    v.volumeUnit || 'cm3';
-
-                const massToKg = {
-                    mg: 1e-6,
-                    g: 1e-3,
-                    kg: 1
-                };
-
-                const volumeToM3 = {
-                    mL: 1e-6,
-                    cm3: 1e-6,
-                    L: 1e-3,
-                    dm3: 1e-3,
-                    m3: 1
-                };
-
-                const massLabels = {
-                    mg: 'mg',
-                    g: 'g',
-                    kg: 'kg'
-                };
-
-                const volumeLabels = {
-                    mL: 'mL',
-                    cm3: 'cm³',
-                    L: 'L',
-                    dm3: 'dm³',
-                    m3: 'm³'
-                };
-
-                if (
-                    !Object.prototype.hasOwnProperty.call(
-                        massToKg,
-                        massUnit
-                    )
-                ) {
-                    throw new Error(
-                        'Unité de masse non reconnue.'
-                    );
-                }
-
-                if (
-                    !Object.prototype.hasOwnProperty.call(
-                        volumeToM3,
-                        volumeUnit
-                    )
-                ) {
-                    throw new Error(
-                        'Unité de volume non reconnue.'
-                    );
-                }
-
-                const massKg =
-                    m *
-                    massToKg[massUnit];
-
-                const volumeM3 =
-                    V *
-                    volumeToM3[volumeUnit];
-
-                const rhoSI =
-                    massKg /
-                    volumeM3;
-
                 const r =
-                    rhoSI *
-                    volumeToM3[volumeUnit] /
-                    massToKg[massUnit];
-
-                const massLabel =
-                    massLabels[massUnit];
-
-                const volumeLabel =
-                    volumeLabels[volumeUnit];
-
-                const densityUnit =
-                    `${massLabel}·${volumeLabel}⁻¹`;
+                    m / V;
 
                 return {
                     result:
                         formatNumber(r),
 
                     unit:
-                        densityUnit,
+                        'kg·m⁻³',
 
                     numericValue:
                         r,
 
                     expression:
-                        `${m} ${massLabel} / ${V} ${volumeLabel}`,
+                        `${m}/${V}`,
 
                     formula:
                         'ρ = m / V',
 
                     steps:
-                        `ρ = ${m} ${massLabel} / ${V} ${volumeLabel}\n` +
-                        `ρ = ${formatNumber(r)} ${densityUnit}`
+                        `ρ = ${m} / ${V}\n` +
+                        `ρ = ${formatNumber(r)} kg·m⁻³`
                 };
             }
 
-            case 'ohmLaw': {
-                const unknown =
-                    v.unknown;
 
-                const V =
-                    requireValue(
-                        v,
-                        'v',
-                        'Tension V'
-                    );
 
-                const I =
-                    requireValue(
-                        v,
-                        'i',
-                        'Courant I'
-                    );
 
-                const R =
-                    requireValue(
-                        v,
-                        'r',
-                        'Résistance R'
-                    );
 
-                let r;
-                let unit;
-                let expression;
 
-                if (unknown === 'v') {
-                    r =
-                        I * R;
 
-                    unit =
-                        'V';
 
-                    expression =
-                        `${I}×${R}`;
 
-                } else if (unknown === 'i') {
-                    if (R === 0) {
-                        throw new Error(
-                            'R ne peut pas être zéro.'
-                        );
-                    }
 
-                    r =
-                        V / R;
 
-                    unit =
-                        'A';
-
-                    expression =
-                        `${V}/${R}`;
-
-                } else {
-                    if (I === 0) {
-                        throw new Error(
-                            'I ne peut pas être zéro.'
-                        );
-                    }
-
-                    r =
-                        V / I;
-
-                    unit =
-                        'Ω';
-
-                    expression =
-                        `${V}/${I}`;
-                }
-
-                return {
-                    result:
-                        formatNumber(r),
-
-                    unit,
-
-                    numericValue:
-                        r,
-
-                    expression,
-
-                    formula:
-                        'V = I × R',
-
-                    steps:
-                        `Grandeur recherchée : ${unknown.toUpperCase()}\n` +
-                        `Résultat = ${formatNumber(r)} ${unit}`
-                };
-            }
-
-            case 'electricPower': {
-                const V =
-                    requireValue(
-                        v,
-                        'v',
-                        'Tension V'
-                    );
-
-                const I =
-                    requireValue(
-                        v,
-                        'i',
-                        'Courant I'
-                    );
-
-                const r =
-                    V * I;
-
-                return {
-                    result:
-                        formatNumber(r),
-
-                    unit:
-                        'W',
-
-                    numericValue:
-                        r,
-
-                    expression:
-                        `${V}×${I}`,
-
-                    formula:
-                        'P = V × I',
-
-                    steps:
-                        `P = ${V} × ${I}\n` +
-                        `P = ${formatNumber(r)} W`
-                };
-            }
-
-            case 'resistance': {
-                const V =
-                    requireValue(
-                        v,
-                        'v',
-                        'Tension V'
-                    );
-
-                const I =
-                    requireValue(
-                        v,
-                        'i',
-                        'Courant I'
-                    );
-
-                if (I === 0) {
-                    throw new Error(
-                        'I ne peut pas être zéro.'
-                    );
-                }
-
-                const r =
-                    V / I;
-
-                return {
-                    result:
-                        formatNumber(r),
-
-                    unit:
-                        'Ω',
-
-                    numericValue:
-                        r,
-
-                    expression:
-                        `${V}/${I}`,
-
-                    formula:
-                        'R = V / I',
-
-                    steps:
-                        `R = ${V} / ${I}\n` +
-                        `R = ${formatNumber(r)} Ω`
-                };
-            }
-
-            case 'electricCharge': {
-                const I =
-                    requireValue(
-                        v,
-                        'i',
-                        'Courant I'
-                    );
-
-                const t =
-                    requireValue(
-                        v,
-                        't',
-                        'Temps'
-                    );
-
-                const r =
-                    I * t;
-
-                return {
-                    result:
-                        formatNumber(r),
-
-                    unit:
-                        'C',
-
-                    numericValue:
-                        r,
-
-                    expression:
-                        `${I}×${t}`,
-
-                    formula:
-                        'Q = I × t',
-
-                    steps:
-                        `Q = ${I} × ${t}\n` +
-                        `Q = ${formatNumber(r)} C`
-                };
-            }
-
-            case 'frequency': {
-                const T =
-                    requireValue(
-                        v,
-                        'period',
-                        'Période T'
-                    );
-
-                if (T <= 0) {
-                    throw new Error(
-                        'La période doit être supérieure à 0.'
-                    );
-                }
-
-                const r =
-                    1 / T;
-
-                return {
-                    result:
-                        formatNumber(r),
-
-                    unit:
-                        'Hz',
-
-                    numericValue:
-                        r,
-
-                    expression:
-                        `1/${T}`,
-
-                    formula:
-                        'f = 1 / T',
-
-                    steps:
-                        `f = 1 / ${T}\n` +
-                        `f = ${formatNumber(r)} Hz`
-                };
-            }
-
-            case 'wave': {
-                const speed =
-                    requireValue(
-                        v,
-                        'speed',
-                        'Vitesse v'
-                    );
-
-                const frequency =
-                    requireValue(
-                        v,
-                        'frequency',
-                        'Fréquence f'
-                    );
-
-                if (frequency === 0) {
-                    throw new Error(
-                        'La fréquence ne peut pas être zéro.'
-                    );
-                }
-
-                const r =
-                    speed / frequency;
-
-                return {
-                    result:
-                        formatNumber(r),
-
-                    unit:
-                        'm',
-
-                    numericValue:
-                        r,
-
-                    expression:
-                        `${speed}/${frequency}`,
-
-                    formula:
-                        'λ = v / f',
-
-                    steps:
-                        `λ = ${speed} / ${frequency}\n` +
-                        `λ = ${formatNumber(r)} m`
-                };
-            }
-
-            case 'temperature': {
-                const value =
-                    requireValue(
-                        v,
-                        'value',
-                        'Température'
-                    );
-
-                let celsius;
-
-                if (v.from === 'C') {
-                    celsius =
-                        value;
-
-                } else if (v.from === 'K') {
-                    celsius =
-                        value - 273.15;
-
-                } else {
-                    celsius =
-                        (value - 32) *
-                        5 /
-                        9;
-                }
-
-                let result;
-
-                if (v.to === 'C') {
-                    result =
-                        celsius;
-
-                } else if (v.to === 'K') {
-                    result =
-                        celsius + 273.15;
-
-                } else {
-                    result =
-                        celsius *
-                        9 /
-                        5 +
-                        32;
-                }
-
-                return {
-                    result:
-                        formatNumber(result),
-
-                    unit:
-                        v.to === 'C'
-                            ? '°C'
-                            : v.to === 'K'
-                                ? 'K'
-                                : '°F',
-
-                    numericValue:
-                        result,
-
-                    expression:
-                        `${value} ${v.from}`,
-
-                    formula:
-                        'Conversion de température',
-
-                    steps:
-                        `${value} ${v.from} → ${formatNumber(result)} ${v.to}`
-                };
-            }
-
-            case 'physicsUnits': {
-                const value =
-                    requireValue(
-                        v,
-                        'value',
-                        'Valeur'
-                    );
-
-                const result =
-                    convertUnit(
-                        value,
-                        v.from,
-                        v.to
-                    );
-
-                return {
-                    result:
-                        formatNumber(result),
-
-                    unit:
-                        v.to,
-
-                    numericValue:
-                        result,
-
-                    expression:
-                        `${value} ${v.from}`,
-
-                    formula:
-                        'Conversion d’unités SI',
-
-                    steps:
-                        `${value} ${v.from} → ${formatNumber(result)} ${v.to}`
-                };
-            }
-
-            default:
-                throw new Error(
-                    'Fonction physique non implémentée.'
-                );
-        }
-    
 
 
 
