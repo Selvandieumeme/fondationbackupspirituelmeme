@@ -1,50 +1,29 @@
 <!DOCTYPE html>
 <html lang="ht">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
-
-  <meta name="theme-color" content="#070910" />
-  <meta
-    name="description"
-    content="Simulation Video FòBAS — AI Digital Video Studio"
-  />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070910">
+  <meta name="description" content="Simulation Video FòBAS — AI Digital Video Studio">
   <title>Simulation Video FòBAS — AI Video Lab</title>
 
   <style>
-    /* =========================================================
-       SIMULATION VIDEO FÒBAS
-       FRONT-END / LOCAL VIDEO LAB
-       ========================================================= */
-
     :root {
       --bg: #070910;
       --bg-soft: #0b0e17;
       --panel: #101522;
       --panel-2: #151b2a;
       --panel-3: #1a2132;
-
       --border: #293247;
       --border-soft: #20283a;
-
       --text: #f5f7ff;
       --muted: #8f9ab3;
-
       --purple: #7c5cff;
-      --purple-2: #5f42e8;
-
       --cyan: #20d9ff;
       --green: #23d5ab;
       --red: #ff5c6c;
       --orange: #ffae57;
-
       --radius: 14px;
-      --radius-small: 9px;
-
       --topbar: 58px;
       --timeline: 245px;
     }
@@ -60,10 +39,8 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-
       background: var(--bg);
       color: var(--text);
-
       font-family:
         Inter,
         system-ui,
@@ -84,16 +61,13 @@
       border: 1px solid var(--border);
       background: var(--panel-2);
       color: var(--text);
-
       border-radius: 10px;
       padding: 9px 12px;
-
       cursor: pointer;
-
       transition:
-        background 0.15s ease,
-        transform 0.1s ease,
-        border-color 0.15s ease;
+        background .15s ease,
+        transform .1s ease,
+        border-color .15s ease;
     }
 
     button:hover {
@@ -102,23 +76,12 @@
     }
 
     button:active {
-      transform: scale(0.97);
+      transform: scale(.97);
     }
 
     button.primary {
-      border: none;
-
-      background:
-        linear-gradient(
-          135deg,
-          var(--purple),
-          #4b8dff
-        );
-    }
-
-    button.success {
-      background: #103b34;
-      border-color: #1d665a;
+      border: 0;
+      background: linear-gradient(135deg, var(--purple), #4b8dff);
     }
 
     button.danger {
@@ -126,30 +89,28 @@
       border-color: #652733;
     }
 
+    button.success {
+      background: #103b34;
+      border-color: #1d665a;
+    }
+
     button.icon-button {
       width: 42px;
       height: 42px;
-
+      padding: 0;
       display: grid;
       place-items: center;
-
-      padding: 0;
     }
 
     input,
     select,
     textarea {
       width: 100%;
-
       background: #090d17;
       color: var(--text);
-
       border: 1px solid var(--border);
-
       border-radius: 10px;
-
       padding: 10px;
-
       outline: none;
     }
 
@@ -157,11 +118,16 @@
     select:focus,
     textarea:focus {
       border-color: var(--purple);
-      box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.12);
+      box-shadow: 0 0 0 2px rgba(124, 92, 255, .12);
     }
 
     textarea {
       resize: vertical;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      accent-color: var(--purple);
     }
 
     .hidden {
@@ -172,37 +138,25 @@
       flex: 1;
     }
 
-    /* =========================================================
-       APPLICATION
-       ========================================================= */
-
     .app {
       width: 100%;
       height: 100%;
-
       display: grid;
-
       grid-template-rows:
         var(--topbar)
         1fr
         var(--timeline);
     }
 
-    /* =========================================================
-       TOP BAR
-       ========================================================= */
+    /* TOPBAR */
 
     .topbar {
       display: flex;
       align-items: center;
       gap: 10px;
-
       padding: 8px 12px;
-
       background: #0b0e16;
-
       border-bottom: 1px solid var(--border);
-
       z-index: 50;
     }
 
@@ -210,90 +164,61 @@
       display: flex;
       align-items: center;
       gap: 9px;
-
       font-size: 15px;
       font-weight: 800;
-
       white-space: nowrap;
     }
 
     .brand-icon {
       width: 34px;
       height: 34px;
-
       display: grid;
       place-items: center;
-
       border-radius: 10px;
-
-      background:
-        linear-gradient(
-          135deg,
-          var(--purple),
-          #3e8dff
-        );
+      background: linear-gradient(135deg, var(--purple), #3e8dff);
     }
 
     .brand-text small {
       display: block;
-
       color: var(--muted);
-
       font-size: 9px;
       font-weight: 500;
-      letter-spacing: 0.08em;
+      letter-spacing: .08em;
       text-transform: uppercase;
     }
 
     .local-badge {
       color: #c7c1ff;
-
       background: #211c3d;
-
       border: 1px solid #41377d;
-
       border-radius: 999px;
-
       padding: 5px 9px;
-
       font-size: 10px;
       font-weight: 700;
     }
 
-    /* =========================================================
-       MAIN WORKSPACE
-       ========================================================= */
+    /* WORKSPACE */
 
     .workspace {
       min-height: 0;
-
       display: grid;
-
       grid-template-columns:
         280px
         minmax(0, 1fr)
         300px;
-
       gap: 10px;
-
       padding: 10px;
     }
 
     .panel {
       min-height: 0;
-
       background: var(--panel);
-
       border: 1px solid var(--border);
-
       border-radius: var(--radius);
-
       overflow: hidden;
     }
 
-    /* =========================================================
-       MEDIA LIBRARY
-       ========================================================= */
+    /* MEDIA */
 
     .media-panel {
       display: flex;
@@ -302,28 +227,20 @@
 
     .panel-title {
       height: 46px;
-
       display: flex;
       align-items: center;
-
       padding: 0 14px;
-
       border-bottom: 1px solid var(--border);
-
       font-size: 11px;
       font-weight: 800;
-
       color: var(--muted);
-
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: .08em;
     }
 
     .media-content {
       min-height: 0;
-
       overflow-y: auto;
-
       padding: 10px;
     }
 
@@ -334,37 +251,24 @@
 
     .drop-zone {
       min-height: 105px;
-
       display: grid;
       place-items: center;
-
       text-align: center;
-
       color: var(--muted);
-
       border: 1px dashed #46526e;
-
       border-radius: 13px;
-
       padding: 16px;
-
       margin-bottom: 10px;
-
-      transition:
-        border-color 0.15s ease,
-        background 0.15s ease;
     }
 
     .drop-zone.dragging {
       border-color: var(--purple);
-      background: rgba(124, 92, 255, 0.08);
+      background: rgba(124, 92, 255, .08);
     }
 
     .drop-zone strong {
       display: block;
-
       color: var(--text);
-
       margin-bottom: 5px;
     }
 
@@ -382,15 +286,10 @@
       display: flex;
       align-items: center;
       gap: 9px;
-
       padding: 8px;
-
       background: #0d121e;
-
       border: 1px solid var(--border-soft);
-
       border-radius: 11px;
-
       cursor: pointer;
     }
 
@@ -401,18 +300,12 @@
     .media-thumb {
       width: 52px;
       height: 40px;
-
       flex-shrink: 0;
-
       display: grid;
       place-items: center;
-
       background: #171e30;
-
       border-radius: 7px;
-
       overflow: hidden;
-
       font-size: 16px;
     }
 
@@ -420,7 +313,6 @@
     .media-thumb video {
       width: 100%;
       height: 100%;
-
       object-fit: cover;
     }
 
@@ -430,108 +322,79 @@
 
     .media-name {
       overflow: hidden;
-
       white-space: nowrap;
       text-overflow: ellipsis;
-
       font-size: 11px;
       font-weight: 650;
     }
 
     .media-type {
       color: var(--muted);
-
       font-size: 9px;
-
       margin-top: 3px;
     }
 
-    /* =========================================================
-       CENTER STAGE
-       ========================================================= */
+    /* STAGE */
 
     .stage-panel {
       display: flex;
       flex-direction: column;
-
       min-width: 0;
     }
 
     .stage-toolbar {
       height: 48px;
-
       display: flex;
       align-items: center;
       gap: 7px;
-
       padding: 7px 9px;
-
       border-bottom: 1px solid var(--border);
     }
 
     .time-display {
       font-size: 12px;
-
       color: #ccd3e5;
-
       font-variant-numeric: tabular-nums;
     }
 
     .stage-status {
       color: var(--muted);
-
       font-size: 10px;
     }
 
     .preview-area {
       position: relative;
-
       min-height: 0;
       flex: 1;
-
       display: grid;
       place-items: center;
-
       overflow: hidden;
-
       background:
         radial-gradient(
           circle at center,
           #11182a 0%,
           #05070d 65%
         );
-
       touch-action: none;
     }
 
     #previewCanvas {
       display: block;
-
       max-width: 95%;
       max-height: 90%;
-
       background: #000;
-
-      box-shadow:
-        0 20px 70px rgba(0, 0, 0, 0.65);
-
+      box-shadow: 0 20px 70px rgba(0, 0, 0, .65);
       border-radius: 3px;
     }
 
     .preview-empty {
       position: absolute;
-
       inset: 0;
-
       display: grid;
       place-items: center;
-
       pointer-events: none;
-
       color: var(--muted);
-
       text-align: center;
-
       padding: 30px;
     }
 
@@ -541,17 +404,13 @@
 
     .preview-empty-icon {
       font-size: 42px;
-
       margin-bottom: 10px;
     }
 
     .preview-empty strong {
       display: block;
-
       color: var(--text);
-
       font-size: 15px;
-
       margin-bottom: 7px;
     }
 
@@ -562,19 +421,14 @@
 
     .transport {
       height: 54px;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       gap: 7px;
-
       border-top: 1px solid var(--border);
     }
 
-    /* =========================================================
-       INSPECTOR
-       ========================================================= */
+    /* INSPECTOR */
 
     .inspector-panel {
       display: flex;
@@ -583,9 +437,7 @@
 
     .inspector-content {
       min-height: 0;
-
       overflow-y: auto;
-
       padding: 12px;
     }
 
@@ -595,11 +447,8 @@
 
     .field label {
       display: block;
-
       margin-bottom: 5px;
-
       color: var(--muted);
-
       font-size: 10px;
       font-weight: 650;
     }
@@ -615,52 +464,38 @@
 
     .tool-grid {
       display: grid;
-
       grid-template-columns: 1fr 1fr;
-
       gap: 7px;
     }
 
     .inspector-divider {
       height: 1px;
-
       background: var(--border);
-
       margin: 15px 0;
     }
 
     .inspector-note {
       color: var(--muted);
-
       font-size: 10px;
-
       line-height: 1.5;
     }
 
-    /* =========================================================
-       TIMELINE
-       ========================================================= */
+    /* TIMELINE */
 
     .timeline {
       min-height: 0;
-
       display: flex;
       flex-direction: column;
-
       background: #0a0d15;
-
       border-top: 1px solid var(--border);
     }
 
     .timeline-toolbar {
       height: 48px;
-
       display: flex;
       align-items: center;
       gap: 7px;
-
       padding: 6px 10px;
-
       border-bottom: 1px solid var(--border);
     }
 
@@ -671,251 +506,154 @@
 
     .clip-count {
       color: var(--muted);
-
       font-size: 10px;
     }
 
     .timeline-scroll {
       position: relative;
-
       min-height: 0;
       flex: 1;
-
       overflow: auto;
-
       touch-action: pan-x pinch-zoom;
     }
 
     .timeline-inner {
       position: relative;
-
       min-width: 1000px;
-
       padding-bottom: 8px;
     }
 
     .ruler {
       position: relative;
-
       height: 27px;
-
       background: #0e1320;
-
       border-bottom: 1px solid var(--border);
     }
 
     .ruler-mark {
       position: absolute;
-
       top: 7px;
-
       color: #77829d;
-
       font-size: 9px;
-
       pointer-events: none;
     }
 
     .track {
       position: relative;
-
       height: 54px;
-
       border-bottom: 1px solid #1b2231;
     }
 
     .track-label {
       position: sticky;
-
       left: 0;
-
       z-index: 15;
-
       width: 58px;
       height: 100%;
-
       display: grid;
       place-items: center;
-
       background: #0c101a;
-
       border-right: 1px solid var(--border);
-
       color: #7f8ba7;
-
       font-size: 9px;
       font-weight: 800;
     }
 
     .clip {
       position: absolute;
-
       top: 7px;
-
       height: 40px;
-
       min-width: 25px;
-
       padding: 6px 8px;
-
       overflow: hidden;
-
       white-space: nowrap;
       text-overflow: ellipsis;
-
       border-radius: 8px;
-
       cursor: pointer;
-
       font-size: 10px;
       font-weight: 650;
-
       user-select: none;
     }
 
     .clip.video {
-      background:
-        linear-gradient(
-          135deg,
-          #39256f,
-          #1c315e
-        );
-
+      background: linear-gradient(135deg, #39256f, #1c315e);
       border: 1px solid #5d4bb6;
     }
 
     .clip.image {
-      background:
-        linear-gradient(
-          135deg,
-          #233b72,
-          #183d53
-        );
-
+      background: linear-gradient(135deg, #233b72, #183d53);
       border: 1px solid #3977a1;
     }
 
     .clip.audio {
-      background:
-        linear-gradient(
-          135deg,
-          #124d45,
-          #153c55
-        );
-
+      background: linear-gradient(135deg, #124d45, #153c55);
       border: 1px solid #28786b;
     }
 
     .clip.text {
-      background:
-        linear-gradient(
-          135deg,
-          #603a29,
-          #4b2f5e
-        );
-
+      background: linear-gradient(135deg, #603a29, #4b2f5e);
       border: 1px solid #9762b7;
     }
 
     .clip.selected {
       outline: 2px solid #fff;
-
       outline-offset: -2px;
     }
 
     .playhead {
       position: absolute;
-
       top: 27px;
       bottom: 0;
-
       width: 2px;
-
       background: var(--red);
-
       z-index: 30;
-
       pointer-events: none;
     }
 
     .playhead::before {
       content: "";
-
       position: absolute;
-
       top: -6px;
       left: -5px;
-
       border-left: 6px solid transparent;
       border-right: 6px solid transparent;
-
       border-top: 8px solid var(--red);
     }
 
-    /* =========================================================
-       TOAST
-       ========================================================= */
+    /* TOAST */
 
     .toast {
       position: fixed;
-
       left: 50%;
       bottom: 265px;
-
-      transform:
-        translateX(-50%)
-        translateY(10px);
-
+      transform: translateX(-50%) translateY(10px);
       opacity: 0;
-
       pointer-events: none;
-
       z-index: 1000;
-
       padding: 10px 14px;
-
       background: #181e2e;
-
       border: 1px solid var(--border);
-
       border-radius: 11px;
-
       color: var(--text);
-
       font-size: 11px;
-
-      transition:
-        opacity 0.2s ease,
-        transform 0.2s ease;
+      transition: opacity .2s ease, transform .2s ease;
     }
 
     .toast.show {
       opacity: 1;
-
-      transform:
-        translateX(-50%)
-        translateY(0);
+      transform: translateX(-50%) translateY(0);
     }
 
-    /* =========================================================
-       EXPORT MODAL
-       ========================================================= */
+    /* MODAL */
 
     .modal {
       position: fixed;
-
       inset: 0;
-
       z-index: 500;
-
       display: none;
-
       place-items: center;
-
       padding: 20px;
-
-      background: rgba(0, 0, 0, 0.72);
-
+      background: rgba(0, 0, 0, .72);
       backdrop-filter: blur(6px);
     }
 
@@ -925,54 +663,36 @@
 
     .modal-card {
       width: min(520px, 100%);
-
       background: var(--panel);
-
       border: 1px solid var(--border);
-
       border-radius: 18px;
-
       padding: 18px;
     }
 
     .modal-card h2 {
       margin: 0 0 7px;
-
       font-size: 18px;
     }
 
     .modal-card p {
       color: var(--muted);
-
       font-size: 11px;
-
       line-height: 1.5;
     }
 
     .progress {
       height: 8px;
-
       overflow: hidden;
-
       background: #080b12;
-
       border-radius: 999px;
-
       margin: 16px 0;
     }
 
     .progress-bar {
       width: 0%;
       height: 100%;
-
-      background:
-        linear-gradient(
-          90deg,
-          var(--purple),
-          var(--cyan)
-        );
-
-      transition: width 0.1s linear;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      transition: width .1s linear;
     }
 
     .modal-actions {
@@ -980,15 +700,11 @@
       justify-content: flex-end;
     }
 
-    /* =========================================================
-       RESPONSIVE
-       ========================================================= */
+    /* RESPONSIVE */
 
     @media (max-width: 1050px) {
       .workspace {
-        grid-template-columns:
-          230px
-          minmax(0, 1fr);
+        grid-template-columns: 230px minmax(0, 1fr);
       }
 
       .inspector-panel {
@@ -1004,9 +720,7 @@
 
       .workspace {
         display: block;
-
         padding: 6px;
-
         height: 100%;
       }
 
@@ -1035,10 +749,6 @@
         height: 44px;
       }
 
-      .preview-area {
-        min-height: 0;
-      }
-
       #previewCanvas {
         max-width: 97%;
         max-height: 88%;
@@ -1046,10 +756,7 @@
 
       .timeline {
         margin: 0 6px 6px;
-
-        border:
-          1px solid var(--border);
-
+        border: 1px solid var(--border);
         border-radius: 14px;
       }
 
@@ -1068,30 +775,19 @@
 
 <div class="app">
 
-  <!-- =======================================================
-       TOP BAR
-       ======================================================== -->
-
+  <!-- TOP BAR -->
   <header class="topbar">
 
     <div class="brand">
-
-      <div class="brand-icon">
-        🎬
-      </div>
+      <div class="brand-icon">🎬</div>
 
       <div class="brand-text">
         Simulation Video FòBAS
-        <small>
-          AI Digital Video Laboratory
-        </small>
+        <small>AI Digital Video Laboratory</small>
       </div>
-
     </div>
 
-    <span class="local-badge">
-      LOCAL • FREE
-    </span>
+    <span class="local-badge">LOCAL • FREE</span>
 
     <div class="spacer"></div>
 
@@ -1099,39 +795,25 @@
       id="newProjectBtn"
       class="icon-button"
       title="Nouvo pwojè"
-    >
-      ＋
-    </button>
+    >＋</button>
 
     <button
       id="saveProjectBtn"
       class="icon-button"
       title="Sove pwojè"
-    >
-      💾
-    </button>
+    >💾</button>
 
     <button
       id="exportBtn"
       class="primary"
-    >
-      ⬇ Export
-    </button>
+    >⬇ Export</button>
 
   </header>
 
-
-  <!-- =======================================================
-       MAIN WORKSPACE
-       ======================================================== -->
-
+  <!-- WORKSPACE -->
   <main class="workspace">
 
-
-    <!-- =====================================================
-         MEDIA LIBRARY
-         ====================================================== -->
-
+    <!-- MEDIA -->
     <section class="panel media-panel">
 
       <div class="panel-title">
@@ -1153,25 +835,16 @@
           type="file"
           multiple
           accept="video/*,image/*,audio/*"
-        />
+        >
 
         <div
           id="dropZone"
           class="drop-zone"
         >
-
           <div>
-
-            <strong>
-              📥 Mete fichye yo isit la
-            </strong>
-
-            <small>
-              Video • Foto • Audio
-            </small>
-
+            <strong>📥 Mete fichye yo isit la</strong>
+            <small>Video • Foto • Audio</small>
           </div>
-
         </div>
 
         <div
@@ -1180,44 +853,30 @@
         ></div>
 
       </div>
-
     </section>
 
-
-    <!-- =====================================================
-         VIDEO STAGE
-         ====================================================== -->
-
+    <!-- STAGE -->
     <section class="panel stage-panel">
 
       <div class="stage-toolbar">
 
-        <button id="fitBtn">
-          Fit
-        </button>
+        <button id="fitBtn">Fit</button>
 
-        <button id="fullscreenBtn">
-          ⛶
-        </button>
+        <button id="fullscreenBtn">⛶</button>
 
         <span
           id="timeDisplay"
           class="time-display"
-        >
-          00:00.0 / 05:00.0
-        </span>
+        >00:00.0 / 05:00.0</span>
 
         <div class="spacer"></div>
 
         <span
           id="stageStatus"
           class="stage-status"
-        >
-          Pare
-        </span>
+        >Pare</span>
 
       </div>
-
 
       <div
         id="previewArea"
@@ -1230,21 +889,15 @@
           height="720"
         ></canvas>
 
-
         <div
           id="previewEmpty"
           class="preview-empty"
         >
-
           <div class="preview-empty-inner">
 
-            <div class="preview-empty-icon">
-              🎞️
-            </div>
+            <div class="preview-empty-icon">🎞️</div>
 
-            <strong>
-              Kòmanse montaj ou
-            </strong>
+            <strong>Kòmanse montaj ou</strong>
 
             <span>
               Ajoute yon video, foto oswa audio.
@@ -1253,52 +906,38 @@
             </span>
 
           </div>
-
         </div>
 
       </div>
-
 
       <div class="transport">
 
         <button
           id="previousBtn"
           title="Retounen 5 segonn"
-        >
-          ↶
-        </button>
+        >↶</button>
 
         <button
           id="playBtn"
           class="primary"
           title="Play"
-        >
-          ▶
-        </button>
+        >▶</button>
 
         <button
           id="stopBtn"
           title="Stop"
-        >
-          ■
-        </button>
+        >■</button>
 
         <button
           id="nextBtn"
           title="Avanse 5 segonn"
-        >
-          ↷
-        </button>
+        >↷</button>
 
       </div>
 
     </section>
 
-
-    <!-- =====================================================
-         INSPECTOR
-         ====================================================== -->
-
+    <!-- INSPECTOR -->
     <section class="panel inspector-panel">
 
       <div class="panel-title">
@@ -1307,26 +946,18 @@
 
       <div class="inspector-content">
 
-
         <div class="field">
-
-          <label>
-            Non pwojè
-          </label>
+          <label>Non pwojè</label>
 
           <input
             id="projectName"
             value="Piblisite mwen"
-          />
-
+          >
         </div>
-
 
         <div class="field">
 
-          <label>
-            Format videyo
-          </label>
+          <label>Format videyo</label>
 
           <select id="ratio">
 
@@ -1346,12 +977,9 @@
 
         </div>
 
-
         <div class="field">
 
-          <label>
-            Tèks sou videyo
-          </label>
+          <label>Tèks sou videyo</label>
 
           <textarea
             id="overlayText"
@@ -1361,14 +989,11 @@
 
         </div>
 
-
         <div class="field-row">
 
           <div class="field">
 
-            <label>
-              Kòmansman
-            </label>
+            <label>Kòmansman</label>
 
             <input
               id="clipStart"
@@ -1376,16 +1001,13 @@
               min="0"
               step="0.1"
               value="0"
-            />
+            >
 
           </div>
 
-
           <div class="field">
 
-            <label>
-              Dire
-            </label>
+            <label>Dire</label>
 
             <input
               id="clipDuration"
@@ -1393,12 +1015,11 @@
               min="0.1"
               step="0.1"
               value="5"
-            />
+            >
 
           </div>
 
         </div>
-
 
         <div class="tool-grid">
 
@@ -1423,17 +1044,13 @@
 
         </div>
 
-
         <div class="inspector-divider"></div>
-
 
         <div class="field">
 
           <label>
             Zoom Timeline:
-            <span id="zoomValue">
-              1.0×
-            </span>
+            <span id="zoomValue">1.0×</span>
           </label>
 
           <input
@@ -1443,49 +1060,36 @@
             max="4"
             step="0.1"
             value="1"
-          />
+          >
 
         </div>
 
-
         <div class="field">
 
-          <label>
-            Istwa montaj
-          </label>
+          <label>Istwa montaj</label>
 
           <div class="field-row">
 
-            <button id="undoBtn">
-              ↶ Undo
-            </button>
+            <button id="undoBtn">↶ Undo</button>
 
-            <button id="redoBtn">
-              ↷ Redo
-            </button>
+            <button id="redoBtn">↷ Redo</button>
 
           </div>
 
         </div>
 
-
         <p class="inspector-note">
           Tout pwojè a fèt lokalman nan navigatè a.
-          Pa gen okenn backend obligatwa pou premye
-          vèsyon laboratwa a.
+          Pa gen backend obligatwa pou premye vèsyon
+          laboratwa a.
         </p>
 
       </div>
-
     </section>
 
   </main>
 
-
-  <!-- =======================================================
-       TIMELINE
-       ======================================================== -->
-
+  <!-- TIMELINE -->
   <section class="timeline">
 
     <div class="timeline-toolbar">
@@ -1497,22 +1101,14 @@
       <span
         id="clipCount"
         class="clip-count"
-      >
-        0 clips
-      </span>
+      >0 clips</span>
 
       <div class="spacer"></div>
 
-      <button id="timelineZoomMinus">
-        −
-      </button>
-
-      <button id="timelineZoomPlus">
-        ＋
-      </button>
+      <button id="timelineZoomMinus">−</button>
+      <button id="timelineZoomPlus">＋</button>
 
     </div>
-
 
     <div
       id="timelineScroll"
@@ -1529,42 +1125,26 @@
           class="ruler"
         ></div>
 
-
         <div
           id="videoTrack"
           class="track"
         >
-
-          <div class="track-label">
-            VIDEO
-          </div>
-
+          <div class="track-label">VIDEO</div>
         </div>
-
 
         <div
           id="audioTrack"
           class="track"
         >
-
-          <div class="track-label">
-            AUDIO
-          </div>
-
+          <div class="track-label">AUDIO</div>
         </div>
-
 
         <div
           id="textTrack"
           class="track"
         >
-
-          <div class="track-label">
-            TEXT
-          </div>
-
+          <div class="track-label">TEXT</div>
         </div>
-
 
         <div
           id="playhead"
@@ -1572,28 +1152,18 @@
         ></div>
 
       </div>
-
     </div>
-
   </section>
 
 </div>
 
-
-<!-- =========================================================
-     TOAST
-     ========================================================== -->
-
+<!-- TOAST -->
 <div
   id="toast"
   class="toast"
 ></div>
 
-
-<!-- =========================================================
-     EXPORT MODAL
-     ========================================================== -->
-
+<!-- EXPORT MODAL -->
 <div
   id="exportModal"
   class="modal"
@@ -1601,142 +1171,103 @@
 
   <div class="modal-card">
 
-    <h2>
-      Export Videyo
-    </h2>
+    <h2>Export Videyo</h2>
 
     <p id="exportMessage">
       Preparasyon...
     </p>
 
     <div class="progress">
-
       <div
         id="exportProgress"
         class="progress-bar"
       ></div>
-
     </div>
 
     <div class="modal-actions">
-
       <button id="closeExport">
         Fèmen
       </button>
-
     </div>
 
   </div>
-
 </div>
 
 
 <script>
-/* ============================================================
-   SIMULATION VIDEO FÒBAS
-   CORE VIDEO EDITOR ENGINE
-   ============================================================ */
-
 (() => {
-
   "use strict";
 
+  /* =========================================================
+     HELPER
+  ========================================================= */
 
-  /* ==========================================================
-     HELPERS
-     ========================================================== */
-
-  const $ = (selector) => {
-    return document.querySelector(selector);
-  };
-
+  const $ = (selector) =>
+    document.querySelector(selector);
 
   const state = {
-
     projectName: "Piblisite mwen",
-
     duration: 300,
-
     currentTime: 0,
-
     playing: false,
-
     zoom: 1,
-
     clips: [],
-
     media: new Map(),
-
     selectedClipId: null,
-
     history: [],
-
     future: []
-
   };
 
-
   let animationFrame = null;
-
   let previousFrameTime = null;
+  let toastTimer = null;
 
 
-  /* ==========================================================
-     DOM REFERENCES
-     ========================================================== */
+  /* =========================================================
+     DOM
+  ========================================================= */
 
   const canvas = $("#previewCanvas");
-
   const ctx = canvas.getContext("2d");
 
   const previewArea = $("#previewArea");
-
   const previewEmpty = $("#previewEmpty");
 
   const timelineScroll = $("#timelineScroll");
-
   const timelineInner = $("#timelineInner");
-
   const playhead = $("#playhead");
 
   const timeDisplay = $("#timeDisplay");
-
   const playBtn = $("#playBtn");
-
   const stageStatus = $("#stageStatus");
 
 
-  /* ==========================================================
+  /* =========================================================
      TOAST
-     ========================================================== */
+  ========================================================= */
 
   function showToast(message) {
-
     const toast = $("#toast");
 
-    toast.textContent = message;
+    clearTimeout(toastTimer);
 
+    toast.textContent = message;
     toast.classList.add("show");
 
-    setTimeout(() => {
-
+    toastTimer = setTimeout(() => {
       toast.classList.remove("show");
-
     }, 1800);
-
   }
 
 
-  /* ==========================================================
-     TIME FORMAT
-     ========================================================== */
+  /* =========================================================
+     TIME
+  ========================================================= */
 
   function formatTime(seconds) {
-
-    seconds = Math.max(0, seconds);
+    seconds = Math.max(0, Number(seconds) || 0);
 
     const minutes = Math.floor(seconds / 60);
-
     const secs = seconds % 60;
 
     return (
@@ -1747,80 +1278,78 @@
   }
 
 
-  /* ==========================================================
-     HISTORY
-     ========================================================== */
+  /* =========================================================
+     ESCAPE
+  ========================================================= */
+
+  function escapeHTML(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+
+  /* =========================================================
+     SNAPSHOT / HISTORY
+  ========================================================= */
+
+  function createSnapshot() {
+    return JSON.stringify({
+      clips: state.clips,
+      currentTime: state.currentTime,
+      selectedClipId: state.selectedClipId
+    });
+  }
+
 
   function saveHistory() {
+    state.history.push(createSnapshot());
 
-    state.history.push(
-      JSON.stringify(state.clips)
-    );
-
-    if (state.history.length > 40) {
-
+    if (state.history.length > 50) {
       state.history.shift();
-
     }
 
     state.future = [];
-
   }
 
 
   function restoreSnapshot(snapshot) {
+    const data = JSON.parse(snapshot);
 
-    state.clips = JSON.parse(snapshot);
+    state.clips = data.clips || [];
+    state.currentTime = data.currentTime || 0;
+    state.selectedClipId =
+      data.selectedClipId || null;
 
     renderTimeline();
-
-    renderPreview(
-      state.currentTime
-    );
-
+    renderPreview(state.currentTime);
     updateEmptyState();
-
+    loadSelectedClipIntoInspector();
   }
 
 
-  /* ==========================================================
+  /* =========================================================
      CANVAS RATIO
-     ========================================================== */
+  ========================================================= */
 
   function updateCanvasRatio() {
-
     const ratio = $("#ratio").value;
 
-
     if (ratio === "9:16") {
-
       canvas.width = 720;
-
       canvas.height = 1280;
-
-    }
-
-    else if (ratio === "1:1") {
-
+    } else if (ratio === "1:1") {
       canvas.width = 1080;
-
       canvas.height = 1080;
-
-    }
-
-    else {
-
+    } else {
       canvas.width = 1280;
-
       canvas.height = 720;
-
     }
 
-
-    renderPreview(
-      state.currentTime
-    );
-
+    renderPreview(state.currentTime);
   }
 
 
@@ -1830,376 +1359,308 @@
   );
 
 
-  /* ==========================================================
-     ADD CLIP
-     ========================================================== */
-
-  function addClip(clip) {
-
-    saveHistory();
-
-
-    clip.id =
-      crypto.randomUUID();
-
-
-    state.clips.push(clip);
-
-    state.selectedClipId =
-      clip.id;
-
-
-    renderTimeline();
-
-    renderPreview(
-      state.currentTime
-    );
-
-    updateEmptyState();
-
-    loadSelectedClipIntoInspector();
-
-  }
-
-
-  /* ==========================================================
-     UPDATE EMPTY STATE
-     ========================================================== */
+  /* =========================================================
+     EMPTY STATE
+  ========================================================= */
 
   function updateEmptyState() {
-
     previewEmpty.style.display =
       state.clips.length > 0
         ? "none"
         : "grid";
-
   }
 
 
-  /* ==========================================================
+  /* =========================================================
      MEDIA IMPORT
-     ========================================================== */
+  ========================================================= */
 
   function importFiles(files) {
+    Array.from(files || []).forEach((file) => {
 
-    Array.from(files).forEach(
-      (file) => {
+      if (!file.type) {
+        return;
+      }
 
-        const url =
-          URL.createObjectURL(file);
+      const url =
+        URL.createObjectURL(file);
 
-        let element = null;
+      let element = null;
 
+      if (file.type.startsWith("video/")) {
 
-        if (
-          file.type.startsWith(
-            "video/"
-          )
-        ) {
+        element =
+          document.createElement("video");
 
-          element =
-            document.createElement(
-              "video"
-            );
+        element.src = url;
+        element.muted = true;
+        element.playsInline = true;
+        element.preload = "auto";
 
-          element.src = url;
-
-          element.muted = true;
-
-          element.playsInline = true;
-
-          element.preload = "metadata";
-
-        }
-
-        else if (
-          file.type.startsWith(
-            "image/"
-          )
-        ) {
-
-          element =
-            new Image();
-
-          element.src = url;
-
-        }
-
-        else if (
-          file.type.startsWith(
-            "audio/"
-          )
-        ) {
-
-          element =
-            new Audio(url);
-
-        }
-
-
-        state.media.set(
-          url,
-          {
-            file,
-            element
+        element.addEventListener(
+          "loadedmetadata",
+          () => {
+            renderPreview(state.currentTime);
           }
         );
 
+      } else if (file.type.startsWith("image/")) {
 
-        createMediaItem(
-          file,
-          url
-        );
+        element = new Image();
 
+        element.onload = () => {
+          renderPreview(state.currentTime);
+        };
+
+        element.src = url;
+
+      } else if (file.type.startsWith("audio/")) {
+
+        element =
+          new Audio(url);
+
+        element.preload = "auto";
       }
-    );
 
+      if (!element) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      state.media.set(url, {
+        file,
+        element
+      });
+
+      createMediaItem(file, url);
+    });
+
+    if (files && files.length) {
+      showToast("Media ajoute");
+    }
   }
 
 
-  /* ==========================================================
-     CREATE MEDIA ITEM
-     ========================================================== */
+  /* =========================================================
+     MEDIA ITEM
+  ========================================================= */
 
-  function createMediaItem(
-    file,
-    url
-  ) {
-
+  function createMediaItem(file, url) {
     const item =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
-    item.className =
-      "media-item";
-
+    item.className = "media-item";
 
     let icon = "📄";
 
-
-    if (
-      file.type.startsWith(
-        "video/"
-      )
-    ) {
-
+    if (file.type.startsWith("video/")) {
       icon = "🎬";
-
-    }
-
-    else if (
-      file.type.startsWith(
-        "image/"
-      )
-    ) {
-
+    } else if (file.type.startsWith("image/")) {
       icon = "🖼️";
-
-    }
-
-    else if (
-      file.type.startsWith(
-        "audio/"
-      )
-    ) {
-
+    } else if (file.type.startsWith("audio/")) {
       icon = "🎵";
-
     }
-
 
     item.innerHTML = `
-
       <div class="media-thumb">
-
         ${icon}
-
       </div>
 
       <div class="media-info">
-
         <div class="media-name">
           ${escapeHTML(file.name)}
         </div>
 
         <div class="media-type">
-          ${escapeHTML(
-            file.type || "media"
-          )}
+          ${escapeHTML(file.type || "media")}
         </div>
-
       </div>
-
     `;
 
+    const thumb =
+      item.querySelector(".media-thumb");
 
-    item.addEventListener(
-      "click",
-      () => {
-
-        addMediaToTimeline(
-          url,
-          file
-        );
-
-      }
-    );
-
-
-    $("#mediaList")
-      .appendChild(item);
-
-  }
-
-
-  /* ==========================================================
-     ESCAPE HTML
-     ========================================================== */
-
-  function escapeHTML(value) {
-
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-
-  }
-
-
-  /* ==========================================================
-     ADD MEDIA TO TIMELINE
-     ========================================================== */
-
-  function addMediaToTimeline(
-    url,
-    file
-  ) {
-
-    let type =
-      "video";
-
+    const media =
+      state.media.get(url);
 
     if (
-      file.type.startsWith(
-        "image/"
-      )
+      media &&
+      media.element &&
+      file.type.startsWith("image/")
     ) {
+      thumb.innerHTML = "";
 
-      type = "image";
+      const img =
+        document.createElement("img");
 
+      img.src = url;
+      img.alt = file.name;
+
+      thumb.appendChild(img);
     }
 
-    else if (
-      file.type.startsWith(
-        "audio/"
-      )
+    if (
+      media &&
+      media.element &&
+      file.type.startsWith("video/")
     ) {
+      thumb.innerHTML = "";
 
-      type = "audio";
+      const video =
+        document.createElement("video");
 
+      video.src = url;
+      video.muted = true;
+      video.preload = "metadata";
+
+      thumb.appendChild(video);
     }
 
-
-    const duration =
-      type === "audio"
-        ? 10
-        : 5;
-
-
-    addClip({
-
-      type,
-
-      src: url,
-
-      name: file.name,
-
-      start:
-        state.currentTime,
-
-      duration
-
+    item.addEventListener("click", () => {
+      addMediaToTimeline(url, file);
     });
 
-
-    showToast(
-      "Media ajoute sou timeline"
-    );
-
+    $("#mediaList").appendChild(item);
   }
 
 
-  /* ==========================================================
-     MEDIA IMPORT BUTTON
-     ========================================================== */
+  /* =========================================================
+     ADD MEDIA TO TIMELINE
+  ========================================================= */
 
-  $("#importBtn")
-    .addEventListener(
-      "click",
-      () => {
+  function addMediaToTimeline(url, file) {
+    let type = "video";
 
-        $("#fileInput").click();
+    if (file.type.startsWith("image/")) {
+      type = "image";
+    } else if (file.type.startsWith("audio/")) {
+      type = "audio";
+    }
 
+    let duration = 5;
+
+    const media =
+      state.media.get(url);
+
+    if (
+      media &&
+      media.element &&
+      type === "video"
+    ) {
+      if (
+        Number.isFinite(
+          media.element.duration
+        ) &&
+        media.element.duration > 0
+      ) {
+        duration =
+          Math.min(
+            media.element.duration,
+            60
+          );
       }
-    );
+    }
 
-
-  $("#fileInput")
-    .addEventListener(
-      "change",
-      (event) => {
-
-        importFiles(
-          event.target.files
-        );
-
-        event.target.value = "";
-
+    if (type === "audio") {
+      if (
+        media &&
+        Number.isFinite(
+          media.element.duration
+        ) &&
+        media.element.duration > 0
+      ) {
+        duration =
+          Math.min(
+            media.element.duration,
+            60
+          );
+      } else {
+        duration = 10;
       }
-    );
+    }
+
+    if (type === "image") {
+      duration = 5;
+    }
+
+    duration =
+      Math.max(.1, duration);
+
+    const start =
+      Math.min(
+        state.currentTime,
+        Math.max(
+          0,
+          state.duration - duration
+        )
+      );
+
+    addClip({
+      type,
+      src: url,
+      name: file.name,
+      start,
+      duration
+    });
+
+    showToast("Media ajoute sou timeline");
+  }
 
 
-  /* ==========================================================
-     DRAG & DROP
-     ========================================================== */
+  /* =========================================================
+     ADD CLIP
+  ========================================================= */
 
-  const dropZone =
-    $("#dropZone");
+  function addClip(clip) {
+    saveHistory();
 
+    const newClip = {
+      ...clip,
+      id:
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(
+              Date.now() +
+              Math.random()
+            )
+    };
+
+    state.clips.push(newClip);
+
+    state.selectedClipId =
+      newClip.id;
+
+    renderTimeline();
+    renderPreview(state.currentTime);
+    updateEmptyState();
+    loadSelectedClipIntoInspector();
+  }
+
+
+  /* =========================================================
+     DROP
+  ========================================================= */
+
+  const dropZone = $("#dropZone");
 
   dropZone.addEventListener(
     "dragover",
     (event) => {
-
       event.preventDefault();
-
-      dropZone.classList.add(
-        "dragging"
-      );
-
+      dropZone.classList.add("dragging");
     }
   );
-
 
   dropZone.addEventListener(
     "dragleave",
     () => {
-
-      dropZone.classList.remove(
-        "dragging"
-      );
-
+      dropZone.classList.remove("dragging");
     }
   );
-
 
   dropZone.addEventListener(
     "drop",
     (event) => {
-
       event.preventDefault();
 
       dropZone.classList.remove(
@@ -2209,19 +1670,70 @@
       importFiles(
         event.dataTransfer.files
       );
-
     }
   );
 
 
-  /* ==========================================================
-     PREVIEW ENGINE
-     ========================================================== */
+  $("#importBtn").addEventListener(
+    "click",
+    () => {
+      $("#fileInput").click();
+    }
+  );
+
+
+  $("#fileInput").addEventListener(
+    "change",
+    (event) => {
+      importFiles(event.target.files);
+      event.target.value = "";
+    }
+  );
+
+
+  /* =========================================================
+     PREVIEW
+  ========================================================= */
 
   function renderPreview(time) {
+    drawBackground();
 
-    ctx.fillStyle =
-      "#05070c";
+    const active =
+      state.clips.filter((clip) =>
+        time >= clip.start &&
+        time < clip.start + clip.duration
+      );
+
+    const visualClip =
+      active.find(
+        (clip) => clip.type === "video"
+      ) ||
+      active.find(
+        (clip) => clip.type === "image"
+      );
+
+    if (visualClip) {
+      drawVisualClip(
+        visualClip,
+        time
+      );
+    } else {
+      drawEmptyCanvas();
+    }
+
+    active
+      .filter(
+        (clip) => clip.type === "text"
+      )
+      .forEach(drawTextClip);
+
+    updateTimeDisplay();
+    updatePlayhead();
+  }
+
+
+  function drawBackground() {
+    ctx.fillStyle = "#05070c";
 
     ctx.fillRect(
       0,
@@ -2229,150 +1741,73 @@
       canvas.width,
       canvas.height
     );
-
-
-    const active =
-      state.clips.filter(
-        (clip) => {
-
-          return (
-            time >= clip.start &&
-            time <
-              clip.start +
-              clip.duration
-          );
-
-        }
-      );
-
-
-    const visualClip =
-      active.find(
-        (clip) =>
-          clip.type === "video"
-      ) ||
-      active.find(
-        (clip) =>
-          clip.type === "image"
-      );
-
-
-    if (visualClip) {
-
-      drawVisualClip(
-        visualClip,
-        time
-      );
-
-    }
-
-
-    active
-      .filter(
-        (clip) =>
-          clip.type === "text"
-      )
-      .forEach(
-        drawTextClip
-      );
-
-
-    if (
-      !visualClip &&
-      !active.some(
-        (clip) =>
-          clip.type === "text"
-      )
-    ) {
-
-      drawEmptyCanvas();
-
-    }
-
-
-    updateTimeDisplay();
-
-    updatePlayhead();
-
   }
 
 
-  /* ==========================================================
-     DRAW VISUAL
-     ========================================================== */
+  /* =========================================================
+     DRAW VIDEO / IMAGE
+  ========================================================= */
 
-  function drawVisualClip(
-    clip,
-    time
-  ) {
-
+  function drawVisualClip(clip, time) {
     const media =
-      state.media.get(
-        clip.src
-      );
+      state.media.get(clip.src);
 
-
-    if (
-      !media ||
-      !media.element
-    ) {
-
+    if (!media || !media.element) {
       return;
-
     }
 
-
-    const element =
-      media.element;
-
+    const element = media.element;
 
     try {
 
       if (
         clip.type === "video"
       ) {
-
         const localTime =
           Math.max(
             0,
             time - clip.start
           );
 
-
         if (
           Number.isFinite(
             element.duration
           )
         ) {
+          const safeTime =
+            Math.min(
+              localTime,
+              Math.max(
+                0,
+                element.duration - .001
+              )
+            );
 
           if (
             Math.abs(
               element.currentTime -
-              localTime
-            ) > 0.08
+              safeTime
+            ) > .06
           ) {
-
             element.currentTime =
-              localTime;
-
+              safeTime;
           }
-
         }
-
       }
 
-
-      let width =
+      const width =
         element.videoWidth ||
         element.naturalWidth ||
         canvas.width;
 
-
-      let height =
+      const height =
         element.videoHeight ||
         element.naturalHeight ||
         canvas.height;
 
+      if (!width || !height) {
+        return;
+      }
 
       const sourceRatio =
         width / height;
@@ -2381,50 +1816,35 @@
         canvas.width /
         canvas.height;
 
-
-      let drawWidth =
-        canvas.width;
-
-      let drawHeight =
-        canvas.height;
-
+      let drawWidth;
+      let drawHeight;
 
       if (
         sourceRatio >
         canvasRatio
       ) {
-
         drawHeight =
           canvas.height;
 
         drawWidth =
           drawHeight *
           sourceRatio;
-
-      }
-
-      else {
-
+      } else {
         drawWidth =
           canvas.width;
 
         drawHeight =
           drawWidth /
           sourceRatio;
-
       }
-
 
       const x =
         (canvas.width -
-          drawWidth) /
-        2;
+          drawWidth) / 2;
 
       const y =
         (canvas.height -
-          drawHeight) /
-        2;
-
+          drawHeight) / 2;
 
       ctx.drawImage(
         element,
@@ -2434,55 +1854,41 @@
         drawHeight
       );
 
-    }
-
-    catch (error) {
-
+    } catch (error) {
       console.warn(
         "Preview error:",
         error
       );
-
     }
-
   }
 
 
-  /* ==========================================================
-     DRAW TEXT
-     ========================================================== */
+  /* =========================================================
+     TEXT
+  ========================================================= */
 
-  function drawTextClip(
-    clip
-  ) {
-
+  function drawTextClip(clip) {
     const text =
       clip.text || "";
 
-
     if (!text.trim()) {
-
       return;
-
     }
 
-
     const boxX =
-      canvas.width * 0.05;
+      canvas.width * .05;
 
     const boxY =
-      canvas.height * 0.72;
+      canvas.height * .72;
 
     const boxWidth =
-      canvas.width * 0.90;
+      canvas.width * .90;
 
     const boxHeight =
-      canvas.height * 0.18;
-
+      canvas.height * .18;
 
     ctx.fillStyle =
-      "rgba(0,0,0,0.48)";
-
+      "rgba(0,0,0,.48)";
 
     ctx.fillRect(
       boxX,
@@ -2491,45 +1897,38 @@
       boxHeight
     );
 
-
     ctx.fillStyle =
       "#ffffff";
-
 
     ctx.textAlign =
       "center";
 
-
     ctx.textBaseline =
       "middle";
-
 
     ctx.font =
       `700 ${Math.max(
         26,
-        canvas.width * 0.035
+        canvas.width * .035
       )}px system-ui`;
-
 
     ctx.fillText(
       text,
       canvas.width / 2,
       boxY +
-        boxHeight / 2
+      boxHeight / 2,
+      boxWidth - 40
     );
-
   }
 
 
-  /* ==========================================================
+  /* =========================================================
      EMPTY CANVAS
-     ========================================================== */
+  ========================================================= */
 
   function drawEmptyCanvas() {
-
     ctx.fillStyle =
       "#101627";
-
 
     ctx.fillRect(
       0,
@@ -2538,38 +1937,31 @@
       canvas.height
     );
 
-
     ctx.fillStyle =
       "#8792ac";
-
 
     ctx.textAlign =
       "center";
 
-
     ctx.textBaseline =
       "middle";
 
-
     ctx.font =
       "600 18px system-ui";
-
 
     ctx.fillText(
       "Ajoute yon media pou kòmanse",
       canvas.width / 2,
       canvas.height / 2
     );
-
   }
 
 
-  /* ==========================================================
-     UPDATE TIME
-     ========================================================== */
+  /* =========================================================
+     TIME DISPLAY
+  ========================================================= */
 
   function updateTimeDisplay() {
-
     timeDisplay.textContent =
       formatTime(
         state.currentTime
@@ -2578,49 +1970,41 @@
       formatTime(
         state.duration
       );
-
   }
 
 
-  /* ==========================================================
+  /* =========================================================
      TIMELINE SCALE
-     ========================================================== */
+  ========================================================= */
 
   function timelineScale() {
-
     return 80 * state.zoom;
-
   }
 
 
-  /* ==========================================================
-     RENDER TIMELINE
-     ========================================================== */
+  /* =========================================================
+     TIMELINE
+  ========================================================= */
 
   function renderTimeline() {
-
     const scale =
       timelineScale();
-
 
     const minimumWidth =
       Math.max(
         1000,
         58 +
-          state.duration *
-            scale
+        state.duration *
+        scale
       );
-
 
     timelineInner.style.minWidth =
       minimumWidth + "px";
-
 
     renderRuler(
       minimumWidth,
       scale
     );
-
 
     renderTrack(
       "video",
@@ -2628,6 +2012,11 @@
       scale
     );
 
+    renderTrack(
+      "image",
+      $("#videoTrack"),
+      scale
+    );
 
     renderTrack(
       "audio",
@@ -2635,301 +2024,214 @@
       scale
     );
 
-
     renderTrack(
       "text",
       $("#textTrack"),
       scale
     );
 
-
     $("#clipCount").textContent =
       state.clips.length +
       " clips";
 
-
     updatePlayhead();
-
   }
 
 
-  /* ==========================================================
+  /* =========================================================
      RULER
-     ========================================================== */
+  ========================================================= */
 
   function renderRuler(
     width,
     scale
   ) {
-
     const ruler =
       $("#ruler");
-
 
     ruler.style.minWidth =
       width + "px";
 
-
     ruler.innerHTML = "";
-
 
     for (
       let second = 0;
       second <= state.duration;
       second += 10
     ) {
-
       const mark =
-        document.createElement(
-          "span"
-        );
-
+        document.createElement("span");
 
       mark.className =
         "ruler-mark";
-
 
       mark.style.left =
         (
           58 +
           second *
-            scale
+          scale
         ) + "px";
-
 
       mark.textContent =
         formatTime(second);
 
-
-      ruler.appendChild(
-        mark
-      );
-
+      ruler.appendChild(mark);
     }
-
   }
 
 
-  /* ==========================================================
-     RENDER TRACK
-     ========================================================== */
+  /* =========================================================
+     TRACK
+  ========================================================= */
 
   function renderTrack(
     type,
     track,
     scale
   ) {
-
     track
-      .querySelectorAll(
-        ".clip"
-      )
+      .querySelectorAll(".clip")
       .forEach(
-        (clip) =>
-          clip.remove()
+        (clip) => clip.remove()
       );
-
 
     state.clips
       .filter(
-        (clip) =>
-          clip.type === type
+        (clip) => clip.type === type
       )
-      .forEach(
-        (clip) => {
+      .forEach((clip) => {
 
-          const element =
-            document.createElement(
-              "div"
-            );
+        const element =
+          document.createElement("div");
 
+        element.className =
+          "clip " + type;
 
-          element.className =
-            "clip " +
-            type;
-
-
-          if (
-            clip.id ===
-            state.selectedClipId
-          ) {
-
-            element.classList.add(
-              "selected"
-            );
-
-          }
-
-
-          element.style.left =
-            (
-              58 +
-              clip.start *
-                scale
-            ) + "px";
-
-
-          element.style.width =
-            Math.max(
-              25,
-              clip.duration *
-                scale
-            ) + "px";
-
-
-          element.textContent =
-            clip.name ||
-            clip.type;
-
-
-          element.addEventListener(
-            "click",
-            (event) => {
-
-              event.stopPropagation();
-
-              state.selectedClipId =
-                clip.id;
-
-              loadSelectedClipIntoInspector();
-
-              renderTimeline();
-
-              renderPreview(
-                state.currentTime
-              );
-
-            }
+        if (
+          clip.id ===
+          state.selectedClipId
+        ) {
+          element.classList.add(
+            "selected"
           );
-
-
-          track.appendChild(
-            element
-          );
-
         }
-      );
 
+        element.style.left =
+          (
+            58 +
+            clip.start *
+            scale
+          ) + "px";
+
+        element.style.width =
+          Math.max(
+            25,
+            clip.duration *
+            scale
+          ) + "px";
+
+        element.textContent =
+          clip.name ||
+          clip.text ||
+          clip.type;
+
+        element.addEventListener(
+          "click",
+          (event) => {
+            event.stopPropagation();
+
+            state.selectedClipId =
+              clip.id;
+
+            loadSelectedClipIntoInspector();
+
+            renderTimeline();
+
+            renderPreview(
+              state.currentTime
+            );
+          }
+        );
+
+        track.appendChild(element);
+      });
   }
 
 
-  /* ==========================================================
+  /* =========================================================
      PLAYHEAD
-     ========================================================== */
+  ========================================================= */
 
   function updatePlayhead() {
-
-    const scale =
-      timelineScale();
-
-
     playhead.style.left =
       (
         58 +
         state.currentTime *
-          scale
+        timelineScale()
       ) + "px";
-
   }
 
 
-  /* ==========================================================
+  /* =========================================================
      PLAYBACK
-     ========================================================== */
+  ========================================================= */
 
   function togglePlayback() {
-
-    if (
-      state.playing
-    ) {
-
+    if (state.playing) {
       stopPlayback();
-
       return;
-
     }
-
 
     if (
       state.currentTime >=
       state.duration
     ) {
-
       state.currentTime = 0;
-
     }
 
-
     state.playing = true;
+    previousFrameTime = null;
 
-    previousFrameTime =
-      null;
-
-    playBtn.textContent =
-      "❚❚";
-
+    playBtn.textContent = "❚❚";
     stageStatus.textContent =
       "Lecture";
-
 
     animationFrame =
       requestAnimationFrame(
         playbackLoop
       );
-
   }
 
 
   function stopPlayback() {
-
     state.playing = false;
+    previousFrameTime = null;
 
-    previousFrameTime =
-      null;
-
-    playBtn.textContent =
-      "▶";
-
+    playBtn.textContent = "▶";
     stageStatus.textContent =
       "Pare";
 
-
-    if (
-      animationFrame
-    ) {
-
+    if (animationFrame) {
       cancelAnimationFrame(
         animationFrame
       );
 
+      animationFrame = null;
     }
-
   }
 
 
-  function playbackLoop(
-    timestamp
-  ) {
-
-    if (
-      !state.playing
-    ) {
-
+  function playbackLoop(timestamp) {
+    if (!state.playing) {
       return;
-
     }
 
-
     if (
-      previousFrameTime ===
-      null
+      previousFrameTime === null
     ) {
-
       previousFrameTime =
         timestamp;
-
     }
-
 
     const delta =
       (
@@ -2937,131 +2239,100 @@
         previousFrameTime
       ) / 1000;
 
-
     previousFrameTime =
       timestamp;
 
-
-    state.currentTime +=
-      delta;
-
+    state.currentTime += delta;
 
     if (
       state.currentTime >=
       state.duration
     ) {
-
       state.currentTime =
         state.duration;
 
       stopPlayback();
-
     }
-
 
     renderPreview(
       state.currentTime
     );
 
-
-    if (
-      state.playing
-    ) {
-
+    if (state.playing) {
       animationFrame =
         requestAnimationFrame(
           playbackLoop
         );
-
     }
-
   }
 
 
-  $("#playBtn")
-    .addEventListener(
-      "click",
-      togglePlayback
-    );
+  $("#playBtn").addEventListener(
+    "click",
+    togglePlayback
+  );
 
 
-  $("#stopBtn")
-    .addEventListener(
-      "click",
-      () => {
+  $("#stopBtn").addEventListener(
+    "click",
+    () => {
+      stopPlayback();
 
-        stopPlayback();
+      state.currentTime = 0;
 
-        state.currentTime = 0;
-
-        renderPreview(0);
-
-      }
-    );
+      renderPreview(0);
+    }
+  );
 
 
-  $("#previousBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        state.currentTime =
-          Math.max(
-            0,
-            state.currentTime -
-              5
-          );
-
-        renderPreview(
-          state.currentTime
+  $("#previousBtn").addEventListener(
+    "click",
+    () => {
+      state.currentTime =
+        Math.max(
+          0,
+          state.currentTime - 5
         );
 
-      }
-    );
+      renderPreview(
+        state.currentTime
+      );
+    }
+  );
 
 
-  $("#nextBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        state.currentTime =
-          Math.min(
-            state.duration,
-            state.currentTime +
-              5
-          );
-
-        renderPreview(
-          state.currentTime
+  $("#nextBtn").addEventListener(
+    "click",
+    () => {
+      state.currentTime =
+        Math.min(
+          state.duration,
+          state.currentTime + 5
         );
 
-      }
-    );
+      renderPreview(
+        state.currentTime
+      );
+    }
+  );
 
 
-  /* ==========================================================
+  /* =========================================================
      TIMELINE CLICK
-     ========================================================== */
+  ========================================================= */
 
   timelineScroll.addEventListener(
     "click",
     (event) => {
 
       if (
-        event.target.closest(
-          ".clip"
-        )
+        event.target.closest(".clip")
       ) {
-
         return;
-
       }
-
 
       const rect =
         timelineInner.getBoundingClientRect();
-
 
       const x =
         event.clientX -
@@ -3069,124 +2340,84 @@
         timelineScroll.scrollLeft -
         58;
 
-
       state.currentTime =
         Math.max(
           0,
           Math.min(
             state.duration,
-            x /
-              timelineScale()
+            x / timelineScale()
           )
         );
-
 
       renderPreview(
         state.currentTime
       );
-
     }
   );
 
 
-  /* ==========================================================
+  /* =========================================================
      INSPECTOR
-     ========================================================== */
+  ========================================================= */
 
   function getSelectedClip() {
-
     return state.clips.find(
       (clip) =>
         clip.id ===
         state.selectedClipId
     );
-
   }
 
 
   function loadSelectedClipIntoInspector() {
-
     const clip =
       getSelectedClip();
 
-
     if (!clip) {
-
       return;
-
     }
-
 
     $("#clipStart").value =
-      clip.start;
-
+      Number(clip.start || 0)
+        .toFixed(1);
 
     $("#clipDuration").value =
-      clip.duration;
+      Number(clip.duration || 0)
+        .toFixed(1);
 
-
-    if (
-      clip.type === "text"
-    ) {
-
+    if (clip.type === "text") {
       $("#overlayText").value =
         clip.text || "";
-
     }
-
   }
 
 
-  /* ==========================================================
-     CHANGE CLIP
-     ========================================================== */
-
   function updateSelectedClip() {
-
     const clip =
       getSelectedClip();
 
-
     if (!clip) {
-
       return;
-
     }
-
 
     saveHistory();
 
-
     let start =
-      Number(
-        $("#clipStart").value
-      );
-
+      Number($("#clipStart").value);
 
     let duration =
-      Number(
-        $("#clipDuration").value
-      );
+      Number($("#clipDuration").value);
 
-
-    if (
-      !Number.isFinite(start)
-    ) {
-
+    if (!Number.isFinite(start)) {
       start = 0;
-
     }
-
 
     if (
       !Number.isFinite(duration) ||
       duration <= 0
     ) {
-
-      duration = 0.1;
-
+      duration = .1;
     }
-
 
     duration =
       Math.min(
@@ -3194,459 +2425,394 @@
         state.duration
       );
 
-
     start =
       Math.max(
         0,
         Math.min(
           start,
           state.duration -
-            duration
+          duration
         )
       );
 
-
-    clip.start =
-      start;
-
-
-    clip.duration =
-      duration;
-
+    clip.start = start;
+    clip.duration = duration;
 
     renderTimeline();
-
     renderPreview(
       state.currentTime
     );
-
   }
 
 
-  $("#clipStart")
-    .addEventListener(
-      "change",
-      updateSelectedClip
-    );
+  $("#clipStart").addEventListener(
+    "change",
+    updateSelectedClip
+  );
+
+  $("#clipDuration").addEventListener(
+    "change",
+    updateSelectedClip
+  );
 
 
-  $("#clipDuration")
-    .addEventListener(
-      "change",
-      updateSelectedClip
-    );
-
-
-  /* ==========================================================
+  /* =========================================================
      TEXT
-     ========================================================== */
+  ========================================================= */
 
-  $("#addTextBtn")
-    .addEventListener(
-      "click",
-      () => {
+  $("#addTextBtn").addEventListener(
+    "click",
+    () => {
 
-        addClip({
+      const text =
+        $("#overlayText")
+          .value
+          .trim() ||
+        "Nouvo mesaj";
 
-          type: "text",
+      const duration = 5;
 
-          name: "Tèks",
-
-          text:
-            $("#overlayText")
-              .value
-              .trim() ||
-            "Nouvo mesaj",
-
-          start:
-            state.currentTime,
-
-          duration: 5
-
-        });
-
-
-        showToast(
-          "Tèks ajoute"
-        );
-
-      }
-    );
-
-
-  $("#overlayText")
-    .addEventListener(
-      "input",
-      () => {
-
-        const clip =
-          getSelectedClip();
-
-
-        if (
-          !clip ||
-          clip.type !== "text"
-        ) {
-
-          return;
-
-        }
-
-
-        clip.text =
-          $("#overlayText")
-            .value;
-
-
-        renderPreview(
-          state.currentTime
-        );
-
-
-      }
-    );
-
-
-  /* ==========================================================
-     DELETE
-     ========================================================== */
-
-  $("#deleteBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        const clip =
-          getSelectedClip();
-
-
-        if (!clip) {
-
-          showToast(
-            "Chwazi yon clip anvan"
-          );
-
-          return;
-
-        }
-
-
-        saveHistory();
-
-
-        state.clips =
-          state.clips.filter(
-            (item) =>
-              item.id !==
-              clip.id
-          );
-
-
-        state.selectedClipId =
-          null;
-
-
-        renderTimeline();
-
-        renderPreview(
-          state.currentTime
-        );
-
-        updateEmptyState();
-
-      }
-    );
-
-
-  /* ==========================================================
-     DUPLICATE
-     ========================================================== */
-
-  $("#duplicateBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        const clip =
-          getSelectedClip();
-
-
-        if (!clip) {
-
-          showToast(
-            "Chwazi yon clip"
-          );
-
-          return;
-
-        }
-
-
-        const copy = {
-          ...clip,
-
-          id:
-            undefined,
-
-          start:
-            Math.min(
-              state.duration -
-                clip.duration,
-              clip.start +
-                clip.duration
-            )
-
-        };
-
-
-        addClip(copy);
-
-
-        showToast(
-          "Clip duplike"
-        );
-
-      }
-    );
-
-
-  /* ==========================================================
-     SPLIT
-     ========================================================== */
-
-  $("#splitBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        const clip =
-          getSelectedClip();
-
-
-        if (!clip) {
-
-          showToast(
-            "Chwazi yon clip"
-          );
-
-          return;
-
-        }
-
-
-        if (
-          state.currentTime <=
-          clip.start ||
-          state.currentTime >=
-          clip.start +
-            clip.duration
-        ) {
-
-          showToast(
-            "Playhead la dwe andedan clip la"
-          );
-
-          return;
-
-        }
-
-
-        saveHistory();
-
-
-        const firstDuration =
-          state.currentTime -
-          clip.start;
-
-
-        const secondDuration =
-          clip.duration -
-          firstDuration;
-
-
-        const first = {
-          ...clip,
-
-          id:
-            crypto.randomUUID(),
-
-          duration:
-            firstDuration
-
-        };
-
-
-        const second = {
-          ...clip,
-
-          id:
-            crypto.randomUUID(),
-
-          start:
-            state.currentTime,
-
-          duration:
-            secondDuration
-
-        };
-
-
-        state.clips =
-          state.clips.filter(
-            (item) =>
-              item.id !==
-              clip.id
-          );
-
-
-        state.clips.push(
-          first,
-          second
-        );
-
-
-        state.selectedClipId =
-          second.id;
-
-
-        renderTimeline();
-
-        renderPreview(
-          state.currentTime
-        );
-
-      }
-    );
-
-
-  /* ==========================================================
-     ZOOM
-     ========================================================== */
-
-  function setTimelineZoom(
-    value
-  ) {
-
-    state.zoom =
-      Math.max(
-        0.5,
+      const start =
         Math.min(
-          4,
-          value
-        )
+          state.currentTime,
+          state.duration - duration
+        );
+
+      addClip({
+        type: "text",
+        name: "Tèks",
+        text,
+        start: Math.max(0, start),
+        duration
+      });
+
+      showToast("Tèks ajoute");
+    }
+  );
+
+
+  $("#overlayText").addEventListener(
+    "input",
+    () => {
+
+      const clip =
+        getSelectedClip();
+
+      if (
+        !clip ||
+        clip.type !== "text"
+      ) {
+        return;
+      }
+
+      clip.text =
+        $("#overlayText").value;
+
+      renderTimeline();
+
+      renderPreview(
+        state.currentTime
+      );
+    }
+  );
+
+
+  /* =========================================================
+     DELETE
+  ========================================================= */
+
+  $("#deleteBtn").addEventListener(
+    "click",
+    () => {
+
+      const clip =
+        getSelectedClip();
+
+      if (!clip) {
+        showToast(
+          "Chwazi yon clip anvan"
+        );
+
+        return;
+      }
+
+      saveHistory();
+
+      state.clips =
+        state.clips.filter(
+          (item) =>
+            item.id !== clip.id
+        );
+
+      state.selectedClipId =
+        null;
+
+      renderTimeline();
+      renderPreview(
+        state.currentTime
+      );
+      updateEmptyState();
+
+      $("#overlayText").value = "";
+    }
+  );
+
+
+  /* =========================================================
+     DUPLICATE
+  ========================================================= */
+
+  $("#duplicateBtn").addEventListener(
+    "click",
+    () => {
+
+      const clip =
+        getSelectedClip();
+
+      if (!clip) {
+        showToast(
+          "Chwazi yon clip"
+        );
+
+        return;
+      }
+
+      saveHistory();
+
+      const newId =
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(
+              Date.now() +
+              Math.random()
+            );
+
+      const start =
+        Math.min(
+          Math.max(
+            0,
+            state.duration -
+            clip.duration
+          ),
+          clip.start +
+          clip.duration
+        );
+
+      const copy = {
+        ...clip,
+        id: newId,
+        start
+      };
+
+      state.clips.push(copy);
+      state.selectedClipId =
+        newId;
+
+      renderTimeline();
+      renderPreview(
+        state.currentTime
       );
 
+      loadSelectedClipIntoInspector();
+
+      showToast(
+        "Clip duplike"
+      );
+    }
+  );
+
+
+  /* =========================================================
+     SPLIT
+  ========================================================= */
+
+  $("#splitBtn").addEventListener(
+    "click",
+    () => {
+
+      const clip =
+        getSelectedClip();
+
+      if (!clip) {
+        showToast(
+          "Chwazi yon clip"
+        );
+
+        return;
+      }
+
+      if (
+        state.currentTime <=
+        clip.start ||
+        state.currentTime >=
+        clip.start +
+        clip.duration
+      ) {
+        showToast(
+          "Playhead la dwe andedan clip la"
+        );
+
+        return;
+      }
+
+      saveHistory();
+
+      const firstDuration =
+        state.currentTime -
+        clip.start;
+
+      const secondDuration =
+        clip.duration -
+        firstDuration;
+
+      const id1 =
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(
+              Date.now() +
+              Math.random()
+            );
+
+      const id2 =
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(
+              Date.now() +
+              Math.random()
+            );
+
+      const first = {
+        ...clip,
+        id: id1,
+        duration: firstDuration
+      };
+
+      const second = {
+        ...clip,
+        id: id2,
+        start:
+          state.currentTime,
+        duration:
+          secondDuration
+      };
+
+      state.clips =
+        state.clips.filter(
+          (item) =>
+            item.id !== clip.id
+        );
+
+      state.clips.push(
+        first,
+        second
+      );
+
+      state.selectedClipId =
+        id2;
+
+      renderTimeline();
+
+      renderPreview(
+        state.currentTime
+      );
+
+      loadSelectedClipIntoInspector();
+
+      showToast("Clip separe");
+    }
+  );
+
+
+  /* =========================================================
+     ZOOM
+  ========================================================= */
+
+  function setTimelineZoom(value) {
+    state.zoom =
+      Math.max(
+        .5,
+        Math.min(
+          4,
+          Number(value)
+        )
+      );
 
     $("#zoomRange").value =
       state.zoom;
 
-
-    $("#zoomValue")
-      .textContent =
+    $("#zoomValue").textContent =
       state.zoom.toFixed(1) +
       "×";
 
-
     renderTimeline();
-
   }
 
 
-  $("#zoomRange")
-    .addEventListener(
-      "input",
-      (event) => {
-
-        setTimelineZoom(
-          Number(
-            event.target.value
-          )
-        );
-
-      }
-    );
+  $("#zoomRange").addEventListener(
+    "input",
+    (event) => {
+      setTimelineZoom(
+        Number(event.target.value)
+      );
+    }
+  );
 
 
-  $("#timelineZoomMinus")
-    .addEventListener(
-      "click",
-      () => {
-
-        setTimelineZoom(
-          state.zoom -
-            0.2
-        );
-
-      }
-    );
+  $("#timelineZoomMinus").addEventListener(
+    "click",
+    () => {
+      setTimelineZoom(
+        state.zoom - .2
+      );
+    }
+  );
 
 
-  $("#timelineZoomPlus")
-    .addEventListener(
-      "click",
-      () => {
-
-        setTimelineZoom(
-          state.zoom +
-            0.2
-        );
-
-      }
-    );
+  $("#timelineZoomPlus").addEventListener(
+    "click",
+    () => {
+      setTimelineZoom(
+        state.zoom + .2
+      );
+    }
+  );
 
 
-  /* ==========================================================
-     TWO-FINGER PINCH ZOOM
-     ANDROID TIMELINE
-     ========================================================== */
+  /* =========================================================
+     PINCH ZOOM
+  ========================================================= */
 
-  let pinchStartDistance =
-    null;
-
-
-  let pinchStartZoom =
-    1;
-
+  let pinchStartDistance = null;
+  let pinchStartZoom = 1;
 
   timelineScroll.addEventListener(
     "touchstart",
     (event) => {
 
       if (
-        event.touches.length !==
-        2
+        event.touches.length !== 2
       ) {
-
         return;
-
       }
-
 
       const a =
         event.touches[0];
 
-
       const b =
         event.touches[1];
-
 
       pinchStartDistance =
         Math.hypot(
           a.clientX -
-            b.clientX,
-
+          b.clientX,
           a.clientY -
-            b.clientY
+          b.clientY
         );
-
 
       pinchStartZoom =
         state.zoom;
-
     },
-    {
-      passive: true
-    }
+    { passive: true }
   );
 
 
@@ -3655,476 +2821,388 @@
     (event) => {
 
       if (
-        event.touches.length !==
-          2 ||
-        pinchStartDistance ===
-          null
+        event.touches.length !== 2 ||
+        pinchStartDistance === null
       ) {
-
         return;
-
       }
-
 
       const a =
         event.touches[0];
 
-
       const b =
         event.touches[1];
-
 
       const distance =
         Math.hypot(
           a.clientX -
-            b.clientX,
-
+          b.clientX,
           a.clientY -
-            b.clientY
+          b.clientY
         );
-
 
       const factor =
         distance /
         pinchStartDistance;
 
-
       setTimelineZoom(
         pinchStartZoom *
-          factor
+        factor
       );
-
     },
-    {
-      passive: true
-    }
+    { passive: true }
   );
 
 
   timelineScroll.addEventListener(
     "touchend",
     () => {
-
-      pinchStartDistance =
-        null;
-
+      pinchStartDistance = null;
     }
   );
 
 
-  /* ==========================================================
+  /* =========================================================
      UNDO
-     ========================================================== */
+  ========================================================= */
 
-  $("#undoBtn")
-    .addEventListener(
-      "click",
-      () => {
+  $("#undoBtn").addEventListener(
+    "click",
+    () => {
 
-        if (
-          state.history.length ===
-          0
-        ) {
-
-          return;
-
-        }
-
-
-        state.future.push(
-          JSON.stringify(
-            state.clips
-          )
+      if (
+        state.history.length === 0
+      ) {
+        showToast(
+          "Pa gen aksyon pou retounen"
         );
 
-
-        const snapshot =
-          state.history.pop();
-
-
-        restoreSnapshot(
-          snapshot
-        );
-
+        return;
       }
-    );
+
+      state.future.push(
+        createSnapshot()
+      );
+
+      const snapshot =
+        state.history.pop();
+
+      restoreSnapshot(
+        snapshot
+      );
+
+      showToast("Undo");
+    }
+  );
 
 
-  /* ==========================================================
+  /* =========================================================
      REDO
-     ========================================================== */
+  ========================================================= */
 
-  $("#redoBtn")
-    .addEventListener(
-      "click",
-      () => {
+  $("#redoBtn").addEventListener(
+    "click",
+    () => {
+
+      if (
+        state.future.length === 0
+      ) {
+        showToast(
+          "Pa gen aksyon pou refè"
+        );
+
+        return;
+      }
+
+      state.history.push(
+        createSnapshot()
+      );
+
+      const snapshot =
+        state.future.pop();
+
+      restoreSnapshot(
+        snapshot
+      );
+
+      showToast("Redo");
+    }
+  );
+
+
+  /* =========================================================
+     FULLSCREEN
+  ========================================================= */
+
+  $("#fullscreenBtn").addEventListener(
+    "click",
+    async () => {
+
+      try {
 
         if (
-          state.future.length ===
-          0
+          document.fullscreenElement
         ) {
-
-          return;
-
-        }
-
-
-        state.history.push(
-          JSON.stringify(
-            state.clips
-          )
-        );
-
-
-        const snapshot =
-          state.future.pop();
-
-
-        restoreSnapshot(
-          snapshot
-        );
-
-      }
-    );
-
-
-  /* ==========================================================
-     FULLSCREEN
-     ========================================================== */
-
-  $("#fullscreenBtn")
-    .addEventListener(
-      "click",
-      async () => {
-
-        try {
-
-          if (
-            document.fullscreenElement
-          ) {
-
-            await document.exitFullscreen();
-
-          }
-
-          else {
-
-            await previewArea.requestFullscreen();
-
-          }
-
-        }
-
-        catch (error) {
-
+          await document.exitFullscreen();
+        } else if (
+          previewArea.requestFullscreen
+        ) {
+          await previewArea.requestFullscreen();
+        } else {
           showToast(
             "Fullscreen pa disponib"
           );
-
         }
 
+      } catch (error) {
+
+        console.warn(error);
+
+        showToast(
+          "Fullscreen pa disponib"
+        );
       }
-    );
+    }
+  );
 
 
-  /* ==========================================================
+  /* =========================================================
      FIT
-     ========================================================== */
+  ========================================================= */
 
-  $("#fitBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        renderPreview(
-          state.currentTime
-        );
-
-      }
-    );
+  $("#fitBtn").addEventListener(
+    "click",
+    () => {
+      renderPreview(
+        state.currentTime
+      );
+    }
+  );
 
 
-  /* ==========================================================
+  /* =========================================================
      NEW PROJECT
-     ========================================================== */
+  ========================================================= */
 
-  $("#newProjectBtn")
-    .addEventListener(
-      "click",
-      () => {
+  $("#newProjectBtn").addEventListener(
+    "click",
+    () => {
 
-        const confirmed =
-          confirm(
-            "Kreye yon nouvo pwojè? Travay ki pa sove ka pèdi."
-          );
-
-
-        if (!confirmed) {
-
-          return;
-
-        }
-
-
-        stopPlayback();
-
-
-        state.clips = [];
-
-        state.media.clear();
-
-        state.selectedClipId =
-          null;
-
-        state.currentTime =
-          0;
-
-        state.history = [];
-
-        state.future = [];
-
-
-        $("#mediaList")
-          .innerHTML = "";
-
-
-        renderTimeline();
-
-        renderPreview(0);
-
-        updateEmptyState();
-
-
-        showToast(
-          "Nouvo pwojè pare"
+      const confirmed =
+        confirm(
+          "Kreye yon nouvo pwojè? Travay ki pa sove ka pèdi."
         );
 
+      if (!confirmed) {
+        return;
       }
-    );
 
+      stopPlayback();
 
-  /* ==========================================================
-     SAVE PROJECT
-     ========================================================== */
+      state.clips = [];
 
-  $("#saveProjectBtn")
-    .addEventListener(
-      "click",
-      () => {
-
-        state.projectName =
-          $("#projectName")
-            .value
-            .trim() ||
-          "Piblisite mwen";
-
-
-        const project = {
-
-          version: 1,
-
-          application:
-            "Simulation Video FòBAS",
-
-          projectName:
-            state.projectName,
-
-          duration:
-            state.duration,
-
-          ratio:
-            $("#ratio").value,
-
-          clips:
-            state.clips.map(
-              (clip) => {
-
-                return {
-                  ...clip,
-
-                  /*
-                    Object URLs are temporary.
-                    The actual media remains
-                    in browser memory for the
-                    current editing session.
-                  */
-
-                  src: undefined
-
-                };
-
-              }
-            )
-
-        };
-
-
-        const blob =
-          new Blob(
-            [
-              JSON.stringify(
-                project,
-                null,
-                2
-              )
-            ],
-            {
-              type:
-                "application/json"
+      state.media.forEach(
+        (media) => {
+          try {
+            if (
+              media.element &&
+              media.element.pause
+            ) {
+              media.element.pause();
             }
-          );
+          } catch {}
+        }
+      );
+
+      state.media.clear();
+
+      state.selectedClipId = null;
+      state.currentTime = 0;
+      state.history = [];
+      state.future = [];
+
+      $("#mediaList").innerHTML = "";
+      $("#overlayText").value = "";
+
+      renderTimeline();
+      renderPreview(0);
+      updateEmptyState();
+
+      showToast(
+        "Nouvo pwojè pare"
+      );
+    }
+  );
 
 
-        const url =
-          URL.createObjectURL(
-            blob
-          );
+  /* =========================================================
+     SAVE PROJECT
+  ========================================================= */
 
+  $("#saveProjectBtn").addEventListener(
+    "click",
+    () => {
 
-        const anchor =
-          document.createElement(
-            "a"
-          );
+      state.projectName =
+        $("#projectName")
+          .value
+          .trim() ||
+        "Piblisite mwen";
 
+      const project = {
+        version: 2,
+        application:
+          "Simulation Video FòBAS",
 
-        anchor.href = url;
+        projectName:
+          state.projectName,
 
-        anchor.download =
-          (
-            state.projectName
-              .replace(
-                /[^a-z0-9_-]/gi,
-                "_"
-              )
+        duration:
+          state.duration,
+
+        ratio:
+          $("#ratio").value,
+
+        clips:
+          state.clips.map(
+            (clip) => ({
+              ...clip,
+              src: undefined
+            })
+          )
+      };
+
+      const blob =
+        new Blob(
+          [
+            JSON.stringify(
+              project,
+              null,
+              2
+            )
+          ],
+          {
+            type:
+              "application/json"
+          }
+        );
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const anchor =
+        document.createElement("a");
+
+      anchor.href = url;
+
+      anchor.download =
+        state.projectName
+          .replace(
+            /[^a-z0-9_-]/gi,
+            "_"
           ) +
-          ".json";
+        ".json";
+
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+
+      setTimeout(
+        () => {
+          URL.revokeObjectURL(url);
+        },
+        1000
+      );
+
+      showToast(
+        "Pwojè JSON la sove"
+      );
+    }
+  );
 
 
-        anchor.click();
+  /* =========================================================
+     EXPORT
+  ========================================================= */
 
-
-        setTimeout(
-          () => {
-
-            URL.revokeObjectURL(
-              url
-            );
-
-          },
-          1000
-        );
-
-
-        showToast(
-          "Pwojè JSON la sove"
-        );
-
-      }
-    );
-
-
-  /* ==========================================================
-     EXPORT ENGINE
-     ========================================================== */
-
-  $("#exportBtn")
-    .addEventListener(
-      "click",
-      startExport
-    );
+  $("#exportBtn").addEventListener(
+    "click",
+    startExport
+  );
 
 
   async function startExport() {
 
     if (
-      state.clips.length ===
-      0
+      state.clips.length === 0
     ) {
-
       showToast(
         "Ajoute omwen yon media anvan export"
       );
 
       return;
-
     }
 
-
     if (
-      !canvas.captureStream
+      !canvas.captureStream ||
+      !window.MediaRecorder
     ) {
-
       showToast(
-        "Navigatè sa a pa sipòte export canvas"
+        "Navigatè sa a pa sipòte export"
       );
 
       return;
-
     }
 
-
     $("#exportModal")
-      .classList.add(
-        "show"
-      );
-
+      .classList.add("show");
 
     $("#exportMessage")
       .textContent =
       "Preparasyon export lokal...";
 
-
     $("#exportProgress")
-      .style.width =
-      "0%";
+      .style.width = "0%";
 
+    const wasPlaying =
+      state.playing;
+
+    stopPlayback();
+
+    const originalTime =
+      state.currentTime;
 
     try {
 
       const stream =
-        canvas.captureStream(
-          30
-        );
-
+        canvas.captureStream(30);
 
       let mimeType =
         "video/webm";
-
 
       if (
         MediaRecorder.isTypeSupported(
           "video/webm;codecs=vp9"
         )
       ) {
-
         mimeType =
           "video/webm;codecs=vp9";
-
-      }
-
-      else if (
+      } else if (
         MediaRecorder.isTypeSupported(
           "video/webm;codecs=vp8"
         )
       ) {
-
         mimeType =
           "video/webm;codecs=vp8";
-
       }
-
 
       const recorder =
         new MediaRecorder(
           stream,
-          {
-            mimeType
-          }
+          { mimeType }
         );
 
-
       const chunks = [];
-
 
       recorder.ondataavailable =
         (event) => {
@@ -4133,15 +3211,9 @@
             event.data &&
             event.data.size
           ) {
-
-            chunks.push(
-              event.data
-            );
-
+            chunks.push(event.data);
           }
-
         };
-
 
       recorder.onerror =
         () => {
@@ -4149,9 +3221,7 @@
           $("#exportMessage")
             .textContent =
             "Yon erè rive pandan export.";
-
         };
-
 
       recorder.onstop =
         () => {
@@ -4159,28 +3229,16 @@
           const blob =
             new Blob(
               chunks,
-              {
-                type:
-                  mimeType
-              }
+              { type: mimeType }
             );
-
 
           const url =
-            URL.createObjectURL(
-              blob
-            );
-
+            URL.createObjectURL(blob);
 
           const anchor =
-            document.createElement(
-              "a"
-            );
+            document.createElement("a");
 
-
-          anchor.href =
-            url;
-
+          anchor.href = url;
 
           const safeName =
             (
@@ -4188,70 +3246,57 @@
                 .value
                 .trim() ||
               "simulation-video"
-            )
-              .replace(
-                /[^a-z0-9_-]/gi,
-                "_"
-              );
-
+            ).replace(
+              /[^a-z0-9_-]/gi,
+              "_"
+            );
 
           anchor.download =
-            safeName +
-            ".webm";
+            safeName + ".webm";
 
-
+          document.body.appendChild(anchor);
           anchor.click();
-
+          anchor.remove();
 
           setTimeout(
             () => {
-
-              URL.revokeObjectURL(
-                url
-              );
-
+              URL.revokeObjectURL(url);
             },
             5000
           );
 
-
           $("#exportProgress")
-            .style.width =
-            "100%";
-
+            .style.width = "100%";
 
           $("#exportMessage")
             .textContent =
-            "Export fini. Videyo a pare sou aparèy la.";
+            "Export fini. Videyo a pare.";
 
           showToast(
             "Export fini"
           );
 
+          state.currentTime =
+            originalTime;
+
+          renderPreview(
+            originalTime
+          );
+
+          if (wasPlaying) {
+            togglePlayback();
+          }
         };
 
-
-      const originalTime =
-        state.currentTime;
-
-
-      state.currentTime =
-        0;
-
-
+      state.currentTime = 0;
       renderPreview(0);
 
-
       recorder.start();
-
 
       const startTime =
         performance.now();
 
-
-      function exportFrame(
-        timestamp
-      ) {
+      function exportFrame(timestamp) {
 
         const elapsed =
           (
@@ -4259,31 +3304,25 @@
             startTime
           ) / 1000;
 
-
         state.currentTime =
           Math.min(
             state.duration,
             elapsed
           );
 
-
         renderPreview(
           state.currentTime
         );
-
 
         const progress =
           (
             state.currentTime /
             state.duration
-          ) *
-          100;
-
+          ) * 100;
 
         $("#exportProgress")
           .style.width =
           progress + "%";
-
 
         $("#exportMessage")
           .textContent =
@@ -4291,73 +3330,165 @@
           Math.round(progress) +
           "%";
 
-
         if (
           state.currentTime <
           state.duration
         ) {
-
           requestAnimationFrame(
             exportFrame
           );
-
-        }
-
-        else {
-
+        } else {
           recorder.stop();
-
-          state.currentTime =
-            originalTime;
-
-          renderPreview(
-            state.currentTime
-          );
-
         }
-
       }
-
 
       requestAnimationFrame(
         exportFrame
       );
 
-    }
+    } catch (error) {
 
-    catch (error) {
-
-      console.error(
-        error
-      );
-
+      console.error(error);
 
       $("#exportMessage")
         .textContent =
         "Export pa disponib nan navigatè sa a.";
 
-    }
+      state.currentTime =
+        originalTime;
 
+      renderPreview(
+        originalTime
+      );
+    }
   }
 
 
-  $("#closeExport")
-    .addEventListener(
-      "click",
-      () => {
+  $("#closeExport").addEventListener(
+    "click",
+    () => {
+      $("#exportModal")
+        .classList.remove("show");
+    }
+  );
 
-        $("#exportModal")
-          .classList.remove(
-            "show"
+
+  /* =========================================================
+     KEYBOARD SHORTCUTS
+  ========================================================= */
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+
+      const tag =
+        event.target.tagName;
+
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT"
+      ) {
+        return;
+      }
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        togglePlayback();
+      }
+
+      if (
+        event.key === "ArrowLeft"
+      ) {
+        state.currentTime =
+          Math.max(
+            0,
+            state.currentTime - .5
           );
 
+        renderPreview(
+          state.currentTime
+        );
       }
-    );
+
+      if (
+        event.key === "ArrowRight"
+      ) {
+        state.currentTime =
+          Math.min(
+            state.duration,
+            state.currentTime + .5
+          );
+
+        renderPreview(
+          state.currentTime
+        );
+      }
+
+      if (
+        event.key === "Delete"
+      ) {
+        $("#deleteBtn").click();
+      }
+
+      if (
+        (event.ctrlKey ||
+          event.metaKey) &&
+        event.key.toLowerCase() === "z"
+      ) {
+        event.preventDefault();
+
+        if (event.shiftKey) {
+          $("#redoBtn").click();
+        } else {
+          $("#undoBtn").click();
+        }
+      }
+
+      if (
+        (event.ctrlKey ||
+          event.metaKey) &&
+        event.key.toLowerCase() === "y"
+      ) {
+        event.preventDefault();
+        $("#redoBtn").click();
+      }
+    }
+  );
 
 
-  /* ==========================================================
-     INITIALIZATION
-     ========================================================== */
+  /* =========================================================
+     CLEANUP
+  ========================================================= */
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+
+      state.media.forEach(
+        (media, url) => {
+
+          try {
+            if (
+              media.element &&
+              media.element.pause
+            ) {
+              media.element.pause();
+            }
+          } catch {}
+
+          try {
+            URL.revokeObjectURL(url);
+          } catch {}
+        }
+      );
+    }
+  );
+
+
+  /* =========================================================
+     INIT
+  ========================================================= */
 
   updateCanvasRatio();
 
@@ -4372,3 +3503,34 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
