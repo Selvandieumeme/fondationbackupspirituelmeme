@@ -1,4869 +1,2620 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1,
-                 user-scalable=yes, viewport-fit=cover">
-
-  <meta name="theme-color" content="#080c16">
-  <meta name="description"
-        content="Simulation Video Fobas - laboratoire commercial de création vidéo publicitaire avec IA">
-
-  <title>Simulation Video Fobas</title>
-
-  <style>
-    :root {
-      --couleur-fond: #080c16;
-      --couleur-panel: #101727;
-      --couleur-panel-2: #151e30;
-      --couleur-bordure: #283550;
-      --couleur-texte: #f5f7fb;
-      --couleur-secondaire: #9ba9bf;
-      --couleur-primaire: #6ea8fe;
-      --couleur-primaire-2: #8b5cf6;
-      --couleur-succes: #32d583;
-      --couleur-danger: #ff5d73;
-      --rayon: 12px;
-      --hauteur-barre: 58px;
-      --hauteur-pied: 34px;
-      --securite-haut: env(safe-area-inset-top);
-      --securite-bas: env(safe-area-inset-bottom);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: var(--couleur-fond);
-      color: var(--couleur-texte);
-      font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-    }
-
-    button,
-    input,
-    select,
-    textarea {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-      color: inherit;
-    }
-
-    #application {
-      width: 100%;
-      height: 100dvh;
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
-      overflow: hidden;
-    }
-
-    /* =========================================================
-       BARRE SUPÉRIEURE
-    ========================================================= */
-
-    #barreSuperieure {
-      min-height: var(--hauteur-barre);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding:
-        calc(8px + var(--securite-haut))
-        12px
-        8px;
-      background: rgba(8, 12, 22, 0.97);
-      border-bottom: 1px solid var(--couleur-bordure);
-      z-index: 100;
-    }
-
-    #identiteApplication {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      min-width: 220px;
-    }
-
-    #logoApplication {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      flex: 0 0 auto;
-      border-radius: 11px;
-      background:
-        linear-gradient(
-          135deg,
-          var(--couleur-primaire),
-          var(--couleur-primaire-2)
-        );
-      font-size: 13px;
-      font-weight: 900;
-    }
-
-    #nomApplication {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.2;
-      font-weight: 800;
-    }
-
-    #sousTitreApplication {
-      margin: 3px 0 0;
-      color: var(--couleur-secondaire);
-      font-size: 10px;
-    }
-
-    #actionsPrincipales {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-left: auto;
-    }
-
-    .bouton {
-      min-height: 38px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 0 11px;
-      border: 1px solid var(--couleur-bordure);
-      border-radius: 9px;
-      background: var(--couleur-panel);
-      color: var(--couleur-texte);
-      font-size: 11px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .bouton:hover {
-      background: var(--couleur-panel-2);
-    }
-
-    .boutonPrimaire {
-      border-color: transparent;
-      background:
-        linear-gradient(
-          135deg,
-          #4f8ff7,
-          #7657e8
-        );
-    }
-
-    .boutonSucces {
-      background: #123a2a;
-      border-color: #1d6c49;
-    }
-
-    .boutonDanger {
-      background: #3c1721;
-      border-color: #70283a;
-    }
-
-    .boutonIcone {
-      width: 38px;
-      padding: 0;
-    }
-
-    /* =========================================================
-       ESPACE DE TRAVAIL
-    ========================================================= */
-
-    #espaceTravail {
-      min-height: 0;
-      display: grid;
-      grid-template-columns:
-        minmax(210px, 250px)
-        minmax(0, 1fr)
-        minmax(230px, 280px);
-      overflow: hidden;
-    }
-
-    .panneau {
-      min-height: 0;
-      overflow: auto;
-      background: var(--couleur-panel);
-    }
-
-    #panneauMedias {
-      border-right: 1px solid var(--couleur-bordure);
-    }
-
-    #panneauProprietes {
-      border-left: 1px solid var(--couleur-bordure);
-    }
-
-    .titrePanneau {
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 11px;
-      border-bottom: 1px solid var(--couleur-bordure);
-      color: #dbe5f5;
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-
-    .corpsPanneau {
-      padding: 10px;
-    }
-
-    .sectionPanneau {
-      margin-bottom: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--couleur-bordure);
-    }
-
-    .sectionPanneau:last-child {
-      border-bottom: 0;
-    }
-
-    .titreSection {
-      margin: 0 0 9px;
-      color: #cbd5e5;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    /* =========================================================
-       IMPORTATION
-    ========================================================= */
-
-    #zoneImportation {
-      margin-bottom: 10px;
-      padding: 18px 9px;
-      border: 1px dashed #405477;
-      border-radius: var(--rayon);
-      background: #0d1424;
-      color: var(--couleur-secondaire);
-      text-align: center;
-      font-size: 11px;
-      line-height: 1.5;
-      cursor: pointer;
-    }
-
-    #zoneImportation strong {
-      color: #e8edf7;
-    }
-
-    #champFichiers {
-      display: none;
-    }
-
-    #grilleActionsMedias {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 7px;
-      margin-bottom: 12px;
-    }
-
-    #grilleActionsMedias .bouton {
-      width: 100%;
-      padding: 0 5px;
-    }
-
-    /* =========================================================
-       BIBLIOTHÈQUE
-    ========================================================= */
-
-    #bibliothequeMedias {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .carteMedia {
-      position: relative;
-      min-width: 0;
-      overflow: hidden;
-      border: 1px solid var(--couleur-bordure);
-      border-radius: 9px;
-      background: #0b1220;
-      cursor: pointer;
-    }
-
-    .carteMedia img,
-    .carteMedia video {
-      display: block;
-      width: 100%;
-      height: 72px;
-      object-fit: cover;
-    }
-
-    .vignetteAudio {
-      height: 72px;
-      display: grid;
-      place-items: center;
-      background: #0c1425;
-      font-size: 25px;
-    }
-
-    .typeMedia {
-      position: absolute;
-      top: 5px;
-      left: 5px;
-      z-index: 2;
-      padding: 3px 5px;
-      border-radius: 5px;
-      background: rgba(0, 0, 0, .65);
-      font-size: 8px;
-    }
-
-    .nomMedia {
-      overflow: hidden;
-      padding: 6px;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      font-size: 9px;
-    }
-
-    /* =========================================================
-       ÉDITEUR CENTRAL
-    ========================================================= */
-
-    #editeurCentral {
-      min-width: 0;
-      min-height: 0;
-      display: grid;
-      grid-template-rows: minmax(0, 1fr) 250px;
-      background: #090e19;
-    }
-
-    #zoneApercu {
-      position: relative;
-      min-height: 0;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      padding: 12px;
-    }
-
-    #cadreApercu {
-      position: relative;
-      width: min(900px, 100%);
-      height: min(100%, 540px);
-      aspect-ratio: 16 / 9;
-      overflow: hidden;
-      border: 1px solid #2c3953;
-      border-radius: 14px;
-      background: #02040a;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, .5);
-      touch-action: none;
-    }
-
-    #canvasApercu {
-      display: block;
-      width: 100%;
-      height: 100%;
-      background: #05070c;
-    }
-
-    #statutApercu,
-    #informationZoom {
-      position: absolute;
-      top: 14px;
-      z-index: 10;
-      padding: 5px 8px;
-      border-radius: 6px;
-      background: rgba(0, 0, 0, .58);
-      font-size: 9px;
-      pointer-events: none;
-    }
-
-    #statutApercu {
-      left: 14px;
-    }
-
-    #informationZoom {
-      right: 14px;
-    }
-
-    #barreApercu {
-      position: absolute;
-      left: 50%;
-      bottom: 13px;
-      z-index: 10;
-      display: flex;
-      gap: 5px;
-      transform: translateX(-50%);
-      padding: 6px;
-      border: 1px solid #34415d;
-      border-radius: 11px;
-      background: rgba(8, 11, 19, .86);
-      backdrop-filter: blur(8px);
-    }
-
-    /* =========================================================
-       TIMELINE
-    ========================================================= */
-
-    #timeline {
-      min-height: 0;
-      display: grid;
-      grid-template-rows: 44px minmax(0, 1fr);
-      border-top: 1px solid var(--couleur-bordure);
-      background: #0d1320;
-    }
-
-    #enteteTimeline {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 5px 9px;
-      border-bottom: 1px solid var(--couleur-bordure);
-    }
-
-    #lectureTemps {
-      min-width: 95px;
-      color: var(--couleur-secondaire);
-      font-size: 10px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    #zoneTimelineDefilante {
-      position: relative;
-      min-height: 0;
-      overflow: auto;
-      touch-action: pan-x pinch-zoom;
-    }
-
-    #timelineInterne {
-      --pixelsParSeconde: 3;
-      position: relative;
-      min-width: 1100px;
-      height: 100%;
-    }
-
-    #regleTimeline {
-      position: relative;
-      height: 30px;
-      border-bottom: 1px solid var(--couleur-bordure);
-      background:
-        repeating-linear-gradient(
-          90deg,
-          transparent 0,
-          transparent calc(var(--pixelsParSeconde) * 5px - 1px),
-          #293650 calc(var(--pixelsParSeconde) * 5px)
-        );
-    }
-
-    .etiquetteTemps {
-      position: absolute;
-      top: 7px;
-      transform: translateX(-50%);
-      color: var(--couleur-secondaire);
-      font-size: 9px;
-    }
-
-    .piste {
-      position: relative;
-      height: 52px;
-      border-bottom: 1px solid #202b40;
-      background: #0b111d;
-    }
-
-    .etiquettePiste {
-      position: sticky;
-      left: 0;
-      z-index: 4;
-      display: inline-flex;
-      align-items: center;
-      width: 82px;
-      height: 100%;
-      padding-left: 8px;
-      border-right: 1px solid var(--couleur-bordure);
-      background: #0e1523;
-      color: var(--couleur-secondaire);
-      font-size: 9px;
-    }
-
-    .clip {
-      position: absolute;
-      top: 8px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-      padding: 0 8px;
-      border: 1px solid #718ed0;
-      border-radius: 7px;
-      background:
-        linear-gradient(
-          135deg,
-          #315d9e,
-          #6849a5
-        );
-      color: white;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      font-size: 9px;
-      cursor: pointer;
-    }
-
-    .clipTexte {
-      border-color: #c68d49;
-      background:
-        linear-gradient(
-          135deg,
-          #8a5c25,
-          #b26d26
-        );
-    }
-
-    .clipAudio {
-      border-color: #48ae84;
-      background:
-        linear-gradient(
-          135deg,
-          #1e715a,
-          #2f9169
-        );
-    }
-
-    #teteLecture {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      z-index: 8;
-      width: 2px;
-      background: #ff496b;
-      pointer-events: none;
-    }
-
-    #teteLecture::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -5px;
-      border-right: 6px solid transparent;
-      border-bottom: 0;
-      border-left: 6px solid transparent;
-      border-top: 8px solid #ff496b;
-    }
-
-    /* =========================================================
-       PROPRIÉTÉS
-    ========================================================= */
-
-    .ligneFormulaire {
-      margin-bottom: 11px;
-    }
-
-    .ligneFormulaire label {
-      display: block;
-      margin-bottom: 5px;
-      color: var(--couleur-secondaire);
-      font-size: 9px;
-    }
-
-    .champ,
-    .selecteur,
-    .zoneTexte {
-      width: 100%;
-      outline: none;
-      border: 1px solid var(--couleur-bordure);
-      border-radius: 8px;
-      background: #0b1220;
-      color: var(--couleur-texte);
-      font-size: 11px;
-    }
-
-    .champ,
-    .selecteur {
-      height: 36px;
-      padding: 0 9px;
-    }
-
-    .zoneTexte {
-      min-height: 75px;
-      padding: 9px;
-      resize: vertical;
-    }
-
-    .curseur {
-      width: 100%;
-    }
-
-    #grilleAnimations {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 7px;
-    }
-
-    #grilleAnimations .bouton {
-      width: 100%;
-    }
-
-    /* =========================================================
-       PIED
-    ========================================================= */
-
-    #piedApplication {
-      min-height: var(--hauteur-pied);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding:
-        0
-        12px
-        var(--securite-bas);
-      border-top: 1px solid var(--couleur-bordure);
-      background: #080c16;
-      color: var(--couleur-secondaire);
-      font-size: 9px;
-    }
-
-    #statutApplication {
-      color: #d8e1ef;
-    }
-
-    /* =========================================================
-       FENÊTRE IA
-    ========================================================= */
-
-    #fenetreIA {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: none;
-      place-items: center;
-      padding: 20px;
-      background: rgba(0, 0, 0, .65);
-    }
-
-    #fenetreIA.active {
-      display: grid;
-    }
-
-    #carteIA {
-      width: min(520px, 100%);
-      padding: 16px;
-      border: 1px solid var(--couleur-bordure);
-      border-radius: 15px;
-      background: var(--couleur-panel);
-      box-shadow: 0 25px 80px rgba(0, 0, 0, .55);
-    }
-
-    #enteteIA {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-
-    #actionsIA {
-      display: flex;
-      justify-content: flex-end;
-      gap: 7px;
-      margin-top: 14px;
-    }
-
-    /* =========================================================
-       TOAST
-    ========================================================= */
-
-    #notification {
-      position: fixed;
-      right: 15px;
-      bottom: 49px;
-      z-index: 2000;
-      max-width: min(340px, calc(100vw - 30px));
-      padding: 10px 13px;
-      border: 1px solid #354664;
-      border-radius: 9px;
-      background: #121b2d;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, .5);
-      font-size: 11px;
-      opacity: 0;
-      transform: translateY(10px);
-      pointer-events: none;
-      transition: .2s ease;
-    }
-
-    #notification.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* =========================================================
-       PANNEAUX MOBILES
-    ========================================================= */
-
-    #navigationMobile {
-      display: none;
-    }
-
-    @media (max-width: 900px) {
-      #espaceTravail {
-        grid-template-columns:
-          minmax(190px, 220px)
-          minmax(0, 1fr)
-          minmax(210px, 240px);
-      }
-
-      #identiteApplication {
-        min-width: 170px;
-      }
-    }
-
-    @media (max-width: 760px) {
-      #application {
-        grid-template-rows: auto minmax(0, 1fr) auto;
-      }
-
-      #nomApplication {
-        font-size: 12px;
-      }
-
-      #sousTitreApplication {
-        display: none;
-      }
-
-      #identiteApplication {
-        min-width: auto;
-      }
-
-      #actionsPrincipales .texteBouton {
-        display: none;
-      }
-
-      #espaceTravail {
-        display: block;
-        position: relative;
-      }
-
-      .panneau {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        z-index: 200;
-        display: none;
-        width: min(88vw, 330px);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, .65);
-      }
-
-      #panneauMedias {
-        left: 0;
-      }
-
-      #panneauProprietes {
-        right: 0;
-      }
-
-      .panneau.mobileOuvert {
-        display: block;
-      }
-
-      #editeurCentral {
-        width: 100%;
-        height: calc(100dvh - 108px);
-        grid-template-rows: minmax(0, 1fr) 215px;
-      }
-
-      #zoneApercu {
-        padding: 7px;
-      }
-
-      #cadreApercu {
-        border-radius: 10px;
-      }
-
-      #navigationMobile {
-        position: absolute;
-        right: 8px;
-        bottom: 39px;
-        left: 8px;
-        z-index: 150;
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-        pointer-events: none;
-      }
-
-      #navigationMobile .bouton {
-        min-width: 82px;
-        pointer-events: auto;
-      }
-
-      #piedApplication {
-        height: 34px;
-      }
-    }
-
-    @media (max-width: 430px) {
-      #logoApplication {
-        width: 32px;
-        height: 32px;
-      }
-
-      #actionsPrincipales {
-        gap: 4px;
-      }
-
-      #actionsPrincipales .bouton {
-        min-height: 34px;
-        padding: 0 7px;
-        font-size: 10px;
-      }
-
-      #barreApercu {
-        bottom: 8px;
-      }
-
-      #timeline {
-        height: 205px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+    <meta name="theme-color" content="#0b1020">
+    <meta name="description" content="Laboratoire commercial de création et de montage vidéo assisté par IA.">
+    <meta name="application-name" content="Simulation Video Fobas">
+
+    <title>Simulation Video Fobas — Laboratoire de Création Vidéo IA</title>
+
+    <link rel="stylesheet" href="simulationvideofobas.css">
 </head>
 
-<body>
-
-<div
-  id="application"
-  data-nom-application="Simulation Video Fobas"
-  data-version="1.0.0"
+<body
+    id="simulationVideoFobas"
+    class="app-body"
+    data-app="simulation-video-fobas"
+    data-version="1.0.0"
+    data-language="fr"
+    data-max-video-duration="300"
+    data-storage-key="simulationVideoFobasProject"
 >
 
-  <!-- =======================================================
-       BARRE PRINCIPALE
-  ======================================================== -->
-  <header id="barreSuperieure">
-
-    <div id="identiteApplication">
-      <div id="logoApplication">VF</div>
-
-      <div>
-        <h1 id="nomApplication">Simulation Video Fobas</h1>
-        <p id="sousTitreApplication">
-          Studio publicitaire IA · jusqu'à 5 minutes
-        </p>
-      </div>
-    </div>
-
-    <div id="actionsPrincipales">
-
-      <button
-        id="boutonNouveauProjet"
-        class="bouton"
-        data-action="nouveau-projet"
-        type="button"
-      >
-        ＋ <span class="texteBouton">Nouveau</span>
-      </button>
-
-      <button
-        id="boutonSauvegarder"
-        class="bouton"
-        data-action="sauvegarder"
-        type="button"
-      >
-        💾 <span class="texteBouton">Sauvegarder</span>
-      </button>
-
-      <button
-        id="boutonTelecharger"
-        class="bouton boutonPrimaire"
-        data-action="telecharger"
-        type="button"
-      >
-        ⬇ <span class="texteBouton">Télécharger</span>
-      </button>
-
-    </div>
-
-  </header>
-
-
-  <!-- =======================================================
-       ESPACE DE TRAVAIL
-  ======================================================== -->
-  <div id="espaceTravail">
-
-    <!-- =====================================================
-         PANNEAU MÉDIAS
-    ====================================================== -->
-    <aside
-      id="panneauMedias"
-      class="panneau"
-      data-panneau="medias"
+    <!-- =========================================================
+         APPLICATION
+    ========================================================== -->
+    <div
+        id="app"
+        class="app-container"
+        data-component="application"
     >
 
-      <div class="titrePanneau">
-
-        <span>Médias</span>
-
-        <button
-          id="boutonFermerMedias"
-          class="bouton boutonIcone"
-          data-action="fermer-medias"
-          type="button"
-        >
-          ×
-        </button>
-
-      </div>
-
-      <div class="corpsPanneau">
-
-        <section class="sectionPanneau">
-
-          <h2 class="titreSection">Importer</h2>
-
-          <div
-            id="zoneImportation"
-            data-action="ouvrir-importation"
-          >
-            <strong>Importer vos médias</strong>
-            <br>
-            Photos · Vidéos · Musique · Voix
-          </div>
-
-          <input
-            id="champFichiers"
-            name="fichiersMedias"
-            type="file"
-            accept="image/*,video/*,audio/*"
-            multiple
-          >
-
-          <div id="grilleActionsMedias">
-
-            <button
-              id="boutonPhotos"
-              class="bouton"
-              data-action="importer-photos"
-              type="button"
-            >
-              🖼 Photos
-            </button>
-
-            <button
-              id="boutonVideos"
-              class="bouton"
-              data-action="importer-videos"
-              type="button"
-            >
-              🎬 Vidéos
-            </button>
-
-            <button
-              id="boutonAudio"
-              class="bouton"
-              data-action="importer-audio"
-              type="button"
-            >
-              🎵 Audio
-            </button>
-
-            <button
-              id="boutonTexte"
-              class="bouton"
-              data-action="ajouter-texte"
-              type="button"
-            >
-              T Texte
-            </button>
-
-          </div>
-
-        </section>
-
-
-        <section class="sectionPanneau">
-
-          <h2 class="titreSection">Bibliothèque</h2>
-
-          <div id="bibliothequeMedias"></div>
-
-        </section>
-
-      </div>
-
-    </aside>
-
-
-    <!-- =====================================================
-         ÉDITEUR CENTRAL
-    ====================================================== -->
-    <main id="editeurCentral">
-
-      <!-- ===================================================
-           APERÇU
-      ==================================================== -->
-      <section id="zoneApercu">
-
-        <div
-          id="cadreApercu"
-          data-action="gestes-apercu"
-          aria-label="Aperçu de la vidéo"
+        <!-- =====================================================
+             HEADER / BARRE PRINCIPALE
+        ====================================================== -->
+        <header
+            id="appHeader"
+            class="app-header"
+            data-component="header"
         >
 
-          <canvas
-            id="canvasApercu"
-            width="1280"
-            height="720"
-          ></canvas>
+            <div class="brand-area">
+                <button
+                    id="brandButton"
+                    class="brand-button"
+                    type="button"
+                    data-action="home"
+                    aria-label="Accueil"
+                >
+                    <span
+                        id="brandLogo"
+                        class="brand-logo"
+                        aria-hidden="true"
+                    >VF</span>
 
-          <div id="statutApercu">
-            APERÇU · 16:9
-          </div>
-
-          <div id="informationZoom">
-            Zoom 100%
-          </div>
-
-
-          <div id="barreApercu">
-
-            <button
-              id="boutonLecture"
-              class="bouton boutonIcone"
-              data-action="lecture"
-              title="Lire"
-              type="button"
-            >
-              ▶
-            </button>
-
-            <button
-              id="boutonArret"
-              class="bouton boutonIcone"
-              data-action="arret"
-              title="Arrêter"
-              type="button"
-            >
-              ■
-            </button>
-
-            <button
-              id="boutonZoomMoins"
-              class="bouton boutonIcone"
-              data-action="zoom-moins"
-              title="Zoom arrière"
-              type="button"
-            >
-              −
-            </button>
-
-            <button
-              id="boutonZoomReset"
-              class="bouton boutonIcone"
-              data-action="zoom-reset"
-              title="Réinitialiser le zoom"
-              type="button"
-            >
-              100%
-            </button>
-
-            <button
-              id="boutonZoomPlus"
-              class="bouton boutonIcone"
-              data-action="zoom-plus"
-              title="Zoom avant"
-              type="button"
-            >
-              ＋
-            </button>
-
-            <button
-              id="boutonPleinEcran"
-              class="bouton boutonIcone"
-              data-action="plein-ecran"
-              title="Plein écran"
-              type="button"
-            >
-              ⛶
-            </button>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ===================================================
-           TIMELINE
-      ==================================================== -->
-      <section id="timeline">
-
-        <div id="enteteTimeline">
-
-          <button
-            id="boutonAnnuler"
-            class="bouton"
-            data-action="annuler"
-            type="button"
-          >
-            ↶ Annuler
-          </button>
-
-          <button
-            id="boutonRetablir"
-            class="bouton"
-            data-action="retablir"
-            type="button"
-          >
-            ↷ Rétablir
-          </button>
-
-          <span id="lectureTemps">
-            00:00 / 05:00
-          </span>
-
-          <button
-            id="boutonGenererIA"
-            class="bouton boutonPrimaire"
-            data-action="ouvrir-ia"
-            type="button"
-          >
-            ✦ Générer avec l'IA
-          </button>
-
-        </div>
-
-
-        <div
-          id="zoneTimelineDefilante"
-          data-action="timeline"
-        >
-
-          <div id="timelineInterne">
-
-            <div id="regleTimeline"></div>
-
+                    <span class="brand-text">
+                        <strong id="brandName">Video Fobas</strong>
+                        <small id="brandSubtitle">Laboratoire IA</small>
+                    </span>
+                </button>
+            </div>
 
             <div
-              id="pisteVideo"
-              class="piste"
-              data-piste="video"
+                id="projectHeader"
+                class="project-header"
+                data-component="project-header"
             >
 
-              <span class="etiquettePiste">
-                Vidéo
-              </span>
+                <div class="project-title-wrapper">
+                    <label
+                        for="projectName"
+                        class="sr-only"
+                    >
+                        Nom du projet
+                    </label>
 
-              <div id="conteneurClipsVideo"></div>
+                    <input
+                        id="projectName"
+                        name="projectName"
+                        type="text"
+                        value="Nouveau projet"
+                        maxlength="120"
+                        autocomplete="off"
+                        data-field="project-name"
+                    >
+                </div>
+
+                <span
+                    id="projectStatus"
+                    class="project-status"
+                    data-status="saved"
+                    aria-live="polite"
+                >
+                    Enregistré
+                </span>
+            </div>
+
+            <nav
+                id="mainToolbar"
+                class="main-toolbar"
+                aria-label="Actions principales"
+            >
+
+                <button
+                    id="newProjectButton"
+                    class="toolbar-button"
+                    type="button"
+                    data-action="new-project"
+                >
+                    <span aria-hidden="true">＋</span>
+                    <span>Nouveau</span>
+                </button>
+
+                <button
+                    id="saveProjectButton"
+                    class="toolbar-button"
+                    type="button"
+                    data-action="save-project"
+                >
+                    <span aria-hidden="true">💾</span>
+                    <span>Sauvegarder</span>
+                </button>
+
+                <button
+                    id="loadProjectButton"
+                    class="toolbar-button"
+                    type="button"
+                    data-action="load-project"
+                >
+                    <span aria-hidden="true">↥</span>
+                    <span>Charger</span>
+                </button>
+
+                <button
+                    id="undoButton"
+                    class="toolbar-button"
+                    type="button"
+                    data-action="undo"
+                    disabled
+                >
+                    <span aria-hidden="true">↶</span>
+                    <span>Annuler</span>
+                </button>
+
+                <button
+                    id="redoButton"
+                    class="toolbar-button"
+                    type="button"
+                    data-action="redo"
+                    disabled
+                >
+                    <span aria-hidden="true">↷</span>
+                    <span>Rétablir</span>
+                </button>
+
+                <button
+                    id="exportButton"
+                    class="toolbar-button toolbar-button-primary"
+                    type="button"
+                    data-action="export"
+                >
+                    <span aria-hidden="true">⇩</span>
+                    <span>Télécharger</span>
+                </button>
+
+            </nav>
+        </header>
+
+
+        <!-- =====================================================
+             BARRE DE CONTRÔLE DU PROJET
+        ====================================================== -->
+        <section
+            id="projectControlBar"
+            class="project-control-bar"
+            data-component="project-controls"
+        >
+
+            <div class="control-group">
+
+                <label
+                    for="videoFormat"
+                    class="control-label"
+                >
+                    Format
+                </label>
+
+                <select
+                    id="videoFormat"
+                    name="videoFormat"
+                    data-field="video-format"
+                >
+                    <option value="16:9">16:9 — Paysage</option>
+                    <option value="9:16">9:16 — Vertical</option>
+                    <option value="1:1">1:1 — Carré</option>
+                    <option value="4:5">4:5 — Social</option>
+                    <option value="4:3">4:3 — Classique</option>
+                </select>
+
+            </div>
+
+
+            <div class="control-group">
+
+                <label
+                    for="videoResolution"
+                    class="control-label"
+                >
+                    Résolution
+                </label>
+
+                <select
+                    id="videoResolution"
+                    name="videoResolution"
+                    data-field="video-resolution"
+                >
+                    <option value="720p">HD 720p</option>
+                    <option value="1080p" selected>Full HD 1080p</option>
+                    <option value="1440p">2K 1440p</option>
+                    <option value="2160p">4K 2160p</option>
+                </select>
+
+            </div>
+
+
+            <div class="control-group">
+
+                <label
+                    for="frameRate"
+                    class="control-label"
+                >
+                    Images/s
+                </label>
+
+                <select
+                    id="frameRate"
+                    name="frameRate"
+                    data-field="frame-rate"
+                >
+                    <option value="24">24 FPS</option>
+                    <option value="25">25 FPS</option>
+                    <option value="30" selected>30 FPS</option>
+                    <option value="50">50 FPS</option>
+                    <option value="60">60 FPS</option>
+                </select>
 
             </div>
 
 
             <div
-              id="pisteTexte"
-              class="piste"
-              data-piste="texte"
+                id="durationDisplay"
+                class="duration-display"
+                data-component="duration"
             >
-
-              <span class="etiquettePiste">
-                Texte
-              </span>
-
-              <div id="conteneurClipsTexte"></div>
-
+                <span>Durée maximale</span>
+                <strong id="maxDurationLabel">05:00</strong>
             </div>
 
 
             <div
-              id="pisteAudio"
-              class="piste"
-              data-piste="audio"
+                id="zoomControls"
+                class="zoom-controls"
+                data-component="zoom-controls"
             >
 
-              <span class="etiquettePiste">
-                Audio
-              </span>
+                <button
+                    id="zoomOutButton"
+                    type="button"
+                    class="icon-button"
+                    data-action="zoom-out"
+                    aria-label="Réduire le zoom"
+                >
+                    −
+                </button>
 
-              <div id="conteneurClipsAudio"></div>
+                <output
+                    id="zoomValue"
+                    class="zoom-value"
+                    aria-label="Niveau de zoom"
+                >
+                    100%
+                </output>
+
+                <button
+                    id="zoomInButton"
+                    type="button"
+                    class="icon-button"
+                    data-action="zoom-in"
+                    aria-label="Augmenter le zoom"
+                >
+                    ＋
+                </button>
+
+                <button
+                    id="zoomResetButton"
+                    type="button"
+                    class="icon-button"
+                    data-action="zoom-reset"
+                    aria-label="Réinitialiser le zoom"
+                >
+                    100%
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CORPS PRINCIPAL
+        ====================================================== -->
+        <main
+            id="mainWorkspace"
+            class="main-workspace"
+            data-component="workspace"
+        >
+
+            <!-- =================================================
+                 SIDEBAR GAUCHE
+            ================================================== -->
+            <aside
+                id="leftSidebar"
+                class="left-sidebar"
+                data-component="media-sidebar"
+            >
+
+                <nav
+                    id="mediaNavigation"
+                    class="media-navigation"
+                    aria-label="Outils du laboratoire"
+                >
+
+                    <button
+                        id="mediaTabButton"
+                        class="sidebar-tab active"
+                        type="button"
+                        data-tab="media"
+                    >
+                        <span class="tab-icon" aria-hidden="true">▣</span>
+                        <span>Médias</span>
+                    </button>
+
+                    <button
+                        id="textTabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="text"
+                    >
+                        <span class="tab-icon" aria-hidden="true">T</span>
+                        <span>Texte</span>
+                    </button>
+
+                    <button
+                        id="audioTabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="audio"
+                    >
+                        <span class="tab-icon" aria-hidden="true">♫</span>
+                        <span>Audio</span>
+                    </button>
+
+                    <button
+                        id="voiceTabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="voice"
+                    >
+                        <span class="tab-icon" aria-hidden="true">🎙</span>
+                        <span>Voix IA</span>
+                    </button>
+
+                    <button
+                        id="imageAITabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="image-ai"
+                    >
+                        <span class="tab-icon" aria-hidden="true">✦</span>
+                        <span>Image IA</span>
+                    </button>
+
+                    <button
+                        id="videoAITabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="video-ai"
+                    >
+                        <span class="tab-icon" aria-hidden="true">▶</span>
+                        <span>Vidéo IA</span>
+                    </button>
+
+                    <button
+                        id="effectsTabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="effects"
+                    >
+                        <span class="tab-icon" aria-hidden="true">✧</span>
+                        <span>Effets</span>
+                    </button>
+
+                    <button
+                        id="transitionsTabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="transitions"
+                    >
+                        <span class="tab-icon" aria-hidden="true">⇄</span>
+                        <span>Transitions</span>
+                    </button>
+
+                    <button
+                        id="threeDTabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="3d"
+                    >
+                        <span class="tab-icon" aria-hidden="true">◇</span>
+                        <span>3D</span>
+                    </button>
+
+                    <button
+                        id="colorTabButton"
+                        class="sidebar-tab"
+                        type="button"
+                        data-tab="color"
+                    >
+                        <span class="tab-icon" aria-hidden="true">◐</span>
+                        <span>Couleur</span>
+                    </button>
+
+                </nav>
+
+
+                <!-- =============================================
+                     PANNEAU DES OUTILS
+                ============================================== -->
+                <section
+                    id="toolPanel"
+                    class="tool-panel"
+                    data-component="tool-panel"
+                >
+
+                    <!-- =========================
+                         ONGLET MÉDIAS
+                    ========================== -->
+                    <div
+                        id="mediaPanel"
+                        class="tool-panel-content active"
+                        data-panel="media"
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Médias</h2>
+                                <p>Importez vos éléments.</p>
+                            </div>
+
+                            <button
+                                id="clearMediaButton"
+                                type="button"
+                                class="small-button"
+                                data-action="clear-media"
+                            >
+                                Effacer
+                            </button>
+                        </div>
+
+
+                        <div
+                            id="mediaDropZone"
+                            class="media-drop-zone"
+                            data-dropzone="media"
+                        >
+
+                            <input
+                                id="mediaFileInput"
+                                name="mediaFiles"
+                                type="file"
+                                accept="image/*,video/*"
+                                multiple
+                                hidden
+                                data-input="media"
+                            >
+
+                            <button
+                                id="importMediaButton"
+                                type="button"
+                                class="upload-button"
+                                data-action="import-media"
+                            >
+                                <span aria-hidden="true">＋</span>
+                                <strong>Importer des médias</strong>
+                                <small>Images et vidéos</small>
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="mediaLibrary"
+                            class="media-library"
+                            data-component="media-library"
+                        >
+                            <!-- Éléments générés par JavaScript -->
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET TEXTE
+                    ========================== -->
+                    <div
+                        id="textPanel"
+                        class="tool-panel-content"
+                        data-panel="text"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Texte</h2>
+                                <p>Ajoutez du texte à la scène.</p>
+                            </div>
+                        </div>
+
+                        <button
+                            id="addTextButton"
+                            type="button"
+                            class="primary-action"
+                            data-action="add-text"
+                        >
+                            ＋ Ajouter un texte
+                        </button>
+
+
+                        <div class="form-stack">
+
+                            <div class="form-field">
+
+                                <label for="textContent">
+                                    Contenu
+                                </label>
+
+                                <textarea
+                                    id="textContent"
+                                    name="textContent"
+                                    rows="4"
+                                    maxlength="500"
+                                    placeholder="Écrivez votre texte..."
+                                    data-field="text-content"
+                                ></textarea>
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="textFont">
+                                    Police
+                                </label>
+
+                                <select
+                                    id="textFont"
+                                    name="textFont"
+                                    data-field="text-font"
+                                >
+                                    <option value="Arial">Arial</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Roboto">Roboto</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Verdana">Verdana</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="textSize">
+                                    Taille
+                                </label>
+
+                                <input
+                                    id="textSize"
+                                    name="textSize"
+                                    type="range"
+                                    min="8"
+                                    max="180"
+                                    value="48"
+                                    data-field="text-size"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="textColor">
+                                    Couleur
+                                </label>
+
+                                <input
+                                    id="textColor"
+                                    name="textColor"
+                                    type="color"
+                                    value="#ffffff"
+                                    data-field="text-color"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="textAnimation">
+                                    Animation
+                                </label>
+
+                                <select
+                                    id="textAnimation"
+                                    name="textAnimation"
+                                    data-field="text-animation"
+                                >
+                                    <option value="none">Aucune</option>
+                                    <option value="fade">Fondu</option>
+                                    <option value="slide">Glissement</option>
+                                    <option value="scale">Zoom</option>
+                                    <option value="typewriter">Machine à écrire</option>
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET AUDIO
+                    ========================== -->
+                    <div
+                        id="audioPanel"
+                        class="tool-panel-content"
+                        data-panel="audio"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Audio</h2>
+                                <p>Musique et fichiers audio.</p>
+                            </div>
+                        </div>
+
+                        <input
+                            id="audioFileInput"
+                            name="audioFiles"
+                            type="file"
+                            accept="audio/*"
+                            multiple
+                            hidden
+                            data-input="audio"
+                        >
+
+                        <button
+                            id="importAudioButton"
+                            type="button"
+                            class="primary-action"
+                            data-action="import-audio"
+                        >
+                            ＋ Importer un audio
+                        </button>
+
+                        <div
+                            id="audioLibrary"
+                            class="asset-list"
+                            data-component="audio-library"
+                        >
+                            <!-- Généré par JavaScript -->
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET VOIX IA
+                    ========================== -->
+                    <div
+                        id="voicePanel"
+                        class="tool-panel-content"
+                        data-panel="voice"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Voix IA</h2>
+                                <p>Préparez une narration.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+
+                            <label for="voiceText">
+                                Texte de narration
+                            </label>
+
+                            <textarea
+                                id="voiceText"
+                                name="voiceText"
+                                rows="7"
+                                maxlength="5000"
+                                placeholder="Saisissez le texte de la narration..."
+                                data-field="voice-text"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="voiceLanguage">
+                                Langue
+                            </label>
+
+                            <select
+                                id="voiceLanguage"
+                                name="voiceLanguage"
+                                data-field="voice-language"
+                            >
+                                <option value="fr-FR">Français</option>
+                                <option value="fr-CA">Français Canada</option>
+                                <option value="en-US">English</option>
+                                <option value="es-ES">Español</option>
+                                <option value="ht-HT">Kreyòl haïtien</option>
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="voiceStyle">
+                                Style vocal
+                            </label>
+
+                            <select
+                                id="voiceStyle"
+                                name="voiceStyle"
+                                data-field="voice-style"
+                            >
+                                <option value="natural">Naturel</option>
+                                <option value="professional">Professionnel</option>
+                                <option value="energetic">Énergique</option>
+                                <option value="calm">Calme</option>
+                                <option value="commercial">Publicitaire</option>
+                            </select>
+
+                        </div>
+
+
+                        <button
+                            id="generateVoiceButton"
+                            type="button"
+                            class="primary-action"
+                            data-action="generate-voice"
+                        >
+                            ✦ Générer la voix
+                        </button>
+
+                        <audio
+                            id="voicePreviewAudio"
+                            class="audio-preview"
+                            controls
+                            preload="metadata"
+                            hidden
+                        ></audio>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET IMAGE IA
+                    ========================== -->
+                    <div
+                        id="imageAIPanel"
+                        class="tool-panel-content"
+                        data-panel="image-ai"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Image IA</h2>
+                                <p>Préparez une image à générer.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+
+                            <label for="imagePrompt">
+                                Description
+                            </label>
+
+                            <textarea
+                                id="imagePrompt"
+                                name="imagePrompt"
+                                rows="6"
+                                maxlength="2000"
+                                placeholder="Décrivez l'image souhaitée..."
+                                data-field="image-prompt"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="imageStyle">
+                                Style
+                            </label>
+
+                            <select
+                                id="imageStyle"
+                                name="imageStyle"
+                                data-field="image-style"
+                            >
+                                <option value="realistic">Réaliste</option>
+                                <option value="cinematic">Cinématique</option>
+                                <option value="3d">3D</option>
+                                <option value="illustration">Illustration</option>
+                                <option value="advertising">Publicitaire</option>
+                            </select>
+
+                        </div>
+
+
+                        <button
+                            id="generateImageButton"
+                            type="button"
+                            class="primary-action"
+                            data-action="generate-image"
+                        >
+                            ✦ Générer l'image
+                        </button>
+
+
+                        <div
+                            id="generatedImageLibrary"
+                            class="generated-library"
+                            data-component="generated-images"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET VIDÉO IA
+                    ========================== -->
+                    <div
+                        id="videoAIPanel"
+                        class="tool-panel-content"
+                        data-panel="video-ai"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Vidéo IA</h2>
+                                <p>Créez des séquences courtes.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+
+                            <label for="videoPrompt">
+                                Description de la scène
+                            </label>
+
+                            <textarea
+                                id="videoPrompt"
+                                name="videoPrompt"
+                                rows="6"
+                                maxlength="2000"
+                                placeholder="Décrivez la scène vidéo..."
+                                data-field="video-prompt"
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="aiVideoDuration">
+                                Durée
+                            </label>
+
+                            <select
+                                id="aiVideoDuration"
+                                name="aiVideoDuration"
+                                data-field="ai-video-duration"
+                            >
+                                <option value="3">3 secondes</option>
+                                <option value="5">5 secondes</option>
+                                <option value="8">8 secondes</option>
+                                <option value="10">10 secondes</option>
+                            </select>
+
+                        </div>
+
+
+                        <button
+                            id="generateVideoButton"
+                            type="button"
+                            class="primary-action"
+                            data-action="generate-video"
+                        >
+                            ✦ Générer la vidéo
+                        </button>
+
+
+                        <div
+                            id="generatedVideoLibrary"
+                            class="generated-library"
+                            data-component="generated-videos"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET EFFETS
+                    ========================== -->
+                    <div
+                        id="effectsPanel"
+                        class="tool-panel-content"
+                        data-panel="effects"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Effets</h2>
+                                <p>Effets visuels de la scène.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            id="effectsList"
+                            class="option-grid"
+                            data-component="effects-list"
+                        >
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-effect="none"
+                            >
+                                Aucun
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-effect="blur"
+                            >
+                                Flou
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-effect="brightness"
+                            >
+                                Luminosité
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-effect="contrast"
+                            >
+                                Contraste
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-effect="grayscale"
+                            >
+                                Noir & blanc
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-effect="vintage"
+                            >
+                                Vintage
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET TRANSITIONS
+                    ========================== -->
+                    <div
+                        id="transitionsPanel"
+                        class="tool-panel-content"
+                        data-panel="transitions"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Transitions</h2>
+                                <p>Transitions entre les scènes.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            id="transitionList"
+                            class="option-grid"
+                            data-component="transition-list"
+                        >
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-transition="none"
+                            >
+                                Aucune
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-transition="fade"
+                            >
+                                Fondu
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-transition="slide-left"
+                            >
+                                Glissement gauche
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-transition="slide-right"
+                            >
+                                Glissement droite
+                            </button>
+
+                            <button
+                                type="button"
+                                class="option-button"
+                                data-transition="zoom"
+                            >
+                                Zoom
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET 3D
+                    ========================== -->
+                    <div
+                        id="threeDPanel"
+                        class="tool-panel-content"
+                        data-panel="3d"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>3D</h2>
+                                <p>Contrôles 3D sans Three.js.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+
+                            <label for="rotationX">
+                                Rotation X
+                            </label>
+
+                            <input
+                                id="rotationX"
+                                name="rotationX"
+                                type="range"
+                                min="-180"
+                                max="180"
+                                value="0"
+                                data-field="rotation-x"
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="rotationY">
+                                Rotation Y
+                            </label>
+
+                            <input
+                                id="rotationY"
+                                name="rotationY"
+                                type="range"
+                                min="-180"
+                                max="180"
+                                value="0"
+                                data-field="rotation-y"
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="rotationZ">
+                                Rotation Z
+                            </label>
+
+                            <input
+                                id="rotationZ"
+                                name="rotationZ"
+                                type="range"
+                                min="-180"
+                                max="180"
+                                value="0"
+                                data-field="rotation-z"
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="perspective3D">
+                                Perspective
+                            </label>
+
+                            <input
+                                id="perspective3D"
+                                name="perspective3D"
+                                type="range"
+                                min="200"
+                                max="3000"
+                                value="1000"
+                                data-field="perspective-3d"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         ONGLET COULEUR
+                    ========================== -->
+                    <div
+                        id="colorPanel"
+                        class="tool-panel-content"
+                        data-panel="color"
+                        hidden
+                    >
+
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Couleur</h2>
+                                <p>Ajustement visuel.</p>
+                            </div>
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="brightnessControl">
+                                Luminosité
+                            </label>
+
+                            <input
+                                id="brightnessControl"
+                                name="brightnessControl"
+                                type="range"
+                                min="0"
+                                max="200"
+                                value="100"
+                                data-field="brightness"
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="contrastControl">
+                                Contraste
+                            </label>
+
+                            <input
+                                id="contrastControl"
+                                name="contrastControl"
+                                type="range"
+                                min="0"
+                                max="200"
+                                value="100"
+                                data-field="contrast"
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="saturationControl">
+                                Saturation
+                            </label>
+
+                            <input
+                                id="saturationControl"
+                                name="saturationControl"
+                                type="range"
+                                min="0"
+                                max="200"
+                                value="100"
+                                data-field="saturation"
+                            >
+
+                        </div>
+
+
+                        <button
+                            id="resetColorButton"
+                            type="button"
+                            class="secondary-action"
+                            data-action="reset-color"
+                        >
+                            Réinitialiser
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </aside>
+
+
+            <!-- =================================================
+                 ZONE CENTRALE
+            ================================================== -->
+            <section
+                id="centerWorkspace"
+                class="center-workspace"
+                data-component="center-workspace"
+            >
+
+                <!-- =============================================
+                     PREVIEW
+                ============================================== -->
+                <section
+                    id="previewSection"
+                    class="preview-section"
+                    data-component="preview"
+                >
+
+                    <div
+                        id="previewHeader"
+                        class="preview-header"
+                    >
+
+                        <div class="preview-title">
+                            <span>APERÇU</span>
+                            <strong id="previewResolution">
+                                1920 × 1080
+                            </strong>
+                        </div>
+
+
+                        <div
+                            id="previewTools"
+                            class="preview-tools"
+                        >
+
+                            <button
+                                id="fitPreviewButton"
+                                type="button"
+                                class="preview-tool-button"
+                                data-action="fit-preview"
+                            >
+                                Ajuster
+                            </button>
+
+                            <button
+                                id="fullscreenPreviewButton"
+                                type="button"
+                                class="preview-tool-button"
+                                data-action="fullscreen-preview"
+                            >
+                                Plein écran
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="previewViewport"
+                        class="preview-viewport"
+                        data-component="preview-viewport"
+                    >
+
+                        <div
+                            id="previewStage"
+                            class="preview-stage"
+                            data-component="preview-stage"
+                            tabindex="0"
+                        >
+
+                            <video
+                                id="previewVideo"
+                                class="preview-video"
+                                preload="metadata"
+                                playsinline
+                                muted
+                            ></video>
+
+
+                            <canvas
+                                id="previewCanvas"
+                                class="preview-canvas"
+                                width="1920"
+                                height="1080"
+                                aria-label="Zone de composition vidéo"
+                            ></canvas>
+
+
+                            <div
+                                id="previewOverlay"
+                                class="preview-overlay"
+                                data-component="preview-overlay"
+                            >
+                                <!-- Objets texte/images/éléments générés par JS -->
+                            </div>
+
+
+                            <div
+                                id="previewEmptyState"
+                                class="preview-empty-state"
+                            >
+
+                                <div class="empty-state-icon">
+                                    ▶
+                                </div>
+
+                                <h2>Votre vidéo apparaîtra ici</h2>
+
+                                <p>
+                                    Importez un média ou ajoutez un élément
+                                    pour commencer votre montage.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         CONTRÔLES LECTEUR
+                    ========================================== -->
+                    <div
+                        id="playerControls"
+                        class="player-controls"
+                        data-component="player"
+                    >
+
+                        <button
+                            id="previousFrameButton"
+                            type="button"
+                            class="player-button"
+                            data-action="previous-frame"
+                            aria-label="Image précédente"
+                        >
+                            ◀
+                        </button>
+
+                        <button
+                            id="playButton"
+                            type="button"
+                            class="player-button player-play-button"
+                            data-action="play"
+                            aria-label="Lire"
+                        >
+                            ▶
+                        </button>
+
+                        <button
+                            id="nextFrameButton"
+                            type="button"
+                            class="player-button"
+                            data-action="next-frame"
+                            aria-label="Image suivante"
+                        >
+                            ▶
+                        </button>
+
+                        <span
+                            id="currentTimeDisplay"
+                            class="time-display"
+                        >
+                            00:00.000
+                        </span>
+
+                        <input
+                            id="playerSeek"
+                            name="playerSeek"
+                            type="range"
+                            min="0"
+                            max="300"
+                            step="0.001"
+                            value="0"
+                            aria-label="Position de lecture"
+                            data-field="player-seek"
+                        >
+
+                        <span
+                            id="totalTimeDisplay"
+                            class="time-display"
+                        >
+                            05:00.000
+                        </span>
+
+                        <button
+                            id="muteButton"
+                            type="button"
+                            class="player-button"
+                            data-action="mute"
+                            aria-label="Activer ou désactiver le son"
+                        >
+                            🔊
+                        </button>
+
+                        <button
+                            id="playbackSettingsButton"
+                            type="button"
+                            class="player-button"
+                            data-action="playback-settings"
+                            aria-label="Paramètres de lecture"
+                        >
+                            ⚙
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =============================================
+                     TIMELINE
+                ============================================== -->
+                <section
+                    id="timelineSection"
+                    class="timeline-section"
+                    data-component="timeline"
+                >
+
+                    <header
+                        id="timelineHeader"
+                        class="timeline-header"
+                    >
+
+                        <div
+                            id="timelineToolbar"
+                            class="timeline-toolbar"
+                        >
+
+                            <button
+                                id="addTrackButton"
+                                type="button"
+                                class="timeline-button"
+                                data-action="add-track"
+                            >
+                                ＋ Piste
+                            </button>
+
+                            <button
+                                id="splitClipButton"
+                                type="button"
+                                class="timeline-button"
+                                data-action="split-clip"
+                            >
+                                ✂ Diviser
+                            </button>
+
+                            <button
+                                id="deleteClipButton"
+                                type="button"
+                                class="timeline-button"
+                                data-action="delete-clip"
+                            >
+                                Supprimer
+                            </button>
+
+                            <button
+                                id="duplicateClipButton"
+                                type="button"
+                                class="timeline-button"
+                                data-action="duplicate-clip"
+                            >
+                                Dupliquer
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="timelineZoom"
+                            class="timeline-zoom"
+                        >
+
+                            <button
+                                id="timelineZoomOut"
+                                type="button"
+                                class="icon-button"
+                                data-action="timeline-zoom-out"
+                            >
+                                −
+                            </button>
+
+                            <output
+                                id="timelineZoomValue"
+                                class="zoom-value"
+                            >
+                                100%
+                            </output>
+
+                            <button
+                                id="timelineZoomIn"
+                                type="button"
+                                class="icon-button"
+                                data-action="timeline-zoom-in"
+                            >
+                                ＋
+                            </button>
+
+                        </div>
+
+                    </header>
+
+
+                    <div
+                        id="timelineViewport"
+                        class="timeline-viewport"
+                        data-component="timeline-viewport"
+                    >
+
+                        <div
+                            id="timelineRuler"
+                            class="timeline-ruler"
+                            data-component="timeline-ruler"
+                        >
+                            <!-- Généré par JS -->
+                        </div>
+
+
+                        <div
+                            id="timelineTracks"
+                            class="timeline-tracks"
+                            data-component="timeline-tracks"
+                        >
+
+                            <div
+                                id="videoTrack"
+                                class="timeline-track"
+                                data-track-type="video"
+                                data-track-id="video-track-1"
+                            >
+
+                                <div class="track-header">
+
+                                    <span class="track-name">
+                                        Vidéo
+                                    </span>
+
+                                    <button
+                                        id="videoTrackMuteButton"
+                                        type="button"
+                                        class="track-control"
+                                        data-action="mute-track"
+                                        data-track-id="video-track-1"
+                                    >
+                                        🔊
+                                    </button>
+
+                                    <button
+                                        id="videoTrackLockButton"
+                                        type="button"
+                                        class="track-control"
+                                        data-action="lock-track"
+                                        data-track-id="video-track-1"
+                                    >
+                                        🔓
+                                    </button>
+
+                                </div>
+
+                                <div
+                                    id="videoTrackContent"
+                                    class="track-content"
+                                    data-track-content="video"
+                                >
+                                    <!-- Clips vidéo générés par JS -->
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="overlayTrack"
+                                class="timeline-track"
+                                data-track-type="overlay"
+                                data-track-id="overlay-track-1"
+                            >
+
+                                <div class="track-header">
+
+                                    <span class="track-name">
+                                        Overlay
+                                    </span>
+
+                                    <button
+                                        id="overlayTrackMuteButton"
+                                        type="button"
+                                        class="track-control"
+                                        data-action="mute-track"
+                                        data-track-id="overlay-track-1"
+                                    >
+                                        🔊
+                                    </button>
+
+                                    <button
+                                        id="overlayTrackLockButton"
+                                        type="button"
+                                        class="track-control"
+                                        data-action="lock-track"
+                                        data-track-id="overlay-track-1"
+                                    >
+                                        🔓
+                                    </button>
+
+                                </div>
+
+                                <div
+                                    id="overlayTrackContent"
+                                    class="track-content"
+                                    data-track-content="overlay"
+                                >
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="textTrack"
+                                class="timeline-track"
+                                data-track-type="text"
+                                data-track-id="text-track-1"
+                            >
+
+                                <div class="track-header">
+
+                                    <span class="track-name">
+                                        Texte
+                                    </span>
+
+                                    <button
+                                        id="textTrackLockButton"
+                                        type="button"
+                                        class="track-control"
+                                        data-action="lock-track"
+                                        data-track-id="text-track-1"
+                                    >
+                                        🔓
+                                    </button>
+
+                                </div>
+
+                                <div
+                                    id="textTrackContent"
+                                    class="track-content"
+                                    data-track-content="text"
+                                >
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="voiceTrack"
+                                class="timeline-track"
+                                data-track-type="voice"
+                                data-track-id="voice-track-1"
+                            >
+
+                                <div class="track-header">
+
+                                    <span class="track-name">
+                                        Voix
+                                    </span>
+
+                                    <button
+                                        id="voiceTrackMuteButton"
+                                        type="button"
+                                        class="track-control"
+                                        data-action="mute-track"
+                                        data-track-id="voice-track-1"
+                                    >
+                                        🔊
+                                    </button>
+
+                                </div>
+
+                                <div
+                                    id="voiceTrackContent"
+                                    class="track-content"
+                                    data-track-content="voice"
+                                >
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="musicTrack"
+                                class="timeline-track"
+                                data-track-type="music"
+                                data-track-id="music-track-1"
+                            >
+
+                                <div class="track-header">
+
+                                    <span class="track-name">
+                                        Musique
+                                    </span>
+
+                                    <button
+                                        id="musicTrackMuteButton"
+                                        type="button"
+                                        class="track-control"
+                                        data-action="mute-track"
+                                        data-track-id="music-track-1"
+                                    >
+                                        🔊
+                                    </button>
+
+                                </div>
+
+                                <div
+                                    id="musicTrackContent"
+                                    class="track-content"
+                                    data-track-content="music"
+                                >
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div
+                            id="timelinePlayhead"
+                            class="timeline-playhead"
+                            data-component="playhead"
+                        >
+                            <span class="playhead-handle"></span>
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+
+            <!-- =================================================
+                 INSPECTEUR DROIT
+            ================================================== -->
+            <aside
+                id="rightSidebar"
+                class="right-sidebar"
+                data-component="inspector"
+            >
+
+                <header
+                    id="inspectorHeader"
+                    class="inspector-header"
+                >
+                    <h2>Inspecteur</h2>
+
+                    <button
+                        id="closeInspectorButton"
+                        type="button"
+                        class="icon-button"
+                        data-action="close-inspector"
+                        aria-label="Fermer l'inspecteur"
+                    >
+                        ×
+                    </button>
+                </header>
+
+
+                <div
+                    id="inspectorContent"
+                    class="inspector-content"
+                >
+
+                    <!-- =========================================
+                         PROPRIÉTÉS POSITION
+                    ========================================== -->
+                    <section
+                        id="transformSection"
+                        class="inspector-section"
+                        data-section="transform"
+                    >
+
+                        <h3>Transformation</h3>
+
+                        <div class="property-grid">
+
+                            <div class="form-field">
+
+                                <label for="positionX">
+                                    X
+                                </label>
+
+                                <input
+                                    id="positionX"
+                                    name="positionX"
+                                    type="number"
+                                    value="0"
+                                    step="1"
+                                    data-property="position-x"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="positionY">
+                                    Y
+                                </label>
+
+                                <input
+                                    id="positionY"
+                                    name="positionY"
+                                    type="number"
+                                    value="0"
+                                    step="1"
+                                    data-property="position-y"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="scaleX">
+                                    Échelle X
+                                </label>
+
+                                <input
+                                    id="scaleX"
+                                    name="scaleX"
+                                    type="number"
+                                    value="100"
+                                    min="1"
+                                    max="1000"
+                                    step="1"
+                                    data-property="scale-x"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="scaleY">
+                                    Échelle Y
+                                </label>
+
+                                <input
+                                    id="scaleY"
+                                    name="scaleY"
+                                    type="number"
+                                    value="100"
+                                    min="1"
+                                    max="1000"
+                                    step="1"
+                                    data-property="scale-y"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="rotation">
+                                    Rotation
+                                </label>
+
+                                <input
+                                    id="rotation"
+                                    name="rotation"
+                                    type="number"
+                                    value="0"
+                                    min="-360"
+                                    max="360"
+                                    step="1"
+                                    data-property="rotation"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="opacity">
+                                    Opacité
+                                </label>
+
+                                <input
+                                    id="opacity"
+                                    name="opacity"
+                                    type="number"
+                                    value="100"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    data-property="opacity"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =========================================
+                         POSITION DANS LE TEMPS
+                    ========================================== -->
+                    <section
+                        id="timingSection"
+                        class="inspector-section"
+                        data-section="timing"
+                    >
+
+                        <h3>Durée</h3>
+
+                        <div class="property-grid">
+
+                            <div class="form-field">
+
+                                <label for="clipStart">
+                                    Début
+                                </label>
+
+                                <input
+                                    id="clipStart"
+                                    name="clipStart"
+                                    type="number"
+                                    value="0"
+                                    min="0"
+                                    max="300"
+                                    step="0.001"
+                                    data-property="clip-start"
+                                >
+
+                            </div>
+
+
+                            <div class="form-field">
+
+                                <label for="clipDuration">
+                                    Durée
+                                </label>
+
+                                <input
+                                    id="clipDuration"
+                                    name="clipDuration"
+                                    type="number"
+                                    value="5"
+                                    min="0.001"
+                                    max="300"
+                                    step="0.001"
+                                    data-property="clip-duration"
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =========================================
+                         AUDIO
+                    ========================================== -->
+                    <section
+                        id="audioPropertiesSection"
+                        class="inspector-section"
+                        data-section="audio-properties"
+                    >
+
+                        <h3>Audio</h3>
+
+                        <div class="form-field">
+
+                            <label for="volumeControl">
+                                Volume
+                            </label>
+
+                            <input
+                                id="volumeControl"
+                                name="volumeControl"
+                                type="range"
+                                min="0"
+                                max="200"
+                                value="100"
+                                data-property="volume"
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="fadeInDuration">
+                                Fondu entrant
+                            </label>
+
+                            <input
+                                id="fadeInDuration"
+                                name="fadeInDuration"
+                                type="number"
+                                min="0"
+                                max="30"
+                                step="0.1"
+                                value="0"
+                                data-property="fade-in"
+                            >
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="fadeOutDuration">
+                                Fondu sortant
+                            </label>
+
+                            <input
+                                id="fadeOutDuration"
+                                name="fadeOutDuration"
+                                type="number"
+                                min="0"
+                                max="30"
+                                step="0.1"
+                                value="0"
+                                data-property="fade-out"
+                            >
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- =========================================
+                         SUPPRESSION
+                    ========================================== -->
+                    <section
+                        id="selectionActionsSection"
+                        class="inspector-section"
+                        data-section="selection-actions"
+                    >
+
+                        <button
+                            id="duplicateSelectedButton"
+                            type="button"
+                            class="secondary-action"
+                            data-action="duplicate-selected"
+                        >
+                            Dupliquer l'élément
+                        </button>
+
+                        <button
+                            id="deleteSelectedButton"
+                            type="button"
+                            class="danger-action"
+                            data-action="delete-selected"
+                        >
+                            Supprimer l'élément
+                        </button>
+
+                    </section>
+
+                </div>
+
+            </aside>
+
+        </main>
+
+
+        <!-- =====================================================
+             FOOTER / ÉTAT SYSTÈME
+        ====================================================== -->
+        <footer
+            id="appFooter"
+            class="app-footer"
+            data-component="footer"
+        >
+
+            <div
+                id="systemStatus"
+                class="system-status"
+                aria-live="polite"
+            >
+                Prêt
+            </div>
+
+            <div
+                id="storageStatus"
+                class="storage-status"
+            >
+                Stockage local activé
+            </div>
+
+            <div
+                id="connectionStatus"
+                class="connection-status"
+            >
+                Mode local
+            </div>
+
+            <div
+                id="renderStatus"
+                class="render-status"
+            >
+                Moteur prêt
+            </div>
+
+        </footer>
+
+    </div>
+
+
+    <!-- =========================================================
+         MODALE NOUVEAU PROJET
+    ========================================================== -->
+    <dialog
+        id="newProjectDialog"
+        class="app-dialog"
+        data-dialog="new-project"
+    >
+
+        <form
+            id="newProjectForm"
+            method="dialog"
+            data-form="new-project"
+        >
+
+            <header class="dialog-header">
+                <h2>Nouveau projet</h2>
+
+                <button
+                    id="closeNewProjectDialogButton"
+                    type="button"
+                    class="icon-button"
+                    data-action="close-new-project-dialog"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+            </header>
+
+
+            <div class="dialog-body">
+
+                <div class="form-field">
+
+                    <label for="newProjectName">
+                        Nom du projet
+                    </label>
+
+                    <input
+                        id="newProjectName"
+                        name="newProjectName"
+                        type="text"
+                        maxlength="120"
+                        value="Nouveau projet"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="newProjectFormat">
+                        Format
+                    </label>
+
+                    <select
+                        id="newProjectFormat"
+                        name="newProjectFormat"
+                    >
+                        <option value="16:9">16:9</option>
+                        <option value="9:16">9:16</option>
+                        <option value="1:1">1:1</option>
+                        <option value="4:5">4:5</option>
+                    </select>
+
+                </div>
 
             </div>
 
 
-            <div id="teteLecture"></div>
+            <footer class="dialog-footer">
 
-          </div>
+                <button
+                    id="cancelNewProjectButton"
+                    type="button"
+                    class="secondary-action"
+                    data-action="cancel-new-project"
+                >
+                    Annuler
+                </button>
+
+                <button
+                    id="confirmNewProjectButton"
+                    type="submit"
+                    class="primary-action"
+                    data-action="confirm-new-project"
+                >
+                    Créer le projet
+                </button>
+
+            </footer>
+
+        </form>
+
+    </dialog>
+
+
+    <!-- =========================================================
+         MODALE EXPORT
+    ========================================================== -->
+    <dialog
+        id="exportDialog"
+        class="app-dialog"
+        data-dialog="export"
+    >
+
+        <form
+            id="exportForm"
+            method="dialog"
+            data-form="export"
+        >
+
+            <header class="dialog-header">
+
+                <h2>Exporter la vidéo</h2>
+
+                <button
+                    id="closeExportDialogButton"
+                    type="button"
+                    class="icon-button"
+                    data-action="close-export-dialog"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <div class="dialog-body">
+
+                <div class="form-field">
+
+                    <label for="exportFormat">
+                        Format
+                    </label>
+
+                    <select
+                        id="exportFormat"
+                        name="exportFormat"
+                    >
+                        <option value="webm">WebM</option>
+                        <option value="mp4">MP4</option>
+                    </select>
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <label for="exportQuality">
+                        Qualité
+                    </label>
+
+                    <select
+                        id="exportQuality"
+                        name="exportQuality"
+                    >
+                        <option value="standard">Standard</option>
+                        <option value="high" selected>Haute</option>
+                        <option value="maximum">Maximum</option>
+                    </select>
+
+                </div>
+
+
+                <div class="export-summary">
+
+                    <div>
+                        <span>Projet</span>
+                        <strong id="exportProjectName">
+                            Nouveau projet
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Durée</span>
+                        <strong id="exportDuration">
+                            00:00
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Résolution</span>
+                        <strong id="exportResolution">
+                            1920 × 1080
+                        </strong>
+                    </div>
+
+                </div>
+
+                <div
+                    id="exportProgressContainer"
+                    class="progress-container"
+                    hidden
+                >
+
+                    <progress
+                        id="exportProgress"
+                        value="0"
+                        max="100"
+                    >
+                    </progress>
+
+                    <span id="exportProgressLabel">
+                        0%
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <footer class="dialog-footer">
+
+                <button
+                    id="cancelExportButton"
+                    type="button"
+                    class="secondary-action"
+                    data-action="cancel-export"
+                >
+                    Annuler
+                </button>
+
+                <button
+                    id="confirmExportButton"
+                    type="submit"
+                    class="primary-action"
+                    data-action="confirm-export"
+                >
+                    Télécharger
+                </button>
+
+            </footer>
+
+        </form>
+
+    </dialog>
+
+
+    <!-- =========================================================
+         MODALE CHARGEMENT
+    ========================================================== -->
+    <dialog
+        id="loadProjectDialog"
+        class="app-dialog"
+        data-dialog="load-project"
+    >
+
+        <section class="dialog-content">
+
+            <header class="dialog-header">
+
+                <h2>Projets sauvegardés</h2>
+
+                <button
+                    id="closeLoadProjectDialogButton"
+                    type="button"
+                    class="icon-button"
+                    data-action="close-load-dialog"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <div
+                id="savedProjectsList"
+                class="saved-projects-list"
+                data-component="saved-projects"
+            >
+                <!-- Généré par JavaScript -->
+            </div>
+
+
+            <footer class="dialog-footer">
+
+                <button
+                    id="clearSavedProjectsButton"
+                    type="button"
+                    class="danger-action"
+                    data-action="clear-saved-projects"
+                >
+                    Effacer les projets locaux
+                </button>
+
+            </footer>
+
+        </section>
+
+    </dialog>
+
+
+    <!-- =========================================================
+         TOAST / NOTIFICATIONS
+    ========================================================== -->
+    <div
+        id="notificationContainer"
+        class="notification-container"
+        aria-live="polite"
+        aria-atomic="true"
+        data-component="notifications"
+    >
+    </div>
+
+
+    <!-- =========================================================
+         LOADER
+    ========================================================== -->
+    <div
+        id="applicationLoader"
+        class="application-loader"
+        data-component="loader"
+        aria-hidden="true"
+    >
+
+        <div class="loader-content">
+
+            <div
+                id="loaderSpinner"
+                class="loader-spinner"
+            ></div>
+
+            <strong id="loaderTitle">
+                Initialisation
+            </strong>
+
+            <span id="loaderMessage">
+                Préparation du laboratoire...
+            </span>
 
         </div>
 
-      </section>
-
-    </main>
-
-
-    <!-- =====================================================
-         PANNEAU PROPRIÉTÉS
-    ====================================================== -->
-    <aside
-      id="panneauProprietes"
-      class="panneau"
-      data-panneau="proprietes"
-    >
-
-      <div class="titrePanneau">
-
-        <span>Propriétés</span>
-
-        <button
-          id="boutonFermerProprietes"
-          class="bouton boutonIcone"
-          data-action="fermer-proprietes"
-          type="button"
-        >
-          ×
-        </button>
-
-      </div>
-
-
-      <div class="corpsPanneau">
-
-        <!-- PROJET -->
-        <section class="sectionPanneau">
-
-          <h2 class="titreSection">
-            Projet
-          </h2>
-
-
-          <div class="ligneFormulaire">
-
-            <label for="nomProjet">
-              Nom du projet
-            </label>
-
-            <input
-              id="nomProjet"
-              name="nomProjet"
-              class="champ"
-              type="text"
-              value="Nouvelle publicité"
-              autocomplete="off"
-            >
-
-          </div>
-
-
-          <div class="ligneFormulaire">
-
-            <label for="dureeProjet">
-              Durée maximale
-            </label>
-
-            <select
-              id="dureeProjet"
-              name="dureeProjet"
-              class="selecteur"
-            >
-              <option value="15">
-                15 secondes
-              </option>
-
-              <option value="30">
-                30 secondes
-              </option>
-
-              <option value="60">
-                1 minute
-              </option>
-
-              <option value="120">
-                2 minutes
-              </option>
-
-              <option value="180">
-                3 minutes
-              </option>
-
-              <option value="240">
-                4 minutes
-              </option>
-
-              <option value="300" selected>
-                5 minutes
-              </option>
-            </select>
-
-          </div>
-
-
-          <div class="ligneFormulaire">
-
-            <label for="styleProjet">
-              Style publicitaire
-            </label>
-
-            <select
-              id="styleProjet"
-              name="styleProjet"
-              class="selecteur"
-            >
-              <option value="Moderne">
-                Moderne
-              </option>
-
-              <option value="Premium">
-                Premium
-              </option>
-
-              <option value="Dynamique">
-                Dynamique
-              </option>
-
-              <option value="Minimaliste">
-                Minimaliste
-              </option>
-
-              <option value="Cinématique">
-                Cinématique
-              </option>
-
-              <option value="Élégant">
-                Élégant
-              </option>
-            </select>
-
-          </div>
-
-        </section>
-
-
-        <!-- TEXTE -->
-        <section class="sectionPanneau">
-
-          <h2 class="titreSection">
-            Texte sélectionné
-          </h2>
-
-
-          <div class="ligneFormulaire">
-
-            <label for="contenuTexte">
-              Contenu
-            </label>
-
-            <textarea
-              id="contenuTexte"
-              name="contenuTexte"
-              class="zoneTexte"
-              placeholder="Votre slogan..."
-            ></textarea>
-
-          </div>
-
-
-          <div class="ligneFormulaire">
-
-            <label for="tailleTexte">
-              Taille
-            </label>
-
-            <input
-              id="tailleTexte"
-              name="tailleTexte"
-              class="curseur"
-              type="range"
-              min="16"
-              max="120"
-              value="48"
-            >
-
-          </div>
-
-
-          <div class="ligneFormulaire">
-
-            <label for="opaciteTexte">
-              Opacité
-            </label>
-
-            <input
-              id="opaciteTexte"
-              name="opaciteTexte"
-              class="curseur"
-              type="range"
-              min="0"
-              max="100"
-              value="100"
-            >
-
-          </div>
-
-        </section>
-
-
-        <!-- ANIMATION -->
-        <section class="sectionPanneau">
-
-          <h2 class="titreSection">
-            Animation
-          </h2>
-
-          <div id="grilleAnimations">
-
-            <button
-              id="boutonAnimationFondu"
-              class="bouton"
-              data-action="animation-fondu"
-              type="button"
-            >
-              Fondu
-            </button>
-
-            <button
-              id="boutonAnimationZoom"
-              class="bouton"
-              data-action="animation-zoom"
-              type="button"
-            >
-              Zoom
-            </button>
-
-            <button
-              id="boutonAnimationGlissement"
-              class="bouton"
-              data-action="animation-glissement"
-              type="button"
-            >
-              Glissement
-            </button>
-
-            <button
-              id="boutonAnimationParallaxe"
-              class="bouton"
-              data-action="animation-parallaxe"
-              type="button"
-            >
-              Parallaxe
-            </button>
-
-          </div>
-
-        </section>
-
-
-        <!-- AUDIO -->
-        <section class="sectionPanneau">
-
-          <h2 class="titreSection">
-            Audio
-          </h2>
-
-
-          <div class="ligneFormulaire">
-
-            <label for="volumeAudio">
-              Volume
-            </label>
-
-            <input
-              id="volumeAudio"
-              name="volumeAudio"
-              class="curseur"
-              type="range"
-              min="0"
-              max="100"
-              value="80"
-            >
-
-          </div>
-
-
-          <div id="grilleAnimations">
-
-            <button
-              id="boutonFadeIn"
-              class="bouton"
-              data-action="fade-in"
-              type="button"
-            >
-              Fade-in
-            </button>
-
-            <button
-              id="boutonFadeOut"
-              class="bouton"
-              data-action="fade-out"
-              type="button"
-            >
-              Fade-out
-            </button>
-
-          </div>
-
-        </section>
-
-
-        <!-- EXPORT -->
-        <section class="sectionPanneau">
-
-          <h2 class="titreSection">
-            Projet
-          </h2>
-
-          <button
-            id="boutonExporterProjet"
-            class="bouton boutonSucces"
-            data-action="exporter-projet"
-            type="button"
-            style="width:100%;"
-          >
-            Exporter le projet
-          </button>
-
-        </section>
-
-      </div>
-
-    </aside>
-
-  </div>
-
-
-  <!-- =======================================================
-       NAVIGATION MOBILE
-  ======================================================== -->
-  <nav id="navigationMobile">
-
-    <button
-      id="boutonMobileMedias"
-      class="bouton"
-      data-action="ouvrir-medias"
-      type="button"
-    >
-      Médias
-    </button>
-
-    <button
-      id="boutonMobileProprietes"
-      class="bouton"
-      data-action="ouvrir-proprietes"
-      type="button"
-    >
-      Propriétés
-    </button>
-
-  </nav>
-
-
-  <!-- =======================================================
-       PIED
-  ======================================================== -->
-  <footer id="piedApplication">
-
-    <span id="statutApplication">
-      Prêt
-    </span>
-
-    <span id="statutSauvegarde">
-      Sauvegarde locale activée
-    </span>
-
-    <span id="compteurMedias">
-      0 média
-    </span>
-
-  </footer>
-
-
-  <!-- =======================================================
-       NOTIFICATION
-  ======================================================== -->
-  <div
-    id="notification"
-    role="status"
-    aria-live="polite"
-  ></div>
-
-
-  <!-- =======================================================
-       FENÊTRE IA
-  ======================================================== -->
-  <div
-    id="fenetreIA"
-    aria-hidden="true"
-  >
-
-    <div id="carteIA">
-
-      <div id="enteteIA">
-
-        <strong>
-          Génération assistée par IA
-        </strong>
-
-        <button
-          id="boutonFermerIA"
-          class="bouton boutonIcone"
-          data-action="fermer-ia"
-          type="button"
-        >
-          ×
-        </button>
-
-      </div>
-
-
-      <div class="ligneFormulaire">
-
-        <label for="briefIA">
-          Brief publicitaire
-        </label>
-
-        <textarea
-          id="briefIA"
-          name="briefIA"
-          class="zoneTexte"
-          placeholder="Produit, public cible, message, ambiance..."
-        ></textarea>
-
-      </div>
-
-
-      <div class="ligneFormulaire">
-
-        <label for="dureeIA">
-          Durée
-        </label>
-
-        <select
-          id="dureeIA"
-          name="dureeIA"
-          class="selecteur"
-        >
-
-          <option value="15">
-            15 secondes
-          </option>
-
-          <option value="30">
-            30 secondes
-          </option>
-
-          <option value="60">
-            1 minute
-          </option>
-
-          <option value="120">
-            2 minutes
-          </option>
-
-          <option value="180">
-            3 minutes
-          </option>
-
-          <option value="240">
-            4 minutes
-          </option>
-
-          <option value="300" selected>
-            5 minutes
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div id="actionsIA">
-
-        <button
-          id="boutonAnnulerIA"
-          class="bouton"
-          data-action="fermer-ia"
-          type="button"
-        >
-          Annuler
-        </button>
-
-        <button
-          id="boutonConfirmerIA"
-          class="bouton boutonPrimaire"
-          data-action="confirmer-ia"
-          type="button"
-        >
-          Créer le scénario
-        </button>
-
-      </div>
-
     </div>
 
-  </div>
 
-
-<script>
-"use strict";
-
-/* ==========================================================
-   CONFIGURATION GLOBALE
-========================================================== */
-
-const NOM_APPLICATION =
-  "Simulation Video Fobas";
-
-const CLE_STOCKAGE =
-  "simulationVideoFobas.projet.v1";
-
-const NOM_BASE_DONNEES =
-  "SimulationVideoFobasMedia";
-
-const VERSION_BASE_DONNEES =
-  1;
-
-const NOM_STORE =
-  "fichiers";
-
-const DUREE_MAXIMALE =
-  300;
-
-
-/* ==========================================================
-   ÉTAT PRINCIPAL
-========================================================== */
-
-const etat = {
-
-  projet: {
-    id: creerIdentifiant("projet"),
-    nom: "Nouvelle publicité",
-    duree: 300,
-    style: "Moderne",
-    dateCreation: new Date().toISOString(),
-    dateModification: new Date().toISOString()
-  },
-
-  tempsCourant: 0,
-
-  lecture: false,
-
-  zoom: 1,
-
-  deplacementX: 0,
-
-  deplacementY: 0,
-
-  tailleTexte: 48,
-
-  opaciteTexte: 100,
-
-  volumeAudio: 80,
-
-  medias: [],
-
-  scenes: [],
-
-  textes: [],
-
-  audios: [],
-
-  texteSelectionne: null
-};
-
-
-/* ==========================================================
-   VARIABLES TECHNIQUES
-========================================================== */
-
-let baseDonnees = null;
-
-let animationLecture = null;
-
-let derniereImage =
-  performance.now();
-
-let historique = [];
-
-let futur = [];
-
-const pointeurs =
-  new Map();
-
-let debutPincement =
-  null;
-
-
-/* ==========================================================
-   OUTILS
-========================================================== */
-
-function obtenirElement(id) {
-  return document.getElementById(id);
-}
-
-
-function creerIdentifiant(prefixe) {
-
-  return (
-    prefixe +
-    "-" +
-    Date.now().toString(36) +
-    "-" +
-    Math.random()
-      .toString(36)
-      .substring(2, 9)
-  );
-}
-
-
-function limiter(
-  valeur,
-  minimum,
-  maximum
-) {
-
-  return Math.max(
-    minimum,
-    Math.min(maximum, valeur)
-  );
-}
-
-
-function formaterTemps(secondes) {
-
-  secondes =
-    Math.max(
-      0,
-      Math.round(secondes)
-    );
-
-  const minutes =
-    Math.floor(secondes / 60);
-
-  const secondesRestantes =
-    secondes % 60;
-
-  return (
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(secondesRestantes).padStart(2, "0")
-  );
-}
-
-
-function afficherNotification(message) {
-
-  const notification =
-    obtenirElement("notification");
-
-  notification.textContent =
-    message;
-
-  notification.classList.add(
-    "active"
-  );
-
-  clearTimeout(
-    afficherNotification.timer
-  );
-
-  afficherNotification.timer =
-    setTimeout(
-      () => {
-        notification.classList.remove(
-          "active"
-        );
-      },
-      2200
-    );
-}
-
-
-function afficherStatut(message) {
-
-  obtenirElement(
-    "statutApplication"
-  ).textContent = message;
-}
-
-
-/* ==========================================================
-   HISTORIQUE
-========================================================== */
-
-function creerEtatHistorique() {
-
-  return JSON.stringify({
-
-    projet: etat.projet,
-
-    tempsCourant:
-      etat.tempsCourant,
-
-    lecture:
-      etat.lecture,
-
-    zoom:
-      etat.zoom,
-
-    deplacementX:
-      etat.deplacementX,
-
-    deplacementY:
-      etat.deplacementY,
-
-    tailleTexte:
-      etat.tailleTexte,
-
-    opaciteTexte:
-      etat.opaciteTexte,
-
-    volumeAudio:
-      etat.volumeAudio,
-
-    medias:
-      etat.medias.map(
-        media => ({
-          id: media.id,
-          nom: media.nom,
-          type: media.type,
-          categorie: media.categorie,
-          taille: media.taille
-        })
-      ),
-
-    scenes:
-      etat.scenes,
-
-    textes:
-      etat.textes,
-
-    audios:
-      etat.audios,
-
-    texteSelectionne:
-      etat.texteSelectionne
-
-  });
-}
-
-
-function ajouterHistorique() {
-
-  historique.push(
-    creerEtatHistorique()
-  );
-
-  if (
-    historique.length > 50
-  ) {
-    historique.shift();
-  }
-
-  futur = [];
-}
-
-
-function restaurerEtat(
-  donnees
-) {
-
-  const nouvelEtat =
-    JSON.parse(donnees);
-
-  Object.assign(
-    etat,
-    nouvelEtat
-  );
-
-  etat.projet.duree =
-    limiter(
-      Number(etat.projet.duree) || 300,
-      1,
-      DUREE_MAXIMALE
-    );
-
-  afficherTout();
-}
-
-
-function annulerAction() {
-
-  if (!historique.length) {
-
-    afficherNotification(
-      "Aucune action à annuler."
-    );
-
-    return;
-  }
-
-  futur.push(
-    creerEtatHistorique()
-  );
-
-  const precedent =
-    historique.pop();
-
-  restaurerEtat(
-    precedent
-  );
-
-  afficherNotification(
-    "Action annulée."
-  );
-}
-
-
-function retablirAction() {
-
-  if (!futur.length) {
-
-    afficherNotification(
-      "Aucune action à rétablir."
-    );
-
-    return;
-  }
-
-  historique.push(
-    creerEtatHistorique()
-  );
-
-  const suivant =
-    futur.pop();
-
-  restaurerEtat(
-    suivant
-  );
-
-  afficherNotification(
-    "Action rétablie."
-  );
-}
-
-
-/* ==========================================================
-   INDEXEDDB
-========================================================== */
-
-function initialiserBaseDonnees() {
-
-  return new Promise(
-    resolve => {
-
-      if (
-        !("indexedDB" in window)
-      ) {
-        resolve();
-        return;
-      }
-
-      const requete =
-        indexedDB.open(
-          NOM_BASE_DONNEES,
-          VERSION_BASE_DONNEES
-        );
-
-      requete.onupgradeneeded =
-        evenement => {
-
-          const db =
-            evenement.target.result;
-
-          if (
-            !db.objectStoreNames.contains(
-              NOM_STORE
-            )
-          ) {
-
-            db.createObjectStore(
-              NOM_STORE
-            );
-
-          }
-        };
-
-      requete.onsuccess =
-        evenement => {
-
-          baseDonnees =
-            evenement.target.result;
-
-          resolve();
-        };
-
-      requete.onerror =
-        () => resolve();
-    }
-  );
-}
-
-
-function enregistrerFichier(
-  identifiant,
-  fichier
-) {
-
-  if (!baseDonnees) {
-    return Promise.resolve();
-  }
-
-  return new Promise(
-    resolve => {
-
-      const transaction =
-        baseDonnees.transaction(
-          NOM_STORE,
-          "readwrite"
-        );
-
-      transaction
-        .objectStore(NOM_STORE)
-        .put(
-          fichier,
-          identifiant
-        );
-
-      transaction.oncomplete =
-        () => resolve();
-
-      transaction.onerror =
-        () => resolve();
-    }
-  );
-}
-
-
-function chargerFichier(
-  identifiant
-) {
-
-  if (!baseDonnees) {
-    return Promise.resolve(null);
-  }
-
-  return new Promise(
-    resolve => {
-
-      const transaction =
-        baseDonnees.transaction(
-          NOM_STORE,
-          "readonly"
-        );
-
-      const requete =
-        transaction
-          .objectStore(NOM_STORE)
-          .get(identifiant);
-
-      requete.onsuccess =
-        () => {
-
-          resolve(
-            requete.result || null
-          );
-
-        };
-
-      requete.onerror =
-        () => resolve(null);
-    }
-  );
-}
-
-
-/* ==========================================================
-   SAUVEGARDE LOCALE
-========================================================== */
-
-async function sauvegarderProjet(
-  silencieux = false
-) {
-
-  etat.projet.dateModification =
-    new Date().toISOString();
-
-  localStorage.setItem(
-    CLE_STOCKAGE,
-    creerEtatHistorique()
-  );
-
-  for (
-    const media of etat.medias
-  ) {
-
-    if (media.fichier) {
-
-      await enregistrerFichier(
-        media.id,
-        media.fichier
-      );
-
-    }
-  }
-
-  obtenirElement(
-    "statutSauvegarde"
-  ).textContent =
-    "Sauvegardé " +
-    new Date().toLocaleTimeString(
-      "fr-FR"
-    );
-
-  if (!silencieux) {
-
-    afficherNotification(
-      "Projet sauvegardé localement."
-    );
-
-  }
-}
-
-
-async function chargerProjetLocal() {
-
-  const sauvegarde =
-    localStorage.getItem(
-      CLE_STOCKAGE
-    );
-
-  if (!sauvegarde) {
-    return;
-  }
-
-  try {
-
-    restaurerEtat(
-      sauvegarde
-    );
-
-    for (
-      const media of etat.medias
-    ) {
-
-      const fichier =
-        await chargerFichier(
-          media.id
-        );
-
-      if (fichier) {
-
-        media.fichier =
-          fichier;
-
-        media.source =
-          URL.createObjectURL(
-            fichier
-          );
-      }
-    }
-
-    afficherTout();
-
-    afficherStatut(
-      "Projet local chargé"
-    );
-
-  } catch (erreur) {
-
-    console.warn(
-      "Chargement local impossible:",
-      erreur
-    );
-
-  }
-}
-
-
-/* ==========================================================
-   IMPORTATION DES MÉDIAS
-========================================================== */
-
-function determinerCategorie(
-  fichier
-) {
-
-  if (
-    fichier.type.startsWith(
-      "image/"
-    )
-  ) {
-    return "image";
-  }
-
-  if (
-    fichier.type.startsWith(
-      "video/"
-    )
-  ) {
-    return "video";
-  }
-
-  if (
-    fichier.type.startsWith(
-      "audio/"
-    )
-  ) {
-    return "audio";
-  }
-
-  return "autre";
-}
-
-
-function ouvrirSelecteurFichiers(
-  categorie = "tous"
-) {
-
-  const champ =
-    obtenirElement(
-      "champFichiers"
-    );
-
-  champ.value = "";
-
-  if (
-    categorie === "image"
-  ) {
-
-    champ.accept =
-      "image/*";
-
-  } else if (
-    categorie === "video"
-  ) {
-
-    champ.accept =
-      "video/*";
-
-  } else if (
-    categorie === "audio"
-  ) {
-
-    champ.accept =
-      "audio/*";
-
-  } else {
-
-    champ.accept =
-      "image/*,video/*,audio/*";
-  }
-
-  champ.click();
-}
-
-
-async function importerFichiers(
-  fichiers
-) {
-
-  const liste =
-    [...fichiers].filter(
-      fichier => {
-
-        const categorie =
-          determinerCategorie(
-            fichier
-          );
-
-        return [
-          "image",
-          "video",
-          "audio"
-        ].includes(
-          categorie
-        );
-      }
-    );
-
-  if (!liste.length) {
-    return;
-  }
-
-  ajouterHistorique();
-
-  for (
-    const fichier of liste
-  ) {
-
-    const id =
-      creerIdentifiant(
-        "media"
-      );
-
-    const categorie =
-      determinerCategorie(
-        fichier
-      );
-
-    const media = {
-
-      id,
-
-      nom:
-        fichier.name,
-
-      categorie,
-
-      type:
-        fichier.type,
-
-      taille:
-        fichier.size,
-
-      fichier,
-
-      source:
-        URL.createObjectURL(
-          fichier
-        )
-
-    };
-
-    etat.medias.push(
-      media
-    );
-
-    await enregistrerFichier(
-      id,
-      fichier
-    );
-  }
-
-  afficherBibliotheque();
-
-  afficherStatut(
-    liste.length +
-    " média ajouté" +
-    (
-      liste.length > 1
-        ? "s"
-        : ""
-    )
-  );
-
-  afficherNotification(
-    "Importation terminée."
-  );
-
-  await sauvegarderProjet(
-    true
-  );
-}
-
-
-/* ==========================================================
-   BIBLIOTHÈQUE
-========================================================== */
-
-function afficherBibliotheque() {
-
-  const conteneur =
-    obtenirElement(
-      "bibliothequeMedias"
-    );
-
-  conteneur.innerHTML = "";
-
-  etat.medias.forEach(
-    media => {
-
-      const carte =
-        document.createElement(
-          "div"
-        );
-
-      carte.className =
-        "carteMedia";
-
-      carte.dataset.mediaId =
-        media.id;
-
-
-      const type =
-        document.createElement(
-          "div"
-        );
-
-      type.className =
-        "typeMedia";
-
-      type.textContent =
-        media.categorie
-          .toUpperCase();
-
-      carte.appendChild(
-        type
-      );
-
-
-      if (
-        media.categorie ===
-        "image"
-      ) {
-
-        const image =
-          document.createElement(
-            "img"
-          );
-
-        image.src =
-          media.source;
-
-        image.alt =
-          media.nom;
-
-        carte.appendChild(
-          image
-        );
-
-      } else if (
-        media.categorie ===
-        "video"
-      ) {
-
-        const video =
-          document.createElement(
-            "video"
-          );
-
-        video.src =
-          media.source;
-
-        video.muted = true;
-
-        video.playsInline =
-          true;
-
-        carte.appendChild(
-          video
-        );
-
-      } else {
-
-        const audio =
-          document.createElement(
-            "div"
-          );
-
-        audio.className =
-          "vignetteAudio";
-
-        audio.textContent =
-          "♫";
-
-        carte.appendChild(
-          audio
-        );
-      }
-
-
-      const nom =
-        document.createElement(
-          "div"
-        );
-
-      nom.className =
-        "nomMedia";
-
-      nom.textContent =
-        media.nom;
-
-      carte.appendChild(
-        nom
-      );
-
-
-      carte.addEventListener(
-        "click",
-        () => {
-
-          ajouterMediaTimeline(
-            media.id
-          );
-
-        }
-      );
-
-
-      conteneur.appendChild(
-        carte
-      );
-    }
-  );
-
-
-  obtenirElement(
-    "compteurMedias"
-  ).textContent =
-    etat.medias.length +
-    " média" +
-    (
-      etat.medias.length === 1
-        ? ""
-        : "s"
-    );
-}
-
-
-/* ==========================================================
-   AJOUTER MÉDIA À LA TIMELINE
-========================================================== */
-
-function ajouterMediaTimeline(
-  idMedia
-) {
-
-  const media =
-    etat.medias.find(
-      element =>
-        element.id === idMedia
-    );
-
-  if (!media) {
-    return;
-  }
-
-  ajouterHistorique();
-
-  const debut =
-    etat.tempsCourant;
-
-
-  if (
-    media.categorie ===
-    "audio"
-  ) {
-
-    etat.audios.push({
-
-      id:
-        creerIdentifiant(
-          "audio"
-        ),
-
-      debut,
-
-      duree:
-        Math.min(
-          30,
-          etat.projet.duree -
-          debut
-        ),
-
-      mediaId:
-        idMedia,
-
-      volume:
-        etat.volumeAudio
-    });
-
-  } else {
-
-    etat.scenes.push({
-
-      id:
-        creerIdentifiant(
-          "scene"
-        ),
-
-      type:
-        "media",
-
-      debut,
-
-      duree:
-        Math.min(
-          10,
-          etat.projet.duree -
-          debut
-        ),
-
-      titre:
-        media.nom,
-
-      mediaId:
-        idMedia,
-
-      animation:
-        "zoom"
-    });
-
-  }
-
-
-  afficherTout();
-
-  afficherNotification(
-    "Média ajouté à la timeline."
-  );
-}
-
-
-/* ==========================================================
-   TEXTE
-========================================================== */
-
-function ajouterTexte() {
-
-  ajouterHistorique();
-
-  const texte = {
-
-    id:
-      creerIdentifiant(
-        "texte"
-      ),
-
-    debut:
-      etat.tempsCourant,
-
-    duree:
-      Math.min(
-        7,
-        etat.projet.duree -
-        etat.tempsCourant
-      ),
-
-    contenu:
-      "Votre message publicitaire",
-
-    taille:
-      48,
-
-    opacite:
-      100,
-
-    animation:
-      "fondu"
-  };
-
-
-  etat.textes.push(
-    texte
-  );
-
-  etat.texteSelectionne =
-    texte.id;
-
-  afficherTout();
-
-  afficherNotification(
-    "Texte ajouté."
-  );
-}
-
-
-function chargerTexteSelectionne() {
-
-  const texte =
-    etat.textes.find(
-      element =>
-        element.id ===
-        etat.texteSelectionne
-    );
-
-  if (!texte) {
-    return;
-  }
-
-  obtenirElement(
-    "contenuTexte"
-  ).value =
-    texte.contenu;
-
-  obtenirElement(
-    "tailleTexte"
-  ).value =
-    texte.taille;
-
-  obtenirElement(
-    "opaciteTexte"
-  ).value =
-    texte.opacite;
-}
-
-
-/* ==========================================================
-   RÈGLE TIMELINE
-========================================================== */
-
-function afficherRegleTimeline() {
-
-  const timeline =
-    obtenirElement(
-      "timelineInterne"
-    );
-
-  const regle =
-    obtenirElement(
-      "regleTimeline"
-    );
-
-  const pixelsParSeconde =
-    parseFloat(
-      getComputedStyle(
-        timeline
-      ).getPropertyValue(
-        "--pixelsParSeconde"
-      )
-    ) || 3;
-
-
-  timeline.style.minWidth =
-    Math.max(
-      900,
-      82 +
-      etat.projet.duree *
-      pixelsParSeconde +
-      100
-    ) +
-    "px";
-
-
-  regle.innerHTML = "";
-
-
-  for (
-    let seconde = 0;
-    seconde <= etat.projet.duree;
-    seconde += 10
-  ) {
-
-    const etiquette =
-      document.createElement(
-        "span"
-      );
-
-    etiquette.className =
-      "etiquetteTemps";
-
-    etiquette.style.left =
-      (
-        82 +
-        seconde *
-        pixelsParSeconde
-      ) +
-      "px";
-
-    etiquette.textContent =
-      formaterTemps(
-        seconde
-      );
-
-    regle.appendChild(
-      etiquette
-    );
-  }
-}
-
-
-/* ==========================================================
-   CLIPS
-========================================================== */
-
-function creerClip(
-  element,
-  piste,
-  classe
-) {
-
-  const timeline =
-    obtenirElement(
-      "timelineInterne"
-    );
-
-  const pixelsParSeconde =
-    parseFloat(
-      getComputedStyle(
-        timeline
-      ).getPropertyValue(
-        "--pixelsParSeconde"
-      )
-    ) || 3;
-
-
-  const clip =
-    document.createElement(
-      "div"
-    );
-
-  clip.className =
-    "clip " +
-    classe;
-
-  clip.dataset.elementId =
-    element.id;
-
-
-  clip.style.left =
-    (
-      82 +
-      element.debut *
-      pixelsParSeconde
-    ) +
-    "px";
-
-
-  clip.style.width =
-    Math.max(
-      14,
-      element.duree *
-      pixelsParSeconde
-    ) +
-    "px";
-
-
-  clip.textContent =
-    element.titre ||
-    element.contenu ||
-    "Média";
-
-
-  clip.addEventListener(
-    "click",
-    evenement => {
-
-      evenement.stopPropagation();
-
-      if (
-        classe ===
-        "clipTexte"
-      ) {
-
-        etat.texteSelectionne =
-          element.id;
-
-        chargerTexteSelectionne();
-
-        dessinerApercu();
-      }
-    }
-  );
-
-
-  piste.appendChild(
-    clip
-  );
-}
-
-
-/* ==========================================================
-   TIMELINE
-========================================================== */
-
-function afficherTimeline() {
-
-  afficherRegleTimeline();
-
-
-  const video =
-    obtenirElement(
-      "conteneurClipsVideo"
-    );
-
-  const texte =
-    obtenirElement(
-      "conteneurClipsTexte"
-    );
-
-  const audio =
-    obtenirElement(
-      "conteneurClipsAudio"
-    );
-
-
-  video.innerHTML = "";
-  texte.innerHTML = "";
-  audio.innerHTML = "";
-
-
-  etat.scenes.forEach(
-    scene => {
-
-      creerClip(
-        scene,
-        video,
-        ""
-      );
-
-    }
-  );
-
-
-  etat.textes.forEach(
-    texteItem => {
-
-      creerClip(
-        texteItem,
-        texte,
-        "clipTexte"
-      );
-
-    }
-  );
-
-
-  etat.audios.forEach(
-    audioItem => {
-
-      creerClip(
-        audioItem,
-        audio,
-        "clipAudio"
-      );
-
-    }
-  );
-
-
-  actualiserTeteLecture();
-}
-
-
-function actualiserTeteLecture() {
-
-  const timeline =
-    obtenirElement(
-      "timelineInterne"
-    );
-
-  const pixelsParSeconde =
-    parseFloat(
-      getComputedStyle(
-        timeline
-      ).getPropertyValue(
-        "--pixelsParSeconde"
-      )
-    ) || 3;
-
-
-  obtenirElement(
-    "teteLecture"
-  ).style.left =
-    (
-      82 +
-      etat.tempsCourant *
-      pixelsParSeconde
-    ) +
-    "px";
-
-
-  obtenirElement(
-    "lectureTemps"
-  ).textContent =
-    formaterTemps(
-      etat.tempsCourant
-    ) +
-    " / " +
-    formaterTemps(
-      etat.projet.duree
-    );
-}
-
-
-/* ==========================================================
-   APERÇU
-========================================================== */
-
-function sceneCourante() {
-
-  return etat.scenes.find(
-    scene =>
-      etat.tempsCourant >=
-        scene.debut &&
-      etat.tempsCourant <
-        scene.debut +
-        scene.duree
-  );
-}
-
-
-function dessinerApercu() {
-
-  const canvas =
-    obtenirElement(
-      "canvasApercu"
-    );
-
-  const contexte =
-    canvas.getContext(
-      "2d"
-    );
-
-  const largeur =
-    canvas.width;
-
-  const hauteur =
-    canvas.height;
-
-
-  contexte.clearRect(
-    0,
-    0,
-    largeur,
-    hauteur
-  );
-
-
-  contexte.save();
-
-
-  contexte.translate(
-    largeur / 2 +
-      etat.deplacementX,
-
-    hauteur / 2 +
-      etat.deplacementY
-  );
-
-
-  contexte.scale(
-    etat.zoom,
-    etat.zoom
-  );
-
-
-  contexte.translate(
-    -largeur / 2,
-    -hauteur / 2
-  );
-
-
-  const fond =
-    contexte.createLinearGradient(
-      0,
-      0,
-      largeur,
-      hauteur
-    );
-
-  fond.addColorStop(
-    0,
-    "#111a31"
-  );
-
-  fond.addColorStop(
-    1,
-    "#2a183d"
-  );
-
-
-  contexte.fillStyle =
-    fond;
-
-  contexte.fillRect(
-    0,
-    0,
-    largeur,
-    hauteur
-  );
-
-
-  const scene =
-    sceneCourante();
-
-
-  if (
-    scene &&
-    scene.mediaId
-  ) {
-
-    const media =
-      etat.medias.find(
-        element =>
-          element.id ===
-          scene.mediaId
-      );
-
-
-    if (
-      media &&
-      media.categorie ===
-      "image"
-    ) {
-
-      const image =
-        new Image();
-
-      image.onload =
-        () => {
-
-          dessinerImageApercu(
-            contexte,
-            image,
-            largeur,
-            hauteur
-          );
-
-        };
-
-      image.src =
-        media.source;
-
-    } else if (
-      media &&
-      media.categorie ===
-      "video"
-    ) {
-
-      contexte.fillStyle =
-        "#05070d";
-
-      contexte.fillRect(
-        0,
-        0,
-        largeur,
-        hauteur
-      );
-
-
-      contexte.fillStyle =
-        "#dbe5f5";
-
-      contexte.textAlign =
-        "center";
-
-      contexte.font =
-        "700 28px system-ui";
-
-      contexte.fillText(
-        "APERÇU VIDÉO",
-        largeur / 2,
-        hauteur / 2 - 10
-      );
-
-
-      contexte.font =
-        "16px system-ui";
-
-      contexte.fillStyle =
-        "#8fa0bb";
-
-      contexte.fillText(
-        media.nom,
-        largeur / 2,
-        hauteur / 2 + 25
-      );
-
-    }
-
-  }
-
-
-  contexte.restore();
-
-
-  const texte =
-    etat.textes.find(
-      element =>
-        etat.tempsCourant >=
-          element.debut &&
-        etat.tempsCourant <
-          element.debut +
-          element.duree
-    );
-
-
-  if (texte) {
-
-    contexte.save();
-
-    contexte.globalAlpha =
-      texte.opacite / 100;
-
-    contexte.fillStyle =
-      "#ffffff";
-
-    contexte.font =
-      "700 " +
-      texte.taille +
-      "px system-ui";
-
-    contexte.textAlign =
-      "center";
-
-    contexte.textBaseline =
-      "middle";
-
-    contexte.shadowColor =
-      "#000000";
-
-    contexte.shadowBlur =
-      14;
-
-    contexte.fillText(
-      texte.contenu,
-      largeur / 2,
-      hauteur * .82
-    );
-
-    contexte.restore();
-  }
-
-
-  obtenirElement(
-    "informationZoom"
-  ).textContent =
-    "Zoom " +
-    Math.round(
-      etat.zoom * 100
-    ) +
-    "%";
-}
-
-
-function dessinerImageApercu(
-  contexte,
-  image,
-  largeur,
-  hauteur
-) {
-
-  const echelle =
-    Math.max(
-      largeur / image.width,
-      hauteur / image.height
-    );
-
-  const largeurImage =
-    image.width *
-    echelle;
-
-  const hauteurImage =
-    image.height *
-    echelle;
-
-
-  contexte.drawImage(
-    image,
-
-    (largeur -
-      largeurImage) / 2,
-
-    (hauteur -
-      hauteurImage) / 2,
-
-    largeurImage,
-    hauteurImage
-  );
-}
-
-
-/* ==========================================================
-   ZOOM
-========================================================== */
-
-function definirZoom(
-  nouveauZoom
-) {
-
-  etat.zoom =
-    limiter(
-      nouveauZoom,
-      .5,
-      3
-    );
-
-  dessinerApercu();
-}
-
-
-function zoomPlus() {
-
-  definirZoom(
-    etat.zoom + .1
-  );
-}
-
-
-function zoomMoins() {
-
-  definirZoom(
-    etat.zoom - .1
-  );
-}
-
-
-function reinitialiserZoom() {
-
-  etat.zoom = 1;
-
-  etat.deplacementX = 0;
-
-  etat.deplacementY = 0;
-
-  dessinerApercu();
-}
-
-
-/* ==========================================================
-   GESTES TACTILES — ZOOM 2 DOIGTS ANDROID
-========================================================== */
-
-function initialiserGestesTactiles() {
-
-  const cadre =
-    obtenirElement(
-      "cadreApercu"
-    );
-
-
-  cadre.addEventListener(
-    "pointerdown",
-    evenement => {
-
-      cadre.setPointerCapture(
-        evenement.pointerId
-      );
-
-
-      pointeurs.set(
-        evenement.pointerId,
-        {
-          x:
-            evenement.clientX,
-
-          y:
-            evenement.clientY
-        }
-      );
-
-
-      if (
-        pointeurs.size === 2
-      ) {
-
-        const points =
-          [...pointeurs.values()];
-
-        const dx =
-          points[0].x -
-          points[1].x;
-
-        const dy =
-          points[0].y -
-          points[1].y;
-
-
-        debutPincement = {
-
-          distance:
-            Math.hypot(
-              dx,
-              dy
-            ),
-
-          zoom:
-            etat.zoom,
-
-          deplacementX:
-            etat.deplacementX,
-
-          deplacementY:
-            etat.deplacementY,
-
-          centreX:
-            (
-              points[0].x +
-              points[1].x
-            ) / 2,
-
-          centreY:
-            (
-              points[0].y +
-              points[1].y
-            ) / 2
-
-        };
-      }
-    }
-  );
-
-
-  cadre.addEventListener(
-    "pointermove",
-    evenement => {
-
-      if (
-        !pointeurs.has(
-          evenement.pointerId
-        )
-      ) {
-        return;
-      }
-
-
-      pointeurs.set(
-        evenement.pointerId,
-        {
-          x:
-            evenement.clientX,
-
-          y:
-            evenement.clientY
-        }
-      );
-
-
-      if (
-        pointeurs.size === 2 &&
-        debutPincement
-      ) {
-
-        const points =
-          [...pointeurs.values()];
-
-
-        const dx =
-          points[0].x -
-          points[1].x;
-
-        const dy =
-          points[0].y -
-          points[1].y;
-
-
-        const distance =
-          Math.hypot(
-            dx,
-            dy
-          );
-
-
-        const centreX =
-          (
-            points[0].x +
-            points[1].x
-          ) / 2;
-
-
-        const centreY =
-          (
-            points[0].y +
-            points[1].y
-          ) / 2;
-
-
-        etat.zoom =
-          limiter(
-            debutPincement.zoom *
-              (
-                distance /
-                debutPincement.distance
-              ),
-            .5,
-            3
-          );
-
-
-        etat.deplacementX =
-          debutPincement.deplacementX +
-          (
-            centreX -
-            debutPincement.centreX
-          );
-
-
-        etat.deplacementY =
-          debutPincement.deplacementY +
-          (
-            centreY -
-            debutPincement.centreY
-          );
-
-
-        dessinerApercu();
-      }
-    }
-  );
-
-
-  [
-    "pointerup",
-    "pointercancel",
-    "pointerleave"
-  ].forEach(
-    type => {
-
-      cadre.addEventListener(
-        type,
-        evenement => {
-
-          pointeurs.delete(
-            evenement.pointerId
-          );
-
-          if (
-            pointeurs.size < 2
-          ) {
-
-            debutPincement =
-              null;
-
-          }
-
-        }
-      );
-    }
-  );
-}
-
-
-/* ==========================================================
-   TEMPS TIMELINE
-========================================================== */
-
-function definirTemps(
-  temps
-) {
-
-  etat.tempsCourant =
-    limiter(
-      temps,
-      0,
-      etat.projet.duree
-    );
-
-  actualiserTeteLecture();
-
-  dessinerApercu();
-}
-
-
-function gererClicTimeline(
-  evenement
-) {
-
-  const zone =
-    obtenirElement(
-      "zoneTimelineDefilante"
-    );
-
-  const rectangle =
-    zone.getBoundingClientRect();
-
-
-  const timeline =
-    obtenirElement(
-      "timelineInterne"
-    );
-
-
-  const pixelsParSeconde =
-    parseFloat(
-      getComputedStyle(
-        timeline
-      ).getPropertyValue(
-        "--pixelsParSeconde"
-      )
-    ) || 3;
-
-
-  const temps =
-    (
-      evenement.clientX -
-      rectangle.left +
-      zone.scrollLeft -
-      82
-    ) /
-    pixelsParSeconde;
-
-
-  definirTemps(
-    temps
-  );
-}
-
-
-/* ==========================================================
-   LECTURE
-========================================================== */
-
-function boucleLecture(
-  temps
-) {
-
-  if (!etat.lecture) {
-    return;
-  }
-
-
-  const delta =
-    (
-      temps -
-      derniereImage
-    ) / 1000;
-
-
-  derniereImage =
-    temps;
-
-
-  etat.tempsCourant +=
-    delta;
-
-
-  if (
-    etat.tempsCourant >=
-    etat.projet.duree
-  ) {
-
-    etat.tempsCourant =
-      0;
-
-  }
-
-
-  actualiserTeteLecture();
-
-  dessinerApercu();
-
-
-  animationLecture =
-    requestAnimationFrame(
-      boucleLecture
-    );
-}
-
-
-function basculerLecture() {
-
-  etat.lecture =
-    !etat.lecture;
-
-
-  const bouton =
-    obtenirElement(
-      "boutonLecture"
-    );
-
-
-  bouton.textContent =
-    etat.lecture
-      ? "❚❚"
-      : "▶";
-
-
-  if (etat.lecture) {
-
-    derniereImage =
-      performance.now();
-
-    animationLecture =
-      requestAnimationFrame(
-        boucleLecture
-      );
-
-  } else {
-
-    cancelAnimationFrame(
-      animationLecture
-    );
-
-  }
-}
-
-
-function arreterLecture() {
-
-  etat.lecture =
-    false;
-
-  cancelAnimationFrame(
-    animationLecture
-  );
-
-  obtenirElement(
-    "boutonLecture"
-  ).textContent =
-    "▶";
-
-  definirTemps(0);
-}
-
-
-/* ==========================================================
-   ANIMATIONS
-========================================================== */
-
-function appliquerAnimation(
-  animation
-) {
-
-  const texte =
-    etat.textes.find(
-      element =>
-        element.id ===
-        etat.texteSelectionne
-    );
-
-
-  if (!texte) {
-
-    afficherNotification(
-      "Sélectionnez un texte."
-    );
-
-    return;
-  }
-
-
-  ajouterHistorique();
-
-  texte.animation =
-    animation;
-
-
-  afficherTimeline();
-
-  dessinerApercu();
-
-
-  afficherNotification(
-    "Animation : " +
-    animation
-  );
-}
-
-
-/* ==========================================================
-   PANNEAUX MOBILES
-========================================================== */
-
-function ouvrirPanneau(
-  panneau
-) {
-
-  const medias =
-    obtenirElement(
-      "panneauMedias"
-    );
-
-  const proprietes =
-    obtenirElement(
-      "panneauProprietes"
-    );
-
-
-  medias.classList.toggle(
-    "mobileOuvert",
-    panneau === "medias"
-  );
-
-
-  proprietes.classList.toggle(
-    "mobileOuvert",
-    panneau === "proprietes"
-  );
-}
-
-
-function fermerPanneaux() {
-
-  document
-    .querySelectorAll(
-      ".panneau"
-    )
-    .forEach(
-      panneau =>
-        panneau.classList.remove(
-          "mobileOuvert"
-        )
-    );
-}
-
-
-/* ==========================================================
-   NOUVEAU PROJET
-========================================================== */
-
-function nouveauProjet() {
-
-  const confirmer =
-    window.confirm(
-      "Créer un nouveau projet ? Les modifications non sauvegardées seront perdues."
-    );
-
-
-  if (!confirmer) {
-    return;
-  }
-
-
-  localStorage.removeItem(
-    CLE_STOCKAGE
-  );
-
-
-  window.location.reload();
-}
-
-
-/* ==========================================================
-   IA
-========================================================== */
-
-function ouvrirFenetreIA() {
-
-  const fenetre =
-    obtenirElement(
-      "fenetreIA"
-    );
-
-  fenetre.classList.add(
-    "active"
-  );
-
-  fenetre.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-}
-
-
-function fermerFenetreIA() {
-
-  const fenetre =
-    obtenirElement(
-      "fenetreIA"
-    );
-
-  fenetre.classList.remove(
-    "active"
-  );
-
-  fenetre.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-}
-
-
-function genererScenarioIA() {
-
-  const brief =
-    obtenirElement(
-      "briefIA"
-    ).value.trim() ||
-    "Publicité moderne";
-
-
-  const duree =
-    Number(
-      obtenirElement(
-        "dureeIA"
-      ).value
-    );
-
-
-  ajouterHistorique();
-
-
-  etat.projet.duree =
-    limiter(
-      duree,
-      1,
-      DUREE_MAXIMALE
-    );
-
-
-  etat.tempsCourant =
-    0;
-
-  etat.scenes = [];
-
-  etat.textes = [];
-
-  etat.audios = [];
-
-
-  const nombreScenes =
-    Math.max(
-      3,
-      Math.min(
-        8,
-        Math.ceil(
-          duree / 20
-        )
-      )
-    );
-
-
-  const dureeScene =
-    duree /
-    nombreScenes;
-
-
-  for (
-    let index = 0;
-    index < nombreScenes;
-    index++
-  ) {
-
-    const mediaDisponible =
-      etat.medias.find(
-        media =>
-          media.categorie ===
-            "image" ||
-          media.categorie ===
-            "video"
-      );
-
-
-    etat.scenes.push({
-
-      id:
-        creerIdentifiant(
-          "scene"
-        ),
-
-      type:
-        "media",
-
-      debut:
-        index *
-        dureeScene,
-
-      duree:
-        dureeScene,
-
-      titre:
-        "Scène " +
-        (index + 1),
-
-      mediaId:
-        mediaDisponible
-          ? mediaDisponible.id
-          : null,
-
-      animation:
-        index % 2
-          ? "fondu"
-          : "zoom"
-
-    });
-  }
-
-
-  const textePrincipal = {
-
-    id:
-      creerIdentifiant(
-        "texte"
-      ),
-
-    debut:
-      0,
-
-    duree:
-      Math.min(
-        7,
-        duree
-      ),
-
-    contenu:
-      brief,
-
-    taille:
-      48,
-
-    opacite:
-      100,
-
-    animation:
-      "fondu"
-  };
-
-
-  etat.textes.push(
-    textePrincipal
-  );
-
-
-  etat.texteSelectionne =
-    textePrincipal.id;
-
-
-  fermerFenetreIA();
-
-  afficherTout();
-
-  sauvegarderProjet(
-    true
-  );
-
-
-  afficherNotification(
-    "Scénario publicitaire généré."
-  );
-}
-
-
-/* ==========================================================
-   EXPORT PROJET
-========================================================== */
-
-function exporterProjet() {
-
-  const donnees =
-    JSON.stringify(
-      JSON.parse(
-        creerEtatHistorique()
-      ),
-      null,
-      2
-    );
-
-
-  const blob =
-    new Blob(
-      [donnees],
-      {
-        type:
-          "application/json"
-      }
-    );
-
-
-  const url =
-    URL.createObjectURL(
-      blob
-    );
-
-
-  const lien =
-    document.createElement(
-      "a"
-    );
-
-
-  lien.href =
-    url;
-
-
-  lien.download =
-    (
-      etat.projet.nom ||
-      "projet-video"
-    )
-      .replace(
-        /[^\wÀ-ÿ -]/g,
-        "_"
-      ) +
-    ".json";
-
-
-  lien.click();
-
-
-  setTimeout(
-    () =>
-      URL.revokeObjectURL(
-        url
-      ),
-    1000
-  );
-
-
-  afficherNotification(
-    "Projet exporté."
-  );
-}
-
-
-/* ==========================================================
-   TÉLÉCHARGEMENT VIDÉO
-========================================================== */
-
-function telechargerVideo() {
-
-  const canvas =
-    obtenirElement(
-      "canvasApercu"
-    );
-
-
-  if (
-    !window.MediaRecorder
-  ) {
-
-    afficherNotification(
-      "MediaRecorder n'est pas disponible dans ce navigateur."
-    );
-
-    return;
-  }
-
-
-  const flux =
-    canvas.captureStream(
-      30
-    );
-
-
-  const morceaux = [];
-
-
-  let enregistreur;
-
-
-  try {
-
-    enregistreur =
-      new MediaRecorder(
-        flux,
-        {
-          mimeType:
-            "video/webm"
-        }
-      );
-
-  } catch (
-    erreur
-  ) {
-
-    enregistreur =
-      new MediaRecorder(
-        flux
-      );
-  }
-
-
-  enregistreur.ondataavailable =
-    evenement => {
-
-      if (
-        evenement.data.size
-      ) {
-
-        morceaux.push(
-          evenement.data
-        );
-      }
-    };
-
-
-  enregistreur.onstop =
-    () => {
-
-      const blob =
-        new Blob(
-          morceaux,
-          {
-            type:
-              "video/webm"
-          }
-        );
-
-
-      const url =
-        URL.createObjectURL(
-          blob
-        );
-
-
-      const lien =
-        document.createElement(
-          "a"
-        );
-
-
-      lien.href =
-        url;
-
-
-      lien.download =
-        (
-          etat.projet.nom ||
-          "video-fobas"
-        )
-          .replace(
-            /[^\wÀ-ÿ -]/g,
-            "_"
-          ) +
-        ".webm";
-
-
-      lien.click();
-
-
-      setTimeout(
-        () =>
-          URL.revokeObjectURL(
-            url
-          ),
-        1000
-      );
-
-
-      afficherNotification(
-        "Vidéo WebM téléchargée."
-      );
-    };
-
-
-  enregistreur.start();
-
-
-  setTimeout(
-    () => {
-
-      if (
-        enregistreur.state !==
-        "inactive"
-      ) {
-
-        enregistreur.stop();
-
-      }
-
-    },
-    Math.min(
-      10000,
-      etat.projet.duree *
-      1000
-    )
-  );
-
-
-  afficherNotification(
-    "Export vidéo démarré."
-  );
-}
-
-
-/* ==========================================================
-   AFFICHAGE GLOBAL
-========================================================== */
-
-function synchroniserFormulaires() {
-
-  obtenirElement(
-    "nomProjet"
-  ).value =
-    etat.projet.nom;
-
-
-  obtenirElement(
-    "dureeProjet"
-  ).value =
-    String(
-      etat.projet.duree
-    );
-
-
-  obtenirElement(
-    "styleProjet"
-  ).value =
-    etat.projet.style;
-
-
-  obtenirElement(
-    "tailleTexte"
-  ).value =
-    etat.tailleTexte;
-
-
-  obtenirElement(
-    "opaciteTexte"
-  ).value =
-    etat.opaciteTexte;
-
-
-  obtenirElement(
-    "volumeAudio"
-  ).value =
-    etat.volumeAudio;
-}
-
-
-function afficherTout() {
-
-  afficherBibliotheque();
-
-  afficherTimeline();
-
-  chargerTexteSelectionne();
-
-  synchroniserFormulaires();
-
-  dessinerApercu();
-}
-
-
-/* ==========================================================
-   ÉVÉNEMENTS
-========================================================== */
-
-function initialiserEvenements() {
-
-  document.addEventListener(
-    "click",
-    evenement => {
-
-      const bouton =
-        evenement.target.closest(
-          "[data-action]"
-        );
-
-
-      if (!bouton) {
-        return;
-      }
-
-
-      const action =
-        bouton.dataset.action;
-
-
-      const actions = {
-
-        "nouveau-projet":
-          nouveauProjet,
-
-        "sauvegarder":
-          () =>
-            sauvegarderProjet(),
-
-        "telecharger":
-          telechargerVideo,
-
-        "ouvrir-importation":
-          () =>
-            ouvrirSelecteurFichiers(),
-
-        "importer-photos":
-          () =>
-            ouvrirSelecteurFichiers(
-              "image"
-            ),
-
-        "importer-videos":
-          () =>
-            ouvrirSelecteurFichiers(
-              "video"
-            ),
-
-        "importer-audio":
-          () =>
-            ouvrirSelecteurFichiers(
-              "audio"
-            ),
-
-        "ajouter-texte":
-          ajouterTexte,
-
-        "lecture":
-          basculerLecture,
-
-        "arret":
-          arreterLecture,
-
-        "zoom-moins":
-          zoomMoins,
-
-        "zoom-plus":
-          zoomPlus,
-
-        "zoom-reset":
-          reinitialiserZoom,
-
-        "plein-ecran":
-          () => {
-
-            const cadre =
-              obtenirElement(
-                "cadreApercu"
-              );
-
-
-            if (
-              document.fullscreenElement
-            ) {
-
-              document.exitFullscreen();
-
-            } else if (
-              cadre.requestFullscreen
-            ) {
-
-              cadre.requestFullscreen();
-
+    <!-- =========================================================
+         DONNÉES INITIALES POUR JAVASCRIPT
+    ========================================================== -->
+    <script
+        type="application/json"
+        id="initialApplicationState"
+    >
+    {
+        "application": {
+            "name": "Video Fobas",
+            "version": "1.0.0",
+            "language": "fr",
+            "maxDuration": 300
+        },
+        "project": {
+            "id": null,
+            "name": "Nouveau projet",
+            "format": "16:9",
+            "resolution": "1080p",
+            "fps": 30,
+            "duration": 0
+        },
+        "playback": {
+            "currentTime": 0,
+            "isPlaying": false,
+            "isMuted": true,
+            "volume": 1
+        },
+        "zoom": {
+            "preview": 1,
+            "timeline": 1
+        },
+        "selection": {
+            "type": null,
+            "id": null
+        },
+        "tracks": [
+            {
+                "id": "video-track-1",
+                "type": "video",
+                "name": "Vidéo",
+                "locked": false,
+                "muted": false,
+                "clips": []
+            },
+            {
+                "id": "overlay-track-1",
+                "type": "overlay",
+                "name": "Overlay",
+                "locked": false,
+                "muted": false,
+                "clips": []
+            },
+            {
+                "id": "text-track-1",
+                "type": "text",
+                "name": "Texte",
+                "locked": false,
+                "muted": false,
+                "clips": []
+            },
+            {
+                "id": "voice-track-1",
+                "type": "voice",
+                "name": "Voix",
+                "locked": false,
+                "muted": false,
+                "clips": []
+            },
+            {
+                "id": "music-track-1",
+                "type": "music",
+                "name": "Musique",
+                "locked": false,
+                "muted": false,
+                "clips": []
             }
-
-          },
-
-        "annuler":
-          annulerAction,
-
-        "retablir":
-          retablirAction,
-
-        "ouvrir-ia":
-          ouvrirFenetreIA,
-
-        "fermer-ia":
-          fermerFenetreIA,
-
-        "confirmer-ia":
-          genererScenarioIA,
-
-        "ouvrir-medias":
-          () =>
-            ouvrirPanneau(
-              "medias"
-            ),
-
-        "fermer-medias":
-          fermerPanneaux,
-
-        "ouvrir-proprietes":
-          () =>
-            ouvrirPanneau(
-              "proprietes"
-            ),
-
-        "fermer-proprietes":
-          fermerPanneaux,
-
-        "animation-fondu":
-          () =>
-            appliquerAnimation(
-              "fondu"
-            ),
-
-        "animation-zoom":
-          () =>
-            appliquerAnimation(
-              "zoom"
-            ),
-
-        "animation-glissement":
-          () =>
-            appliquerAnimation(
-              "glissement"
-            ),
-
-        "animation-parallaxe":
-          () =>
-            appliquerAnimation(
-              "parallaxe"
-            ),
-
-        "fade-in":
-          () =>
-            afficherNotification(
-              "Fade-in appliqué à l'audio sélectionné."
-            ),
-
-        "fade-out":
-          () =>
-            afficherNotification(
-              "Fade-out appliqué à l'audio sélectionné."
-            ),
-
-        "exporter-projet":
-          exporterProjet
-
-      };
-
-
-      if (
-        actions[action]
-      ) {
-
-        actions[action]();
-
-      }
-
+        ],
+        "media": [],
+        "history": {
+            "undo": [],
+            "redo": []
+        }
     }
-  );
-
-
-  obtenirElement(
-    "champFichiers"
-  ).addEventListener(
-    "change",
-    evenement =>
-      importerFichiers(
-        evenement.target.files
-      )
-  );
-
-
-  obtenirElement(
-    "zoneTimelineDefilante"
-  ).addEventListener(
-    "pointerdown",
-    evenement => {
-
-      if (
-        evenement.target.closest(
-          ".clip"
-        )
-      ) {
-        return;
-      }
-
-      gererClicTimeline(
-        evenement
-      );
-
-    }
-  );
-
-
-  obtenirElement(
-    "nomProjet"
-  ).addEventListener(
-    "input",
-    evenement => {
-
-      etat.projet.nom =
-        evenement.target.value;
-
-    }
-  );
-
-
-  obtenirElement(
-    "dureeProjet"
-  ).addEventListener(
-    "change",
-    evenement => {
-
-      ajouterHistorique();
-
-      etat.projet.duree =
-        limiter(
-          Number(
-            evenement.target.value
-          ),
-          1,
-          DUREE_MAXIMALE
-        );
-
-
-      definirTemps(
-        etat.tempsCourant
-      );
-
-      afficherTimeline();
-
-    }
-  );
-
-
-  obtenirElement(
-    "styleProjet"
-  ).addEventListener(
-    "change",
-    evenement => {
-
-      etat.projet.style =
-        evenement.target.value;
-
-    }
-  );
-
-
-  obtenirElement(
-    "contenuTexte"
-  ).addEventListener(
-    "input",
-    evenement => {
-
-      const texte =
-        etat.textes.find(
-          element =>
-            element.id ===
-            etat.texteSelectionne
-        );
-
-
-      if (!texte) {
-        return;
-      }
-
-
-      texte.contenu =
-        evenement.target.value;
-
-
-      dessinerApercu();
-
-      afficherTimeline();
-    }
-  );
-
-
-  obtenirElement(
-    "tailleTexte"
-  ).addEventListener(
-    "input",
-    evenement => {
-
-      etat.tailleTexte =
-        Number(
-          evenement.target.value
-        );
-
-
-      const texte =
-        etat.textes.find(
-          element =>
-            element.id ===
-            etat.texteSelectionne
-        );
-
-
-      if (texte) {
-
-        texte.taille =
-          etat.tailleTexte;
-
-      }
-
-
-      dessinerApercu();
-    }
-  );
-
-
-  obtenirElement(
-    "opaciteTexte"
-  ).addEventListener(
-    "input",
-    evenement => {
-
-      etat.opaciteTexte =
-        Number(
-          evenement.target.value
-        );
-
-
-      const texte =
-        etat.textes.find(
-          element =>
-            element.id ===
-            etat.texteSelectionne
-        );
-
-
-      if (texte) {
-
-        texte.opacite =
-          etat.opaciteTexte;
-
-      }
-
-
-      dessinerApercu();
-    }
-  );
-
-
-  obtenirElement(
-    "volumeAudio"
-  ).addEventListener(
-    "input",
-    evenement => {
-
-      etat.volumeAudio =
-        Number(
-          evenement.target.value
-        );
-
-    }
-  );
-
-
-  obtenirElement(
-    "fenetreIA"
-  ).addEventListener(
-    "click",
-    evenement => {
-
-      if (
-        evenement.target.id ===
-        "fenetreIA"
-      ) {
-
-        fermerFenetreIA();
-
-      }
-
-    }
-  );
-}
-
-
-/* ==========================================================
-   INITIALISATION
-========================================================== */
-
-async function initialiserApplication() {
-
-  await initialiserBaseDonnees();
-
-  initialiserEvenements();
-
-  initialiserGestesTactiles();
-
-  await chargerProjetLocal();
-
-  afficherTout();
-
-  afficherStatut(
-    "Laboratoire prêt"
-  );
-
-
-  /*
-    Sauvegarde automatique légère.
-    Elle ne remplace pas le bouton Sauvegarder.
-  */
-
-  setInterval(
-    () => {
-
-      sauvegarderProjet(
-        true
-      );
-
-    },
-    30000
-  );
-}
-
-
-window.addEventListener(
-  "DOMContentLoaded",
-  initialiserApplication
-);
-
-</script>
+    </script>
+
+
+    <!-- =========================================================
+         JAVASCRIPT EXTERNE UNIQUEMENT
+    ========================================================== -->
+    <script
+        src="simulationvideofobas.js"
+        defer
+    ></script>
 
 </body>
 </html>
-
-
-
-
-
-
-
 
 
 
