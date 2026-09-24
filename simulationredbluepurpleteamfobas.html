@@ -1,0 +1,1331 @@
+<!doctype html>
+
+<html lang="ht">
+<head>
+  <meta charset="UTF-8">  <!-- =========================================================
+       MOBILE VIEWPORT + TWO-FINGER PINCH ZOOM
+       - Pinch-to-zoom enabled
+       - Maximum zoom: 5x
+       - User scaling explicitly allowed
+       - No touch-action restriction is applied to the page
+  ========================================================== --><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+
+«»
+
+<meta
+name="description"
+content="WhiteHat CyberRange - Red, Blue and Purple Team wireless security training platform"
+
+«»
+
+<meta
+name="theme-color"
+content="#070a0f"
+
+«»
+
+  <title>
+    WhiteHat CyberRange | Red • Blue • Purple Team
+  </title>  <link
+    rel="stylesheet"
+    href="simulationredbluepurpleteamfobas.css"
+  >
+</head><body>  <!-- =========================================================
+       APPLICATION HEADER
+  ========================================================== -->  <header class="topbar"><div class="brand-area">
+
+  <div class="eyebrow">
+    WHITEHAT CYBERRANGE
+  </div>
+
+  <h1>
+    Red / Blue / Purple Team
+  </h1>
+
+  <p class="subtitle">
+    Wireless Security Training • WPA2 / WPA3 •
+    Attack → Detect → Respond → Retest
+  </p>
+
+</div>
+
+<div
+  class="system-status"
+  id="systemStatusContainer"
+>
+
+  <span
+    id="systemDot"
+    class="status-dot"
+  ></span>
+
+  <span id="systemStatus">
+    LAB READY
+  </span>
+
+</div>
+
+  </header>  <!-- =========================================================
+       MAIN APPLICATION
+  ========================================================== -->  <main class="shell"><!-- =======================================================
+     1. WIFI DISCOVERY
+======================================================== -->
+
+<section
+  class="panel discovery-panel"
+  id="wifiDiscovery"
+>
+
+  <div class="panel-head">
+
+    <div>
+
+      <span class="tag">
+        PHASE 01
+      </span>
+
+      <h2>
+        Wi-Fi Discovery
+      </h2>
+
+      <p class="section-description">
+        Scan available wireless networks and populate the
+        assessment workspace.
+      </p>
+
+    </div>
+
+    <div class="panel-actions">
+
+      <button
+        id="scanWifiBtn"
+        class="btn primary"
+        type="button"
+      >
+        Scan Wi-Fi
+      </button>
+
+      <button
+        id="stopScanBtn"
+        class="btn ghost"
+        type="button"
+      >
+        Stop
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="scan-status">
+
+    <div class="scan-indicator">
+
+      <span
+        id="scanIndicator"
+        class="scan-dot"
+      ></span>
+
+      <span id="scanStatusText">
+        Ready to scan
+      </span>
+
+    </div>
+
+    <div>
+      Networks:
+      <strong id="networkCount">
+        0
+      </strong>
+    </div>
+
+  </div>
+
+
+  <!-- Dynamic Wi-Fi cards -->
+
+  <div
+    id="wifiResults"
+    class="wifi-results"
+  >
+
+    <div
+      id="emptyWifiState"
+      class="empty-state"
+    >
+
+      <strong>
+        No networks discovered
+      </strong>
+
+      <p>
+        Start a scan to populate the wireless environment.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     2. SELECTED TARGET
+======================================================== -->
+
+<section
+  class="control-grid"
+  id="targetWorkspace"
+>
+
+  <article class="panel target-panel">
+
+    <div class="panel-head">
+
+      <div>
+
+        <span class="tag">
+          PHASE 02
+        </span>
+
+        <h2>
+          Target Workspace
+        </h2>
+
+      </div>
+
+      <button
+        id="clearTargetBtn"
+        class="btn ghost"
+        type="button"
+      >
+        Clear Target
+      </button>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <label>
+        SSID
+
+        <input
+          id="ssid"
+          type="text"
+          maxlength="32"
+          value="WHITEHAT-LAB"
+        >
+
+      </label>
+
+
+      <label>
+        BSSID
+
+        <input
+          id="bssid"
+          type="text"
+          value="AA:BB:CC:11:22:33"
+        >
+
+      </label>
+
+
+      <label>
+        Security
+
+        <select id="protocol">
+
+          <option value="WPA2-Personal">
+            WPA2-Personal
+          </option>
+
+          <option value="WPA3-Personal">
+            WPA3-Personal
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <label>
+        Signal
+
+        <select id="signal">
+
+          <option value="Excellent">
+            Excellent
+          </option>
+
+          <option value="Good" selected>
+            Good
+          </option>
+
+          <option value="Weak">
+            Weak
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <label>
+        Credential Profile
+
+        <select id="credentialProfile">
+
+          <option value="strong">
+            Strong / Hardened
+          </option>
+
+          <option value="weak">
+            Weak / Training Scenario
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <label>
+        Scenario
+
+        <select id="scenario">
+
+          <option value="credential">
+            Credential Security
+          </option>
+
+          <option value="rogue-ap">
+            Rogue AP Detection
+          </option>
+
+          <option value="auth-anomaly">
+            Authentication Anomaly
+          </option>
+
+        </select>
+
+      </label>
+
+    </div>
+
+
+    <div class="target-card">
+
+      <div>
+
+        <span class="mini-label">
+          TARGET
+        </span>
+
+        <strong id="targetName">
+          WHITEHAT-LAB
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span class="mini-label">
+          SECURITY
+        </span>
+
+        <strong id="securityName">
+          WPA2-Personal
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span class="mini-label">
+          STATE
+        </span>
+
+        <strong
+          id="targetState"
+          class="good-text"
+        >
+          HARDENED
+        </strong>
+
+      </div>
+
+    </div>
+
+  </article>
+
+
+  <!-- =====================================================
+       TELEMETRY
+  ====================================================== -->
+
+  <article class="panel metrics-panel">
+
+    <div class="panel-head">
+
+      <div>
+
+        <span class="tag">
+          LIVE TELEMETRY
+        </span>
+
+        <h2>
+          Security Posture
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div class="metrics">
+
+      <div class="metric">
+
+        <span>
+          Risk
+        </span>
+
+        <strong id="riskMetric">
+          LOW
+        </strong>
+
+        <small id="riskScore">
+          18/100
+        </small>
+
+      </div>
+
+
+      <div class="metric">
+
+        <span>
+          Detection
+        </span>
+
+        <strong id="detectMetric">
+          READY
+        </strong>
+
+        <small id="detectScore">
+          0 events
+        </small>
+
+      </div>
+
+
+      <div class="metric">
+
+        <span>
+          Containment
+        </span>
+
+        <strong id="containMetric">
+          100%
+        </strong>
+
+        <small>
+          lab coverage
+        </small>
+
+      </div>
+
+
+      <div class="metric">
+
+        <span>
+          Retest
+        </span>
+
+        <strong id="retestMetric">
+          PENDING
+        </strong>
+
+        <small id="retestScore">
+          0/3 controls
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <div class="progress">
+
+      <span
+        id="riskBar"
+        style="width:18%"
+      ></span>
+
+    </div>
+
+  </article>
+
+</section>
+
+
+<!-- =======================================================
+     3. AP FINGERPRINT
+======================================================== -->
+
+<section
+  class="panel fingerprint-panel"
+  id="fingerprintPanel"
+>
+
+  <div class="panel-head">
+
+    <div>
+
+      <span class="tag">
+        PHASE 03
+      </span>
+
+      <h2>
+        AP Fingerprint
+      </h2>
+
+      <p class="section-description">
+        Consolidated wireless identity and security
+        characteristics for the selected target.
+      </p>
+
+    </div>
+
+    <button
+      id="fingerprintBtn"
+      class="btn primary"
+      type="button"
+    >
+      Fingerprint AP
+    </button>
+
+  </div>
+
+
+  <div
+    id="fingerprintResults"
+    class="fingerprint-grid"
+  >
+
+    <div class="fingerprint-item">
+
+      <span>
+        SSID
+      </span>
+
+      <strong id="fpSsid">
+        —
+      </strong>
+
+    </div>
+
+
+    <div class="fingerprint-item">
+
+      <span>
+        BSSID
+      </span>
+
+      <strong id="fpBssid">
+        —
+      </strong>
+
+    </div>
+
+
+    <div class="fingerprint-item">
+
+      <span>
+        Security
+      </span>
+
+      <strong id="fpSecurity">
+        —
+      </strong>
+
+    </div>
+
+
+    <div class="fingerprint-item">
+
+      <span>
+        Signal
+      </span>
+
+      <strong id="fpSignal">
+        —
+      </strong>
+
+    </div>
+
+
+    <div class="fingerprint-item">
+
+      <span>
+        Fingerprint
+      </span>
+
+      <strong id="fpIdentity">
+        —
+      </strong>
+
+    </div>
+
+
+    <div class="fingerprint-item">
+
+      <span>
+        Assessment State
+      </span>
+
+      <strong id="fpState">
+        —
+      </strong>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     4. SAVED CREDENTIAL RECOVERY
+======================================================== -->
+
+<section
+  class="panel credential-panel"
+  id="credentialRecovery"
+>
+
+  <div class="panel-head">
+
+    <div>
+
+      <span class="tag">
+        AUTHORIZED RECOVERY
+      </span>
+
+      <h2>
+        Saved Credential Recovery
+      </h2>
+
+      <p class="section-description">
+        Checks whether a credential for the selected
+        network is already available through an authorized
+        local credential source.
+      </p>
+
+    </div>
+
+    <button
+      id="credentialRecoveryBtn"
+      class="btn primary"
+      type="button"
+    >
+      Check Saved Credential
+    </button>
+
+  </div>
+
+
+  <div class="credential-status">
+
+    <div>
+
+      <span class="mini-label">
+        SOURCE
+      </span>
+
+      <strong id="credentialSource">
+        Not checked
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <span class="mini-label">
+        STATUS
+      </span>
+
+      <strong id="credentialStatus">
+        PENDING
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <span class="mini-label">
+        RESULT
+      </span>
+
+      <strong id="credentialResult">
+        —
+      </strong>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     5. RED / BLUE / PURPLE
+======================================================== -->
+
+<section
+  class="team-grid"
+  id="teamOperations"
+>
+
+  <!-- RED TEAM -->
+
+  <article class="panel team red">
+
+    <div class="team-head">
+
+      <span class="team-icon">
+        R
+      </span>
+
+      <div>
+
+        <h2>
+          Red Team
+        </h2>
+
+        <p>
+          Offensive assessment
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="action-list">
+
+      <button
+        class="action"
+        data-cmd="recon"
+        type="button"
+      >
+        Run Reconnaissance
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="enumerate"
+        type="button"
+      >
+        Enumerate Security Posture
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="validate"
+        type="button"
+      >
+        Validate Training Weakness
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="evidence"
+        type="button"
+      >
+        Collect Evidence
+      </button>
+
+    </div>
+
+  </article>
+
+
+  <!-- BLUE TEAM -->
+
+  <article class="panel team blue">
+
+    <div class="team-head">
+
+      <span class="team-icon">
+        B
+      </span>
+
+      <div>
+
+        <h2>
+          Blue Team
+        </h2>
+
+        <p>
+          Detection & defense
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="action-list">
+
+      <button
+        class="action"
+        data-cmd="monitor"
+        type="button"
+      >
+        Analyze Telemetry
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="investigate"
+        type="button"
+      >
+        Investigate Incident
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="contain"
+        type="button"
+      >
+        Contain Incident
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="harden"
+        type="button"
+      >
+        Harden Controls
+      </button>
+
+    </div>
+
+  </article>
+
+
+  <!-- PURPLE TEAM -->
+
+  <article class="panel team purple">
+
+    <div class="team-head">
+
+      <span class="team-icon">
+        P
+      </span>
+
+      <div>
+
+        <h2>
+          Purple Team
+        </h2>
+
+        <p>
+          Coordinate & verify
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="action-list">
+
+      <button
+        class="action"
+        data-cmd="orchestrate"
+        type="button"
+      >
+        Run Purple Exercise
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="retest"
+        type="button"
+      >
+        Run Defensive Retest
+      </button>
+
+
+      <button
+        class="action"
+        data-cmd="report"
+        type="button"
+      >
+        Generate Assessment
+      </button>
+
+    </div>
+
+  </article>
+
+</section>
+
+
+<!-- =======================================================
+     6. OPERATIONS CONSOLE
+======================================================== -->
+
+<section
+  class="work-grid"
+  id="operations"
+>
+
+  <article class="panel console-panel">
+
+    <div class="panel-head">
+
+      <div>
+
+        <span class="tag">
+          OPERATIONS CONSOLE
+        </span>
+
+        <h2>
+          Lab Commands
+        </h2>
+
+      </div>
+
+      <button
+        id="clearConsole"
+        class="btn ghost"
+        type="button"
+      >
+        Clear
+      </button>
+
+    </div>
+
+
+    <div
+      id="console"
+      class="console"
+      aria-live="polite"
+    ></div>
+
+
+    <div class="command-row">
+
+      <span class="prompt">
+        lab@cyberrange:~$
+      </span>
+
+      <input
+        id="commandInput"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Type help"
+      >
+
+      <button
+        id="runCommand"
+        class="btn primary"
+        type="button"
+      >
+        Run
+      </button>
+
+    </div>
+
+
+    <p class="notice">
+      CyberRange operation console. Backend-connected
+      operational adapters can be attached separately.
+    </p>
+
+  </article>
+
+
+  <!-- =====================================================
+       INCIDENT TIMELINE
+  ====================================================== -->
+
+  <article class="panel event-panel">
+
+    <div class="panel-head">
+
+      <div>
+
+        <span class="tag">
+          EVIDENCE
+        </span>
+
+        <h2>
+          Incident Timeline
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="timeline"
+      class="timeline"
+    ></div>
+
+  </article>
+
+</section>
+
+
+<!-- =======================================================
+     7. SECURITY REPORT
+======================================================== -->
+
+<section
+  class="panel report-panel"
+  id="assessmentReport"
+>
+
+  <div class="panel-head">
+
+    <div>
+
+      <span class="tag">
+        FINAL ASSESSMENT
+      </span>
+
+      <h2>
+        Security Report
+      </h2>
+
+    </div>
+
+    <div class="panel-actions">
+
+      <button
+        id="generateReportBtn"
+        class="btn ghost"
+        type="button"
+      >
+        Generate
+      </button>
+
+      <button
+        id="exportBtn"
+        class="btn primary"
+        type="button"
+      >
+        Export JSON
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="report-grid">
+
+    <div>
+
+      <span>
+        Protocol
+      </span>
+
+      <strong id="reportProtocol">
+        —
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <span>
+        Target
+      </span>
+
+      <strong id="reportTarget">
+        —
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <span>
+        Findings
+      </span>
+
+      <strong id="reportFindings">
+        0
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <span>
+        Controls Fixed
+      </span>
+
+      <strong id="reportControls">
+        0/3
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <span>
+        Retest
+      </span>
+
+      <strong id="reportRetest">
+        PENDING
+      </strong>
+
+    </div>
+
+
+    <div>
+
+      <span>
+        Risk
+      </span>
+
+      <strong id="reportRisk">
+        LOW
+      </strong>
+
+    </div>
+
+
+    <div class="report-wide">
+
+      <span>
+        Conclusion
+      </span>
+
+      <p id="reportConclusion">
+        Run a Red / Blue / Purple workflow to populate
+        the assessment.
+      </p>
+
+    </div>
+
+
+    <div class="report-wide">
+
+      <span>
+        Findings Detail
+      </span>
+
+      <div
+        id="reportFindingList"
+        class="finding-list"
+      ></div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =======================================================
+     8. TRAINING OBJECTIVES
+======================================================== -->
+
+<section
+  class="panel objectives-panel"
+  id="trainingObjectives"
+>
+
+  <div class="panel-head">
+
+    <div>
+
+      <span class="tag">
+        TRAINING
+      </span>
+
+      <h2>
+        Exercise Objectives
+      </h2>
+
+    </div>
+
+  </div>
+
+
+  <div class="objectives-grid">
+
+    <div class="objective">
+
+      <span class="objective-number">
+        01
+      </span>
+
+      <div>
+
+        <strong>
+          Discover
+        </strong>
+
+        <p>
+          Identify wireless targets and security modes.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="objective">
+
+      <span class="objective-number">
+        02
+      </span>
+
+      <div>
+
+        <strong>
+          Assess
+        </strong>
+
+        <p>
+          Evaluate the configured security posture.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="objective">
+
+      <span class="objective-number">
+        03
+      </span>
+
+      <div>
+
+        <strong>
+          Detect
+        </strong>
+
+        <p>
+          Correlate simulated/connected telemetry.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="objective">
+
+      <span class="objective-number">
+        04
+      </span>
+
+      <div>
+
+        <strong>
+          Respond
+        </strong>
+
+        <p>
+          Investigate, contain and remediate findings.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="objective">
+
+      <span class="objective-number">
+        05
+      </span>
+
+      <div>
+
+        <strong>
+          Retest
+        </strong>
+
+        <p>
+          Verify that defensive controls withstand retesting.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="objective">
+
+      <span class="objective-number">
+        06
+      </span>
+
+      <div>
+
+        <strong>
+          Report
+        </strong>
+
+        <p>
+          Produce structured technical assessment evidence.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+  </main>  <!-- =========================================================
+       FOOTER
+  ========================================================== -->  <footer><p>
+  WhiteHat CyberRange • Red / Blue / Purple Team Training
+</p>
+
+<p>
+  Authorized security-training environment
+</p>
+
+  </footer>  <!-- =========================================================
+       JAVASCRIPT APPLICATION
+  ========================================================== -->  <script
+    src="simulationredbluepurpleteamfobas.js"
+    defer
+  ></script></body>
+</html>
