@@ -1,2627 +1,414 @@
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ht">
 <head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-    <meta name="theme-color" content="#0b1020">
-    <meta name="description" content="Laboratoire commercial de création et de montage vidéo assisté par IA.">
-    <meta name="application-name" content="Simulation Video Fobas">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#080b14">
+  <title>FÒBAS AI VIDEO STUDIO</title>
 
-    <title>Simulation Video Fobas — Laboratoire de Création Vidéo IA</title>
-
-    <link rel="stylesheet" href="simulationvideofobas.css">
+  <link rel="stylesheet" href="simulationvideofobas.css">
 </head>
 
-<body
-    id="simulationVideoFobas"
-    class="app-body"
-    data-app="simulation-video-fobas"
-    data-version="1.0.0"
-    data-language="fr"
-    data-max-video-duration="300"
-    data-storage-key="simulationVideoFobasProject"
->
+<body>
 
-    <!-- =========================================================
-         APPLICATION
-    ========================================================== -->
-    <div
-        id="app"
-        class="app-container"
-        data-component="application"
-    >
+<div id="app">
 
-        <!-- =====================================================
-             HEADER / BARRE PRINCIPALE
-        ====================================================== -->
-        <header
-            id="appHeader"
-            class="app-header"
-            data-component="header"
-        >
+  <!-- TOP BAR -->
+  <header class="topbar">
 
-            <div class="brand-area">
-                <button
-                    id="brandButton"
-                    class="brand-button"
-                    type="button"
-                    data-action="home"
-                    aria-label="Accueil"
-                >
-                    <span
-                        id="brandLogo"
-                        class="brand-logo"
-                        aria-hidden="true"
-                    >VF</span>
+    <div class="brand">
+      <div class="brand-logo">✦</div>
 
-                    <span class="brand-text">
-                        <strong id="brandName">Video Fobas</strong>
-                        <small id="brandSubtitle">Laboratoire IA</small>
-                    </span>
-                </button>
-            </div>
-
-            <div
-                id="projectHeader"
-                class="project-header"
-                data-component="project-header"
-            >
-
-                <div class="project-title-wrapper">
-                    <label
-                        for="projectName"
-                        class="sr-only"
-                    >
-                        Nom du projet
-                    </label>
-
-                    <input
-                        id="projectName"
-                        name="projectName"
-                        type="text"
-                        value="Nouveau projet"
-                        maxlength="120"
-                        autocomplete="off"
-                        data-field="project-name"
-                    >
-                </div>
-
-                <span
-                    id="projectStatus"
-                    class="project-status"
-                    data-status="saved"
-                    aria-live="polite"
-                >
-                    Enregistré
-                </span>
-            </div>
-
-            <nav
-                id="mainToolbar"
-                class="main-toolbar"
-                aria-label="Actions principales"
-            >
-
-                <button
-                    id="newProjectButton"
-                    class="toolbar-button"
-                    type="button"
-                    data-action="new-project"
-                >
-                    <span aria-hidden="true">＋</span>
-                    <span>Nouveau</span>
-                </button>
-
-                <button
-                    id="saveProjectButton"
-                    class="toolbar-button"
-                    type="button"
-                    data-action="save-project"
-                >
-                    <span aria-hidden="true">💾</span>
-                    <span>Sauvegarder</span>
-                </button>
-
-                <button
-                    id="loadProjectButton"
-                    class="toolbar-button"
-                    type="button"
-                    data-action="load-project"
-                >
-                    <span aria-hidden="true">↥</span>
-                    <span>Charger</span>
-                </button>
-
-                <button
-                    id="undoButton"
-                    class="toolbar-button"
-                    type="button"
-                    data-action="undo"
-                    disabled
-                >
-                    <span aria-hidden="true">↶</span>
-                    <span>Annuler</span>
-                </button>
-
-                <button
-                    id="redoButton"
-                    class="toolbar-button"
-                    type="button"
-                    data-action="redo"
-                    disabled
-                >
-                    <span aria-hidden="true">↷</span>
-                    <span>Rétablir</span>
-                </button>
-
-                <button
-                    id="exportButton"
-                    class="toolbar-button toolbar-button-primary"
-                    type="button"
-                    data-action="export"
-                >
-                    <span aria-hidden="true">⇩</span>
-                    <span>Télécharger</span>
-                </button>
-
-            </nav>
-        </header>
-
-
-        <!-- =====================================================
-             BARRE DE CONTRÔLE DU PROJET
-        ====================================================== -->
-        <section
-            id="projectControlBar"
-            class="project-control-bar"
-            data-component="project-controls"
-        >
-
-            <div class="control-group">
-
-                <label
-                    for="videoFormat"
-                    class="control-label"
-                >
-                    Format
-                </label>
-
-                <select
-                    id="videoFormat"
-                    name="videoFormat"
-                    data-field="video-format"
-                >
-                    <option value="16:9">16:9 — Paysage</option>
-                    <option value="9:16">9:16 — Vertical</option>
-                    <option value="1:1">1:1 — Carré</option>
-                    <option value="4:5">4:5 — Social</option>
-                    <option value="4:3">4:3 — Classique</option>
-                </select>
-
-            </div>
-
-
-            <div class="control-group">
-
-                <label
-                    for="videoResolution"
-                    class="control-label"
-                >
-                    Résolution
-                </label>
-
-                <select
-                    id="videoResolution"
-                    name="videoResolution"
-                    data-field="video-resolution"
-                >
-                    <option value="720p">HD 720p</option>
-                    <option value="1080p" selected>Full HD 1080p</option>
-                    <option value="1440p">2K 1440p</option>
-                    <option value="2160p">4K 2160p</option>
-                </select>
-
-            </div>
-
-
-            <div class="control-group">
-
-                <label
-                    for="frameRate"
-                    class="control-label"
-                >
-                    Images/s
-                </label>
-
-                <select
-                    id="frameRate"
-                    name="frameRate"
-                    data-field="frame-rate"
-                >
-                    <option value="24">24 FPS</option>
-                    <option value="25">25 FPS</option>
-                    <option value="30" selected>30 FPS</option>
-                    <option value="50">50 FPS</option>
-                    <option value="60">60 FPS</option>
-                </select>
-
-            </div>
-
-
-            <div
-                id="durationDisplay"
-                class="duration-display"
-                data-component="duration"
-            >
-                <span>Durée maximale</span>
-                <strong id="maxDurationLabel">05:00</strong>
-            </div>
-
-
-            <div
-                id="zoomControls"
-                class="zoom-controls"
-                data-component="zoom-controls"
-            >
-
-                <button
-                    id="zoomOutButton"
-                    type="button"
-                    class="icon-button"
-                    data-action="zoom-out"
-                    aria-label="Réduire le zoom"
-                >
-                    −
-                </button>
-
-                <output
-                    id="zoomValue"
-                    class="zoom-value"
-                    aria-label="Niveau de zoom"
-                >
-                    100%
-                </output>
-
-                <button
-                    id="zoomInButton"
-                    type="button"
-                    class="icon-button"
-                    data-action="zoom-in"
-                    aria-label="Augmenter le zoom"
-                >
-                    ＋
-                </button>
-
-                <button
-                    id="zoomResetButton"
-                    type="button"
-                    class="icon-button"
-                    data-action="zoom-reset"
-                    aria-label="Réinitialiser le zoom"
-                >
-                    100%
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             CORPS PRINCIPAL
-        ====================================================== -->
-        <main
-            id="mainWorkspace"
-            class="main-workspace"
-            data-component="workspace"
-        >
-
-            <!-- =================================================
-                 SIDEBAR GAUCHE
-            ================================================== -->
-            <aside
-                id="leftSidebar"
-                class="left-sidebar"
-                data-component="media-sidebar"
-            >
-
-                <nav
-                    id="mediaNavigation"
-                    class="media-navigation"
-                    aria-label="Outils du laboratoire"
-                >
-
-                    <button
-                        id="mediaTabButton"
-                        class="sidebar-tab active"
-                        type="button"
-                        data-tab="media"
-                    >
-                        <span class="tab-icon" aria-hidden="true">▣</span>
-                        <span>Médias</span>
-                    </button>
-
-                    <button
-                        id="textTabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="text"
-                    >
-                        <span class="tab-icon" aria-hidden="true">T</span>
-                        <span>Texte</span>
-                    </button>
-
-                    <button
-                        id="audioTabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="audio"
-                    >
-                        <span class="tab-icon" aria-hidden="true">♫</span>
-                        <span>Audio</span>
-                    </button>
-
-                    <button
-                        id="voiceTabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="voice"
-                    >
-                        <span class="tab-icon" aria-hidden="true">🎙</span>
-                        <span>Voix IA</span>
-                    </button>
-
-                    <button
-                        id="imageAITabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="image-ai"
-                    >
-                        <span class="tab-icon" aria-hidden="true">✦</span>
-                        <span>Image IA</span>
-                    </button>
-
-                    <button
-                        id="videoAITabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="video-ai"
-                    >
-                        <span class="tab-icon" aria-hidden="true">▶</span>
-                        <span>Vidéo IA</span>
-                    </button>
-
-                    <button
-                        id="effectsTabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="effects"
-                    >
-                        <span class="tab-icon" aria-hidden="true">✧</span>
-                        <span>Effets</span>
-                    </button>
-
-                    <button
-                        id="transitionsTabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="transitions"
-                    >
-                        <span class="tab-icon" aria-hidden="true">⇄</span>
-                        <span>Transitions</span>
-                    </button>
-
-                    <button
-                        id="threeDTabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="3d"
-                    >
-                        <span class="tab-icon" aria-hidden="true">◇</span>
-                        <span>3D</span>
-                    </button>
-
-                    <button
-                        id="colorTabButton"
-                        class="sidebar-tab"
-                        type="button"
-                        data-tab="color"
-                    >
-                        <span class="tab-icon" aria-hidden="true">◐</span>
-                        <span>Couleur</span>
-                    </button>
-
-                </nav>
-
-
-                <!-- =============================================
-                     PANNEAU DES OUTILS
-                ============================================== -->
-                <section
-                    id="toolPanel"
-                    class="tool-panel"
-                    data-component="tool-panel"
-                >
-
-                    <!-- =========================
-                         ONGLET MÉDIAS
-                    ========================== -->
-                    <div
-                        id="mediaPanel"
-                        class="tool-panel-content active"
-                        data-panel="media"
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Médias</h2>
-                                <p>Importez vos éléments.</p>
-                            </div>
-
-                            <button
-                                id="clearMediaButton"
-                                type="button"
-                                class="small-button"
-                                data-action="clear-media"
-                            >
-                                Effacer
-                            </button>
-                        </div>
-
-
-                        <div
-                            id="mediaDropZone"
-                            class="media-drop-zone"
-                            data-dropzone="media"
-                        >
-
-                            <input
-                                id="mediaFileInput"
-                                name="mediaFiles"
-                                type="file"
-                                accept="image/*,video/*"
-                                multiple
-                                hidden
-                                data-input="media"
-                            >
-
-                            <button
-                                id="importMediaButton"
-                                type="button"
-                                class="upload-button"
-                                data-action="import-media"
-                            >
-                                <span aria-hidden="true">＋</span>
-                                <strong>Importer des médias</strong>
-                                <small>Images et vidéos</small>
-                            </button>
-
-                        </div>
-
-
-                        <div
-                            id="mediaLibrary"
-                            class="media-library"
-                            data-component="media-library"
-                        >
-                            <!-- Éléments générés par JavaScript -->
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET TEXTE
-                    ========================== -->
-                    <div
-                        id="textPanel"
-                        class="tool-panel-content"
-                        data-panel="text"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Texte</h2>
-                                <p>Ajoutez du texte à la scène.</p>
-                            </div>
-                        </div>
-
-                        <button
-                            id="addTextButton"
-                            type="button"
-                            class="primary-action"
-                            data-action="add-text"
-                        >
-                            ＋ Ajouter un texte
-                        </button>
-
-
-                        <div class="form-stack">
-
-                            <div class="form-field">
-
-                                <label for="textContent">
-                                    Contenu
-                                </label>
-
-                                <textarea
-                                    id="textContent"
-                                    name="textContent"
-                                    rows="4"
-                                    maxlength="500"
-                                    placeholder="Écrivez votre texte..."
-                                    data-field="text-content"
-                                ></textarea>
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="textFont">
-                                    Police
-                                </label>
-
-                                <select
-                                    id="textFont"
-                                    name="textFont"
-                                    data-field="text-font"
-                                >
-                                    <option value="Arial">Arial</option>
-                                    <option value="Inter">Inter</option>
-                                    <option value="Roboto">Roboto</option>
-                                    <option value="Georgia">Georgia</option>
-                                    <option value="Verdana">Verdana</option>
-                                    <option value="Times New Roman">Times New Roman</option>
-                                </select>
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="textSize">
-                                    Taille
-                                </label>
-
-                                <input
-                                    id="textSize"
-                                    name="textSize"
-                                    type="range"
-                                    min="8"
-                                    max="180"
-                                    value="48"
-                                    data-field="text-size"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="textColor">
-                                    Couleur
-                                </label>
-
-                                <input
-                                    id="textColor"
-                                    name="textColor"
-                                    type="color"
-                                    value="#ffffff"
-                                    data-field="text-color"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="textAnimation">
-                                    Animation
-                                </label>
-
-                                <select
-                                    id="textAnimation"
-                                    name="textAnimation"
-                                    data-field="text-animation"
-                                >
-                                    <option value="none">Aucune</option>
-                                    <option value="fade">Fondu</option>
-                                    <option value="slide">Glissement</option>
-                                    <option value="scale">Zoom</option>
-                                    <option value="typewriter">Machine à écrire</option>
-                                </select>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET AUDIO
-                    ========================== -->
-                    <div
-                        id="audioPanel"
-                        class="tool-panel-content"
-                        data-panel="audio"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Audio</h2>
-                                <p>Musique et fichiers audio.</p>
-                            </div>
-                        </div>
-
-                        <input
-                            id="audioFileInput"
-                            name="audioFiles"
-                            type="file"
-                            accept="audio/*"
-                            multiple
-                            hidden
-                            data-input="audio"
-                        >
-
-                        <button
-                            id="importAudioButton"
-                            type="button"
-                            class="primary-action"
-                            data-action="import-audio"
-                        >
-                            ＋ Importer un audio
-                        </button>
-
-                        <div
-                            id="audioLibrary"
-                            class="asset-list"
-                            data-component="audio-library"
-                        >
-                            <!-- Généré par JavaScript -->
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET VOIX IA
-                    ========================== -->
-                    <div
-                        id="voicePanel"
-                        class="tool-panel-content"
-                        data-panel="voice"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Voix IA</h2>
-                                <p>Préparez une narration.</p>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
-
-                            <label for="voiceText">
-                                Texte de narration
-                            </label>
-
-                            <textarea
-                                id="voiceText"
-                                name="voiceText"
-                                rows="7"
-                                maxlength="5000"
-                                placeholder="Saisissez le texte de la narration..."
-                                data-field="voice-text"
-                            ></textarea>
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="voiceLanguage">
-                                Langue
-                            </label>
-
-                            <select
-                                id="voiceLanguage"
-                                name="voiceLanguage"
-                                data-field="voice-language"
-                            >
-                                <option value="fr-FR">Français</option>
-                                <option value="fr-CA">Français Canada</option>
-                                <option value="en-US">English</option>
-                                <option value="es-ES">Español</option>
-                                <option value="ht-HT">Kreyòl haïtien</option>
-                            </select>
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="voiceStyle">
-                                Style vocal
-                            </label>
-
-                            <select
-                                id="voiceStyle"
-                                name="voiceStyle"
-                                data-field="voice-style"
-                            >
-                                <option value="natural">Naturel</option>
-                                <option value="professional">Professionnel</option>
-                                <option value="energetic">Énergique</option>
-                                <option value="calm">Calme</option>
-                                <option value="commercial">Publicitaire</option>
-                            </select>
-
-                        </div>
-
-
-                        <button
-                            id="generateVoiceButton"
-                            type="button"
-                            class="primary-action"
-                            data-action="generate-voice"
-                        >
-                            ✦ Générer la voix
-                        </button>
-
-                        <audio
-                            id="voicePreviewAudio"
-                            class="audio-preview"
-                            controls
-                            preload="metadata"
-                            hidden
-                        ></audio>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET IMAGE IA
-                    ========================== -->
-                    <div
-                        id="imageAIPanel"
-                        class="tool-panel-content"
-                        data-panel="image-ai"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Image IA</h2>
-                                <p>Préparez une image à générer.</p>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
-
-                            <label for="imagePrompt">
-                                Description
-                            </label>
-
-                            <textarea
-                                id="imagePrompt"
-                                name="imagePrompt"
-                                rows="6"
-                                maxlength="2000"
-                                placeholder="Décrivez l'image souhaitée..."
-                                data-field="image-prompt"
-                            ></textarea>
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="imageStyle">
-                                Style
-                            </label>
-
-                            <select
-                                id="imageStyle"
-                                name="imageStyle"
-                                data-field="image-style"
-                            >
-                                <option value="realistic">Réaliste</option>
-                                <option value="cinematic">Cinématique</option>
-                                <option value="3d">3D</option>
-                                <option value="illustration">Illustration</option>
-                                <option value="advertising">Publicitaire</option>
-                            </select>
-
-                        </div>
-
-
-                        <button
-                            id="generateImageButton"
-                            type="button"
-                            class="primary-action"
-                            data-action="generate-image"
-                        >
-                            ✦ Générer l'image
-                        </button>
-
-
-                        <div
-                            id="generatedImageLibrary"
-                            class="generated-library"
-                            data-component="generated-images"
-                        >
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET VIDÉO IA
-                    ========================== -->
-                    <div
-                        id="videoAIPanel"
-                        class="tool-panel-content"
-                        data-panel="video-ai"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Vidéo IA</h2>
-                                <p>Créez des séquences courtes.</p>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
-
-                            <label for="videoPrompt">
-                                Description de la scène
-                            </label>
-
-                            <textarea
-                                id="videoPrompt"
-                                name="videoPrompt"
-                                rows="6"
-                                maxlength="2000"
-                                placeholder="Décrivez la scène vidéo..."
-                                data-field="video-prompt"
-                            ></textarea>
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="aiVideoDuration">
-                                Durée
-                            </label>
-
-                            <select
-                                id="aiVideoDuration"
-                                name="aiVideoDuration"
-                                data-field="ai-video-duration"
-                            >
-                                <option value="3">3 secondes</option>
-                                <option value="5">5 secondes</option>
-                                <option value="8">8 secondes</option>
-                                <option value="10">10 secondes</option>
-                            </select>
-
-                        </div>
-
-
-                        <button
-                            id="generateVideoButton"
-                            type="button"
-                            class="primary-action"
-                            data-action="generate-video"
-                        >
-                            ✦ Générer la vidéo
-                        </button>
-
-
-                        <div
-                            id="generatedVideoLibrary"
-                            class="generated-library"
-                            data-component="generated-videos"
-                        >
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET EFFETS
-                    ========================== -->
-                    <div
-                        id="effectsPanel"
-                        class="tool-panel-content"
-                        data-panel="effects"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Effets</h2>
-                                <p>Effets visuels de la scène.</p>
-                            </div>
-                        </div>
-
-                        <div
-                            id="effectsList"
-                            class="option-grid"
-                            data-component="effects-list"
-                        >
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-effect="none"
-                            >
-                                Aucun
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-effect="blur"
-                            >
-                                Flou
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-effect="brightness"
-                            >
-                                Luminosité
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-effect="contrast"
-                            >
-                                Contraste
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-effect="grayscale"
-                            >
-                                Noir & blanc
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-effect="vintage"
-                            >
-                                Vintage
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET TRANSITIONS
-                    ========================== -->
-                    <div
-                        id="transitionsPanel"
-                        class="tool-panel-content"
-                        data-panel="transitions"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Transitions</h2>
-                                <p>Transitions entre les scènes.</p>
-                            </div>
-                        </div>
-
-                        <div
-                            id="transitionList"
-                            class="option-grid"
-                            data-component="transition-list"
-                        >
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-transition="none"
-                            >
-                                Aucune
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-transition="fade"
-                            >
-                                Fondu
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-transition="slide-left"
-                            >
-                                Glissement gauche
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-transition="slide-right"
-                            >
-                                Glissement droite
-                            </button>
-
-                            <button
-                                type="button"
-                                class="option-button"
-                                data-transition="zoom"
-                            >
-                                Zoom
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET 3D
-                    ========================== -->
-                    <div
-                        id="threeDPanel"
-                        class="tool-panel-content"
-                        data-panel="3d"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>3D</h2>
-                                <p>Contrôles 3D sans Three.js.</p>
-                            </div>
-                        </div>
-
-                        <div class="form-field">
-
-                            <label for="rotationX">
-                                Rotation X
-                            </label>
-
-                            <input
-                                id="rotationX"
-                                name="rotationX"
-                                type="range"
-                                min="-180"
-                                max="180"
-                                value="0"
-                                data-field="rotation-x"
-                            >
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="rotationY">
-                                Rotation Y
-                            </label>
-
-                            <input
-                                id="rotationY"
-                                name="rotationY"
-                                type="range"
-                                min="-180"
-                                max="180"
-                                value="0"
-                                data-field="rotation-y"
-                            >
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="rotationZ">
-                                Rotation Z
-                            </label>
-
-                            <input
-                                id="rotationZ"
-                                name="rotationZ"
-                                type="range"
-                                min="-180"
-                                max="180"
-                                value="0"
-                                data-field="rotation-z"
-                            >
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="perspective3D">
-                                Perspective
-                            </label>
-
-                            <input
-                                id="perspective3D"
-                                name="perspective3D"
-                                type="range"
-                                min="200"
-                                max="3000"
-                                value="1000"
-                                data-field="perspective-3d"
-                            >
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================
-                         ONGLET COULEUR
-                    ========================== -->
-                    <div
-                        id="colorPanel"
-                        class="tool-panel-content"
-                        data-panel="color"
-                        hidden
-                    >
-
-                        <div class="panel-heading">
-                            <div>
-                                <h2>Couleur</h2>
-                                <p>Ajustement visuel.</p>
-                            </div>
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="brightnessControl">
-                                Luminosité
-                            </label>
-
-                            <input
-                                id="brightnessControl"
-                                name="brightnessControl"
-                                type="range"
-                                min="0"
-                                max="200"
-                                value="100"
-                                data-field="brightness"
-                            >
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="contrastControl">
-                                Contraste
-                            </label>
-
-                            <input
-                                id="contrastControl"
-                                name="contrastControl"
-                                type="range"
-                                min="0"
-                                max="200"
-                                value="100"
-                                data-field="contrast"
-                            >
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="saturationControl">
-                                Saturation
-                            </label>
-
-                            <input
-                                id="saturationControl"
-                                name="saturationControl"
-                                type="range"
-                                min="0"
-                                max="200"
-                                value="100"
-                                data-field="saturation"
-                            >
-
-                        </div>
-
-
-                        <button
-                            id="resetColorButton"
-                            type="button"
-                            class="secondary-action"
-                            data-action="reset-color"
-                        >
-                            Réinitialiser
-                        </button>
-
-                    </div>
-
-                </section>
-
-            </aside>
-
-
-            <!-- =================================================
-                 ZONE CENTRALE
-            ================================================== -->
-            <section
-                id="centerWorkspace"
-                class="center-workspace"
-                data-component="center-workspace"
-            >
-
-                <!-- =============================================
-                     PREVIEW
-                ============================================== -->
-                <section
-                    id="previewSection"
-                    class="preview-section"
-                    data-component="preview"
-                >
-
-                    <div
-                        id="previewHeader"
-                        class="preview-header"
-                    >
-
-                        <div class="preview-title">
-                            <span>APERÇU</span>
-                            <strong id="previewResolution">
-                                1920 × 1080
-                            </strong>
-                        </div>
-
-
-                        <div
-                            id="previewTools"
-                            class="preview-tools"
-                        >
-
-                            <button
-                                id="fitPreviewButton"
-                                type="button"
-                                class="preview-tool-button"
-                                data-action="fit-preview"
-                            >
-                                Ajuster
-                            </button>
-
-                            <button
-                                id="fullscreenPreviewButton"
-                                type="button"
-                                class="preview-tool-button"
-                                data-action="fullscreen-preview"
-                            >
-                                Plein écran
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        id="previewViewport"
-                        class="preview-viewport"
-                        data-component="preview-viewport"
-                    >
-
-                        <div
-                            id="previewStage"
-                            class="preview-stage"
-                            data-component="preview-stage"
-                            tabindex="0"
-                        >
-
-                            <video
-                                id="previewVideo"
-                                class="preview-video"
-                                preload="metadata"
-                                playsinline
-                                muted
-                            ></video>
-
-
-                            <canvas
-                                id="previewCanvas"
-                                class="preview-canvas"
-                                width="1920"
-                                height="1080"
-                                aria-label="Zone de composition vidéo"
-                            ></canvas>
-
-
-                            <div
-                                id="previewOverlay"
-                                class="preview-overlay"
-                                data-component="preview-overlay"
-                            >
-                                <!-- Objets texte/images/éléments générés par JS -->
-                            </div>
-
-
-                            <div
-                                id="previewEmptyState"
-                                class="preview-empty-state"
-                            >
-
-                                <div class="empty-state-icon">
-                                    ▶
-                                </div>
-
-                                <h2>Votre vidéo apparaîtra ici</h2>
-
-                                <p>
-                                    Importez un média ou ajoutez un élément
-                                    pour commencer votre montage.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- =========================================
-                         CONTRÔLES LECTEUR
-                    ========================================== -->
-                    <div
-                        id="playerControls"
-                        class="player-controls"
-                        data-component="player"
-                    >
-
-                        <button
-                            id="previousFrameButton"
-                            type="button"
-                            class="player-button"
-                            data-action="previous-frame"
-                            aria-label="Image précédente"
-                        >
-                            ◀
-                        </button>
-
-                        <button
-                            id="playButton"
-                            type="button"
-                            class="player-button player-play-button"
-                            data-action="play"
-                            aria-label="Lire"
-                        >
-                            ▶
-                        </button>
-
-                        <button
-                            id="nextFrameButton"
-                            type="button"
-                            class="player-button"
-                            data-action="next-frame"
-                            aria-label="Image suivante"
-                        >
-                            ▶
-                        </button>
-
-                        <span
-                            id="currentTimeDisplay"
-                            class="time-display"
-                        >
-                            00:00.000
-                        </span>
-
-                        <input
-                            id="playerSeek"
-                            name="playerSeek"
-                            type="range"
-                            min="0"
-                            max="300"
-                            step="0.001"
-                            value="0"
-                            aria-label="Position de lecture"
-                            data-field="player-seek"
-                        >
-
-                        <span
-                            id="totalTimeDisplay"
-                            class="time-display"
-                        >
-                            05:00.000
-                        </span>
-
-                        <button
-                            id="muteButton"
-                            type="button"
-                            class="player-button"
-                            data-action="mute"
-                            aria-label="Activer ou désactiver le son"
-                        >
-                            🔊
-                        </button>
-
-                        <button
-                            id="playbackSettingsButton"
-                            type="button"
-                            class="player-button"
-                            data-action="playback-settings"
-                            aria-label="Paramètres de lecture"
-                        >
-                            ⚙
-                        </button>
-
-                    </div>
-
-                </section>
-
-
-                <!-- =============================================
-                     TIMELINE
-                ============================================== -->
-                <section
-                    id="timelineSection"
-                    class="timeline-section"
-                    data-component="timeline"
-                >
-
-                    <header
-                        id="timelineHeader"
-                        class="timeline-header"
-                    >
-
-                        <div
-                            id="timelineToolbar"
-                            class="timeline-toolbar"
-                        >
-
-                            <button
-                                id="addTrackButton"
-                                type="button"
-                                class="timeline-button"
-                                data-action="add-track"
-                            >
-                                ＋ Piste
-                            </button>
-
-                            <button
-                                id="splitClipButton"
-                                type="button"
-                                class="timeline-button"
-                                data-action="split-clip"
-                            >
-                                ✂ Diviser
-                            </button>
-
-                            <button
-                                id="deleteClipButton"
-                                type="button"
-                                class="timeline-button"
-                                data-action="delete-clip"
-                            >
-                                Supprimer
-                            </button>
-
-                            <button
-                                id="duplicateClipButton"
-                                type="button"
-                                class="timeline-button"
-                                data-action="duplicate-clip"
-                            >
-                                Dupliquer
-                            </button>
-
-                        </div>
-
-
-                        <div
-                            id="timelineZoom"
-                            class="timeline-zoom"
-                        >
-
-                            <button
-                                id="timelineZoomOut"
-                                type="button"
-                                class="icon-button"
-                                data-action="timeline-zoom-out"
-                            >
-                                −
-                            </button>
-
-                            <output
-                                id="timelineZoomValue"
-                                class="zoom-value"
-                            >
-                                100%
-                            </output>
-
-                            <button
-                                id="timelineZoomIn"
-                                type="button"
-                                class="icon-button"
-                                data-action="timeline-zoom-in"
-                            >
-                                ＋
-                            </button>
-
-                        </div>
-
-                    </header>
-
-
-                    <div
-                        id="timelineViewport"
-                        class="timeline-viewport"
-                        data-component="timeline-viewport"
-                    >
-
-                        <div
-                            id="timelineRuler"
-                            class="timeline-ruler"
-                            data-component="timeline-ruler"
-                        >
-                            <!-- Généré par JS -->
-                        </div>
-
-
-                        <div
-                            id="timelineTracks"
-                            class="timeline-tracks"
-                            data-component="timeline-tracks"
-                        >
-
-                            <div
-                                id="videoTrack"
-                                class="timeline-track"
-                                data-track-type="video"
-                                data-track-id="video-track-1"
-                            >
-
-                                <div class="track-header">
-
-                                    <span class="track-name">
-                                        Vidéo
-                                    </span>
-
-                                    <button
-                                        id="videoTrackMuteButton"
-                                        type="button"
-                                        class="track-control"
-                                        data-action="mute-track"
-                                        data-track-id="video-track-1"
-                                    >
-                                        🔊
-                                    </button>
-
-                                    <button
-                                        id="videoTrackLockButton"
-                                        type="button"
-                                        class="track-control"
-                                        data-action="lock-track"
-                                        data-track-id="video-track-1"
-                                    >
-                                        🔓
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    id="videoTrackContent"
-                                    class="track-content"
-                                    data-track-content="video"
-                                >
-                                    <!-- Clips vidéo générés par JS -->
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                id="overlayTrack"
-                                class="timeline-track"
-                                data-track-type="overlay"
-                                data-track-id="overlay-track-1"
-                            >
-
-                                <div class="track-header">
-
-                                    <span class="track-name">
-                                        Overlay
-                                    </span>
-
-                                    <button
-                                        id="overlayTrackMuteButton"
-                                        type="button"
-                                        class="track-control"
-                                        data-action="mute-track"
-                                        data-track-id="overlay-track-1"
-                                    >
-                                        🔊
-                                    </button>
-
-                                    <button
-                                        id="overlayTrackLockButton"
-                                        type="button"
-                                        class="track-control"
-                                        data-action="lock-track"
-                                        data-track-id="overlay-track-1"
-                                    >
-                                        🔓
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    id="overlayTrackContent"
-                                    class="track-content"
-                                    data-track-content="overlay"
-                                >
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                id="textTrack"
-                                class="timeline-track"
-                                data-track-type="text"
-                                data-track-id="text-track-1"
-                            >
-
-                                <div class="track-header">
-
-                                    <span class="track-name">
-                                        Texte
-                                    </span>
-
-                                    <button
-                                        id="textTrackLockButton"
-                                        type="button"
-                                        class="track-control"
-                                        data-action="lock-track"
-                                        data-track-id="text-track-1"
-                                    >
-                                        🔓
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    id="textTrackContent"
-                                    class="track-content"
-                                    data-track-content="text"
-                                >
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                id="voiceTrack"
-                                class="timeline-track"
-                                data-track-type="voice"
-                                data-track-id="voice-track-1"
-                            >
-
-                                <div class="track-header">
-
-                                    <span class="track-name">
-                                        Voix
-                                    </span>
-
-                                    <button
-                                        id="voiceTrackMuteButton"
-                                        type="button"
-                                        class="track-control"
-                                        data-action="mute-track"
-                                        data-track-id="voice-track-1"
-                                    >
-                                        🔊
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    id="voiceTrackContent"
-                                    class="track-content"
-                                    data-track-content="voice"
-                                >
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                id="musicTrack"
-                                class="timeline-track"
-                                data-track-type="music"
-                                data-track-id="music-track-1"
-                            >
-
-                                <div class="track-header">
-
-                                    <span class="track-name">
-                                        Musique
-                                    </span>
-
-                                    <button
-                                        id="musicTrackMuteButton"
-                                        type="button"
-                                        class="track-control"
-                                        data-action="mute-track"
-                                        data-track-id="music-track-1"
-                                    >
-                                        🔊
-                                    </button>
-
-                                </div>
-
-                                <div
-                                    id="musicTrackContent"
-                                    class="track-content"
-                                    data-track-content="music"
-                                >
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div
-                            id="timelinePlayhead"
-                            class="timeline-playhead"
-                            data-component="playhead"
-                        >
-                            <span class="playhead-handle"></span>
-                        </div>
-
-                    </div>
-
-                </section>
-
-            </section>
-
-
-            <!-- =================================================
-                 INSPECTEUR DROIT
-            ================================================== -->
-            <aside
-                id="rightSidebar"
-                class="right-sidebar"
-                data-component="inspector"
-            >
-
-                <header
-                    id="inspectorHeader"
-                    class="inspector-header"
-                >
-                    <h2>Inspecteur</h2>
-
-                    <button
-                        id="closeInspectorButton"
-                        type="button"
-                        class="icon-button"
-                        data-action="close-inspector"
-                        aria-label="Fermer l'inspecteur"
-                    >
-                        ×
-                    </button>
-                </header>
-
-
-                <div
-                    id="inspectorContent"
-                    class="inspector-content"
-                >
-
-                    <!-- =========================================
-                         PROPRIÉTÉS POSITION
-                    ========================================== -->
-                    <section
-                        id="transformSection"
-                        class="inspector-section"
-                        data-section="transform"
-                    >
-
-                        <h3>Transformation</h3>
-
-                        <div class="property-grid">
-
-                            <div class="form-field">
-
-                                <label for="positionX">
-                                    X
-                                </label>
-
-                                <input
-                                    id="positionX"
-                                    name="positionX"
-                                    type="number"
-                                    value="0"
-                                    step="1"
-                                    data-property="position-x"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="positionY">
-                                    Y
-                                </label>
-
-                                <input
-                                    id="positionY"
-                                    name="positionY"
-                                    type="number"
-                                    value="0"
-                                    step="1"
-                                    data-property="position-y"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="scaleX">
-                                    Échelle X
-                                </label>
-
-                                <input
-                                    id="scaleX"
-                                    name="scaleX"
-                                    type="number"
-                                    value="100"
-                                    min="1"
-                                    max="1000"
-                                    step="1"
-                                    data-property="scale-x"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="scaleY">
-                                    Échelle Y
-                                </label>
-
-                                <input
-                                    id="scaleY"
-                                    name="scaleY"
-                                    type="number"
-                                    value="100"
-                                    min="1"
-                                    max="1000"
-                                    step="1"
-                                    data-property="scale-y"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="rotation">
-                                    Rotation
-                                </label>
-
-                                <input
-                                    id="rotation"
-                                    name="rotation"
-                                    type="number"
-                                    value="0"
-                                    min="-360"
-                                    max="360"
-                                    step="1"
-                                    data-property="rotation"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="opacity">
-                                    Opacité
-                                </label>
-
-                                <input
-                                    id="opacity"
-                                    name="opacity"
-                                    type="number"
-                                    value="100"
-                                    min="0"
-                                    max="100"
-                                    step="1"
-                                    data-property="opacity"
-                                >
-
-                            </div>
-
-                        </div>
-
-                    </section>
-
-
-                    <!-- =========================================
-                         POSITION DANS LE TEMPS
-                    ========================================== -->
-                    <section
-                        id="timingSection"
-                        class="inspector-section"
-                        data-section="timing"
-                    >
-
-                        <h3>Durée</h3>
-
-                        <div class="property-grid">
-
-                            <div class="form-field">
-
-                                <label for="clipStart">
-                                    Début
-                                </label>
-
-                                <input
-                                    id="clipStart"
-                                    name="clipStart"
-                                    type="number"
-                                    value="0"
-                                    min="0"
-                                    max="300"
-                                    step="0.001"
-                                    data-property="clip-start"
-                                >
-
-                            </div>
-
-
-                            <div class="form-field">
-
-                                <label for="clipDuration">
-                                    Durée
-                                </label>
-
-                                <input
-                                    id="clipDuration"
-                                    name="clipDuration"
-                                    type="number"
-                                    value="5"
-                                    min="0.001"
-                                    max="300"
-                                    step="0.001"
-                                    data-property="clip-duration"
-                                >
-
-                            </div>
-
-                        </div>
-
-                    </section>
-
-
-                    <!-- =========================================
-                         AUDIO
-                    ========================================== -->
-                    <section
-                        id="audioPropertiesSection"
-                        class="inspector-section"
-                        data-section="audio-properties"
-                    >
-
-                        <h3>Audio</h3>
-
-                        <div class="form-field">
-
-                            <label for="volumeControl">
-                                Volume
-                            </label>
-
-                            <input
-                                id="volumeControl"
-                                name="volumeControl"
-                                type="range"
-                                min="0"
-                                max="200"
-                                value="100"
-                                data-property="volume"
-                            >
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="fadeInDuration">
-                                Fondu entrant
-                            </label>
-
-                            <input
-                                id="fadeInDuration"
-                                name="fadeInDuration"
-                                type="number"
-                                min="0"
-                                max="30"
-                                step="0.1"
-                                value="0"
-                                data-property="fade-in"
-                            >
-
-                        </div>
-
-
-                        <div class="form-field">
-
-                            <label for="fadeOutDuration">
-                                Fondu sortant
-                            </label>
-
-                            <input
-                                id="fadeOutDuration"
-                                name="fadeOutDuration"
-                                type="number"
-                                min="0"
-                                max="30"
-                                step="0.1"
-                                value="0"
-                                data-property="fade-out"
-                            >
-
-                        </div>
-
-                    </section>
-
-
-                    <!-- =========================================
-                         SUPPRESSION
-                    ========================================== -->
-                    <section
-                        id="selectionActionsSection"
-                        class="inspector-section"
-                        data-section="selection-actions"
-                    >
-
-                        <button
-                            id="duplicateSelectedButton"
-                            type="button"
-                            class="secondary-action"
-                            data-action="duplicate-selected"
-                        >
-                            Dupliquer l'élément
-                        </button>
-
-                        <button
-                            id="deleteSelectedButton"
-                            type="button"
-                            class="danger-action"
-                            data-action="delete-selected"
-                        >
-                            Supprimer l'élément
-                        </button>
-
-                    </section>
-
-                </div>
-
-            </aside>
-
-        </main>
-
-
-        <!-- =====================================================
-             FOOTER / ÉTAT SYSTÈME
-        ====================================================== -->
-        <footer
-            id="appFooter"
-            class="app-footer"
-            data-component="footer"
-        >
-
-            <div
-                id="systemStatus"
-                class="system-status"
-                aria-live="polite"
-            >
-                Prêt
-            </div>
-
-            <div
-                id="storageStatus"
-                class="storage-status"
-            >
-                Stockage local activé
-            </div>
-
-            <div
-                id="connectionStatus"
-                class="connection-status"
-            >
-                Mode local
-            </div>
-
-            <div
-                id="renderStatus"
-                class="render-status"
-            >
-                Moteur prêt
-            </div>
-
-        </footer>
-
+      <div>
+        <strong>FÒBAS AI VIDEO</strong>
+        <span>LOCAL CREATIVE STUDIO</span>
+      </div>
     </div>
 
-
-    <!-- =========================================================
-         MODALE NOUVEAU PROJET
-    ========================================================== -->
-    <dialog
-        id="newProjectDialog"
-        class="app-dialog"
-        data-dialog="new-project"
-    >
-
-        <form
-            id="newProjectForm"
-            method="dialog"
-            data-form="new-project"
-        >
-
-            <header class="dialog-header">
-                <h2>Nouveau projet</h2>
-
-                <button
-                    id="closeNewProjectDialogButton"
-                    type="button"
-                    class="icon-button"
-                    data-action="close-new-project-dialog"
-                    aria-label="Fermer"
-                >
-                    ×
-                </button>
-            </header>
-
-
-            <div class="dialog-body">
-
-                <div class="form-field">
-
-                    <label for="newProjectName">
-                        Nom du projet
-                    </label>
-
-                    <input
-                        id="newProjectName"
-                        name="newProjectName"
-                        type="text"
-                        maxlength="120"
-                        value="Nouveau projet"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-field">
-
-                    <label for="newProjectFormat">
-                        Format
-                    </label>
-
-                    <select
-                        id="newProjectFormat"
-                        name="newProjectFormat"
-                    >
-                        <option value="16:9">16:9</option>
-                        <option value="9:16">9:16</option>
-                        <option value="1:1">1:1</option>
-                        <option value="4:5">4:5</option>
-                    </select>
-
-                </div>
-
-            </div>
-
-
-            <footer class="dialog-footer">
-
-                <button
-                    id="cancelNewProjectButton"
-                    type="button"
-                    class="secondary-action"
-                    data-action="cancel-new-project"
-                >
-                    Annuler
-                </button>
-
-                <button
-                    id="confirmNewProjectButton"
-                    type="submit"
-                    class="primary-action"
-                    data-action="confirm-new-project"
-                >
-                    Créer le projet
-                </button>
-
-            </footer>
-
-        </form>
-
-    </dialog>
-
-
-    <!-- =========================================================
-         MODALE EXPORT
-    ========================================================== -->
-    <dialog
-        id="exportDialog"
-        class="app-dialog"
-        data-dialog="export"
-    >
-
-        <form
-            id="exportForm"
-            method="dialog"
-            data-form="export"
-        >
-
-            <header class="dialog-header">
-
-                <h2>Exporter la vidéo</h2>
-
-                <button
-                    id="closeExportDialogButton"
-                    type="button"
-                    class="icon-button"
-                    data-action="close-export-dialog"
-                    aria-label="Fermer"
-                >
-                    ×
-                </button>
-
-            </header>
-
-
-            <div class="dialog-body">
-
-                <div class="form-field">
-
-                    <label for="exportFormat">
-                        Format
-                    </label>
-
-                    <select
-                        id="exportFormat"
-                        name="exportFormat"
-                    >
-                        <option value="webm">WebM</option>
-                        <option value="mp4">MP4</option>
-                    </select>
-
-                </div>
-
-
-                <div class="form-field">
-
-                    <label for="exportQuality">
-                        Qualité
-                    </label>
-
-                    <select
-                        id="exportQuality"
-                        name="exportQuality"
-                    >
-                        <option value="standard">Standard</option>
-                        <option value="high" selected>Haute</option>
-                        <option value="maximum">Maximum</option>
-                    </select>
-
-                </div>
-
-
-                <div class="export-summary">
-
-                    <div>
-                        <span>Projet</span>
-                        <strong id="exportProjectName">
-                            Nouveau projet
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Durée</span>
-                        <strong id="exportDuration">
-                            00:00
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Résolution</span>
-                        <strong id="exportResolution">
-                            1920 × 1080
-                        </strong>
-                    </div>
-
-                </div>
-
-                <div
-                    id="exportProgressContainer"
-                    class="progress-container"
-                    hidden
-                >
-
-                    <progress
-                        id="exportProgress"
-                        value="0"
-                        max="100"
-                    >
-                    </progress>
-
-                    <span id="exportProgressLabel">
-                        0%
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <footer class="dialog-footer">
-
-                <button
-                    id="cancelExportButton"
-                    type="button"
-                    class="secondary-action"
-                    data-action="cancel-export"
-                >
-                    Annuler
-                </button>
-
-                <button
-                    id="confirmExportButton"
-                    type="submit"
-                    class="primary-action"
-                    data-action="confirm-export"
-                >
-                    Télécharger
-                </button>
-
-            </footer>
-
-        </form>
-
-    </dialog>
-
-
-    <!-- =========================================================
-         MODALE CHARGEMENT
-    ========================================================== -->
-    <dialog
-        id="loadProjectDialog"
-        class="app-dialog"
-        data-dialog="load-project"
-    >
-
-        <section class="dialog-content">
-
-            <header class="dialog-header">
-
-                <h2>Projets sauvegardés</h2>
-
-                <button
-                    id="closeLoadProjectDialogButton"
-                    type="button"
-                    class="icon-button"
-                    data-action="close-load-dialog"
-                    aria-label="Fermer"
-                >
-                    ×
-                </button>
-
-            </header>
-
-
-            <div
-                id="savedProjectsList"
-                class="saved-projects-list"
-                data-component="saved-projects"
-            >
-                <!-- Généré par JavaScript -->
-            </div>
-
-
-            <footer class="dialog-footer">
-
-                <button
-                    id="clearSavedProjectsButton"
-                    type="button"
-                    class="danger-action"
-                    data-action="clear-saved-projects"
-                >
-                    Effacer les projets locaux
-                </button>
-
-            </footer>
-
-        </section>
-
-    </dialog>
-
-
-    <!-- =========================================================
-         TOAST / NOTIFICATIONS
-    ========================================================== -->
-    <div
-        id="notificationContainer"
-        class="notification-container"
-        aria-live="polite"
-        aria-atomic="true"
-        data-component="notifications"
-    >
+    <div class="top-actions">
+      <button id="newProjectBtn" class="ghost-btn">
+        Nouveau
+      </button>
+
+      <button id="saveProjectBtn" class="ghost-btn">
+        Sove
+      </button>
+
+      <button id="exportBtn" class="primary-btn">
+        ⬇ Export
+      </button>
     </div>
 
+  </header>
 
-    <!-- =========================================================
-         LOADER
-    ========================================================== -->
-    <div
-        id="applicationLoader"
-        class="application-loader"
-        data-component="loader"
-        aria-hidden="true"
-    >
 
-        <div class="loader-content">
+  <!-- MAIN WORKSPACE -->
+  <main class="workspace">
 
-            <div
-                id="loaderSpinner"
-                class="loader-spinner"
-            ></div>
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar left-sidebar">
 
-            <strong id="loaderTitle">
-                Initialisation
-            </strong>
+      <!-- AI GENERATOR -->
+      <section class="panel-section">
 
-            <span id="loaderMessage">
-                Préparation du laboratoire...
-            </span>
+        <div class="section-title">
+          ✦ KREYE AK AI
+        </div>
+
+        <textarea
+          id="prompt"
+          class="prompt-input"
+          placeholder="Ekri sa ou vle kreye a...
+
+Egzanp:
+Kreye yon videyo piblisite 30 segonn pou yon restoran, style premium, an kreyòl, ak yon call-to-action."
+        ></textarea>
+
+        <div class="form-row">
+
+          <select id="duration">
+            <option value="15">15 segonn</option>
+            <option value="30" selected>30 segonn</option>
+            <option value="60">1 minit</option>
+            <option value="120">2 minit</option>
+            <option value="180">3 minit</option>
+          </select>
+
+          <select id="format">
+            <option value="16:9">16:9</option>
+            <option value="9:16">9:16</option>
+            <option value="1:1">1:1</option>
+          </select>
 
         </div>
 
+        <button id="generateBtn" class="ai-button">
+          ✨ Jenere Scene yo
+        </button>
+
+        <p class="small-info">
+          Sistèm nan prepare storyboard, scenes,
+          tèks ak timing lokalman.
+        </p>
+
+      </section>
+
+
+      <!-- MEDIA -->
+      <section class="panel-section">
+
+        <div class="section-title">
+          MEDIA
+        </div>
+
+        <input
+          id="mediaInput"
+          type="file"
+          accept="image/*,video/*,audio/*"
+          multiple
+          hidden
+        >
+
+        <button id="addMediaBtn" class="tool-button">
+          ＋ Ajoute Foto / Video / Audio
+        </button>
+
+        <div id="mediaBin" class="media-bin"></div>
+
+      </section>
+
+
+      <!-- BACKGROUND -->
+      <section class="panel-section">
+
+        <div class="section-title">
+          BACKGROUND
+        </div>
+
+        <div id="backgroundGrid" class="background-grid">
+
+          <button data-bg="aurora"></button>
+
+          <button data-bg="sunset"></button>
+
+          <button data-bg="ocean"></button>
+
+          <button data-bg="neon"></button>
+
+          <button data-bg="dark"></button>
+
+          <button data-bg="paper"></button>
+
+        </div>
+
+      </section>
+
+    </aside>
+
+
+    <!-- CENTER EDITOR -->
+    <section class="editor panel">
+
+      <!-- PREVIEW HEADER -->
+      <div class="preview-header">
+
+        <div class="project-info">
+
+          <strong id="projectName">
+            Untitled Project
+          </strong>
+
+          <span id="projectTime">
+            00:00 / 00:30
+          </span>
+
+        </div>
+
+
+        <div class="preview-controls">
+
+          <button id="zoomOut">−</button>
+
+          <span id="zoomLabel">100%</span>
+
+          <button id="zoomIn">＋</button>
+
+          <button id="fullscreenBtn">
+            ⛶
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- VIDEO STAGE -->
+      <div id="stageWrap" class="stage-wrap">
+
+        <canvas id="stage"></canvas>
+
+        <div id="dropHint">
+          Glise media isit la
+        </div>
+
+      </div>
+
+
+      <!-- VIDEO CONTROLS -->
+      <div class="transport">
+
+        <button id="backBtn">
+          ↶
+        </button>
+
+        <button id="playBtn" class="play-button">
+          ▶
+        </button>
+
+        <button id="forwardBtn">
+          ↷
+        </button>
+
+        <input
+          id="scrubber"
+          type="range"
+          min="0"
+          max="30"
+          value="0"
+          step="0.01"
+        >
+
+        <span id="currentTime">
+          00:00
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="sidebar right-sidebar">
+
+      <!-- TABS -->
+      <div class="tabs">
+
+        <button
+          class="tab-button active"
+          data-tab="scene"
+        >
+          Scene
+        </button>
+
+        <button
+          class="tab-button"
+          data-tab="text"
+        >
+          Tèks
+        </button>
+
+        <button
+          class="tab-button"
+          data-tab="audio"
+        >
+          Audio
+        </button>
+
+      </div>
+
+
+      <!-- SCENE TAB -->
+      <div
+        id="tab-scene"
+        class="tab-content"
+      >
+
+        <div class="section-title">
+          SCENES
+        </div>
+
+        <div
+          id="sceneList"
+          class="scene-list"
+        ></div>
+
+        <button
+          id="addSceneBtn"
+          class="tool-button"
+        >
+          ＋ Ajoute Scene
+        </button>
+
+      </div>
+
+
+      <!-- TEXT TAB -->
+      <div
+        id="tab-text"
+        class="tab-content hidden"
+      >
+
+        <div class="section-title">
+          TÈKS SCENE
+        </div>
+
+        <textarea
+          id="sceneText"
+          rows="6"
+          placeholder="Ekri tèks scene a..."
+        ></textarea>
+
+        <div class="form-row">
+
+          <input
+            id="fontSize"
+            type="number"
+            min="12"
+            max="160"
+            value="54"
+          >
+
+          <select id="textAlign">
+
+            <option value="center">
+              Center
+            </option>
+
+            <option value="left">
+              Left
+            </option>
+
+            <option value="right">
+              Right
+            </option>
+
+          </select>
+
+        </div>
+
+        <button
+          id="speakBtn"
+          class="tool-button"
+        >
+          🔊 Li Tèks la
+        </button>
+
+      </div>
+
+
+      <!-- AUDIO TAB -->
+      <div
+        id="tab-audio"
+        class="tab-content hidden"
+      >
+
+        <div class="section-title">
+          AUDIO / VOICE
+        </div>
+
+        <input
+          id="audioInput"
+          type="file"
+          accept="audio/*"
+          hidden
+        >
+
+        <button
+          id="voiceFileBtn"
+          class="tool-button"
+        >
+          🎙 Ajoute Voice / Music
+        </button>
+
+        <p class="small-info">
+          Ajoute yon fichye audio pou itilize
+          voice-over oswa mizik nan workflow la.
+        </p>
+
+      </div>
+
+    </aside>
+
+  </main>
+
+
+  <!-- TIMELINE -->
+  <section class="timeline-panel panel">
+
+    <div class="timeline-header">
+
+      <strong>
+        TIMELINE
+      </strong>
+
+      <span id="timelineDuration">
+        30s
+      </span>
+
     </div>
 
+    <div
+      id="timeline"
+      class="timeline"
+    ></div>
 
-    <!-- =========================================================
-         DONNÉES INITIALES POUR JAVASCRIPT
-    ========================================================== -->
-    <script
-        type="application/json"
-        id="initialApplicationState"
-    >
-    {
-        "application": {
-            "name": "Video Fobas",
-            "version": "1.0.0",
-            "language": "fr",
-            "maxDuration": 300
-        },
-        "project": {
-            "id": null,
-            "name": "Nouveau projet",
-            "format": "16:9",
-            "resolution": "1080p",
-            "fps": 30,
-            "duration": 0
-        },
-        "playback": {
-            "currentTime": 0,
-            "isPlaying": false,
-            "isMuted": true,
-            "volume": 1
-        },
-        "zoom": {
-            "preview": 1,
-            "timeline": 1
-        },
-        "selection": {
-            "type": null,
-            "id": null
-        },
-        "tracks": [
-            {
-                "id": "video-track-1",
-                "type": "video",
-                "name": "Vidéo",
-                "locked": false,
-                "muted": false,
-                "clips": []
-            },
-            {
-                "id": "overlay-track-1",
-                "type": "overlay",
-                "name": "Overlay",
-                "locked": false,
-                "muted": false,
-                "clips": []
-            },
-            {
-                "id": "text-track-1",
-                "type": "text",
-                "name": "Texte",
-                "locked": false,
-                "muted": false,
-                "clips": []
-            },
-            {
-                "id": "voice-track-1",
-                "type": "voice",
-                "name": "Voix",
-                "locked": false,
-                "muted": false,
-                "clips": []
-            },
-            {
-                "id": "music-track-1",
-                "type": "music",
-                "name": "Musique",
-                "locked": false,
-                "muted": false,
-                "clips": []
-            }
-        ],
-        "media": [],
-        "history": {
-            "undo": [],
-            "redo": []
-        }
-    }
-    </script>
+  </section>
 
 
-    <!-- =========================================================
-         JAVASCRIPT EXTERNE UNIQUEMENT
-    ========================================================== -->
-    <script
-        src="simulationvideofobas.js"
-        defer
-    ></script>
+  <!-- TOAST -->
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+</div>
+
+
+<script src="simulationvideofobas.js"></script>
 
 </body>
 </html>
-
-
-
-
-
-
-
 
 
 
