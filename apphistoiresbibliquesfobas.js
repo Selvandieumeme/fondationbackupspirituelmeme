@@ -2040,7 +2040,7 @@ const STORIES = [
                 source: "Istwa Neyemya Rebati Miray Jerizalèm"
             }
         ]
-    }
+    },
 
 
 
