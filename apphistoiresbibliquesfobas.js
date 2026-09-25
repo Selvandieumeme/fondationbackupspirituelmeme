@@ -3435,7 +3435,7 @@ function bindSettings() {
             () => {
 
                 openModal(
-                    "50 Bèl Istwa nan Bib la",
+                    " Bèl Istwa nan Bib la",
 
                     `
                     <div class="about-app-content">
