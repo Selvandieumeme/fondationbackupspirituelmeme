@@ -2042,7 +2042,1662 @@ const STORIES = [
         ]
     }
 
+
+
+
+
+
+
+{
+        id: 21,
+        title: "Nesans Moyiz",
+        category: "Pèsonaj Biblik",
+        reference: "Egzòd 2:1–10",
+        image: "images/nesans-moyiz.jpg",
+        audio: "audio/nesans-moyiz.mp3",
+
+        content: `
+            <p>
+                Nan tan Moyiz la, pèp Izrayèl la t ap viv nan peyi Lejip.
+                Farawon te bay lòd pou yo touye tibebe gason Izrayelit yo.
+                Manman Moyiz te kache l pandan twa mwa pou pwoteje lavi li.
+            </p>
+
+            <p>
+                Lè li pa t kapab kache l ankò, li pran yon panyen, li pase
+                l ak goudwon pou dlo pa antre ladan l, epi li mete tibebe a
+                nan mitan wozo bò larivyè Nil la.
+            </p>
+
+            <p>
+                Sè Moyiz la te rete lwen pou l gade sa k t ap pase.
+                Pitit fi Farawon an te desann bò larivyè a, li wè panyen an
+                epi li dekouvri tibebe a ladan l.
+            </p>
+
+            <p>
+                Pitit fi Farawon an te pran Moyiz kòm pwòp pitit li.
+                Se konsa Moyiz te grandi nan fanmi wa peyi Lejip la.
+            </p>
+        `,
+
+        lesson:
+            "Bondye ka sèvi ak moun ak sitiyasyon difisil pou pwoteje yon lavi epi prepare yon moun pou yon misyon.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki kote manman Moyiz te mete l?",
+                options: [
+                    "Nan yon panyen bò larivyè Nil la",
+                    "Nan yon kay",
+                    "Nan yon tanp",
+                    "Nan yon jaden"
+                ],
+                answer: "Nan yon panyen bò larivyè Nil la",
+                explanation:
+                    "Manman Moyiz te mete l nan yon panyen epi li te mete panyen an nan mitan wozo bò larivyè Nil la.",
+                reference: "Egzòd 2:3"
+            },
+
+            {
+                question: "Ki moun ki te jwenn Moyiz nan panyen an?",
+                options: [
+                    "Pitit fi Farawon an",
+                    "Sara",
+                    "Rit",
+                    "Debora"
+                ],
+                answer: "Pitit fi Farawon an",
+                explanation:
+                    "Pitit fi Farawon an te jwenn panyen an pandan li t ap benyen nan larivyè a.",
+                reference: "Egzòd 2:5–6"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa yon panyen ki byen fèt ka itil sou dlo?",
+                options: [
+                    "Li ka flote si li fèt pou sa",
+                    "Li toujou koule",
+                    "Li tounen yon bato otomatikman",
+                    "Li fè dlo disparèt"
+                ],
+                answer: "Li ka flote si li fèt pou sa",
+                explanation:
+                    "Yon resipyan ki fèt pou flote ka rete sou sifas dlo a si li gen bon fòm ak materyèl apwopriye.",
+                source: "Istwa Nesans Moyiz"
+            }
+        ]
+    },
+
+
+    {
+        id: 22,
+        title: "Moyiz ak Arawon Devan Farawon",
+        category: "Gwo Evènman",
+        reference: "Egzòd 5–7",
+        image: "images/moyiz-arawon-farawon.jpg",
+        audio: "audio/moyiz-arawon-farawon.mp3",
+
+        content: `
+            <p>
+                Bondye te voye Moyiz ak Arawon al jwenn Farawon pou mande
+                l kite pèp Izrayèl la ale. Yo te pote mesaj Bondye te ba yo a.
+            </p>
+
+            <p>
+                Farawon te refize kite pèp la ale. Li te menm fè travay
+                Izrayelit yo vin pi difisil.
+            </p>
+
+            <p>
+                Moyiz te santi sitiyasyon an te vin pi difisil, men Bondye
+                te kontinye ankouraje li pou l fè misyon an.
+            </p>
+
+            <p>
+                Arawon te ede Moyiz pale devan Farawon. Yo te kontinye
+                prezante mesaj Bondye a pandan Bondye t ap prepare pwochen
+                etap liberasyon pèp Izrayèl la.
+            </p>
+        `,
+
+        lesson:
+            "Lè yon travay difisil vin pi konplike, pèseverans ak konfyans ka ede yon moun kontinye fè sa li gen pou fè.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun Moyiz ak Arawon te ale jwenn?",
+                options: [
+                    "Farawon",
+                    "David",
+                    "Sayil",
+                    "Jozye"
+                ],
+                answer: "Farawon",
+                explanation:
+                    "Moyiz ak Arawon te ale devan Farawon pou mande l kite pèp Izrayèl la soti.",
+                reference: "Egzòd 5:1"
+            },
+
+            {
+                question: "Ki moun ki te ede Moyiz pale?",
+                options: [
+                    "Arawon",
+                    "Jozye",
+                    "Neyemya",
+                    "Samyèl"
+                ],
+                answer: "Arawon",
+                explanation:
+                    "Arawon te sèvi kòm pòtpawòl Moyiz devan Farawon ak pèp la.",
+                reference: "Egzòd 4:14–16"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa pèseverans vle di?",
+                options: [
+                    "Kontinye fè efò malgre difikilte",
+                    "Abandone touswit",
+                    "Pa janm aprann",
+                    "Evite tout travay"
+                ],
+                answer: "Kontinye fè efò malgre difikilte",
+                explanation:
+                    "Pèseverans se kapasite pou kontinye fè efò menm lè gen obstak.",
+                source: "Istwa Moyiz ak Arawon Devan Farawon"
+            }
+        ]
+    },
+
+
+    {
+        id: 23,
+        title: "Man Bondye Bay nan Dezè a",
+        category: "Mirak",
+        reference: "Egzòd 16:1–36",
+        image: "images/man-deze.jpg",
+        audio: "audio/man-deze.mp3",
+
+        content: `
+            <p>
+                Apre pèp Izrayèl la te kite peyi Lejip, yo te vwayaje nan
+                dezè a. Apre kèk tan, yo te kòmanse plenyen paske yo te
+                bezwen manje.
+            </p>
+
+            <p>
+                Bondye te di Moyiz li t ap bay pèp la manje. Nan maten,
+                lè lawouze a te fin disparèt, pèp la te wè ti bagay sou tè a.
+            </p>
+
+            <p>
+                Moyiz te eksplike yo se manje Bondye te bay yo. Pèp la
+                rele manje sa a man.
+            </p>
+
+            <p>
+                Chak jou, moun yo te ranmase kantite yo te bezwen. Bondye
+                te sèvi ak sa pou pran swen pèp la pandan vwayaj yo nan dezè a.
+            </p>
+        `,
+
+        lesson:
+            "Bondye te montre pèp Izrayèl la li kapab pran swen bezwen yo pandan yon vwayaj ki te difisil.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki non manje Bondye te bay pèp Izrayèl la nan dezè a?",
+                options: [
+                    "Man",
+                    "Lwil",
+                    "Siwo myèl",
+                    "Pen ble"
+                ],
+                answer: "Man",
+                explanation:
+                    "Pèp Izrayèl la te rele manje Bondye te bay yo nan dezè a man.",
+                reference: "Egzòd 16:15"
+            },
+
+            {
+                question: "Ki kote pèp la te ye lè Bondye te bay yo man?",
+                options: [
+                    "Nan dezè a",
+                    "Nan Jerizalèm",
+                    "Nan Betleyèm",
+                    "Nan Jeriko"
+                ],
+                answer: "Nan dezè a",
+                explanation:
+                    "Man an te bay pèp Izrayèl la pandan yo t ap vwayaje nan dezè a.",
+                reference: "Egzòd 16:1–4"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa manje enpòtan pou kò moun?",
+                options: [
+                    "Li bay kò a enèji ak eleman nitritif",
+                    "Li fè moun pa bezwen dòmi",
+                    "Li ranplase dlo nèt",
+                    "Li fè moun pa bezwen respire"
+                ],
+                answer: "Li bay kò a enèji ak eleman nitritif",
+                explanation:
+                    "Kò moun bezwen manje pou jwenn enèji ak eleman nitritif ki nesesè pou fonksyone.",
+                source: "Istwa Man Bondye Bay nan Dezè a"
+            }
+        ]
+    },
+
+
+    {
+        id: 24,
+        title: "Dlo Soti nan Wòch la",
+        category: "Mirak",
+        reference: "Egzòd 17:1–7",
+        image: "images/dlo-woch.jpg",
+        audio: "audio/dlo-wòch.mp3",
+
+        content: `
+            <p>
+                Pèp Izrayèl la te kontinye vwayaj li nan dezè a. Lè yo rive
+                Refidim, yo pa t jwenn dlo pou yo bwè.
+            </p>
+
+            <p>
+                Pèp la te plenyen devan Moyiz paske yo te swaf. Moyiz te
+                mande Bondye sa pou li fè.
+            </p>
+
+            <p>
+                Bondye te mande Moyiz pran baton li te sèvi avè l la epi
+                frape wòch ki te nan Orèb la.
+            </p>
+
+            <p>
+                Dapre istwa a, lè Moyiz fè sa, dlo soti nan wòch la pou pèp
+                la te kapab bwè. Yo te jwenn dlo pandan yo t ap vwayaje nan
+                dezè a.
+            </p>
+        `,
+
+        lesson:
+            "Nan moman bezwen, moun ka chèche Bondye pou direksyon epi sonje li pa nesesè pou pèdi espwa.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki sa pèp Izrayèl la te bezwen nan Refidim?",
+                options: [
+                    "Dlo",
+                    "Lò",
+                    "Rad",
+                    "Bato"
+                ],
+                answer: "Dlo",
+                explanation:
+                    "Pèp la te rive nan yon kote kote pa t gen dlo pou yo bwè.",
+                reference: "Egzòd 17:1"
+            },
+
+            {
+                question: "Ki sa Moyiz te frape dapre enstriksyon Bondye?",
+                options: [
+                    "Yon wòch",
+                    "Yon pye bwa",
+                    "Yon pòt",
+                    "Yon miray"
+                ],
+                answer: "Yon wòch",
+                explanation:
+                    "Bondye te mande Moyiz frape wòch la, epi dlo soti ladan l dapre istwa a.",
+                reference: "Egzòd 17:6"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa dlo enpòtan pou kò moun?",
+                options: [
+                    "Kò a bezwen dlo pou fonksyone",
+                    "Dlo fè moun pa bezwen manje",
+                    "Dlo ranplase lè",
+                    "Dlo fè tout maladi disparèt"
+                ],
+                answer: "Kò a bezwen dlo pou fonksyone",
+                explanation:
+                    "Dlo patisipe nan anpil fonksyon enpòtan nan kò moun.",
+                source: "Istwa Dlo Soti nan Wòch la"
+            }
+        ]
+    },
+
+
+    {
+        id: 25,
+        title: "Jozye Vin Asistan Moyiz",
+        category: "Pèsonaj Biblik",
+        reference: "Egzòd 17:8–16; Nonb 27:18–23",
+        image: "images/jozye-asistan-moyiz.jpg",
+        audio: "audio/jozye-asistan-moyiz.mp3",
+
+        content: `
+            <p>
+                Jozye te youn nan moun ki te sèvi avèk Moyiz pandan pèp
+                Izrayèl la t ap vwayaje. Li te vin yon moun Moyiz te kapab
+                fè konfyans.
+            </p>
+
+            <p>
+                Lè Amalekit yo te vin goumen kont pèp Izrayèl la, Moyiz te
+                chwazi Jozye pou dirije mesye yo nan batay la.
+            </p>
+
+            <p>
+                Jozye te obeyi enstriksyon Moyiz epi li te mennen pèp la
+                nan batay pandan Moyiz te kanpe sou tèt yon ti mòn.
+            </p>
+
+            <p>
+                Plizyè ane apre, Bondye te chwazi Jozye pou pran plas Moyiz
+                kòm lidè pèp Izrayèl la. Eksperyans li te ede prepare l pou
+                gwo responsablite sa a.
+            </p>
+        `,
+
+        lesson:
+            "Ti responsablite ak eksperyans nou resevwa jodi a kapab prepare nou pou pi gwo responsablite demen.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun Moyiz te chwazi pou dirije mesye yo kont Amalekit yo?",
+                options: [
+                    "Jozye",
+                    "David",
+                    "Arawon",
+                    "Samyèl"
+                ],
+                answer: "Jozye",
+                explanation:
+                    "Moyiz te voye Jozye chwazi kèk mesye pou al goumen kont Amalekit yo.",
+                reference: "Egzòd 17:9"
+            },
+
+            {
+                question: "Ki moun ki te vin lidè pèp Izrayèl la apre Moyiz?",
+                options: [
+                    "Jozye",
+                    "Salomon",
+                    "Sayil",
+                    "Eli"
+                ],
+                answer: "Jozye",
+                explanation:
+                    "Apre lanmò Moyiz, Jozye te pran responsablite pou dirije pèp Izrayèl la.",
+                reference: "Jozye 1:1–2"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa eksperyans enpòtan lè yon moun resevwa yon nouvo responsablite?",
+                options: [
+                    "Li ka ede moun nan prepare pou nouvo travay la",
+                    "Li anpeche moun aprann",
+                    "Li fè tout travay fasil",
+                    "Li retire bezwen pou konsèy"
+                ],
+                answer: "Li ka ede moun nan prepare pou nouvo travay la",
+                explanation:
+                    "Eksperyans ka ede yon moun devlope ladrès ak bon jijman pou nouvo responsablite.",
+                source: "Istwa Jozye Vin Asistan Moyiz"
+            }
+        ]
+    },
+
+
+    {
+        id: 26,
+        title: "Jozye Antre nan Peyi Pwomès la",
+        category: "Gwo Evènman",
+        reference: "Jozye 1",
+        image: "images/jozye-peyi-pwomes.jpg",
+        audio: "audio/jozye-peyi-pwomes.mp3",
+
+        content: `
+            <p>
+                Apre Moyiz te mouri, Bondye te pale ak Jozye. Bondye te
+                bay Jozye responsablite pou dirije pèp Izrayèl la.
+            </p>
+
+            <p>
+                Bondye te ankouraje Jozye pou li gen kouraj epi rete fidèl
+                ak enstriksyon li te resevwa.
+            </p>
+
+            <p>
+                Jozye te bay pèp la lòd pou yo prepare yo paske yo t ap
+                travèse larivyè Jouden pou antre nan peyi Bondye te pwomèt yo a.
+            </p>
+
+            <p>
+                Pèp la te dakò pou suiv Jozye. Yo te pare pou kòmanse yon
+                nouvo etap nan vwayaj yo.
+            </p>
+        `,
+
+        lesson:
+            "Nouvo responsablite mande kouraj, preparasyon ak volonte pou suiv bon direksyon.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun ki te vin lidè pèp Izrayèl la apre Moyiz?",
+                options: [
+                    "Jozye",
+                    "Arawon",
+                    "David",
+                    "Eli"
+                ],
+                answer: "Jozye",
+                explanation:
+                    "Bondye te chwazi Jozye pou pran responsablite Moyiz te genyen an.",
+                reference: "Jozye 1:1–2"
+            },
+
+            {
+                question: "Ki rivyè pèp la te pare pou travèse?",
+                options: [
+                    "Larivyè Jouden",
+                    "Nil",
+                    "Efrat",
+                    "Tigr"
+                ],
+                answer: "Larivyè Jouden",
+                explanation:
+                    "Jozye te prepare pèp la pou travèse larivyè Jouden.",
+                reference: "Jozye 1:11"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa preparasyon vle di?",
+                options: [
+                    "Fè sa ki nesesè anvan yon travay oswa yon evènman",
+                    "Abandone yon travay",
+                    "Pa planifye anyen",
+                    "Rete san fè anyen"
+                ],
+                answer: "Fè sa ki nesesè anvan yon travay oswa yon evènman",
+                explanation:
+                    "Preparasyon ede moun òganize sa yo bezwen anvan yo kòmanse yon aktivite.",
+                source: "Istwa Jozye Antre nan Peyi Pwomès la"
+            }
+        ]
+    },
+
+
+    {
+        id: 27,
+        title: "Debora ak Barak",
+        category: "Pèsonaj Biblik",
+        reference: "Jij 4",
+        image: "images/debora-barak.jpg",
+        audio: "audio/debora-barak.mp3",
+
+        content: `
+            <p>
+                Debora te yon pwofètès ak jij nan pèp Izrayèl la. Moun yo
+                te konn vin jwenn li pou jwenn konsèy ak jijman.
+            </p>
+
+            <p>
+                Nan epòk sa a, pèp Izrayèl la te anba presyon lame Jabin,
+                wa peyi Kanaran an. Kòmandan lame a te rele Sisera.
+            </p>
+
+            <p>
+                Debora te rele Barak epi li te transmèt mesaj Bondye ba li.
+                Li te mande Barak rasanble sòlda pou al fè fas ak lame Sisera.
+            </p>
+
+            <p>
+                Barak te dakò ale, epi Debora te ale avèk li. Batay la te
+                fini ak defèt lame Sisera a, dapre istwa biblik la.
+            </p>
+        `,
+
+        lesson:
+            "Lidèchip ka pran diferan fòm, epi sajès ak kouraj ka ede moun pran bon desizyon nan moman difisil.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki wòl Debora te genyen nan pèp Izrayèl la?",
+                options: [
+                    "Pwofètès ak jij",
+                    "Rèn peyi Lejip",
+                    "Sòlda Filisten",
+                    "Machann"
+                ],
+                answer: "Pwofètès ak jij",
+                explanation:
+                    "Debora te sèvi kòm pwofètès ak jij nan pèp Izrayèl la.",
+                reference: "Jij 4:4–5"
+            },
+
+            {
+                question: "Ki moun Debora te rele pou dirije sòlda yo?",
+                options: [
+                    "Barak",
+                    "Gideyon",
+                    "Samson",
+                    "Jefte"
+                ],
+                answer: "Barak",
+                explanation:
+                    "Debora te rele Barak epi li te ba li mesaj pou rasanble sòlda yo.",
+                reference: "Jij 4:6"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa yon jij fè nan yon kominote?",
+                options: [
+                    "Li ede pran desizyon sou kesyon legal oswa konfli",
+                    "Li plante tout rekòt yo",
+                    "Li bati tout kay yo",
+                    "Li kondi tout bato yo"
+                ],
+                answer: "Li ede pran desizyon sou kesyon legal oswa konfli",
+                explanation:
+                    "Nan yon sistèm jistis, jij yo ede aplike lalwa epi pran desizyon sou ka yo.",
+                source: "Istwa Debora ak Barak"
+            }
+        ]
+    },
+
+
+    {
+        id: 28,
+        title: "Gideyon ak Ti Lame li",
+        category: "Gwo Evènman",
+        reference: "Jij 6–7",
+        image: "images/gideyon.jpg",
+        audio: "audio/gideyon.mp3",
+
+        content: `
+            <p>
+                Gideyon te viv nan yon epòk kote pèp Izrayèl la te sibi
+                atak moun Madyan yo. Bondye te rele Gideyon pou ede pèp la.
+            </p>
+
+            <p>
+                Gideyon te rasanble yon gwo kantite moun pou batay la.
+                Men Bondye te montre li lame a te twò gwo pou objektif la.
+            </p>
+
+            <p>
+                Apre plizyè etap, kantite sòlda yo te vin piti anpil.
+                Gideyon te rete ak sèlman twasan gason.
+            </p>
+
+            <p>
+                Yo te itilize twonpèt, krich ak flanbo pandan lannwit.
+                Lame Madyan an te pran panik, epi Izrayelit yo te genyen batay la.
+            </p>
+        `,
+
+        lesson:
+            "Kantite moun pa toujou sèl bagay ki detèmine sa yon gwoup kapab reyalize; disiplin ak estrateji enpòtan tou.",
+
+        biblicalQuestions: [
+            {
+                question: "Konbyen gason ki te rete avèk Gideyon pou batay la?",
+                options: [
+                    "300",
+                    "1,000",
+                    "10,000",
+                    "30,000"
+                ],
+                answer: "300",
+                explanation:
+                    "Dapre Jij 7, Gideyon te rete ak twasan gason.",
+                reference: "Jij 7:7"
+            },
+
+            {
+                question: "Ki bagay yo te itilize pou fè bri nan plan an?",
+                options: [
+                    "Twonpèt",
+                    "Tanbou sèlman",
+                    "Klòch",
+                    "Gita"
+                ],
+                answer: "Twonpèt",
+                explanation:
+                    "Gason Gideyon yo te pote twonpèt ansanm ak krich ak flanbo.",
+                reference: "Jij 7:16"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa yon estrateji ye?",
+                options: [
+                    "Yon plan pou rive jwenn yon objektif",
+                    "Yon kalite manje",
+                    "Yon kalite rad",
+                    "Yon bèt"
+                ],
+                answer: "Yon plan pou rive jwenn yon objektif",
+                explanation:
+                    "Estrateji se fason yon moun oswa yon gwoup planifye aksyon pou rive jwenn yon objektif.",
+                source: "Istwa Gideyon ak Ti Lame li"
+            }
+        ]
+    },
+
+
+    {
+        id: 29,
+        title: "Samyèl Tande Vwa Bondye",
+        category: "Pwofèt ak Mirak",
+        reference: "1 Samyèl 3:1–21",
+        image: "images/samyel-tande-vwa.jpg",
+        audio: "audio/samyel-tande-vwa.mp3",
+
+        content: `
+            <p>
+                Samyèl te yon jèn gason ki t ap sèvi Bondye anba direksyon
+                Eli. Nan epòk sa a, Samyèl te konn sèvi nan kay Bondye a.
+            </p>
+
+            <p>
+                Yon nuit, Samyèl tande yon vwa ki rele non li. Li leve epi
+                li ale jwenn Eli paske li te panse Eli te rele l.
+            </p>
+
+            <p>
+                Sa rive plizyè fwa. Finalman, Eli konprann se Bondye ki t ap
+                rele Samyèl. Li konseye Samyèl reponn si li tande vwa a ankò.
+            </p>
+
+            <p>
+                Samyèl retounen kouche. Lè Bondye rele l ankò, Samyèl reponn.
+                Apre sa, Samyèl te kòmanse resevwa mesaj Bondye pou pèp la.
+            </p>
+        `,
+
+        lesson:
+            "Aprann koute avèk atansyon epi chèche bon konsèy ka ede yon moun konprann responsablite li pi byen.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun ki t ap pran swen Samyèl nan sèvis li?",
+                options: [
+                    "Eli",
+                    "David",
+                    "Moyiz",
+                    "Jozye"
+                ],
+                answer: "Eli",
+                explanation:
+                    "Samyèl te sèvi anba direksyon Eli nan kay Bondye a.",
+                reference: "1 Samyèl 3:1"
+            },
+
+            {
+                question: "Ki moun Samyèl te panse ki t ap rele l?",
+                options: [
+                    "Eli",
+                    "Sayil",
+                    "David",
+                    "Jonatan"
+                ],
+                answer: "Eli",
+                explanation:
+                    "Samyèl te panse se Eli ki t ap rele l paske li pa t ankò konprann se Bondye ki t ap rele l.",
+                reference: "1 Samyèl 3:4–6"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa li enpòtan pou koute avèk atansyon?",
+                options: [
+                    "Pou konprann mesaj la byen",
+                    "Pou evite aprann",
+                    "Pou pale san rete",
+                    "Pou inyore lòt moun"
+                ],
+                answer: "Pou konprann mesaj la byen",
+                explanation:
+                    "Koute avèk atansyon ede moun konprann enfòmasyon ak enstriksyon yo.",
+                source: "Istwa Samyèl Tande Vwa Bondye"
+            }
+        ]
+    },
+
+
+    {
+        id: 30,
+        title: "Sayil Vin Premye Wa Izrayèl",
+        category: "Pèsonaj Biblik",
+        reference: "1 Samyèl 9–10",
+        image: "images/sayil-wa.jpg",
+        audio: "audio/sayil-wa.mp3",
+
+        content: `
+            <p>
+                Pèp Izrayèl la te mande yon wa pou dirije yo menm jan ak
+                lòt nasyon yo. Bondye te bay Samyèl enstriksyon sou moun
+                ki t ap vin premye wa yo.
+            </p>
+
+            <p>
+                Nonm sa a te rele Sayil. Li te soti nan branch fanmi Benjamen.
+                Li te rankontre Samyèl pandan li t ap chèche bourik papa li yo.
+            </p>
+
+            <p>
+                Samyèl te vide lwil sou tèt Sayil kòm yon siy li te chwazi
+                pou vin wa. Apre sa, Sayil te prezante devan pèp la.
+            </p>
+
+            <p>
+                Sayil te kòmanse dirije pèp Izrayèl la kòm premye wa yo.
+                Istwa li montre responsablite yon lidè mande obeyisans ak sajès.
+            </p>
+        `,
+
+        lesson:
+            "Yon pozisyon lidè pote gwo responsablite, epi moun ki resevwa li bezwen sèvi ak pouvwa li avèk sajès.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki non premye wa pèp Izrayèl la?",
+                options: [
+                    "Sayil",
+                    "David",
+                    "Salomon",
+                    "Jozye"
+                ],
+                answer: "Sayil",
+                explanation:
+                    "Sayil te premye wa pèp Izrayèl la dapre istwa 1 Samyèl la.",
+                reference: "1 Samyèl 10:1, 24"
+            },
+
+            {
+                question: "Ki branch fanmi Sayil te soti?",
+                options: [
+                    "Benjamen",
+                    "Jida",
+                    "Levi",
+                    "Efrayim"
+                ],
+                answer: "Benjamen",
+                explanation:
+                    "Sayil te soti nan branch fanmi Benjamen.",
+                reference: "1 Samyèl 9:1–2"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa yon lidè ye?",
+                options: [
+                    "Yon moun ki gide oswa dirije lòt moun",
+                    "Yon moun ki toujou travay pou kont li",
+                    "Yon kalite bèt",
+                    "Yon kalite manje"
+                ],
+                answer: "Yon moun ki gide oswa dirije lòt moun",
+                explanation:
+                    "Yon lidè se yon moun ki gen responsablite pou gide oswa dirije yon gwoup.",
+                source: "Istwa Sayil Vin Premye Wa Izrayèl"
+            }
+        ]
+    },
+
+
+    {
+        id: 31,
+        title: "David Chwazi kòm Wa",
+        category: "Pèsonaj Biblik",
+        reference: "1 Samyèl 16:1–13",
+        image: "images/david-chwazi-wa.jpg",
+        audio: "audio/david-chwazi-wa.mp3",
+
+        content: `
+            <p>
+                Bondye te voye Samyèl lakay Izayi nan Betleyèm paske li te
+                chwazi youn nan pitit Izayi yo pou yon nouvo responsablite.
+            </p>
+
+            <p>
+                Samyèl te wè plizyè pitit Izayi. Li te panse kèk nan yo
+                ta ka moun Bondye te chwazi a, men Bondye te montre li aparans
+                deyò pa t pi enpòtan.
+            </p>
+
+            <p>
+                Yo rele David, pi piti pitit Izayi a, ki te okipe mouton yo.
+                Lè David rive, Bondye te di Samyèl se li menm.
+            </p>
+
+            <p>
+                Samyèl vide lwil sou tèt David devan fanmi an. Apati moman sa,
+                David te resevwa yon siy espesyal sou wòl li t ap gen nan lavni.
+            </p>
+        `,
+
+        lesson:
+            "Valè yon moun pa mezire sèlman selon aparans li; karaktè ak kè moun nan gen anpil enpòtans.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun ki te vide lwil sou David?",
+                options: [
+                    "Samyèl",
+                    "Sayil",
+                    "Natan",
+                    "Eli"
+                ],
+                answer: "Samyèl",
+                explanation:
+                    "Samyèl te vide lwil sou David apre Bondye te chwazi li.",
+                reference: "1 Samyèl 16:13"
+            },
+
+            {
+                question: "Ki travay David t ap fè lè yo te rele l?",
+                options: [
+                    "Li t ap pran swen mouton",
+                    "Li t ap bati yon kay",
+                    "Li t ap peche",
+                    "Li t ap travay nan palè"
+                ],
+                answer: "Li t ap pran swen mouton",
+                explanation:
+                    "David te pi piti pitit Izayi a epi li te konn pran swen mouton papa li.",
+                reference: "1 Samyèl 16:11"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa karaktè yon moun vle di?",
+                options: [
+                    "Kalite ak prensip ki montre fason moun nan konpòte li",
+                    "Koulè rad li",
+                    "Wotè li sèlman",
+                    "Kote li dòmi"
+                ],
+                answer: "Kalite ak prensip ki montre fason moun nan konpòte li",
+                explanation:
+                    "Karaktè gen rapò ak kalite, prensip ak fason yon moun aji.",
+                source: "Istwa David Chwazi kòm Wa"
+            }
+        ]
+    },
+
+
+    {
+        id: 32,
+        title: "David ak Jonatan",
+        category: "Zanmitay ak Fidelite",
+        reference: "1 Samyèl 18–20",
+        image: "images/david-jonatan.jpg",
+        audio: "audio/david-jonatan.mp3",
+
+        content: `
+            <p>
+                Apre David te vin sèvi nan lame Sayil la, li te vin zanmi
+                Jonatan, pitit wa Sayil la. Jonatan te wè kalite David te genyen
+                epi li te fè yon alyans amitye avè l.
+            </p>
+
+            <p>
+                David ak Jonatan te pataje yon relasyon ki te chita sou
+                fidelite ak konfyans. Jonatan te bay David kèk bagay pèsonèl
+                kòm siy amitye yo.
+            </p>
+
+            <p>
+                Lè Sayil te vin vle fè David mal, Jonatan te eseye pwoteje
+                zanmi li. Li te chèche konnen entansyon papa li epi li te
+                avèti David sou danje a.
+            </p>
+
+            <p>
+                Menm lè David te oblije ale lwen, amitye li avèk Jonatan
+                te rete enpòtan. Yo te kontinye montre youn lòt fidelite.
+            </p>
+        `,
+
+        lesson:
+            "Vrè amitye chita sou konfyans, fidelite ak volonte pou ede lòt moun nan moman difisil.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun ki te vin bon zanmi David?",
+                options: [
+                    "Jonatan",
+                    "Farawon",
+                    "Golyat",
+                    "Aman"
+                ],
+                answer: "Jonatan",
+                explanation:
+                    "Jonatan, pitit Sayil, te vin yon bon zanmi David.",
+                reference: "1 Samyèl 18:1–3"
+            },
+
+            {
+                question: "Ki jan Jonatan te ede David?",
+                options: [
+                    "Li te avèti l sou danje",
+                    "Li te fè l wa touswit",
+                    "Li te voye l Lejip",
+                    "Li te bati yon kay pou li"
+                ],
+                answer: "Li te avèti l sou danje",
+                explanation:
+                    "Jonatan te avèti David lè li te konnen Sayil te gen move entansyon kont li.",
+                reference: "1 Samyèl 20:35–42"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Ki sa fidelite vle di nan yon amitye?",
+                options: [
+                    "Rete serye ak yon moun epi pa abandone li fasil",
+                    "Chanje zanmi chak jou",
+                    "Pa janm ede lòt moun",
+                    "Toujou chèche avantaj pou tèt ou"
+                ],
+                answer: "Rete serye ak yon moun epi pa abandone li fasil",
+                explanation:
+                    "Fidelite nan yon amitye gen rapò ak konfyans, respè ak sipò.",
+                source: "Istwa David ak Jonatan"
+            }
+        ]
+    },
+
+
+    {
+        id: 33,
+        title: "David Vin Wa",
+        category: "Pèsonaj Biblik",
+        reference: "2 Samyèl 5:1–10",
+        image: "images/david-wa.jpg",
+        audio: "audio/david-wa.mp3",
+
+        content: `
+            <p>
+                Apre lanmò Sayil, David te kontinye grandi nan enfliyans li
+                nan mitan pèp Izrayèl la. Apre yon tan, branch fanmi Izrayèl
+                yo te vin jwenn li pou yo rekonèt li kòm wa.
+            </p>
+
+            <p>
+                David te vin wa sou tout pèp Izrayèl la. Li te chwazi Jerizalèm
+                kòm yon vil enpòtan pou wayòm li an.
+            </p>
+
+            <p>
+                David te vin youn nan wa ki pi enpòtan nan istwa pèp Izrayèl la.
+                Li te dirije pandan plizyè ane epi li te etabli Jerizalèm kòm
+                yon sant enpòtan pou wayòm nan.
+            </p>
+        `,
+
+        lesson:
+            "Lidèchip mande responsablite, epi desizyon yon lidè ka gen efè sou yon kominote pandan anpil ane.",
+
+        biblicalQuestions: [
+            {
+                question: "Sou kiyès David te vin wa?",
+                options: [
+                    "Tout pèp Izrayèl la",
+                    "Peyi Lejip sèlman",
+                    "Peyi Moab sèlman",
+                    "Filisten yo sèlman"
+                ],
+                answer: "Tout pèp Izrayèl la",
+                explanation:
+                    "Branch fanmi Izrayèl yo te vin jwenn David epi yo te rekonèt li kòm wa sou tout Izrayèl.",
+                reference: "2 Samyèl 5:3"
+            },
+
+            {
+                question: "Ki vil David te pran kòm sant wayòm li?",
+                options: [
+                    "Jerizalèm",
+                    "Niniv",
+                    "Lejip",
+                    "Moab"
+                ],
+                answer: "Jerizalèm",
+                explanation:
+                    "David te pran fòtrès Siyon an nan Jerizalèm epi li te fè vil la vin yon sant enpòtan.",
+                reference: "2 Samyèl 5:6–9"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa yon vil ka vin yon sant enpòtan pou yon wayòm?",
+                options: [
+                    "Li ka sèvi kòm yon kote pou administrasyon ak aktivite enpòtan",
+                    "Li toujou pi pre lanmè",
+                    "Li pa janm bezwen moun",
+                    "Li pa gen okenn bilding"
+                ],
+                answer: "Li ka sèvi kòm yon kote pou administrasyon ak aktivite enpòtan",
+                explanation:
+                    "Kapital oswa sant wayòm yo souvan gen enstitisyon ak aktivite politik oswa administratif.",
+                source: "Istwa David Vin Wa"
+            }
+        ]
+    },
+
+
+    {
+        id: 34,
+        title: "Salomon Bati Tanp lan",
+        category: "Lalwa ak Sajès",
+        reference: "1 Wa 5–8",
+        image: "images/salomon-tanp.jpg",
+        audio: "audio/salomon-tanp.mp3",
+
+        content: `
+            <p>
+                Apre Salomon te vin wa, li te prepare pou konstwi yon tanp
+                pou Bondye nan Jerizalèm. David, papa li, te deja prepare anpil
+                bagay pou pwojè a.
+            </p>
+
+            <p>
+                Salomon te òganize travayè yo epi li te jwenn materyèl ki
+                nesesè pou konstriksyon an. Travay la te pran plizyè ane.
+            </p>
+
+            <p>
+                Lè tanp lan te fini, Salomon te rasanble pèp la pou yon gwo
+                seremoni. Yo te pote Bwat Kontra a antre nan tanp lan.
+            </p>
+
+            <p>
+                Salomon te priye Bondye epi li te mande Bondye tande lapriyè
+                pèp la lè yo t ap vin chèche li nan tanp lan.
+            </p>
+        `,
+
+        lesson:
+            "Gwo pwojè mande planifikasyon, òganizasyon, travay ansanm ak pasyans pou yo rive fini.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun ki te bati tanp lan nan Jerizalèm?",
+                options: [
+                    "Salomon",
+                    "David",
+                    "Moyiz",
+                    "Jozye"
+                ],
+                answer: "Salomon",
+                explanation:
+                    "Salomon te dirije konstriksyon tanp lan nan Jerizalèm.",
+                reference: "1 Wa 6:1"
+            },
+
+            {
+                question: "Ki bagay espesyal yo te pote antre nan tanp lan?",
+                options: [
+                    "Bwat Kontra a",
+                    "Baton Moyiz la",
+                    "Kouwòn David la",
+                    "Fistibal David la"
+                ],
+                answer: "Bwat Kontra a",
+                explanation:
+                    "Apre tanp lan te fini, yo te pote Bwat Kontra a antre ladan l.",
+                reference: "1 Wa 8:6"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa planifikasyon enpòtan nan yon gwo pwojè?",
+                options: [
+                    "Li ede òganize travay ak resous yo",
+                    "Li fè travay la pa bezwen moun",
+                    "Li anpeche moun kolabore",
+                    "Li fè materyèl pa nesesè"
+                ],
+                answer: "Li ede òganize travay ak resous yo",
+                explanation:
+                    "Planifikasyon ede yon gwoup konnen sa li bezwen fè, ki resous ki nesesè ak ki etap pou swiv.",
+                source: "Istwa Salomon Bati Tanp lan"
+            }
+        ]
+    },
+
+
+    {
+        id: 35,
+        title: "Eliya ak Vwa Dou a",
+        category: "Pwofèt ak Mirak",
+        reference: "1 Wa 19:1–18",
+        image: "images/eliya-mòn.jpg",
+        audio: "audio/eliya-voix-dou.mp3",
+
+        content: `
+            <p>
+                Apre evènman ki te pase sou mòn Kamèl la, Eliya te ale nan
+                dezè a. Li te fatige anpil e li te chèche yon kote pou l repoze.
+            </p>
+
+            <p>
+                Apre li fin manje epi repoze, Eliya te vwayaje pandan plizyè
+                jou jouk li rive sou mòn Orèb.
+            </p>
+
+            <p>
+                Pandan li te la, te gen yon gwo van, yon tranbleman tè ak yon
+                dife. Men istwa a di Eliya pa t rekonèt prezans Bondye nan
+                evènman sa yo.
+            </p>
+
+            <p>
+                Apre dife a, Eliya tande yon son ki te dous e trankil.
+                Se nan moman sa a li resevwa mesaj Bondye ak nouvo enstriksyon
+                pou kontinye misyon li.
+            </p>
+        `,
+
+        lesson:
+            "Gen moman kote direksyon ak ankourajman pa vini nan bri, men nan yon fason ki mande atansyon ak kalm pou nou koute.",
+
+        biblicalQuestions: [
+            {
+                question: "Sou ki mòn Eliya te ale apre li te vwayaje nan dezè a?",
+                options: [
+                    "Mòn Orèb",
+                    "Mòn Kamèl",
+                    "Mòn Sinayi",
+                    "Mòn Olivye"
+                ],
+                answer: "Mòn Orèb",
+                explanation:
+                    "Eliya te rive sou mòn Orèb, mòn Bondye a.",
+                reference: "1 Wa 19:8"
+            },
+
+            {
+                question: "Ki kalite son Eliya te tande apre gwo evènman yo?",
+                options: [
+                    "Yon son dous e trankil",
+                    "Yon gwo tanbou",
+                    "Yon gwo kri",
+                    "Yon chante foul moun"
+                ],
+                answer: "Yon son dous e trankil",
+                explanation:
+                    "Apre van, tranbleman tè ak dife a, Eliya te tande yon son dous e trankil.",
+                reference: "1 Wa 19:12"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Poukisa yon moun ka bezwen kalm pou koute byen?",
+                options: [
+                    "Paske bri ka fè li difisil pou konsantre",
+                    "Paske kalm fè moun pa aprann",
+                    "Paske bri toujou nesesè",
+                    "Paske koute pa mande atansyon"
+                ],
+                answer: "Paske bri ka fè li difisil pou konsantre",
+                explanation:
+                    "Yon anviwònman ki pi kalm ka ede yon moun konsantre sou sa li ap tande.",
+                source: "Istwa Eliya ak Vwa Dou a"
+            }
+        ]
+    },
+
+
+    {
+        id: 36,
+        title: "Eliya Monte nan Syèl la",
+        category: "Pwofèt ak Mirak",
+        reference: "2 Wa 2:1–14",
+        image: "images/eliya-monte-syel.jpg",
+        audio: "audio/eliya-monte-syel.mp3",
+
+        content: `
+            <p>
+                Eliya te konnen moman li pou l kite lavi li te prè. Li te
+                vwayaje ansanm ak Elize, yon pwofèt ki te sèvi bò kote li.
+            </p>
+
+            <p>
+                Eliya ak Elize te travèse plizyè kote pandan yo t ap kontinye
+                vwayaj la. Elize te refize kite Eliya pou kont li.
+            </p>
+
+            <p>
+                Lè yo rive bò larivyè Jouden an, Eliya te pran manto li,
+                li woule l epi li frape dlo a. Dapre istwa a, dlo a te separe
+                pou de mesye yo te kapab travèse.
+            </p>
+
+            <p>
+                Apre yo fin pale, yon bagay ekstraòdinè te rive. Eliya te
+                separe ak Elize, epi Elize te wè li monte nan syèl la nan yon
+                gwo van.
+            </p>
+        `,
+
+        lesson:
+            "Fidelite ak pèseverans ka ede yon moun rete bò kote yon bon konseye pandan yon peryòd aprantisaj.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun ki te ak Eliya pandan dènye vwayaj li?",
+                options: [
+                    "Elize",
+                    "David",
+                    "Samyèl",
+                    "Natan"
+                ],
+                answer: "Elize",
+                explanation:
+                    "Elize te akonpaye Eliya epi li te sèvi kòm pwofèt ki t ap aprann nan men li.",
+                reference: "2 Wa 2:2"
+            },
+
+            {
+                question: "Ki sa Eliya te itilize pou frape dlo larivyè Jouden an?",
+                options: [
+                    "Manto li",
+                    "Yon nepe",
+                    "Yon baton an lò",
+                    "Yon wòch"
+                ],
+                answer: "Manto li",
+                explanation:
+                    "Eliya te pran manto li, li woule l epi li frape dlo a.",
+                reference: "2 Wa 2:8"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa yon konseye ka fè?",
+                options: [
+                    "Bay yon moun direksyon ak konsèy",
+                    "Anpeche moun aprann",
+                    "Fè tout desizyon pou tout moun",
+                    "Toujou travay pou kont li"
+                ],
+                answer: "Bay yon moun direksyon ak konsèy",
+                explanation:
+                    "Yon konseye ka pataje eksperyans li epi ede yon lòt moun pran pi bon direksyon.",
+                source: "Istwa Eliya Monte nan Syèl la"
+            }
+        ]
+    },
+
+
+    {
+        id: 37,
+        title: "Eli Akòz Kè li",
+        category: "Pwofèt ak Mirak",
+        reference: "1 Wa 21",
+        image: "images/eli-akab-nabot.jpg",
+        audio: "audio/eli-akab-nabot.mp3",
+
+        content: `
+            <p>
+                Wa Akab te wè yon jaden rezen ki te toupre palè li. Jaden an
+                te pou yon nonm ki te rele Nabòt.
+            </p>
+
+            <p>
+                Akab te vle achte jaden an, men Nabòt pa t vle vann li paske
+                jaden an te yon eritaj fanmi li.
+            </p>
+
+            <p>
+                Akab te tris paske li pa t jwenn sa li te vle. Rèn Jezabèl
+                te wè sa epi li te prepare yon plan ki te lakòz Nabòt pèdi lavi
+                li epi jaden an pase nan men Akab.
+            </p>
+
+            <p>
+                Pwofèt Eli te konfwonte Akab sou sa ki te pase a. Istwa a
+                montre danje ki genyen lè yon moun kite dezi pou byen lòt moun
+                mennen li nan enjistis.
+            </p>
+        `,
+
+        lesson:
+            "Anvi posede sa lòt moun genyen ka mennen nan move desizyon; respè pou dwa lòt moun enpòtan.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun ki te posede jaden rezen Akab te vle a?",
+                options: [
+                    "Nabòt",
+                    "Eli",
+                    "David",
+                    "Elize"
+                ],
+                answer: "Nabòt",
+                explanation:
+                    "Jaden rezen an te pou Nabòt, e li te refize vann eritaj fanmi li.",
+                reference: "1 Wa 21:1–3"
+            },
+
+            {
+                question: "Ki pwofèt ki te konfwonte Akab?",
+                options: [
+                    "Eli",
+                    "Samyèl",
+                    "Natan",
+                    "Jonas"
+                ],
+                answer: "Eli",
+                explanation:
+                    "Eli te ale jwenn Akab pou pale avè l sou sa ki te rive Nabòt.",
+                reference: "1 Wa 21:17–19"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa enjistis vle di?",
+                options: [
+                    "Trete yon moun yon fason ki pa jis",
+                    "Ede yon moun aprann",
+                    "Pataje yon bagay",
+                    "Travay ansanm"
+                ],
+                answer: "Trete yon moun yon fason ki pa jis",
+                explanation:
+                    "Enjistis rive lè yon moun oswa yon gwoup pa jwenn tretman ki jis oswa ekitab.",
+                source: "Istwa Eli ak Jaden Nabòt"
+            }
+        ]
+    },
+
+
+    {
+        id: 38,
+        title: "Jozèf Entèprete Rèv nan Prizon",
+        category: "Pèsonaj Biblik",
+        reference: "Jenèz 40",
+        image: "images/jozef-prizon.jpg",
+        audio: "audio/jozef-prizon.mp3",
+
+        content: `
+            <p>
+                Apre Jozèf te rive nan peyi Lejip, li te fini nan prizon malgre
+                li pa t fè sa yo te akize l la.
+            </p>
+
+            <p>
+                Pandan li te nan prizon, de sèvitè Farawon te vin nan menm
+                kote a. Chak moun te fè yon rèv pandan yon nuit.
+            </p>
+
+            <p>
+                Nan maten, Jozèf remake yo te tris. Yo rakonte l rèv yo,
+                epi Jozèf eksplike rèv yo dapre sa Bondye te pèmèt li konprann.
+            </p>
+
+            <p>
+                Youn nan mesye yo te retounen nan sèvis Farawon jan Jozèf
+                te esplike a. Jozèf te mande li sonje l lè li retounen nan palè a.
+            </p>
+        `,
+
+        lesson:
+            "Menm nan yon sitiyasyon difisil, yon moun ka sèvi ak kapasite li pou ede lòt moun epi kontinye espere.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki kote Jozèf te ye lè li te entèprete rèv mesye yo?",
+                options: [
+                    "Nan prizon",
+                    "Nan palè",
+                    "Nan tanp",
+                    "Nan jaden"
+                ],
+                answer: "Nan prizon",
+                explanation:
+                    "Jozèf te nan prizon lè de sèvitè Farawon yo te rakonte l rèv yo.",
+                reference: "Jenèz 40:1–4"
+            },
+
+            {
+                question: "Konbyen sèvitè Farawon ki te fè rèv nan istwa sa a?",
+                options: [
+                    "De",
+                    "Twa",
+                    "Senk",
+                    "Douz"
+                ],
+                answer: "De",
+                explanation:
+                    "Se te chèf kanbiz Farawon ak chèf boulanje li a.",
+                reference: "Jenèz 40:2–5"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa yon entèpretasyon ye?",
+                options: [
+                    "Eksplikasyon sou sans yon bagay",
+                    "Yon kalite manje",
+                    "Yon vwayaj",
+                    "Yon bilding"
+                ],
+                answer: "Eksplikasyon sou sans yon bagay",
+                explanation:
+                    "Entèpretasyon se fason yo eksplike oswa konprann sans yon bagay.",
+                source: "Istwa Jozèf Entèprete Rèv nan Prizon"
+            }
+        ]
+    },
+
+
+    {
+        id: 39,
+        title: "Jozèf Devni Gwo Responsab nan Lejip",
+        category: "Pèsonaj Biblik",
+        reference: "Jenèz 41",
+        image: "images/jozef-lejip.jpg",
+        audio: "audio/jozef-lejip.mp3",
+
+        content: `
+            <p>
+                Farawon te fè de rèv ki te boulvèse l. Li te chèche moun ki
+                te kapab esplike yo, men pèsonn pa t kapab bay li yon repons.
+            </p>
+
+            <p>
+                Chèf kanbiz la te sonje Jozèf, li rakonte Farawon kijan Jozèf
+                te entèprete rèv li pandan li te nan prizon.
+            </p>
+
+            <p>
+                Yo rele Jozèf devan Farawon. Jozèf eksplike rèv yo te anonse
+                sèt ane kote peyi a t ap gen anpil manje epi apre sa sèt ane
+                grangou.
+            </p>
+
+            <p>
+                Farawon te wè Jozèf kòm yon moun ki gen bon konprann pou
+                òganize peyi a. Li mete Jozèf nan yon gwo pozisyon pou dirije
+                travay preparasyon manje a.
+            </p>
+        `,
+
+        lesson:
+            "Sajès pa sèlman vle di konprann yon pwoblèm; li vle di tou konnen kijan pou prepare pou sa k ap vini.",
+
+        biblicalQuestions: [
+            {
+                question: "Konbyen ane abondans Jozèf te anonse nan entèpretasyon rèv Farawon an?",
+                options: [
+                    "Sèt ane",
+                    "De ane",
+                    "Twa ane",
+                    "Douz ane"
+                ],
+                answer: "Sèt ane",
+                explanation:
+                    "Jozèf te esplike sèt ane abondans t ap vini anvan sèt ane grangou.",
+                reference: "Jenèz 41:29–30"
+            },
+
+            {
+                question: "Ki moun ki te rele Jozèf pou entèprete rèv li yo?",
+                options: [
+                    "Farawon",
+                    "Sayil",
+                    "David",
+                    "Neyemya"
+                ],
+                answer: "Farawon",
+                explanation:
+                    "Farawon te rele Jozèf apre li te tande Jozèf te kapab esplike rèv.",
+                reference: "Jenèz 41:14–16"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa abondans vle di?",
+                options: [
+                    "Lè gen anpil nan yon bagay",
+                    "Lè pa gen anyen",
+                    "Lè tout bagay disparèt",
+                    "Lè yon moun dòmi"
+                ],
+                answer: "Lè gen anpil nan yon bagay",
+                explanation:
+                    "Abondans vle di gen yon kantite ki anpil oswa ki plis pase sa ki nesesè.",
+                source: "Istwa Jozèf Devni Gwo Responsab nan Lejip"
+            }
+        ]
+    },
+
+
+    {
+        id: 40,
+        title: "Jozèf Padonnen Frè li yo",
+        category: "Padon ak Fanmi",
+        reference: "Jenèz 45:1–15; 50:15–21",
+        image: "images/jozef-padonnen.jpg",
+        audio: "audio/jozef-padonnen.mp3",
+
+        content: `
+            <p>
+                Apre anpil ane, frè Jozèf yo te vin nan peyi Lejip pou achte
+                manje paske te gen grangou nan peyi yo. Yo pa t rekonèt Jozèf,
+                ki te vin yon gwo responsab nan peyi Lejip.
+            </p>
+
+            <p>
+                Jozèf te finalman revele idantite li. Frè li yo te pè paske
+                yo te sonje sa yo te fè l lè yo te vann li kòm esklav.
+            </p>
+
+            <p>
+                Men Jozèf pa t chèche fè yo mal. Li te eksplike yo Bondye te
+                sèvi ak tout sa ki te rive pou prezève lavi anpil moun.
+            </p>
+
+            <p>
+                Jozèf te mande yo fè papa yo konnen li toujou vivan epi pote
+                tout fanmi an desann nan peyi Lejip.
+            </p>
+
+            <p>
+                Plizyè ane apre, lè Jakòb te mouri, frè yo te toujou pè Jozèf.
+                Jozèf te ankouraje yo pou yo pa pè epi li te chwazi padonnen yo.
+            </p>
+        `,
+
+        lesson:
+            "Padon ka ede yon fanmi soti nan sik konfli ak laperèz pou jwenn yon chemen pou viv nan lapè.",
+
+        biblicalQuestions: [
+            {
+                question: "Ki moun frè Jozèf yo pa t rekonèt lè yo te rive nan peyi Lejip?",
+                options: [
+                    "Jozèf",
+                    "Farawon",
+                    "Moyiz",
+                    "Jozye"
+                ],
+                answer: "Jozèf",
+                explanation:
+                    "Frè Jozèf yo pa t rekonèt li paske anpil ane te pase depi yo te vann li.",
+                reference: "Jenèz 42:8"
+            },
+
+            {
+                question: "Ki sa Jozèf te chwazi fè ak frè li yo?",
+                options: [
+                    "Padonnen yo",
+                    "Vann yo",
+                    "Mete yo nan prizon pou toutan",
+                    "Kouri lwen yo"
+                ],
+                answer: "Padonnen yo",
+                explanation:
+                    "Jozèf te di frè li yo pou yo pa pè epi li te chwazi padonnen yo.",
+                reference: "Jenèz 50:19–21"
+            }
+        ],
+
+        generalQuestions: [
+            {
+                question: "Kisa padon vle di?",
+                options: [
+                    "Lage yon moun anba dèt oswa fot li epi chwazi pa kenbe rankin",
+                    "Fè yon lòt moun mal",
+                    "Kouri kite fanmi an",
+                    "Pa janm pale ankò"
+                ],
+                answer: "Lage yon moun anba dèt oswa fot li epi chwazi pa kenbe rankin",
+                explanation:
+                    "Padon se desizyon pou pa kontinye kenbe yon moun nan fot li epi chèche yon fason pou avanse.",
+                source: "Istwa Jozèf Padonnen Frè li yo"
+            }
+        ]
+    }
+
 ];
+
+
+
+
+
 
 
 
