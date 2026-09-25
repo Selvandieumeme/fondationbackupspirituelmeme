@@ -1406,13 +1406,18 @@ function renderProjectInformation() {
 }
 
 
+
+
+
+
+
 /* ================================================================
    12 — EXÉCUTION DU PROJET
    ================================================================ */
 
 function getProjectFile(project, name) {
 
-    if (!project || !project.files) {
+    if (!project || !project.files || !name) {
         return "";
     }
 
@@ -1422,6 +1427,167 @@ function getProjectFile(project, name) {
 }
 
 
+/*
+   Normalise une référence de fichier provenant du HTML.
+
+   Exemples acceptés :
+   style.css
+   ./style.css
+   css/style.css
+   ./css/style.css?v=1
+   js/app.js#main
+*/
+function normalizeProjectReference(reference) {
+
+    let value = String(reference || "").trim();
+
+    if (!value) {
+        return "";
+    }
+
+    value = value.split("#")[0];
+    value = value.split("?")[0];
+
+    value = value.replace(/\\/g, "/");
+
+    while (value.indexOf("./") === 0) {
+        value = value.substring(2);
+    }
+
+    value = value.replace(/^\/+/, "");
+
+    return value;
+}
+
+
+/*
+   Vérifie si une référence correspond réellement à un fichier
+   présent dans le projet.
+
+   La recherche se fait d'abord sur le chemin exact.
+   Si aucun chemin exact n'est trouvé, le nom simple est utilisé
+   uniquement lorsqu'il est unique dans le projet.
+*/
+function resolveProjectFileName(project, reference) {
+
+    if (!project || !project.files || !reference) {
+        return null;
+    }
+
+    const normalizedReference =
+        normalizeProjectReference(reference);
+
+    if (!normalizedReference) {
+        return null;
+    }
+
+    const fileNames =
+        Object.keys(project.files);
+
+    /*
+       1 — Correspondance exacte.
+    */
+    const exactMatch =
+        fileNames.find(function (name) {
+
+            return (
+                normalizeProjectReference(name) ===
+                normalizedReference
+            );
+
+        });
+
+    if (exactMatch) {
+        return exactMatch;
+    }
+
+    /*
+       2 — Correspondance par nom de fichier uniquement,
+       seulement si ce nom est unique dans le projet.
+    */
+    const referenceBaseName =
+        normalizedReference
+            .split("/")
+            .pop();
+
+    const baseMatches =
+        fileNames.filter(function (name) {
+
+            return (
+                normalizeProjectReference(name)
+                    .split("/")
+                    .pop() === referenceBaseName
+            );
+
+        });
+
+    if (baseMatches.length === 1) {
+        return baseMatches[0];
+    }
+
+    return null;
+}
+
+
+/*
+   Détermine le HTML qui doit servir de page d'entrée.
+
+   RÈGLE PRINCIPALE :
+   si le fichier actuellement actif est un HTML/HTM,
+   c'est LUI qui doit être utilisé.
+
+   index.html n'est donc plus prioritaire.
+
+   Si le fichier actif n'est pas un HTML, on utilise le premier
+   HTML disponible comme solution de secours.
+*/
+function getActiveHTMLFileName(project) {
+
+    if (!project || !project.files) {
+        return null;
+    }
+
+    const activeFileName =
+        state && state.activeFileName
+            ? state.activeFileName
+            : "";
+
+    if (
+        activeFileName &&
+        project.files[activeFileName] &&
+        getFileType(activeFileName) === "html"
+    ) {
+
+        return activeFileName;
+    }
+
+    /*
+       Solution de secours si le fichier actif est CSS/JS
+       ou si le fichier actif n'existe plus.
+    */
+    const firstHTML =
+        Object.keys(project.files)
+            .find(function (name) {
+
+                return getFileType(name) === "html";
+
+            });
+
+    return firstHTML || null;
+}
+
+
+/*
+   Construit le document qui sera envoyé au preview.
+
+   IMPORTANT :
+   - le HTML vient du fichier HTML actuellement actif ;
+   - seuls les CSS réellement référencés par ce HTML
+     sont intégrés ;
+   - seuls les JS réellement référencés par ce HTML
+     sont intégrés ;
+   - les autres CSS/JS du projet ne sont pas injectés.
+*/
 function buildProjectDocument() {
 
     const project = getCurrentProject();
@@ -1430,28 +1596,16 @@ function buildProjectDocument() {
         return "";
     }
 
+    const activeHTMLFileName =
+        getActiveHTMLFileName(project);
+
     let html =
-        getProjectFile(
-            project,
-            "index.html"
-        );
-
-    if (!html) {
-
-        const firstHTML =
-            Object.keys(project.files)
-                .find(function (name) {
-                    return getFileType(name) === "html";
-                });
-
-        if (firstHTML) {
-            html =
-                getProjectFile(
-                    project,
-                    firstHTML
-                );
-        }
-    }
+        activeHTMLFileName
+            ? getProjectFile(
+                project,
+                activeHTMLFileName
+            )
+            : "";
 
     if (!html) {
 
@@ -1465,186 +1619,317 @@ function buildProjectDocument() {
 </html>`;
     }
 
-    const cssFiles =
-        Object.keys(project.files)
-            .filter(function (name) {
-                return getFileType(name) === "css";
-            });
-
-    const jsFiles =
-        Object.keys(project.files)
-            .filter(function (name) {
-                return getFileType(name) === "js";
-            });
-
-    const cssBundle =
-        cssFiles
-            .map(function (name) {
-
-                return (
-                    "\n/* ===== " +
-                    name +
-                    " ===== */\n" +
-                    getProjectFile(
-                        project,
-                        name
-                    )
-                );
-
-            })
-            .join("\n");
-
-    const jsBundle =
-        jsFiles
-            .map(function (name) {
-
-                return (
-                    "\n/* ===== " +
-                    name +
-                    " ===== */\n" +
-                    getProjectFile(
-                        project,
-                        name
-                    )
-                );
-
-            })
-            .join("\n");
-
-    html = injectProjectAssets(
-        html,
-        cssBundle,
-        jsBundle
-    );
+    html =
+        injectProjectAssets(
+            html,
+            project,
+            activeHTMLFileName
+        );
 
     return html;
 }
 
 
+/*
+   Intègre les ressources locales référencées par le HTML actif.
+
+   CSS :
+   <link rel="stylesheet" href="style.css">
+
+   devient :
+
+   <style data-fobas-generated-css>
+       contenu de style.css
+   </style>
+
+   JS :
+   <script src="script.js"></script>
+
+   devient :
+
+   <script data-fobas-generated-js>
+       contenu de script.js
+   </script>
+
+   Les ressources externes restent inchangées.
+*/
 function injectProjectAssets(
     html,
-    cssBundle,
-    jsBundle
+    project,
+    activeHTMLFileName
 ) {
 
-    let result = String(html || "");
+    let result =
+        String(html || "");
 
-    const cssBlock =
-        cssBundle
-            ? "<style data-fobas-generated-css>\n" +
-              cssBundle +
-              "\n</style>"
-            : "";
-
-    const jsBlock =
-        jsBundle
-            ? "<script data-fobas-generated-js>\n" +
-              jsBundle +
-              "\n<\/script>"
-            : "";
-
-    if (cssBlock) {
-
-        if (/<\/head>/i.test(result)) {
-
-            result =
-                result.replace(
-                    /<\/head>/i,
-                    cssBlock + "\n</head>"
-                );
-
-        } else {
-
-            result =
-                cssBlock + "\n" + result;
-        }
-    }
-
-    if (jsBlock) {
-
-        if (/<\/body>/i.test(result)) {
-
-            result =
-                result.replace(
-                    /<\/body>/i,
-                    jsBlock + "\n</body>"
-                );
-
-        } else {
-
-            result =
-                result + "\n" + jsBlock;
-        }
+    if (!project || !project.files) {
+        return result;
     }
 
     /*
-       Les liens vers style.css et script.js peuvent exister
-       dans index.html. Ils sont neutralisés pour éviter que
-       l'iframe cherche inutilement des fichiers externes.
+       ------------------------------------------------------------
+       CSS LOCAUX RÉFÉRENCÉS PAR LE HTML ACTIF
+       ------------------------------------------------------------
     */
 
     result =
         result.replace(
-            /<link\b[^>]*href=["'](?:\.\/)?style\.css["'][^>]*>/gi,
-            ""
+            /<link\b([^>]*?)>/gi,
+            function (
+                fullTag,
+                attributes
+            ) {
+
+                const relMatch =
+                    attributes.match(
+                        /\brel\s*=\s*["']([^"']+)["']/i
+                    );
+
+                const hrefMatch =
+                    attributes.match(
+                        /\bhref\s*=\s*["']([^"']+)["']/i
+                    );
+
+                if (!hrefMatch) {
+                    return fullTag;
+                }
+
+                const href =
+                    hrefMatch[1].trim();
+
+                const rel =
+                    relMatch
+                        ? relMatch[1].toLowerCase()
+                        : "";
+
+                /*
+                   On ne touche qu'aux feuilles CSS locales.
+                */
+                if (
+                    rel.split(/\s+/).indexOf("stylesheet") === -1
+                ) {
+                    return fullTag;
+                }
+
+                /*
+                   Les URL externes restent dans le document.
+                   Exemples :
+                   https://...
+                   http://...
+                   //
+                   data:...
+                */
+                if (
+                    /^(?:https?:|\/\/|data:|blob:)/i.test(href)
+                ) {
+                    return fullTag;
+                }
+
+                const cssFileName =
+                    resolveProjectFileName(
+                        project,
+                        href
+                    );
+
+                if (!cssFileName) {
+
+                    /*
+                       Si le fichier n'existe pas dans le projet,
+                       on conserve le lien original au lieu de
+                       casser silencieusement le HTML.
+                    */
+                    return fullTag;
+                }
+
+                const cssContent =
+                    getProjectFile(
+                        project,
+                        cssFileName
+                    );
+
+                return (
+                    "<style data-fobas-generated-css " +
+                    'data-fobas-source="' +
+                    escapeHTML(cssFileName) +
+                    '">\n' +
+                    cssContent +
+                    "\n</style>"
+                );
+            }
         );
+
+
+    /*
+       ------------------------------------------------------------
+       JAVASCRIPT LOCAUX RÉFÉRENCÉS PAR LE HTML ACTIF
+       ------------------------------------------------------------
+    */
 
     result =
         result.replace(
-            /<script\b[^>]*src=["'](?:\.\/)?script\.js["'][^>]*><\/script>/gi,
-            ""
+            /<script\b([^>]*)>([\s\S]*?)<\/script>/gi,
+            function (
+                fullTag,
+                attributes,
+                inlineContent
+            ) {
+
+                const srcMatch =
+                    attributes.match(
+                        /\bsrc\s*=\s*["']([^"']+)["']/i
+                    );
+
+                /*
+                   Script déjà inline :
+                   on le conserve exactement.
+                */
+                if (!srcMatch) {
+                    return fullTag;
+                }
+
+                const src =
+                    srcMatch[1].trim();
+
+                /*
+                   Les scripts externes restent inchangés.
+                */
+                if (
+                    /^(?:https?:|\/\/|data:|blob:)/i.test(src)
+                ) {
+                    return fullTag;
+                }
+
+                const jsFileName =
+                    resolveProjectFileName(
+                        project,
+                        src
+                    );
+
+                if (!jsFileName) {
+
+                    /*
+                       Si le fichier local n'existe pas,
+                       on conserve le script original.
+                    */
+                    return fullTag;
+                }
+
+                const jsContent =
+                    getProjectFile(
+                        project,
+                        jsFileName
+                    );
+
+                /*
+                   On conserve les attributs du script
+                   sauf src, puisque le code est maintenant
+                   intégré directement dans le preview.
+                */
+                const cleanedAttributes =
+                    attributes
+                        .replace(
+                            /\s+\bsrc\s*=\s*["'][^"']*["']/i,
+                            ""
+                        )
+                        .trim();
+
+                const attributeText =
+                    cleanedAttributes
+                        ? " " + cleanedAttributes
+                        : "";
+
+                return (
+                    "<script" +
+                    attributeText +
+                    " data-fobas-generated-js" +
+                    ' data-fobas-source="' +
+                    escapeHTML(jsFileName) +
+                    '">\n' +
+                    jsContent +
+                    "\n</script>"
+                );
+            }
         );
+
+
+    /*
+       ------------------------------------------------------------
+       CAS PARTICULIER :
+       certains fichiers peuvent avoir un script vide avec src
+       et être détectés correctement par le bloc ci-dessus.
+       Le contenu inline original n'est donc jamais perdu.
+       ------------------------------------------------------------
+    */
 
     return result;
 }
 
 
+/*
+   Exécute le projet.
+
+   Le contenu actuellement présent dans l'éditeur est d'abord
+   sauvegardé, puis le HTML ACTIF est reconstruit et envoyé
+   directement dans l'iframe du laboratoire.
+*/
 function runProject() {
 
     saveCurrentEditorToState();
     saveStoredProjects();
 
-    const project = getCurrentProject();
+    const project =
+        getCurrentProject();
 
     if (!project) {
-        showToast("Aucun projet disponible.");
+
+        showToast(
+            "Aucun projet disponible."
+        );
+
         return;
     }
 
-    const html = buildProjectDocument();
+    const html =
+        buildProjectDocument();
 
-    if (!dom.previewFrame) return;
+    if (!dom.previewFrame) {
+        return;
+    }
 
-    dom.previewFrame.srcdoc = html;
+    dom.previewFrame.srcdoc =
+        html;
 
     setStatus(
         "Projet exécuté : " +
         project.name
     );
 
-    showToast("Projet exécuté dans le laboratoire.");
+    showToast(
+        "Projet exécuté dans le laboratoire."
+    );
 }
 
 
+/*
+   Actualise le preview.
+
+   runProject() reconstruit déjà entièrement le srcdoc.
+   Il n'est donc pas nécessaire de demander ensuite à
+   contentWindow.location.reload() de recharger l'ancien document.
+*/
 function refreshPreview() {
 
     runProject();
 
-    if (dom.previewFrame) {
-
-        try {
-
-            dom.previewFrame.contentWindow.location.reload();
-
-        } catch (error) {
-            /* srcdoc peut être rechargé par runProject */
-        }
-    }
-
-    setStatus("Aperçu actualisé.");
+    setStatus(
+        "Aperçu actualisé."
+    );
 }
 
 
+/*
+   Initialisation du laboratoire.
+*/
 function initializeLaboratory() {
 
     state.laboratoryZoom =
@@ -1654,10 +1939,34 @@ function initializeLaboratory() {
 
     runProject();
 
-    setStatus("Laboratoire initialisé.");
+    setStatus(
+        "Laboratoire initialisé."
+    );
 
-    showToast("Laboratoire initialisé.");
+    showToast(
+        "Laboratoire initialisé."
+    );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ================================================================
