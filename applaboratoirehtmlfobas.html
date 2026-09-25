@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS — Laboratoire professionnel de création de sites Web HTML, CSS et JavaScript."
+    >
+
+    <meta
+        name="theme-color"
+        content="#0b1f3a"
+    >
+
+    <title>FOBAS — Laboratoire de Création Web</title>
+
+    <!-- =========================================================
+         FEUILLE DE STYLE PRINCIPALE
+         ========================================================= -->
+    <link
+        rel="stylesheet"
+        href="applaboratoirehtmlfobas.css"
+    >
+</head>
+
+<body>
+
+<!-- =============================================================
+     APPLICATION PRINCIPALE
+     ============================================================= -->
+
+<div
+    id="fobasWebLaboratoryApp"
+    class="fobas-web-laboratory-app"
+    data-app="fobas-web-laboratory"
+    data-version="1.0.0"
+>
+
+    <!-- =========================================================
+         EN-TÊTE PRINCIPAL
+         ========================================================= -->
+
+    <header
+        id="mainHeader"
+        class="main-header"
+        data-section="header"
+    >
+
+        <div
+            id="brandArea"
+            class="brand-area"
+        >
+
+            <div
+                id="brandLogo"
+                class="brand-logo"
+                aria-hidden="true"
+            >
+                F
+            </div>
+
+            <div
+                id="brandInformation"
+                class="brand-information"
+            >
+
+                <h1
+                    id="applicationTitle"
+                    class="application-title"
+                >
+                    FOBAS — Laboratoire de Création Web
+                </h1>
+
+                <p
+                    id="applicationSubtitle"
+                    class="application-subtitle"
+                >
+                    HTML • CSS • JavaScript
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="headerActions"
+            class="header-actions"
+            data-section="header-actions"
+        >
+
+            <button
+                id="newProjectBtn"
+                name="newProject"
+                class="header-action-btn"
+                type="button"
+                data-action="new-project"
+                title="Créer un nouveau projet"
+            >
+                ＋ Nouveau
+            </button>
+
+            <button
+                id="saveProjectBtn"
+                name="saveProject"
+                class="header-action-btn primary-action"
+                type="button"
+                data-action="save-project"
+                title="Sauvegarder le projet actuel"
+            >
+                💾 Sauvegarder
+            </button>
+
+            <button
+                id="projectManagerBtn"
+                name="projectManager"
+                class="header-action-btn"
+                type="button"
+                data-action="open-project-manager"
+                title="Ouvrir le gestionnaire de projets"
+            >
+                📁 Projets
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         BARRE PRINCIPALE DES OUTILS
+         ========================================================= -->
+
+    <nav
+        id="mainToolbar"
+        class="main-toolbar"
+        aria-label="Outils principaux"
+        data-section="main-toolbar"
+    >
+
+        <button
+            id="pedagogicalBtn"
+            name="pedagogical"
+            class="main-tool-btn"
+            type="button"
+            data-panel="pedagogicalPanel"
+            data-action="open-pedagogical"
+        >
+            📚 Pédagogique
+        </button>
+
+        <button
+            id="dictionaryBtn"
+            name="dictionary"
+            class="main-tool-btn"
+            type="button"
+            data-panel="dictionaryPanel"
+            data-action="open-dictionary"
+        >
+            📖 Dictionnaire HTML complet
+        </button>
+
+        <button
+            id="libraryBtn"
+            name="library"
+            class="main-tool-btn"
+            type="button"
+            data-panel="libraryPanel"
+            data-action="open-library"
+        >
+            🧱 Bibliothèque
+        </button>
+
+        <button
+            id="codeEditorBtn"
+            name="codeEditor"
+            class="main-tool-btn"
+            type="button"
+            data-panel="editorPanel"
+            data-action="open-code-editor"
+        >
+            📝 Éditeur de Code
+        </button>
+
+        <button
+            id="laboratoryBtn"
+            name="laboratory"
+            class="main-tool-btn active"
+            type="button"
+            data-panel="laboratoryPanel"
+            data-action="open-laboratory"
+        >
+            🧪 Laboratoire
+        </button>
+
+    </nav>
+
+
+    <!-- =========================================================
+         ESPACE PRINCIPAL DE TRAVAIL
+         ========================================================= -->
+
+    <main
+        id="mainWorkspace"
+        class="main-workspace"
+        data-section="workspace"
+    >
+
+        <!-- =====================================================
+             EXPLORATEUR DU PROJET
+             ===================================================== -->
+
+        <aside
+            id="projectExplorerPanel"
+            class="project-explorer-panel"
+            data-panel-type="project-explorer"
+        >
+
+            <div
+                id="projectExplorerHeader"
+                class="panel-header"
+            >
+
+                <div class="panel-header-information">
+
+                    <span
+                        class="panel-header-label"
+                    >
+                        Projet
+                    </span>
+
+                    <strong
+                        id="currentProjectName"
+                        class="current-project-name"
+                    >
+                        Mon Projet
+                    </strong>
+
+                </div>
+
+                <button
+                    id="renameProjectBtn"
+                    name="renameProject"
+                    class="small-icon-btn"
+                    type="button"
+                    data-action="rename-project"
+                    title="Renommer le projet"
+                    aria-label="Renommer le projet"
+                >
+                    ✏️
+                </button>
+
+            </div>
+
+
+            <div
+                id="fileManagementToolbar"
+                class="file-management-toolbar"
+                data-section="file-management"
+            >
+
+                <button
+                    id="newFileBtn"
+                    name="newFile"
+                    class="file-management-btn"
+                    type="button"
+                    data-action="new-file"
+                    title="Créer un nouveau fichier"
+                >
+                    ＋ Fichier
+                </button>
+
+                <button
+                    id="openFileBtn"
+                    name="openFile"
+                    class="file-management-btn"
+                    type="button"
+                    data-action="open-file"
+                    title="Ouvrir le fichier sélectionné"
+                >
+                    📂
+                </button>
+
+                <button
+                    id="deleteFileBtn"
+                    name="deleteFile"
+                    class="file-management-btn danger-action"
+                    type="button"
+                    data-action="delete-file"
+                    title="Supprimer le fichier sélectionné"
+                >
+                    🗑️
+                </button>
+
+            </div>
+
+
+            <div
+                id="projectFileTree"
+                class="project-file-tree"
+                role="tree"
+                aria-label="Fichiers du projet"
+                data-section="file-tree"
+            >
+                <!-- Les fichiers seront générés dynamiquement par JavaScript -->
+            </div>
+
+
+            <div
+                id="projectExplorerFooter"
+                class="project-explorer-footer"
+            >
+
+                <button
+                    id="openProjectsBtn"
+                    name="openProjects"
+                    class="footer-action-btn"
+                    type="button"
+                    data-action="open-project-manager"
+                >
+                    📂 Ouvrir un projet
+                </button>
+
+                <button
+                    id="deleteProjectBtn"
+                    name="deleteProject"
+                    class="footer-action-btn danger-action"
+                    type="button"
+                    data-action="delete-project"
+                >
+                    🗑️ Supprimer le projet
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =====================================================
+             ÉDITEUR DE CODE
+             ===================================================== -->
+
+        <section
+            id="editorPanel"
+            class="editor-panel"
+            data-panel-type="code-editor"
+        >
+
+            <div
+                id="editorHeader"
+                class="editor-header"
+            >
+
+                <div
+                    id="activeFileInformation"
+                    class="active-file-information"
+                >
+
+                    <strong
+                        id="activeFileName"
+                        class="active-file-name"
+                    >
+                        index.html
+                    </strong>
+
+                    <span
+                        id="activeFileType"
+                        class="active-file-type"
+                    >
+                        HTML
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="editorActions"
+                    class="editor-actions"
+                >
+
+                    <button
+                        id="undoBtn"
+                        name="undo"
+                        class="editor-action-btn"
+                        type="button"
+                        data-action="undo"
+                        title="Annuler"
+                        aria-label="Annuler"
+                    >
+                        ↶
+                    </button>
+
+                    <button
+                        id="redoBtn"
+                        name="redo"
+                        class="editor-action-btn"
+                        type="button"
+                        data-action="redo"
+                        title="Rétablir"
+                        aria-label="Rétablir"
+                    >
+                        ↷
+                    </button>
+
+                    <button
+                        id="clearEditorBtn"
+                        name="clearEditor"
+                        class="editor-action-btn"
+                        type="button"
+                        data-action="clear-editor"
+                        title="Effacer le contenu de l'éditeur"
+                        aria-label="Effacer"
+                    >
+                        🧹
+                    </button>
+
+                    <button
+                        id="saveFileBtn"
+                        name="saveFile"
+                        class="editor-action-btn primary-action"
+                        type="button"
+                        data-action="save-file"
+                        title="Sauvegarder le fichier"
+                        aria-label="Sauvegarder le fichier"
+                    >
+                        💾
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="editorWorkspace"
+                class="editor-workspace"
+            >
+
+                <textarea
+                    id="codeEditor"
+                    name="codeEditor"
+                    class="code-editor"
+                    spellcheck="false"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    wrap="off"
+                    aria-label="Éditeur de code"
+                    data-role="code-editor"
+                ></textarea>
+
+                <div
+                    id="editorStatusBar"
+                    class="editor-status-bar"
+                >
+
+                    <span
+                        id="editorLineInfo"
+                        class="editor-line-info"
+                    >
+                        Ligne 1
+                    </span>
+
+                    <span
+                        id="editorCharacterInfo"
+                        class="editor-character-info"
+                    >
+                        0 caractères
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             LABORATOIRE / APERÇU
+             ===================================================== -->
+
+        <section
+            id="laboratoryPanel"
+            class="laboratory-panel"
+            data-panel-type="laboratory"
+        >
+
+            <div
+                id="laboratoryHeader"
+                class="laboratory-header"
+            >
+
+                <div
+                    id="laboratoryTitleArea"
+                    class="laboratory-title-area"
+                >
+
+                    <strong
+                        id="laboratoryTitle"
+                        class="laboratory-title"
+                    >
+                        Laboratoire
+                    </strong>
+
+                    <span
+                        id="laboratoryProjectName"
+                        class="laboratory-project-name"
+                    >
+                        Mon Projet
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="laboratoryActions"
+                    class="laboratory-actions"
+                >
+
+                    <button
+                        id="runBtn"
+                        name="run"
+                        class="laboratory-action-btn primary-action"
+                        type="button"
+                        data-action="run-project"
+                        title="Exécuter le projet"
+                    >
+                        ▶ Exécuter
+                    </button>
+
+                    <button
+                        id="refreshPreviewBtn"
+                        name="refreshPreview"
+                        class="laboratory-action-btn"
+                        type="button"
+                        data-action="refresh-preview"
+                        title="Actualiser l'aperçu"
+                    >
+                        🔄 Actualiser
+                    </button>
+
+                    <button
+                        id="initializeLabBtn"
+                        name="initializeLab"
+                        class="laboratory-action-btn"
+                        type="button"
+                        data-action="initialize-laboratory"
+                        title="Initialiser le laboratoire"
+                    >
+                        ♻ Initialiser
+                    </button>
+
+                    <button
+                        id="listenLabBtn"
+                        name="listenLab"
+                        class="laboratory-action-btn"
+                        type="button"
+                        data-action="listen-laboratory"
+                        title="Écouter le texte visible"
+                    >
+                        🔊 Écouter
+                    </button>
+
+                    <button
+                        id="labZoomOutBtn"
+                        name="labZoomOut"
+                        class="laboratory-action-btn zoom-action-btn"
+                        type="button"
+                        data-action="laboratory-zoom-out"
+                        title="Zoom arrière"
+                        aria-label="Zoom arrière"
+                    >
+                        −
+                    </button>
+
+                    <span
+                        id="labZoomValue"
+                        class="laboratory-zoom-value"
+                        data-role="laboratory-zoom-value"
+                    >
+                        100%
+                    </span>
+
+                    <button
+                        id="labZoomInBtn"
+                        name="labZoomIn"
+                        class="laboratory-action-btn zoom-action-btn"
+                        type="button"
+                        data-action="laboratory-zoom-in"
+                        title="Zoom avant"
+                        aria-label="Zoom avant"
+                    >
+                        ＋
+                    </button>
+
+                    <button
+                        id="fullscreenLabBtn"
+                        name="fullscreenLab"
+                        class="laboratory-action-btn"
+                        type="button"
+                        data-action="laboratory-fullscreen"
+                        title="Plein écran"
+                        aria-label="Plein écran"
+                    >
+                        ⛶
+                    </button>
+
+                    <button
+                        id="closeLabBtn"
+                        name="closeLab"
+                        class="laboratory-action-btn"
+                        type="button"
+                        data-action="close-laboratory"
+                        title="Fermer le laboratoire"
+                    >
+                        ✕ Fermer
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="laboratoryViewport"
+                class="laboratory-viewport"
+                tabindex="0"
+                data-role="laboratory-viewport"
+                aria-label="Zone de travail du laboratoire"
+            >
+
+                <div
+                    id="laboratoryCanvas"
+                    class="laboratory-canvas"
+                    data-role="laboratory-canvas"
+                >
+
+                    <iframe
+                        id="previewFrame"
+                        name="previewFrame"
+                        class="preview-frame"
+                        title="Aperçu du projet Web"
+                        sandbox="allow-scripts allow-forms allow-modals allow-popups"
+                    ></iframe>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="laboratoryStatusBar"
+                class="laboratory-status-bar"
+                data-section="laboratory-status"
+            >
+
+                <span
+                    id="laboratoryStatusMessage"
+                    class="laboratory-status-message"
+                    role="status"
+                    aria-live="polite"
+                >
+                    Prêt.
+                </span>
+
+                <span
+                    id="laboratoryTouchHint"
+                    class="laboratory-touch-hint"
+                >
+                    Android : utilisez deux doigts pour le zoom du laboratoire.
+                </span>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================================================
+         PANNEAU PÉDAGOGIQUE
+         STRICTEMENT :
+         THÉORIE / PRATIQUE / EXERCICES / DEVOIRS
+         ========================================================= -->
+
+    <section
+        id="pedagogicalPanel"
+        class="overlay-panel hidden"
+        data-panel-type="pedagogical"
+        aria-hidden="true"
+    >
+
+        <div
+            id="pedagogicalHeader"
+            class="overlay-header"
+        >
+
+            <div>
+                <h2 id="pedagogicalTitle">
+                    📚 Pédagogique
+                </h2>
+            </div>
+
+            <div class="overlay-header-actions">
+
+                <button
+                    id="listenPedBtn"
+                    name="listenPedagogical"
+                    class="overlay-action-btn"
+                    type="button"
+                    data-action="listen-pedagogical"
+                >
+                    🔊 Écouter
+                </button>
+
+                <button
+                    id="closePedagogicalBtn"
+                    name="closePedagogical"
+                    class="overlay-close-btn"
+                    type="button"
+                    data-action="close-panel"
+                    data-target="pedagogicalPanel"
+                    aria-label="Fermer Pédagogique"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="pedagogicalChapterToolbar"
+            class="pedagogical-chapter-toolbar"
+        >
+
+            <select
+                id="chapterSelect"
+                name="chapterSelect"
+                class="chapter-select"
+                aria-label="Sélectionner un chapitre"
+            ></select>
+
+            <button
+                id="previousChapterBtn"
+                name="previousChapter"
+                class="chapter-navigation-btn"
+                type="button"
+                data-action="previous-chapter"
+                title="Chapitre précédent"
+            >
+                ←
+            </button>
+
+            <button
+                id="nextChapterBtn"
+                name="nextChapter"
+                class="chapter-navigation-btn"
+                type="button"
+                data-action="next-chapter"
+                title="Chapitre suivant"
+            >
+                →
+            </button>
+
+            <button
+                id="addChapterBtn"
+                name="addChapter"
+                class="chapter-navigation-btn"
+                type="button"
+                data-action="add-chapter"
+            >
+                ＋ Ajouter chapitre
+            </button>
+
+        </div>
+
+
+        <nav
+            id="pedagogicalTabs"
+            class="pedagogical-tabs"
+            aria-label="Sections pédagogiques"
+        >
+
+            <button
+                id="theorieTabBtn"
+                name="theorie"
+                class="pedagogical-tab active"
+                type="button"
+                data-pedagogical-tab="theorie"
+            >
+                Théorie
+            </button>
+
+            <button
+                id="pratiqueTabBtn"
+                name="pratique"
+                class="pedagogical-tab"
+                type="button"
+                data-pedagogical-tab="pratique"
+            >
+                Pratique
+            </button>
+
+            <button
+                id="exercicesTabBtn"
+                name="exercices"
+                class="pedagogical-tab"
+                type="button"
+                data-pedagogical-tab="exercices"
+            >
+                Exercices
+            </button>
+
+            <button
+                id="devoirsTabBtn"
+                name="devoirs"
+                class="pedagogical-tab"
+                type="button"
+                data-pedagogical-tab="devoirs"
+            >
+                Devoirs
+            </button>
+
+        </nav>
+
+
+        <article
+            id="pedagogicalContent"
+            class="pedagogical-content"
+            data-role="pedagogical-content"
+        >
+            <!-- Contenu dynamique généré par JavaScript -->
+        </article>
+
+    </section>
+
+
+    <!-- =========================================================
+         DICTIONNAIRE HTML COMPLET
+         ========================================================= -->
+
+    <section
+        id="dictionaryPanel"
+        class="overlay-panel hidden"
+        data-panel-type="dictionary"
+        aria-hidden="true"
+    >
+
+        <div
+            id="dictionaryHeader"
+            class="overlay-header"
+        >
+
+            <h2 id="dictionaryTitle">
+                📖 Dictionnaire HTML complet
+            </h2>
+
+            <div class="overlay-header-actions">
+
+                <input
+                    id="dictionarySearch"
+                    name="dictionarySearch"
+                    class="dictionary-search"
+                    type="search"
+                    placeholder="Rechercher un terme HTML..."
+                    autocomplete="off"
+                >
+
+                <button
+                    id="listenDictionaryBtn"
+                    name="listenDictionary"
+                    class="overlay-action-btn"
+                    type="button"
+                    data-action="listen-dictionary"
+                >
+                    🔊 Écouter
+                </button>
+
+                <button
+                    id="closeDictionaryBtn"
+                    name="closeDictionary"
+                    class="overlay-close-btn"
+                    type="button"
+                    data-action="close-panel"
+                    data-target="dictionaryPanel"
+                    aria-label="Fermer le dictionnaire"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="dictionaryContent"
+            class="dictionary-content"
+            data-role="dictionary-content"
+        >
+            <!-- Entrées dynamiques -->
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         BIBLIOTHÈQUE HTML
+         ========================================================= -->
+
+    <section
+        id="libraryPanel"
+        class="overlay-panel hidden"
+        data-panel-type="library"
+        aria-hidden="true"
+    >
+
+        <div
+            id="libraryHeader"
+            class="overlay-header"
+        >
+
+            <h2 id="libraryTitle">
+                🧱 Bibliothèque HTML
+            </h2>
+
+            <div class="overlay-header-actions">
+
+                <button
+                    id="listenLibraryBtn"
+                    name="listenLibrary"
+                    class="overlay-action-btn"
+                    type="button"
+                    data-action="listen-library"
+                >
+                    🔊 Écouter
+                </button>
+
+                <button
+                    id="closeLibraryBtn"
+                    name="closeLibrary"
+                    class="overlay-close-btn"
+                    type="button"
+                    data-action="close-panel"
+                    data-target="libraryPanel"
+                    aria-label="Fermer la bibliothèque"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="libraryFilters"
+            class="library-filters"
+        >
+
+            <input
+                id="librarySearch"
+                name="librarySearch"
+                class="library-search"
+                type="search"
+                placeholder="Rechercher un élément HTML..."
+                autocomplete="off"
+            >
+
+            <select
+                id="libraryCategorySelect"
+                name="libraryCategory"
+                class="library-category-select"
+            >
+                <option value="all">Toutes les catégories</option>
+            </select>
+
+        </div>
+
+
+        <div
+            id="libraryContent"
+            class="library-content"
+            data-role="library-content"
+        >
+            <!-- Bibliothèque dynamique -->
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         GESTIONNAIRE DE PROJETS
+         ========================================================= -->
+
+    <section
+        id="projectManagerPanel"
+        class="modal-backdrop hidden"
+        data-panel-type="project-manager"
+        aria-hidden="true"
+    >
+
+        <div
+            id="projectManagerModal"
+            class="project-manager-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="projectManagerTitle"
+        >
+
+            <div
+                id="projectManagerHeader"
+                class="overlay-header"
+            >
+
+                <h2 id="projectManagerTitle">
+                    📁 Mes Projets
+                </h2>
+
+                <button
+                    id="closeProjectManagerBtn"
+                    name="closeProjectManager"
+                    class="overlay-close-btn"
+                    type="button"
+                    data-action="close-panel"
+                    data-target="projectManagerPanel"
+                    aria-label="Fermer le gestionnaire de projets"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+
+            <div
+                id="projectManagerToolbar"
+                class="project-manager-toolbar"
+            >
+
+                <button
+                    id="createProjectFromManagerBtn"
+                    name="createProjectFromManager"
+                    class="primary-action"
+                    type="button"
+                    data-action="new-project"
+                >
+                    ＋ Nouveau projet
+                </button>
+
+            </div>
+
+
+            <div
+                id="projectList"
+                class="project-list"
+                data-role="project-list"
+            >
+                <!-- Projets générés dynamiquement -->
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         RESSOURCES LOCALES
+         IMAGES / VIDÉOS
+         ========================================================= -->
+
+    <section
+        id="resourcePanel"
+        class="overlay-panel hidden"
+        data-panel-type="resources"
+        aria-hidden="true"
+    >
+
+        <div
+            id="resourceHeader"
+            class="overlay-header"
+        >
+
+            <h2 id="resourcePanelTitle">
+                🗂️ Ressources du projet
+            </h2>
+
+            <button
+                id="closeResourcePanelBtn"
+                name="closeResourcePanel"
+                class="overlay-close-btn"
+                type="button"
+                data-action="close-panel"
+                data-target="resourcePanel"
+                aria-label="Fermer les ressources"
+            >
+                ✕
+            </button>
+
+        </div>
+
+
+        <div
+            id="resourceActions"
+            class="resource-actions"
+        >
+
+            <label
+                id="addImageLabel"
+                class="resource-upload-btn"
+            >
+                ＋ Ajouter une image
+
+                <input
+                    id="imageInput"
+                    name="imageInput"
+                    type="file"
+                    accept="image/*"
+                    hidden
+                >
+            </label>
+
+
+            <label
+                id="addVideoLabel"
+                class="resource-upload-btn"
+            >
+                ＋ Ajouter une vidéo
+
+                <input
+                    id="videoInput"
+                    name="videoInput"
+                    type="file"
+                    accept="video/*"
+                    hidden
+                >
+            </label>
+
+        </div>
+
+
+        <p
+            id="resourceStorageNotice"
+            class="resource-storage-notice"
+        >
+            Les ressources sont conservées localement avec le projet. Les fichiers volumineux utilisent un stockage local adapté au navigateur.
+        </p>
+
+
+        <div
+            id="resourceList"
+            class="resource-list"
+            data-role="resource-list"
+        >
+            <!-- Ressources dynamiques -->
+        </div>
+
+    </section>
+
+
+    <!-- =========================================================
+         MESSAGE SYSTÈME / NOTIFICATIONS
+         ========================================================= -->
+
+    <div
+        id="toast"
+        class="toast"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+    ></div>
+
+
+    <!-- =========================================================
+         CHARGEMENT DU JAVASCRIPT PRINCIPAL
+         ========================================================= -->
+
+    <script
+        src="applaboratoirehtmlfobas.js"
+        defer
+    ></script>
+
+</div>
+
+</body>
+</html>
