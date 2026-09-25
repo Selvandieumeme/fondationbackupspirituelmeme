@@ -4126,6 +4126,11 @@ body.lab-fullscreen .laboratory-viewport {
 }
 
 
+
+
+
+
+
 /* ================================================================
    33 — ACCESSIBILITÉ / TOUCH
    ================================================================ */
@@ -4153,10 +4158,26 @@ body.lab-fullscreen .laboratory-viewport {
 
     .laboratory-viewport {
 
+        /*
+         * Yon sèl dwèt:
+         * pèmèt deplasman vètikal nan Preview la.
+         *
+         * De dwèt:
+         * jesyon pinch zoom la rete nan JavaScript
+         * ki egziste deja nan aplikasyon an.
+         */
         touch-action:
-            none;
+            pan-y;
     }
 }
+
+
+
+
+
+
+
+
 
 
 /* ================================================================
