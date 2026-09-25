@@ -35,7 +35,7 @@ const APP_CONFIG = {
 
     /* Lè w mete plis istwa nan DATABASE la,
        aplikasyon an ap ka montre yo otomatikman. */
-    maxStories: 1000,
+    maxStories: 10000000000,
 
     storage: {
         favorites: "biblik_favorites",
