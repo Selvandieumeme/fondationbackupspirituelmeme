@@ -3447,7 +3447,7 @@ function bindSettings() {
                         <p>
                             Yon aplikasyon biblik pou li,
                             koute epi aprann nan istwa Bib la
-                            an Kreyòl Ayisyen.
+                            an Kreyòl Ayisyen. Ingenieur Informatique : MEME Selvandieu Whatsapp: +50943706706.
                         </p>
 
                         <p>
