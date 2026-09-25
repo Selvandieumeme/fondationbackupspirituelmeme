@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <meta
+        name="description"
+        content="50 Bèl Istwa nan Bib la an Kreyòl Ayisyen — istwa, odyo, imaj, referans biblik ak jwèt konesans."
+    >
+
+    <meta name="theme-color" content="#101827">
+
+    <title>50 Bèl Istwa nan Bib la</title>
+
+    <!-- FICHYE CSS PRINSIPAL -->
+    <link
+        rel="stylesheet"
+        href="apphistoiresbibliquesfobas.css"
+    >
+</head>
+
+<body>
+
+    <!-- =========================================================
+         APP CONTAINER
+    ========================================================== -->
+    <div id="app" class="app-container">
+
+        <!-- =====================================================
+             HEADER PRINCIPAL
+        ====================================================== -->
+        <header id="main-header" class="main-header">
+
+            <div class="header-left">
+
+                <button
+                    id="menu-button"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Louvri meni"
+                    title="Meni"
+                >
+                    ☰
+                </button>
+
+                <div class="brand">
+                    <div class="brand-icon" aria-hidden="true">
+                        📖
+                    </div>
+
+                    <div class="brand-text">
+                        <h1>50 Bèl Istwa</h1>
+                        <span>Nan Bib la</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="header-actions">
+
+                <button
+                    id="search-button"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Rechèch"
+                    title="Rechèch"
+                >
+                    🔎
+                </button>
+
+                <button
+                    id="favorites-button"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Favori"
+                    title="Favori"
+                >
+                    ❤️
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             SIDE MENU / NAVIGATION
+        ====================================================== -->
+        <aside
+            id="side-menu"
+            class="side-menu"
+            aria-hidden="true"
+        >
+
+            <div class="side-menu-header">
+
+                <div class="side-menu-brand">
+                    <span class="side-menu-icon">📖</span>
+
+                    <div>
+                        <strong>50 Bèl Istwa</strong>
+                        <small>Nan Bib la</small>
+                    </div>
+                </div>
+
+                <button
+                    id="close-menu-button"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Fèmen meni"
+                >
+                    ✕
+                </button>
+
+            </div>
+
+
+            <nav class="main-navigation">
+
+                <button
+                    class="nav-item active"
+                    type="button"
+                    data-view="home"
+                >
+                    <span>🏠</span>
+                    <span>Akèy</span>
+                </button>
+
+                <button
+                    class="nav-item"
+                    type="button"
+                    data-view="stories"
+                >
+                    <span>📚</span>
+                    <span>Tout Istwa yo</span>
+                </button>
+
+                <button
+                    class="nav-item"
+                    type="button"
+                    data-view="favorites"
+                >
+                    <span>❤️</span>
+                    <span>Favori</span>
+                </button>
+
+                <button
+                    class="nav-item"
+                    type="button"
+                    data-view="categories"
+                >
+                    <span>🗂️</span>
+                    <span>Kategori</span>
+                </button>
+
+                <button
+                    class="nav-item"
+                    type="button"
+                    data-view="biblical-game"
+                >
+                    <span>🧠</span>
+                    <span>Jwèt Biblik</span>
+                </button>
+
+                <button
+                    class="nav-item"
+                    type="button"
+                    data-view="general-knowledge"
+                >
+                    <span>🎯</span>
+                    <span>Konesans Jeneral</span>
+                </button>
+
+                <button
+                    class="nav-item"
+                    type="button"
+                    data-view="settings"
+                >
+                    <span>⚙️</span>
+                    <span>Paramèt</span>
+                </button>
+
+            </nav>
+
+
+            <div class="side-menu-footer">
+                <p>Yon app pou li, koute, aprann.</p>
+            </div>
+
+        </aside>
+
+
+        <!-- =====================================================
+             OVERLAY MENU
+        ====================================================== -->
+        <div
+            id="menu-overlay"
+            class="menu-overlay"
+            aria-hidden="true"
+        ></div>
+
+
+        <!-- =====================================================
+             MAIN CONTENT
+        ====================================================== -->
+        <main id="main-content" class="main-content">
+
+            <!-- =================================================
+                 HOME VIEW
+            ================================================== -->
+            <section
+                id="home-view"
+                class="app-view active-view"
+                data-view-section="home"
+            >
+
+                <!-- HERO -->
+                <section class="hero-section">
+
+                    <div class="hero-content">
+
+                        <span class="hero-label">
+                            📖 ISTWA BIBLIK
+                        </span>
+
+                        <h2>
+                            Dekouvri bèl istwa
+                            <br>
+                            ki nan Bib la
+                        </h2>
+
+                        <p>
+                            Li, koute epi aprann nan istwa biblik yo
+                            nan bèl Kreyòl Ayisyen.
+                        </p>
+
+                        <button
+                            id="start-reading-button"
+                            class="primary-button"
+                            type="button"
+                        >
+                            <span>📖</span>
+                            Kòmanse Li
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="hero-visual"
+                        class="hero-visual"
+                        aria-label="Ilistrasyon istwa biblik"
+                    >
+                        <div class="hero-placeholder">
+                            ✨
+                        </div>
+                    </div>
+
+                </section>
+
+
+                <!-- QUICK ACTIONS -->
+                <section class="quick-actions-section">
+
+                    <div class="section-heading">
+                        <h2>Aksè rapid</h2>
+                    </div>
+
+                    <div class="quick-actions-grid">
+
+                        <button
+                            class="quick-action-card"
+                            type="button"
+                            data-view="stories"
+                        >
+                            <span class="quick-action-icon">📚</span>
+                            <strong>Istwa yo</strong>
+                            <small>20 premye istwa yo</small>
+                        </button>
+
+                        <button
+                            class="quick-action-card"
+                            type="button"
+                            data-view="favorites"
+                        >
+                            <span class="quick-action-icon">❤️</span>
+                            <strong>Favori</strong>
+                            <small>Istwa ou sove yo</small>
+                        </button>
+
+                        <button
+                            class="quick-action-card"
+                            type="button"
+                            data-view="biblical-game"
+                        >
+                            <span class="quick-action-icon">🧠</span>
+                            <strong>Jwèt Biblik</strong>
+                            <small>Teste konesans ou</small>
+                        </button>
+
+                        <button
+                            class="quick-action-card"
+                            type="button"
+                            data-view="general-knowledge"
+                        >
+                            <span class="quick-action-icon">🎯</span>
+                            <strong>Konesans Jeneral</strong>
+                            <small>Aprann pandan w ap jwe</small>
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <!-- FEATURED STORIES -->
+                <section class="featured-stories-section">
+
+                    <div class="section-heading">
+
+                        <div>
+                            <span class="section-kicker">
+                                DEKOUVRI
+                            </span>
+
+                            <h2>
+                                Premye istwa yo
+                            </h2>
+                        </div>
+
+                        <button
+                            id="view-all-stories-button"
+                            class="text-button"
+                            type="button"
+                            data-view="stories"
+                        >
+                            Wè tout
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="featured-stories-grid"
+                        class="stories-grid"
+                        aria-live="polite"
+                    >
+                        <!-- JS ap mete istwa yo isit la -->
+                    </div>
+
+                </section>
+
+            </section>
+
+
+            <!-- =================================================
+                 STORIES VIEW
+            ================================================== -->
+            <section
+                id="stories-view"
+                class="app-view"
+                data-view-section="stories"
+                hidden
+            >
+
+                <div class="page-header">
+
+                    <div>
+                        <span class="section-kicker">
+                            BIBLIYOTÈK
+                        </span>
+
+                        <h2>
+                            Tout Istwa yo
+                        </h2>
+
+                        <p>
+                            Dekouvri istwa yo youn apre lòt.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- SEARCH -->
+                <div class="search-container">
+
+                    <label
+                        for="story-search-input"
+                        class="visually-hidden"
+                    >
+                        Chèche yon istwa
+                    </label>
+
+                    <input
+                        id="story-search-input"
+                        type="search"
+                        placeholder="Chèche yon istwa..."
+                        autocomplete="off"
+                    >
+
+                    <button
+                        id="clear-story-search"
+                        class="search-clear-button"
+                        type="button"
+                        aria-label="Efase rechèch"
+                        hidden
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+
+                <!-- CATEGORY FILTER -->
+                <div
+                    id="category-filter"
+                    class="category-filter"
+                    aria-label="Filtre kategori"
+                >
+
+                    <button
+                        class="filter-button active"
+                        type="button"
+                        data-category="all"
+                    >
+                        Tout
+                    </button>
+
+                    <!-- JS ap ajoute lòt kategori yo -->
+
+                </div>
+
+
+                <div
+                    id="all-stories-grid"
+                    class="stories-grid"
+                    aria-live="polite"
+                >
+                    <!-- JS ap chaje istwa yo isit la -->
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 STORY DETAIL VIEW
+            ================================================== -->
+            <section
+                id="story-detail-view"
+                class="app-view story-detail-view"
+                data-view-section="story-detail"
+                hidden
+            >
+
+                <!-- STORY NAVIGATION -->
+                <div class="story-top-navigation">
+
+                    <button
+                        id="back-to-stories-button"
+                        class="secondary-button"
+                        type="button"
+                    >
+                        ← Retounen
+                    </button>
+
+                    <button
+                        id="story-favorite-button"
+                        class="icon-button favorite-story-button"
+                        type="button"
+                        aria-label="Ajoute nan favori"
+                        title="Favori"
+                    >
+                        ♡
+                    </button>
+
+                </div>
+
+
+                <!-- STORY HERO -->
+                <article
+                    id="story-article"
+                    class="story-article"
+                >
+
+                    <div
+                        id="story-image-container"
+                        class="story-image-container"
+                    >
+
+                        <img
+                            id="story-image"
+                            class="story-image"
+                            src=""
+                            alt=""
+                            loading="eager"
+                        >
+
+                        <div
+                            id="story-image-placeholder"
+                            class="story-image-placeholder"
+                            hidden
+                        >
+                            📖
+                        </div>
+
+                    </div>
+
+
+                    <div class="story-header">
+
+                        <span
+                            id="story-number"
+                            class="story-number"
+                        >
+                        </span>
+
+                        <h2 id="story-title">
+                        </h2>
+
+                        <p
+                            id="story-reference"
+                            class="story-reference"
+                        >
+                        </p>
+
+                    </div>
+
+
+                    <!-- AUDIO -->
+                    <section
+                        id="story-audio-section"
+                        class="story-audio-section"
+                    >
+
+                        <audio
+                            id="story-audio"
+                            preload="metadata"
+                        ></audio>
+
+                        <div class="audio-player">
+
+                            <button
+                                id="audio-play-button"
+                                class="audio-main-button"
+                                type="button"
+                                aria-label="Jwe istwa a"
+                            >
+                                ▶
+                            </button>
+
+                            <div class="audio-info">
+
+                                <strong>
+                                    Koute istwa a
+                                </strong>
+
+                                <span id="audio-time">
+                                    00:00 / 00:00
+                                </span>
+
+                            </div>
+
+                            <input
+                                id="audio-progress"
+                                class="audio-progress"
+                                type="range"
+                                min="0"
+                                max="100"
+                                value="0"
+                                step="0.1"
+                                aria-label="Pwogrè odyo"
+                            >
+
+                            <button
+                                id="audio-volume-button"
+                                class="audio-control-button"
+                                type="button"
+                                aria-label="Volim"
+                            >
+                                🔊
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- STORY CONTENT -->
+                    <div class="story-content-wrapper">
+
+                        <div class="story-content-tools">
+
+                            <button
+                                id="decrease-text-button"
+                                class="small-action-button"
+                                type="button"
+                                aria-label="Diminye gwosè tèks"
+                            >
+                                A−
+                            </button>
+
+                            <button
+                                id="increase-text-button"
+                                class="small-action-button"
+                                type="button"
+                                aria-label="Ogmante gwosè tèks"
+                            >
+                                A+
+                            </button>
+
+                            <button
+                                id="story-share-button"
+                                class="small-action-button"
+                                type="button"
+                            >
+                                ↗️ Pataje
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="story-content"
+                            class="story-content"
+                        >
+                            <!-- JS ap mete tèks istwa a -->
+                        </div>
+
+                    </div>
+
+
+                    <!-- LESON -->
+                    <section
+                        id="story-lesson-section"
+                        class="story-lesson-section"
+                    >
+
+                        <div class="lesson-icon">
+                            💡
+                        </div>
+
+                        <div>
+                            <span class="section-kicker">
+                                LESON NAN ISTWA A
+                            </span>
+
+                            <p id="story-lesson">
+                            </p>
+                        </div>
+
+                    </section>
+
+
+                    <!-- STORY ACTIONS -->
+                    <section class="story-actions">
+
+                        <button
+                            id="start-biblical-game-button"
+                            class="primary-button"
+                            type="button"
+                        >
+                            🧠 Jwe jwèt biblik la
+                        </button>
+
+                        <button
+                            id="start-general-game-button"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            🎯 Teste konesans jeneral
+                        </button>
+
+                    </section>
+
+
+                    <!-- STORY NAVIGATION -->
+                    <div class="story-pagination">
+
+                        <button
+                            id="previous-story-button"
+                            class="pagination-button"
+                            type="button"
+                        >
+                            ←
+                            <span>
+                                Istwa anvan
+                            </span>
+                        </button>
+
+                        <button
+                            id="next-story-button"
+                            class="pagination-button"
+                            type="button"
+                        >
+                            <span>
+                                Istwa apre
+                            </span>
+                            →
+                        </button>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <!-- =================================================
+                 FAVORITES VIEW
+            ================================================== -->
+            <section
+                id="favorites-view"
+                class="app-view"
+                data-view-section="favorites"
+                hidden
+            >
+
+                <div class="page-header">
+
+                    <span class="section-kicker">
+                        KONSÈVE YO
+                    </span>
+
+                    <h2>
+                        Istwa Favori yo
+                    </h2>
+
+                    <p>
+                        Istwa ou chwazi pou w jwenn fasil.
+                    </p>
+
+                </div>
+
+                <div
+                    id="favorites-grid"
+                    class="stories-grid"
+                    aria-live="polite"
+                >
+                    <!-- JS -->
+                </div>
+
+                <div
+                    id="empty-favorites"
+                    class="empty-state"
+                    hidden
+                >
+                    <div class="empty-state-icon">
+                        ❤️
+                    </div>
+
+                    <h3>
+                        Ou poko gen favori
+                    </h3>
+
+                    <p>
+                        Peze kè a sou yon istwa pou mete l isit la.
+                    </p>
+
+                    <button
+                        class="primary-button"
+                        type="button"
+                        data-view="stories"
+                    >
+                        Dekouvri istwa yo
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CATEGORIES VIEW
+            ================================================== -->
+            <section
+                id="categories-view"
+                class="app-view"
+                data-view-section="categories"
+                hidden
+            >
+
+                <div class="page-header">
+
+                    <span class="section-kicker">
+                        EKSPLORE
+                    </span>
+
+                    <h2>
+                        Kategori
+                    </h2>
+
+                    <p>
+                        Jwenn istwa selon sijè yo.
+                    </p>
+
+                </div>
+
+                <div
+                    id="categories-grid"
+                    class="categories-grid"
+                >
+                    <!-- JS -->
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 BIBLICAL GAME VIEW
+            ================================================== -->
+            <section
+                id="biblical-game-view"
+                class="app-view game-view"
+                data-view-section="biblical-game"
+                hidden
+            >
+
+                <div class="page-header">
+
+                    <span class="section-kicker">
+                        JWE & APRANN
+                    </span>
+
+                    <h2>
+                        🧠 Jwèt Biblik
+                    </h2>
+
+                    <p>
+                        Teste sa ou konnen sou istwa ki nan Bib la.
+                    </p>
+
+                </div>
+
+
+                <!-- GAME START -->
+                <div
+                    id="biblical-game-start"
+                    class="game-panel"
+                >
+
+                    <div class="game-icon">
+                        📖
+                    </div>
+
+                    <h3>
+                        Pare pou teste konesans ou?
+                    </h3>
+
+                    <p>
+                        Kesyon yo sòti dirèkteman nan istwa biblik yo.
+                        Chak repons gen eksplikasyon ak referans biblik.
+                    </p>
+
+                    <button
+                        id="start-biblical-game"
+                        class="primary-button"
+                        type="button"
+                    >
+                        Kòmanse jwèt la
+                    </button>
+
+                </div>
+
+
+                <!-- ACTIVE GAME -->
+                <div
+                    id="biblical-game-active"
+                    class="game-panel"
+                    hidden
+                >
+
+                    <div class="game-progress">
+
+                        <span id="biblical-question-counter">
+                            Kesyon 1
+                        </span>
+
+                        <span id="biblical-score">
+                            ⭐ 0
+                        </span>
+
+                    </div>
+
+
+                    <div class="game-progress-bar">
+                        <div
+                            id="biblical-progress-fill"
+                            class="game-progress-fill"
+                        ></div>
+                    </div>
+
+
+                    <div class="question-card">
+
+                        <span
+                            id="biblical-question-category"
+                            class="question-category"
+                        >
+                        </span>
+
+                        <h3 id="biblical-question">
+                        </h3>
+
+                    </div>
+
+
+                    <div
+                        id="biblical-answer-options"
+                        class="answer-options"
+                    >
+                        <!-- JS -->
+                    </div>
+
+
+                    <!-- SHOW ANSWER -->
+                    <button
+                        id="show-biblical-answer-button"
+                        class="help-answer-button"
+                        type="button"
+                    >
+                        💡 Mwen pa konnen repons lan
+                    </button>
+
+
+                    <!-- ANSWER EXPLANATION -->
+                    <div
+                        id="biblical-answer-explanation"
+                        class="answer-explanation"
+                        hidden
+                    >
+
+                        <div class="answer-status">
+                            📖 Repons Biblik
+                        </div>
+
+                        <h4>
+                            Bon repons:
+                        </h4>
+
+                        <p id="biblical-correct-answer">
+                        </p>
+
+                        <h4>
+                            Eksplikasyon:
+                        </h4>
+
+                        <p id="biblical-explanation">
+                        </p>
+
+                        <div class="biblical-reference-box">
+
+                            <span>
+                                📚 Referans Biblik
+                            </span>
+
+                            <strong id="biblical-reference">
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        id="next-biblical-question-button"
+                        class="primary-button"
+                        type="button"
+                        hidden
+                    >
+                        Kesyon apre →
+                    </button>
+
+                </div>
+
+
+                <!-- GAME RESULT -->
+                <div
+                    id="biblical-game-result"
+                    class="game-panel game-result"
+                    hidden
+                >
+
+                    <div class="result-icon">
+                        🏆
+                    </div>
+
+                    <h3>
+                        Jwèt la fini!
+                    </h3>
+
+                    <p>
+                        Men rezilta ou:
+                    </p>
+
+                    <strong
+                        id="biblical-final-score"
+                        class="final-score"
+                    >
+                        0 / 0
+                    </strong>
+
+                    <div class="result-actions">
+
+                        <button
+                            id="restart-biblical-game"
+                            class="primary-button"
+                            type="button"
+                        >
+                            🔄 Jwe ankò
+                        </button>
+
+                        <button
+                            id="exit-biblical-game"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Retounen
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 GENERAL KNOWLEDGE GAME VIEW
+            ================================================== -->
+            <section
+                id="general-knowledge-view"
+                class="app-view game-view"
+                data-view-section="general-knowledge"
+                hidden
+            >
+
+                <div class="page-header">
+
+                    <span class="section-kicker">
+                        APRANN PANDAN W AP JWE
+                    </span>
+
+                    <h2>
+                        🎯 Konesans Jeneral
+                    </h2>
+
+                    <p>
+                        Kesyon yo sòti nan enfòmasyon ki prezan
+                        nan chak istwa.
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="general-game-start"
+                    class="game-panel"
+                >
+
+                    <div class="game-icon">
+                        🎯
+                    </div>
+
+                    <h3>
+                        Aprann plis nan chak istwa
+                    </h3>
+
+                    <p>
+                        Jwèt sa a sèvi ak detay ki soti nan istwa yo
+                        pou ede w devlope konesans ou.
+                    </p>
+
+                    <button
+                        id="start-general-game"
+                        class="primary-button"
+                        type="button"
+                    >
+                        Kòmanse jwèt la
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="general-game-active"
+                    class="game-panel"
+                    hidden
+                >
+
+                    <div class="game-progress">
+
+                        <span id="general-question-counter">
+                            Kesyon 1
+                        </span>
+
+                        <span id="general-score">
+                            ⭐ 0
+                        </span>
+
+                    </div>
+
+
+                    <div class="game-progress-bar">
+
+                        <div
+                            id="general-progress-fill"
+                            class="game-progress-fill"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="question-card">
+
+                        <span
+                            id="general-question-category"
+                            class="question-category"
+                        >
+                        </span>
+
+                        <h3 id="general-question">
+                        </h3>
+
+                    </div>
+
+
+                    <div
+                        id="general-answer-options"
+                        class="answer-options"
+                    >
+                        <!-- JS -->
+                    </div>
+
+
+                    <button
+                        id="show-general-answer-button"
+                        class="help-answer-button"
+                        type="button"
+                    >
+                        💡 Mwen pa konnen repons lan
+                    </button>
+
+
+                    <div
+                        id="general-answer-explanation"
+                        class="answer-explanation"
+                        hidden
+                    >
+
+                        <div class="answer-status">
+                            🎯 Bon repons
+                        </div>
+
+                        <h4>
+                            Repons:
+                        </h4>
+
+                        <p id="general-correct-answer">
+                        </p>
+
+                        <h4>
+                            Poukisa?
+                        </h4>
+
+                        <p id="general-explanation">
+                        </p>
+
+                        <div class="source-story-box">
+
+                            <span>
+                                📖 Sous nan istwa a
+                            </span>
+
+                            <strong id="general-source-story">
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        id="next-general-question-button"
+                        class="primary-button"
+                        type="button"
+                        hidden
+                    >
+                        Kesyon apre →
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="general-game-result"
+                    class="game-panel game-result"
+                    hidden
+                >
+
+                    <div class="result-icon">
+                        🏆
+                    </div>
+
+                    <h3>
+                        Felisitasyon!
+                    </h3>
+
+                    <p>
+                        Ou fini seri kesyon an.
+                    </p>
+
+                    <strong
+                        id="general-final-score"
+                        class="final-score"
+                    >
+                        0 / 0
+                    </strong>
+
+                    <div class="result-actions">
+
+                        <button
+                            id="restart-general-game"
+                            class="primary-button"
+                            type="button"
+                        >
+                            🔄 Jwe ankò
+                        </button>
+
+                        <button
+                            id="exit-general-game"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Retounen
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SETTINGS VIEW
+            ================================================== -->
+            <section
+                id="settings-view"
+                class="app-view"
+                data-view-section="settings"
+                hidden
+            >
+
+                <div class="page-header">
+
+                    <span class="section-kicker">
+                        PÈSONALIZE
+                    </span>
+
+                    <h2>
+                        ⚙️ Paramèt
+                    </h2>
+
+                    <p>
+                        Chwazi fason ou vle sèvi ak aplikasyon an.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-list">
+
+                    <div class="setting-item">
+
+                        <div class="setting-info">
+
+                            <strong>
+                                🌙 Mòd nwa
+                            </strong>
+
+                            <small>
+                                Chanje aparans aplikasyon an.
+                            </small>
+
+                        </div>
+
+                        <label class="toggle-switch">
+
+                            <input
+                                id="dark-mode-toggle"
+                                type="checkbox"
+                            >
+
+                            <span class="toggle-slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="setting-item">
+
+                        <div class="setting-info">
+
+                            <strong>
+                                🔤 Gwosè tèks
+                            </strong>
+
+                            <small>
+                                Ajiste tèks istwa yo.
+                            </small>
+
+                        </div>
+
+                        <div class="text-size-controls">
+
+                            <button
+                                id="settings-text-decrease"
+                                type="button"
+                            >
+                                A−
+                            </button>
+
+                            <button
+                                id="settings-text-reset"
+                                type="button"
+                            >
+                                A
+                            </button>
+
+                            <button
+                                id="settings-text-increase"
+                                type="button"
+                            >
+                                A+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="setting-item">
+
+                        <div class="setting-info">
+
+                            <strong>
+                                🔊 Odyo
+                            </strong>
+
+                            <small>
+                                Kontwole son istwa yo.
+                            </small>
+
+                        </div>
+
+                        <button
+                            id="audio-settings-button"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Paramèt odyo
+                        </button>
+
+                    </div>
+
+
+                    <div class="setting-item">
+
+                        <div class="setting-info">
+
+                            <strong>
+                                📱 Zoom
+                            </strong>
+
+                            <small>
+                                Sipò pou jès manyen sou ekran.
+                            </small>
+
+                        </div>
+
+                        <span class="setting-status">
+                            Aktif
+                        </span>
+
+                    </div>
+
+
+                    <div class="setting-item">
+
+                        <div class="setting-info">
+
+                            <strong>
+                                ℹ️ Sou aplikasyon an
+                            </strong>
+
+                            <small>
+                                Enfòmasyon sou pwojè a.
+                            </small>
+
+                        </div>
+
+                        <button
+                            id="about-app-button"
+                            class="secondary-button"
+                            type="button"
+                        >
+                            Gade
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =====================================================
+             GLOBAL LOADING
+        ====================================================== -->
+        <div
+            id="loading-screen"
+            class="loading-screen"
+            hidden
+        >
+
+            <div class="loading-spinner"></div>
+
+            <p>
+                Ap chaje...
+            </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             TOAST NOTIFICATION
+        ====================================================== -->
+        <div
+            id="toast"
+            class="toast"
+            role="status"
+            aria-live="polite"
+            hidden
+        >
+            <span id="toast-message"></span>
+        </div>
+
+
+        <!-- =====================================================
+             STORY CARD TEMPLATE
+             JS ap klone template sa a
+        ====================================================== -->
+        <template id="story-card-template">
+
+            <article class="story-card">
+
+                <button
+                    class="story-card-main"
+                    type="button"
+                >
+
+                    <div class="story-card-image-wrapper">
+
+                        <img
+                            class="story-card-image"
+                            src=""
+                            alt=""
+                            loading="lazy"
+                        >
+
+                        <div
+                            class="story-card-number"
+                        >
+                        </div>
+
+                    </div>
+
+
+                    <div class="story-card-content">
+
+                        <span
+                            class="story-card-category"
+                        >
+                        </span>
+
+                        <h3
+                            class="story-card-title"
+                        >
+                        </h3>
+
+                        <p
+                            class="story-card-reference"
+                        >
+                        </p>
+
+                    </div>
+
+                </button>
+
+
+                <button
+                    class="story-card-favorite"
+                    type="button"
+                    aria-label="Ajoute istwa nan favori"
+                >
+                    ♡
+                </button>
+
+            </article>
+
+        </template>
+
+
+        <!-- =====================================================
+             CATEGORY TEMPLATE
+        ====================================================== -->
+        <template id="category-card-template">
+
+            <button
+                class="category-card"
+                type="button"
+            >
+
+                <span
+                    class="category-card-icon"
+                >
+                    📖
+                </span>
+
+                <span
+                    class="category-card-title"
+                >
+                </span>
+
+                <small
+                    class="category-card-count"
+                >
+                    0 istwa
+                </small>
+
+            </button>
+
+        </template>
+
+
+        <!-- =====================================================
+             CONFIRMATION / INFORMATION MODAL
+        ====================================================== -->
+        <div
+            id="app-modal"
+            class="modal"
+            hidden
+            aria-hidden="true"
+        >
+
+            <div
+                class="modal-overlay"
+                data-close-modal="true"
+            ></div>
+
+            <div
+                class="modal-content"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modal-title"
+            >
+
+                <div class="modal-header">
+
+                    <h3 id="modal-title">
+                    </h3>
+
+                    <button
+                        id="close-modal-button"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fèmen"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+                <div
+                    id="modal-body"
+                    class="modal-body"
+                >
+                    <!-- JS -->
+                </div>
+
+                <div
+                    id="modal-actions"
+                    class="modal-actions"
+                >
+                    <!-- JS -->
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             GAME ANSWER MODAL
+        ====================================================== -->
+        <div
+            id="answer-modal"
+            class="modal answer-modal"
+            hidden
+            aria-hidden="true"
+        >
+
+            <div
+                class="modal-overlay"
+                data-close-answer-modal="true"
+            ></div>
+
+            <div
+                class="modal-content answer-modal-content"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="answer-modal-title"
+            >
+
+                <div class="answer-modal-icon">
+                    📖
+                </div>
+
+                <h3 id="answer-modal-title">
+                    Repons lan
+                </h3>
+
+                <div
+                    id="answer-modal-body"
+                    class="answer-modal-body"
+                >
+                    <!-- JS -->
+                </div>
+
+                <button
+                    id="close-answer-modal-button"
+                    class="primary-button"
+                    type="button"
+                >
+                    Mwen konprann
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         JAVASCRIPT PRINCIPAL
+         Tout lojik aplikasyon an soti nan fichye sa a.
+    ========================================================== -->
+    <script
+        src="apphistoiresbibliquesfobas.js"
+        defer
+    ></script>
+
+</body>
+</html>
