@@ -1281,104 +1281,371 @@ function scheduleAutosave() {
 }
 
 
+
+
+
+
+
 /* ================================================================
    10 — ARBRE DES FICHIERS
    ================================================================ */
 
-function renderFileTree() {
+async function renderFileTree() {
 
     if (!dom.projectFileTree) return;
 
     const project = getCurrentProject();
 
     if (!project) {
+
         dom.projectFileTree.innerHTML =
-            '<div class="empty-project-message">Aucun projet.</div>';
+            '<div class="empty-project-message">' +
+            'Aucun projet.' +
+            '</div>';
+
         return;
     }
 
-    const names = Object.keys(
-        project.files || {}
-    ).sort(function (a, b) {
+    /*
+     * ------------------------------------------------------------
+     * 1 — FICHIERS TEXTE DU PROJET
+     * ------------------------------------------------------------
+     */
 
-        if (a === "index.html") return -1;
-        if (b === "index.html") return 1;
+    const fileEntries =
+        Object.keys(
+            project.files || {}
+        ).map(
+            function (fileName) {
 
-        return a.localeCompare(b);
-    });
+                return {
+                    name: fileName,
+                    type:
+                        project.files[fileName].type,
+                    source: "project"
+                };
+            }
+        );
 
-    if (!names.length) {
+
+    /*
+     * ------------------------------------------------------------
+     * 2 — RESSOURCES IMAGE / VIDÉO
+     * ------------------------------------------------------------
+     */
+
+    let resourceEntries = [];
+
+    try {
+
+        const resources =
+            await getProjectResources();
+
+        resourceEntries =
+            (resources || []).map(
+                function (resource) {
+
+                    return {
+                        name: resource.name,
+
+                        type:
+                            resource.type ||
+                            (
+                                resource.kind === "image"
+                                    ? "image"
+                                    : "video"
+                            ),
+
+                        kind:
+                            resource.kind,
+
+                        resource:
+                            resource,
+
+                        source: "resource"
+                    };
+                }
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Erreur chargement ressources dans l'arbre :",
+            error
+        );
+    }
+
+
+    /*
+     * ------------------------------------------------------------
+     * 3 — COMBINAISON FICHIERS + RESSOURCES
+     * ------------------------------------------------------------
+     */
+
+    const entries =
+        fileEntries.concat(
+            resourceEntries
+        );
+
+
+    /*
+     * ------------------------------------------------------------
+     * 4 — TRI DYNAMIQUE
+     *
+     * index.html reste en premier.
+     * Les autres éléments sont ensuite classés
+     * par nom.
+     * ------------------------------------------------------------
+     */
+
+    entries.sort(
+        function (a, b) {
+
+            if (a.name === "index.html") return -1;
+
+            if (b.name === "index.html") return 1;
+
+            return a.name.localeCompare(
+                b.name
+            );
+        }
+    );
+
+
+    /*
+     * ------------------------------------------------------------
+     * 5 — AUCUN ÉLÉMENT
+     * ------------------------------------------------------------
+     */
+
+    if (!entries.length) {
 
         dom.projectFileTree.innerHTML =
-            '<div class="empty-project-message">Aucun fichier.</div>';
+            '<div class="empty-project-message">' +
+            'Aucun fichier.' +
+            '</div>';
 
         return;
     }
+
+
+    /*
+     * ------------------------------------------------------------
+     * 6 — RENDU DE L'ARBRE
+     * ------------------------------------------------------------
+     */
 
     dom.projectFileTree.innerHTML = "";
 
-    names.forEach(function (fileName) {
 
-        const file = project.files[fileName];
+    entries.forEach(
+        function (entry) {
 
-        const item = document.createElement("button");
+            const item =
+                document.createElement("button");
 
-        item.type = "button";
-        item.className = "file-item";
+            item.type = "button";
 
-        if (
-            fileName === state.activeFileName
-        ) {
-            item.classList.add("active");
-        }
+            item.className =
+                "file-item";
 
-        item.setAttribute(
-            "role",
-            "treeitem"
-        );
 
-        item.dataset.fileName = fileName;
+            /*
+             * ----------------------------------------------------
+             * FICHIER HTML / CSS / JS
+             * ----------------------------------------------------
+             */
 
-        item.innerHTML =
-            '<span class="file-icon">' +
-            escapeHTML(
-                getFileIcon(file.type)
-            ) +
-            '</span>' +
+            if (
+                entry.source === "project"
+                &&
+                entry.name === state.activeFileName
+            ) {
 
-            '<span class="file-name">' +
-            escapeHTML(fileName) +
-            '</span>';
-
-        item.addEventListener(
-            "click",
-            function () {
-                selectFile(fileName);
+                item.classList.add(
+                    "active"
+                );
             }
-        );
 
-        item.addEventListener(
-            "contextmenu",
-            function (event) {
 
-                event.preventDefault();
+            item.setAttribute(
+                "role",
+                "treeitem"
+            );
+
+
+            item.dataset.fileName =
+                entry.name;
+
+
+            /*
+             * ----------------------------------------------------
+             * ICÔNE
+             * ----------------------------------------------------
+             */
+
+            let icon = "📄";
+
+            if (
+                entry.source === "resource"
+            ) {
 
                 if (
-                    window.confirm(
-                        "Renommer « " +
-                        fileName +
-                        " » ?"
-                    )
+                    entry.kind === "image"
                 ) {
-                    state.activeFileName = fileName;
-                    renameActiveFile();
-                }
-            }
-        );
 
-        dom.projectFileTree.appendChild(item);
-    });
+                    icon = "🖼️";
+
+                } else if (
+                    entry.kind === "video"
+                ) {
+
+                    icon = "🎬";
+                }
+
+            } else {
+
+                icon =
+                    getFileIcon(
+                        entry.type
+                    );
+            }
+
+
+            /*
+             * ----------------------------------------------------
+             * NOM
+             * ----------------------------------------------------
+             */
+
+            item.innerHTML =
+                '<span class="file-icon">' +
+                escapeHTML(icon) +
+                '</span>' +
+
+                '<span class="file-name">' +
+                escapeHTML(entry.name) +
+                '</span>';
+
+
+            /*
+             * ----------------------------------------------------
+             * CLIC SUR UN FICHIER
+             * ----------------------------------------------------
+             */
+
+            item.addEventListener(
+                "click",
+                function () {
+
+                    /*
+                     * Les fichiers HTML/CSS/JS
+                     * continuent d'utiliser le système
+                     * existant.
+                     */
+
+                    if (
+                        entry.source === "project"
+                    ) {
+
+                        selectFile(
+                            entry.name
+                        );
+
+                        return;
+                    }
+
+
+                    /*
+                     * Les images/vidéos ne sont pas
+                     * des fichiers texte de l'éditeur.
+                     *
+                     * Un clic les sélectionne comme
+                     * ressource disponible.
+                     */
+
+                    if (
+                        entry.source === "resource"
+                    ) {
+
+                        insertResourceIntoEditor(
+                            entry.resource
+                        );
+                    }
+                }
+            );
+
+
+            /*
+             * ----------------------------------------------------
+             * MENU CONTEXTUEL
+             *
+             * Renommage uniquement pour les vrais fichiers
+             * du projet.
+             *
+             * On ne touche pas au nom IndexedDB ici.
+             * ----------------------------------------------------
+             */
+
+            item.addEventListener(
+                "contextmenu",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    if (
+                        entry.source !== "project"
+                    ) {
+
+                        return;
+                    }
+
+
+                    if (
+                        window.confirm(
+                            "Renommer « " +
+                            entry.name +
+                            " » ?"
+                        )
+                    ) {
+
+                        state.activeFileName =
+                            entry.name;
+
+                        renameActiveFile();
+                    }
+                }
+            );
+
+
+            /*
+             * ----------------------------------------------------
+             * AJOUT DANS L'ARBRE
+             * ----------------------------------------------------
+             */
+
+            dom.projectFileTree.appendChild(
+                item
+            );
+        }
+    );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ================================================================
