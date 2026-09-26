@@ -5321,31 +5321,133 @@ function initializeLibrary() {
 
 
 
-/* ================================================================
-   30 — RESSOURCES
-   ================================================================ */
+
+
+
+
+
+
+
+
+
+
+ /* ================================================================
+    30 — RESSOURCES
+    ================================================================ */
 
 function initializeResourceInputs() {
 
-    /*
-       Upload Image / Video la pa bezwen yon input HTML
-       espesyal ankò.
+    if (dom.imageInput) {
 
-       Blòk 19 kreye input natif la dirèkteman epi
-       konekte li ak bouton:
-       "🖼️ Upload Image / Video"
-    */
+        dom.imageInput.addEventListener(
+            "change",
+            function () {
 
-    if (!dom.resourceList) {
-        return;
+                const file =
+                    dom.imageInput.files[0];
+
+                if (file) {
+                    handleResourceFile(
+                        file,
+                        "image"
+                    );
+                }
+
+                dom.imageInput.value = "";
+            }
+        );
     }
 
-    /*
-       Kreye bouton Upload Image / Video la
-       lè aplikasyon an pare.
-    */
-    createMediaUploadControls();
+
+    if (dom.videoInput) {
+
+        dom.videoInput.addEventListener(
+            "change",
+            function () {
+
+                const file =
+                    dom.videoInput.files[0];
+
+                if (file) {
+                    handleResourceFile(
+                        file,
+                        "video"
+                    );
+                }
+
+                dom.videoInput.value = "";
+            }
+        );
+    }
+
+
+    /* ============================================================
+       NOUVEAU — UPLOAD IMAGE / VIDÉO
+       Connexion du nouveau bouton visible dans l'explorateur
+       ============================================================ */
+
+    const mediaUploadInput =
+        document.getElementById(
+            "mediaUploadInput"
+        );
+
+    if (mediaUploadInput) {
+
+        mediaUploadInput.addEventListener(
+            "change",
+            function () {
+
+                const file =
+                    mediaUploadInput.files[0];
+
+                if (!file) {
+                    mediaUploadInput.value = "";
+                    return;
+                }
+
+
+                let kind = "";
+
+                if (
+                    file.type &&
+                    file.type.startsWith("image/")
+                ) {
+
+                    kind = "image";
+
+                } else if (
+                    file.type &&
+                    file.type.startsWith("video/")
+                ) {
+
+                    kind = "video";
+                }
+
+
+                if (!kind) {
+
+                    showToast(
+                        "Format image ou vidéo non reconnu."
+                    );
+
+                    mediaUploadInput.value = "";
+
+                    return;
+                }
+
+
+                handleResourceFile(
+                    file,
+                    kind
+                );
+
+
+                mediaUploadInput.value = "";
+            }
+        );
+    }
 }
+
 
 
 
