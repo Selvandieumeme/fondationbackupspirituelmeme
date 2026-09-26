@@ -3738,158 +3738,15 @@ function deleteResourceFromDatabase(
 
 
 
+
+
+
+
+
+
 /* ================================================================
    19 — RESSOURCES IMAGE / VIDÉO
    ================================================================ */
-
-function createMediaUploadControls() {
-
-    if (!dom.resourceList) return;
-
-    /*
-       Evite kreye menm bouton/input plizyè fwa.
-    */
-    if (
-        dom.resourceList.querySelector(
-            "#fobasMediaUploadButton"
-        )
-    ) {
-        return;
-    }
-
-    const uploadContainer =
-        document.createElement("div");
-
-    uploadContainer.id =
-        "fobasMediaUploadContainer";
-
-    uploadContainer.className =
-        "resource-upload-container";
-
-
-    const uploadButton =
-        document.createElement("button");
-
-    uploadButton.id =
-        "fobasMediaUploadButton";
-
-    uploadButton.type =
-        "button";
-
-    uploadButton.className =
-        "resource-upload-btn";
-
-    uploadButton.textContent =
-        "🖼️ Upload Image / Video";
-
-
-    const mediaInput =
-        document.createElement("input");
-
-    mediaInput.id =
-        "fobasMediaUploadInput";
-
-    mediaInput.type =
-        "file";
-
-    mediaInput.accept =
-        "image/*,video/*";
-
-    mediaInput.multiple =
-        false;
-
-    mediaInput.style.display =
-        "none";
-
-
-    uploadButton.addEventListener(
-        "click",
-        function () {
-
-            mediaInput.click();
-
-        }
-    );
-
-
-    mediaInput.addEventListener(
-        "change",
-        function () {
-
-            const file =
-                mediaInput.files &&
-                mediaInput.files[0];
-
-            if (!file) {
-                mediaInput.value = "";
-                return;
-            }
-
-
-            let kind = null;
-
-
-            if (
-                file.type &&
-                file.type.startsWith("image/")
-            ) {
-
-                kind = "image";
-
-            } else if (
-                file.type &&
-                file.type.startsWith("video/")
-            ) {
-
-                kind = "video";
-
-            }
-
-
-            if (!kind) {
-
-                showToast(
-                    "Se sèlman Image oswa Vidéo ki aksepte."
-                );
-
-                mediaInput.value = "";
-                return;
-            }
-
-
-            handleResourceFile(
-                file,
-                kind
-            );
-
-
-            /*
-               Pèmèt itilizatè a chwazi menm fichye a
-               ankò pita si li vle.
-            */
-            mediaInput.value = "";
-
-        }
-    );
-
-
-    uploadContainer.appendChild(
-        uploadButton
-    );
-
-    uploadContainer.appendChild(
-        mediaInput
-    );
-
-
-    /*
-       Bouton an toujou rete anwo lis resous yo.
-    */
-    dom.resourceList.appendChild(
-        uploadContainer
-    );
-}
-
 
 function handleResourceFile(
     file,
@@ -3901,104 +3758,64 @@ function handleResourceFile(
 
     if (!project || !file) return;
 
-
-    /*
-       Double vérification pou anpeche yon move kalite
-       fichye antre nan depo Image/Vidéo a.
-    */
-    if (
-        kind === "image"
-        &&
-        !file.type.startsWith("image/")
-    ) {
-
-        showToast(
-            "Fichye a pa yon image valide."
-        );
-
-        return;
-    }
-
-
-    if (
-        kind === "video"
-        &&
-        !file.type.startsWith("video/")
-    ) {
-
-        showToast(
-            "Fichye a pa yon vidéo valide."
-        );
-
-        return;
-    }
-
-
     const resource = {
 
-        id:
-            generateId("resource"),
+        id: generateId("resource"),
 
-        projectId:
-            project.id,
+        projectId: project.id,
 
-        name:
-            file.name,
+        name: file.name,
 
-        type:
-            file.type,
+        type: file.type,
 
-        kind:
-            kind,
+        kind: kind,
 
-        size:
-            file.size,
+        size: file.size,
 
         createdAt:
             new Date().toISOString(),
 
-        /*
-           Binary Image/Vidéo a rete nan IndexedDB.
-           Li pa antre nan project.files ni LocalStorage.
-        */
-        blob:
-            file
+        blob: file
     };
 
+    addResourceToDatabase(resource)
+        .then(
+            function () {
 
-    addResourceToDatabase(
-        resource
-    )
-    .then(
-        function () {
+                showToast(
+                    "Ressource ajoutée : " +
+                    file.name
+                );
 
-            showToast(
-                (
-                    kind === "image"
-                        ? "Image"
-                        : "Vidéo"
-                ) +
-                " ajoutée : " +
-                file.name
-            );
+                /*
+                 * Recharge la liste des ressources
+                 * si le panneau Ressources est utilisé.
+                 */
+                renderResourceList();
 
-            renderResourceList();
+                /*
+                 * Informe l'arbre principal des fichiers.
+                 *
+                 * Le Block 10 pourra maintenant relire
+                 * les ressources du projet depuis IndexedDB
+                 * avec getProjectResources().
+                 */
+                renderFileTree();
+            }
+        )
+        .catch(
+            function (error) {
 
-        }
-    )
-    .catch(
-        function (error) {
+                console.error(
+                    "Erreur ressource :",
+                    error
+                );
 
-            console.error(
-                "Erreur ressource :",
-                error
-            );
-
-            showToast(
-                "Impossible d'enregistrer la ressource."
-            );
-        }
-    );
+                showToast(
+                    "Impossible d'enregistrer la ressource."
+                );
+            }
+        );
 }
 
 
@@ -4006,49 +3823,22 @@ async function renderResourceList() {
 
     if (!dom.resourceList) return;
 
-
     try {
 
         const resources =
             await getProjectResources();
 
-
-        /*
-           On reconstruit proprement la zone afin que
-           le bouton Upload Image / Video reste toujours
-           visible.
-        */
-        dom.resourceList.innerHTML = "";
-
-
-        createMediaUploadControls();
-
-
         if (!resources.length) {
 
-            const empty =
-                document.createElement("div");
-
-            empty.className =
-                "no-results";
-
-            empty.textContent =
-                "Aucune ressource locale.";
-
-            dom.resourceList.appendChild(
-                empty
-            );
+            dom.resourceList.innerHTML =
+                '<div class="no-results">' +
+                "Aucune ressource locale." +
+                "</div>";
 
             return;
         }
 
-
-        const resourcesContainer =
-            document.createElement("div");
-
-        resourcesContainer.id =
-            "fobasMediaResourceItems";
-
+        dom.resourceList.innerHTML = "";
 
         resources.forEach(
             function (resource) {
@@ -4059,44 +3849,26 @@ async function renderResourceList() {
                 card.className =
                     "resource-card";
 
-
                 const info =
                     document.createElement("div");
 
                 info.className =
                     "resource-information";
 
+                info.innerHTML =
+                    "<strong>" +
+                    escapeHTML(resource.name) +
+                    "</strong>" +
 
-                const name =
-                    document.createElement("strong");
-
-                name.textContent =
-                    resource.name;
-
-
-                const details =
-                    document.createElement("span");
-
-                details.textContent =
-                    (
-                        resource.kind === "image"
-                            ? "Image"
-                            : "Vidéo"
+                    "<span>" +
+                    escapeHTML(
+                        resource.kind
                     ) +
                     " • " +
                     formatBytes(
                         resource.size
-                    );
-
-
-                info.appendChild(
-                    name
-                );
-
-                info.appendChild(
-                    details
-                );
-
+                    ) +
+                    "</span>";
 
                 const actions =
                     document.createElement("div");
@@ -4104,19 +3876,14 @@ async function renderResourceList() {
                 actions.className =
                     "resource-card-actions";
 
-
                 const useButton =
                     document.createElement("button");
 
-                useButton.type =
-                    "button";
-
+                useButton.type = "button";
                 useButton.className =
                     "resource-use-btn";
-
                 useButton.textContent =
                     "Insérer";
-
 
                 useButton.addEventListener(
                     "click",
@@ -4125,23 +3892,17 @@ async function renderResourceList() {
                         insertResourceIntoEditor(
                             resource
                         );
-
                     }
                 );
-
 
                 const deleteButton =
                     document.createElement("button");
 
-                deleteButton.type =
-                    "button";
-
+                deleteButton.type = "button";
                 deleteButton.className =
                     "danger-action";
-
                 deleteButton.textContent =
                     "Supprimer";
-
 
                 deleteButton.addEventListener(
                     "click",
@@ -4152,39 +3913,28 @@ async function renderResourceList() {
                                 "Supprimer cette ressource ?"
                             );
 
+                        if (!confirmed) return;
 
-                        if (!confirmed) {
-                            return;
-                        }
+                        await deleteResourceFromDatabase(
+                            resource.id
+                        );
 
+                        /*
+                         * Recharge le panneau Ressources.
+                         */
+                        renderResourceList();
 
-                        try {
+                        /*
+                         * Recharge également l'arbre
+                         * principal des fichiers.
+                         */
+                        renderFileTree();
 
-                            await deleteResourceFromDatabase(
-                                resource.id
-                            );
-
-                            showToast(
-                                "Ressource supprimée."
-                            );
-
-                            renderResourceList();
-
-                        } catch (error) {
-
-                            console.error(
-                                "Erreur suppression ressource :",
-                                error
-                            );
-
-                            showToast(
-                                "Impossible de supprimer la ressource."
-                            );
-                        }
-
+                        showToast(
+                            "Ressource supprimée."
+                        );
                     }
                 );
-
 
                 actions.appendChild(
                     useButton
@@ -4194,28 +3944,14 @@ async function renderResourceList() {
                     deleteButton
                 );
 
+                card.appendChild(info);
+                card.appendChild(actions);
 
-                card.appendChild(
-                    info
-                );
-
-                card.appendChild(
-                    actions
-                );
-
-
-                resourcesContainer.appendChild(
+                dom.resourceList.appendChild(
                     card
                 );
-
             }
         );
-
-
-        dom.resourceList.appendChild(
-            resourcesContainer
-        );
-
 
     } catch (error) {
 
@@ -4224,26 +3960,10 @@ async function renderResourceList() {
             error
         );
 
-
-        dom.resourceList.innerHTML = "";
-
-
-        createMediaUploadControls();
-
-
-        const errorMessage =
-            document.createElement("div");
-
-        errorMessage.className =
-            "no-results";
-
-        errorMessage.textContent =
-            "Impossible de charger les ressources.";
-
-
-        dom.resourceList.appendChild(
-            errorMessage
-        );
+        dom.resourceList.innerHTML =
+            '<div class="no-results">' +
+            "Impossible de charger les ressources." +
+            "</div>";
     }
 }
 
@@ -4254,36 +3974,23 @@ function formatBytes(bytes) {
         return "0 octet";
     }
 
-
     if (bytes < 1024) {
-
-        return (
-            bytes +
-            " octets"
-        );
-
+        return bytes + " octets";
     }
 
-
     if (bytes < 1024 * 1024) {
-
         return (
             (bytes / 1024).toFixed(1) +
             " Ko"
         );
-
     }
 
-
     if (bytes < 1024 * 1024 * 1024) {
-
         return (
             (bytes / (1024 * 1024)).toFixed(1) +
             " Mo"
         );
-
     }
-
 
     return (
         (bytes / (1024 * 1024 * 1024)).toFixed(1) +
@@ -4303,14 +4010,9 @@ function insertResourceIntoEditor(
 
     let code = "";
 
+    if (resource.kind === "image") {
 
-    if (
-        resource.kind === "image"
-    ) {
-
-        if (
-            fileType === "html"
-        ) {
+        if (fileType === "html") {
 
             code =
 `<img
@@ -4318,9 +4020,7 @@ function insertResourceIntoEditor(
     alt="${resource.name}"
 >`;
 
-        } else if (
-            fileType === "css"
-        ) {
+        } else if (fileType === "css") {
 
             code =
 `background-image: url("${resource.name}");`;
@@ -4331,10 +4031,7 @@ function insertResourceIntoEditor(
 `// Image : ${resource.name}`;
         }
 
-
-    } else if (
-        resource.kind === "video"
-    ) {
+    } else if (resource.kind === "video") {
 
         code =
 `<video controls>
@@ -4345,19 +4042,17 @@ function insertResourceIntoEditor(
 </video>`;
     }
 
-
     if (!code) return;
 
-
-    insertLibraryCode(
-        code
-    );
-
+    insertLibraryCode(code);
 
     showToast(
         "Référence de ressource insérée."
     );
 }
+
+
+
 
 
 
