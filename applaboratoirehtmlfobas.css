@@ -1601,8 +1601,6 @@ button:disabled {
 
 
 
-
-
 /* ================================================================
    18 — VIEWPORT LABORATOIRE
    ================================================================ */
@@ -1718,78 +1716,6 @@ button:disabled {
 
 
 /* ================================================================
-   ANDROID / MOBILE — AJISTMAN PREVIEW LA SÈLMAN
-   Desktop ak laptop rete egzakteman jan yo ye.
-   ================================================================ */
-
-@media (max-width: 720px) {
-
-    .laboratory-viewport {
-
-        width: 100%;
-        max-width: 100%;
-
-        box-sizing: border-box;
-
-        padding:
-            8px;
-
-        /*
-         * Kenbe mekanis santre orijinal la.
-         */
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-    }
-
-
-    .laboratory-canvas {
-
-        /*
-         * Pran prèske tout lajè ekran Android la,
-         * olye li rete limite ak yon ti kolòn.
-         */
-        width:
-            calc(100vw - 16px);
-
-        max-width:
-            calc(100vw - 16px);
-
-        /*
-         * Kenbe pwopòsyon paj la epi kite viewport la
-         * kontwole limit wotè a.
-         */
-        height:
-            min(
-                1123px,
-                calc(100% - 16px)
-            );
-
-        max-height:
-            calc(100% - 16px);
-
-        /*
-         * Pa gen deplasman adwat/gòch.
-         * Santre ki te deja la rete aktif.
-         */
-        margin-left:
-            auto;
-
-        margin-right:
-            auto;
-
-        transform:
-            scale(1);
-
-        transform-origin:
-            center center;
-    }
-}
-
-
-/* ================================================================
    PAGE HTML AFFICHÉE DANS LE CANVAS
    ================================================================ */
 
@@ -1869,6 +1795,63 @@ button:disabled {
 
     opacity:
         0.75;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ================================================================
+   18.1 — ANDROID — AGRANDISSEMENT ISOLÉ DU CANVAS PREVIEW
+   Ne modifie pas le Block 18 original.
+   Android/mobile uniquement.
+   ================================================================ */
+
+@media (max-width: 720px) {
+
+    .laboratory-viewport > .laboratory-canvas {
+
+        /*
+         * Fòse canvas preview la sèvi ak tout espas
+         * vizib viewport la san li pa deplase sou kote.
+         */
+        width: calc(100% - 4px) !important;
+        height: calc(100% - 4px) !important;
+
+        max-width: none !important;
+        max-height: none !important;
+
+        /*
+         * Kenbe canvas la santre nan gwo espas Preview la.
+         */
+        margin: 0 auto !important;
+
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+
+        flex: 0 0 auto !important;
+        flex-shrink: 0 !important;
+
+        /*
+         * Pa ajoute okenn deplasman oswa zoom CSS.
+         * Sa kite lojik zoom/pinch ki egziste deja a travay.
+         */
+        transform-origin: center center !important;
+
+        box-sizing: border-box !important;
+
+        overflow: hidden !important;
+    }
+
 }
 
 
