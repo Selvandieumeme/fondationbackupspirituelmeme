@@ -1592,6 +1592,14 @@ button:disabled {
 
 
 
+
+
+
+
+
+
+
+
 /* ================================================================
    18 — VIEWPORT LABORATOIRE
    ================================================================ */
@@ -1772,6 +1780,10 @@ button:disabled {
 }
 
 
+/* ================================================================
+   MESSAGE STATUS
+   ================================================================ */
+
 .laboratory-status-message {
 
     color:
@@ -1787,6 +1799,61 @@ button:disabled {
     opacity:
         0.75;
 }
+
+
+/* ================================================================
+   ANDROID / MOBILE — AGRANDI SÈLMAN PAJ HTML AKTIF LA
+   ================================================================ */
+
+@media (max-width: 720px) {
+
+    .laboratory-canvas {
+
+        width:
+            calc(100% - 8px);
+
+        height:
+            calc(100% - 8px);
+
+        max-width:
+            calc(100% - 8px);
+
+        max-height:
+            calc(100% - 8px);
+
+        flex:
+            0 1 auto;
+
+        transform:
+            scale(1);
+
+        transform-origin:
+            center center;
+
+        box-sizing:
+            border-box;
+
+        overflow:
+            hidden;
+    }
+
+    .preview-frame {
+
+        width:
+            100%;
+
+        height:
+            100%;
+    }
+}
+
+
+
+
+
+
+
+
 
 
 
