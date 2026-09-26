@@ -244,6 +244,7 @@
 
                 </div>
 
+
                 <button
                     id="renameProjectBtn"
                     name="renameProject"
@@ -259,46 +260,81 @@
             </div>
 
 
-            <div
-                id="fileManagementToolbar"
-                class="file-management-toolbar"
-                data-section="file-management"
-            >
 
-                <button
-                    id="newFileBtn"
-                    name="newFile"
-                    class="file-management-btn"
-                    type="button"
-                    data-action="new-file"
-                    title="Créer un nouveau fichier"
-                >
-                    ＋ Fichier
-                </button>
 
-                <button
-                    id="openFileBtn"
-                    name="openFile"
-                    class="file-management-btn"
-                    type="button"
-                    data-action="open-file"
-                    title="Ouvrir le fichier sélectionné"
-                >
-                    📂
-                </button>
 
-                <button
-                    id="deleteFileBtn"
-                    name="deleteFile"
-                    class="file-management-btn danger-action"
-                    type="button"
-                    data-action="delete-file"
-                    title="Supprimer le fichier sélectionné"
-                >
-                    🗑️
-                </button>
 
-            </div>
+
+<div
+    id="fileManagementToolbar"
+    class="file-management-toolbar"
+    data-section="file-management"
+>
+
+    <button
+        id="newFileBtn"
+        name="newFile"
+        class="file-management-btn"
+        type="button"
+        data-action="new-file"
+        title="Créer un nouveau fichier"
+    >
+        ＋ Fichier
+    </button>
+
+    <label
+        id="mediaUploadBtn"
+        class="file-management-btn media-upload-btn"
+        title="Importer une image ou une vidéo"
+    >
+        🖼️🎬 Upload Image / Vidéo
+
+        <input
+            id="mediaUploadInput"
+            name="mediaUploadInput"
+            type="file"
+            accept="image/*,video/*"
+            hidden
+        >
+    </label>
+
+    <button
+        id="openFileBtn"
+        name="openFile"
+        class="file-management-btn"
+        type="button"
+        data-action="open-file"
+        title="Ouvrir le fichier sélectionné"
+    >
+        📂
+    </button>
+
+    <button
+        id="deleteFileBtn"
+        name="deleteFile"
+        class="file-management-btn danger-action"
+        type="button"
+        data-action="delete-file"
+        title="Supprimer le fichier sélectionné"
+    >
+        🗑️
+    </button>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
             <div
