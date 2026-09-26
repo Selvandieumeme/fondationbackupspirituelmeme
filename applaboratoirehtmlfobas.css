@@ -1600,6 +1600,8 @@ button:disabled {
 
 
 
+
+
 /* ================================================================
    18 — VIEWPORT LABORATOIRE
    ================================================================ */
@@ -1780,10 +1782,6 @@ button:disabled {
 }
 
 
-/* ================================================================
-   MESSAGE STATUS
-   ================================================================ */
-
 .laboratory-status-message {
 
     color:
@@ -1802,7 +1800,7 @@ button:disabled {
 
 
 /* ================================================================
-   ANDROID / MOBILE — AGRANDI SÈLMAN PAJ HTML AKTIF LA
+   ANDROID / MOBILE — AGRANDI SÈLMAN PAGE PREVIEW LA
    ================================================================ */
 
 @media (max-width: 720px) {
@@ -1810,43 +1808,37 @@ button:disabled {
     .laboratory-canvas {
 
         width:
-            calc(100% - 8px);
-
-        height:
-            calc(100% - 8px);
+            min(
+                794px,
+                calc(100% - 8px)
+            );
 
         max-width:
             calc(100% - 8px);
 
+        /*
+         * Wotè a rete sou menm sistèm orijinal la.
+         * Nou pa chanje flex, pozisyon, transform oswa santre.
+         */
+        height:
+            min(
+                1123px,
+                calc(100% - 40px)
+            );
+
         max-height:
-            calc(100% - 8px);
+            calc(100% - 40px);
 
         flex:
-            0 1 auto;
+            0 0 auto;
 
         transform:
             scale(1);
 
         transform-origin:
             center center;
-
-        box-sizing:
-            border-box;
-
-        overflow:
-            hidden;
-    }
-
-    .preview-frame {
-
-        width:
-            100%;
-
-        height:
-            100%;
     }
 }
-
 
 
 
