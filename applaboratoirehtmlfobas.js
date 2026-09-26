@@ -4011,6 +4011,18 @@ function deleteResourceFromDatabase(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 /* ================================================================
    19 — RESSOURCES IMAGE / VIDÉO
    ================================================================ */
@@ -4047,7 +4059,7 @@ function handleResourceFile(
 
     addResourceToDatabase(resource)
         .then(
-            function () {
+            async function () {
 
                 showToast(
                     "Ressource ajoutée : " +
@@ -4056,18 +4068,18 @@ function handleResourceFile(
 
                 /*
                  * Recharge la liste des ressources
-                 * si le panneau Ressources est utilisé.
+                 * du panneau Ressources.
                  */
-                renderResourceList();
+                await renderResourceList();
 
                 /*
-                 * Informe l'arbre principal des fichiers.
+                 * Recharge l'arbre principal du projet.
                  *
-                 * Le Block 10 pourra maintenant relire
-                 * les ressources du projet depuis IndexedDB
-                 * avec getProjectResources().
+                 * Le Block 10 récupère alors les ressources
+                 * enregistrées dans IndexedDB et les affiche
+                 * avec les fichiers HTML / CSS / JS.
                  */
-                renderFileTree();
+                await renderFileTree();
             }
         )
         .catch(
@@ -4189,13 +4201,13 @@ async function renderResourceList() {
                         /*
                          * Recharge le panneau Ressources.
                          */
-                        renderResourceList();
+                        await renderResourceList();
 
                         /*
                          * Recharge également l'arbre
-                         * principal des fichiers.
+                         * principal du projet.
                          */
-                        renderFileTree();
+                        await renderFileTree();
 
                         showToast(
                             "Ressource supprimée."
@@ -4317,10 +4329,6 @@ function insertResourceIntoEditor(
         "Référence de ressource insérée."
     );
 }
-
-
-
-
 
 
 
