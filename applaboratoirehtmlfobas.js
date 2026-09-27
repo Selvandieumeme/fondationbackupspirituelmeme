@@ -5534,27 +5534,3282 @@ la préparer pour son intégration avec CSS et JavaScript.`
 
 
 
-    {
-        id: "C",
-        title: "C — Attributs HTML",
-        theorie:
-`Les attributs donnent des informations supplémentaires aux
-éléments HTML. Exemples : id, class, href, src, alt, title.`,
 
-        pratique:
-`Créez un lien avec href, une image avec src et alt,
-et un élément possédant id et class.`,
 
-        exercices: [
-            "Créer un élément avec id.",
-            "Créer deux éléments avec la même class.",
-            "Créer un lien."
-        ],
 
-        devoirs:
-`Créer une page contenant plusieurs éléments correctement
-identifiés avec id et class.`
-    },
+{
+    id: "C",
+
+    title:
+        "C — CSS, mise en forme, mise en page et Responsive Design",
+
+    theorie:
+`CSS — CASCADING STYLE SHEETS
+
+CSS est le langage utilisé pour définir la présentation,
+l'apparence, la mise en page et le comportement visuel
+des documents HTML.
+
+Dans le Chapitre B, nous avons appris à construire la
+structure d'une page avec HTML.
+
+Dans ce Chapitre C, nous allons apprendre à transformer
+cette structure en une véritable interface Web organisée,
+lisible, responsive et professionnelle.
+
+HTML = STRUCTURE
+CSS  = PRÉSENTATION
+JavaScript = COMPORTEMENT ET INTERACTIVITÉ
+
+
+============================================================
+ILLUSTRATION VISUELLE — HTML + CSS + LAYOUT
+============================================================
+
+<div style="
+    width:100%;
+    margin:25px auto;
+    padding:20px;
+    border-radius:20px;
+    background:linear-gradient(145deg,#111827,#1e293b,#334155);
+    box-shadow:0 20px 45px rgba(0,0,0,.35);
+    overflow:hidden;
+">
+
+    <svg
+        viewBox="0 0 1000 720"
+        width="100%"
+        role="img"
+        aria-label="Illustration 3D de la structure HTML et de sa mise en forme CSS"
+        style="
+            display:block;
+            width:100%;
+            height:auto;
+            min-height:520px;
+        "
+    >
+
+        <defs>
+
+            <linearGradient id="cBg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#0f172a"/>
+                <stop offset="55%" stop-color="#1e3a8a"/>
+                <stop offset="100%" stop-color="#312e81"/>
+            </linearGradient>
+
+            <linearGradient id="cHtml" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#f97316"/>
+                <stop offset="100%" stop-color="#dc2626"/>
+            </linearGradient>
+
+            <linearGradient id="cCss" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="100%" stop-color="#2563eb"/>
+            </linearGradient>
+
+            <linearGradient id="cBox" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#22c55e"/>
+                <stop offset="100%" stop-color="#15803d"/>
+            </linearGradient>
+
+            <linearGradient id="cLayout" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#a855f7"/>
+                <stop offset="100%" stop-color="#7e22ce"/>
+            </linearGradient>
+
+            <filter id="cShadow">
+                <feDropShadow
+                    dx="0"
+                    dy="14"
+                    stdDeviation="12"
+                    flood-opacity=".38"
+                />
+            </filter>
+
+            <filter id="cGlow">
+                <feGaussianBlur
+                    stdDeviation="8"
+                    result="blur"
+                />
+            </filter>
+
+        </defs>
+
+        <rect
+            x="0"
+            y="0"
+            width="1000"
+            height="720"
+            rx="35"
+            fill="url(#cBg)"
+        />
+
+        <ellipse
+            cx="500"
+            cy="630"
+            rx="350"
+            ry="45"
+            fill="#000000"
+            opacity=".35"
+            filter="url(#cGlow)"
+        />
+
+        <text
+            x="500"
+            y="62"
+            text-anchor="middle"
+            fill="#ffffff"
+            font-size="32"
+            font-weight="700"
+            font-family="Arial, sans-serif"
+        >
+            HTML + CSS = PAGE WEB
+        </text>
+
+        <text
+            x="500"
+            y="94"
+            text-anchor="middle"
+            fill="#cbd5e1"
+            font-size="17"
+            font-family="Arial, sans-serif"
+        >
+            Structure • Style • Layout • Responsive Design
+        </text>
+
+
+        <!-- HTML CARD -->
+
+        <g filter="url(#cShadow)">
+
+            <polygon
+                points="105,175 270,135 355,185 190,225"
+                fill="#fb923c"
+            />
+
+            <polygon
+                points="105,175 190,225 190,375 105,325"
+                fill="#c2410c"
+            />
+
+            <polygon
+                points="190,225 355,185 355,335 190,375"
+                fill="url(#cHtml)"
+            />
+
+            <text
+                x="270"
+                y="255"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-size="25"
+                font-weight="700"
+                font-family="Arial, sans-serif"
+            >
+                HTML
+            </text>
+
+            <text
+                x="270"
+                y="286"
+                text-anchor="middle"
+                fill="#fee2e2"
+                font-size="17"
+                font-family="Arial, sans-serif"
+            >
+                STRUCTURE
+            </text>
+
+            <text
+                x="270"
+                y="315"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-size="14"
+                font-family="monospace"
+            >
+                header • main • section
+            </text>
+
+        </g>
+
+
+        <!-- CSS CARD -->
+
+        <g filter="url(#cShadow)">
+
+            <polygon
+                points="645,185 810,145 895,195 730,235"
+                fill="#60a5fa"
+            />
+
+            <polygon
+                points="645,185 730,235 730,385 645,335"
+                fill="#1d4ed8"
+            />
+
+            <polygon
+                points="730,235 895,195 895,345 730,385"
+                fill="url(#cCss)"
+            />
+
+            <text
+                x="810"
+                y="265"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-size="25"
+                font-weight="700"
+                font-family="Arial, sans-serif"
+            >
+                CSS
+            </text>
+
+            <text
+                x="810"
+                y="296"
+                text-anchor="middle"
+                fill="#dbeafe"
+                font-size="17"
+                font-family="Arial, sans-serif"
+            >
+                PRÉSENTATION
+            </text>
+
+            <text
+                x="810"
+                y="325"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-size="14"
+                font-family="monospace"
+            >
+                color • spacing • layout
+            </text>
+
+        </g>
+
+
+        <!-- CENTER PAGE / BOX MODEL -->
+
+        <g filter="url(#cShadow)">
+
+            <polygon
+                points="335,335 565,285 665,340 435,390"
+                fill="#86efac"
+            />
+
+            <polygon
+                points="335,335 435,390 435,550 335,495"
+                fill="#15803d"
+            />
+
+            <polygon
+                points="435,390 665,340 665,500 435,550"
+                fill="url(#cBox)"
+            />
+
+            <text
+                x="550"
+                y="405"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-size="23"
+                font-weight="700"
+                font-family="Arial, sans-serif"
+            >
+                BOX MODEL
+            </text>
+
+            <text
+                x="550"
+                y="434"
+                text-anchor="middle"
+                fill="#dcfce7"
+                font-size="15"
+                font-family="Arial, sans-serif"
+            >
+                margin • border • padding • content
+            </text>
+
+            <rect
+                x="480"
+                y="458"
+                width="115"
+                height="55"
+                rx="8"
+                fill="#ffffff"
+                opacity=".92"
+            />
+
+            <text
+                x="537"
+                y="492"
+                text-anchor="middle"
+                fill="#166534"
+                font-size="14"
+                font-weight="700"
+                font-family="Arial, sans-serif"
+            >
+                CONTENT
+            </text>
+
+        </g>
+
+
+        <!-- LAYOUT -->
+
+        <g filter="url(#cShadow)">
+
+            <polygon
+                points="180,500 350,465 435,515 265,550"
+                fill="#c084fc"
+            />
+
+            <polygon
+                points="180,500 265,550 265,625 180,575"
+                fill="#6b21a8"
+            />
+
+            <polygon
+                points="265,550 435,515 435,590 265,625"
+                fill="url(#cLayout)"
+            />
+
+            <text
+                x="350"
+                y="555"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-size="19"
+                font-weight="700"
+                font-family="Arial, sans-serif"
+            >
+                FLEX / GRID
+            </text>
+
+            <text
+                x="350"
+                y="580"
+                text-anchor="middle"
+                fill="#f3e8ff"
+                font-size="14"
+                font-family="Arial, sans-serif"
+            >
+                LAYOUT
+            </text>
+
+        </g>
+
+
+        <!-- RESPONSIVE -->
+
+        <g filter="url(#cShadow)">
+
+            <rect
+                x="610"
+                y="470"
+                width="145"
+                height="105"
+                rx="15"
+                fill="#0f172a"
+                stroke="#38bdf8"
+                stroke-width="5"
+            />
+
+            <rect
+                x="630"
+                y="490"
+                width="105"
+                height="65"
+                rx="7"
+                fill="#172554"
+            />
+
+            <circle
+                cx="682"
+                cy="565"
+                r="4"
+                fill="#38bdf8"
+            />
+
+            <text
+                x="682"
+                y="600"
+                text-anchor="middle"
+                fill="#ffffff"
+                font-size="19"
+                font-weight="700"
+                font-family="Arial, sans-serif"
+            >
+                RESPONSIVE
+            </text>
+
+            <text
+                x="682"
+                y="624"
+                text-anchor="middle"
+                fill="#bae6fd"
+                font-size="13"
+                font-family="Arial, sans-serif"
+            >
+                Mobile • Tablet • Desktop
+            </text>
+
+        </g>
+
+
+        <!-- CONNECTORS -->
+
+        <path
+            d="M355 260 C430 220 560 220 645 270"
+            fill="none"
+            stroke="#ffffff"
+            stroke-width="4"
+            stroke-dasharray="10 8"
+            opacity=".8"
+        />
+
+        <path
+            d="M500 350 C500 300 500 260 500 220"
+            fill="none"
+            stroke="#ffffff"
+            stroke-width="3"
+            stroke-dasharray="8 8"
+            opacity=".6"
+        />
+
+        <path
+            d="M435 520 C500 500 560 500 610 520"
+            fill="none"
+            stroke="#ffffff"
+            stroke-width="4"
+            stroke-dasharray="10 8"
+            opacity=".8"
+        />
+
+        <text
+            x="500"
+            y="685"
+            text-anchor="middle"
+            fill="#e2e8f0"
+            font-size="16"
+            font-family="Arial, sans-serif"
+        >
+            Construire → Styliser → Organiser → Adapter
+        </text>
+
+    </svg>
+</div>
+
+
+============================================================
+1 — INTRODUCTION AU CSS
+============================================================
+
+CSS signifie Cascading Style Sheets.
+
+CSS permet de contrôler la présentation visuelle d'un
+document HTML.
+
+HTML décrit la structure et le sens du contenu.
+
+CSS contrôle notamment :
+
+les couleurs ;
+
+les dimensions ;
+
+les espacements ;
+
+les bordures ;
+
+les arrière-plans ;
+
+la typographie ;
+
+la position des éléments ;
+
+la disposition des éléments ;
+
+les animations ;
+
+la présentation responsive.
+
+
+Syntaxe générale :
+
+selecteur {
+    propriete: valeur;
+}
+
+Exemple :
+
+p {
+    color: blue;
+    font-size: 18px;
+}
+
+Le sélecteur indique l'élément ciblé.
+
+La propriété indique ce que nous voulons modifier.
+
+La valeur indique comment la propriété doit être appliquée.
+
+Une déclaration CSS est composée d'une propriété et d'une
+valeur.
+
+
+Commentaires CSS :
+
+/* Ceci est un commentaire CSS */
+
+
+============================================================
+2 — LES TROIS MÉTHODES CSS
+============================================================
+
+Il existe trois principales méthodes pour appliquer du CSS.
+
+------------------------------------------------------------
+CSS INLINE
+------------------------------------------------------------
+
+<p style="color: blue;">
+    Texte bleu
+</p>
+
+Le CSS est directement placé dans l'attribut style.
+
+Cette méthode peut être utile pour une modification très
+ponctuelle mais elle est difficile à maintenir dans un
+grand projet.
+
+
+------------------------------------------------------------
+CSS INTERNE
+------------------------------------------------------------
+
+<style>
+
+    p {
+        color: blue;
+    }
+
+</style>
+
+Le CSS est placé dans l'élément style du document HTML.
+
+
+------------------------------------------------------------
+CSS EXTERNE
+------------------------------------------------------------
+
+<link
+    rel="stylesheet"
+    href="style.css"
+>
+
+Le CSS est placé dans un fichier séparé.
+
+Exemple :
+
+style.css
+
+p {
+    color: blue;
+}
+
+Pour un projet professionnel, la séparation du HTML et du
+CSS facilite généralement l'organisation et la maintenance.
+
+
+============================================================
+3 — SÉLECTEURS CSS
+============================================================
+
+Le sélecteur détermine les éléments auxquels une règle CSS
+doit être appliquée.
+
+------------------------------------------------------------
+SÉLECTEUR D'ÉLÉMENT
+------------------------------------------------------------
+
+p {
+    color: black;
+}
+
+------------------------------------------------------------
+SÉLECTEUR DE CLASSE
+------------------------------------------------------------
+
+.card {
+    padding: 20px;
+}
+
+HTML :
+
+<div class="card">
+    Contenu
+</div>
+
+------------------------------------------------------------
+SÉLECTEUR D'ID
+------------------------------------------------------------
+
+#header {
+    background: black;
+}
+
+------------------------------------------------------------
+SÉLECTEUR UNIVERSEL
+------------------------------------------------------------
+
+* {
+    box-sizing: border-box;
+}
+
+------------------------------------------------------------
+PLUSIEURS SÉLECTEURS
+------------------------------------------------------------
+
+h1,
+h2,
+h3 {
+    font-family: Arial, sans-serif;
+}
+
+------------------------------------------------------------
+DESCENDANT
+------------------------------------------------------------
+
+nav a {
+    text-decoration: none;
+}
+
+------------------------------------------------------------
+ENFANT DIRECT
+------------------------------------------------------------
+
+nav > a {
+    display: inline-block;
+}
+
+------------------------------------------------------------
+ATTRIBUT
+------------------------------------------------------------
+
+input[type="email"] {
+    border: 1px solid gray;
+}
+
+------------------------------------------------------------
+PSEUDO-CLASSE
+------------------------------------------------------------
+
+button:hover {
+    transform: scale(1.02);
+}
+
+------------------------------------------------------------
+PSEUDO-ÉLÉMENT
+------------------------------------------------------------
+
+.card::before {
+    content: "";
+}
+
+
+============================================================
+4 — CASCADE, HÉRITAGE ET SPÉCIFICITÉ
+============================================================
+
+CSS signifie Cascading Style Sheets parce que plusieurs
+règles peuvent s'appliquer au même élément.
+
+La cascade détermine quelle déclaration sera utilisée.
+
+L'héritage permet à certaines propriétés d'être transmises
+des éléments parents vers leurs descendants.
+
+La spécificité permet de déterminer quelle règle est la
+plus précise lorsqu'il existe plusieurs règles concurrentes.
+
+Ordre simplifié :
+
+sélecteur d'élément
+
+classe et pseudo-classe
+
+id
+
+styles inline
+
+!important possède une priorité particulière et doit être
+utilisé avec prudence.
+
+
+Exemple :
+
+p {
+    color: black;
+}
+
+.text {
+    color: blue;
+}
+
+#message {
+    color: red;
+}
+
+Un élément possédant id="message", class="text" et étant
+un paragraphe sera affecté par plusieurs règles, mais la
+spécificité intervient dans le choix final.
+
+
+============================================================
+5 — COULEURS
+============================================================
+
+CSS permet de définir des couleurs de plusieurs manières.
+
+Nom :
+
+color: red;
+
+HEX :
+
+color: #ff0000;
+
+RGB :
+
+color: rgb(255, 0, 0);
+
+RGBA :
+
+color: rgba(255, 0, 0, 0.5);
+
+HSL :
+
+color: hsl(0, 100%, 50%);
+
+HSLA :
+
+color: hsla(0, 100%, 50%, 0.5);
+
+On peut également utiliser :
+
+opacity: 0.5;
+
+
+============================================================
+6 — TEXTE ET TYPOGRAPHIE
+============================================================
+
+Propriétés importantes :
+
+color
+
+font-family
+
+font-size
+
+font-weight
+
+font-style
+
+font-variant
+
+line-height
+
+letter-spacing
+
+word-spacing
+
+text-align
+
+text-decoration
+
+text-transform
+
+text-indent
+
+text-shadow
+
+Exemple :
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+h1 {
+    text-align: center;
+    text-transform: uppercase;
+}
+
+p {
+    letter-spacing: 0.3px;
+}
+
+
+============================================================
+7 — UNITÉS CSS
+============================================================
+
+Unités absolues :
+
+px
+
+cm
+
+mm
+
+in
+
+pt
+
+pc
+
+
+Unités relatives :
+
+%
+
+em
+
+rem
+
+vw
+
+vh
+
+vmin
+
+vmax
+
+ch
+
+ex
+
+
+px représente généralement une unité basée sur le pixel CSS.
+
+% dépend généralement de la dimension de référence.
+
+em dépend de la taille de police du contexte.
+
+rem dépend de la taille de police de l'élément racine.
+
+vw représente une fraction de la largeur du viewport.
+
+vh représente une fraction de la hauteur du viewport.
+
+
+============================================================
+8 — LE MODÈLE DE BOÎTE — BOX MODEL
+============================================================
+
+Chaque élément HTML peut être considéré comme une boîte.
+
+Le Box Model est composé de :
+
+CONTENT
+
+PADDING
+
+BORDER
+
+MARGIN
+
+
+Exemple :
+
+.card {
+
+    width: 300px;
+
+    padding: 20px;
+
+    border: 2px solid black;
+
+    margin: 30px;
+
+}
+
+La propriété box-sizing permet de contrôler la manière dont
+la largeur et la hauteur sont calculées.
+
+Très souvent :
+
+* {
+    box-sizing: border-box;
+}
+
+Avec border-box, le padding et la bordure sont inclus dans
+la largeur et la hauteur déclarées.
+
+
+============================================================
+9 — BACKGROUNDS
+============================================================
+
+CSS permet de contrôler les arrière-plans.
+
+background-color
+
+background-image
+
+background-repeat
+
+background-position
+
+background-size
+
+background-attachment
+
+Exemple :
+
+.hero {
+    background-color: #0f172a;
+    background-image: url("image.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+CSS permet également les gradients.
+
+Exemple :
+
+background: linear-gradient(
+    135deg,
+    #2563eb,
+    #7c3aed
+);
+
+Gradient radial :
+
+background: radial-gradient(
+    circle,
+    white,
+    blue
+);
+
+
+============================================================
+10 — BORDURES
+============================================================
+
+Propriétés :
+
+border
+
+border-width
+
+border-style
+
+border-color
+
+border-radius
+
+outline
+
+Exemple :
+
+.card {
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+}
+
+On peut définir chaque côté :
+
+border-top
+
+border-right
+
+border-bottom
+
+border-left.
+
+
+============================================================
+11 — ESPACEMENT ET DIMENSIONS
+============================================================
+
+margin définit l'espace extérieur.
+
+padding définit l'espace intérieur.
+
+width définit la largeur.
+
+height définit la hauteur.
+
+min-width définit une largeur minimale.
+
+max-width définit une largeur maximale.
+
+min-height définit une hauteur minimale.
+
+max-height définit une hauteur maximale.
+
+gap définit l'espace entre les éléments d'un layout
+Flexbox ou Grid.
+
+
+Exemple :
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
+============================================================
+12 — DISPLAY
+============================================================
+
+display contrôle le mode d'affichage d'un élément.
+
+Valeurs importantes :
+
+block
+
+inline
+
+inline-block
+
+none
+
+contents
+
+flex
+
+grid
+
+
+block occupe généralement toute la largeur disponible.
+
+inline reste dans le flux du texte.
+
+inline-block permet notamment de combiner certaines
+caractéristiques du inline et du block.
+
+none retire l'élément de la mise en page.
+
+flex active Flexbox.
+
+grid active CSS Grid.
+
+
+============================================================
+13 — POSITIONNEMENT
+============================================================
+
+CSS propose plusieurs modes de positionnement.
+
+static
+
+relative
+
+absolute
+
+fixed
+
+sticky
+
+
+Exemple :
+
+.card {
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+position: fixed peut maintenir un élément par rapport
+au viewport.
+
+position: sticky permet à un élément de rester visible
+pendant le défilement selon les conditions définies.
+
+Propriétés :
+
+top
+
+right
+
+bottom
+
+left
+
+inset
+
+z-index
+
+
+============================================================
+14 — OVERFLOW
+============================================================
+
+overflow contrôle le contenu qui dépasse les limites
+d'une boîte.
+
+Valeurs :
+
+visible
+
+hidden
+
+scroll
+
+auto
+
+
+Exemple :
+
+.panel {
+    width: 300px;
+    height: 200px;
+    overflow: auto;
+}
+
+On peut également utiliser :
+
+overflow-x
+
+overflow-y
+
+
+============================================================
+15 — FLEXBOX
+============================================================
+
+Flexbox est un système de mise en page unidimensionnel.
+
+Activation :
+
+.container {
+    display: flex;
+}
+
+Propriétés principales du conteneur :
+
+flex-direction
+
+justify-content
+
+align-items
+
+align-content
+
+flex-wrap
+
+gap
+
+
+Exemple :
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+
+Les éléments enfants peuvent utiliser :
+
+flex-grow
+
+flex-shrink
+
+flex-basis
+
+flex
+
+order
+
+align-self
+
+
+Exemple :
+
+.item {
+    flex: 1;
+}
+
+
+============================================================
+16 — CSS GRID
+============================================================
+
+CSS Grid est un système de mise en page basé sur les
+lignes et les colonnes.
+
+Activation :
+
+.container {
+    display: grid;
+}
+
+Exemple :
+
+.container {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+}
+
+
+Propriétés importantes :
+
+grid-template-columns
+
+grid-template-rows
+
+grid-column
+
+grid-row
+
+grid-area
+
+gap
+
+
+Unités et fonctions utiles :
+
+fr
+
+repeat()
+
+minmax()
+
+auto-fit
+
+auto-fill
+
+
+Exemple responsive :
+
+.container {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(220px, 1fr)
+        );
+
+    gap: 20px;
+}
+
+
+============================================================
+17 — RESPONSIVE DESIGN
+============================================================
+
+Le Responsive Web Design permet à une page de s'adapter
+aux différentes tailles d'écran.
+
+Un site responsive doit pouvoir fonctionner sur :
+
+téléphone ;
+
+tablette ;
+
+ordinateur portable ;
+
+ordinateur de bureau ;
+
+écrans plus larges.
+
+
+Les media queries permettent d'appliquer des règles selon
+les caractéristiques du viewport.
+
+Exemple :
+
+@media (max-width: 600px) {
+
+    .menu {
+        flex-direction: column;
+    }
+
+}
+
+
+Approche mobile-first :
+
+On commence par concevoir le style destiné aux petits
+écrans puis on ajoute progressivement les adaptations
+pour les écrans plus larges.
+
+
+============================================================
+18 — IMAGES ET CONTENUS RESPONSIVES
+============================================================
+
+Une image doit généralement pouvoir s'adapter à son
+conteneur.
+
+Exemple :
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+
+object-fit permet de contrôler l'ajustement d'une image
+ou d'une vidéo dans sa boîte.
+
+Exemple :
+
+img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+
+object-position permet de contrôler la position du contenu.
+
+aspect-ratio permet de conserver un rapport largeur/hauteur.
+
+Exemple :
+
+.video {
+    aspect-ratio: 16 / 9;
+}
+
+
+============================================================
+19 — FORMULAIRES AVEC CSS
+============================================================
+
+CSS peut être utilisé pour créer des formulaires lisibles
+et professionnels.
+
+Exemple :
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+}
+
+button {
+    padding: 12px 20px;
+    cursor: pointer;
+}
+
+
+On peut cibler différents états :
+
+:focus
+
+:focus-visible
+
+:checked
+
+:disabled
+
+:required
+
+:valid
+
+:invalid
+
+:placeholder-shown
+
+
+Exemple :
+
+input:focus {
+    outline: 2px solid blue;
+}
+
+
+============================================================
+20 — LIENS ET BOUTONS
+============================================================
+
+Les liens peuvent utiliser plusieurs états.
+
+a:link
+
+a:visited
+
+a:hover
+
+a:active
+
+a:focus
+
+
+Exemple :
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+Les boutons peuvent également recevoir des effets :
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+
+============================================================
+21 — PSEUDO-CLASSES
+============================================================
+
+Les pseudo-classes permettent de cibler un état ou une
+position particulière.
+
+Exemples :
+
+:hover
+
+:active
+
+:focus
+
+:focus-visible
+
+:visited
+
+:first-child
+
+:last-child
+
+:nth-child()
+
+:nth-of-type()
+
+:not()
+
+:is()
+
+:where()
+
+
+Exemple :
+
+li:nth-child(even) {
+    background: #f1f5f9;
+}
+
+
+============================================================
+22 — PSEUDO-ÉLÉMENTS
+============================================================
+
+Les pseudo-éléments ciblent une partie particulière d'un
+élément ou permettent de générer du contenu.
+
+Exemples :
+
+::before
+
+::after
+
+::first-letter
+
+::first-line
+
+::selection
+
+::placeholder
+
+
+Exemple :
+
+.card::before {
+    content: "";
+    display: block;
+    height: 4px;
+    background: blue;
+}
+
+
+============================================================
+23 — OMBRES ET EFFETS
+============================================================
+
+box-shadow permet de créer une ombre autour d'une boîte.
+
+Exemple :
+
+.card {
+    box-shadow:
+        0 10px 30px
+        rgba(0, 0, 0, 0.15);
+}
+
+
+text-shadow permet d'ajouter une ombre au texte.
+
+opacity contrôle la transparence globale d'un élément.
+
+
+============================================================
+24 — TRANSITIONS
+============================================================
+
+Une transition permet de rendre un changement visuel
+progressif.
+
+Propriétés :
+
+transition-property
+
+transition-duration
+
+transition-timing-function
+
+transition-delay
+
+transition
+
+
+Exemple :
+
+.button {
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+}
+
+
+============================================================
+25 — TRANSFORMATIONS
+============================================================
+
+La propriété transform permet de modifier visuellement
+la position, l'échelle, la rotation ou l'inclinaison
+d'un élément.
+
+Fonctions :
+
+translate()
+
+translateX()
+
+translateY()
+
+scale()
+
+rotate()
+
+skew()
+
+skewX()
+
+skewY()
+
+
+Exemple :
+
+.card:hover {
+    transform:
+        translateY(-5px)
+        scale(1.02);
+}
+
+
+transform-origin permet de définir le point d'origine
+de la transformation.
+
+
+============================================================
+26 — ANIMATIONS CSS
+============================================================
+
+Les animations CSS utilisent notamment @keyframes.
+
+Exemple :
+
+@keyframes apparition {
+
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+.box {
+    animation:
+        apparition
+        0.8s
+        ease
+        both;
+}
+
+
+Propriétés importantes :
+
+animation-name
+
+animation-duration
+
+animation-delay
+
+animation-iteration-count
+
+animation-direction
+
+animation-fill-mode
+
+animation-play-state
+
+animation-timing-function
+
+
+============================================================
+27 — VARIABLES CSS
+============================================================
+
+Les variables CSS permettent de centraliser des valeurs
+réutilisables.
+
+Exemple :
+
+:root {
+
+    --couleur-principale: #2563eb;
+
+    --couleur-secondaire: #7c3aed;
+
+    --espacement: 20px;
+
+    --rayon: 12px;
+
+}
+
+
+Utilisation :
+
+.card {
+
+    padding: var(--espacement);
+
+    border-radius: var(--rayon);
+
+    color: var(--couleur-principale);
+
+}
+
+
+Les variables facilitent la modification globale d'un
+design.
+
+
+============================================================
+28 — FONCTIONS CSS
+============================================================
+
+CSS possède plusieurs fonctions utiles.
+
+var()
+
+calc()
+
+min()
+
+max()
+
+clamp()
+
+rgb()
+
+hsl()
+
+
+Exemple :
+
+.container {
+    width: calc(100% - 40px);
+}
+
+
+Exemple :
+
+.title {
+    font-size:
+        clamp(
+            28px,
+            5vw,
+            60px
+        );
+}
+
+
+clamp() permet de définir une valeur minimale, une valeur
+flexible et une valeur maximale.
+
+
+============================================================
+29 — LAYOUT D'UNE VRAIE PAGE WEB
+============================================================
+
+Une page Web professionnelle peut utiliser une structure
+comme :
+
+HEADER
+
+NAVIGATION
+
+MAIN
+
+SECTION
+
+ARTICLE
+
+ASIDE
+
+FOOTER
+
+
+CSS peut organiser cette structure avec Flexbox ou Grid.
+
+Exemple :
+
+.page {
+    min-height: 100vh;
+
+    display: grid;
+
+    grid-template-rows:
+        auto
+        auto
+        1fr
+        auto;
+}
+
+
+Une section peut utiliser :
+
+display: grid;
+
+ou :
+
+display: flex;
+
+
+L'objectif est de créer une hiérarchie visuelle claire.
+
+
+============================================================
+30 — DESIGN D'UNE INTERFACE WEB
+============================================================
+
+CSS permet de construire des composants visuels.
+
+Exemples :
+
+cards
+
+menus
+
+barres de navigation
+
+boutons
+
+badges
+
+alertes
+
+panneaux
+
+hero sections
+
+footers
+
+formulaires
+
+galeries
+
+portfolios
+
+landing pages
+
+
+Un composant doit idéalement avoir une structure claire
+et des classes réutilisables.
+
+Exemple :
+
+.card {
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    background: white;
+
+    box-shadow:
+        0 10px 30px
+        rgba(0,0,0,.10);
+}
+
+
+============================================================
+31 — ACCESSIBILITÉ VISUELLE
+============================================================
+
+Le design CSS doit également respecter les besoins
+d'accessibilité.
+
+Il faut notamment faire attention :
+
+au contraste ;
+
+à la lisibilité ;
+
+à la taille du texte ;
+
+à l'espacement ;
+
+à la visibilité du focus ;
+
+à l'utilisation de la couleur ;
+
+aux animations excessives.
+
+
+Exemple :
+
+button:focus-visible {
+    outline:
+        3px solid
+        #2563eb;
+
+    outline-offset:
+        3px;
+}
+
+
+Pour les utilisateurs sensibles aux animations :
+
+@media (prefers-reduced-motion: reduce) {
+
+    * {
+        animation-duration: 0.01ms;
+        transition-duration: 0.01ms;
+        scroll-behavior: auto;
+    }
+
+}
+
+
+============================================================
+32 — ORGANISATION PROFESSIONNELLE DU CSS
+============================================================
+
+Un projet professionnel doit garder un CSS organisé.
+
+On peut notamment séparer :
+
+variables ;
+
+base ;
+
+typographie ;
+
+layout ;
+
+composants ;
+
+formulaires ;
+
+responsive ;
+
+animations.
+
+
+Exemple de structure :
+
+css/
+
+    variables.css
+
+    base.css
+
+    layout.css
+
+    components.css
+
+    forms.css
+
+    responsive.css
+
+
+Pour un petit projet, un seul fichier style.css peut être
+suffisant.
+
+Pour un projet plus important, une organisation modulaire
+peut faciliter la maintenance.
+
+
+============================================================
+33 — DÉBOGAGE CSS
+============================================================
+
+Lorsqu'un style ne fonctionne pas, il faut rechercher
+méthodiquement la cause.
+
+Vérifiez :
+
+le sélecteur ;
+
+la classe ;
+
+l'id ;
+
+la syntaxe ;
+
+les accolades ;
+
+les propriétés ;
+
+les valeurs ;
+
+la spécificité ;
+
+la cascade ;
+
+l'héritage ;
+
+le Box Model ;
+
+la largeur ;
+
+la hauteur ;
+
+le positionnement ;
+
+Flexbox ;
+
+Grid ;
+
+les media queries.
+
+
+Les outils de développement du navigateur permettent
+notamment d'inspecter un élément et de voir les règles
+CSS qui lui sont appliquées.
+
+Un développeur doit apprendre à identifier la cause d'un
+problème au lieu de modifier le code au hasard.
+
+
+============================================================
+CONCLUSION DU CHAPITRE C
+============================================================
+
+Dans le Chapitre B, nous avons appris à construire la
+structure HTML d'une page.
+
+Dans le Chapitre C, nous avons appris à transformer cette
+structure en interface visuelle.
+
+Nous avons étudié :
+
+sélecteurs ;
+
+cascade ;
+
+spécificité ;
+
+couleurs ;
+
+typographie ;
+
+unités ;
+
+Box Model ;
+
+backgrounds ;
+
+bordures ;
+
+dimensions ;
+
+display ;
+
+positionnement ;
+
+overflow ;
+
+Flexbox ;
+
+Grid ;
+
+Responsive Design ;
+
+images responsives ;
+
+formulaires ;
+
+pseudo-classes ;
+
+pseudo-éléments ;
+
+ombres ;
+
+transitions ;
+
+transformations ;
+
+animations ;
+
+variables CSS ;
+
+fonctions CSS ;
+
+layout ;
+
+composants ;
+
+accessibilité ;
+
+organisation du CSS ;
+
+débogage.
+
+La prochaine étape consiste à combiner HTML et CSS pour
+construire des interfaces Web complètes et responsive.`,
+
+    pratique:
+`TRAVAUX PRATIQUES — CSS ET CONSTRUCTION D'UNE INTERFACE WEB
+
+Objectif général :
+
+Transformer progressivement une page HTML créée dans le
+Chapitre B en une interface Web organisée, esthétique,
+responsive et professionnelle.
+
+------------------------------------------------------------
+TP 1 — PREMIER FICHIER CSS
+------------------------------------------------------------
+
+Créez :
+
+style.css
+
+Reliez-le à index.html avec :
+
+<link
+    rel="stylesheet"
+    href="style.css"
+>
+
+Modifiez :
+
+la couleur du texte ;
+
+la couleur du fond ;
+
+la taille du texte.
+
+
+------------------------------------------------------------
+TP 2 — SÉLECTEURS
+------------------------------------------------------------
+
+Créez des règles CSS pour :
+
+h1 ;
+
+h2 ;
+
+p ;
+
+une classe ;
+
+un id ;
+
+un groupe de sélecteurs.
+
+
+------------------------------------------------------------
+TP 3 — COULEURS
+------------------------------------------------------------
+
+Testez :
+
+nom ;
+
+HEX ;
+
+RGB ;
+
+RGBA ;
+
+HSL ;
+
+HSLA.
+
+
+------------------------------------------------------------
+TP 4 — TYPOGRAPHIE
+------------------------------------------------------------
+
+Modifiez :
+
+font-family ;
+
+font-size ;
+
+font-weight ;
+
+line-height ;
+
+text-align ;
+
+text-transform ;
+
+letter-spacing.
+
+
+------------------------------------------------------------
+TP 5 — BOX MODEL
+------------------------------------------------------------
+
+Créez une carte contenant :
+
+content ;
+
+padding ;
+
+border ;
+
+margin.
+
+Testez :
+
+content-box ;
+
+border-box.
+
+
+------------------------------------------------------------
+TP 6 — BACKGROUND
+------------------------------------------------------------
+
+Ajoutez :
+
+background-color ;
+
+background-image ;
+
+background-size ;
+
+background-position ;
+
+background-repeat.
+
+
+------------------------------------------------------------
+TP 7 — BORDURES
+------------------------------------------------------------
+
+Créez plusieurs cartes avec :
+
+border ;
+
+border-radius ;
+
+outline.
+
+
+------------------------------------------------------------
+TP 8 — DIMENSIONS
+------------------------------------------------------------
+
+Testez :
+
+width ;
+
+height ;
+
+min-width ;
+
+max-width ;
+
+min-height ;
+
+max-height.
+
+
+------------------------------------------------------------
+TP 9 — DISPLAY
+------------------------------------------------------------
+
+Créez des exemples avec :
+
+block ;
+
+inline ;
+
+inline-block ;
+
+none.
+
+
+------------------------------------------------------------
+TP 10 — POSITIONNEMENT
+------------------------------------------------------------
+
+Créez un badge placé dans un coin d'une carte avec :
+
+position: relative ;
+
+position: absolute.
+
+
+------------------------------------------------------------
+TP 11 — FLEXBOX
+------------------------------------------------------------
+
+Créez une navigation horizontale avec Flexbox.
+
+Testez :
+
+flex-direction ;
+
+justify-content ;
+
+align-items ;
+
+gap ;
+
+flex-wrap.
+
+
+------------------------------------------------------------
+TP 12 — FLEXBOX AVANCÉ
+------------------------------------------------------------
+
+Créez trois cartes.
+
+Testez :
+
+flex-grow ;
+
+flex-shrink ;
+
+flex-basis ;
+
+order ;
+
+align-self.
+
+
+------------------------------------------------------------
+TP 13 — GRID
+------------------------------------------------------------
+
+Créez une grille de six cartes avec :
+
+display: grid ;
+
+grid-template-columns ;
+
+gap.
+
+
+------------------------------------------------------------
+TP 14 — GRID RESPONSIVE
+------------------------------------------------------------
+
+Utilisez :
+
+repeat() ;
+
+minmax() ;
+
+auto-fit ;
+
+1fr.
+
+
+------------------------------------------------------------
+TP 15 — OVERFLOW
+------------------------------------------------------------
+
+Créez un panneau avec une hauteur limitée.
+
+Testez :
+
+hidden ;
+
+scroll ;
+
+auto.
+
+
+------------------------------------------------------------
+TP 16 — IMAGES RESPONSIVES
+------------------------------------------------------------
+
+Ajoutez :
+
+max-width: 100% ;
+
+height: auto ;
+
+object-fit ;
+
+aspect-ratio.
+
+
+------------------------------------------------------------
+TP 17 — FORMULAIRE
+------------------------------------------------------------
+
+Stylisez le formulaire du Chapitre B.
+
+Modifiez :
+
+input ;
+
+label ;
+
+textarea ;
+
+select ;
+
+button.
+
+
+------------------------------------------------------------
+TP 18 — ÉTATS DU FORMULAIRE
+------------------------------------------------------------
+
+Testez :
+
+:focus ;
+
+:required ;
+
+:valid ;
+
+:invalid ;
+
+:disabled ;
+
+:checked.
+
+
+------------------------------------------------------------
+TP 19 — LIENS
+------------------------------------------------------------
+
+Créez les styles :
+
+normal ;
+
+hover ;
+
+active ;
+
+visited ;
+
+focus.
+
+
+------------------------------------------------------------
+TP 20 — PSEUDO-CLASSES
+------------------------------------------------------------
+
+Utilisez :
+
+:first-child ;
+
+:last-child ;
+
+:nth-child() ;
+
+:not().
+
+
+------------------------------------------------------------
+TP 21 — PSEUDO-ÉLÉMENTS
+------------------------------------------------------------
+
+Créez un élément décoratif avec :
+
+::before
+
+et
+
+::after
+
+
+------------------------------------------------------------
+TP 22 — OMBRES
+------------------------------------------------------------
+
+Ajoutez :
+
+box-shadow ;
+
+text-shadow.
+
+
+------------------------------------------------------------
+TP 23 — TRANSITIONS
+------------------------------------------------------------
+
+Créez un bouton avec un effet progressif au survol.
+
+
+------------------------------------------------------------
+TP 24 — TRANSFORMATIONS
+------------------------------------------------------------
+
+Testez :
+
+translate ;
+
+scale ;
+
+rotate ;
+
+skew.
+
+
+------------------------------------------------------------
+TP 25 — ANIMATION
+------------------------------------------------------------
+
+Créez une animation avec :
+
+@keyframes ;
+
+animation-duration ;
+
+animation-iteration-count.
+
+
+------------------------------------------------------------
+TP 26 — VARIABLES CSS
+------------------------------------------------------------
+
+Créez :
+
+:root
+
+avec plusieurs variables de couleurs et d'espacement.
+
+Réutilisez-les dans plusieurs composants.
+
+
+------------------------------------------------------------
+TP 27 — FONCTIONS CSS
+------------------------------------------------------------
+
+Testez :
+
+calc() ;
+
+min() ;
+
+max() ;
+
+clamp().
+
+
+------------------------------------------------------------
+TP 28 — RESPONSIVE DESIGN
+------------------------------------------------------------
+
+Créez une page qui s'adapte à :
+
+mobile ;
+
+tablette ;
+
+ordinateur.
+
+
+------------------------------------------------------------
+TP 29 — MOBILE-FIRST
+------------------------------------------------------------
+
+Commencez avec une interface destinée au téléphone.
+
+Ajoutez ensuite des adaptations pour les écrans plus larges.
+
+
+------------------------------------------------------------
+TP 30 — NAVIGATION RESPONSIVE
+------------------------------------------------------------
+
+Créez une navigation qui change de disposition sur petit
+écran.
+
+
+------------------------------------------------------------
+TP 31 — LAYOUT COMPLET
+------------------------------------------------------------
+
+Construisez :
+
+header ;
+
+nav ;
+
+main ;
+
+section ;
+
+article ;
+
+aside ;
+
+footer.
+
+Utilisez Flexbox ou Grid.
+
+
+------------------------------------------------------------
+TP 32 — CARD PROFESSIONNELLE
+------------------------------------------------------------
+
+Créez une carte contenant :
+
+image ;
+
+titre ;
+
+description ;
+
+bouton.
+
+Ajoutez :
+
+bordure ;
+
+ombre ;
+
+rayon ;
+
+hover ;
+
+transition.
+
+
+------------------------------------------------------------
+TP 33 — HERO SECTION
+------------------------------------------------------------
+
+Créez une section d'accueil avec :
+
+titre ;
+
+description ;
+
+bouton ;
+
+image.
+
+Rendez-la responsive.
+
+
+------------------------------------------------------------
+TP 34 — ACCESSIBILITÉ
+------------------------------------------------------------
+
+Ajoutez un état focus-visible clair aux liens et boutons.
+
+Testez également :
+
+prefers-reduced-motion.
+
+
+------------------------------------------------------------
+TP 35 — DÉBOGAGE
+------------------------------------------------------------
+
+Utilisez les outils du navigateur pour identifier :
+
+une règle CSS ;
+
+une règle écrasée ;
+
+une mauvaise dimension ;
+
+un problème Flexbox ;
+
+un problème Grid.
+
+
+------------------------------------------------------------
+TP FINAL — TRANSFORMATION DU MINI-SITE DU CHAPITRE B
+------------------------------------------------------------
+
+Reprenez le mini-site HTML créé dans le Chapitre B.
+
+Ajoutez un fichier :
+
+style.css
+
+Transformez progressivement le projet avec :
+
+couleurs ;
+
+typographie ;
+
+Box Model ;
+
+Flexbox ;
+
+Grid ;
+
+responsive design ;
+
+formulaires stylisés ;
+
+boutons ;
+
+cards ;
+
+navigation ;
+
+footer ;
+
+animations ;
+
+variables CSS.
+
+Le résultat doit fonctionner sur téléphone, tablette et
+ordinateur.`,
+
+    exercices: [
+
+        "Exercice 1 — Écrire une règle CSS complète avec un sélecteur, une propriété et une valeur.",
+
+        "Exercice 2 — Créer une règle CSS ciblant tous les paragraphes.",
+
+        "Exercice 3 — Créer une classe CSS et l'appliquer à plusieurs éléments HTML.",
+
+        "Exercice 4 — Créer un sélecteur utilisant un id.",
+
+        "Exercice 5 — Utiliser le sélecteur universel *.",
+
+        "Exercice 6 — Regrouper plusieurs sélecteurs dans une seule règle CSS.",
+
+        "Exercice 7 — Créer un sélecteur descendant.",
+
+        "Exercice 8 — Créer un sélecteur enfant direct avec >.",
+
+        "Exercice 9 — Créer un sélecteur d'attribut pour un champ email.",
+
+        "Exercice 10 — Expliquer la différence entre une classe et un id.",
+
+        "Exercice 11 — Créer une page utilisant CSS inline, interne et externe.",
+
+        "Exercice 12 — Utiliser les couleurs avec des noms, HEX et RGB.",
+
+        "Exercice 13 — Créer une couleur avec RGBA et expliquer la transparence.",
+
+        "Exercice 14 — Utiliser HSL pour créer une couleur.",
+
+        "Exercice 15 — Modifier la typographie d'une page avec font-family, font-size et font-weight.",
+
+        "Exercice 16 — Modifier line-height, letter-spacing et text-align.",
+
+        "Exercice 17 — Créer un exemple avec text-transform et text-decoration.",
+
+        "Exercice 18 — Utiliser les unités px, %, em et rem.",
+
+        "Exercice 19 — Utiliser vw et vh pour créer une section responsive.",
+
+        "Exercice 20 — Construire une démonstration complète du Box Model.",
+
+        "Exercice 21 — Utiliser box-sizing: border-box.",
+
+        "Exercice 22 — Créer un élément avec un background-color et un background-image.",
+
+        "Exercice 23 — Créer un gradient linéaire.",
+
+        "Exercice 24 — Créer un gradient radial.",
+
+        "Exercice 25 — Créer une carte avec border, border-radius et outline.",
+
+        "Exercice 26 — Créer un conteneur avec width, max-width, margin et padding.",
+
+        "Exercice 27 — Démontrer les différences entre block, inline, inline-block et none.",
+
+        "Exercice 28 — Créer un badge positionné avec relative et absolute.",
+
+        "Exercice 29 — Créer un élément fixe avec position: fixed.",
+
+        "Exercice 30 — Créer un élément sticky avec position: sticky.",
+
+        "Exercice 31 — Créer une navigation complète avec Flexbox.",
+
+        "Exercice 32 — Utiliser justify-content, align-items et gap.",
+
+        "Exercice 33 — Utiliser flex-grow, flex-shrink et flex-basis.",
+
+        "Exercice 34 — Créer une grille CSS de trois colonnes.",
+
+        "Exercice 35 — Utiliser repeat(), minmax() et 1fr avec CSS Grid.",
+
+        "Exercice 36 — Créer une grille responsive avec auto-fit.",
+
+        "Exercice 37 — Créer un formulaire stylisé avec CSS.",
+
+        "Exercice 38 — Styliser les états :hover, :focus, :active et :disabled.",
+
+        "Exercice 39 — Utiliser :first-child, :last-child et :nth-child().",
+
+        "Exercice 40 — Créer un effet visuel avec ::before et ::after.",
+
+        "Exercice 41 — Créer une carte avec box-shadow et text-shadow.",
+
+        "Exercice 42 — Créer un bouton avec transition et transform.",
+
+        "Exercice 43 — Créer une animation CSS avec @keyframes.",
+
+        "Exercice 44 — Créer des variables CSS dans :root et les utiliser avec var().",
+
+        "Exercice 45 — Utiliser calc(), min(), max() et clamp().",
+
+        "Exercice 46 — Créer une page responsive avec une media query.",
+
+        "Exercice 47 — Construire un layout complet avec header, nav, main, section, article, aside et footer.",
+
+        "Exercice 48 — Créer une interface de type landing page avec hero section, cards et boutons.",
+
+        "Exercice 49 — Inspecter une page avec les outils de développement et identifier une erreur CSS.",
+
+        "Exercice 50 — Transformer une page HTML du Chapitre B en interface Web responsive complète avec CSS."
+    ],
+
+    devoirs:
+`DEVOIR — CRÉATION D'UNE INTERFACE WEB PROFESSIONNELLE RESPONSIVE
+
+Objectif :
+
+Reprendre le mini-site HTML réalisé dans le Chapitre B et
+le transformer en une interface Web complète grâce au CSS.
+
+Le projet doit contenir au minimum :
+
+index.html
+
+about.html
+
+services.html
+
+contact.html
+
+style.css
+
+
+============================================================
+1 — STRUCTURE
+============================================================
+
+Conservez la structure HTML créée dans le Chapitre B.
+
+Le projet doit utiliser correctement :
+
+header ;
+
+nav ;
+
+main ;
+
+section ;
+
+article ;
+
+aside ;
+
+footer.
+
+
+============================================================
+2 — FICHIER CSS
+============================================================
+
+Créez un fichier :
+
+style.css
+
+Toutes les principales règles de présentation doivent être
+organisées dans ce fichier.
+
+
+============================================================
+3 — IDENTITÉ VISUELLE
+============================================================
+
+Définissez une identité visuelle avec :
+
+couleur principale ;
+
+couleur secondaire ;
+
+couleur de fond ;
+
+couleur du texte ;
+
+typographie ;
+
+espacements ;
+
+rayons de bordure.
+
+
+Utilisez des variables CSS.
+
+
+============================================================
+4 — TYPOGRAPHIE
+============================================================
+
+Stylisez :
+
+h1 ;
+
+h2 ;
+
+h3 ;
+
+p ;
+
+li ;
+
+liens.
+
+
+Utilisez correctement :
+
+font-family ;
+
+font-size ;
+
+font-weight ;
+
+line-height ;
+
+text-align ;
+
+text-transform.
+
+
+============================================================
+5 — NAVIGATION
+============================================================
+
+Créez une navigation professionnelle.
+
+La navigation doit fonctionner sur :
+
+téléphone ;
+
+tablette ;
+
+ordinateur.
+
+
+Ajoutez des effets :
+
+hover ;
+
+focus ;
+
+active.
+
+
+============================================================
+6 — HERO
+============================================================
+
+Créez une Hero Section sur la page d'accueil contenant :
+
+un titre ;
+
+une description ;
+
+un bouton ;
+
+une image ou illustration.
+
+
+La section doit être responsive.
+
+
+============================================================
+7 — CARDS
+============================================================
+
+La page services doit présenter plusieurs services
+sous forme de cartes.
+
+Chaque carte doit contenir :
+
+titre ;
+
+description ;
+
+bouton ou lien.
+
+
+Utilisez :
+
+padding ;
+
+border ;
+
+border-radius ;
+
+box-shadow ;
+
+transition.
+
+
+============================================================
+8 — FLEXBOX
+============================================================
+
+Utilisez Flexbox pour organiser au moins une partie
+importante du projet.
+
+
+============================================================
+9 — CSS GRID
+============================================================
+
+Utilisez CSS Grid pour organiser une galerie ou une
+section de cartes.
+
+
+============================================================
+10 — FORMULAIRE
+============================================================
+
+Stylisez le formulaire de contact.
+
+Les champs doivent être lisibles et correctement espacés.
+
+Ajoutez des styles pour :
+
+focus ;
+
+valid ;
+
+invalid ;
+
+disabled ;
+
+button.
+
+
+============================================================
+11 — IMAGES
+============================================================
+
+Les images doivent :
+
+s'adapter au conteneur ;
+
+ne pas provoquer de débordement ;
+
+conserver un rapport adapté.
+
+
+Utilisez si nécessaire :
+
+max-width ;
+
+height ;
+
+object-fit ;
+
+object-position ;
+
+aspect-ratio.
+
+
+============================================================
+12 — RESPONSIVE DESIGN
+============================================================
+
+Le site doit fonctionner correctement sur :
+
+petit téléphone ;
+
+grand téléphone ;
+
+tablette ;
+
+ordinateur portable ;
+
+ordinateur de bureau.
+
+
+Utilisez au moins une media query.
+
+L'approche mobile-first est recommandée.
+
+
+============================================================
+13 — EFFETS VISUELS
+============================================================
+
+Ajoutez avec modération :
+
+ombres ;
+
+transitions ;
+
+transformations ;
+
+animations ;
+
+gradients.
+
+
+Les effets ne doivent pas empêcher la lecture du contenu.
+
+
+============================================================
+14 — ACCESSIBILITÉ
+============================================================
+
+Vérifiez :
+
+contraste ;
+
+lisibilité ;
+
+focus visible ;
+
+taille des textes ;
+
+navigation ;
+
+réduction des animations.
+
+
+Utilisez :
+
+:focus-visible
+
+et, lorsque cela est pertinent :
+
+prefers-reduced-motion.
+
+
+============================================================
+15 — ORGANISATION DU CSS
+============================================================
+
+Organisez le CSS de manière logique.
+
+Exemple :
+
+/* VARIABLES */
+
+/* RESET / BASE */
+
+/* TYPOGRAPHIE */
+
+/* HEADER */
+
+/* NAVIGATION */
+
+/* MAIN */
+
+/* SECTIONS */
+
+/* CARDS */
+
+/* FORMULAIRES */
+
+/* FOOTER */
+
+/* RESPONSIVE */
+
+/* ANIMATIONS */
+
+
+============================================================
+16 — DÉBOGAGE
+============================================================
+
+Testez le projet.
+
+Vérifiez :
+
+les sélecteurs ;
+
+les propriétés ;
+
+les valeurs ;
+
+les dimensions ;
+
+les espacements ;
+
+Flexbox ;
+
+Grid ;
+
+les media queries ;
+
+les débordements ;
+
+les éléments cachés.
+
+
+============================================================
+17 — TEST FINAL
+============================================================
+
+Ouvrez le projet dans le Laboratoire FOBAS.
+
+Testez toutes les pages.
+
+Testez tous les liens.
+
+Testez le formulaire.
+
+Testez les images.
+
+Testez la navigation.
+
+Testez les cartes.
+
+Testez l'affichage sur différentes tailles d'écran.
+
+
+============================================================
+OBJECTIF FINAL
+============================================================
+
+À la fin du devoir, l'étudiant doit être capable de partir
+d'une structure HTML et de créer une interface Web complète,
+organisée, esthétique, responsive et maintenable avec CSS.
+
+Le projet final doit démontrer la maîtrise de :
+
+sélecteurs ;
+
+cascade ;
+
+spécificité ;
+
+couleurs ;
+
+typographie ;
+
+unités ;
+
+Box Model ;
+
+backgrounds ;
+
+bordures ;
+
+dimensions ;
+
+display ;
+
+positionnement ;
+
+overflow ;
+
+Flexbox ;
+
+Grid ;
+
+Responsive Design ;
+
+images responsives ;
+
+formulaires ;
+
+pseudo-classes ;
+
+pseudo-éléments ;
+
+ombres ;
+
+transitions ;
+
+transformations ;
+
+animations ;
+
+variables CSS ;
+
+fonctions CSS ;
+
+layout ;
+
+composants ;
+
+accessibilité ;
+
+organisation CSS ;
+
+débogage.`
+},
+
+
+
+
+
+
+
+
+
+
 
     {
         id: "D",
