@@ -2446,25 +2446,2168 @@ une image et un bouton.`,
 CSS et JavaScript.`
     },
 
-    {
-        id: "B",
-        title: "B — Balises HTML",
-        theorie:
-`Une balise HTML décrit la structure et le rôle d'un élément.
-Exemples : h1, p, a, img, section, article, button.`,
 
-        pratique:
-`Créez une structure HTML avec header, main, section et footer.`,
 
-        exercices: [
-            "Identifier les balises ouvrantes et fermantes.",
-            "Créer une section.",
-            "Ajouter un footer."
-        ],
 
-        devoirs:
-`Construire une page complète avec header, main et footer.`
-    },
+
+{
+    id: "B",
+
+    title:
+        "B — Balises HTML et construction d'une page Web",
+
+    theorie:
+`Une balise HTML (HTML tag) est un élément utilisé pour
+décrire la structure, le contenu et le rôle d'une partie
+d'une page Web.
+
+HTML signifie HyperText Markup Language. HTML ne sert pas
+principalement à décorer une page : il sert à organiser
+et à donner une structure sémantique au contenu.
+
+Une balise peut généralement être écrite avec une balise
+ouvrante et une balise fermante :
+
+<p>Mon paragraphe</p>
+
+Certaines balises sont des éléments vides (void elements)
+et ne possèdent pas de balise fermante, par exemple :
+
+<img>
+<br>
+<hr>
+<input>
+<meta>
+<link>
+
+Un élément HTML peut également recevoir des attributs
+(HTML attributes) qui donnent des informations
+supplémentaires :
+
+<a href="https://example.com">Visiter</a>
+
+Ici, a est la balise, href est l'attribut et
+"https://example.com" est sa valeur.
+
+============================================================
+1 — STRUCTURE GÉNÉRALE D'UN DOCUMENT HTML
+============================================================
+
+Un document HTML5 complet peut utiliser :
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ma page</title>
+</head>
+<body>
+    Contenu de la page
+</body>
+</html>
+
+<!DOCTYPE html> est une déclaration indiquant au navigateur
+qu'il doit interpréter le document comme HTML moderne.
+
+<html> est l'élément racine du document.
+
+<head> contient les informations du document qui ne sont pas
+normalement affichées comme contenu principal.
+
+<title> définit le titre du document affiché notamment dans
+l'onglet du navigateur.
+
+<body> contient le contenu principal visible de la page.
+
+Dans <head>, on peut notamment rencontrer :
+
+<meta> pour les métadonnées.
+
+<link> pour établir une relation avec une ressource externe,
+par exemple une feuille CSS.
+
+<style> pour placer du CSS directement dans le document HTML.
+
+<script> pour placer ou charger du JavaScript.
+
+<base> permet de définir une URL de base pour les URL
+relatives du document.
+
+<noscript> permet de fournir un contenu lorsque JavaScript
+n'est pas disponible ou désactivé.
+
+Exemple :
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <base href="./">
+
+    <title>Mon site Web</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+
+    <script src="script.js" defer></script>
+</head>
+
+============================================================
+2 — TITRES ET TEXTE
+============================================================
+
+Les titres utilisent h1 à h6 :
+
+<h1>Titre principal</h1>
+<h2>Titre de section</h2>
+<h3>Sous-section</h3>
+<h4>Titre de niveau 4</h4>
+<h5>Titre de niveau 5</h5>
+<h6>Titre de niveau 6</h6>
+
+<p> permet de créer un paragraphe.
+
+<br> effectue un retour à la ligne.
+
+<hr> représente une séparation thématique.
+
+<pre> conserve les espaces et les retours à la ligne du texte.
+
+<blockquote> représente une citation longue.
+
+Exemple :
+
+<p>Voici un paragraphe.</p>
+
+<p>
+    Première ligne<br>
+    Deuxième ligne
+</p>
+
+<hr>
+
+<blockquote>
+    Ceci est une citation.
+</blockquote>
+
+<pre>
+Texte
+    avec
+        des espaces conservés
+</pre>
+
+============================================================
+3 — FORMATAGE ET IMPORTANCE DU TEXTE
+============================================================
+
+<strong> indique une importance forte.
+
+<b> attire l'attention sur du texte sans lui donner
+nécessairement une importance sémantique forte.
+
+<em> indique une emphase.
+
+<i> représente un texte dans une voix ou un registre différent,
+par exemple un terme technique ou étranger selon le contexte.
+
+<u> représente un texte souligné ou annoté.
+
+<mark> met en évidence une partie du texte.
+
+<small> représente un texte secondaire ou de petite importance.
+
+<del> représente du contenu supprimé.
+
+<ins> représente du contenu ajouté.
+
+<sub> permet d'écrire un indice.
+
+<sup> permet d'écrire un exposant.
+
+<s> représente du contenu qui n'est plus pertinent ou exact.
+
+Exemple :
+
+<p>
+    <strong>Important</strong> :
+    respecter la structure HTML.
+</p>
+
+<p>
+    <em>HTML</em> est un langage de balisage.
+</p>
+
+<p>
+    H<sub>2</sub>O
+</p>
+
+<p>
+    x<sup>2</sup>
+</p>
+
+<p>
+    <del>Ancienne information</del>
+    <ins>Nouvelle information</ins>
+</p>
+
+<p>
+    <mark>Information importante</mark>
+</p>
+
+============================================================
+4 — INFORMATIONS ET ÉLÉMENTS SÉMANTIQUES
+============================================================
+
+<abbr> représente une abréviation.
+
+<cite> représente le titre d'une œuvre ou une référence
+créative.
+
+<q> représente une courte citation.
+
+<dfn> représente le terme défini.
+
+<address> représente des informations de contact.
+
+<time> représente une date ou une heure.
+
+<data> associe une valeur lisible par une machine à un contenu.
+
+Exemple :
+
+<p>
+    <abbr title="HyperText Markup Language">
+        HTML
+    </abbr>
+</p>
+
+<p>
+    <dfn>HTML</dfn> est un langage de balisage.
+</p>
+
+<p>
+    Il a écrit <cite>Mon premier livre Web</cite>.
+</p>
+
+<p>
+    Il a déclaré :
+    <q>Le Web commence par une bonne structure.</q>
+</p>
+
+<address>
+    FOBAS<br>
+    Haïti
+</address>
+
+<time datetime="2026-09-27">
+    27 septembre 2026
+</time>
+
+<data value="100">
+    Produit 100
+</data>
+
+============================================================
+5 — CODE ET INFORMATIONS TECHNIQUES
+============================================================
+
+<code> représente un fragment de code informatique.
+
+<kbd> représente une entrée effectuée par l'utilisateur,
+comme une touche du clavier.
+
+<samp> représente une sortie produite par un programme.
+
+<var> représente une variable.
+
+Exemple :
+
+<p>
+    Utilisez <code>document.querySelector()</code>.
+</p>
+
+<p>
+    Appuyez sur <kbd>Ctrl</kbd> + <kbd>S</kbd>.
+</p>
+
+<p>
+    Résultat :
+    <samp>Fichier enregistré</samp>
+</p>
+
+<p>
+    La variable <var>nom</var> contient le nom de l'utilisateur.
+</p>
+
+============================================================
+6 — LIENS ET NAVIGATION
+============================================================
+
+<a> crée un lien hypertexte.
+
+L'attribut href indique la destination.
+
+Exemple :
+
+<a href="about.html">
+    À propos
+</a>
+
+Un lien peut pointer vers :
+
+une autre page :
+
+<a href="contact.html">Contact</a>
+
+une section de la même page :
+
+<a href="#services">Services</a>
+
+un site externe :
+
+<a href="https://example.com">
+    Site externe
+</a>
+
+une adresse électronique :
+
+<a href="mailto:contact@example.com">
+    Envoyer un email
+</a>
+
+un numéro de téléphone :
+
+<a href="tel:+50900000000">
+    Appeler
+</a>
+
+L'attribut target peut contrôler la cible du lien :
+
+<a href="https://example.com"
+   target="_blank">
+    Ouvrir le site
+</a>
+
+L'attribut download peut demander le téléchargement
+d'une ressource lorsque cela est applicable :
+
+<a href="document.pdf" download>
+    Télécharger le document
+</a>
+
+<nav> représente une zone de navigation.
+
+Exemple :
+
+<nav>
+    <a href="index.html">Accueil</a>
+    <a href="about.html">À propos</a>
+    <a href="services.html">Services</a>
+    <a href="contact.html">Contact</a>
+</nav>
+
+============================================================
+7 — IMAGES
+============================================================
+
+<img> permet d'afficher une image.
+
+Les attributs importants comprennent :
+
+src : source de l'image.
+
+alt : texte alternatif.
+
+width : largeur.
+
+height : hauteur.
+
+loading : stratégie de chargement.
+
+Exemple :
+
+<img
+    src="photo.jpg"
+    alt="Photo de présentation"
+    width="400"
+    height="300"
+    loading="lazy"
+>
+
+L'attribut alt est particulièrement important pour
+l'accessibilité et lorsque l'image ne peut pas être affichée.
+
+<figure> représente une illustration ou un contenu référencé.
+
+<figcaption> fournit sa légende.
+
+Exemple :
+
+<figure>
+    <img
+        src="ordinateur.jpg"
+        alt="Ordinateur portable"
+    >
+
+    <figcaption>
+        Ordinateur utilisé pour la programmation Web.
+    </figcaption>
+</figure>
+
+<picture> permet de proposer différentes sources d'image.
+
+Exemple :
+
+<picture>
+    <source
+        media="(max-width: 600px)"
+        srcset="mobile.jpg"
+    >
+
+    <img
+        src="desktop.jpg"
+        alt="Illustration responsive"
+    >
+</picture>
+
+============================================================
+8 — LISTES
+============================================================
+
+<ul> représente une liste non ordonnée.
+
+<ol> représente une liste ordonnée.
+
+<li> représente un élément de liste.
+
+Exemple :
+
+<ul>
+    <li>HTML</li>
+    <li>CSS</li>
+    <li>JavaScript</li>
+</ul>
+
+<ol>
+    <li>Créer le fichier HTML.</li>
+    <li>Ajouter le CSS.</li>
+    <li>Ajouter JavaScript.</li>
+</ol>
+
+Les listes de définitions utilisent :
+
+<dl> : liste de définitions.
+
+<dt> : terme.
+
+<dd> : description.
+
+Exemple :
+
+<dl>
+    <dt>HTML</dt>
+    <dd>Structure d'une page Web.</dd>
+
+    <dt>CSS</dt>
+    <dd>Présentation d'une page Web.</dd>
+
+    <dt>JavaScript</dt>
+    <dd>Logique et interactivité.</dd>
+</dl>
+
+============================================================
+9 — CONTENEURS ET STRUCTURE SÉMANTIQUE
+============================================================
+
+<div> est un conteneur générique de type bloc.
+
+<span> est un conteneur générique en ligne.
+
+Les éléments sémantiques HTML5 permettent de donner
+un rôle plus précis aux différentes parties d'une page.
+
+<header> représente un en-tête.
+
+<main> représente le contenu principal.
+
+<section> représente une section thématique.
+
+<article> représente un contenu autonome.
+
+<aside> représente un contenu complémentaire.
+
+<footer> représente un pied de page ou de section.
+
+Exemple :
+
+<header>
+    <h1>Mon site Web</h1>
+</header>
+
+<nav>
+    <a href="#accueil">Accueil</a>
+    <a href="#services">Services</a>
+</nav>
+
+<main>
+
+    <section id="accueil">
+        <h2>Accueil</h2>
+        <p>Bienvenue sur mon site.</p>
+    </section>
+
+    <section id="services">
+
+        <article>
+            <h3>Service Web</h3>
+            <p>Création de sites Web.</p>
+        </article>
+
+        <aside>
+            <h3>Information</h3>
+            <p>Informations complémentaires.</p>
+        </aside>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>Copyright 2026</p>
+</footer>
+
+============================================================
+10 — TABLEAUX
+============================================================
+
+<table> représente un tableau de données.
+
+<caption> donne un titre au tableau.
+
+<thead> contient l'en-tête.
+
+<tbody> contient les données principales.
+
+<tfoot> contient le pied du tableau.
+
+<tr> représente une ligne.
+
+<th> représente une cellule d'en-tête.
+
+<td> représente une cellule de données.
+
+<colgroup> permet de regrouper des colonnes.
+
+<col> représente une colonne ou une partie de colonne.
+
+Exemple :
+
+<table>
+
+    <caption>
+        Liste des étudiants
+    </caption>
+
+    <colgroup>
+        <col>
+        <col>
+        <col>
+    </colgroup>
+
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Classe</th>
+            <th>Note</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Jean</td>
+            <td>NS3</td>
+            <td>85</td>
+        </tr>
+
+        <tr>
+            <td>Marie</td>
+            <td>NS3</td>
+            <td>90</td>
+        </tr>
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <td colspan="2">
+                Moyenne
+            </td>
+
+            <td>
+                87.5
+            </td>
+        </tr>
+    </tfoot>
+
+</table>
+
+colspan permet à une cellule de couvrir plusieurs colonnes.
+
+rowspan permet à une cellule de couvrir plusieurs lignes.
+
+Exemple :
+
+<table>
+    <tr>
+        <th rowspan="2">
+            Étudiant
+        </th>
+
+        <th colspan="2">
+            Résultats
+        </th>
+    </tr>
+
+    <tr>
+        <th>HTML</th>
+        <th>CSS</th>
+    </tr>
+</table>
+
+============================================================
+11 — FORMULAIRES
+============================================================
+
+<form> représente un formulaire.
+
+<label> identifie un champ.
+
+<input> permet différentes formes de saisie.
+
+<textarea> permet une saisie multiligne.
+
+<select> crée une liste de sélection.
+
+<option> représente une option.
+
+<optgroup> regroupe des options.
+
+<button> crée un bouton.
+
+<fieldset> regroupe plusieurs champs.
+
+<legend> donne un titre au groupe.
+
+<datalist> fournit des suggestions.
+
+<output> représente un résultat calculé.
+
+<meter> représente une mesure dans une plage connue.
+
+<progress> représente la progression d'une opération.
+
+Exemple :
+
+<form>
+
+    <fieldset>
+
+        <legend>
+            Informations personnelles
+        </legend>
+
+        <label for="nom">
+            Nom
+        </label>
+
+        <input
+            id="nom"
+            name="nom"
+            type="text"
+            placeholder="Votre nom"
+            required
+        >
+
+        <label for="email">
+            Email
+        </label>
+
+        <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="nom@example.com"
+            required
+        >
+
+        <label for="message">
+            Message
+        </label>
+
+        <textarea
+            id="message"
+            name="message"
+            rows="5"
+            placeholder="Votre message"
+        ></textarea>
+
+        <label for="pays">
+            Pays
+        </label>
+
+        <select
+            id="pays"
+            name="pays"
+        >
+            <option value="">
+                Choisir
+            </option>
+
+            <option value="haiti">
+                Haïti
+            </option>
+
+            <option value="france">
+                France
+            </option>
+        </select>
+
+        <button type="submit">
+            Envoyer
+        </button>
+
+    </fieldset>
+
+</form>
+
+============================================================
+12 — TYPES DE INPUT
+============================================================
+
+<input> peut utiliser plusieurs types de données.
+
+type="text"
+pour un texte.
+
+type="password"
+pour un mot de passe.
+
+type="email"
+pour une adresse email.
+
+type="number"
+pour une valeur numérique.
+
+type="tel"
+pour un numéro de téléphone.
+
+type="url"
+pour une adresse Web.
+
+type="search"
+pour une recherche.
+
+type="date"
+pour une date.
+
+type="time"
+pour une heure.
+
+type="datetime-local"
+pour une date et une heure locales.
+
+type="month"
+pour un mois.
+
+type="week"
+pour une semaine.
+
+type="color"
+pour choisir une couleur.
+
+type="file"
+pour sélectionner un fichier.
+
+type="checkbox"
+pour une case à cocher.
+
+type="radio"
+pour choisir une option dans un groupe.
+
+type="range"
+pour une valeur dans une plage.
+
+type="hidden"
+pour une donnée non affichée directement.
+
+type="submit"
+pour envoyer le formulaire.
+
+type="reset"
+pour réinitialiser le formulaire.
+
+type="button"
+pour un bouton générique.
+
+Exemple :
+
+<input type="text">
+
+<input type="password">
+
+<input type="email">
+
+<input type="number">
+
+<input type="tel">
+
+<input type="url">
+
+<input type="search">
+
+<input type="date">
+
+<input type="time">
+
+<input type="datetime-local">
+
+<input type="month">
+
+<input type="week">
+
+<input type="color">
+
+<input type="file">
+
+<input type="checkbox">
+
+<input type="radio">
+
+<input type="range">
+
+<input type="hidden">
+
+<input type="submit">
+
+<input type="reset">
+
+<input type="button">
+
+============================================================
+13 — ATTRIBUTS DE FORMULAIRE
+============================================================
+
+Les attributs courants des formulaires comprennent :
+
+name
+value
+placeholder
+required
+disabled
+readonly
+checked
+selected
+min
+max
+step
+minlength
+maxlength
+pattern
+autocomplete
+
+Exemple :
+
+<input
+    type="text"
+    name="nom"
+    value=""
+    placeholder="Votre nom"
+    minlength="2"
+    maxlength="50"
+    required
+    autocomplete="name"
+>
+
+<input
+    type="number"
+    name="age"
+    min="1"
+    max="100"
+    step="1"
+>
+
+<input
+    type="checkbox"
+    name="accepter"
+    checked
+>
+
+<input
+    type="text"
+    value="Information fixe"
+    readonly
+>
+
+<input
+    type="text"
+    disabled
+>
+
+============================================================
+14 — AUDIO ET VIDÉO
+============================================================
+
+<audio> permet d'intégrer un contenu audio.
+
+<video> permet d'intégrer un contenu vidéo.
+
+<source> définit une source multimédia.
+
+<track> permet notamment d'ajouter des sous-titres
+ou d'autres pistes textuelles à une vidéo.
+
+Attributs courants :
+
+controls
+autoplay
+muted
+loop
+poster
+preload
+
+Exemple audio :
+
+<audio controls>
+    <source
+        src="audio.mp3"
+        type="audio/mpeg"
+    >
+</audio>
+
+Exemple vidéo :
+
+<video
+    controls
+    width="640"
+    poster="poster.jpg"
+    preload="metadata"
+>
+
+    <source
+        src="video.mp4"
+        type="video/mp4"
+    >
+
+    <track
+        src="subtitles.vtt"
+        kind="subtitles"
+        srclang="fr"
+        label="Français"
+    >
+
+</video>
+
+autoplay demande le démarrage automatique lorsque les
+conditions du navigateur le permettent.
+
+muted démarre le média sans son.
+
+loop répète le média.
+
+poster définit une image d'aperçu pour une vidéo.
+
+preload indique une préférence de chargement.
+
+============================================================
+15 — INTÉGRATION DE CONTENUS EXTERNES
+============================================================
+
+<iframe> permet d'intégrer une autre ressource Web
+dans la page.
+
+Exemple :
+
+<iframe
+    src="https://example.com"
+    title="Exemple de contenu Web"
+    width="600"
+    height="400"
+></iframe>
+
+<embed> permet d'intégrer certains contenus externes.
+
+<object> permet également d'intégrer une ressource externe
+et peut contenir un contenu de remplacement.
+
+Exemple :
+
+<embed
+    src="document.pdf"
+    type="application/pdf"
+>
+
+<object
+    data="document.pdf"
+    type="application/pdf"
+>
+    Document PDF
+</object>
+
+============================================================
+16 — ÉLÉMENTS INTERACTIFS
+============================================================
+
+<details> crée une zone que l'utilisateur peut ouvrir
+et fermer.
+
+<summary> définit le titre visible de cette zone.
+
+Exemple :
+
+<details>
+    <summary>
+        Voir les détails
+    </summary>
+
+    <p>
+        Voici les informations supplémentaires.
+    </p>
+</details>
+
+<dialog> représente une boîte de dialogue.
+
+Exemple :
+
+<dialog id="maBoite">
+    <p>Bonjour.</p>
+</dialog>
+
+Un programme JavaScript peut contrôler l'ouverture
+et la fermeture d'une boîte de dialogue.
+
+============================================================
+17 — ATTRIBUTS HTML IMPORTANTS
+============================================================
+
+id identifie de manière unique un élément dans le document.
+
+class permet de regrouper des éléments.
+
+title fournit une information complémentaire.
+
+name donne un nom à un élément ou à une donnée.
+
+value représente une valeur.
+
+type indique un type.
+
+href indique la destination d'un lien.
+
+src indique la source d'une ressource.
+
+alt fournit un texte alternatif.
+
+Les attributs data-* permettent de stocker des données
+personnalisées dans un élément.
+
+Exemple :
+
+<div
+    id="profil"
+    class="card"
+    data-user-id="25"
+    title="Profil utilisateur"
+>
+    <span>
+        Utilisateur
+    </span>
+</div>
+
+Les attributs aria-* sont utilisés pour améliorer
+l'accessibilité lorsque cela est nécessaire.
+
+Exemple :
+
+<button
+    type="button"
+    aria-label="Fermer le menu"
+>
+    X
+</button>
+
+============================================================
+18 — CANVAS, SVG ET TEMPLATES
+============================================================
+
+<canvas> fournit une surface graphique contrôlée
+principalement par JavaScript.
+
+Exemple :
+
+<canvas
+    id="graphique"
+    width="400"
+    height="200"
+>
+</canvas>
+
+<svg> permet de représenter des graphiques vectoriels.
+
+Exemple :
+
+<svg
+    width="200"
+    height="100"
+    viewBox="0 0 200 100"
+>
+    <rect
+        x="10"
+        y="10"
+        width="180"
+        height="80"
+    ></rect>
+</svg>
+
+<template> contient un modèle HTML qui n'est pas rendu
+immédiatement comme contenu normal.
+
+<slot> est utilisé principalement avec les Web Components
+pour définir un point d'insertion de contenu.
+
+============================================================
+19 — STRUCTURE D'UNE PAGE WEB COMPLÈTE
+============================================================
+
+Une page Web bien organisée peut réunir plusieurs
+éléments sémantiques :
+
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Mon site Web
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <script
+        src="script.js"
+        defer
+    ></script>
+
+    <noscript>
+        JavaScript est nécessaire pour certaines fonctionnalités.
+    </noscript>
+</head>
+
+<body>
+
+    <header>
+
+        <h1>
+            Mon site Web
+        </h1>
+
+        <nav>
+            <a href="index.html">
+                Accueil
+            </a>
+
+            <a href="services.html">
+                Services
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+        </nav>
+
+    </header>
+
+    <main>
+
+        <section id="presentation">
+
+            <h2>
+                Présentation
+            </h2>
+
+            <p>
+                Bienvenue sur mon site.
+            </p>
+
+        </section>
+
+        <section id="services">
+
+            <h2>
+                Services
+            </h2>
+
+            <article>
+
+                <h3>
+                    Création Web
+                </h3>
+
+                <p>
+                    Création de pages et applications Web.
+                </p>
+
+            </article>
+
+            <aside>
+
+                <h3>
+                    Information
+                </h3>
+
+                <p>
+                    Informations complémentaires.
+                </p>
+
+            </aside>
+
+        </section>
+
+    </main>
+
+    <footer>
+
+        <address>
+            Haïti
+        </address>
+
+        <p>
+            <small>
+                © 2026
+            </small>
+        </p>
+
+    </footer>
+
+</body>
+
+</html>
+
+============================================================
+20 — RÈGLE IMPORTANTE
+============================================================
+
+Une bonne page HTML ne consiste pas simplement à empiler
+des balises.
+
+Il faut choisir chaque élément selon son rôle.
+
+Utilisez les titres pour structurer les niveaux de contenu.
+
+Utilisez les paragraphes pour les paragraphes.
+
+Utilisez les liens pour la navigation.
+
+Utilisez les images avec un texte alternatif pertinent.
+
+Utilisez les listes pour les ensembles d'éléments.
+
+Utilisez les tableaux pour les données tabulaires.
+
+Utilisez les formulaires pour collecter des informations.
+
+Utilisez les éléments sémantiques comme header, main,
+section, article, aside et footer pour clarifier la structure.
+
+Utilisez les attributs correctement.
+
+Une structure HTML claire facilite ensuite le travail
+avec CSS, JavaScript, l'accessibilité, le référencement
+et la maintenance du projet.`,
+
+    pratique:
+`TRAVAUX PRATIQUES — CONSTRUCTION PROGRESSIVE D'UNE PAGE WEB
+
+Objectif : construire progressivement une vraie page Web
+en utilisant les principales balises HTML étudiées.
+
+------------------------------------------------------------
+TP 1 — STRUCTURE HTML5
+------------------------------------------------------------
+
+Créez un fichier index.html contenant :
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Mon premier site Web
+    </title>
+</head>
+
+<body>
+
+</body>
+</html>
+
+Vérifiez que le document s'exécute correctement dans
+le laboratoire.
+
+------------------------------------------------------------
+TP 2 — TITRES ET TEXTES
+------------------------------------------------------------
+
+Dans <body>, ajoutez :
+
+un h1 ;
+
+deux h2 ;
+
+des paragraphes p ;
+
+un strong ;
+
+un em ;
+
+un mark ;
+
+un texte avec sub ;
+
+un texte avec sup ;
+
+un hr ;
+
+un blocquote ;
+
+un pre.
+
+------------------------------------------------------------
+TP 3 — NAVIGATION
+------------------------------------------------------------
+
+Créez une navigation avec nav et a.
+
+Ajoutez :
+
+Accueil ;
+
+À propos ;
+
+Services ;
+
+Contact.
+
+Créez également une section possédant un id et créez
+un lien interne vers cette section.
+
+Ajoutez un lien externe.
+
+Ajoutez également un lien mailto et un lien tel.
+
+------------------------------------------------------------
+TP 4 — IMAGES
+------------------------------------------------------------
+
+Ajoutez une image avec :
+
+src ;
+
+alt ;
+
+width ;
+
+height ;
+
+loading.
+
+Ensuite, créez une figure avec figcaption.
+
+Enfin, expérimentez picture avec une source alternative.
+
+------------------------------------------------------------
+TP 5 — LISTES
+------------------------------------------------------------
+
+Créez :
+
+une liste ul ;
+
+une liste ol ;
+
+une liste de définitions avec dl, dt et dd.
+
+Présentez par exemple cinq compétences Web.
+
+------------------------------------------------------------
+TP 6 — STRUCTURE SÉMANTIQUE
+------------------------------------------------------------
+
+Construisez :
+
+header ;
+
+nav ;
+
+main ;
+
+section ;
+
+article ;
+
+aside ;
+
+footer.
+
+Organisez les éléments pour créer une page professionnelle.
+
+------------------------------------------------------------
+TP 7 — TABLEAU
+------------------------------------------------------------
+
+Créez un tableau contenant :
+
+caption ;
+
+colgroup ;
+
+col ;
+
+thead ;
+
+tbody ;
+
+tfoot ;
+
+tr ;
+
+th ;
+
+td.
+
+Utilisez également colspan et rowspan dans un exercice
+de mise en forme de données.
+
+------------------------------------------------------------
+TP 8 — FORMULAIRE
+------------------------------------------------------------
+
+Créez un formulaire contenant :
+
+fieldset ;
+
+legend ;
+
+label ;
+
+input text ;
+
+input email ;
+
+input number ;
+
+input tel ;
+
+textarea ;
+
+select ;
+
+option ;
+
+optgroup ;
+
+button.
+
+Ajoutez les attributs :
+
+name ;
+
+value ;
+
+placeholder ;
+
+required ;
+
+min ;
+
+max ;
+
+step ;
+
+minlength ;
+
+maxlength ;
+
+autocomplete.
+
+Ajoutez également une checkbox et deux boutons radio.
+
+------------------------------------------------------------
+TP 9 — MÉDIAS
+------------------------------------------------------------
+
+Ajoutez :
+
+un audio avec controls ;
+
+une vidéo avec controls ;
+
+source ;
+
+track.
+
+Testez :
+
+controls ;
+
+muted ;
+
+loop ;
+
+poster ;
+
+preload.
+
+------------------------------------------------------------
+TP 10 — ÉLÉMENTS INTERACTIFS
+------------------------------------------------------------
+
+Créez :
+
+un details avec summary ;
+
+une dialog.
+
+Utilisez JavaScript si nécessaire pour ouvrir et fermer
+la boîte de dialogue.
+
+------------------------------------------------------------
+TP 11 — INTÉGRATION
+------------------------------------------------------------
+
+Testez :
+
+iframe ;
+
+embed ;
+
+object.
+
+Intégrez une ressource appropriée et observez le résultat
+dans le laboratoire.
+
+------------------------------------------------------------
+TP 12 — ÉLÉMENTS AVANCÉS
+------------------------------------------------------------
+
+Créez :
+
+un canvas ;
+
+un SVG ;
+
+un template.
+
+Identifiez le rôle de chacun.
+
+------------------------------------------------------------
+TP FINAL — MINI SITE
+------------------------------------------------------------
+
+Construisez une page Web complète contenant au minimum :
+
+header ;
+
+nav ;
+
+main ;
+
+section ;
+
+article ;
+
+aside ;
+
+footer ;
+
+h1 ;
+
+h2 ;
+
+p ;
+
+a ;
+
+img ;
+
+figure ;
+
+figcaption ;
+
+ul ;
+
+ol ;
+
+dl ;
+
+table ;
+
+form ;
+
+audio ;
+
+video.
+
+La page doit être correctement structurée et testée
+dans le laboratoire FOBAS.`,
+
+    exercices: [
+
+        "Exercice 1 — Écrire un document HTML5 complet avec <!DOCTYPE html>, html, head, title et body.",
+
+        "Exercice 2 — Créer une page contenant un h1, trois h2 et plusieurs paragraphes p correctement structurés.",
+
+        "Exercice 3 — Utiliser strong, b, em, i, u, mark, small, del, ins, sub, sup et s dans une page de démonstration.",
+
+        "Exercice 4 — Créer un exemple utilisant br, hr, pre et blockquote.",
+
+        "Exercice 5 — Créer une abréviation avec abbr, une citation avec cite et q, une définition avec dfn et une date avec time.",
+
+        "Exercice 6 — Créer un exemple utilisant code, kbd, samp et var pour présenter des informations informatiques.",
+
+        "Exercice 7 — Créer une navigation avec nav et plusieurs liens a vers des pages différentes.",
+
+        "Exercice 8 — Créer un lien interne avec href vers une section possédant un id.",
+
+        "Exercice 9 — Créer un lien externe avec target, un lien mailto et un lien tel.",
+
+        "Exercice 10 — Insérer une image avec src, alt, width, height et loading.",
+
+        "Exercice 11 — Créer une figure contenant img et figcaption.",
+
+        "Exercice 12 — Créer une image responsive avec picture et source.",
+
+        "Exercice 13 — Créer une liste ul contenant cinq compétences Web.",
+
+        "Exercice 14 — Créer une liste ol présentant cinq étapes pour créer une page Web.",
+
+        "Exercice 15 — Créer une liste de définitions avec dl, dt et dd pour expliquer HTML, CSS et JavaScript.",
+
+        "Exercice 16 — Construire une page utilisant header, nav, main, section, article, aside et footer.",
+
+        "Exercice 17 — Créer un tableau avec table, caption, thead, tbody, tfoot, tr, th et td.",
+
+        "Exercice 18 — Ajouter colgroup et col dans un tableau et expliquer leur rôle.",
+
+        "Exercice 19 — Utiliser colspan et rowspan dans un tableau.",
+
+        "Exercice 20 — Créer un formulaire avec form, label, input et button.",
+
+        "Exercice 21 — Créer des champs input de type text, password, email, number, tel, url et search.",
+
+        "Exercice 22 — Créer des champs input de type date, time, datetime-local, month, week et color.",
+
+        "Exercice 23 — Créer des champs input de type file, checkbox, radio, range et hidden.",
+
+        "Exercice 24 — Créer des boutons submit, reset et button.",
+
+        "Exercice 25 — Créer un formulaire utilisant textarea, select, option et optgroup.",
+
+        "Exercice 26 — Ajouter fieldset et legend pour organiser un formulaire.",
+
+        "Exercice 27 — Ajouter datalist et proposer plusieurs suggestions à l'utilisateur.",
+
+        "Exercice 28 — Créer un output pour afficher un résultat calculé.",
+
+        "Exercice 29 — Créer une progress et une meter et expliquer la différence entre les deux.",
+
+        "Exercice 30 — Utiliser les attributs name, value, placeholder, required, disabled et readonly.",
+
+        "Exercice 31 — Utiliser checked, selected, min, max et step.",
+
+        "Exercice 32 — Utiliser minlength, maxlength, pattern et autocomplete.",
+
+        "Exercice 33 — Créer un lecteur audio avec audio et source.",
+
+        "Exercice 34 — Créer un lecteur vidéo avec video et source.",
+
+        "Exercice 35 — Ajouter track à une vidéo pour fournir une piste de sous-titres.",
+
+        "Exercice 36 — Tester controls, autoplay, muted, loop, poster et preload.",
+
+        "Exercice 37 — Intégrer une ressource avec iframe.",
+
+        "Exercice 38 — Tester embed et object avec une ressource appropriée.",
+
+        "Exercice 39 — Créer details et summary pour afficher du contenu dépliable.",
+
+        "Exercice 40 — Créer une dialog et préparer son ouverture avec JavaScript.",
+
+        "Exercice 41 — Créer un canvas avec une largeur et une hauteur définies.",
+
+        "Exercice 42 — Créer un SVG contenant une forme vectorielle simple.",
+
+        "Exercice 43 — Créer un template HTML et expliquer pourquoi son contenu n'est pas rendu immédiatement.",
+
+        "Exercice 44 — Identifier les rôles de id, class, data-* et aria-* dans une page HTML.",
+
+        "Exercice 45 — Construire une page complète réunissant structure, texte, navigation, image, listes, tableau, formulaire et multimédia.",
+
+        "Exercice 46 — Vérifier la structure d'une page HTML et corriger les erreurs de fermeture ou d'imbrication des balises.",
+
+        "Exercice 47 — Créer un mini-site composé de plusieurs pages HTML reliées par une navigation.",
+
+        "Exercice 48 — Créer une page professionnelle de présentation personnelle utilisant les balises HTML étudiées.",
+
+        "Exercice 49 — Tester la page dans le laboratoire FOBAS et vérifier que les éléments HTML sont correctement affichés.",
+
+        "Exercice 50 — Expliquer oralement le rôle de dix balises HTML choisies parmi celles étudiées dans ce chapitre."
+    ],
+
+    devoirs:
+`DEVOIR — CRÉATION D'UN MINI SITE WEB COMPLET
+
+Construisez un mini-site Web professionnel en utilisant
+les balises HTML étudiées dans le Chapitre B.
+
+Le projet doit contenir au minimum les fichiers :
+
+index.html
+about.html
+services.html
+contact.html
+
+------------------------------------------------------------
+1 — PAGE D'ACCUEIL
+------------------------------------------------------------
+
+index.html doit contenir :
+
+DOCTYPE ;
+
+html ;
+
+head ;
+
+meta ;
+
+title ;
+
+link ;
+
+header ;
+
+nav ;
+
+main ;
+
+section ;
+
+article ;
+
+aside ;
+
+footer.
+
+------------------------------------------------------------
+2 — CONTENU TEXTUEL
+------------------------------------------------------------
+
+Utilisez correctement :
+
+h1 à h6 ;
+
+p ;
+
+br ;
+
+hr ;
+
+pre ;
+
+blockquote ;
+
+strong ;
+
+b ;
+
+em ;
+
+i ;
+
+u ;
+
+mark ;
+
+small ;
+
+del ;
+
+ins ;
+
+sub ;
+
+sup ;
+
+s.
+
+Ajoutez également des exemples avec :
+
+abbr ;
+
+cite ;
+
+q ;
+
+dfn ;
+
+time ;
+
+address ;
+
+data ;
+
+code ;
+
+kbd ;
+
+samp ;
+
+var.
+
+------------------------------------------------------------
+3 — NAVIGATION
+------------------------------------------------------------
+
+Les quatre pages doivent être reliées par une navigation.
+
+Utilisez :
+
+a ;
+
+nav ;
+
+href.
+
+Ajoutez au moins :
+
+un lien interne ;
+
+un lien externe ;
+
+un lien email ;
+
+un lien téléphonique.
+
+------------------------------------------------------------
+4 — IMAGES
+------------------------------------------------------------
+
+Ajoutez au moins :
+
+une image avec img ;
+
+un texte alt pertinent ;
+
+une figure avec figcaption ;
+
+une démonstration de picture et source.
+
+------------------------------------------------------------
+5 — LISTES
+------------------------------------------------------------
+
+Ajoutez :
+
+une liste ul ;
+
+une liste ol ;
+
+une liste dl avec dt et dd.
+
+------------------------------------------------------------
+6 — TABLEAU
+------------------------------------------------------------
+
+Créez un tableau contenant :
+
+caption ;
+
+colgroup ;
+
+col ;
+
+thead ;
+
+tbody ;
+
+tfoot ;
+
+tr ;
+
+th ;
+
+td.
+
+Le tableau doit utiliser au moins une fois :
+
+colspan ;
+
+rowspan.
+
+------------------------------------------------------------
+7 — FORMULAIRE
+------------------------------------------------------------
+
+La page contact.html doit contenir un formulaire utilisant :
+
+form ;
+
+label ;
+
+input ;
+
+textarea ;
+
+button ;
+
+select ;
+
+option ;
+
+optgroup ;
+
+fieldset ;
+
+legend.
+
+Ajoutez plusieurs types de input :
+
+text ;
+
+password ;
+
+email ;
+
+number ;
+
+tel ;
+
+url ;
+
+search ;
+
+date ;
+
+time ;
+
+datetime-local ;
+
+month ;
+
+week ;
+
+color ;
+
+file ;
+
+checkbox ;
+
+radio ;
+
+range ;
+
+hidden ;
+
+submit ;
+
+reset ;
+
+button.
+
+Utilisez également :
+
+name ;
+
+value ;
+
+placeholder ;
+
+required ;
+
+disabled ;
+
+readonly ;
+
+checked ;
+
+selected ;
+
+min ;
+
+max ;
+
+step ;
+
+minlength ;
+
+maxlength ;
+
+pattern ;
+
+autocomplete.
+
+Ajoutez également :
+
+datalist ;
+
+output ;
+
+meter ;
+
+progress.
+
+------------------------------------------------------------
+8 — AUDIO ET VIDÉO
+------------------------------------------------------------
+
+Ajoutez au moins :
+
+audio ;
+
+video ;
+
+source ;
+
+track.
+
+Testez les attributs :
+
+controls ;
+
+muted ;
+
+loop ;
+
+poster ;
+
+preload.
+
+------------------------------------------------------------
+9 — INTÉGRATION ET INTERACTIVITÉ
+------------------------------------------------------------
+
+Ajoutez une démonstration avec :
+
+iframe ;
+
+embed ;
+
+object ;
+
+details ;
+
+summary ;
+
+dialog.
+
+------------------------------------------------------------
+10 — ÉLÉMENTS GRAPHIQUES ET AVANCÉS
+------------------------------------------------------------
+
+Ajoutez une démonstration de :
+
+canvas ;
+
+svg ;
+
+template.
+
+------------------------------------------------------------
+11 — ATTRIBUTS
+------------------------------------------------------------
+
+Utilisez correctement :
+
+id ;
+
+class ;
+
+data-* ;
+
+aria-*.
+
+Chaque id utilisé pour identifier un élément dans une page
+doit être choisi avec soin.
+
+------------------------------------------------------------
+12 — ORGANISATION
+------------------------------------------------------------
+
+Le projet doit être proprement indenté.
+
+Les balises doivent être correctement imbriquées.
+
+Les balises doivent être correctement fermées lorsqu'elles
+nécessitent une fermeture.
+
+Les images doivent posséder un alt pertinent.
+
+Les liens doivent avoir une destination appropriée.
+
+Les champs de formulaire doivent être associés à leurs labels.
+
+------------------------------------------------------------
+13 — TEST FINAL
+------------------------------------------------------------
+
+Ouvrez le projet dans le Laboratoire FOBAS.
+
+Testez toutes les pages.
+
+Testez tous les liens.
+
+Testez le formulaire.
+
+Testez les images.
+
+Testez l'audio et la vidéo.
+
+Testez les éléments interactifs.
+
+Vérifiez qu'aucune erreur HTML évidente ne bloque
+l'affichage de la page.
+
+------------------------------------------------------------
+OBJECTIF FINAL
+------------------------------------------------------------
+
+À la fin du devoir, l'étudiant doit être capable de construire
+une structure HTML complète, organisée et sémantique, puis de
+la préparer pour son intégration avec CSS et JavaScript.`
+},
+
+
+
 
     {
         id: "C",
