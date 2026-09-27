@@ -2420,31 +2420,956 @@ function openLaboratory() {
 
 const PEDAGOGICAL_CHAPTERS = [
 
-    {
-        id: "A",
-        title: "A — Introduction au Web",
-        theorie:
-`Le Web permet de créer des pages et des applications accessibles
-depuis un navigateur.
 
-HTML construit la structure du document.
-CSS contrôle la présentation.
-JavaScript ajoute le comportement et l'interactivité.`,
+{
+    id: "A",
 
-        pratique:
-`Créez une page HTML contenant un titre, un paragraphe,
-une image et un bouton.`,
+    title: "A — Introduction au Web et aux technologies Web",
 
-        exercices: [
-            "Créer une page contenant un titre H1.",
-            "Ajouter trois paragraphes.",
-            "Créer un bouton HTML."
-        ],
+    theorie:
+`CHAPITRE A — INTRODUCTION AU WEB
 
-        devoirs:
-`Créer une petite page de présentation personnelle avec HTML,
-CSS et JavaScript.`
-    },
+1. QU'EST-CE QUE LE WEB ?
+
+Le Web, appelé aussi World Wide Web (WWW), est un système qui permet
+d'accéder à des pages, des documents, des images, des vidéos,
+des applications et différents services à travers Internet.
+
+Un utilisateur utilise généralement un navigateur Web pour consulter
+un site ou une application Web.
+
+Exemples de navigateurs :
+Chrome, Firefox, Edge, Safari, Opera et autres navigateurs modernes.
+
+Important :
+Internet et le Web ne sont pas exactement la même chose.
+
+Internet est l'infrastructure mondiale qui permet à différents
+ordinateurs, serveurs et appareils de communiquer.
+
+Le Web est un service qui fonctionne sur Internet et qui permet
+notamment d'accéder à des ressources avec des adresses Web (URL)
+et des protocoles comme HTTP et HTTPS.
+
+
+2. SITE WEB ET APPLICATION WEB
+
+Un site Web est généralement constitué de plusieurs pages ou
+ressources accessibles depuis un navigateur.
+
+Une application Web est un système interactif qui permet à
+l'utilisateur d'effectuer des opérations directement dans le
+navigateur.
+
+Exemples :
+- site institutionnel ;
+- site scolaire ;
+- boutique en ligne ;
+- plateforme de formation ;
+- tableau de bord ;
+- application de gestion ;
+- laboratoire virtuel.
+
+Une même réalisation peut être à la fois un site Web et une
+application Web selon ses fonctionnalités.
+
+
+3. COMMENT FONCTIONNE UNE PAGE WEB ?
+
+Lorsqu'un utilisateur demande une page Web, plusieurs éléments
+peuvent intervenir :
+
+Utilisateur
+    ↓
+Navigateur Web
+    ↓
+Internet / réseau
+    ↓
+Serveur Web
+    ↓
+Ressources Web
+    ↓
+Navigateur
+    ↓
+Affichage de la page
+
+Le navigateur reçoit les ressources nécessaires et les interprète
+pour afficher la page.
+
+Les ressources peuvent comprendre :
+- HTML ;
+- CSS ;
+- JavaScript ;
+- images ;
+- audio ;
+- vidéo ;
+- polices ;
+- données provenant d'un serveur.
+
+
+4. LES TROIS TECHNOLOGIES FONDAMENTALES
+
+La création Web repose notamment sur trois technologies essentielles :
+
+HTML
+CSS
+JavaScript
+
+HTML = HyperText Markup Language
+
+HTML définit la structure et le contenu de la page.
+
+CSS = Cascading Style Sheets
+
+CSS définit la présentation et l'apparence de la page.
+
+JavaScript
+
+JavaScript permet d'ajouter du comportement, de la logique et
+de l'interactivité.
+
+On peut retenir :
+
+HTML → structure
+CSS → présentation
+JavaScript → comportement
+
+
+5. HTML : CONSTRUIRE LA STRUCTURE
+
+HTML permet de décrire les différents éléments d'une page.
+
+Exemples :
+
+- titre ;
+- paragraphe ;
+- lien ;
+- image ;
+- liste ;
+- tableau ;
+- formulaire ;
+- vidéo ;
+- audio ;
+- section ;
+- article ;
+- bouton.
+
+Exemple simple :
+
+<h1>Bienvenue</h1>
+
+<p>Ma première page Web.</p>
+
+Dans cet exemple :
+
+<h1> représente un titre principal.
+
+<p> représente un paragraphe.
+
+
+6. CSS : STYLISER LA PAGE
+
+CSS permet de modifier l'apparence des éléments HTML.
+
+On peut notamment contrôler :
+
+- couleurs ;
+- tailles ;
+- marges ;
+- espacements ;
+- bordures ;
+- arrière-plans ;
+- positions ;
+- dimensions ;
+- typographie ;
+- disposition des éléments ;
+- adaptation aux écrans mobiles.
+
+Exemple :
+
+h1 {
+    color: blue;
+    font-size: 32px;
+}
+
+HTML définit ce qu'est l'élément.
+
+CSS définit principalement comment cet élément doit apparaître.
+
+
+7. JAVASCRIPT : AJOUTER L'INTERACTIVITÉ
+
+JavaScript permet à une page Web de réagir aux actions
+de l'utilisateur.
+
+Exemples :
+
+- cliquer sur un bouton ;
+- afficher ou cacher un élément ;
+- modifier un texte ;
+- vérifier un formulaire ;
+- effectuer un calcul ;
+- changer une image ;
+- créer une animation ;
+- manipuler le contenu HTML ;
+- communiquer avec une API ;
+- sauvegarder des informations localement.
+
+Exemple :
+
+<button onclick="alert('Bonjour !')">
+    Cliquer
+</button>
+
+Lorsqu'on clique sur le bouton, JavaScript exécute une action.
+
+
+8. LE NAVIGATEUR WEB
+
+Le navigateur est le logiciel utilisé pour consulter et exécuter
+les ressources Web.
+
+Il interprète notamment :
+
+HTML → structure
+CSS → présentation
+JavaScript → comportement
+
+Le navigateur possède également un environnement d'exécution
+permettant au JavaScript de manipuler la page.
+
+Exemples d'éléments du navigateur :
+
+- barre d'adresse ;
+- onglets ;
+- historique ;
+- favoris ;
+- outils de développement ;
+- moteur de rendu ;
+- console JavaScript.
+
+
+9. QU'EST-CE QU'UNE URL ?
+
+URL signifie Uniform Resource Locator.
+
+Une URL permet d'indiquer l'adresse d'une ressource sur le Web.
+
+Exemple :
+
+https://www.exemple.com/index.html
+
+Une URL peut contenir :
+
+- protocole ;
+- domaine ;
+- chemin ;
+- nom de fichier ;
+- paramètres ;
+- fragment.
+
+Exemple :
+
+https://www.exemple.com/produits?id=10#details
+
+Le navigateur utilise cette adresse pour accéder à la ressource
+correspondante.
+
+
+10. HTTP ET HTTPS
+
+HTTP signifie HyperText Transfer Protocol.
+
+HTTPS signifie HyperText Transfer Protocol Secure.
+
+HTTPS permet de sécuriser la communication entre le navigateur
+et le serveur grâce au chiffrement de la connexion.
+
+Pour un site Web moderne, HTTPS est particulièrement important
+pour la sécurité et la protection des échanges.
+
+
+11. CLIENT ET SERVEUR
+
+Dans une architecture Web, le client est généralement le navigateur
+ou l'appareil de l'utilisateur.
+
+Le serveur est un ordinateur ou un système informatique qui fournit
+des ressources ou des services.
+
+Exemple :
+
+Client
+→ demande une page
+
+Serveur
+→ traite la demande
+
+Serveur
+→ renvoie les ressources
+
+Navigateur
+→ affiche la page
+
+
+12. FRONT-END ET BACK-END
+
+Front-end désigne principalement la partie visible et interactive
+exécutée du côté utilisateur.
+
+Technologies principales :
+
+HTML
+CSS
+JavaScript
+
+Back-end désigne principalement la partie exécutée côté serveur.
+
+Elle peut gérer :
+
+- utilisateurs ;
+- authentification ;
+- bases de données ;
+- traitements ;
+- fichiers ;
+- API ;
+- logique métier ;
+- sécurité.
+
+Le front-end et le back-end peuvent communiquer à travers
+des requêtes réseau et des API.
+
+
+13. QU'EST-CE QU'UNE PAGE HTML ?
+
+Une page HTML est généralement enregistrée dans un fichier portant
+l'extension :
+
+.html
+
+Exemple :
+
+index.html
+
+Un document HTML moderne commence généralement par :
+
+<!DOCTYPE html>
+
+Puis possède une structure générale comme :
+
+<html>
+<head>
+    ...
+</head>
+
+<body>
+    ...
+</body>
+</html>
+
+La partie head contient notamment les informations destinées
+au navigateur et les ressources nécessaires.
+
+La partie body contient principalement le contenu affiché
+dans la page.
+
+
+14. LE FICHIER index.html
+
+Dans de nombreux projets Web, le fichier principal est appelé :
+
+index.html
+
+Il peut servir de page d'accueil.
+
+Exemple d'organisation :
+
+mon-projet/
+│
+├── index.html
+├── about.html
+├── contact.html
+├── css/
+│   └── style.css
+├── js/
+│   └── script.js
+└── images/
+    └── logo.png
+
+Cette organisation facilite la gestion du projet.
+
+
+15. ORGANISATION D'UN PROJET WEB
+
+Un projet Web peut contenir plusieurs types de fichiers.
+
+HTML :
+contient les pages et la structure.
+
+CSS :
+contient les règles de présentation.
+
+JavaScript :
+contient la logique et l'interactivité.
+
+Images :
+contiennent les ressources graphiques.
+
+Audio :
+contient les sons.
+
+Vidéo :
+contient les vidéos.
+
+Un projet bien organisé est plus facile à maintenir et à modifier.
+
+
+16. CHEMIN RELATIF ET CHEMIN ABSOLU
+
+Un chemin relatif indique une ressource par rapport au fichier
+actuellement utilisé.
+
+Exemple :
+
+images/logo.png
+
+Un chemin absolu peut indiquer une adresse complète :
+
+https://www.exemple.com/images/logo.png
+
+Les chemins relatifs sont particulièrement utiles pour organiser
+les ressources d'un projet local.
+
+
+17. BALISE, ÉLÉMENT ET ATTRIBUT
+
+Une balise HTML est une instruction utilisée pour définir
+la structure d'un document.
+
+Exemple :
+
+<p>
+
+Un élément HTML peut comprendre une balise ouvrante, un contenu
+et une balise fermante.
+
+Exemple :
+
+<p>Bonjour</p>
+
+Un attribut fournit une information supplémentaire à un élément.
+
+Exemple :
+
+<a href="https://www.exemple.com">
+    Visiter le site
+</a>
+
+Ici :
+
+<a> = élément de lien
+
+href = attribut
+
+"https://www.exemple.com" = valeur de l'attribut
+
+
+18. IMBRICATION DES ÉLÉMENTS
+
+Les éléments HTML peuvent être placés à l'intérieur d'autres éléments.
+
+Exemple :
+
+<section>
+    <h2>Présentation</h2>
+    <p>Bienvenue sur mon site.</p>
+</section>
+
+L'organisation doit respecter correctement l'ordre
+d'ouverture et de fermeture des éléments.
+
+
+19. DOCUMENT HTML VALIDE ET PROPRE
+
+Un document HTML doit être organisé de manière claire.
+
+Il faut notamment :
+
+- utiliser une structure HTML correcte ;
+- respecter l'imbrication ;
+- fermer les éléments qui doivent l'être ;
+- utiliser des attributs appropriés ;
+- éviter les répétitions inutiles ;
+- utiliser des noms de fichiers clairs ;
+- organiser correctement les ressources.
+
+
+20. ACCESSIBILITÉ WEB
+
+Une page Web doit être conçue pour être utilisable par
+le plus grand nombre de personnes possible.
+
+Quelques bonnes pratiques :
+
+- utiliser une structure sémantique ;
+- fournir un texte alternatif aux images importantes ;
+- associer correctement les labels aux champs de formulaire ;
+- utiliser des titres dans un ordre logique ;
+- conserver une bonne lisibilité ;
+- ne pas dépendre uniquement de la couleur ;
+- rendre les commandes utilisables au clavier lorsque nécessaire.
+
+L'accessibilité est une partie importante de la conception Web.
+
+
+21. RESPONSIVE WEB DESIGN
+
+Une page Web responsive s'adapte aux différentes tailles d'écran.
+
+Elle peut être consultée sur :
+
+- smartphone ;
+- tablette ;
+- ordinateur portable ;
+- ordinateur de bureau.
+
+Le CSS permet notamment d'utiliser :
+
+- unités relatives ;
+- flexbox ;
+- grid ;
+- media queries ;
+- dimensions adaptatives.
+
+Un développeur Web doit penser aux appareils mobiles dès
+la conception de l'interface.
+
+
+22. OUTILS DU DÉVELOPPEUR
+
+Les navigateurs modernes disposent d'outils permettant
+d'analyser une page Web.
+
+On peut notamment examiner :
+
+- HTML ;
+- CSS ;
+- JavaScript ;
+- console ;
+- réseau ;
+- stockage ;
+- performances.
+
+La console permet également d'identifier certaines erreurs
+JavaScript.
+
+
+23. ERREURS COURANTES DU DÉBUTANT
+
+Quelques erreurs fréquentes :
+
+- oublier une balise ;
+- mal fermer une balise ;
+- utiliser un mauvais chemin de fichier ;
+- oublier une image ;
+- utiliser un mauvais nom de fichier ;
+- créer des identifiants HTML en double ;
+- écrire du CSS incorrect ;
+- créer une erreur JavaScript ;
+- oublier de sauvegarder les modifications ;
+- tester uniquement sur un seul type d'écran.
+
+Le développeur doit apprendre à observer les erreurs et à les
+corriger méthodiquement.
+
+
+24. LES ÉTAPES DE CRÉATION D'UNE PAGE WEB
+
+Une méthode simple :
+
+1. définir l'objectif de la page ;
+2. préparer la structure HTML ;
+3. ajouter le contenu ;
+4. organiser les sections ;
+5. créer le CSS ;
+6. ajouter JavaScript si nécessaire ;
+7. tester dans le navigateur ;
+8. corriger les erreurs ;
+9. vérifier l'affichage mobile ;
+10. améliorer l'accessibilité ;
+11. tester les interactions ;
+12. finaliser le projet.
+
+
+25. HTML, CSS ET JAVASCRIPT TRAVAILLENT ENSEMBLE
+
+Exemple conceptuel :
+
+HTML :
+
+<button id="monBouton">
+    Cliquer
+</button>
+
+CSS :
+
+#monBouton {
+    padding: 10px;
+}
+
+JavaScript :
+
+document
+    .getElementById("monBouton")
+    .addEventListener("click", function () {
+        alert("Bouton activé !");
+    });
+
+HTML crée le bouton.
+
+CSS définit son apparence.
+
+JavaScript définit son comportement.
+
+
+26. PREMIÈRE VISION DU MÉTIER DE DÉVELOPPEUR WEB
+
+Le développement Web ne consiste pas seulement à écrire du code.
+
+Le développeur doit également :
+
+- analyser un besoin ;
+- concevoir une solution ;
+- organiser un projet ;
+- écrire du code ;
+- tester ;
+- rechercher les erreurs ;
+- corriger ;
+- améliorer ;
+- sécuriser ;
+- documenter ;
+- maintenir le projet.
+
+La programmation est donc une partie d'un processus plus large
+de conception informatique.
+
+
+27. RÈGLE FONDAMENTALE DU CHAPITRE A
+
+Avant de vouloir créer une application Web complexe, il faut
+comprendre les bases :
+
+Web
+↓
+Navigateur
+↓
+HTML
+↓
+CSS
+↓
+JavaScript
+↓
+Interaction
+↓
+Application Web
+
+Cette base permet ensuite d'étudier les balises HTML en profondeur
+dans le Chapitre B, puis les autres technologies Web dans les
+chapitres suivants.`,
+
+    pratique:
+`TRAVAUX PRATIQUES — CHAPITRE A
+
+TP 1 — Découvrir une page Web
+
+1. Ouvrir un navigateur Web.
+2. Créer un nouveau fichier nommé index.html.
+3. Écrire une structure HTML5 minimale.
+4. Ajouter un titre principal.
+5. Ajouter un paragraphe.
+6. Enregistrer le fichier.
+7. Ouvrir la page dans le navigateur.
+
+Objectif :
+Comprendre la relation entre un fichier HTML et son affichage
+dans le navigateur.
+
+
+TP 2 — Première structure HTML
+
+Créer une page contenant :
+
+- DOCTYPE ;
+- html ;
+- head ;
+- title ;
+- body ;
+- h1 ;
+- p.
+
+Objectif :
+Comprendre la structure générale d'un document HTML.
+
+
+TP 3 — Découvrir CSS
+
+1. Créer une page HTML.
+2. Ajouter un fichier style.css.
+3. Relier le fichier CSS à la page.
+4. Modifier la couleur du titre.
+5. Modifier la taille du texte.
+6. Ajouter une marge.
+
+Objectif :
+Comprendre la séparation entre structure et présentation.
+
+
+TP 4 — Découvrir JavaScript
+
+1. Créer un bouton HTML.
+2. Ajouter JavaScript.
+3. Détecter le clic.
+4. Afficher un message.
+5. Modifier ensuite le texte d'un élément.
+
+Objectif :
+Comprendre le principe de l'interactivité.
+
+
+TP 5 — Organiser un projet
+
+Créer cette organisation :
+
+mon-premier-site/
+│
+├── index.html
+├── about.html
+├── contact.html
+├── css/
+│   └── style.css
+├── js/
+│   └── script.js
+└── images/
+
+Créer les trois pages HTML et relier correctement
+les fichiers CSS et JavaScript.
+
+
+TP 6 — Navigation
+
+Créer des liens permettant de passer :
+
+index.html
+→ about.html
+→ contact.html
+→ index.html
+
+Ajouter également un lien externe.
+
+
+TP 7 — Page responsive
+
+Créer une page simple contenant :
+
+- titre ;
+- texte ;
+- image ;
+- bouton.
+
+Utiliser CSS pour que la page reste lisible
+sur smartphone et ordinateur.
+
+
+TP 8 — Analyse
+
+Ouvrir les outils de développement du navigateur.
+
+Observer :
+
+- HTML ;
+- CSS ;
+- console ;
+- réseau.
+
+Identifier une erreur volontairement créée dans le code,
+puis la corriger.
+
+
+TP 9 — Mini-projet
+
+Créer une petite page Web personnelle comprenant :
+
+- nom du projet ;
+- titre ;
+- présentation ;
+- image ;
+- lien ;
+- bouton ;
+- CSS ;
+- JavaScript.
+
+Objectif :
+Réunir les trois technologies fondamentales.
+
+
+TP 10 — Première application Web
+
+Créer une petite interface interactive contenant :
+
+- un titre ;
+- une zone de texte ;
+- un bouton ;
+- une zone de résultat.
+
+Lorsque l'utilisateur clique sur le bouton,
+JavaScript doit modifier le résultat.
+
+Objectif :
+Comprendre le passage d'une simple page Web
+vers une interface interactive.`,
+
+    exercices: [
+        "Expliquer avec ses propres mots ce qu'est le Web.",
+        "Expliquer la différence entre Internet et le Web.",
+        "Donner la définition de HTML.",
+        "Donner la définition de CSS.",
+        "Donner la définition de JavaScript.",
+        "Expliquer le rôle du navigateur Web.",
+        "Citer cinq navigateurs Web.",
+        "Expliquer ce qu'est un serveur Web.",
+        "Expliquer ce qu'est un client dans une architecture Web.",
+        "Expliquer la différence entre front-end et back-end.",
+        "Donner la signification de WWW.",
+        "Donner la signification de HTML.",
+        "Donner la signification de CSS.",
+        "Donner la signification de URL.",
+        "Donner la signification de HTTP.",
+        "Donner la signification de HTTPS.",
+        "Expliquer pourquoi HTTPS est utilisé.",
+        "Créer un fichier index.html.",
+        "Créer la structure HTML5 minimale d'une page.",
+        "Ajouter un titre dans une page HTML.",
+        "Ajouter trois paragraphes.",
+        "Créer un lien HTML.",
+        "Créer un lien vers une autre page du même projet.",
+        "Créer un lien vers un site externe.",
+        "Créer un dossier images.",
+        "Ajouter une image dans un projet Web.",
+        "Créer un fichier CSS externe.",
+        "Relier un fichier CSS à une page HTML.",
+        "Modifier la couleur d'un titre avec CSS.",
+        "Modifier la taille d'un texte avec CSS.",
+        "Créer un fichier JavaScript externe.",
+        "Relier JavaScript à une page HTML.",
+        "Créer un bouton HTML.",
+        "Détecter un clic sur un bouton avec JavaScript.",
+        "Afficher un message après un clic.",
+        "Modifier le contenu d'un élément avec JavaScript.",
+        "Expliquer la différence entre HTML, CSS et JavaScript.",
+        "Expliquer ce qu'est une URL.",
+        "Identifier le protocole dans une URL.",
+        "Identifier le domaine dans une URL.",
+        "Expliquer la différence entre chemin relatif et chemin absolu.",
+        "Créer une organisation simple de projet Web.",
+        "Expliquer pourquoi il faut organiser les fichiers d'un projet.",
+        "Expliquer ce qu'est une page Web responsive.",
+        "Citer trois appareils pouvant afficher une page responsive.",
+        "Expliquer pourquoi l'accessibilité est importante.",
+        "Identifier une erreur HTML dans une structure simple.",
+        "Identifier une erreur de chemin vers une image.",
+        "Identifier une erreur CSS simple.",
+        "Identifier une erreur JavaScript simple.",
+        "Créer une petite page utilisant HTML, CSS et JavaScript."
+    ],
+
+    devoirs:
+`DEVOIR — PREMIER PROJET WEB
+
+Créer un mini-site Web complet en utilisant les connaissances
+du Chapitre A.
+
+Le projet doit contenir au minimum :
+
+1. Une page index.html servant de page d'accueil.
+
+2. Une deuxième page HTML.
+
+3. Une troisième page HTML.
+
+4. Une navigation permettant de passer d'une page à l'autre.
+
+5. Des titres et des paragraphes.
+
+6. Au moins une image correctement intégrée.
+
+7. Un fichier CSS externe.
+
+8. Un fichier JavaScript externe.
+
+9. Au moins un bouton interactif.
+
+10. Une action JavaScript déclenchée par l'utilisateur.
+
+11. Une organisation claire des fichiers.
+
+Organisation recommandée :
+
+mon-premier-site/
+│
+├── index.html
+├── about.html
+├── contact.html
+│
+├── css/
+│   └── style.css
+│
+├── js/
+│   └── script.js
+│
+└── images/
+
+CONTRAINTES
+
+Le projet doit :
+
+- utiliser une structure HTML correcte ;
+- utiliser HTML pour la structure ;
+- utiliser CSS pour la présentation ;
+- utiliser JavaScript pour l'interactivité ;
+- contenir une navigation fonctionnelle ;
+- utiliser des chemins de fichiers corrects ;
+- être lisible sur smartphone ;
+- être lisible sur ordinateur ;
+- ne pas contenir de liens cassés ;
+- ne pas contenir d'erreurs JavaScript visibles dans la console ;
+- utiliser des noms de fichiers clairs ;
+- respecter une organisation propre du projet.
+
+PARTIE ÉCRITE
+
+L'étudiant doit également expliquer :
+
+1. Qu'est-ce que le Web ?
+2. Quelle est la différence entre Internet et le Web ?
+3. Quel est le rôle de HTML ?
+4. Quel est le rôle de CSS ?
+5. Quel est le rôle de JavaScript ?
+6. Quel est le rôle du navigateur ?
+7. Qu'est-ce qu'une URL ?
+8. Quelle est la différence entre HTTP et HTTPS ?
+9. Quelle est la différence entre front-end et back-end ?
+10. Pourquoi faut-il organiser correctement un projet Web ?
+
+OBJECTIF FINAL
+
+À la fin de ce devoir, l'étudiant doit être capable de
+comprendre le fonctionnement général d'un projet Web et de
+construire une première petite réalisation utilisant
+HTML, CSS et JavaScript.
+
+Le Chapitre B permettra ensuite d'étudier beaucoup plus
+profondément les balises HTML et leur utilisation.`
+},
 
 
 
