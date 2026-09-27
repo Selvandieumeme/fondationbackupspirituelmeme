@@ -8809,27 +8809,2800 @@ débogage.`
 
 
 
+{
+    id: "D",
+
+    title:
+        "D — Intégration HTML et CSS et création d'interfaces Web complètes",
+
+    theorie:
+`CHAPITRE D — INTÉGRATION HTML + CSS
+
+Dans le Chapitre B, nous avons appris à construire la
+structure d'une page Web avec HTML.
+
+Dans le Chapitre C, nous avons appris à contrôler son
+apparence, sa mise en page et son adaptation aux différents
+écrans avec CSS.
+
+Dans ce Chapitre D, nous allons combiner HTML et CSS pour
+construire de véritables interfaces Web complètes,
+organisées, responsive, accessibles et maintenables.
+
+HTML = STRUCTURE
+CSS = PRÉSENTATION
+HTML + CSS = INTERFACE WEB
+
+JavaScript pourra ensuite être ajouté pour apporter de la
+logique et de l'interactivité avancée.
 
 
-    {
-        id: "D",
-        title: "D — Structure d'un document HTML",
-        theorie:
-`Un document HTML moderne utilise généralement DOCTYPE,
-html, head et body.`,
+============================================================
+ILLUSTRATION VISUELLE — INTÉGRATION HTML + CSS
+============================================================
 
-        pratique:
-`Créez un document HTML5 complet avec charset et title.`,
+<div style="
+    width:100%;
+    margin:25px auto;
+    padding:18px;
+    border-radius:22px;
+    background:linear-gradient(145deg,#020617,#172554,#312e81);
+    box-shadow:0 25px 55px rgba(0,0,0,.38);
+    overflow:hidden;
+">
 
-        exercices: [
-            "Ajouter DOCTYPE.",
-            "Ajouter charset UTF-8.",
-            "Ajouter title."
-        ],
+<svg
+    viewBox="0 0 1200 780"
+    width="100%"
+    role="img"
+    aria-label="Illustration 3D montrant l'intégration HTML et CSS dans une interface Web responsive"
+    style="
+        display:block;
+        width:100%;
+        height:auto;
+        min-height:560px;
+    "
+>
 
-        devoirs:
-`Créer un document HTML5 propre et correctement indenté.`
-    },
+<defs>
+
+    <linearGradient id="dBackground"
+        x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#020617"/>
+        <stop offset="50%" stop-color="#172554"/>
+        <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+
+    <linearGradient id="dHtml"
+        x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fb923c"/>
+        <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <linearGradient id="dCss"
+        x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+
+    <linearGradient id="dInterface"
+        x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#a78bfa"/>
+        <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <linearGradient id="dResponsive"
+        x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#34d399"/>
+        <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <filter id="dShadow">
+        <feDropShadow
+            dx="0"
+            dy="18"
+            stdDeviation="14"
+            flood-opacity=".42"
+        />
+    </filter>
+
+</defs>
+
+
+<rect
+    x="0"
+    y="0"
+    width="1200"
+    height="780"
+    rx="35"
+    fill="url(#dBackground)"
+/>
+
+
+<text
+    x="600"
+    y="58"
+    text-anchor="middle"
+    fill="#ffffff"
+    font-size="34"
+    font-weight="700"
+    font-family="Arial, sans-serif"
+>
+    HTML + CSS
+</text>
+
+<text
+    x="600"
+    y="90"
+    text-anchor="middle"
+    fill="#cbd5e1"
+    font-size="18"
+    font-family="Arial, sans-serif"
+>
+    Construction d'une interface Web complète et responsive
+</text>
+
+
+<!-- HTML -->
+
+<g filter="url(#dShadow)">
+
+    <polygon
+        points="95,185 285,140 380,195 190,240"
+        fill="#fdba74"
+    />
+
+    <polygon
+        points="95,185 190,240 190,410 95,355"
+        fill="#c2410c"
+    />
+
+    <polygon
+        points="190,240 380,195 380,365 190,410"
+        fill="url(#dHtml)"
+    />
+
+    <text
+        x="285"
+        y="278"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="28"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        HTML
+    </text>
+
+    <text
+        x="285"
+        y="310"
+        text-anchor="middle"
+        fill="#fee2e2"
+        font-size="17"
+        font-family="Arial, sans-serif"
+    >
+        STRUCTURE
+    </text>
+
+    <text
+        x="285"
+        y="342"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="14"
+        font-family="monospace"
+    >
+        header • main • footer
+    </text>
+
+</g>
+
+
+<!-- CSS -->
+
+<g filter="url(#dShadow)">
+
+    <polygon
+        points="820,190 1010,145 1105,200 915,245"
+        fill="#7dd3fc"
+    />
+
+    <polygon
+        points="820,190 915,245 915,415 820,360"
+        fill="#1d4ed8"
+    />
+
+    <polygon
+        points="915,245 1105,200 1105,370 915,415"
+        fill="url(#dCss)"
+    />
+
+    <text
+        x="1010"
+        y="283"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="28"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        CSS
+    </text>
+
+    <text
+        x="1010"
+        y="315"
+        text-anchor="middle"
+        fill="#dbeafe"
+        font-size="17"
+        font-family="Arial, sans-serif"
+    >
+        DESIGN
+    </text>
+
+    <text
+        x="1010"
+        y="347"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="14"
+        font-family="monospace"
+    >
+        layout • couleur • responsive
+    </text>
+
+</g>
+
+
+<!-- INTERFACE -->
+
+<g filter="url(#dShadow)">
+
+    <polygon
+        points="360,365 705,290 830,360 485,435"
+        fill="#c4b5fd"
+    />
+
+    <polygon
+        points="360,365 485,435 485,650 360,580"
+        fill="#5b21b6"
+    />
+
+    <polygon
+        points="485,435 830,360 830,575 485,650"
+        fill="url(#dInterface)"
+    />
+
+    <!-- browser -->
+
+    <rect
+        x="525"
+        y="410"
+        width="255"
+        height="135"
+        rx="12"
+        fill="#ffffff"
+        opacity=".96"
+    />
+
+    <rect
+        x="525"
+        y="410"
+        width="255"
+        height="25"
+        rx="12"
+        fill="#e2e8f0"
+    />
+
+    <circle cx="543" cy="423" r="4" fill="#ef4444"/>
+    <circle cx="557" cy="423" r="4" fill="#f59e0b"/>
+    <circle cx="571" cy="423" r="4" fill="#22c55e"/>
+
+    <rect
+        x="540"
+        y="450"
+        width="225"
+        height="18"
+        rx="5"
+        fill="#dbeafe"
+    />
+
+    <rect
+        x="540"
+        y="480"
+        width="90"
+        height="48"
+        rx="7"
+        fill="#c4b5fd"
+    />
+
+    <rect
+        x="642"
+        y="480"
+        width="123"
+        height="14"
+        rx="5"
+        fill="#e2e8f0"
+    />
+
+    <rect
+        x="642"
+        y="503"
+        width="95"
+        height="14"
+        rx="5"
+        fill="#e2e8f0"
+    />
+
+    <text
+        x="657"
+        y="585"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="22"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        INTERFACE WEB
+    </text>
+
+</g>
+
+
+<!-- RESPONSIVE DEVICES -->
+
+<g filter="url(#dShadow)">
+
+    <!-- desktop -->
+
+    <rect
+        x="120"
+        y="495"
+        width="170"
+        height="105"
+        rx="12"
+        fill="#0f172a"
+        stroke="#34d399"
+        stroke-width="5"
+    />
+
+    <rect
+        x="138"
+        y="512"
+        width="134"
+        height="70"
+        rx="5"
+        fill="#064e3b"
+    />
+
+    <rect
+        x="175"
+        y="606"
+        width="60"
+        height="8"
+        rx="4"
+        fill="#64748b"
+    />
+
+    <!-- tablet -->
+
+    <rect
+        x="850"
+        y="480"
+        width="110"
+        height="145"
+        rx="13"
+        fill="#0f172a"
+        stroke="#34d399"
+        stroke-width="5"
+    />
+
+    <rect
+        x="866"
+        y="500"
+        width="78"
+        height="100"
+        rx="5"
+        fill="#064e3b"
+    />
+
+    <!-- phone -->
+
+    <rect
+        x="995"
+        y="495"
+        width="65"
+        height="125"
+        rx="13"
+        fill="#0f172a"
+        stroke="#34d399"
+        stroke-width="5"
+    />
+
+    <rect
+        x="1005"
+        y="515"
+        width="45"
+        height="83"
+        rx="5"
+        fill="#064e3b"
+    />
+
+</g>
+
+
+<text
+    x="205"
+    y="650"
+    text-anchor="middle"
+    fill="#a7f3d0"
+    font-size="17"
+    font-weight="700"
+    font-family="Arial, sans-serif"
+>
+    DESKTOP
+</text>
+
+<text
+    x="905"
+    y="650"
+    text-anchor="middle"
+    fill="#a7f3d0"
+    font-size="17"
+    font-weight="700"
+    font-family="Arial, sans-serif"
+>
+    TABLET
+</text>
+
+<text
+    x="1027"
+    y="650"
+    text-anchor="middle"
+    fill="#a7f3d0"
+    font-size="17"
+    font-weight="700"
+    font-family="Arial, sans-serif"
+>
+    MOBILE
+</text>
+
+
+<!-- CONNECTIONS -->
+
+<path
+    d="M380 270 C470 250 700 250 820 275"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="4"
+    stroke-dasharray="12 9"
+/>
+
+<path
+    d="M600 380 C600 340 600 310 600 275"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="3"
+    stroke-dasharray="9 8"
+/>
+
+<path
+    d="M485 600 C400 630 320 640 290 570"
+    fill="none"
+    stroke="#34d399"
+    stroke-width="4"
+    stroke-dasharray="10 8"
+/>
+
+<path
+    d="M830 550 C850 580 870 590 900 590"
+    fill="none"
+    stroke="#34d399"
+    stroke-width="4"
+    stroke-dasharray="10 8"
+/>
+
+
+<text
+    x="600"
+    y="730"
+    text-anchor="middle"
+    fill="#e2e8f0"
+    font-size="17"
+    font-family="Arial, sans-serif"
+>
+    STRUCTURE → DESIGN → COMPOSANTS → RESPONSIVE → INTERFACE COMPLÈTE
+</text>
+
+</svg>
+</div>
+
+
+============================================================
+1 — OBJECTIF DE L'INTÉGRATION HTML + CSS
+============================================================
+
+L'objectif est maintenant de ne plus considérer HTML et CSS
+comme deux apprentissages séparés.
+
+HTML construit la structure.
+
+CSS transforme cette structure en interface.
+
+Exemple :
+
+HTML :
+
+<header>
+    <h1>Mon site</h1>
+</header>
+
+CSS :
+
+header {
+    padding: 30px;
+    text-align: center;
+}
+
+Le HTML fournit l'élément.
+
+Le CSS définit sa présentation.
+
+
+============================================================
+2 — ORGANISATION D'UN PROJET WEB
+============================================================
+
+Un projet simple peut être organisé ainsi :
+
+mon-site/
+
+    index.html
+
+    about.html
+
+    services.html
+
+    contact.html
+
+    css/
+
+        style.css
+
+    images/
+
+        logo.png
+
+        photo.jpg
+
+    media/
+
+        video.mp4
+
+        audio.mp3
+
+
+L'organisation peut évoluer selon la taille du projet.
+
+
+============================================================
+3 — RELIER HTML ET CSS
+============================================================
+
+Dans chaque page HTML :
+
+<link
+    rel="stylesheet"
+    href="css/style.css"
+>
+
+Il faut vérifier que le chemin du fichier CSS est correct.
+
+Exemple :
+
+index.html
+
+css/style.css
+
+Le chemin devient :
+
+href="css/style.css"
+
+
+============================================================
+4 — STRUCTURE HTML ET CLASSES CSS
+============================================================
+
+Une bonne intégration nécessite des classes permettant
+d'identifier les composants.
+
+Exemple :
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>
+            Bienvenue
+        </h1>
+
+        <p>
+            Découvrez notre service.
+        </p>
+
+        <a
+            href="services.html"
+            class="btn"
+        >
+            Découvrir
+        </a>
+
+    </div>
+
+</section>
+
+
+CSS :
+
+.hero {
+    padding: 80px 20px;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 20px;
+}
+
+
+============================================================
+5 — SYSTÈME DE CONTENEUR
+============================================================
+
+Un conteneur permet de contrôler la largeur du contenu.
+
+Exemple :
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+
+HTML :
+
+<div class="container">
+
+    Contenu
+
+</div>
+
+
+Ce modèle est très utile pour les pages responsive.
+
+
+============================================================
+6 — HEADER ET NAVIGATION
+============================================================
+
+Une interface professionnelle doit disposer d'un en-tête
+clairement structuré.
+
+Exemple :
+
+<header class="site-header">
+
+    <div class="container">
+
+        <a
+            href="index.html"
+            class="logo"
+        >
+            Mon Site
+        </a>
+
+        <nav class="site-nav">
+
+            <a href="index.html">
+                Accueil
+            </a>
+
+            <a href="about.html">
+                À propos
+            </a>
+
+            <a href="services.html">
+                Services
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+============================================================
+7 — HERO SECTION
+============================================================
+
+La Hero Section est généralement une zone importante
+située au début d'une page.
+
+Elle peut contenir :
+
+titre ;
+
+description ;
+
+bouton ;
+
+image ;
+
+illustration.
+
+
+Exemple :
+
+<section class="hero">
+
+    <div class="container hero-grid">
+
+        <div class="hero-content">
+
+            <p class="eyebrow">
+                Création Web
+            </p>
+
+            <h1>
+                Construisez votre présence Web
+            </h1>
+
+            <p>
+                Une interface claire, moderne et responsive.
+            </p>
+
+            <a
+                href="services.html"
+                class="btn"
+            >
+                Découvrir
+            </a>
+
+        </div>
+
+        <div class="hero-media">
+            <img
+                src="images/hero.jpg"
+                alt="Illustration de création Web"
+            >
+        </div>
+
+    </div>
+
+</section>
+
+
+============================================================
+8 — SECTIONS ET HIÉRARCHIE VISUELLE
+============================================================
+
+Chaque section doit avoir un rôle clair.
+
+Exemple :
+
+<section class="services">
+
+    <div class="container">
+
+        <h2>
+            Nos services
+        </h2>
+
+        <p>
+            Découvrez nos services.
+        </p>
+
+    </div>
+
+</section>
+
+
+La hiérarchie doit permettre à l'utilisateur de comprendre
+rapidement la page.
+
+
+============================================================
+9 — SYSTÈME DE CARTES
+============================================================
+
+Les cartes permettent de présenter des informations
+répétitives.
+
+Exemple :
+
+<div class="cards">
+
+    <article class="card">
+
+        <h3>
+            Création Web
+        </h3>
+
+        <p>
+            Création de sites Web.
+        </p>
+
+        <a href="#">
+            En savoir plus
+        </a>
+
+    </article>
+
+</div>
+
+
+CSS :
+
+.cards {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(240px, 1fr)
+        );
+    gap: 20px;
+}
+
+.card {
+    padding: 24px;
+    border-radius: 16px;
+    background: white;
+    box-shadow:
+        0 10px 30px
+        rgba(0,0,0,.10);
+}
+
+
+============================================================
+10 — BOUTONS RÉUTILISABLES
+============================================================
+
+Créer une classe réutilisable :
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 44px;
+
+    padding: 12px 20px;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+
+.btn:hover {
+    transform:
+        translateY(-2px);
+}
+
+
+Un même composant peut être utilisé sur plusieurs pages.
+
+
+============================================================
+11 — VARIANTES DE COMPOSANTS
+============================================================
+
+On peut créer des variantes.
+
+Exemple :
+
+.btn-primary
+
+.btn-secondary
+
+.btn-outline
+
+.btn-danger
+
+
+HTML :
+
+<a
+    href="#"
+    class="btn btn-primary"
+>
+    Commencer
+</a>
+
+<a
+    href="#"
+    class="btn btn-outline"
+>
+    En savoir plus
+</a>
+
+
+Cette approche permet de réutiliser une base commune.
+
+
+============================================================
+12 — FLEXBOX DANS UNE INTERFACE RÉELLE
+============================================================
+
+Flexbox peut être utilisé pour :
+
+navigation ;
+
+barres d'outils ;
+
+alignement de boutons ;
+
+groupes de cartes ;
+
+header ;
+
+footer.
+
+
+Exemple :
+
+.site-header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+
+============================================================
+13 — GRID DANS UNE INTERFACE RÉELLE
+============================================================
+
+Grid peut être utilisé pour :
+
+galeries ;
+
+cards ;
+
+hero sections ;
+
+dashboard ;
+
+zones principales.
+
+
+Exemple :
+
+.hero-grid {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 40px;
+
+    align-items: center;
+}
+
+
+============================================================
+14 — RESPONSIVE DESIGN RÉEL
+============================================================
+
+Une interface complète doit s'adapter.
+
+Exemple :
+
+.hero-grid {
+    grid-template-columns:
+        1fr 1fr;
+}
+
+
+Sur mobile :
+
+@media (max-width: 768px) {
+
+    .hero-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+L'objectif n'est pas seulement de réduire les dimensions.
+
+Il faut parfois modifier complètement la disposition.
+
+
+============================================================
+15 — NAVIGATION RESPONSIVE
+============================================================
+
+Sur grand écran :
+
+navigation horizontale.
+
+Sur petit écran :
+
+navigation verticale ou transformée selon les fonctionnalités
+disponibles.
+
+Exemple :
+
+.site-nav {
+    display: flex;
+    gap: 20px;
+}
+
+@media (max-width: 700px) {
+
+    .site-nav {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+}
+
+
+============================================================
+16 — FOOTER
+============================================================
+
+Le footer peut contenir :
+
+navigation secondaire ;
+
+contact ;
+
+adresse ;
+
+liens ;
+
+copyright ;
+
+informations légales.
+
+
+Exemple :
+
+<footer class="site-footer">
+
+    <div class="container">
+
+        <p>
+            © 2026 Mon Site Web
+        </p>
+
+        <nav>
+            <a href="about.html">
+                À propos
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+        </nav>
+
+    </div>
+
+</footer>
+
+
+============================================================
+17 — FORMULAIRE PROFESSIONNEL
+============================================================
+
+Le HTML définit les champs.
+
+CSS organise leur présentation.
+
+Exemple :
+
+.form-group {
+    display: grid;
+    gap: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+}
+
+
+Le formulaire doit rester utilisable sur téléphone.
+
+
+============================================================
+18 — TABLEAUX RESPONSIVES
+============================================================
+
+Les tableaux larges peuvent provoquer un débordement
+sur téléphone.
+
+On peut créer un conteneur :
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+HTML :
+
+<div class="table-wrapper">
+
+    <table>
+        ...
+    </table>
+
+</div>
+
+
+============================================================
+19 — IMAGES ET MÉDIAS
+============================================================
+
+Les médias doivent respecter leur conteneur.
+
+Exemple :
+
+.media img,
+.media video {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+
+Pour une image dans une carte :
+
+.card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+
+============================================================
+20 — GALERIE RESPONSIVE
+============================================================
+
+Une galerie peut utiliser Grid.
+
+Exemple :
+
+.gallery {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(180px, 1fr)
+        );
+
+    gap: 16px;
+}
+
+.gallery img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+
+============================================================
+21 — DESIGN SYSTEM SIMPLE
+============================================================
+
+Un projet peut définir des variables communes.
+
+:root {
+
+    --color-primary: #2563eb;
+
+    --color-secondary: #7c3aed;
+
+    --color-text: #0f172a;
+
+    --color-muted: #64748b;
+
+    --color-background: #f8fafc;
+
+    --color-surface: #ffffff;
+
+    --radius-small: 8px;
+
+    --radius-medium: 14px;
+
+    --spacing-small: 8px;
+
+    --spacing-medium: 16px;
+
+    --spacing-large: 32px;
+
+}
+
+
+Tous les composants peuvent réutiliser ces valeurs.
+
+
+============================================================
+22 — ÉTATS VISUELS
+============================================================
+
+Une interface doit indiquer visuellement les différents
+états des composants.
+
+Exemples :
+
+normal ;
+
+hover ;
+
+focus ;
+
+active ;
+
+disabled ;
+
+selected ;
+
+checked ;
+
+valid ;
+
+invalid.
+
+
+Ces états permettent à l'utilisateur de comprendre
+l'interaction avec l'interface.
+
+
+============================================================
+23 — ACCESSIBILITÉ HTML + CSS
+============================================================
+
+L'accessibilité ne dépend pas uniquement du HTML.
+
+CSS doit également préserver :
+
+contraste ;
+
+focus visible ;
+
+lisibilité ;
+
+espacement ;
+
+taille des zones interactives ;
+
+réduction des animations.
+
+
+Les boutons et liens doivent être facilement identifiables.
+
+
+============================================================
+24 — MOBILE-FIRST
+============================================================
+
+Le mobile-first consiste à commencer par la présentation
+destinée aux petits écrans.
+
+Exemple :
+
+.card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+
+Puis :
+
+@media (min-width: 768px) {
+
+    .card-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+}
+
+
+Puis éventuellement :
+
+@media (min-width: 1100px) {
+
+    .card-grid {
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+
+}
+
+
+============================================================
+25 — BREAKPOINTS
+============================================================
+
+Les breakpoints doivent être choisis en fonction du contenu
+et non uniquement selon des modèles fixes d'appareils.
+
+Exemple :
+
+petit écran ;
+
+écran moyen ;
+
+grand écran.
+
+
+L'objectif est de modifier le layout lorsque le contenu
+commence à manquer d'espace.
+
+
+============================================================
+26 — PAGES MULTIPLES
+============================================================
+
+Un vrai site peut comporter plusieurs pages.
+
+Exemple :
+
+index.html
+
+about.html
+
+services.html
+
+contact.html
+
+
+Le même fichier CSS peut être utilisé par plusieurs pages.
+
+Cela permet de conserver une identité visuelle cohérente.
+
+
+============================================================
+27 — COMPOSANTS RÉUTILISABLES
+============================================================
+
+Les composants CSS réutilisables peuvent comprendre :
+
+container ;
+
+btn ;
+
+card ;
+
+badge ;
+
+alert ;
+
+form-group ;
+
+section ;
+
+hero ;
+
+gallery ;
+
+table-wrapper.
+
+
+Il faut éviter de créer inutilement une règle différente
+pour chaque élément lorsque le même composant peut être
+réutilisé.
+
+
+============================================================
+28 — COHÉRENCE VISUELLE
+============================================================
+
+Un site professionnel doit conserver une cohérence entre
+ses pages.
+
+Les éléments suivants doivent généralement rester cohérents :
+
+couleurs ;
+
+typographie ;
+
+espacements ;
+
+boutons ;
+
+cartes ;
+
+navigation ;
+
+footer ;
+
+rayons ;
+
+ombres.
+
+
+L'utilisateur doit reconnaître qu'il se trouve toujours
+sur le même site.
+
+
+============================================================
+29 — HIÉRARCHIE DES CONTENUS
+============================================================
+
+La mise en page doit guider visuellement l'utilisateur.
+
+On peut utiliser :
+
+taille ;
+
+contraste ;
+
+espacement ;
+
+position ;
+
+groupement ;
+
+répétition.
+
+
+Un titre principal doit être identifiable.
+
+Les sections doivent être séparées.
+
+Les informations secondaires doivent être moins dominantes.
+
+
+============================================================
+30 — OPTIMISATION VISUELLE
+============================================================
+
+Une interface doit éviter :
+
+trop de couleurs ;
+
+trop d'ombres ;
+
+trop d'animations ;
+
+trop de tailles différentes ;
+
+espacements incohérents ;
+
+éléments inutiles.
+
+
+Le CSS doit servir la compréhension et l'utilisation
+de l'interface.
+
+
+============================================================
+31 — TEST RESPONSIVE
+============================================================
+
+Une page doit être testée sur plusieurs dimensions.
+
+Vérifiez :
+
+aucun débordement horizontal ;
+
+aucun texte coupé ;
+
+aucun bouton inaccessible ;
+
+aucune image déformée ;
+
+navigation utilisable ;
+
+formulaire utilisable ;
+
+tableau consultable ;
+
+footer correctement affiché.
+
+
+============================================================
+32 — DÉBOGAGE DE L'INTÉGRATION
+============================================================
+
+Lorsqu'une interface ne fonctionne pas correctement,
+vérifiez successivement :
+
+1. Le fichier CSS est-il correctement lié ?
+
+2. Le chemin du fichier est-il correct ?
+
+3. Le sélecteur correspond-il à l'élément ?
+
+4. La propriété existe-t-elle ?
+
+5. La valeur est-elle valide ?
+
+6. Une autre règle CSS écrase-t-elle la règle ?
+
+7. La spécificité est-elle différente ?
+
+8. Le parent possède-t-il une contrainte ?
+
+9. Flexbox ou Grid est-il correctement configuré ?
+
+10. Une media query modifie-t-elle le comportement ?
+
+
+============================================================
+33 — CONSTRUCTION D'UNE INTERFACE WEB COMPLÈTE
+============================================================
+
+Une interface complète peut suivre cette progression :
+
+1. définir la structure HTML ;
+
+2. créer les classes ;
+
+3. connecter le fichier CSS ;
+
+4. définir les variables ;
+
+5. créer le conteneur ;
+
+6. styliser le body ;
+
+7. créer le header ;
+
+8. créer la navigation ;
+
+9. construire la Hero Section ;
+
+10. créer les sections ;
+
+11. créer les cartes ;
+
+12. ajouter les images ;
+
+13. construire les formulaires ;
+
+14. organiser les tableaux ;
+
+15. construire le footer ;
+
+16. appliquer Flexbox ;
+
+17. appliquer Grid ;
+
+18. ajouter les états ;
+
+19. ajouter les transitions ;
+
+20. ajouter les animations nécessaires ;
+
+21. créer les media queries ;
+
+22. tester le mobile ;
+
+23. tester la tablette ;
+
+24. tester le bureau ;
+
+25. corriger les problèmes ;
+
+26. vérifier l'accessibilité ;
+
+27. vérifier la cohérence ;
+
+28. finaliser le projet.
+
+
+============================================================
+RÈGLE FONDAMENTALE DU CHAPITRE D
+============================================================
+
+Ne pas écrire du HTML et du CSS au hasard.
+
+Chaque élément HTML doit avoir une fonction.
+
+Chaque classe CSS doit avoir une raison.
+
+Chaque règle CSS doit contribuer à la présentation,
+à l'organisation, à la lisibilité, à l'accessibilité
+ou à l'adaptation de l'interface.
+
+HTML construit.
+
+CSS organise et présente.
+
+L'intégration des deux permet de construire une véritable
+interface Web.`,
+
+    pratique:
+`TRAVAUX PRATIQUES — INTÉGRATION HTML + CSS
+
+Objectif :
+
+Construire progressivement une véritable interface Web
+à partir des connaissances acquises dans les Chapitres B et C.
+
+
+------------------------------------------------------------
+TP 1 — CRÉER LE PROJET
+------------------------------------------------------------
+
+Créez :
+
+mon-site/
+
+index.html
+
+about.html
+
+services.html
+
+contact.html
+
+css/style.css
+
+images/
+
+
+------------------------------------------------------------
+TP 2 — RELIER HTML ET CSS
+------------------------------------------------------------
+
+Reliez toutes les pages à :
+
+css/style.css
+
+Vérifiez que le CSS est chargé correctement.
+
+
+------------------------------------------------------------
+TP 3 — CRÉER LE CONTENEUR
+------------------------------------------------------------
+
+Créez une classe :
+
+.container
+
+Utilisez :
+
+width ;
+
+max-width ;
+
+margin ;
+
+padding.
+
+
+------------------------------------------------------------
+TP 4 — HEADER
+------------------------------------------------------------
+
+Construisez un header professionnel avec :
+
+logo ;
+
+navigation ;
+
+conteneur.
+
+
+------------------------------------------------------------
+TP 5 — NAVIGATION
+------------------------------------------------------------
+
+Créez une navigation reliant :
+
+Accueil ;
+
+À propos ;
+
+Services ;
+
+Contact.
+
+
+------------------------------------------------------------
+TP 6 — HERO
+------------------------------------------------------------
+
+Créez une Hero Section avec :
+
+h1 ;
+
+paragraphe ;
+
+bouton ;
+
+image.
+
+
+------------------------------------------------------------
+TP 7 — FLEXBOX
+------------------------------------------------------------
+
+Utilisez Flexbox pour organiser le header et la navigation.
+
+
+------------------------------------------------------------
+TP 8 — GRID
+------------------------------------------------------------
+
+Créez une grille de trois cartes de services.
+
+
+------------------------------------------------------------
+TP 9 — CARTES
+------------------------------------------------------------
+
+Créez plusieurs cards avec :
+
+titre ;
+
+texte ;
+
+lien ;
+
+padding ;
+
+border ;
+
+border-radius ;
+
+box-shadow.
+
+
+------------------------------------------------------------
+TP 10 — BOUTONS
+------------------------------------------------------------
+
+Créez :
+
+btn-primary ;
+
+btn-secondary ;
+
+btn-outline.
+
+
+------------------------------------------------------------
+TP 11 — FORMULAIRE
+------------------------------------------------------------
+
+Créez une page contact avec un formulaire professionnel.
+
+
+------------------------------------------------------------
+TP 12 — ÉTATS DU FORMULAIRE
+------------------------------------------------------------
+
+Stylisez :
+
+focus ;
+
+valid ;
+
+invalid ;
+
+disabled ;
+
+required.
+
+
+------------------------------------------------------------
+TP 13 — TABLEAU
+------------------------------------------------------------
+
+Créez un tableau responsive avec un wrapper
+overflow-x: auto.
+
+
+------------------------------------------------------------
+TP 14 — GALERIE
+------------------------------------------------------------
+
+Créez une galerie responsive avec CSS Grid.
+
+
+------------------------------------------------------------
+TP 15 — IMAGES
+------------------------------------------------------------
+
+Rendez toutes les images responsives.
+
+
+------------------------------------------------------------
+TP 16 — FOOTER
+------------------------------------------------------------
+
+Créez un footer commun aux différentes pages.
+
+
+------------------------------------------------------------
+TP 17 — VARIABLES
+------------------------------------------------------------
+
+Créez un mini design system avec :
+
+couleurs ;
+
+rayons ;
+
+espacements.
+
+
+------------------------------------------------------------
+TP 18 — COMPOSANTS
+------------------------------------------------------------
+
+Créez des classes réutilisables :
+
+container ;
+
+btn ;
+
+card ;
+
+badge ;
+
+form-group.
+
+
+------------------------------------------------------------
+TP 19 — RESPONSIVE
+------------------------------------------------------------
+
+Créez une première version mobile.
+
+Puis adaptez-la à la tablette et au bureau.
+
+
+------------------------------------------------------------
+TP 20 — MOBILE-FIRST
+------------------------------------------------------------
+
+Construisez une grille :
+
+1 colonne mobile ;
+
+2 colonnes tablette ;
+
+3 colonnes bureau.
+
+
+------------------------------------------------------------
+TP 21 — NAVIGATION RESPONSIVE
+------------------------------------------------------------
+
+Adaptez la navigation aux petits écrans.
+
+
+------------------------------------------------------------
+TP 22 — HERO RESPONSIVE
+------------------------------------------------------------
+
+Sur ordinateur :
+
+texte + image côte à côte.
+
+Sur mobile :
+
+texte puis image.
+
+
+------------------------------------------------------------
+TP 23 — CARTES RESPONSIVES
+------------------------------------------------------------
+
+Faites passer les cartes :
+
+3 colonnes ;
+
+2 colonnes ;
+
+1 colonne.
+
+
+------------------------------------------------------------
+TP 24 — FORMULAIRE RESPONSIVE
+------------------------------------------------------------
+
+Assurez-vous que tous les champs utilisent correctement
+la largeur disponible.
+
+
+------------------------------------------------------------
+TP 25 — TABLEAU RESPONSIVE
+------------------------------------------------------------
+
+Testez le tableau sur un écran étroit.
+
+Corrigez tout débordement.
+
+
+------------------------------------------------------------
+TP 26 — ACCESSIBILITÉ
+------------------------------------------------------------
+
+Ajoutez :
+
+focus-visible ;
+
+contraste suffisant ;
+
+zones interactives correctement dimensionnées.
+
+
+------------------------------------------------------------
+TP 27 — TRANSITIONS
+------------------------------------------------------------
+
+Ajoutez des transitions aux boutons et aux cartes.
+
+
+------------------------------------------------------------
+TP 28 — ANIMATIONS
+------------------------------------------------------------
+
+Ajoutez une animation d'apparition légère à une section.
+
+
+------------------------------------------------------------
+TP 29 — TEST DES MÉDIAS
+------------------------------------------------------------
+
+Testez :
+
+images ;
+
+audio ;
+
+vidéo.
+
+
+Vérifiez leur adaptation aux différents écrans.
+
+
+------------------------------------------------------------
+TP 30 — MULTI-PAGES
+------------------------------------------------------------
+
+Assurez-vous que les quatre pages utilisent la même identité
+visuelle.
+
+
+------------------------------------------------------------
+TP 31 — DEBUG
+------------------------------------------------------------
+
+Utilisez les outils du navigateur pour rechercher
+une erreur CSS volontairement introduite.
+
+
+------------------------------------------------------------
+TP 32 — TEST RESPONSIVE
+------------------------------------------------------------
+
+Testez le site sur :
+
+petit écran ;
+
+écran moyen ;
+
+grand écran.
+
+
+Vérifiez :
+
+largeur ;
+
+navigation ;
+
+images ;
+
+texte ;
+
+boutons ;
+
+tableaux.
+
+
+------------------------------------------------------------
+TP 33 — PROJET INTÉGRÉ
+------------------------------------------------------------
+
+Construisez une interface complète contenant :
+
+header ;
+
+nav ;
+
+hero ;
+
+sections ;
+
+cards ;
+
+gallery ;
+
+formulaire ;
+
+tableau ;
+
+footer.
+
+Le site doit être responsive et utiliser le CSS de manière
+organisée.`,
+
+    exercices: [
+
+        "Exercice 1 — Créer une structure de projet contenant quatre pages HTML et un fichier CSS externe.",
+
+        "Exercice 2 — Relier quatre pages HTML au même fichier CSS.",
+
+        "Exercice 3 — Créer un conteneur responsive avec width, max-width, margin et padding.",
+
+        "Exercice 4 — Créer un header contenant un logo et une navigation.",
+
+        "Exercice 5 — Construire une navigation reliant quatre pages HTML.",
+
+        "Exercice 6 — Créer une Hero Section avec titre, paragraphe, bouton et image.",
+
+        "Exercice 7 — Organiser une Hero Section avec Flexbox.",
+
+        "Exercice 8 — Organiser une Hero Section avec CSS Grid.",
+
+        "Exercice 9 — Créer une carte réutilisable pour présenter un service.",
+
+        "Exercice 10 — Créer trois cartes utilisant exactement la même classe CSS.",
+
+        "Exercice 11 — Créer trois variantes de bouton avec des classes réutilisables.",
+
+        "Exercice 12 — Ajouter des effets hover et focus aux boutons.",
+
+        "Exercice 13 — Créer une grille responsive de cartes avec auto-fit et minmax().",
+
+        "Exercice 14 — Créer une galerie responsive avec CSS Grid.",
+
+        "Exercice 15 — Rendre toutes les images d'une page responsives.",
+
+        "Exercice 16 — Créer un formulaire professionnel avec HTML et CSS.",
+
+        "Exercice 17 — Styliser les états focus, valid, invalid et disabled d'un formulaire.",
+
+        "Exercice 18 — Créer un tableau placé dans un conteneur responsive.",
+
+        "Exercice 19 — Construire un footer réutilisable sur plusieurs pages.",
+
+        "Exercice 20 — Créer des variables CSS pour les couleurs, espacements et rayons.",
+
+        "Exercice 21 — Créer un système de composants avec container, card, button et form-group.",
+
+        "Exercice 22 — Construire une interface mobile-first.",
+
+        "Exercice 23 — Ajouter un breakpoint pour tablette.",
+
+        "Exercice 24 — Ajouter un breakpoint pour grand écran.",
+
+        "Exercice 25 — Transformer une grille de trois colonnes en une colonne sur mobile.",
+
+        "Exercice 26 — Transformer une Hero Section horizontale en disposition verticale sur mobile.",
+
+        "Exercice 27 — Créer une navigation qui change de disposition sur petit écran.",
+
+        "Exercice 28 — Vérifier qu'une page ne produit aucun débordement horizontal.",
+
+        "Exercice 29 — Ajouter une transition aux cartes.",
+
+        "Exercice 30 — Ajouter une animation CSS légère à une section.",
+
+        "Exercice 31 — Ajouter un focus-visible accessible aux boutons et liens.",
+
+        "Exercice 32 — Créer une galerie combinant images, texte et boutons.",
+
+        "Exercice 33 — Créer une section de services avec quatre cartes responsive.",
+
+        "Exercice 34 — Créer une page À propos complète avec plusieurs sections.",
+
+        "Exercice 35 — Créer une page Services avec cards, boutons et images.",
+
+        "Exercice 36 — Créer une page Contact avec formulaire et informations de contact.",
+
+        "Exercice 37 — Utiliser Flexbox pour aligner correctement un header.",
+
+        "Exercice 38 — Utiliser Grid pour construire un layout principal avec contenu et aside.",
+
+        "Exercice 39 — Créer un layout avec header, nav, main, section, aside et footer.",
+
+        "Exercice 40 — Créer un design cohérent utilisant les mêmes variables CSS sur toutes les pages.",
+
+        "Exercice 41 — Tester le site sur téléphone et corriger les problèmes de mise en page.",
+
+        "Exercice 42 — Tester le site sur tablette et corriger les problèmes de mise en page.",
+
+        "Exercice 43 — Tester le site sur ordinateur et corriger les problèmes de mise en page.",
+
+        "Exercice 44 — Identifier une règle CSS qui est écrasée par une autre règle et expliquer pourquoi.",
+
+        "Exercice 45 — Corriger un problème de spécificité dans une interface.",
+
+        "Exercice 46 — Créer une page avec une identité visuelle cohérente comprenant couleurs, typographie, espacements et composants.",
+
+        "Exercice 47 — Construire un mini-site de quatre pages entièrement responsive.",
+
+        "Exercice 48 — Transformer une page HTML simple du Chapitre B en interface professionnelle avec les techniques du Chapitre C et du Chapitre D.",
+
+        "Exercice 49 — Tester l'accessibilité visuelle et le comportement responsive d'une interface.",
+
+        "Exercice 50 — Construire et présenter une interface Web complète réalisée avec HTML et CSS."
+    ],
+
+    devoirs:
+`DEVOIR FINAL — CRÉATION D'UN SITE WEB COMPLET RESPONSIVE
+
+Objectif :
+
+Construire un véritable mini-site Web en combinant
+les connaissances des Chapitres B, C et D.
+
+Le projet doit démontrer que l'étudiant sait passer
+de la structure HTML à une interface Web complète.
+
+
+============================================================
+1 — STRUCTURE DU PROJET
+============================================================
+
+Le projet doit contenir au minimum :
+
+index.html
+
+about.html
+
+services.html
+
+contact.html
+
+css/
+
+    style.css
+
+images/
+
+
+Les pages doivent être reliées entre elles.
+
+
+============================================================
+2 — PAGE D'ACCUEIL
+============================================================
+
+index.html doit contenir :
+
+header ;
+
+nav ;
+
+main ;
+
+hero ;
+
+section ;
+
+article ;
+
+aside ;
+
+footer.
+
+
+La Hero Section doit présenter :
+
+un titre principal ;
+
+une description ;
+
+un bouton ;
+
+une image ou illustration.
+
+
+============================================================
+3 — PAGE À PROPOS
+============================================================
+
+about.html doit contenir :
+
+titre ;
+
+présentation ;
+
+plusieurs sections ;
+
+images ;
+
+liste ;
+
+au moins une carte d'information.
+
+
+============================================================
+4 — PAGE SERVICES
+============================================================
+
+services.html doit présenter plusieurs services.
+
+Chaque service doit être présenté dans une carte.
+
+Les cartes doivent être organisées avec :
+
+CSS Grid ou Flexbox.
+
+
+============================================================
+5 — PAGE CONTACT
+============================================================
+
+contact.html doit contenir :
+
+informations de contact ;
+
+formulaire ;
+
+label ;
+
+input ;
+
+textarea ;
+
+select ;
+
+button ;
+
+fieldset ;
+
+legend.
+
+
+Le formulaire doit être responsive.
+
+
+============================================================
+6 — IDENTITÉ VISUELLE
+============================================================
+
+Définissez dans :root :
+
+couleur principale ;
+
+couleur secondaire ;
+
+couleur du texte ;
+
+couleur du fond ;
+
+couleur de surface ;
+
+rayons ;
+
+espacements.
+
+
+Utilisez les variables dans l'ensemble du projet.
+
+
+============================================================
+7 — TYPOGRAPHIE
+============================================================
+
+Définissez une hiérarchie claire pour :
+
+h1 ;
+
+h2 ;
+
+h3 ;
+
+p ;
+
+li ;
+
+liens.
+
+
+Le texte doit rester lisible sur téléphone.
+
+
+============================================================
+8 — CONTENEUR
+============================================================
+
+Créez une classe :
+
+.container
+
+Elle doit contrôler la largeur maximale du contenu.
+
+
+============================================================
+9 — NAVIGATION
+============================================================
+
+La navigation doit :
+
+relier toutes les pages ;
+
+être clairement visible ;
+
+posséder des états hover et focus ;
+
+s'adapter aux petits écrans.
+
+
+============================================================
+10 — HERO
+============================================================
+
+La Hero Section doit être organisée avec :
+
+Flexbox ou Grid.
+
+Elle doit passer à une disposition adaptée sur mobile.
+
+
+============================================================
+11 — SERVICES
+============================================================
+
+Créez au minimum quatre cartes.
+
+Chaque carte doit contenir :
+
+titre ;
+
+description ;
+
+lien ou bouton.
+
+
+Les cartes doivent être responsives.
+
+
+============================================================
+12 — GALERIE
+============================================================
+
+Ajoutez une galerie d'images responsive.
+
+Utilisez :
+
+CSS Grid ;
+
+gap ;
+
+object-fit ;
+
+aspect-ratio.
+
+
+============================================================
+13 — FORMULAIRE
+============================================================
+
+Le formulaire doit utiliser des styles pour :
+
+focus ;
+
+valid ;
+
+invalid ;
+
+disabled ;
+
+hover.
+
+
+Les champs doivent avoir une largeur adaptée
+aux petits écrans.
+
+
+============================================================
+14 — TABLEAU
+============================================================
+
+Ajoutez un tableau sur une page appropriée.
+
+Le tableau doit être placé dans un conteneur permettant
+le défilement horizontal sur petit écran si nécessaire.
+
+
+============================================================
+15 — FOOTER
+============================================================
+
+Toutes les pages doivent posséder un footer cohérent.
+
+Le footer doit contenir :
+
+nom du site ;
+
+copyright ;
+
+liens utiles ;
+
+informations complémentaires.
+
+
+============================================================
+16 — RESPONSIVE DESIGN
+============================================================
+
+Le site doit fonctionner sur :
+
+téléphone ;
+
+tablette ;
+
+ordinateur.
+
+
+Utilisez une approche mobile-first.
+
+Ajoutez les media queries nécessaires.
+
+
+============================================================
+17 — FLEXBOX
+============================================================
+
+Utilisez Flexbox au minimum pour :
+
+navigation ;
+
+header ;
+
+ou une autre partie importante du projet.
+
+
+============================================================
+18 — CSS GRID
+============================================================
+
+Utilisez Grid au minimum pour :
+
+services ;
+
+galerie ;
+
+ou une autre partie importante du projet.
+
+
+============================================================
+19 — COMPOSANTS RÉUTILISABLES
+============================================================
+
+Le projet doit utiliser des classes réutilisables.
+
+Exemples :
+
+container ;
+
+btn ;
+
+card ;
+
+badge ;
+
+form-group.
+
+
+============================================================
+20 — EFFETS
+============================================================
+
+Ajoutez raisonnablement :
+
+hover ;
+
+transition ;
+
+transform ;
+
+box-shadow.
+
+
+Les effets doivent rester utiles et ne doivent pas nuire
+à la lisibilité.
+
+
+============================================================
+21 — ACCESSIBILITÉ
+============================================================
+
+Vérifiez :
+
+contraste ;
+
+focus visible ;
+
+lisibilité ;
+
+taille des zones interactives ;
+
+alt des images ;
+
+structure des titres.
+
+
+Ajoutez :
+
+:focus-visible
+
+
+Si des animations sont utilisées, prévoyez une gestion
+appropriée de :
+
+prefers-reduced-motion.
+
+
+============================================================
+22 — COHÉRENCE
+============================================================
+
+Toutes les pages doivent utiliser :
+
+mêmes couleurs ;
+
+même typographie ;
+
+mêmes boutons ;
+
+mêmes cartes ;
+
+mêmes espacements ;
+
+même navigation ;
+
+même footer.
+
+
+Le site doit donner l'impression d'être un seul projet.
+
+
+============================================================
+23 — QUALITÉ DU CODE
+============================================================
+
+Le code doit être :
+
+indenté ;
+
+lisible ;
+
+organisé ;
+
+commenté lorsque nécessaire ;
+
+sans répétitions inutiles ;
+
+sans balises mal imbriquées ;
+
+sans règles CSS inutiles.
+
+
+============================================================
+24 — TEST
+============================================================
+
+Tester :
+
+toutes les pages ;
+
+tous les liens ;
+
+les images ;
+
+le formulaire ;
+
+les boutons ;
+
+la navigation ;
+
+le tableau ;
+
+la galerie ;
+
+les différentes tailles d'écran.
+
+
+============================================================
+25 — CORRECTION DES PROBLÈMES
+============================================================
+
+L'étudiant doit rechercher et corriger :
+
+débordement horizontal ;
+
+images déformées ;
+
+texte coupé ;
+
+boutons trop petits ;
+
+espacement incorrect ;
+
+navigation cassée ;
+
+grille non responsive ;
+
+formulaire trop large ;
+
+règles CSS contradictoires.
+
+
+============================================================
+26 — TEST DANS LE LABORATOIRE FOBAS
+============================================================
+
+Ouvrez le projet dans le Laboratoire FOBAS.
+
+Chargez :
+
+index.html
+
+Vérifiez le rendu.
+
+Naviguez ensuite vers :
+
+about.html
+
+services.html
+
+contact.html
+
+
+============================================================
+27 — PRÉSENTATION FINALE
+============================================================
+
+L'étudiant doit être capable d'expliquer :
+
+comment HTML construit la structure ;
+
+comment CSS modifie la présentation ;
+
+comment fonctionne le conteneur ;
+
+pourquoi utiliser Flexbox ;
+
+pourquoi utiliser Grid ;
+
+comment fonctionne le responsive design ;
+
+pourquoi utiliser les variables CSS ;
+
+comment fonctionne une media query ;
+
+comment corriger un problème CSS.
+
+
+============================================================
+OBJECTIF FINAL
+============================================================
+
+À la fin du Chapitre D, l'étudiant doit être capable de
+prendre une structure HTML et de la transformer en un
+véritable site Web complet.
+
+Il doit savoir :
+
+construire plusieurs pages ;
+
+relier les pages ;
+
+organiser le projet ;
+
+utiliser un fichier CSS externe ;
+
+créer des composants réutilisables ;
+
+utiliser Flexbox ;
+
+utiliser Grid ;
+
+créer une Hero Section ;
+
+créer des cartes ;
+
+créer des formulaires stylisés ;
+
+créer des galeries ;
+
+créer des tableaux responsives ;
+
+créer une navigation responsive ;
+
+utiliser les variables CSS ;
+
+gérer les états visuels ;
+
+ajouter des transitions ;
+
+utiliser des animations avec modération ;
+
+respecter les principes d'accessibilité ;
+
+tester différentes tailles d'écran ;
+
+déboguer HTML + CSS ;
+
+maintenir une cohérence visuelle.
+
+
+============================================================
+RÉSULTAT ATTENDU
+============================================================
+
+L'étudiant ne doit plus seulement savoir écrire des balises
+HTML ou des règles CSS isolées.
+
+Il doit être capable de combiner les deux technologies pour
+produire une interface Web réelle, structurée, responsive,
+accessible et cohérente.
+
+HTML construit la structure.
+
+CSS donne la présentation.
+
+L'intégration HTML + CSS produit l'interface Web.
+
+La prochaine étape pourra alors introduire JavaScript pour
+ajouter la logique, les événements, les interactions et le
+comportement dynamique aux interfaces construites.`
+},
+
+
+
+
+
+
+
+
+
+
 
     {
         id: "E",
