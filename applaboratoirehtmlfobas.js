@@ -11609,9 +11609,4650 @@ comportement dynamique aux interfaces construites.`
 
 
 
+{
+    id: "E",
+
+    title:
+        "E — JavaScript et création d'interfaces Web interactives",
+
+    theorie:
+`CHAPITRE E — JAVASCRIPT
+
+Dans les Chapitres B et C, nous avons appris à construire
+la structure et la présentation des pages Web.
+
+Dans le Chapitre D, nous avons combiné HTML et CSS pour
+construire des interfaces Web complètes, responsive,
+accessibles et cohérentes.
+
+Dans ce Chapitre E, nous allons apprendre JavaScript,
+le langage qui permet d'ajouter de la logique, des
+événements, des interactions, des calculs, des validations,
+des modifications dynamiques du contenu et des comportements
+interactifs aux interfaces Web.
+
+HTML = STRUCTURE
+CSS = PRÉSENTATION
+JAVASCRIPT = LOGIQUE + INTERACTION + COMPORTEMENT
+
+HTML construit les éléments.
+
+CSS organise et présente les éléments.
+
+JavaScript permet à la page de réagir aux actions de
+l'utilisateur et de modifier son comportement.
+
+Exemple :
+
+HTML :
+
+<button id="btn">
+    Cliquer
+</button>
+
+JavaScript :
+
+const btn = document.querySelector("#btn");
+
+btn.addEventListener("click", function () {
+    alert("Bonjour !");
+});
+
+L'utilisateur clique.
+
+JavaScript détecte l'événement.
+
+JavaScript exécute une action.
 
 
+============================================================
+ILLUSTRATION VISUELLE — HTML + CSS + JAVASCRIPT
+============================================================
 
+<div style="
+    width:100%;
+    margin:25px auto;
+    padding:18px;
+    border-radius:22px;
+    background:linear-gradient(145deg,#020617,#172554,#312e81);
+    box-shadow:0 25px 55px rgba(0,0,0,.38);
+    overflow:hidden;
+">
+
+<svg
+    viewBox="0 0 1200 780"
+    width="100%"
+    role="img"
+    aria-label="Illustration montrant HTML, CSS et JavaScript construisant une interface Web interactive"
+    style="
+        display:block;
+        width:100%;
+        height:auto;
+        min-height:560px;
+    "
+>
+
+<defs>
+
+    <linearGradient
+        id="eBackground"
+        x1="0"
+        y1="0"
+        x2="1"
+        y2="1"
+    >
+        <stop offset="0%" stop-color="#020617"/>
+        <stop offset="50%" stop-color="#172554"/>
+        <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+
+    <linearGradient
+        id="eHtml"
+        x1="0"
+        y1="0"
+        x2="1"
+        y2="1"
+    >
+        <stop offset="0%" stop-color="#fb923c"/>
+        <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <linearGradient
+        id="eCss"
+        x1="0"
+        y1="0"
+        x2="1"
+        y2="1"
+    >
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+
+    <linearGradient
+        id="eJs"
+        x1="0"
+        y1="0"
+        x2="1"
+        y2="1"
+    >
+        <stop offset="0%" stop-color="#fde047"/>
+        <stop offset="100%" stop-color="#eab308"/>
+    </linearGradient>
+
+    <linearGradient
+        id="eInterface"
+        x1="0"
+        y1="0"
+        x2="1"
+        y2="1"
+    >
+        <stop offset="0%" stop-color="#a78bfa"/>
+        <stop offset="100%"
+            stop-color="#7c3aed"
+        />
+    </linearGradient>
+
+    <linearGradient
+        id="eInteractive"
+        x1="0"
+        y1="0"
+        x2="1"
+        y2="1"
+    >
+        <stop offset="0%" stop-color="#34d399"/>
+        <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <filter id="eShadow">
+        <feDropShadow
+            dx="0"
+            dy="18"
+            stdDeviation="14"
+            flood-opacity=".42"
+        />
+    </filter>
+
+</defs>
+
+
+<rect
+    x="0"
+    y="0"
+    width="1200"
+    height="780"
+    rx="35"
+    fill="url(#eBackground)"
+/>
+
+
+<text
+    x="600"
+    y="58"
+    text-anchor="middle"
+    fill="#ffffff"
+    font-size="34"
+    font-weight="700"
+    font-family="Arial, sans-serif"
+>
+    HTML + CSS + JAVASCRIPT
+</text>
+
+<text
+    x="600"
+    y="90"
+    text-anchor="middle"
+    fill="#cbd5e1"
+    font-size="18"
+    font-family="Arial, sans-serif"
+>
+    Structure → Design → Logique → Interaction
+</text>
+
+
+<!-- HTML -->
+
+<g filter="url(#eShadow)">
+
+    <polygon
+        points="80,190 255,145 345,195 170,240"
+        fill="#fdba74"
+    />
+
+    <polygon
+        points="80,190 170,240 170,390 80,340"
+        fill="#c2410c"
+    />
+
+    <polygon
+        points="170,240 345,195 345,345 170,390"
+        fill="url(#eHtml)"
+    />
+
+    <text
+        x="257"
+        y="278"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="27"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        HTML
+    </text>
+
+    <text
+        x="257"
+        y="309"
+        text-anchor="middle"
+        fill="#fee2e2"
+        font-size="17"
+        font-family="Arial, sans-serif"
+    >
+        STRUCTURE
+    </text>
+
+</g>
+
+
+<!-- CSS -->
+
+<g filter="url(#eShadow)">
+
+    <polygon
+        points="855,190 1030,145 1120,195 945,240"
+        fill="#7dd3fc"
+    />
+
+    <polygon
+        points="855,190 945,240 945,390 855,340"
+        fill="#1d4ed8"
+    />
+
+    <polygon
+        points="945,240 1120,195 1120,345 945,390"
+        fill="url(#eCss)"
+    />
+
+    <text
+        x="1032"
+        y="278"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="27"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        CSS
+    </text>
+
+    <text
+        x="1032"
+        y="309"
+        text-anchor="middle"
+        fill="#dbeafe"
+        font-size="17"
+        font-family="Arial, sans-serif"
+    >
+        PRÉSENTATION
+    </text>
+
+</g>
+
+
+<!-- JAVASCRIPT -->
+
+<g filter="url(#eShadow)">
+
+    <polygon
+        points="400,215 600,165 800,215 600,265"
+        fill="#fef08a"
+    />
+
+    <polygon
+        points="400,215 600,265 600,450 400,400"
+        fill="#a16207"
+    />
+
+    <polygon
+        points="600,265 800,215 800,400 600,450"
+        fill="url(#eJs)"
+    />
+
+    <text
+        x="700"
+        y="315"
+        text-anchor="middle"
+        fill="#111827"
+        font-size="30"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        JAVASCRIPT
+    </text>
+
+    <text
+        x="700"
+        y="348"
+        text-anchor="middle"
+        fill="#422006"
+        font-size="17"
+        font-family="Arial, sans-serif"
+    >
+        LOGIQUE + INTERACTION
+    </text>
+
+    <text
+        x="700"
+        y="382"
+        text-anchor="middle"
+        fill="#111827"
+        font-size="14"
+        font-family="monospace"
+    >
+        events • DOM • fonctions • données
+    </text>
+
+</g>
+
+
+<!-- INTERFACE -->
+
+<g filter="url(#eShadow)">
+
+    <polygon
+        points="350,435 690,350 850,425 510,510"
+        fill="#c4b5fd"
+    />
+
+    <polygon
+        points="350,435 510,510 510,690 350,615"
+        fill="#5b21b6"
+    />
+
+    <polygon
+        points="510,510 850,425 850,605 510,690"
+        fill="url(#eInterface)"
+    />
+
+    <!-- browser -->
+
+    <rect
+        x="555"
+        y="470"
+        width="250"
+        height="120"
+        rx="12"
+        fill="#ffffff"
+        opacity=".97"
+    />
+
+    <rect
+        x="555"
+        y="470"
+        width="250"
+        height="24"
+        rx="12"
+        fill="#e2e8f0"
+    />
+
+    <circle
+        cx="573"
+        cy="482"
+        r="4"
+        fill="#ef4444"
+    />
+
+    <circle
+        cx="587"
+        cy="482"
+        r="4"
+        fill="#f59e0b"
+    />
+
+    <circle
+        cx="601"
+        cy="482"
+        r="4"
+        fill="#22c55e"
+    />
+
+    <rect
+        x="575"
+        y="510"
+        width="205"
+        height="15"
+        rx="5"
+        fill="#dbeafe"
+    />
+
+    <rect
+        x="575"
+        y="538"
+        width="85"
+        height="34"
+        rx="7"
+        fill="#c4b5fd"
+    />
+
+    <rect
+        x="672"
+        y="538"
+        width="108"
+        height="12"
+        rx="5"
+        fill="#e2e8f0"
+    />
+
+    <rect
+        x="672"
+        y="557"
+        width="85"
+        height="10"
+        rx="5"
+        fill="#e2e8f0"
+    />
+
+</g>
+
+
+<!-- INTERACTIVE COMPONENTS -->
+
+<g filter="url(#eShadow)">
+
+    <rect
+        x="110"
+        y="500"
+        width="180"
+        height="90"
+        rx="18"
+        fill="#064e3b"
+        stroke="#34d399"
+        stroke-width="5"
+    />
+
+    <text
+        x="200"
+        y="535"
+        text-anchor="middle"
+        fill="#a7f3d0"
+        font-size="18"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        ÉVÉNEMENT
+    </text>
+
+    <text
+        x="200"
+        y="563"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="15"
+        font-family="monospace"
+    >
+        click()
+    </text>
+
+
+    <rect
+        x="900"
+        y="500"
+        width="180"
+        height="90"
+        rx="18"
+        fill="#064e3b"
+        stroke="#34d399"
+        stroke-width="5"
+    />
+
+    <text
+        x="990"
+        y="535"
+        text-anchor="middle"
+        fill="#a7f3d0"
+        font-size="18"
+        font-weight="700"
+        font-family="Arial, sans-serif"
+    >
+        DOM
+    </text>
+
+    <text
+        x="990"
+        y="563"
+        text-anchor="middle"
+        fill="#ffffff"
+        font-size="15"
+        font-family="monospace"
+    >
+        modify()
+    </text>
+
+</g>
+
+
+<!-- CONNECTIONS -->
+
+<path
+    d="M345 270 C400 270 430 270 470 285"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="4"
+    stroke-dasharray="12 9"
+/>
+
+<path
+    d="M730 285 C800 270 840 270 855 270"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="4"
+    stroke-dasharray="12 9"
+/>
+
+<path
+    d="M600 450 C600 470 600 480 600 500"
+    fill="none"
+    stroke="#fde047"
+    stroke-width="5"
+    stroke-dasharray="10 8"
+/>
+
+<path
+    d="M290 545 C350 545 390 545 510 570"
+    fill="none"
+    stroke="#34d399"
+    stroke-width="4"
+    stroke-dasharray="10 8"
+/>
+
+<path
+    d="M850 550 C875 550 885 545 900 545"
+    fill="none"
+    stroke="#34d399"
+    stroke-width="4"
+    stroke-dasharray="10 8"
+/>
+
+
+<text
+    x="600"
+    y="735"
+    text-anchor="middle"
+    fill="#e2e8f0"
+    font-size="17"
+    font-family="Arial, sans-serif"
+>
+    HTML → STRUCTURE | CSS → DESIGN | JAVASCRIPT → LOGIQUE + INTERACTION
+</text>
+
+</svg>
+</div>
+
+
+============================================================
+1 — QU'EST-CE QUE JAVASCRIPT ?
+============================================================
+
+JavaScript est un langage de programmation utilisé notamment
+pour rendre les pages Web interactives et dynamiques.
+
+Il peut :
+
+modifier le contenu HTML ;
+
+modifier les styles ;
+
+réagir aux événements ;
+
+effectuer des calculs ;
+
+contrôler des formulaires ;
+
+valider des données ;
+
+manipuler des tableaux ;
+
+manipuler des objets ;
+
+stocker des données localement ;
+
+communiquer avec des serveurs ;
+
+consommer des API ;
+
+créer des interfaces dynamiques.
+
+
+============================================================
+2 — HTML + CSS + JAVASCRIPT
+============================================================
+
+Une application Web peut être comprise ainsi :
+
+HTML
+    ↓
+Structure
+
+CSS
+    ↓
+Présentation
+
+JavaScript
+    ↓
+Logique et comportement
+
+
+Exemple :
+
+HTML :
+
+<button id="counterButton">
+    Ajouter
+</button>
+
+<p id="counterValue">
+    0
+</p>
+
+
+JavaScript :
+
+let counter = 0;
+
+const button =
+    document.querySelector("#counterButton");
+
+const value =
+    document.querySelector("#counterValue");
+
+button.addEventListener("click", () => {
+
+    counter++;
+
+    value.textContent = counter;
+
+});
+
+
+Le HTML crée les éléments.
+
+Le CSS peut les présenter.
+
+JavaScript contrôle le comportement.
+
+
+============================================================
+3 — COMMENT CHARGER JAVASCRIPT
+============================================================
+
+Méthode recommandée :
+
+<script src="js/app.js"></script>
+
+Il est généralement préférable de placer le script
+avant la fermeture de :
+
+</body>
+
+
+On peut également utiliser :
+
+<script
+    src="js/app.js"
+    defer
+></script>
+
+
+Avec defer, le navigateur charge le script tout en
+préparant la page et exécute le script après l'analyse
+du document HTML.
+
+
+============================================================
+4 — PREMIER PROGRAMME
+============================================================
+
+Exemple :
+
+console.log("Bonjour JavaScript");
+
+
+La fonction console.log() permet d'afficher une information
+dans la console du navigateur.
+
+La console est particulièrement utile pour le développement
+et le débogage.
+
+
+============================================================
+5 — COMMENTAIRES
+============================================================
+
+Commentaire sur une ligne :
+
+// Ceci est un commentaire
+
+
+Commentaire sur plusieurs lignes :
+
+/*
+    Ceci est un commentaire
+    sur plusieurs lignes.
+*/
+
+
+Les commentaires servent à expliquer le code lorsque cela
+est nécessaire.
+
+
+============================================================
+6 — VARIABLES
+============================================================
+
+JavaScript permet de créer des variables.
+
+Exemple :
+
+let nom = "FOBAS";
+
+const ageMinimum = 18;
+
+
+Utilisez :
+
+let
+
+lorsqu'une variable doit pouvoir être réaffectée.
+
+Utilisez :
+
+const
+
+lorsque la référence ne doit pas être réaffectée.
+
+
+Exemple :
+
+let compteur = 0;
+
+compteur = 1;
+
+
+Avec const :
+
+const site = "FOBAS";
+
+
+============================================================
+7 — TYPES DE DONNÉES
+============================================================
+
+JavaScript possède plusieurs types de données.
+
+Exemples :
+
+String :
+
+const nom = "Jean";
+
+
+Number :
+
+const age = 25;
+
+
+Boolean :
+
+const actif = true;
+
+
+Undefined :
+
+let valeur;
+
+
+Null :
+
+const resultat = null;
+
+
+Object :
+
+const utilisateur = {
+    nom: "Jean",
+    age: 25
+};
+
+
+Array :
+
+const langues = [
+    "HTML",
+    "CSS",
+    "JavaScript"
+];
+
+
+============================================================
+8 — STRING
+============================================================
+
+Une chaîne de caractères est un texte.
+
+Exemple :
+
+const message = "Bonjour";
+
+
+On peut utiliser les template literals :
+
+const nom = "Jean";
+
+const message =
+    \`Bonjour \${nom}\`;
+
+
+Cela permet d'intégrer des variables dans une chaîne.
+
+
+============================================================
+9 — NOMBRES
+============================================================
+
+Exemples :
+
+const a = 10;
+const b = 5;
+
+const addition = a + b;
+const soustraction = a - b;
+const multiplication = a * b;
+const division = a / b;
+
+
+JavaScript peut également utiliser :
+
+%
+
+pour obtenir le reste d'une division.
+
+
+Exemple :
+
+const reste = 10 % 3;
+
+
+Résultat :
+
+1
+
+
+============================================================
+10 — OPÉRATEURS
+============================================================
+
+Opérateurs arithmétiques :
+
++
+
+-
+
+*
+
+/
+
+%
+
+**
+
+
+Opérateurs de comparaison :
+
+===
+
+!==
+
+>
+
+<
+
+>=
+
+<=
+
+
+Opérateurs logiques :
+
+&&
+
+||
+
+!
+
+
+Il est recommandé de privilégier :
+
+===
+
+plutôt que des comparaisons implicites lorsque cela
+correspond au besoin.
+
+
+============================================================
+11 — INCRÉMENTATION ET DÉCRÉMENTATION
+============================================================
+
+Exemple :
+
+let compteur = 0;
+
+compteur++;
+
+compteur--;
+
+
+On peut également écrire :
+
+compteur += 5;
+
+compteur -= 2;
+
+compteur *= 2;
+
+compteur /= 2;
+
+
+============================================================
+12 — CONDITIONS
+============================================================
+
+JavaScript peut prendre des décisions.
+
+Exemple :
+
+const age = 20;
+
+if (age >= 18) {
+
+    console.log("Majeur");
+
+} else {
+
+    console.log("Mineur");
+
+}
+
+
+Plusieurs conditions :
+
+if (score >= 90) {
+
+    console.log("Excellent");
+
+} else if (score >= 75) {
+
+    console.log("Très bien");
+
+} else {
+
+    console.log("À améliorer");
+
+}
+
+
+============================================================
+13 — OPÉRATEUR TERNAIRE
+============================================================
+
+Exemple :
+
+const age = 20;
+
+const statut =
+    age >= 18
+        ? "Majeur"
+        : "Mineur";
+
+
+L'opérateur ternaire est utile pour des décisions simples.
+
+Il ne faut pas l'utiliser pour remplacer des conditions
+complexes difficiles à lire.
+
+
+============================================================
+14 — SWITCH
+============================================================
+
+Exemple :
+
+const niveau = "débutant";
+
+switch (niveau) {
+
+    case "débutant":
+        console.log("Niveau 1");
+        break;
+
+    case "intermédiaire":
+        console.log("Niveau 2");
+        break;
+
+    case "expert":
+        console.log("Niveau 3");
+        break;
+
+    default:
+        console.log("Niveau inconnu");
+
+}
+
+
+============================================================
+15 — BOUCLE FOR
+============================================================
+
+Exemple :
+
+for (
+    let i = 0;
+    i < 5;
+    i++
+) {
+
+    console.log(i);
+
+}
+
+
+Les boucles permettent de répéter une opération.
+
+
+============================================================
+16 — BOUCLE WHILE
+============================================================
+
+Exemple :
+
+let compteur = 0;
+
+while (compteur < 5) {
+
+    console.log(compteur);
+
+    compteur++;
+
+}
+
+
+La condition doit pouvoir devenir fausse afin d'éviter
+une boucle infinie.
+
+
+============================================================
+17 — BOUCLE DO...WHILE
+============================================================
+
+Exemple :
+
+let nombre = 0;
+
+do {
+
+    console.log(nombre);
+
+    nombre++;
+
+} while (nombre < 5);
+
+
+Le bloc est exécuté au moins une fois.
+
+
+============================================================
+18 — BREAK ET CONTINUE
+============================================================
+
+break permet d'arrêter une boucle.
+
+Exemple :
+
+for (
+    let i = 0;
+    i < 10;
+    i++
+) {
+
+    if (i === 5) {
+        break;
+    }
+
+}
+
+
+continue permet de passer à l'itération suivante.
+
+
+============================================================
+19 — FONCTIONS
+============================================================
+
+Une fonction regroupe une logique réutilisable.
+
+Exemple :
+
+function saluer() {
+
+    console.log("Bonjour");
+
+}
+
+
+Appel :
+
+saluer();
+
+
+============================================================
+20 — PARAMÈTRES ET RETOUR
+============================================================
+
+Exemple :
+
+function additionner(a, b) {
+
+    return a + b;
+
+}
+
+
+Utilisation :
+
+const resultat =
+    additionner(10, 5);
+
+
+Une fonction peut recevoir des paramètres et retourner
+une valeur.
+
+
+============================================================
+21 — FONCTIONS FLÉCHÉES
+============================================================
+
+Exemple :
+
+const additionner =
+    (a, b) => {
+
+        return a + b;
+
+    };
+
+
+Pour une expression simple :
+
+const carre =
+    nombre => nombre * nombre;
+
+
+Les fonctions fléchées sont très utilisées dans
+les applications JavaScript modernes.
+
+
+============================================================
+22 — PORTÉE DES VARIABLES
+============================================================
+
+Les variables déclarées avec let et const respectent
+la portée des blocs.
+
+Exemple :
+
+if (true) {
+
+    let message = "Bonjour";
+
+}
+
+
+message n'est pas accessible en dehors de ce bloc.
+
+
+Une bonne gestion de la portée permet d'éviter
+des conflits et des comportements inattendus.
+
+
+============================================================
+23 — DOM
+============================================================
+
+DOM signifie :
+
+Document Object Model.
+
+Le navigateur transforme le document HTML en une structure
+que JavaScript peut manipuler.
+
+JavaScript peut ainsi :
+
+chercher des éléments ;
+
+modifier leur contenu ;
+
+modifier leurs attributs ;
+
+modifier leurs classes ;
+
+créer des éléments ;
+
+supprimer des éléments ;
+
+écouter des événements.
+
+
+============================================================
+24 — SÉLECTIONNER UN ÉLÉMENT
+============================================================
+
+Exemple :
+
+const titre =
+    document.querySelector("h1");
+
+
+Avec un ID :
+
+const bouton =
+    document.querySelector("#btn");
+
+
+Avec une classe :
+
+const cartes =
+    document.querySelectorAll(".card");
+
+
+querySelector retourne le premier élément correspondant.
+
+querySelectorAll retourne une collection d'éléments.
+
+
+============================================================
+25 — MODIFIER LE TEXTE
+============================================================
+
+Exemple :
+
+const titre =
+    document.querySelector("#title");
+
+titre.textContent =
+    "Nouveau titre";
+
+
+textContent permet de modifier le texte.
+
+
+Pour du contenu HTML contrôlé :
+
+element.innerHTML = "...";
+
+
+Attention :
+
+innerHTML ne doit pas être utilisé avec des données
+utilisateur non fiables sans traitement approprié.
+
+
+============================================================
+26 — ATTRIBUTS HTML
+============================================================
+
+JavaScript peut lire et modifier des attributs.
+
+Exemple :
+
+const image =
+    document.querySelector("img");
+
+image.setAttribute(
+    "alt",
+    "Logo FOBAS"
+);
+
+
+Lire :
+
+const valeur =
+    image.getAttribute("alt");
+
+
+Supprimer :
+
+image.removeAttribute("title");
+
+
+============================================================
+27 — CLASSES CSS
+============================================================
+
+JavaScript peut contrôler les classes CSS.
+
+Exemple :
+
+element.classList.add("active");
+
+element.classList.remove("active");
+
+element.classList.toggle("active");
+
+element.classList.contains("active");
+
+
+Cette technique permet de séparer la logique JavaScript
+de la présentation CSS.
+
+
+============================================================
+28 — STYLES DIRECTS
+============================================================
+
+JavaScript peut modifier directement un style.
+
+Exemple :
+
+element.style.display = "none";
+
+
+Cependant, pour une interface organisée, il est souvent
+préférable de modifier une classe CSS :
+
+element.classList.add("hidden");
+
+
+CSS :
+
+.hidden {
+    display: none;
+}
+
+
+============================================================
+29 — CRÉER DES ÉLÉMENTS
+============================================================
+
+Exemple :
+
+const paragraph =
+    document.createElement("p");
+
+paragraph.textContent =
+    "Nouveau contenu";
+
+
+Ajouter :
+
+document.body.appendChild(
+    paragraph
+);
+
+
+============================================================
+30 — SUPPRIMER DES ÉLÉMENTS
+============================================================
+
+Exemple :
+
+const element =
+    document.querySelector(".card");
+
+element.remove();
+
+
+La suppression doit être utilisée lorsque l'interface
+doit réellement retirer l'élément du DOM.
+
+
+============================================================
+31 — ÉVÉNEMENTS
+============================================================
+
+Un événement représente une action ou un changement.
+
+Exemples :
+
+click ;
+
+dblclick ;
+
+input ;
+
+change ;
+
+submit ;
+
+focus ;
+
+blur ;
+
+keydown ;
+
+keyup ;
+
+mouseover ;
+
+mouseout ;
+
+DOMContentLoaded.
+
+
+============================================================
+32 — addEventListener()
+============================================================
+
+Exemple :
+
+const button =
+    document.querySelector("#btn");
+
+button.addEventListener(
+    "click",
+    function () {
+
+        console.log("Cliqué");
+
+    }
+);
+
+
+Cette méthode permet d'attacher un gestionnaire
+d'événement à un élément.
+
+
+============================================================
+33 — ÉVÉNEMENTS DE SOURIS ET TACTILES
+============================================================
+
+Pour une interface moderne, il faut également tenir compte
+des appareils tactiles.
+
+Les événements Pointer Events peuvent être utilisés :
+
+pointerdown ;
+
+pointermove ;
+
+pointerup ;
+
+pointercancel.
+
+
+Ils peuvent faciliter la création d'interactions
+compatibles avec souris, stylet et tactile.
+
+
+============================================================
+34 — OBJET EVENT
+============================================================
+
+Exemple :
+
+button.addEventListener(
+    "click",
+    function (event) {
+
+        console.log(event);
+
+    }
+);
+
+
+L'objet event contient des informations sur l'événement.
+
+
+============================================================
+35 — preventDefault()
+============================================================
+
+Certains événements possèdent un comportement par défaut.
+
+Exemple :
+
+form.addEventListener(
+    "submit",
+    function (event) {
+
+        event.preventDefault();
+
+    }
+);
+
+
+Cela permet notamment de contrôler un formulaire
+avec JavaScript avant son envoi.
+
+
+============================================================
+36 — FORMULAIRES
+============================================================
+
+JavaScript peut lire les champs d'un formulaire.
+
+Exemple :
+
+const nameInput =
+    document.querySelector("#name");
+
+console.log(nameInput.value);
+
+
+Pour écouter la soumission :
+
+form.addEventListener(
+    "submit",
+    function (event) {
+
+        event.preventDefault();
+
+        console.log(
+            nameInput.value
+        );
+
+    }
+);
+
+
+============================================================
+37 — VALIDATION DES DONNÉES
+============================================================
+
+Un formulaire peut être vérifié avant traitement.
+
+Exemple :
+
+if (nameInput.value.trim() === "") {
+
+    console.log(
+        "Le nom est obligatoire."
+    );
+
+}
+
+
+JavaScript peut vérifier :
+
+champs obligatoires ;
+
+longueur ;
+
+format ;
+
+valeurs numériques ;
+
+correspondance de champs ;
+
+conditions spécifiques.
+
+
+La validation côté client améliore l'expérience utilisateur,
+mais elle ne remplace pas une validation côté serveur
+pour les applications qui communiquent avec un serveur.
+
+
+============================================================
+38 — TABLEAUX
+============================================================
+
+Exemple :
+
+const languages = [
+    "HTML",
+    "CSS",
+    "JavaScript"
+];
+
+
+Accéder à un élément :
+
+languages[0];
+
+
+Longueur :
+
+languages.length;
+
+
+Ajouter :
+
+languages.push("PHP");
+
+
+Retirer le dernier :
+
+languages.pop();
+
+
+============================================================
+39 — MÉTHODES DE TABLEAUX
+============================================================
+
+Méthodes importantes :
+
+push()
+
+pop()
+
+shift()
+
+unshift()
+
+slice()
+
+splice()
+
+includes()
+
+indexOf()
+
+join()
+
+concat()
+
+
+Ces méthodes permettent de manipuler les données.
+
+
+============================================================
+40 — forEach()
+============================================================
+
+Exemple :
+
+const languages = [
+    "HTML",
+    "CSS",
+    "JavaScript"
+];
+
+languages.forEach(
+    language => {
+
+        console.log(language);
+
+    }
+);
+
+
+forEach permet d'exécuter une fonction pour chaque
+élément du tableau.
+
+
+============================================================
+41 — map()
+============================================================
+
+map permet de produire un nouveau tableau.
+
+Exemple :
+
+const numbers = [
+    1,
+    2,
+    3
+];
+
+const doubles =
+    numbers.map(
+        number => number * 2
+    );
+
+
+Résultat :
+
+[2, 4, 6]
+
+
+============================================================
+42 — filter()
+============================================================
+
+filter permet de conserver certains éléments.
+
+Exemple :
+
+const numbers = [
+    5,
+    10,
+    15,
+    20
+];
+
+const results =
+    numbers.filter(
+        number => number >= 15
+    );
+
+
+Résultat :
+
+[15, 20]
+
+
+============================================================
+43 — find()
+============================================================
+
+find retourne le premier élément correspondant.
+
+Exemple :
+
+const users = [
+    {
+        id: 1,
+        name: "Jean"
+    },
+    {
+        id: 2,
+        name: "Marie"
+    }
+];
+
+const user =
+    users.find(
+        item => item.id === 2
+    );
+
+
+============================================================
+44 — some() ET every()
+============================================================
+
+some vérifie si au moins un élément respecte
+une condition.
+
+every vérifie si tous les éléments respectent
+une condition.
+
+
+Exemple :
+
+const numbers = [
+    10,
+    20,
+    30
+];
+
+numbers.some(
+    number => number > 25
+);
+
+numbers.every(
+    number => number > 0
+);
+
+
+============================================================
+45 — OBJETS
+============================================================
+
+Un objet regroupe des propriétés et éventuellement
+des méthodes.
+
+Exemple :
+
+const student = {
+
+    name: "Jean",
+
+    age: 20,
+
+    level: "NS3"
+
+};
+
+
+Lire une propriété :
+
+student.name;
+
+
+Ou :
+
+student["name"];
+
+
+Modifier :
+
+student.age = 21;
+
+
+Ajouter :
+
+student.city = "Port-au-Prince";
+
+
+============================================================
+46 — OBJETS ET MÉTHODES
+============================================================
+
+Exemple :
+
+const user = {
+
+    name: "Jean",
+
+    sayHello() {
+
+        console.log(
+            "Bonjour " + this.name
+        );
+
+    }
+
+};
+
+
+Appel :
+
+user.sayHello();
+
+
+============================================================
+47 — DESTRUCTURING
+============================================================
+
+Exemple :
+
+const user = {
+
+    name: "Jean",
+
+    age: 25
+
+};
+
+
+On peut écrire :
+
+const {
+    name,
+    age
+} = user;
+
+
+Pour un tableau :
+
+const numbers = [
+    10,
+    20
+];
+
+const [
+    first,
+    second
+] = numbers;
+
+
+============================================================
+48 — SPREAD OPERATOR
+============================================================
+
+Exemple :
+
+const first = [
+    1,
+    2
+];
+
+const second = [
+    3,
+    4
+];
+
+const combined = [
+    ...first,
+    ...second
+];
+
+
+Il permet notamment de créer des copies ou de combiner
+des données.
+
+
+============================================================
+49 — JSON
+============================================================
+
+JSON signifie :
+
+JavaScript Object Notation.
+
+Il est couramment utilisé pour échanger des données.
+
+Exemple :
+
+const user = {
+    name: "Jean",
+    age: 25
+};
+
+
+Convertir en JSON :
+
+const json =
+    JSON.stringify(user);
+
+
+Reconvertir :
+
+const object =
+    JSON.parse(json);
+
+
+============================================================
+50 — localStorage
+============================================================
+
+localStorage permet de conserver des données dans
+le navigateur.
+
+Exemple :
+
+localStorage.setItem(
+    "name",
+    "Jean"
+);
+
+
+Lire :
+
+const name =
+    localStorage.getItem("name");
+
+
+Supprimer :
+
+localStorage.removeItem("name");
+
+
+Tout supprimer :
+
+localStorage.clear();
+
+
+Pour les objets :
+
+localStorage.setItem(
+    "user",
+    JSON.stringify(user)
+);
+
+
+Puis :
+
+const savedUser =
+    JSON.parse(
+        localStorage.getItem("user")
+    );
+
+
+Il faut gérer le cas où aucune donnée n'existe.
+
+
+============================================================
+51 — DATE ET HEURE
+============================================================
+
+JavaScript possède l'objet Date.
+
+Exemple :
+
+const now = new Date();
+
+
+On peut obtenir différentes informations :
+
+now.getFullYear();
+
+now.getMonth();
+
+now.getDate();
+
+now.getHours();
+
+now.getMinutes();
+
+
+Attention :
+
+getMonth() commence à 0 pour janvier.
+
+
+============================================================
+52 — MATH
+============================================================
+
+L'objet Math fournit plusieurs opérations.
+
+Exemples :
+
+Math.round()
+
+Math.floor()
+
+Math.ceil()
+
+Math.abs()
+
+Math.max()
+
+Math.min()
+
+Math.random()
+
+
+Exemple :
+
+const random =
+    Math.floor(
+        Math.random() * 10
+    );
+
+
+============================================================
+53 — CONVERSION DE DONNÉES
+============================================================
+
+Convertir en nombre :
+
+Number("25");
+
+
+Entier :
+
+parseInt("25", 10);
+
+
+Nombre décimal :
+
+parseFloat("25.5");
+
+
+Convertir en chaîne :
+
+String(25);
+
+
+Il faut vérifier les conversions lorsque les données
+proviennent d'un utilisateur.
+
+
+============================================================
+54 — NULL, UNDEFINED ET VALEURS ABSENTES
+============================================================
+
+undefined signifie généralement qu'une valeur n'a pas
+été définie.
+
+null représente volontairement l'absence de valeur.
+
+Exemple :
+
+let value;
+
+const result = null;
+
+
+Une application doit prévoir les valeurs absentes
+avant de les utiliser.
+
+
+============================================================
+55 — OPTIONAL CHAINING
+============================================================
+
+Exemple :
+
+const city =
+    user?.address?.city;
+
+
+Cela permet d'éviter certaines erreurs lorsque
+des propriétés intermédiaires n'existent pas.
+
+
+============================================================
+56 — NULLISH COALESCING
+============================================================
+
+Exemple :
+
+const name =
+    user.name ?? "Utilisateur";
+
+
+La valeur de remplacement est utilisée lorsque
+la valeur est null ou undefined.
+
+
+============================================================
+57 — MODULES JAVASCRIPT
+============================================================
+
+Un projet important peut être divisé en plusieurs fichiers.
+
+Exemple :
+
+js/
+
+    app.js
+
+    ui.js
+
+    storage.js
+
+    validation.js
+
+
+Export :
+
+export function saveData() {
+
+}
+
+
+Import :
+
+import {
+    saveData
+} from "./storage.js";
+
+
+Les modules permettent de mieux organiser
+les grands projets.
+
+
+============================================================
+58 — ASYNC ET PROMISES
+============================================================
+
+Certaines opérations sont asynchrones.
+
+Exemple :
+
+setTimeout(
+    () => {
+
+        console.log("Terminé");
+
+    },
+    1000
+);
+
+
+Les Promises représentent également des opérations
+qui peuvent réussir ou échouer.
+
+Exemple :
+
+const promise =
+    new Promise(
+        (resolve, reject) => {
+
+            resolve("OK");
+
+        }
+    );
+
+
+============================================================
+59 — async / await
+============================================================
+
+Exemple :
+
+async function loadData() {
+
+    const result =
+        await somePromise;
+
+    console.log(result);
+
+}
+
+
+async et await permettent d'écrire du code asynchrone
+de manière plus lisible.
+
+
+============================================================
+60 — FETCH ET API
+============================================================
+
+fetch() permet de communiquer avec une ressource
+HTTP.
+
+Exemple :
+
+async function loadUsers() {
+
+    const response =
+        await fetch("/api/users");
+
+    const data =
+        await response.json();
+
+    console.log(data);
+
+}
+
+
+Dans une application réelle, il faut vérifier
+les erreurs réseau et le statut HTTP.
+
+
+============================================================
+61 — GESTION DES ERREURS
+============================================================
+
+JavaScript fournit :
+
+try
+
+catch
+
+finally
+
+
+Exemple :
+
+try {
+
+    const data =
+        JSON.parse(text);
+
+} catch (error) {
+
+    console.error(
+        "Erreur :",
+        error
+    );
+
+} finally {
+
+    console.log(
+        "Opération terminée"
+    );
+
+}
+
+
+============================================================
+62 — THROW
+============================================================
+
+Une fonction peut signaler volontairement une erreur.
+
+Exemple :
+
+function divide(a, b) {
+
+    if (b === 0) {
+
+        throw new Error(
+            "Division par zéro impossible."
+        );
+
+    }
+
+    return a / b;
+
+}
+
+
+============================================================
+63 — DEBUGGING
+============================================================
+
+Les outils principaux sont :
+
+console.log()
+
+console.warn()
+
+console.error()
+
+console.table()
+
+debugger
+
+
+Exemple :
+
+console.table(users);
+
+
+Le navigateur permet également d'utiliser
+les DevTools pour :
+
+inspecter le DOM ;
+
+voir les erreurs ;
+
+examiner les événements ;
+
+placer des breakpoints ;
+
+observer les variables ;
+
+tester le code.
+
+
+============================================================
+64 — ARCHITECTURE D'UNE APPLICATION
+============================================================
+
+Un projet JavaScript peut séparer :
+
+données ;
+
+interface ;
+
+événements ;
+
+stockage ;
+
+validation ;
+
+communication réseau.
+
+
+Exemple :
+
+js/
+
+    app.js
+
+    state.js
+
+    ui.js
+
+    events.js
+
+    storage.js
+
+    api.js
+
+
+La séparation facilite la maintenance.
+
+
+============================================================
+65 — ÉTAT D'UNE INTERFACE
+============================================================
+
+Une interface interactive possède souvent un état.
+
+Exemple :
+
+const state = {
+
+    count: 0,
+
+    isMenuOpen: false,
+
+    currentPage: 1
+
+};
+
+
+JavaScript modifie l'état.
+
+L'interface peut ensuite être mise à jour.
+
+
+============================================================
+66 — CRÉER UN MENU INTERACTIF
+============================================================
+
+HTML :
+
+<button
+    id="menuButton"
+>
+    Menu
+</button>
+
+<nav id="mobileMenu">
+    ...
+</nav>
+
+
+JavaScript :
+
+const menuButton =
+    document.querySelector(
+        "#menuButton"
+    );
+
+const mobileMenu =
+    document.querySelector(
+        "#mobileMenu"
+    );
+
+menuButton.addEventListener(
+    "click",
+    () => {
+
+        mobileMenu.classList.toggle(
+            "open"
+        );
+
+    }
+);
+
+
+CSS peut ensuite contrôler
+l'apparence de la classe open.
+
+
+============================================================
+67 — CRÉER UN COMPTEUR
+============================================================
+
+let count = 0;
+
+const button =
+    document.querySelector("#add");
+
+const output =
+    document.querySelector("#output");
+
+button.addEventListener(
+    "click",
+    () => {
+
+        count++;
+
+        output.textContent =
+            count;
+
+    }
+);
+
+
+============================================================
+68 — CRÉER UNE LISTE DYNAMIQUE
+============================================================
+
+Exemple :
+
+const tasks = [
+    "Apprendre HTML",
+    "Apprendre CSS",
+    "Apprendre JavaScript"
+];
+
+
+JavaScript peut générer les éléments HTML
+correspondants dynamiquement.
+
+Il faut éviter d'insérer des données utilisateur
+non fiables avec innerHTML.
+
+
+============================================================
+69 — RECHERCHE ET FILTRAGE
+============================================================
+
+Une interface peut filtrer des données.
+
+Exemple :
+
+const results =
+    products.filter(
+        product =>
+            product.name
+                .toLowerCase()
+                .includes(
+                    search.toLowerCase()
+                )
+    );
+
+
+Cette logique peut être utilisée pour :
+
+recherche ;
+
+catalogue ;
+
+bibliothèque ;
+
+liste d'étudiants ;
+
+cours ;
+
+produits.
+
+
+============================================================
+70 — PAGINATION
+============================================================
+
+Une grande quantité de données peut être divisée
+en plusieurs pages.
+
+Variables possibles :
+
+currentPage ;
+
+itemsPerPage ;
+
+totalPages.
+
+
+JavaScript calcule les éléments à afficher
+pour la page actuelle.
+
+
+============================================================
+71 — INTERACTION AVEC CSS
+============================================================
+
+JavaScript ne doit pas nécessairement modifier
+les propriétés CSS une par une.
+
+Préférer souvent :
+
+element.classList.add("active");
+
+ou :
+
+element.classList.remove("hidden");
+
+
+Le CSS conserve la responsabilité de la présentation.
+
+
+============================================================
+72 — ACCESSIBILITÉ ET JAVASCRIPT
+============================================================
+
+JavaScript ne doit pas rendre une interface
+inaccessible.
+
+Il faut notamment :
+
+préserver le clavier ;
+
+conserver les boutons et liens appropriés ;
+
+gérer le focus ;
+
+indiquer les états ;
+
+utiliser les attributs ARIA lorsque nécessaire ;
+
+ne pas dépendre uniquement de la souris ;
+
+prévoir les utilisateurs tactiles.
+
+
+============================================================
+73 — CLAVIER
+============================================================
+
+Exemple :
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Escape") {
+
+            console.log(
+                "Échap détecté"
+            );
+
+        }
+
+    }
+);
+
+
+Les interfaces importantes doivent rester utilisables
+avec le clavier.
+
+
+============================================================
+74 — DELEGATION D'ÉVÉNEMENTS
+============================================================
+
+Lorsque plusieurs éléments dynamiques possèdent
+le même type d'interaction, on peut utiliser
+la délégation d'événements.
+
+Exemple :
+
+container.addEventListener(
+    "click",
+    event => {
+
+        const button =
+            event.target.closest(
+                ".delete-button"
+            );
+
+        if (!button) return;
+
+        console.log(
+            "Suppression demandée"
+        );
+
+    }
+);
+
+
+Cette technique est particulièrement utile
+pour les listes dynamiques.
+
+
+============================================================
+75 — PERFORMANCE
+============================================================
+
+Un bon code JavaScript doit éviter :
+
+boucles inutiles ;
+
+calculs répétés ;
+
+manipulations DOM excessives ;
+
+écouteurs inutiles ;
+
+chargement inutile de ressources.
+
+
+Il faut également éviter de bloquer inutilement
+le thread principal.
+
+
+============================================================
+76 — SÉCURITÉ JAVASCRIPT DE BASE
+============================================================
+
+Il faut être prudent avec :
+
+innerHTML ;
+
+eval() ;
+
+données utilisateur ;
+
+URLs ;
+
+contenus externes ;
+
+stockage local.
+
+
+Ne jamais utiliser :
+
+eval()
+
+pour exécuter arbitrairement du texte utilisateur.
+
+Les données utilisateur doivent être traitées
+comme non fiables.
+
+
+============================================================
+77 — STRUCTURE D'UN PROJET JAVASCRIPT
+============================================================
+
+Exemple :
+
+mon-app/
+
+    index.html
+
+    about.html
+
+    css/
+
+        style.css
+
+    js/
+
+        app.js
+
+        ui.js
+
+        storage.js
+
+        validation.js
+
+        api.js
+
+    images/
+
+
+Cette organisation facilite l'évolution du projet.
+
+
+============================================================
+78 — CYCLE D'UNE INTERACTION
+============================================================
+
+Une interaction Web peut suivre ce modèle :
+
+1. L'utilisateur agit.
+
+2. Un événement est déclenché.
+
+3. JavaScript reçoit l'événement.
+
+4. JavaScript vérifie les données.
+
+5. JavaScript modifie l'état.
+
+6. JavaScript met à jour le DOM.
+
+7. CSS présente le nouvel état.
+
+
+Exemple :
+
+CLICK
+  ↓
+EVENT
+  ↓
+FUNCTION
+  ↓
+STATE
+  ↓
+DOM
+  ↓
+CSS
+  ↓
+NOUVELLE INTERFACE
+
+
+============================================================
+79 — BONNES PRATIQUES
+============================================================
+
+Utiliser des noms explicites.
+
+Éviter les variables inutiles.
+
+Préférer const lorsque possible.
+
+Utiliser let lorsque la réaffectation est nécessaire.
+
+Créer des fonctions courtes et compréhensibles.
+
+Éviter la duplication.
+
+Séparer logique, présentation et données.
+
+Valider les données.
+
+Gérer les erreurs.
+
+Tester les cas normaux et les cas limites.
+
+Commenter uniquement lorsque cela apporte
+une véritable information.
+
+
+============================================================
+80 — CONSTRUCTION D'UNE APPLICATION WEB INTERACTIVE
+============================================================
+
+Progression recommandée :
+
+1. créer le HTML ;
+
+2. créer le CSS ;
+
+3. charger JavaScript ;
+
+4. sélectionner les éléments ;
+
+5. créer l'état ;
+
+6. créer les fonctions ;
+
+7. écouter les événements ;
+
+8. traiter les données ;
+
+9. modifier le DOM ;
+
+10. utiliser les classes CSS ;
+
+11. gérer les formulaires ;
+
+12. valider les entrées ;
+
+13. stocker les données si nécessaire ;
+
+14. charger les données si nécessaire ;
+
+15. gérer les erreurs ;
+
+16. tester ;
+
+17. déboguer ;
+
+18. optimiser ;
+
+19. vérifier l'accessibilité ;
+
+20. finaliser.
+
+
+============================================================
+RÈGLE FONDAMENTALE DU CHAPITRE E
+============================================================
+
+Ne pas écrire du JavaScript au hasard.
+
+Chaque variable doit avoir une fonction.
+
+Chaque fonction doit avoir une responsabilité claire.
+
+Chaque événement doit avoir une raison.
+
+Chaque modification du DOM doit répondre à un besoin
+de l'interface.
+
+JavaScript doit contrôler la logique et le comportement.
+
+HTML construit.
+
+CSS présente.
+
+JavaScript fait fonctionner l'interface.
+
+HTML + CSS + JavaScript permettent de construire
+des applications Web interactives.`,
+
+
+    pratique:
+`TRAVAUX PRATIQUES — JAVASCRIPT
+
+Objectif :
+
+Apprendre progressivement à utiliser JavaScript pour
+transformer une page HTML + CSS en interface interactive.
+
+
+------------------------------------------------------------
+TP 1 — CRÉER LE DOSSIER JAVASCRIPT
+------------------------------------------------------------
+
+Créez :
+
+mon-app/
+
+    index.html
+
+    css/
+
+        style.css
+
+    js/
+
+        app.js
+
+
+------------------------------------------------------------
+TP 2 — RELIER JAVASCRIPT
+------------------------------------------------------------
+
+Reliez :
+
+js/app.js
+
+à :
+
+index.html
+
+Utilisez une balise script appropriée.
+
+
+------------------------------------------------------------
+TP 3 — CONSOLE
+------------------------------------------------------------
+
+Affichez dans la console :
+
+Bonjour JavaScript.
+
+
+------------------------------------------------------------
+TP 4 — VARIABLES
+------------------------------------------------------------
+
+Créez plusieurs variables avec :
+
+const
+
+et :
+
+let
+
+
+------------------------------------------------------------
+TP 5 — TYPES
+------------------------------------------------------------
+
+Créez des variables contenant :
+
+texte ;
+
+nombre ;
+
+boolean ;
+
+null ;
+
+undefined ;
+
+tableau ;
+
+objet.
+
+
+------------------------------------------------------------
+TP 6 — CALCULATRICE SIMPLE
+------------------------------------------------------------
+
+Créez une fonction capable de calculer :
+
+addition ;
+
+soustraction ;
+
+multiplication ;
+
+division.
+
+
+------------------------------------------------------------
+TP 7 — CONDITIONS
+------------------------------------------------------------
+
+Créez un programme qui détermine si un nombre
+est positif, négatif ou égal à zéro.
+
+
+------------------------------------------------------------
+TP 8 — BOUCLE
+------------------------------------------------------------
+
+Affichez les nombres de 1 à 20 avec une boucle.
+
+
+------------------------------------------------------------
+TP 9 — FONCTIONS
+------------------------------------------------------------
+
+Créez une fonction :
+
+saluer(nom)
+
+
+Elle doit retourner un message personnalisé.
+
+
+------------------------------------------------------------
+TP 10 — FONCTION CALCUL
+------------------------------------------------------------
+
+Créez :
+
+calculerMoyenne()
+
+
+La fonction doit calculer la moyenne
+de plusieurs nombres.
+
+
+------------------------------------------------------------
+TP 11 — TABLEAUX
+------------------------------------------------------------
+
+Créez un tableau de 10 éléments.
+
+
+Ajoutez :
+
+push()
+
+
+Supprimez :
+
+pop()
+
+
+Affichez la longueur.
+
+
+------------------------------------------------------------
+TP 12 — forEach
+------------------------------------------------------------
+
+Parcourez un tableau avec :
+
+forEach()
+
+
+------------------------------------------------------------
+TP 13 — map
+------------------------------------------------------------
+
+Créez un tableau de nombres puis produisez
+un nouveau tableau contenant leurs doubles.
+
+
+------------------------------------------------------------
+TP 14 — filter
+------------------------------------------------------------
+
+Filtrez un tableau pour conserver uniquement
+les nombres supérieurs à 10.
+
+
+------------------------------------------------------------
+TP 15 — OBJETS
+------------------------------------------------------------
+
+Créez un objet étudiant contenant :
+
+nom ;
+
+âge ;
+
+niveau ;
+
+école.
+
+
+------------------------------------------------------------
+TP 16 — OBJETS ET MÉTHODES
+------------------------------------------------------------
+
+Ajoutez une méthode permettant à l'étudiant
+de retourner un message de présentation.
+
+
+------------------------------------------------------------
+TP 17 — DOM
+------------------------------------------------------------
+
+Créez :
+
+h1 ;
+
+p ;
+
+button.
+
+
+Sélectionnez-les avec JavaScript.
+
+
+------------------------------------------------------------
+TP 18 — MODIFIER LE TEXTE
+------------------------------------------------------------
+
+Au clic d'un bouton, modifiez le texte d'un paragraphe.
+
+
+------------------------------------------------------------
+TP 19 — MODIFIER UNE CLASSE
+------------------------------------------------------------
+
+Au clic d'un bouton :
+
+ajoutez une classe ;
+
+supprimez une classe ;
+
+utilisez toggle.
+
+
+------------------------------------------------------------
+TP 20 — CHANGER UNE IMAGE
+------------------------------------------------------------
+
+Créez un bouton permettant de modifier
+la source d'une image.
+
+
+------------------------------------------------------------
+TP 21 — AFFICHER / MASQUER
+------------------------------------------------------------
+
+Créez un bouton :
+
+Afficher
+
+et :
+
+Masquer
+
+
+Utilisez une classe CSS.
+
+
+------------------------------------------------------------
+TP 22 — TOGGLE
+------------------------------------------------------------
+
+Créez un menu qui s'ouvre et se ferme
+avec :
+
+classList.toggle()
+
+
+------------------------------------------------------------
+TP 23 — COMPTEUR
+------------------------------------------------------------
+
+Créez :
+
++
+
+-
+
+Reset
+
+
+Le compteur doit fonctionner avec JavaScript.
+
+
+------------------------------------------------------------
+TP 24 — CALCULATRICE
+------------------------------------------------------------
+
+Créez une calculatrice comprenant :
+
+addition ;
+
+soustraction ;
+
+multiplication ;
+
+division ;
+
+effacement.
+
+
+------------------------------------------------------------
+TP 25 — FORMULAIRE
+------------------------------------------------------------
+
+Créez un formulaire avec :
+
+nom ;
+
+email ;
+
+message ;
+
+bouton.
+
+
+Interceptez :
+
+submit
+
+
+------------------------------------------------------------
+TP 26 — VALIDATION
+------------------------------------------------------------
+
+Vérifiez :
+
+nom obligatoire ;
+
+email obligatoire ;
+
+message obligatoire.
+
+
+------------------------------------------------------------
+TP 27 — VALIDATION EMAIL
+------------------------------------------------------------
+
+Vérifiez que l'adresse email respecte
+un format raisonnable.
+
+
+------------------------------------------------------------
+TP 28 — MESSAGE D'ERREUR
+------------------------------------------------------------
+
+Affichez les erreurs directement
+dans l'interface.
+
+
+------------------------------------------------------------
+TP 29 — TABLEAU DYNAMIQUE
+------------------------------------------------------------
+
+Créez un tableau de données JavaScript
+et affichez-le dynamiquement dans HTML.
+
+
+------------------------------------------------------------
+TP 30 — LISTE DYNAMIQUE
+------------------------------------------------------------
+
+Créez une liste de tâches avec :
+
+ajouter ;
+
+supprimer ;
+
+terminer.
+
+
+------------------------------------------------------------
+TP 31 — RECHERCHE
+------------------------------------------------------------
+
+Ajoutez une zone de recherche
+pour filtrer une liste.
+
+
+------------------------------------------------------------
+TP 32 — FILTRE
+------------------------------------------------------------
+
+Créez plusieurs catégories et permettez
+de filtrer les éléments par catégorie.
+
+
+------------------------------------------------------------
+TP 33 — localStorage
+------------------------------------------------------------
+
+Enregistrez une donnée dans :
+
+localStorage
+
+
+Puis rechargez la page et récupérez-la.
+
+
+------------------------------------------------------------
+TP 34 — OBJET DANS localStorage
+------------------------------------------------------------
+
+Enregistrez un objet avec :
+
+JSON.stringify()
+
+
+Puis récupérez-le avec :
+
+JSON.parse()
+
+
+------------------------------------------------------------
+TP 35 — PRÉFÉRENCE UTILISATEUR
+------------------------------------------------------------
+
+Créez une préférence :
+
+mode clair ;
+
+mode sombre.
+
+
+Sauvegardez le choix dans localStorage.
+
+
+------------------------------------------------------------
+TP 36 — DATE
+------------------------------------------------------------
+
+Affichez la date actuelle
+dans l'interface.
+
+
+------------------------------------------------------------
+TP 37 — HORLOGE
+------------------------------------------------------------
+
+Créez une horloge dynamique
+avec :
+
+setInterval()
+
+
+------------------------------------------------------------
+TP 38 — COMPTE À REBOURS
+------------------------------------------------------------
+
+Créez un compte à rebours simple.
+
+
+------------------------------------------------------------
+TP 39 — GESTION DES ERREURS
+------------------------------------------------------------
+
+Utilisez :
+
+try
+
+catch
+
+pour gérer une opération pouvant échouer.
+
+
+------------------------------------------------------------
+TP 40 — FETCH
+------------------------------------------------------------
+
+Utilisez fetch() pour récupérer
+des données depuis une API publique adaptée
+à l'apprentissage.
+
+
+------------------------------------------------------------
+TP 41 — ASYNC / AWAIT
+------------------------------------------------------------
+
+Transformez l'exemple précédent
+avec async et await.
+
+
+------------------------------------------------------------
+TP 42 — ÉTAT D'APPLICATION
+------------------------------------------------------------
+
+Créez un objet state contenant
+plusieurs valeurs représentant
+l'état d'une interface.
+
+
+------------------------------------------------------------
+TP 43 — RENDU DYNAMIQUE
+------------------------------------------------------------
+
+Créez une fonction :
+
+render()
+
+
+Elle doit mettre à jour l'interface
+à partir de l'état.
+
+
+------------------------------------------------------------
+TP 44 — ÉVÉNEMENTS DYNAMIQUES
+------------------------------------------------------------
+
+Créez une liste dont les boutons
+sont générés dynamiquement.
+
+
+------------------------------------------------------------
+TP 45 — EVENT DELEGATION
+------------------------------------------------------------
+
+Utilisez la délégation d'événements
+pour gérer les boutons d'une liste dynamique.
+
+
+------------------------------------------------------------
+TP 46 — MODULES
+------------------------------------------------------------
+
+Séparez le projet en plusieurs fichiers :
+
+app.js ;
+
+ui.js ;
+
+storage.js.
+
+
+Utilisez :
+
+export
+
+et :
+
+import
+
+
+------------------------------------------------------------
+TP 47 — ACCESSIBILITÉ
+------------------------------------------------------------
+
+Vérifiez que les interactions JavaScript
+restent utilisables au clavier.
+
+
+Ajoutez une gestion correcte du focus.
+
+
+------------------------------------------------------------
+TP 48 — DEBUG
+------------------------------------------------------------
+
+Introduisez volontairement une erreur.
+
+Utilisez :
+
+console.log()
+
+console.error()
+
+debugger
+
+
+pour la trouver et la corriger.
+
+
+------------------------------------------------------------
+TP 49 — PROJET INTERACTIF
+------------------------------------------------------------
+
+Construisez une interface contenant :
+
+menu ;
+
+compteur ;
+
+formulaire ;
+
+validation ;
+
+liste dynamique ;
+
+recherche ;
+
+stockage local.
+
+
+------------------------------------------------------------
+TP 50 — PROJET COMPLET
+------------------------------------------------------------
+
+Construisez une application Web complète
+avec :
+
+HTML ;
+
+CSS ;
+
+JavaScript ;
+
+DOM ;
+
+événements ;
+
+fonctions ;
+
+tableaux ;
+
+objets ;
+
+formulaire ;
+
+validation ;
+
+localStorage ;
+
+gestion des erreurs ;
+
+interface responsive.
+
+L'application doit être testée sur téléphone,
+tablette et ordinateur.`,
+
+
+    exercices: [
+
+        "Exercice 1 — Créer un fichier JavaScript externe et le relier à une page HTML.",
+
+        "Exercice 2 — Afficher un message dans la console avec console.log().",
+
+        "Exercice 3 — Déclarer des variables avec const et let.",
+
+        "Exercice 4 — Identifier les principaux types de données JavaScript.",
+
+        "Exercice 5 — Effectuer des opérations d'addition, soustraction, multiplication et division.",
+
+        "Exercice 6 — Utiliser les opérateurs de comparaison.",
+
+        "Exercice 7 — Utiliser les opérateurs logiques &&, || et !.",
+
+        "Exercice 8 — Créer une condition if / else.",
+
+        "Exercice 9 — Créer plusieurs conditions avec else if.",
+
+        "Exercice 10 — Utiliser l'opérateur ternaire pour une décision simple.",
+
+        "Exercice 11 — Utiliser switch pour gérer plusieurs cas.",
+
+        "Exercice 12 — Créer une boucle for.",
+
+        "Exercice 13 — Créer une boucle while.",
+
+        "Exercice 14 — Utiliser do...while.",
+
+        "Exercice 15 — Utiliser break dans une boucle.",
+
+        "Exercice 16 — Utiliser continue dans une boucle.",
+
+        "Exercice 17 — Créer une fonction simple.",
+
+        "Exercice 18 — Créer une fonction avec paramètres.",
+
+        "Exercice 19 — Créer une fonction qui retourne une valeur.",
+
+        "Exercice 20 — Transformer une fonction classique en fonction fléchée.",
+
+        "Exercice 21 — Créer un tableau contenant dix valeurs.",
+
+        "Exercice 22 — Ajouter et supprimer des éléments d'un tableau.",
+
+        "Exercice 23 — Parcourir un tableau avec forEach().",
+
+        "Exercice 24 — Créer un nouveau tableau avec map().",
+
+        "Exercice 25 — Filtrer un tableau avec filter().",
+
+        "Exercice 26 — Rechercher un élément avec find().",
+
+        "Exercice 27 — Utiliser some() et every().",
+
+        "Exercice 28 — Créer un objet représentant un étudiant.",
+
+        "Exercice 29 — Ajouter une méthode à un objet.",
+
+        "Exercice 30 — Utiliser this dans un objet.",
+
+        "Exercice 31 — Utiliser le destructuring avec un objet.",
+
+        "Exercice 32 — Utiliser le destructuring avec un tableau.",
+
+        "Exercice 33 — Utiliser le spread operator pour combiner deux tableaux.",
+
+        "Exercice 34 — Convertir un objet en JSON avec JSON.stringify().",
+
+        "Exercice 35 — Convertir un JSON en objet avec JSON.parse().",
+
+        "Exercice 36 — Sélectionner un élément HTML avec querySelector().",
+
+        "Exercice 37 — Sélectionner plusieurs éléments avec querySelectorAll().",
+
+        "Exercice 38 — Modifier le texte d'un élément avec textContent.",
+
+        "Exercice 39 — Modifier un attribut HTML avec setAttribute().",
+
+        "Exercice 40 — Lire un attribut avec getAttribute().",
+
+        "Exercice 41 — Ajouter et supprimer une classe CSS avec classList.",
+
+        "Exercice 42 — Utiliser classList.toggle() pour ouvrir et fermer un élément.",
+
+        "Exercice 43 — Créer dynamiquement un élément HTML avec createElement().",
+
+        "Exercice 44 — Ajouter un élément au DOM avec appendChild().",
+
+        "Exercice 45 — Supprimer dynamiquement un élément du DOM.",
+
+        "Exercice 46 — Réagir à un clic avec addEventListener().",
+
+        "Exercice 47 — Utiliser l'objet Event dans un gestionnaire d'événement.",
+
+        "Exercice 48 — Empêcher le comportement par défaut d'un formulaire avec preventDefault().",
+
+        "Exercice 49 — Créer un compteur interactif avec les boutons +, - et Reset.",
+
+        "Exercice 50 — Créer une calculatrice JavaScript simple.",
+
+        "Exercice 51 — Créer un menu mobile contrôlé par JavaScript.",
+
+        "Exercice 52 — Créer une interface Afficher / Masquer.",
+
+        "Exercice 53 — Créer une galerie interactive permettant de changer d'image.",
+
+        "Exercice 54 — Créer un formulaire contrôlé par JavaScript.",
+
+        "Exercice 55 — Vérifier qu'un champ obligatoire n'est pas vide.",
+
+        "Exercice 56 — Vérifier la longueur minimale d'un mot de passe.",
+
+        "Exercice 57 — Vérifier le format d'une adresse email.",
+
+        "Exercice 58 — Afficher un message d'erreur dans le DOM.",
+
+        "Exercice 59 — Afficher un message de succès après validation.",
+
+        "Exercice 60 — Créer une liste dynamique de tâches.",
+
+        "Exercice 61 — Ajouter une tâche dans une liste.",
+
+        "Exercice 62 — Supprimer une tâche d'une liste.",
+
+        "Exercice 63 — Marquer une tâche comme terminée.",
+
+        "Exercice 64 — Filtrer une liste de tâches.",
+
+        "Exercice 65 — Ajouter une recherche instantanée dans une liste.",
+
+        "Exercice 66 — Créer une liste de produits à partir d'un tableau d'objets.",
+
+        "Exercice 67 — Afficher dynamiquement des cartes de produits.",
+
+        "Exercice 68 — Filtrer les produits par catégorie.",
+
+        "Exercice 69 — Rechercher un produit par son nom.",
+
+        "Exercice 70 — Trier un tableau de données.",
+
+        "Exercice 71 — Créer une pagination simple.",
+
+        "Exercice 72 — Enregistrer une donnée avec localStorage.",
+
+        "Exercice 73 — Lire une donnée depuis localStorage.",
+
+        "Exercice 74 — Supprimer une donnée de localStorage.",
+
+        "Exercice 75 — Enregistrer un objet dans localStorage.",
+
+        "Exercice 76 — Construire une préférence de thème clair / sombre.",
+
+        "Exercice 77 — Conserver le thème choisi après rechargement de la page.",
+
+        "Exercice 78 — Afficher la date actuelle avec l'objet Date.",
+
+        "Exercice 79 — Construire une horloge avec setInterval().",
+
+        "Exercice 80 — Construire un compte à rebours.",
+
+        "Exercice 81 — Utiliser Math.random() pour générer une valeur aléatoire.",
+
+        "Exercice 82 — Convertir correctement une valeur texte en nombre.",
+
+        "Exercice 83 — Gérer null et undefined dans une application.",
+
+        "Exercice 84 — Utiliser optional chaining pour accéder à une propriété facultative.",
+
+        "Exercice 85 — Utiliser nullish coalescing pour fournir une valeur par défaut.",
+
+        "Exercice 86 — Utiliser try / catch pour gérer une erreur.",
+
+        "Exercice 87 — Générer volontairement une erreur avec throw new Error().",
+
+        "Exercice 88 — Utiliser async et await avec une Promise.",
+
+        "Exercice 89 — Utiliser fetch() pour récupérer des données.",
+
+        "Exercice 90 — Vérifier le statut d'une réponse HTTP avant de traiter les données.",
+
+        "Exercice 91 — Afficher des données récupérées depuis une API dans le DOM.",
+
+        "Exercice 92 — Créer un objet state pour représenter l'état d'une interface.",
+
+        "Exercice 93 — Créer une fonction render() qui met à jour l'interface.",
+
+        "Exercice 94 — Utiliser la délégation d'événements avec event.target.",
+
+        "Exercice 95 — Utiliser closest() pour identifier un composant interactif.",
+
+        "Exercice 96 — Séparer un projet JavaScript en plusieurs modules.",
+
+        "Exercice 97 — Utiliser export et import dans une application.",
+
+        "Exercice 98 — Ajouter une interaction clavier avec keydown.",
+
+        "Exercice 99 — Ajouter une gestion de la touche Escape pour fermer une interface.",
+
+        "Exercice 100 — Construire une application Web complète combinant HTML, CSS et JavaScript."
+    ],
+
+
+    devoirs:
+`DEVOIR FINAL — CRÉATION D'UNE APPLICATION WEB INTERACTIVE
+
+Objectif :
+
+Construire une véritable application Web interactive
+en combinant les connaissances des Chapitres B, C, D et E.
+
+Le projet doit démontrer que l'étudiant sait passer :
+
+de la structure HTML
+
+à la présentation CSS
+
+puis à la logique JavaScript
+
+afin de produire une interface Web fonctionnelle,
+responsive, accessible et interactive.
+
+
+============================================================
+1 — STRUCTURE DU PROJET
+============================================================
+
+Le projet doit contenir au minimum :
+
+index.html
+
+css/
+
+    style.css
+
+js/
+
+    app.js
+
+images/
+
+
+Pour un projet plus avancé, l'étudiant peut organiser
+JavaScript en plusieurs modules :
+
+js/
+
+    app.js
+
+    ui.js
+
+    storage.js
+
+    validation.js
+
+    data.js
+
+
+============================================================
+2 — INTERFACE HTML
+============================================================
+
+La page doit contenir au minimum :
+
+header ;
+
+navigation ;
+
+main ;
+
+section ;
+
+formulaire ;
+
+zone de contenu dynamique ;
+
+footer.
+
+
+L'étudiant doit utiliser une structure HTML
+correctement organisée.
+
+
+============================================================
+3 — CSS
+============================================================
+
+Le projet doit reprendre les principes du Chapitre D :
+
+conteneur ;
+
+variables CSS ;
+
+Flexbox ;
+
+Grid ;
+
+composants réutilisables ;
+
+responsive design ;
+
+états visuels ;
+
+focus-visible ;
+
+transitions raisonnables.
+
+
+L'interface doit fonctionner sur :
+
+téléphone ;
+
+tablette ;
+
+ordinateur.
+
+
+============================================================
+4 — JAVASCRIPT
+============================================================
+
+Le projet doit obligatoirement utiliser JavaScript
+pour produire des interactions réelles.
+
+JavaScript doit être chargé depuis un fichier externe.
+
+
+============================================================
+5 — ÉTAT DE L'APPLICATION
+============================================================
+
+Créez un objet :
+
+state
+
+
+Il doit contenir au minimum plusieurs informations
+représentant l'état courant de l'application.
+
+Exemple :
+
+const state = {
+
+    items: [],
+
+    search: "",
+
+    currentPage: 1
+
+};
+
+
+============================================================
+6 — DOM
+============================================================
+
+JavaScript doit sélectionner plusieurs éléments
+de l'interface et les manipuler.
+
+Utilisez notamment :
+
+querySelector()
+
+querySelectorAll()
+
+textContent
+
+classList
+
+createElement()
+
+
+============================================================
+7 — ÉVÉNEMENTS
+============================================================
+
+Le projet doit utiliser :
+
+click ;
+
+input ;
+
+change ;
+
+submit ;
+
+au moins un événement clavier.
+
+
+Les événements doivent avoir une fonction réelle
+dans l'application.
+
+
+============================================================
+8 — FONCTIONS
+============================================================
+
+Créez plusieurs fonctions spécialisées.
+
+Exemples :
+
+render();
+
+addItem();
+
+deleteItem();
+
+updateItem();
+
+filterItems();
+
+validateForm();
+
+
+Chaque fonction doit avoir une responsabilité
+compréhensible.
+
+
+============================================================
+9 — FORMULAIRE
+============================================================
+
+Le projet doit contenir un formulaire.
+
+Il doit être contrôlé par JavaScript.
+
+Le formulaire doit vérifier :
+
+champs obligatoires ;
+
+format des données ;
+
+valeurs incorrectes ;
+
+erreurs.
+
+
+Les erreurs doivent être présentées clairement
+à l'utilisateur.
+
+
+============================================================
+10 — VALIDATION
+============================================================
+
+La validation JavaScript doit notamment gérer :
+
+champ vide ;
+
+valeur incorrecte ;
+
+format incorrect ;
+
+longueur insuffisante.
+
+
+La validation côté client améliore l'expérience,
+mais ne doit pas être considérée comme une sécurité
+suffisante pour une application serveur.
+
+
+============================================================
+11 — DONNÉES
+============================================================
+
+Utilisez un tableau d'objets.
+
+Exemple :
+
+const items = [
+
+    {
+        id: 1,
+        title: "HTML"
+    },
+
+    {
+        id: 2,
+        title: "CSS"
+    },
+
+    {
+        id: 3,
+        title: "JavaScript"
+    }
+
+];
+
+
+Les données doivent être affichées dynamiquement.
+
+
+============================================================
+12 — AFFICHAGE DYNAMIQUE
+============================================================
+
+Créez une fonction :
+
+render()
+
+
+Elle doit générer ou mettre à jour
+la partie dynamique de l'interface.
+
+
+============================================================
+13 — RECHERCHE
+============================================================
+
+Ajoutez une zone de recherche.
+
+Lorsque l'utilisateur saisit du texte,
+la liste doit être filtrée.
+
+
+La recherche doit fonctionner sans recharger
+la page.
+
+
+============================================================
+14 — FILTRE
+============================================================
+
+Ajoutez au minimum un filtre par catégorie
+ou par autre propriété des données.
+
+
+============================================================
+15 — SUPPRESSION
+============================================================
+
+Chaque élément dynamique doit pouvoir être supprimé.
+
+
+La suppression doit mettre à jour :
+
+les données ;
+
+l'interface.
+
+
+============================================================
+16 — MODIFICATION
+============================================================
+
+Ajoutez si possible une fonction permettant
+de modifier un élément existant.
+
+
+Le formulaire peut être réutilisé pour :
+
+ajouter ;
+
+modifier.
+
+
+============================================================
+17 — localStorage
+============================================================
+
+Le projet doit enregistrer les données importantes
+dans localStorage.
+
+
+Utilisez :
+
+JSON.stringify()
+
+
+pour enregistrer les objets.
+
+
+Utilisez :
+
+JSON.parse()
+
+
+pour les récupérer.
+
+
+============================================================
+18 — RECHARGEMENT
+============================================================
+
+Après fermeture et réouverture de la page,
+les données enregistrées doivent pouvoir être
+récupérées lorsque le projet fonctionne
+dans un contexte permettant l'accès à localStorage.
+
+
+============================================================
+19 — THÈME
+============================================================
+
+Ajoutez si possible :
+
+mode clair ;
+
+mode sombre.
+
+
+Le choix doit être sauvegardé dans localStorage.
+
+
+============================================================
+20 — CALCUL OU LOGIQUE
+============================================================
+
+L'application doit effectuer au moins
+un véritable traitement JavaScript.
+
+Exemples :
+
+calcul ;
+
+compteur ;
+
+moyenne ;
+
+total ;
+
+statistique ;
+
+filtrage ;
+
+tri.
+
+
+============================================================
+21 — TABLEAU OU CARTES
+============================================================
+
+Les données doivent être présentées
+dans une interface organisée.
+
+L'étudiant peut utiliser :
+
+cartes ;
+
+tableau ;
+
+liste ;
+
+grille.
+
+
+Le contenu doit être généré dynamiquement.
+
+
+============================================================
+22 — API — OPTION AVANCÉE
+============================================================
+
+Pour un niveau avancé, utilisez :
+
+fetch()
+
+
+pour récupérer des données depuis une API.
+
+
+Le code doit utiliser :
+
+async ;
+
+await ;
+
+try ;
+
+catch.
+
+
+Les erreurs réseau doivent être traitées.
+
+
+============================================================
+23 — GESTION DES ERREURS
+============================================================
+
+L'application doit prévoir les erreurs.
+
+Utilisez :
+
+try {
+
+    ...
+
+} catch (error) {
+
+    ...
+
+}
+
+
+Les erreurs doivent être traitées
+sans faire planter inutilement toute l'interface.
+
+
+============================================================
+24 — ACCESSIBILITÉ
+============================================================
+
+Vérifiez :
+
+navigation clavier ;
+
+focus visible ;
+
+boutons accessibles ;
+
+labels ;
+
+messages d'erreur compréhensibles ;
+
+structure des titres ;
+
+zones interactives suffisamment grandes.
+
+
+JavaScript ne doit pas supprimer
+l'accessibilité native des éléments HTML.
+
+
+============================================================
+25 — RESPONSIVE DESIGN
+============================================================
+
+L'application doit fonctionner correctement
+sur différentes tailles d'écran.
+
+Vérifiez :
+
+aucun débordement horizontal ;
+
+aucun bouton inaccessible ;
+
+aucun texte coupé ;
+
+formulaire utilisable ;
+
+navigation utilisable ;
+
+cartes correctement organisées.
+
+
+============================================================
+26 — INTERACTION MOBILE
+============================================================
+
+L'application doit être utilisable
+sur écran tactile.
+
+Les interactions ne doivent pas dépendre
+uniquement du survol de la souris.
+
+
+============================================================
+27 — SÉCURITÉ
+============================================================
+
+L'étudiant doit éviter :
+
+eval() ;
+
+exécution arbitraire de code ;
+
+insertion dangereuse de données utilisateur ;
+
+utilisation aveugle de innerHTML.
+
+
+Lorsque du texte utilisateur doit être affiché,
+préférer notamment :
+
+textContent
+
+
+lorsque du HTML n'est pas nécessaire.
+
+
+============================================================
+28 — ORGANISATION DU CODE
+============================================================
+
+Le JavaScript doit être :
+
+indenté ;
+
+lisible ;
+
+organisé ;
+
+commenté lorsque nécessaire ;
+
+sans duplication inutile ;
+
+avec des noms de variables explicites.
+
+
+Les fonctions doivent avoir des responsabilités
+claires.
+
+
+============================================================
+29 — DEBUGGING
+============================================================
+
+L'étudiant doit être capable d'utiliser :
+
+console.log();
+
+console.warn();
+
+console.error();
+
+console.table();
+
+debugger;
+
+
+Il doit également savoir utiliser
+les outils de développement du navigateur.
+
+
+============================================================
+30 — TESTS
+============================================================
+
+Tester :
+
+chargement ;
+
+navigation ;
+
+boutons ;
+
+formulaire ;
+
+validation ;
+
+recherche ;
+
+filtres ;
+
+ajout ;
+
+modification ;
+
+suppression ;
+
+stockage ;
+
+thème ;
+
+responsive ;
+
+clavier.
+
+
+============================================================
+31 — CAS LIMITES
+============================================================
+
+Tester également :
+
+champ vide ;
+
+texte très long ;
+
+aucun résultat ;
+
+liste vide ;
+
+valeur incorrecte ;
+
+donnée absente ;
+
+localStorage vide ;
+
+erreur de récupération ;
+
+réseau indisponible si une API est utilisée.
+
+
+============================================================
+32 — LABORATOIRE FOBAS
+============================================================
+
+Ouvrez le projet dans le Laboratoire FOBAS.
+
+Chargez :
+
+index.html
+
+
+Vérifiez :
+
+HTML ;
+
+CSS ;
+
+JavaScript ;
+
+
+puis testez toutes les interactions.
+
+
+============================================================
+33 — PRÉSENTATION
+============================================================
+
+L'étudiant doit être capable d'expliquer :
+
+qu'est-ce que JavaScript ;
+
+comment charger JavaScript ;
+
+comment fonctionne une variable ;
+
+différence entre let et const ;
+
+types de données ;
+
+conditions ;
+
+boucles ;
+
+fonctions ;
+
+tableaux ;
+
+objets ;
+
+DOM ;
+
+événements ;
+
+formulaires ;
+
+validation ;
+
+localStorage ;
+
+JSON ;
+
+Promises ;
+
+async / await ;
+
+fetch ;
+
+gestion des erreurs ;
+
+modules ;
+
+debugging.
+
+
+============================================================
+34 — ARCHITECTURE DE L'APPLICATION
+============================================================
+
+L'étudiant doit pouvoir expliquer le chemin :
+
+UTILISATEUR
+
+    ↓
+
+ÉVÉNEMENT
+
+    ↓
+
+JAVASCRIPT
+
+    ↓
+
+LOGIQUE
+
+    ↓
+
+ÉTAT
+
+    ↓
+
+DOM
+
+    ↓
+
+CSS
+
+    ↓
+
+INTERFACE
+
+
+============================================================
+35 — CRITÈRES TECHNIQUES
+============================================================
+
+L'application doit démontrer :
+
+HTML correctement structuré ;
+
+CSS correctement organisé ;
+
+JavaScript fonctionnel ;
+
+DOM manipulé correctement ;
+
+événements fonctionnels ;
+
+fonctions réutilisables ;
+
+données structurées ;
+
+validation ;
+
+gestion des erreurs ;
+
+responsive design ;
+
+accessibilité ;
+
+code lisible.
+
+
+============================================================
+OBJECTIF FINAL DU CHAPITRE E
+============================================================
+
+À la fin du Chapitre E, l'étudiant doit être capable
+de transformer une interface HTML + CSS statique
+en véritable interface Web interactive.
+
+Il doit savoir :
+
+écrire du JavaScript ;
+
+déclarer des variables ;
+
+manipuler les types ;
+
+utiliser les conditions ;
+
+utiliser les boucles ;
+
+créer des fonctions ;
+
+manipuler des tableaux ;
+
+manipuler des objets ;
+
+utiliser le DOM ;
+
+réagir aux événements ;
+
+modifier le contenu ;
+
+modifier les classes CSS ;
+
+créer et supprimer des éléments ;
+
+gérer des formulaires ;
+
+valider des données ;
+
+utiliser localStorage ;
+
+manipuler JSON ;
+
+gérer des opérations asynchrones ;
+
+utiliser async / await ;
+
+communiquer avec une API ;
+
+gérer les erreurs ;
+
+organiser un projet en modules ;
+
+déboguer une application ;
+
+respecter les principes d'accessibilité ;
+
+construire des interfaces interactives ;
+
+
+============================================================
+RÉSULTAT ATTENDU
+============================================================
+
+L'étudiant ne doit plus seulement savoir écrire
+du HTML et du CSS.
+
+Il doit maintenant être capable de créer
+une véritable interface Web dynamique.
+
+HTML construit la structure.
+
+CSS donne la présentation.
+
+JavaScript ajoute :
+
+la logique ;
+
+les événements ;
+
+les interactions ;
+
+les traitements ;
+
+les données ;
+
+le comportement dynamique.
+
+
+La combinaison :
+
+HTML + CSS + JavaScript
+
+constitue la base fondamentale du développement
+d'interfaces Web interactives.
+
+Après ce Chapitre E, l'étudiant possède les bases
+nécessaires pour passer à des applications Web
+plus avancées, à la communication avec des API,
+à l'organisation de projets JavaScript plus complexes
+et éventuellement à des frameworks ou bibliothèques
+modernes.`
+},
 
 
 
