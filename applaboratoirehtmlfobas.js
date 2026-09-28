@@ -11604,13 +11604,16 @@ comportement dynamique aux interfaces construites.`
 
 
 
+
 {
 id: "E",
-title: "E — JavaScript : programmation et interaction Web",
 
-theorie: `
+title:
+    "E — JavaScript : programmation et interaction Web",
 
-CHAPITRE E — JAVASCRIPT : PROGRAMMATION ET INTERACTION WEB
+theorie:
+
+`CHAPITRE E — JAVASCRIPT : PROGRAMMATION ET INTERACTION WEB
 
 OBJECTIF GÉNÉRAL
 
@@ -11666,13 +11669,11 @@ Il existe plusieurs manières d'utiliser JavaScript.
 
 A — JavaScript directement dans HTML
 
-<script>
-    alert("Bonjour");
-</script>Cette méthode fonctionne, mais elle devient difficile à maintenir dans les grands projets.
+Cette méthode fonctionne, mais elle devient difficile à maintenir dans les grands projets.
 
 B — JavaScript dans un fichier externe
 
-<script src="script.js"></script>Exemple de fichier :
+Exemple de fichier :
 
 script.js
 
@@ -11682,7 +11683,7 @@ La méthode externe est généralement préférable pour les projets organisés.
 
 C — JavaScript dans le head
 
-<script src="script.js"></script>Pour éviter certains problèmes de chargement du DOM, on peut utiliser :
+Pour éviter certains problèmes de chargement du DOM, on peut utiliser :
 
 <script src="script.js" defer></script>Avec defer, le fichier JavaScript est chargé sans bloquer inutilement l'analyse du HTML et son exécution intervient après l'analyse du document.
 
@@ -11716,10 +11717,7 @@ Commentaire sur une ligne :
 
 Commentaire sur plusieurs lignes :
 
-/*
-Ceci est un commentaire
-sur plusieurs lignes.
-*/
+/* Ceci est un commentaire sur plusieurs lignes. */
 
 Les commentaires ne sont pas exécutés comme instructions JavaScript.
 
@@ -11783,6 +11781,7 @@ console.log(pays);
 Une tentative de réassignation :
 
 const pays = "Haïti";
+
 pays = "Canada";
 
 produit une erreur.
@@ -12043,7 +12042,6 @@ prix /= 2;
 Les principaux opérateurs sont :
 
 ==
-
 !=
 !==
 
@@ -12179,9 +12177,10 @@ Exemple :
 const jour = "lundi";
 
 switch (jour) {
+
 case "lundi":
-console.log("Début de semaine");
-break;
+    console.log("Début de semaine");
+    break;
 
 case "vendredi":
     console.log("Fin de semaine");
@@ -12362,7 +12361,10 @@ Les index commencent généralement à 0.
 
 Exemple :
 
-const fruits = ["Pomme", "Banane"];
+const fruits = [
+"Pomme",
+"Banane"
+];
 
 fruits.push("Orange");
 
@@ -12394,7 +12396,11 @@ for...of permet de parcourir les valeurs d'un tableau.
 
 Exemple :
 
-const fruits = ["Pomme", "Banane", "Orange"];
+const fruits = [
+"Pomme",
+"Banane",
+"Orange"
+];
 
 for (const fruit of fruits) {
 console.log(fruit);
@@ -12404,7 +12410,11 @@ console.log(fruit);
 
 Exemple :
 
-const nombres = [10, 20, 30];
+const nombres = [
+10,
+20,
+30
+];
 
 nombres.forEach(function(nombre) {
 console.log(nombre);
@@ -12422,7 +12432,11 @@ map crée un nouveau tableau transformé.
 
 Exemple :
 
-const nombres = [1, 2, 3];
+const nombres = [
+1,
+2,
+3
+];
 
 const doubles = nombres.map(nombre => nombre * 2);
 
@@ -12438,7 +12452,12 @@ filter conserve les éléments qui répondent à une condition.
 
 Exemple :
 
-const nombres = [10, 15, 20, 25];
+const nombres = [
+10,
+15,
+20,
+25
+];
 
 const grands = nombres.filter(nombre => nombre >= 20);
 
@@ -12450,7 +12469,12 @@ find retourne le premier élément correspondant à une condition.
 
 Exemple :
 
-const nombres = [5, 10, 15, 20];
+const nombres = [
+5,
+10,
+15,
+20
+];
 
 const resultat = nombres.find(nombre => nombre > 12);
 
@@ -12462,7 +12486,11 @@ reduce permet de produire une valeur à partir des éléments d'un tableau.
 
 Exemple :
 
-const nombres = [10, 20, 30];
+const nombres = [
+10,
+20,
+30
+];
 
 const total = nombres.reduce(
 (somme, nombre) => somme + nombre,
@@ -12531,7 +12559,10 @@ nom: "Jean",
 age: 25
 };
 
-const { nom, age } = personne;
+const {
+nom,
+age
+} = personne;
 
 console.log(nom);
 console.log(age);
@@ -12542,9 +12573,17 @@ L'opérateur ... permet notamment de copier ou combiner des données.
 
 Exemple :
 
-const nombres1 = [1, 2, 3];
+const nombres1 = [
+1,
+2,
+3
+];
 
-const nombres2 = [...nombres1, 4, 5];
+const nombres2 = [
+...nombres1,
+4,
+5
+];
 
 console.log(nombres2);
 
@@ -12557,7 +12596,8 @@ Exemple :
 const nom = "Marie";
 const age = 22;
 
-const message = `Je m'appelle ${nom} et j'ai ${age} ans.`;
+const message =
+`Je m'appelle ${nom} et j'ai ${age} ans.`;
 
 console.log(message);
 
@@ -12763,11 +12803,14 @@ JavaScript peut modifier les attributs.
 
 HTML :
 
-<img id="photo" src="image.jpg" alt="Photo">JavaScript :
+<img id="photo" src="photo.jpg" alt="Photo">JavaScript :
 
 const photo = document.querySelector("#photo");
 
-photo.setAttribute("alt", "Nouvelle description");
+photo.setAttribute(
+"alt",
+"Nouvelle description"
+);
 
 On peut lire :
 
@@ -12817,7 +12860,8 @@ Exemple :
 
 const paragraphe = document.createElement("p");
 
-paragraphe.textContent = "Nouveau paragraphe";
+paragraphe.textContent =
+"Nouveau paragraphe";
 
 document.body.appendChild(paragraphe);
 
@@ -12825,7 +12869,8 @@ document.body.appendChild(paragraphe);
 
 Exemple :
 
-const element = document.querySelector("#message");
+const element =
+document.querySelector("#message");
 
 element.remove();
 
@@ -12857,21 +12902,26 @@ Méthode recommandée pour écouter un événement.
 
 Exemple :
 
-const bouton = document.querySelector("#monBouton");
+const bouton =
+document.querySelector("#monBouton");
 
-bouton.addEventListener("click", function() {
+bouton.addEventListener(
+"click",
+function() {
 console.log("Bouton cliqué");
-});
+}
+);
 
 75 — ÉVÉNEMENT CLICK
 
 HTML :
 
-<button id="btn">Cliquer</button>
+<button id="btn">
+    Cliquer
+</button>JavaScript :
 
-JavaScript :
-
-const btn = document.querySelector("#btn");
+const btn =
+document.querySelector("#btn");
 
 btn.addEventListener("click", () => {
 alert("Vous avez cliqué.");
@@ -12883,17 +12933,23 @@ Le gestionnaire d'événement reçoit généralement un objet event.
 
 Exemple :
 
-btn.addEventListener("click", event => {
+btn.addEventListener(
+"click",
+event => {
 console.log(event);
-});
+}
+);
 
 77 — ÉVÉNEMENTS CLAVIER
 
 Exemple :
 
-document.addEventListener("keydown", event => {
+document.addEventListener(
+"keydown",
+event => {
 console.log(event.key);
-});
+}
+);
 
 78 — ÉVÉNEMENTS DE SOURIS ET TACTILES
 
@@ -12913,7 +12969,10 @@ JavaScript peut contrôler les formulaires.
 
 HTML :
 
-<form id="formulaire"><input id="nom" type="text">
+<form id="formulaire"><input
+    id="nom"
+    type="text"
+>
 
 <button type="submit">
     Envoyer
@@ -12923,15 +12982,22 @@ HTML :
 
 On peut intercepter l'envoi du formulaire.
 
-const formulaire = document.querySelector("#formulaire");
+const formulaire =
+document.querySelector("#formulaire");
 
-formulaire.addEventListener("submit", event => {
+formulaire.addEventListener(
+"submit",
+event => {
 
-event.preventDefault();
+    event.preventDefault();
 
-console.log("Formulaire traité par JavaScript.");
+    console.log(
+        "Formulaire traité par JavaScript."
+    );
 
-});
+}
+
+);
 
 81 — preventDefault
 
@@ -12943,9 +13009,16 @@ Dans un formulaire, cela permet notamment de traiter les données avec JavaScrip
 
 HTML :
 
-<input id="nom" type="text">JavaScript :
+<input
+id="nom"
+type="text"
 
-const nom = document.querySelector("#nom");
+«»
+
+JavaScript :
+
+const nom =
+document.querySelector("#nom");
 
 console.log(nom.value);
 
@@ -12957,7 +13030,8 @@ nom.value = "Jean";
 
 Exemple :
 
-const nom = document.querySelector("#nom");
+const nom =
+document.querySelector("#nom");
 
 if (nom.value.trim() === "") {
 console.log("Le nom est obligatoire.");
@@ -12969,11 +13043,15 @@ localStorage permet de conserver des données dans le navigateur.
 
 Exemple :
 
-localStorage.setItem("nom", "Jean");
+localStorage.setItem(
+"nom",
+"Jean"
+);
 
 Lire :
 
-const nom = localStorage.getItem("nom");
+const nom =
+localStorage.getItem("nom");
 
 Supprimer :
 
@@ -13001,9 +13079,11 @@ JSON.stringify(utilisateur)
 
 Lire :
 
-const donnees = localStorage.getItem("utilisateur");
+const donnees =
+localStorage.getItem("utilisateur");
 
-const utilisateurLu = JSON.parse(donnees);
+const utilisateurLu =
+JSON.parse(donnees);
 
 86 — JSON
 
@@ -13047,11 +13127,15 @@ Exemple :
 
 try {
 
-const resultat = JSON.parse("texte incorrect");
+const resultat =
+    JSON.parse("texte incorrect");
 
 } catch (erreur) {
 
-console.error("Une erreur est survenue :", erreur);
+console.error(
+    "Une erreur est survenue :",
+    erreur
+);
 
 }
 
@@ -13064,7 +13148,9 @@ Exemple :
 function verifierAge(age) {
 
 if (age < 0) {
-    throw new Error("L'âge ne peut pas être négatif.");
+    throw new Error(
+        "L'âge ne peut pas être négatif."
+    );
 }
 
 return age;
@@ -13086,8 +13172,14 @@ console.table()
 Exemple :
 
 console.table([
-{ nom: "Jean", age: 20 },
-{ nom: "Marie", age: 22 }
+{
+nom: "Jean",
+age: 20
+},
+{
+nom: "Marie",
+age: 22
+}
 ]);
 
 91 — DEBUGGING
@@ -13123,11 +13215,16 @@ Une solution :
 
 <script src="script.js" defer></script>Une autre solution :
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+"DOMContentLoaded",
+() => {
 
-const bouton = document.querySelector("#btn");
+    const bouton =
+        document.querySelector("#btn");
 
-});
+}
+
+);
 
 93 — CRÉER UNE INTERFACE INTERACTIVE
 
@@ -13135,20 +13232,26 @@ Exemple complet :
 
 HTML :
 
-<button id="compteurBtn">Compter</button>
-
-<p id="compteur">0</p>JavaScript :
+<button id="compteurBtn">
+    Compter
+</button><p id="compteur">
+    0
+</p>JavaScript :
 
 let compteur = 0;
 
-const bouton = document.querySelector("#compteurBtn");
-const affichage = document.querySelector("#compteur");
+const bouton =
+document.querySelector("#compteurBtn");
+
+const affichage =
+document.querySelector("#compteur");
 
 bouton.addEventListener("click", () => {
 
 compteur++;
 
-affichage.textContent = compteur;
+affichage.textContent =
+    compteur;
 
 });
 
@@ -13171,24 +13274,34 @@ color: white;
 
 JavaScript :
 
-const themeBtn = document.querySelector("#themeBtn");
-const contenu = document.querySelector("#contenu");
+const themeBtn =
+document.querySelector("#themeBtn");
 
-themeBtn.addEventListener("click", () => {
+const contenu =
+document.querySelector("#contenu");
 
-contenu.classList.toggle("dark");
+themeBtn.addEventListener(
+"click",
+() => {
 
-});
+    contenu.classList.toggle("dark");
+
+}
+
+);
 
 95 — CRÉER ET INSÉRER DES ÉLÉMENTS
 
 Exemple :
 
-const liste = document.querySelector("#liste");
+const liste =
+document.querySelector("#liste");
 
-const nouvelElement = document.createElement("li");
+const nouvelElement =
+document.createElement("li");
 
-nouvelElement.textContent = "JavaScript";
+nouvelElement.textContent =
+"JavaScript";
 
 liste.appendChild(nouvelElement);
 
@@ -13198,19 +13311,24 @@ DocumentFragment permet de préparer plusieurs éléments avant de les insérer.
 
 Exemple :
 
-const fragment = document.createDocumentFragment();
+const fragment =
+document.createDocumentFragment();
 
 for (let i = 1; i <= 5; i++) {
 
-const li = document.createElement("li");
+const li =
+    document.createElement("li");
 
-li.textContent = "Élément " + i;
+li.textContent =
+    "Élément " + i;
 
 fragment.appendChild(li);
 
 }
 
-document.querySelector("#liste").appendChild(fragment);
+document
+.querySelector("#liste")
+.appendChild(fragment);
 
 97 — EVENT DELEGATION
 
@@ -13218,17 +13336,26 @@ Lorsqu'une interface contient beaucoup d'éléments similaires, on peut écouter
 
 Exemple :
 
-const liste = document.querySelector("#liste");
+const liste =
+document.querySelector("#liste");
 
-liste.addEventListener("click", event => {
+liste.addEventListener(
+"click",
+event => {
 
-if (event.target.matches("button")) {
+    if (
+        event.target.matches("button")
+    ) {
 
-    console.log("Bouton sélectionné");
+        console.log(
+            "Bouton sélectionné"
+        );
+
+    }
 
 }
 
-});
+);
 
 98 — SETTIMEOUT
 
@@ -13236,9 +13363,14 @@ setTimeout exécute une fonction après un délai.
 
 Exemple :
 
-setTimeout(() => {
-console.log("Message après 2 secondes");
-}, 2000);
+setTimeout(
+() => {
+console.log(
+"Message après 2 secondes"
+);
+},
+2000
+);
 
 99 — SETINTERVAL
 
@@ -13246,9 +13378,15 @@ setInterval répète une fonction.
 
 Exemple :
 
-const intervalle = setInterval(() => {
-console.log("Exécution répétée");
-}, 1000);
+const intervalle =
+setInterval(
+() => {
+console.log(
+"Exécution répétée"
+);
+},
+1000
+);
 
 Pour arrêter :
 
@@ -13266,15 +13404,24 @@ rejected
 
 Exemple :
 
-const promesse = new Promise((resolve, reject) => {
+const promesse =
+new Promise((resolve, reject) => {
 
-const succes = true;
+    const succes = true;
 
-if (succes) {
-    resolve("Opération réussie");
-} else {
-    reject("Opération échouée");
-}
+    if (succes) {
+
+        resolve(
+            "Opération réussie"
+        );
+
+    } else {
+
+        reject(
+            "Opération échouée"
+        );
+
+    }
 
 });
 
@@ -13300,9 +13447,11 @@ async function chargerDonnees() {
 
 try {
 
-    const resultat = await fetch("data.json");
+    const resultat =
+        await fetch("data.json");
 
-    const donnees = await resultat.json();
+    const donnees =
+        await resultat.json();
 
     console.log(donnees);
 
@@ -13324,7 +13473,9 @@ fetch("data.json")
 .then(response => {
 
     if (!response.ok) {
-        throw new Error("Erreur réseau");
+        throw new Error(
+            "Erreur réseau"
+        );
     }
 
     return response.json();
@@ -13363,23 +13514,32 @@ DELETE sert généralement à supprimer.
 
 Exemple :
 
-fetch("https://example.com/api/users", {
-
+fetch(
+"https://example.com/api/users",
+{
 method: "POST",
 
-headers: {
-    "Content-Type": "application/json"
-},
+    headers: {
+        "Content-Type":
+            "application/json"
+    },
 
-body: JSON.stringify({
-    nom: "Jean",
-    age: 25
-})
+    body: JSON.stringify({
+        nom: "Jean",
+        age: 25
+    })
+}
 
-})
-.then(response => response.json())
-.then(data => console.log(data))
-.catch(error => console.error(error));
+)
+.then(response =>
+response.json()
+)
+.then(data =>
+console.log(data)
+)
+.catch(error =>
+console.error(error)
+);
 
 106 — MODULES JAVASCRIPT
 
@@ -13395,13 +13555,19 @@ return a + b;
 
 app.js
 
-import { addition } from "./math.js";
+import { addition }
+from "./math.js";
 
-console.log(addition(10, 5));
+console.log(
+addition(10, 5)
+);
 
 HTML :
 
-<script type="module" src="app.js"></script>107 — EXPORT DEFAULT
+<script
+    type="module"
+    src="app.js">
+</script>107 — EXPORT DEFAULT
 
 Exemple :
 
@@ -13411,7 +13577,8 @@ console.log("Bonjour");
 
 Import :
 
-import saluer from "./saluer.js";
+import saluer
+from "./saluer.js";
 
 saluer();
 
@@ -13438,9 +13605,15 @@ saluer() {
 
 }
 
-const utilisateur = new Utilisateur("Jean", 25);
+const utilisateur =
+new Utilisateur(
+"Jean",
+25
+);
 
-console.log(utilisateur.saluer());
+console.log(
+utilisateur.saluer()
+);
 
 109 — CONSTRUCTEUR
 
@@ -13479,9 +13652,12 @@ multiplication(a, b) {
 
 }
 
-const calculatrice = new Calculatrice();
+const calculatrice =
+new Calculatrice();
 
-console.log(calculatrice.addition(5, 3));
+console.log(
+calculatrice.addition(5, 3)
+);
 
 111 — ENCAPSULATION ET CHAMPS PRIVÉS
 
@@ -13535,7 +13711,8 @@ Exemple :
 
 const nom = null;
 
-const resultat = nom ?? "Utilisateur";
+const resultat =
+nom ?? "Utilisateur";
 
 console.log(resultat);
 
@@ -13547,7 +13724,9 @@ Exemple :
 
 const utilisateur = {};
 
-console.log(utilisateur.adresse?.ville);
+console.log(
+utilisateur.adresse?.ville
+);
 
 115 — SET ET MAP
 
@@ -13555,7 +13734,8 @@ Set permet de conserver des valeurs uniques.
 
 Exemple :
 
-const nombres = new Set([1, 2, 2, 3]);
+const nombres =
+new Set([1, 2, 2, 3]);
 
 console.log(nombres);
 
@@ -13563,11 +13743,17 @@ Map permet de conserver des paires clé-valeur.
 
 Exemple :
 
-const utilisateurs = new Map();
+const utilisateurs =
+new Map();
 
-utilisateurs.set("u1", "Jean");
+utilisateurs.set(
+"u1",
+"Jean"
+);
 
-console.log(utilisateurs.get("u1"));
+console.log(
+utilisateurs.get("u1")
+);
 
 116 — REGEX
 
@@ -13575,11 +13761,15 @@ Les expressions régulières permettent notamment de rechercher ou vérifier des
 
 Exemple :
 
-const email = "test@example.com";
+const email =
+"test@example.com";
 
-const modele = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const modele =
+/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-console.log(modele.test(email));
+console.log(
+modele.test(email)
+);
 
 117 — ACCESSIBILITÉ ET JAVASCRIPT
 
@@ -13656,7 +13846,8 @@ Plus clair :
 const prix = 10;
 const taxe = 20;
 
-const total = prix + taxe;
+const total =
+prix + taxe;
 
 console.log(total);
 
@@ -13674,9 +13865,9 @@ Exemple :
 
 HTML :
 
-<button id="themeBtn">Thème</button>
-
-CSS :
+<button id="themeBtn">
+    Thème
+</button>CSS :
 
 .dark {
 background: #111;
@@ -13687,138 +13878,215 @@ JavaScript :
 
 document
 .querySelector("#themeBtn")
-.addEventListener("click", () => {
+.addEventListener(
+"click",
+() => {
 
-    document.body.classList.toggle("dark");
+        document.body
+            .classList
+            .toggle("dark");
 
-});
+    }
+);
 
 123 — MINI PROJET COMPLET : COMPTEUR
 
 HTML :
 
-<!DOCTYPE html><html lang="fr">
-<head><meta charset="UTF-8">
+<meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+«»
 
-<title>Compteur JavaScript</title>
+<title>
+    Compteur JavaScript
+</title><link
+    rel="stylesheet"
+    href="style.css"
+><main><h1>
+    Compteur
+</h1>
 
-<link rel="stylesheet" href="style.css">
+<p id="valeur">
+    0
+</p>
 
-</head><body><main>
+<button id="moins">
+    −
+</button>
 
-    <h1>Compteur</h1>
+<button id="reset">
+    Réinitialiser
+</button>
 
-    <p id="valeur">0</p>
+<button id="plus">
+    +
+</button>
 
-    <button id="moins">−</button>
-
-    <button id="reset">Réinitialiser</button>
-
-    <button id="plus">+</button>
-
-</main>
-
-<script src="script.js" defer></script>
-
-</body>
-</html>JavaScript :
+</main><script
+    src="script.js"
+    defer>
+</script>JavaScript :
 
 let compteur = 0;
 
-const valeur = document.querySelector("#valeur");
-const moins = document.querySelector("#moins");
-const reset = document.querySelector("#reset");
-const plus = document.querySelector("#plus");
+const valeur =
+document.querySelector("#valeur");
+
+const moins =
+document.querySelector("#moins");
+
+const reset =
+document.querySelector("#reset");
+
+const plus =
+document.querySelector("#plus");
 
 function afficherCompteur() {
-valeur.textContent = compteur;
+
+valeur.textContent =
+    compteur;
+
 }
 
-plus.addEventListener("click", () => {
+plus.addEventListener(
+"click",
+() => {
 
-compteur++;
+    compteur++;
 
-afficherCompteur();
+    afficherCompteur();
 
-});
+}
 
-moins.addEventListener("click", () => {
+);
 
-compteur--;
+moins.addEventListener(
+"click",
+() => {
 
-afficherCompteur();
+    compteur--;
 
-});
+    afficherCompteur();
 
-reset.addEventListener("click", () => {
+}
 
-compteur = 0;
+);
 
-afficherCompteur();
+reset.addEventListener(
+"click",
+() => {
 
-});
+    compteur = 0;
+
+    afficherCompteur();
+
+}
+
+);
 
 124 — MINI PROJET : LISTE DE TÂCHES
 
 HTML :
 
-<input id="tache" type="text"><button id="ajouter">Ajouter</button>
+<input
+id="tache"
+type="text"
 
-<ul id="liste"></ul>JavaScript :
+«»
 
-const champ = document.querySelector("#tache");
-const boutonAjouter = document.querySelector("#ajouter");
-const liste = document.querySelector("#liste");
+<button id="ajouter">
+    Ajouter
+</button><ul id="liste"></ul>JavaScript :
 
-boutonAjouter.addEventListener("click", () => {
+const champ =
+document.querySelector("#tache");
 
-const texte = champ.value.trim();
+const boutonAjouter =
+document.querySelector("#ajouter");
 
-if (texte === "") {
-    return;
+const liste =
+document.querySelector("#liste");
+
+boutonAjouter.addEventListener(
+"click",
+() => {
+
+    const texte =
+        champ.value.trim();
+
+    if (texte === "") {
+        return;
+    }
+
+    const element =
+        document.createElement("li");
+
+    element.textContent =
+        texte;
+
+    liste.appendChild(element);
+
+    champ.value = "";
+
+    champ.focus();
+
 }
 
-const element = document.createElement("li");
-
-element.textContent = texte;
-
-liste.appendChild(element);
-
-champ.value = "";
-
-champ.focus();
-
-});
+);
 
 125 — MINI PROJET : CALCULATRICE
 
 HTML :
 
-<input id="a" type="number">
-<input id="b" type="number"><button id="addition">Additionner</button>
+<input
+id="a"
+type="number"
 
-<p id="resultat"></p>JavaScript :
+«»
 
-const a = document.querySelector("#a");
-const b = document.querySelector("#b");
+<input
+id="b"
+type="number"
 
-const addition = document.querySelector("#addition");
+«»
 
-const resultat = document.querySelector("#resultat");
+<button id="addition">
+    Additionner
+</button><p id="resultat"></p>JavaScript :
 
-addition.addEventListener("click", () => {
+const a =
+document.querySelector("#a");
 
-const nombreA = Number(a.value);
-const nombreB = Number(b.value);
+const b =
+document.querySelector("#b");
 
-const total = nombreA + nombreB;
+const addition =
+document.querySelector("#addition");
 
-resultat.textContent = total;
+const resultat =
+document.querySelector("#resultat");
 
-});
+addition.addEventListener(
+"click",
+() => {
+
+    const nombreA =
+        Number(a.value);
+
+    const nombreB =
+        Number(b.value);
+
+    const total =
+        nombreA + nombreB;
+
+    resultat.textContent =
+        total;
+
+}
+
+);
 
 126 — MINI PROJET : FORMULAIRE
 
@@ -13840,39 +14108,50 @@ HTML :
     Envoyer
 </button>
 
-</form><p id="message"></p>JavaScript :
+<p id="message"></p>
 
-const formulaire = document.querySelector("#formulaire");
+</form>JavaScript :
 
-const nom = document.querySelector("#nom");
-const email = document.querySelector("#email");
+const formulaire =
+document.querySelector("#formulaire");
 
-const message = document.querySelector("#message");
+const nom =
+document.querySelector("#nom");
 
-formulaire.addEventListener("submit", event => {
+const email =
+document.querySelector("#email");
 
-event.preventDefault();
+const message =
+document.querySelector("#message");
 
-if (nom.value.trim() === "") {
+formulaire.addEventListener(
+"submit",
+event => {
+
+    event.preventDefault();
+
+    if (nom.value.trim() === "") {
+
+        message.textContent =
+            "Veuillez saisir votre nom.";
+
+        return;
+    }
+
+    if (email.value.trim() === "") {
+
+        message.textContent =
+            "Veuillez saisir votre email.";
+
+        return;
+    }
 
     message.textContent =
-        "Veuillez saisir votre nom.";
+        "Formulaire envoyé avec succès.";
 
-    return;
 }
 
-if (email.value.trim() === "") {
-
-    message.textContent =
-        "Veuillez saisir votre email.";
-
-    return;
-}
-
-message.textContent =
-    "Formulaire envoyé avec succès.";
-
-});
+);
 
 127 — MINI PROJET : CHANGEMENT DE THÈME
 
@@ -13889,43 +14168,67 @@ color: white;
 
 JavaScript :
 
-const theme = document.querySelector("#theme");
+const theme =
+document.querySelector("#theme");
 
-theme.addEventListener("click", () => {
+theme.addEventListener(
+"click",
+() => {
 
-document.body.classList.toggle("dark");
+    document.body
+        .classList
+        .toggle("dark");
 
-});
+}
+
+);
 
 128 — MINI PROJET : HORLOGE
 
 HTML :
 
-<h1 id="horloge">00:00:00</h1>JavaScript :
+<h1 id="horloge">
+    00:00:00
+</h1>JavaScript :
 
-const horloge = document.querySelector("#horloge");
+const horloge =
+document.querySelector("#horloge");
 
 function afficherHeure() {
 
-const maintenant = new Date();
+const maintenant =
+    new Date();
 
 const heures =
-    String(maintenant.getHours()).padStart(2, "0");
+    String(
+        maintenant.getHours()
+    ).padStart(2, "0");
 
 const minutes =
-    String(maintenant.getMinutes()).padStart(2, "0");
+    String(
+        maintenant.getMinutes()
+    ).padStart(2, "0");
 
 const secondes =
-    String(maintenant.getSeconds()).padStart(2, "0");
+    String(
+        maintenant.getSeconds()
+    ).padStart(2, "0");
 
 horloge.textContent =
-    heures + ":" + minutes + ":" + secondes;
+    heures +
+    ":" +
+    minutes +
+    ":" +
+    secondes;
 
 }
 
 afficherHeure();
 
-setInterval(afficherHeure, 1000);
+setInterval(
+afficherHeure,
+1000
+);
 
 129 — MINI PROJET : FILTRER UNE LISTE
 
@@ -13960,9 +14263,11 @@ resultats.innerHTML = "";
 
 liste.forEach(produit => {
 
-    const li = document.createElement("li");
+    const li =
+        document.createElement("li");
 
-    li.textContent = produit;
+    li.textContent =
+        produit;
 
     resultats.appendChild(li);
 
@@ -13970,19 +14275,28 @@ liste.forEach(produit => {
 
 }
 
-recherche.addEventListener("input", () => {
+recherche.addEventListener(
+"input",
+() => {
 
-const texte =
-    recherche.value.toLowerCase().trim();
+    const texte =
+        recherche.value
+            .toLowerCase()
+            .trim();
 
-const filtres =
-    produits.filter(produit =>
-        produit.toLowerCase().includes(texte)
-    );
+    const filtres =
+        produits.filter(
+            produit =>
+                produit
+                    .toLowerCase()
+                    .includes(texte)
+        );
 
-afficherProduits(filtres);
+    afficherProduits(filtres);
 
-});
+}
+
+);
 
 afficherProduits(produits);
 
@@ -13991,14 +14305,15 @@ afficherProduits(produits);
 Un petit projet peut être organisé ainsi :
 
 mon-projet/
-│
+
 ├── index.html
+
 ├── css/
 │   └── style.css
-│
+
 ├── js/
 │   └── app.js
-│
+
 └── assets/
 ├── images/
 └── videos/
@@ -14038,9 +14353,9 @@ HTML :
 
 <button id="toggleBtn">
     Afficher / Masquer
-</button><section id="panneau">
+</button><div id="panneau">
     Contenu du panneau
-</section>CSS :
+</div>CSS :
 
 .cache {
 display: none;
@@ -14054,11 +14369,17 @@ document.querySelector("#toggleBtn");
 const panneau =
 document.querySelector("#panneau");
 
-toggleBtn.addEventListener("click", () => {
+toggleBtn.addEventListener(
+"click",
+() => {
 
-panneau.classList.toggle("cache");
+    panneau
+        .classList
+        .toggle("cache");
 
-});
+}
+
+);
 
 133 — JAVASCRIPT MODERNE
 
@@ -14124,12 +14445,11 @@ CSS présente.
 
 JavaScript programme.
 
-HTML + CSS + JavaScript permettent de construire une véritable interface Web interactive.
-`,
+HTML + CSS + JavaScript permettent de construire une véritable interface Web interactive.`,
 
-pratique: `
+pratique:
 
-TRAVAUX PRATIQUES — JAVASCRIPT
+`TRAVAUX PRATIQUES — JAVASCRIPT
 
 TP 1 — PREMIER SCRIPT
 
@@ -14219,7 +14539,9 @@ TP 11 — DOM
 
 Créer :
 
-<h1 id="titre">Puis modifier son texte avec JavaScript.
+<h1 id="titre">
+    Ancien titre
+</h1>Puis modifier son texte avec JavaScript.
 
 TP 12 — BOUTON
 
@@ -14231,9 +14553,9 @@ TP 13 — COMPTEUR
 
 Créer :
 
-+ 
+<button id="moins">−</button>
 
-- 
+<p id="compteur">0</p><button id="plus">+</button>
 
 Réinitialiser
 
@@ -14590,8 +14912,7 @@ Contraintes :
 
 - aucun bouton décoratif sans fonction ;
 
-- code lisible et commenté.
-  `,
+- code lisible et commenté.`,
   
   exercices: [
   "Exercice 1 — Écrire un programme JavaScript qui affiche Bonjour dans la console.",
@@ -14646,8 +14967,8 @@ Contraintes :
   "Exercice 50 — Construire une mini-application complète combinant HTML, CSS et JavaScript."
   ],
   
-  devoirs: `
-  DEVOIR FINAL — CRÉATION D'UNE APPLICATION WEB INTERACTIVE
+  devoirs:
+  `DEVOIR FINAL — CRÉATION D'UNE APPLICATION WEB INTERACTIVE
 
 OBJECTIF
 
@@ -14840,9 +15161,9 @@ RÉSULTAT ATTENDU
 
 À la fin du devoir, l'étudiant doit être capable de partir d'une structure HTML, de lui appliquer une présentation CSS et de programmer une véritable interaction avec JavaScript.
 
-Le projet final doit fonctionner directement dans un navigateur moderne sans dépendre d'un framework JavaScript obligatoire.
-`
+Le projet final doit fonctionner directement dans un navigateur moderne sans dépendre d'un framework JavaScript obligatoire.`
 },
+
 
 
 
