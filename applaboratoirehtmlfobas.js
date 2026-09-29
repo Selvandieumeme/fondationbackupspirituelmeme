@@ -1678,6 +1678,13 @@ function renderProjectInformation() {
 
 
 
+
+
+
+
+
+
+
 /* ================================================================
    12 — EXÉCUTION DU PROJET
    ================================================================ */
@@ -1844,6 +1851,529 @@ function getActiveHTMLFileName(project) {
 }
 
 
+/* ================================================================
+   12A — CONVERSION BLOB → DATA URL
+   ================================================================ */
+
+/*
+   Convertit le Blob réel enregistré dans IndexedDB
+   en Data URL utilisable directement dans le src
+   du HTML envoyé au preview.
+*/
+function blobToDataURL(blob) {
+
+    return new Promise(
+        function (resolve, reject) {
+
+            if (!(blob instanceof Blob)) {
+
+                reject(
+                    new Error(
+                        "Ressource binaire invalide."
+                    )
+                );
+
+                return;
+            }
+
+            const reader =
+                new FileReader();
+
+            reader.onload =
+                function () {
+
+                    resolve(
+                        reader.result
+                    );
+                };
+
+            reader.onerror =
+                function () {
+
+                    reject(
+                        reader.error ||
+                        new Error(
+                            "Impossible de lire la ressource binaire."
+                        )
+                    );
+                };
+
+            reader.readAsDataURL(blob);
+        }
+    );
+}
+
+
+/* ================================================================
+   12B — RECHERCHE D'UNE RESSOURCE INDEXEDDB
+   ================================================================ */
+
+/*
+   Recherche une ressource image/vidéo dans IndexedDB
+   à partir de sa référence HTML.
+
+   La recherche utilise d'abord le chemin/nom exact,
+   puis le nom simple uniquement lorsqu'il est unique.
+*/
+function resolveProjectResource(
+    resources,
+    reference
+) {
+
+    if (
+        !Array.isArray(resources) ||
+        !reference
+    ) {
+        return null;
+    }
+
+    const normalizedReference =
+        normalizeProjectReference(
+            reference
+        );
+
+    if (!normalizedReference) {
+        return null;
+    }
+
+    /*
+       1 — Correspondance exacte avec le nom enregistré.
+    */
+    const exactMatch =
+        resources.find(
+            function (resource) {
+
+                return (
+                    resource &&
+                    resource.name &&
+                    normalizeProjectReference(
+                        resource.name
+                    ) === normalizedReference
+                );
+
+            }
+        );
+
+    if (exactMatch) {
+        return exactMatch;
+    }
+
+    /*
+       2 — Correspondance par nom simple.
+
+       Exemple :
+       HTML :
+       <img src="./images/photo.jpg">
+
+       Ressource IndexedDB :
+       photo.jpg
+    */
+    const referenceBaseName =
+        normalizedReference
+            .split("/")
+            .pop();
+
+    const baseMatches =
+        resources.filter(
+            function (resource) {
+
+                if (
+                    !resource ||
+                    !resource.name
+                ) {
+                    return false;
+                }
+
+                return (
+                    normalizeProjectReference(
+                        resource.name
+                    )
+                    .split("/")
+                    .pop() ===
+                    referenceBaseName
+                );
+            }
+        );
+
+    if (baseMatches.length === 1) {
+        return baseMatches[0];
+    }
+
+    return null;
+}
+
+
+/* ================================================================
+   12C — VÉRIFICATION DES URL EXTERNES
+   ================================================================ */
+
+/*
+   Retourne true lorsqu'une référence ne doit PAS être
+   remplacée par une ressource IndexedDB.
+*/
+function isExternalOrNonFileReference(reference) {
+
+    const value =
+        String(reference || "").trim();
+
+    if (!value) {
+        return true;
+    }
+
+    return (
+        /^(?:https?:|\/\/|data:|blob:|javascript:|mailto:|tel:|#)/i
+            .test(value)
+    );
+}
+
+
+/* ================================================================
+   12D — INJECTION DES IMAGES / VIDÉOS INDEXEDDB
+   ================================================================ */
+
+/*
+   Remplace les références locales des images et vidéos
+   par les données binaires réellement stockées dans IndexedDB.
+
+   Exemples :
+
+   <img src="photo.jpg">
+
+   devient :
+
+   <img src="data:image/jpeg;base64,...">
+
+   et :
+
+   <video controls>
+       <source src="video.mp4" type="video/mp4">
+   </video>
+
+   devient :
+
+   <video controls>
+       <source
+           src="data:video/mp4;base64,..."
+           type="video/mp4"
+       >
+   </video>
+
+   Les URL externes restent inchangées.
+*/
+async function injectProjectMedia(
+    html,
+    project
+) {
+
+    let result =
+        String(html || "");
+
+    if (!project) {
+        return result;
+    }
+
+    /*
+       Récupère toutes les ressources du projet
+       depuis IndexedDB.
+    */
+    let resources = [];
+
+    try {
+
+        resources =
+            await getProjectResources();
+
+    } catch (error) {
+
+        console.warn(
+            "FOBAS — Impossible de récupérer les ressources IndexedDB :",
+            error
+        );
+
+        return result;
+    }
+
+    if (
+        !Array.isArray(resources) ||
+        !resources.length
+    ) {
+        return result;
+    }
+
+    /*
+       ------------------------------------------------------------
+       IMAGES
+       ------------------------------------------------------------
+    */
+
+    result =
+        await replaceAsyncHTMLAttribute(
+            result,
+            /<img\b([^>]*?)>/gi,
+            "src",
+            resources
+        );
+
+
+    /*
+       ------------------------------------------------------------
+       VIDÉOS
+       ------------------------------------------------------------
+    */
+
+    result =
+        await replaceAsyncHTMLAttribute(
+            result,
+            /<video\b([^>]*?)>/gi,
+            "src",
+            resources
+        );
+
+
+    /*
+       ------------------------------------------------------------
+       AUDIO
+       ------------------------------------------------------------
+       Ajouté pour conserver une résolution cohérente
+       des ressources média locales.
+    */
+
+    result =
+        await replaceAsyncHTMLAttribute(
+            result,
+            /<audio\b([^>]*?)>/gi,
+            "src",
+            resources
+        );
+
+
+    /*
+       ------------------------------------------------------------
+       SOURCE
+       ------------------------------------------------------------
+       Important pour :
+
+       <video>
+           <source src="video.mp4">
+       </video>
+    */
+
+    result =
+        await replaceAsyncHTMLAttribute(
+            result,
+            /<source\b([^>]*?)>/gi,
+            "src",
+            resources
+        );
+
+
+    /*
+       ------------------------------------------------------------
+       POSTER VIDÉO
+       ------------------------------------------------------------
+       Exemple :
+
+       <video poster="image.jpg">
+    */
+
+    result =
+        await replaceAsyncHTMLAttribute(
+            result,
+            /<video\b([^>]*?)>/gi,
+            "poster",
+            resources
+        );
+
+    return result;
+}
+
+
+/*
+   Remplace de manière asynchrone un attribut HTML
+   lorsque sa valeur correspond à une ressource IndexedDB.
+*/
+async function replaceAsyncHTMLAttribute(
+    html,
+    tagPattern,
+    attributeName,
+    resources
+) {
+
+    const matches = [];
+
+    String(html || "").replace(
+        tagPattern,
+        function (
+            fullTag,
+            attributes
+        ) {
+
+            const attributePattern =
+                new RegExp(
+                    "\\b" +
+                    attributeName +
+                    "\\s*=\\s*([\"'])(.*?)\\1",
+                    "i"
+                );
+
+            const attributeMatch =
+                attributes.match(
+                    attributePattern
+                );
+
+            if (!attributeMatch) {
+                return fullTag;
+            }
+
+            matches.push({
+                fullTag:
+                    fullTag,
+
+                attributes:
+                    attributes,
+
+                value:
+                    attributeMatch[2]
+            });
+
+            return fullTag;
+        }
+    );
+
+    if (!matches.length) {
+        return html;
+    }
+
+    const replacements =
+        new Map();
+
+    for (
+        const match of matches
+    ) {
+
+        const reference =
+            String(
+                match.value || ""
+            ).trim();
+
+        /*
+           Ne jamais modifier les URL externes,
+           data URL, Blob URL, ancres, etc.
+        */
+        if (
+            isExternalOrNonFileReference(
+                reference
+            )
+        ) {
+            continue;
+        }
+
+        const resource =
+            resolveProjectResource(
+                resources,
+                reference
+            );
+
+        if (
+            !resource ||
+            !(resource.blob instanceof Blob)
+        ) {
+            continue;
+        }
+
+        /*
+           Convertit le Blob IndexedDB en Data URL.
+        */
+        let dataURL = "";
+
+        try {
+
+            dataURL =
+                await blobToDataURL(
+                    resource.blob
+                );
+
+        } catch (error) {
+
+            console.warn(
+                "FOBAS — Impossible de convertir la ressource :",
+                resource.name,
+                error
+            );
+
+            continue;
+        }
+
+        if (!dataURL) {
+            continue;
+        }
+
+        /*
+           Remplace uniquement la valeur de l'attribut
+           concerné et conserve tous les autres attributs.
+        */
+        const attributePattern =
+            new RegExp(
+                "(\\b" +
+                attributeName +
+                "\\s*=\\s*)([\"'])(.*?)\\2",
+                "i"
+            );
+
+        const newTag =
+            match.fullTag.replace(
+                attributePattern,
+                function (
+                    fullAttribute,
+                    prefix,
+                    quote
+                ) {
+
+                    return (
+                        prefix +
+                        quote +
+                        dataURL +
+                        quote
+                    );
+                }
+            );
+
+        replacements.set(
+            match.fullTag,
+            newTag
+        );
+    }
+
+    if (!replacements.size) {
+        return html;
+    }
+
+    /*
+       Application des remplacements.
+       On remplace uniquement les tags concernés.
+    */
+    let result =
+        String(html || "");
+
+    replacements.forEach(
+        function (
+            newTag,
+            oldTag
+        ) {
+
+            result =
+                result.split(
+                    oldTag
+                ).join(
+                    newTag
+                );
+        }
+    );
+
+    return result;
+}
+
+
 /*
    Construit le document qui sera envoyé au preview.
 
@@ -1853,11 +2383,14 @@ function getActiveHTMLFileName(project) {
      sont intégrés ;
    - seuls les JS réellement référencés par ce HTML
      sont intégrés ;
-   - les autres CSS/JS du projet ne sont pas injectés.
+   - les images/vidéos réellement présentes dans IndexedDB
+     sont également intégrées dans le preview ;
+   - les autres CSS/JS/ressources du projet ne sont pas injectés.
 */
-function buildProjectDocument() {
+async function buildProjectDocument() {
 
-    const project = getCurrentProject();
+    const project =
+        getCurrentProject();
 
     if (!project) {
         return "";
@@ -1886,11 +2419,28 @@ function buildProjectDocument() {
 </html>`;
     }
 
+    /*
+       1 — Intégration CSS et JavaScript.
+    */
     html =
         injectProjectAssets(
             html,
             project,
             activeHTMLFileName
+        );
+
+    /*
+       2 — Intégration des images/vidéos
+       depuis IndexedDB.
+
+       Cette étape récupère resource.blob,
+       le convertit en Data URL et remplace
+       les src locaux dans le document.
+    */
+    html =
+        await injectProjectMedia(
+            html,
+            project
         );
 
     return html;
@@ -2138,8 +2688,11 @@ function injectProjectAssets(
    Le contenu actuellement présent dans l'éditeur est d'abord
    sauvegardé, puis le HTML ACTIF est reconstruit et envoyé
    directement dans l'iframe du laboratoire.
+
+   La construction est asynchrone car les images/vidéos
+   doivent être récupérées depuis IndexedDB.
 */
-function runProject() {
+async function runProject() {
 
     saveCurrentEditorToState();
     saveStoredProjects();
@@ -2156,8 +2709,26 @@ function runProject() {
         return;
     }
 
-    const html =
-        buildProjectDocument();
+    let html = "";
+
+    try {
+
+        html =
+            await buildProjectDocument();
+
+    } catch (error) {
+
+        console.error(
+            "FOBAS — Erreur lors de la construction du preview :",
+            error
+        );
+
+        showToast(
+            "Erreur lors de la préparation du preview."
+        );
+
+        return;
+    }
 
     if (!dom.previewFrame) {
         return;
@@ -2214,6 +2785,8 @@ function initializeLaboratory() {
         "Laboratoire initialisé."
     );
 }
+
+
 
 
 
