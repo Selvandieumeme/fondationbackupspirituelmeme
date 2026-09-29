@@ -1681,6 +1681,1057 @@ function renderProjectInformation() {
 
 
 
+/* ================================================================
+   FOBAS — MEDIA FORMAT & PREVIEW ENGINE
+   VERSION 1.0.0
+
+   OBJECTIF :
+   - Préparer les images et vidéos provenant d'Android.
+   - Reconnaître le vrai type MIME du fichier.
+   - Ne pas dépendre uniquement de l'extension.
+   - Utiliser le Blob réel provenant d'IndexedDB.
+   - Préparer les images pour <img src="">.
+   - Préparer les vidéos pour <video>/<source src="">.
+   - Supporter JPEG / JPG / PNG / WEBP / GIF / SVG.
+   - Supporter HEIC / HEIF lorsque le navigateur possède
+     un décodeur compatible.
+   - Préparer MP4 / WebM / OGG / MOV et autres vidéos
+     compatibles avec le navigateur.
+   - Ne modifier aucune donnée dans IndexedDB.
+   - Ne modifier aucun projet.
+   - Ne modifier aucun fichier de l'éditeur.
+   - Bloc totalement isolé.
+   ================================================================ */
+
+(function () {
+
+    "use strict";
+
+
+    /* ============================================================
+       01 — CONFIGURATION
+       ============================================================ */
+
+    const FOBAS_MEDIA_ENGINE = {
+
+        name:
+            "FOBAS Media Format & Preview Engine",
+
+        version:
+            "1.0.0",
+
+        imageTypes: [
+
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+            "image/gif",
+            "image/bmp",
+            "image/svg+xml",
+            "image/avif",
+            "image/heic",
+            "image/heif"
+
+        ],
+
+        videoTypes: [
+
+            "video/mp4",
+            "video/webm",
+            "video/ogg",
+            "video/quicktime",
+            "video/x-m4v",
+            "video/3gpp",
+            "video/3gpp2",
+            "video/x-msvideo"
+
+        ]
+
+    };
+
+
+    /* ============================================================
+       02 — NORMALISATION DU TYPE MIME
+       ============================================================ */
+
+    function normalizeMimeType(mimeType) {
+
+        return String(
+            mimeType || ""
+        )
+            .trim()
+            .toLowerCase();
+
+    }
+
+
+    /* ============================================================
+       03 — EXTRACTION DE L'EXTENSION
+       ============================================================ */
+
+    function getFileExtension(fileName) {
+
+        const name =
+            String(fileName || "")
+                .trim()
+                .toLowerCase();
+
+        const lastDot =
+            name.lastIndexOf(".");
+
+        if (
+            lastDot < 0 ||
+            lastDot === name.length - 1
+        ) {
+            return "";
+        }
+
+        return name.substring(
+            lastDot + 1
+        );
+
+    }
+
+
+    /* ============================================================
+       04 — DÉTECTION DU TYPE PAR EXTENSION
+       ============================================================ */
+
+    function mimeTypeFromExtension(fileName) {
+
+        const extension =
+            getFileExtension(fileName);
+
+        const types = {
+
+            jpg:
+                "image/jpeg",
+
+            jpeg:
+                "image/jpeg",
+
+            jpe:
+                "image/jpeg",
+
+            png:
+                "image/png",
+
+            webp:
+                "image/webp",
+
+            gif:
+                "image/gif",
+
+            bmp:
+                "image/bmp",
+
+            svg:
+                "image/svg+xml",
+
+            avif:
+                "image/avif",
+
+            heic:
+                "image/heic",
+
+            heif:
+                "image/heif",
+
+            mp4:
+                "video/mp4",
+
+            m4v:
+                "video/x-m4v",
+
+            webm:
+                "video/webm",
+
+            ogv:
+                "video/ogg",
+
+            ogg:
+                "video/ogg",
+
+            mov:
+                "video/quicktime",
+
+            "3gp":
+                "video/3gpp",
+
+            "3g2":
+                "video/3gpp2",
+
+            avi:
+                "video/x-msvideo"
+
+        };
+
+        return types[extension] || "";
+
+    }
+
+
+    /* ============================================================
+       05 — DÉTECTION DU TYPE RÉEL
+       ============================================================ */
+
+    function detectMediaType(
+        blob,
+        fileName,
+        mimeType
+    ) {
+
+        const blobType =
+            normalizeMimeType(
+                blob && blob.type
+            );
+
+        const suppliedType =
+            normalizeMimeType(
+                mimeType
+            );
+
+        const extensionType =
+            mimeTypeFromExtension(
+                fileName
+            );
+
+        if (blobType) {
+            return blobType;
+        }
+
+        if (suppliedType) {
+            return suppliedType;
+        }
+
+        if (extensionType) {
+            return extensionType;
+        }
+
+        return "";
+
+    }
+
+
+    /* ============================================================
+       06 — TEST IMAGE
+       ============================================================ */
+
+    function isImageType(
+        mimeType,
+        fileName
+    ) {
+
+        const type =
+            normalizeMimeType(
+                mimeType
+            );
+
+        if (
+            type.indexOf("image/") === 0
+        ) {
+            return true;
+        }
+
+        const extensionType =
+            mimeTypeFromExtension(
+                fileName
+            );
+
+        return (
+            extensionType.indexOf("image/") === 0
+        );
+
+    }
+
+
+    /* ============================================================
+       07 — TEST VIDÉO
+       ============================================================ */
+
+    function isVideoType(
+        mimeType,
+        fileName
+    ) {
+
+        const type =
+            normalizeMimeType(
+                mimeType
+            );
+
+        if (
+            type.indexOf("video/") === 0
+        ) {
+            return true;
+        }
+
+        const extensionType =
+            mimeTypeFromExtension(
+                fileName
+            );
+
+        return (
+            extensionType.indexOf("video/") === 0
+        );
+
+    }
+
+
+    /* ============================================================
+       08 — BLOB → DATA URL
+       ============================================================ */
+
+    function blobToDataURL(blob) {
+
+        return new Promise(
+            function (
+                resolve,
+                reject
+            ) {
+
+                if (!(blob instanceof Blob)) {
+
+                    reject(
+                        new Error(
+                            "FOBAS : le média fourni n'est pas un Blob."
+                        )
+                    );
+
+                    return;
+                }
+
+                const reader =
+                    new FileReader();
+
+                reader.onload =
+                    function () {
+
+                        resolve(
+                            String(
+                                reader.result || ""
+                            )
+                        );
+
+                    };
+
+                reader.onerror =
+                    function () {
+
+                        reject(
+                            new Error(
+                                "FOBAS : impossible de lire le Blob."
+                            )
+                        );
+
+                    };
+
+                reader.onabort =
+                    function () {
+
+                        reject(
+                            new Error(
+                                "FOBAS : lecture du Blob interrompue."
+                            )
+                        );
+
+                    };
+
+                reader.readAsDataURL(
+                    blob
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       09 — BLOB URL
+       ============================================================ */
+
+    function createBlobURL(blob) {
+
+        if (!(blob instanceof Blob)) {
+            return "";
+        }
+
+        try {
+
+            return URL.createObjectURL(
+                blob
+            );
+
+        } catch (error) {
+
+            return "";
+
+        }
+
+    }
+
+
+    /* ============================================================
+       10 — TEST DE DÉCODAGE IMAGE
+       ============================================================ */
+
+    function testImageDecoding(
+        source
+    ) {
+
+        return new Promise(
+            function (resolve) {
+
+                if (
+                    typeof Image ===
+                    "undefined"
+                ) {
+
+                    resolve(false);
+                    return;
+
+                }
+
+                const image =
+                    new Image();
+
+                let finished =
+                    false;
+
+                const finish =
+                    function (result) {
+
+                        if (finished) {
+                            return;
+                        }
+
+                        finished = true;
+
+                        image.onload = null;
+                        image.onerror = null;
+
+                        resolve(
+                            Boolean(result)
+                        );
+
+                    };
+
+                image.onload =
+                    function () {
+
+                        finish(true);
+
+                    };
+
+                image.onerror =
+                    function () {
+
+                        finish(false);
+
+                    };
+
+                try {
+
+                    image.src =
+                        source;
+
+                } catch (error) {
+
+                    finish(false);
+
+                }
+
+                setTimeout(
+                    function () {
+
+                        finish(false);
+
+                    },
+                    8000
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       11 — PRÉPARATION IMAGE
+       ============================================================ */
+
+    async function prepareImage(
+        blob,
+        fileName,
+        mimeType
+    ) {
+
+        if (!(blob instanceof Blob)) {
+
+            throw new Error(
+                "FOBAS : Blob image introuvable."
+            );
+
+        }
+
+        const detectedType =
+            detectMediaType(
+                blob,
+                fileName,
+                mimeType
+            );
+
+        let effectiveType =
+            detectedType;
+
+        if (!effectiveType) {
+
+            effectiveType =
+                "application/octet-stream";
+
+        }
+
+
+        /* --------------------------------------------------------
+           Première tentative :
+           utiliser directement le Blob via Blob URL.
+           -------------------------------------------------------- */
+
+        const blobURL =
+            createBlobURL(
+                blob
+            );
+
+        if (blobURL) {
+
+            const browserCanDecode =
+                await testImageDecoding(
+                    blobURL
+                );
+
+            if (browserCanDecode) {
+
+                return {
+
+                    success: true,
+
+                    kind: "image",
+
+                    source: blobURL,
+
+                    sourceType: "blob",
+
+                    mimeType:
+                        effectiveType,
+
+                    fileName:
+                        String(
+                            fileName || ""
+                        ),
+
+                    converted: false
+
+                };
+
+            }
+
+            try {
+
+                URL.revokeObjectURL(
+                    blobURL
+                );
+
+            } catch (error) {
+                /* Aucun traitement nécessaire. */
+            }
+
+        }
+
+
+        /* --------------------------------------------------------
+           Deuxième tentative :
+           Data URL.
+           -------------------------------------------------------- */
+
+        let dataURL = "";
+
+        try {
+
+            dataURL =
+                await blobToDataURL(
+                    blob
+                );
+
+        } catch (error) {
+
+            dataURL = "";
+
+        }
+
+        if (dataURL) {
+
+            const browserCanDecode =
+                await testImageDecoding(
+                    dataURL
+                );
+
+            if (browserCanDecode) {
+
+                return {
+
+                    success: true,
+
+                    kind: "image",
+
+                    source: dataURL,
+
+                    sourceType: "data",
+
+                    mimeType:
+                        effectiveType,
+
+                    fileName:
+                        String(
+                            fileName || ""
+                        ),
+
+                    converted: false
+
+                };
+
+            }
+
+        }
+
+
+        /* --------------------------------------------------------
+           HEIC / HEIF :
+           si le navigateur ne possède pas de codec HEIC/HEIF,
+           JavaScript natif ne peut pas inventer le décodage.
+           On retourne néanmoins le Blob URL comme fallback.
+           -------------------------------------------------------- */
+
+        const isHEIC =
+            effectiveType ===
+                "image/heic" ||
+            effectiveType ===
+                "image/heif" ||
+            getFileExtension(
+                fileName
+            ) === "heic" ||
+            getFileExtension(
+                fileName
+            ) === "heif";
+
+        if (isHEIC) {
+
+            const fallbackURL =
+                createBlobURL(
+                    blob
+                );
+
+            if (fallbackURL) {
+
+                return {
+
+                    success: true,
+
+                    kind: "image",
+
+                    source:
+                        fallbackURL,
+
+                    sourceType:
+                        "blob-fallback",
+
+                    mimeType:
+                        effectiveType,
+
+                    fileName:
+                        String(
+                            fileName || ""
+                        ),
+
+                    converted: false,
+
+                    requiresHEICDecoder:
+                        true
+
+                };
+
+            }
+
+        }
+
+
+        throw new Error(
+            "FOBAS : le navigateur ne peut pas décoder cette image (" +
+            effectiveType +
+            ")."
+        );
+
+    }
+
+
+    /* ============================================================
+       12 — TEST DE SUPPORT VIDÉO
+       ============================================================ */
+
+    function canBrowserPlayVideo(
+        mimeType
+    ) {
+
+        try {
+
+            const video =
+                document.createElement(
+                    "video"
+                );
+
+            if (
+                !video ||
+                typeof video.canPlayType !==
+                    "function"
+            ) {
+
+                return false;
+
+            }
+
+            const result =
+                video.canPlayType(
+                    mimeType || ""
+                );
+
+            return (
+                result === "probably" ||
+                result === "maybe"
+            );
+
+        } catch (error) {
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       13 — PRÉPARATION VIDÉO
+       ============================================================ */
+
+    async function prepareVideo(
+        blob,
+        fileName,
+        mimeType
+    ) {
+
+        if (!(blob instanceof Blob)) {
+
+            throw new Error(
+                "FOBAS : Blob vidéo introuvable."
+            );
+
+        }
+
+        const detectedType =
+            detectMediaType(
+                blob,
+                fileName,
+                mimeType
+            );
+
+        let effectiveType =
+            detectedType;
+
+        if (!effectiveType) {
+
+            effectiveType =
+                "application/octet-stream";
+
+        }
+
+
+        /* --------------------------------------------------------
+           Le Blob URL est préférable pour les vidéos :
+           il évite de transformer une grosse vidéo en Data URL.
+           -------------------------------------------------------- */
+
+        const blobURL =
+            createBlobURL(
+                blob
+            );
+
+        if (blobURL) {
+
+            const playable =
+                canBrowserPlayVideo(
+                    effectiveType
+                );
+
+            return {
+
+                success: true,
+
+                kind: "video",
+
+                source:
+                    blobURL,
+
+                sourceType:
+                    "blob",
+
+                mimeType:
+                    effectiveType,
+
+                fileName:
+                    String(
+                        fileName || ""
+                    ),
+
+                converted: false,
+
+                browserPlayable:
+                    playable
+
+            };
+
+        }
+
+
+        /* --------------------------------------------------------
+           Fallback Data URL
+           -------------------------------------------------------- */
+
+        const dataURL =
+            await blobToDataURL(
+                blob
+            );
+
+        if (dataURL) {
+
+            return {
+
+                success: true,
+
+                kind: "video",
+
+                source:
+                    dataURL,
+
+                sourceType:
+                    "data",
+
+                mimeType:
+                    effectiveType,
+
+                fileName:
+                    String(
+                        fileName || ""
+                    ),
+
+                converted: false,
+
+                browserPlayable:
+                    canBrowserPlayVideo(
+                        effectiveType
+                    )
+
+            };
+
+        }
+
+
+        throw new Error(
+            "FOBAS : impossible de préparer cette vidéo."
+        );
+
+    }
+
+
+    /* ============================================================
+       14 — PRÉPARATION UNIVERSELLE
+       ============================================================ */
+
+    async function prepareMedia(
+        blob,
+        fileName,
+        mimeType,
+        forcedKind
+    ) {
+
+        const detectedType =
+            detectMediaType(
+                blob,
+                fileName,
+                mimeType
+            );
+
+        let kind =
+            String(
+                forcedKind || ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            kind !== "image" &&
+            kind !== "video"
+        ) {
+
+            if (
+                isImageType(
+                    detectedType,
+                    fileName
+                )
+            ) {
+
+                kind = "image";
+
+            } else if (
+                isVideoType(
+                    detectedType,
+                    fileName
+                )
+            ) {
+
+                kind = "video";
+
+            }
+
+        }
+
+
+        if (kind === "image") {
+
+            return await prepareImage(
+                blob,
+                fileName,
+                detectedType
+            );
+
+        }
+
+
+        if (kind === "video") {
+
+            return await prepareVideo(
+                blob,
+                fileName,
+                detectedType
+            );
+
+        }
+
+
+        throw new Error(
+            "FOBAS : type de média non reconnu : " +
+            String(
+                detectedType || "inconnu"
+            )
+        );
+
+    }
+
+
+    /* ============================================================
+       15 — LIBÉRATION D'UNE URL BLOB
+       ============================================================ */
+
+    function releaseMediaSource(
+        source
+    ) {
+
+        const value =
+            String(
+                source || ""
+            );
+
+        if (
+            value.indexOf(
+                "blob:"
+            ) === 0
+        ) {
+
+            try {
+
+                URL.revokeObjectURL(
+                    value
+                );
+
+            } catch (error) {
+                /* Aucun traitement nécessaire. */
+            }
+
+        }
+
+    }
+
+
+    /* ============================================================
+       16 — API PUBLIQUE FOBAS
+       ============================================================ */
+
+    window.FOBASMediaEngine = {
+
+        version:
+            FOBAS_MEDIA_ENGINE.version,
+
+        prepare:
+            prepareMedia,
+
+        prepareImage:
+            prepareImage,
+
+        prepareVideo:
+            prepareVideo,
+
+        blobToDataURL:
+            blobToDataURL,
+
+        createBlobURL:
+            createBlobURL,
+
+        detectType:
+            detectMediaType,
+
+        isImage:
+            isImageType,
+
+        isVideo:
+            isVideoType,
+
+        canPlayVideo:
+            canBrowserPlayVideo,
+
+        release:
+            releaseMediaSource
+
+    };
+
+
+    /* ============================================================
+       17 — CONFIRMATION DE CHARGEMENT
+       ============================================================ */
+
+    window.FOBAS_MEDIA_ENGINE_READY =
+        true;
+
+
+})();
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1737,10 +2788,6 @@ function normalizeProjectReference(reference) {
 /*
    Vérifie si une référence correspond réellement à un fichier
    présent dans le projet.
-
-   La recherche se fait d'abord sur le chemin exact.
-   Si aucun chemin exact n'est trouvé, le nom simple est utilisé
-   uniquement lorsqu'il est unique dans le projet.
 */
 function resolveProjectFileName(project, reference) {
 
@@ -1776,8 +2823,8 @@ function resolveProjectFileName(project, reference) {
     }
 
     /*
-       2 — Correspondance par nom de fichier uniquement,
-       seulement si ce nom est unique dans le projet.
+       2 — Correspondance par nom simple uniquement
+       lorsqu'il est unique dans le projet.
     */
     const referenceBaseName =
         normalizedReference
@@ -1805,15 +2852,6 @@ function resolveProjectFileName(project, reference) {
 
 /*
    Détermine le HTML qui doit servir de page d'entrée.
-
-   RÈGLE PRINCIPALE :
-   si le fichier actuellement actif est un HTML/HTM,
-   c'est LUI qui doit être utilisé.
-
-   index.html n'est donc plus prioritaire.
-
-   Si le fichier actif n'est pas un HTML, on utilise le premier
-   HTML disponible comme solution de secours.
 */
 function getActiveHTMLFileName(project) {
 
@@ -1835,10 +2873,6 @@ function getActiveHTMLFileName(project) {
         return activeFileName;
     }
 
-    /*
-       Solution de secours si le fichier actif est CSS/JS
-       ou si le fichier actif n'existe plus.
-    */
     const firstHTML =
         Object.keys(project.files)
             .find(function (name) {
@@ -1855,11 +2889,6 @@ function getActiveHTMLFileName(project) {
    12A — CONVERSION BLOB → DATA URL
    ================================================================ */
 
-/*
-   Convertit le Blob réel enregistré dans IndexedDB
-   en Data URL utilisable directement dans le src
-   du HTML envoyé au preview.
-*/
 function blobToDataURL(blob) {
 
     return new Promise(
@@ -1883,8 +2912,11 @@ function blobToDataURL(blob) {
                 function () {
 
                     resolve(
-                        reader.result
+                        String(
+                            reader.result || ""
+                        )
                     );
+
                 };
 
             reader.onerror =
@@ -1896,9 +2928,11 @@ function blobToDataURL(blob) {
                             "Impossible de lire la ressource binaire."
                         )
                     );
+
                 };
 
             reader.readAsDataURL(blob);
+
         }
     );
 }
@@ -1908,13 +2942,6 @@ function blobToDataURL(blob) {
    12B — RECHERCHE D'UNE RESSOURCE INDEXEDDB
    ================================================================ */
 
-/*
-   Recherche une ressource image/vidéo dans IndexedDB
-   à partir de sa référence HTML.
-
-   La recherche utilise d'abord le chemin/nom exact,
-   puis le nom simple uniquement lorsqu'il est unique.
-*/
 function resolveProjectResource(
     resources,
     reference
@@ -1937,7 +2964,7 @@ function resolveProjectResource(
     }
 
     /*
-       1 — Correspondance exacte avec le nom enregistré.
+       1 — Correspondance exacte.
     */
     const exactMatch =
         resources.find(
@@ -1959,14 +2986,8 @@ function resolveProjectResource(
     }
 
     /*
-       2 — Correspondance par nom simple.
-
-       Exemple :
-       HTML :
-       <img src="./images/photo.jpg">
-
-       Ressource IndexedDB :
-       photo.jpg
+       2 — Correspondance par nom simple
+       lorsqu'il est unique.
     */
     const referenceBaseName =
         normalizedReference
@@ -1992,6 +3013,7 @@ function resolveProjectResource(
                     .pop() ===
                     referenceBaseName
                 );
+
             }
         );
 
@@ -2007,10 +3029,6 @@ function resolveProjectResource(
    12C — VÉRIFICATION DES URL EXTERNES
    ================================================================ */
 
-/*
-   Retourne true lorsqu'une référence ne doit PAS être
-   remplacée par une ressource IndexedDB.
-*/
 function isExternalOrNonFileReference(reference) {
 
     const value =
@@ -2028,38 +3046,131 @@ function isExternalOrNonFileReference(reference) {
 
 
 /* ================================================================
-   12D — INJECTION DES IMAGES / VIDÉOS INDEXEDDB
+   12D — PRÉPARATION D'UNE RESSOURCE MÉDIA
    ================================================================ */
 
 /*
-   Remplace les références locales des images et vidéos
-   par les données binaires réellement stockées dans IndexedDB.
+   Utilise le nouveau moteur FOBASMediaEngine lorsqu'il est
+   disponible.
 
-   Exemples :
-
-   <img src="photo.jpg">
-
-   devient :
-
-   <img src="data:image/jpeg;base64,...">
-
-   et :
-
-   <video controls>
-       <source src="video.mp4" type="video/mp4">
-   </video>
-
-   devient :
-
-   <video controls>
-       <source
-           src="data:video/mp4;base64,..."
-           type="video/mp4"
-       >
-   </video>
-
-   Les URL externes restent inchangées.
+   Si le moteur n'est pas disponible, on conserve un fallback
+   direct vers le Blob → Data URL afin de ne pas casser
+   l'ancien système.
 */
+async function prepareProjectMediaResource(
+    resource
+) {
+
+    if (
+        !resource ||
+        !(resource.blob instanceof Blob)
+    ) {
+        return null;
+    }
+
+    /*
+       ------------------------------------------------------------
+       NOUVEAU MOTEUR FOBAS
+       ------------------------------------------------------------
+    */
+    if (
+        window.FOBASMediaEngine &&
+        typeof window.FOBASMediaEngine.prepare ===
+            "function"
+    ) {
+
+        try {
+
+            const mediaResult =
+                await window.FOBASMediaEngine.prepare(
+                    resource.blob,
+                    resource.name,
+                    resource.type,
+                    resource.kind
+                );
+
+            if (
+                mediaResult &&
+                mediaResult.source
+            ) {
+
+                return mediaResult;
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "FOBAS — Media Engine n'a pas pu préparer :",
+                resource.name,
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+       ------------------------------------------------------------
+       FALLBACK COMPATIBLE AVEC L'ANCIEN SYSTÈME
+       ------------------------------------------------------------
+    */
+
+    try {
+
+        const dataURL =
+            await blobToDataURL(
+                resource.blob
+            );
+
+        if (!dataURL) {
+            return null;
+        }
+
+        return {
+
+            success: true,
+
+            kind:
+                resource.kind || "",
+
+            source:
+                dataURL,
+
+            sourceType:
+                "data",
+
+            mimeType:
+                resource.type ||
+                resource.blob.type ||
+                "",
+
+            fileName:
+                resource.name || "",
+
+            converted:
+                false
+
+        };
+
+    } catch (error) {
+
+        console.warn(
+            "FOBAS — Impossible de préparer la ressource :",
+            resource.name,
+            error
+        );
+
+        return null;
+    }
+}
+
+
+/* ================================================================
+   12E — INJECTION DES IMAGES / VIDÉOS INDEXEDDB
+   ================================================================ */
+
 async function injectProjectMedia(
     html,
     project
@@ -2073,7 +3184,7 @@ async function injectProjectMedia(
     }
 
     /*
-       Récupère toutes les ressources du projet
+       Récupération des ressources du projet
        depuis IndexedDB.
     */
     let resources = [];
@@ -2100,6 +3211,7 @@ async function injectProjectMedia(
         return result;
     }
 
+
     /*
        ------------------------------------------------------------
        IMAGES
@@ -2117,7 +3229,7 @@ async function injectProjectMedia(
 
     /*
        ------------------------------------------------------------
-       VIDÉOS
+       VIDÉOS AVEC SRC DIRECT
        ------------------------------------------------------------
     */
 
@@ -2134,8 +3246,6 @@ async function injectProjectMedia(
        ------------------------------------------------------------
        AUDIO
        ------------------------------------------------------------
-       Ajouté pour conserver une résolution cohérente
-       des ressources média locales.
     */
 
     result =
@@ -2149,13 +3259,8 @@ async function injectProjectMedia(
 
     /*
        ------------------------------------------------------------
-       SOURCE
+       SOURCE VIDEO / AUDIO
        ------------------------------------------------------------
-       Important pour :
-
-       <video>
-           <source src="video.mp4">
-       </video>
     */
 
     result =
@@ -2169,11 +3274,8 @@ async function injectProjectMedia(
 
     /*
        ------------------------------------------------------------
-       POSTER VIDÉO
+       POSTER VIDEO
        ------------------------------------------------------------
-       Exemple :
-
-       <video poster="image.jpg">
     */
 
     result =
@@ -2188,10 +3290,10 @@ async function injectProjectMedia(
 }
 
 
-/*
-   Remplace de manière asynchrone un attribut HTML
-   lorsque sa valeur correspond à une ressource IndexedDB.
-*/
+/* ================================================================
+   12F — REMPLACEMENT ASYNCHRONE D'UN ATTRIBUT HTML
+   ================================================================ */
+
 async function replaceAsyncHTMLAttribute(
     html,
     tagPattern,
@@ -2226,6 +3328,7 @@ async function replaceAsyncHTMLAttribute(
             }
 
             matches.push({
+
                 fullTag:
                     fullTag,
 
@@ -2234,6 +3337,7 @@ async function replaceAsyncHTMLAttribute(
 
                 value:
                     attributeMatch[2]
+
             });
 
             return fullTag;
@@ -2247,6 +3351,7 @@ async function replaceAsyncHTMLAttribute(
     const replacements =
         new Map();
 
+
     for (
         const match of matches
     ) {
@@ -2256,9 +3361,10 @@ async function replaceAsyncHTMLAttribute(
                 match.value || ""
             ).trim();
 
+
         /*
-           Ne jamais modifier les URL externes,
-           data URL, Blob URL, ancres, etc.
+           Ne jamais toucher aux ressources déjà résolues
+           ou aux URL externes.
         */
         if (
             isExternalOrNonFileReference(
@@ -2268,6 +3374,10 @@ async function replaceAsyncHTMLAttribute(
             continue;
         }
 
+
+        /*
+           Recherche dans IndexedDB.
+        */
         const resource =
             resolveProjectResource(
                 resources,
@@ -2281,36 +3391,36 @@ async function replaceAsyncHTMLAttribute(
             continue;
         }
 
+
         /*
-           Convertit le Blob IndexedDB en Data URL.
+           Préparation par le nouveau moteur FOBAS.
         */
-        let dataURL = "";
-
-        try {
-
-            dataURL =
-                await blobToDataURL(
-                    resource.blob
-                );
-
-        } catch (error) {
-
-            console.warn(
-                "FOBAS — Impossible de convertir la ressource :",
-                resource.name,
-                error
+        const mediaResult =
+            await prepareProjectMediaResource(
+                resource
             );
 
+        if (
+            !mediaResult ||
+            !mediaResult.source
+        ) {
             continue;
         }
 
-        if (!dataURL) {
-            continue;
-        }
 
         /*
-           Remplace uniquement la valeur de l'attribut
-           concerné et conserve tous les autres attributs.
+           Source finale réellement utilisable
+           par le document Preview.
+        */
+        const mediaSource =
+            String(
+                mediaResult.source
+            );
+
+
+        /*
+           Conserve tous les autres attributs
+           de la balise.
         */
         const attributePattern =
             new RegExp(
@@ -2319,6 +3429,7 @@ async function replaceAsyncHTMLAttribute(
                 "\\s*=\\s*)([\"'])(.*?)\\2",
                 "i"
             );
+
 
         const newTag =
             match.fullTag.replace(
@@ -2332,28 +3443,33 @@ async function replaceAsyncHTMLAttribute(
                     return (
                         prefix +
                         quote +
-                        dataURL +
+                        mediaSource +
                         quote
                     );
+
                 }
             );
+
 
         replacements.set(
             match.fullTag,
             newTag
         );
+
     }
+
 
     if (!replacements.size) {
         return html;
     }
 
+
     /*
        Application des remplacements.
-       On remplace uniquement les tags concernés.
     */
     let result =
         String(html || "");
+
 
     replacements.forEach(
         function (
@@ -2367,26 +3483,19 @@ async function replaceAsyncHTMLAttribute(
                 ).join(
                     newTag
                 );
+
         }
     );
+
 
     return result;
 }
 
 
-/*
-   Construit le document qui sera envoyé au preview.
+/* ================================================================
+   12G — CONSTRUCTION DU DOCUMENT FINAL
+   ================================================================ */
 
-   IMPORTANT :
-   - le HTML vient du fichier HTML actuellement actif ;
-   - seuls les CSS réellement référencés par ce HTML
-     sont intégrés ;
-   - seuls les JS réellement référencés par ce HTML
-     sont intégrés ;
-   - les images/vidéos réellement présentes dans IndexedDB
-     sont également intégrées dans le preview ;
-   - les autres CSS/JS/ressources du projet ne sont pas injectés.
-*/
 async function buildProjectDocument() {
 
     const project =
@@ -2396,8 +3505,10 @@ async function buildProjectDocument() {
         return "";
     }
 
+
     const activeHTMLFileName =
         getActiveHTMLFileName(project);
+
 
     let html =
         activeHTMLFileName
@@ -2406,6 +3517,7 @@ async function buildProjectDocument() {
                 activeHTMLFileName
             )
             : "";
+
 
     if (!html) {
 
@@ -2417,11 +3529,16 @@ async function buildProjectDocument() {
 </head>
 <body></body>
 </html>`;
+
     }
 
+
     /*
-       1 — Intégration CSS et JavaScript.
+       ------------------------------------------------------------
+       1 — CSS ET JAVASCRIPT DU PROJET
+       ------------------------------------------------------------
     */
+
     html =
         injectProjectAssets(
             html,
@@ -2429,47 +3546,28 @@ async function buildProjectDocument() {
             activeHTMLFileName
         );
 
-    /*
-       2 — Intégration des images/vidéos
-       depuis IndexedDB.
 
-       Cette étape récupère resource.blob,
-       le convertit en Data URL et remplace
-       les src locaux dans le document.
+    /*
+       ------------------------------------------------------------
+       2 — IMAGES / VIDÉOS / AUDIO INDEXEDDB
+       ------------------------------------------------------------
     */
+
     html =
         await injectProjectMedia(
             html,
             project
         );
 
+
     return html;
 }
 
 
-/*
-   Intègre les ressources locales référencées par le HTML actif.
+/* ================================================================
+   12H — INJECTION CSS / JAVASCRIPT
+   ================================================================ */
 
-   CSS :
-   <link rel="stylesheet" href="style.css">
-
-   devient :
-
-   <style data-fobas-generated-css>
-       contenu de style.css
-   </style>
-
-   JS :
-   <script src="script.js"></script>
-
-   devient :
-
-   <script data-fobas-generated-js>
-       contenu de script.js
-   </script>
-
-   Les ressources externes restent inchangées.
-*/
 function injectProjectAssets(
     html,
     project,
@@ -2483,9 +3581,10 @@ function injectProjectAssets(
         return result;
     }
 
+
     /*
        ------------------------------------------------------------
-       CSS LOCAUX RÉFÉRENCÉS PAR LE HTML ACTIF
+       CSS LOCAUX
        ------------------------------------------------------------
     */
 
@@ -2519,28 +3618,25 @@ function injectProjectAssets(
                         ? relMatch[1].toLowerCase()
                         : "";
 
-                /*
-                   On ne touche qu'aux feuilles CSS locales.
-                */
+
                 if (
-                    rel.split(/\s+/).indexOf("stylesheet") === -1
+                    rel.split(/\s+/)
+                        .indexOf("stylesheet") === -1
                 ) {
                     return fullTag;
                 }
 
+
                 /*
-                   Les URL externes restent dans le document.
-                   Exemples :
-                   https://...
-                   http://...
-                   //
-                   data:...
+                   Ressources externes :
+                   ne pas modifier.
                 */
                 if (
                     /^(?:https?:|\/\/|data:|blob:)/i.test(href)
                 ) {
                     return fullTag;
                 }
+
 
                 const cssFileName =
                     resolveProjectFileName(
@@ -2549,20 +3645,16 @@ function injectProjectAssets(
                     );
 
                 if (!cssFileName) {
-
-                    /*
-                       Si le fichier n'existe pas dans le projet,
-                       on conserve le lien original au lieu de
-                       casser silencieusement le HTML.
-                    */
                     return fullTag;
                 }
+
 
                 const cssContent =
                     getProjectFile(
                         project,
                         cssFileName
                     );
+
 
                 return (
                     "<style data-fobas-generated-css " +
@@ -2572,13 +3664,14 @@ function injectProjectAssets(
                     cssContent +
                     "\n</style>"
                 );
+
             }
         );
 
 
     /*
        ------------------------------------------------------------
-       JAVASCRIPT LOCAUX RÉFÉRENCÉS PAR LE HTML ACTIF
+       JAVASCRIPT LOCAUX
        ------------------------------------------------------------
     */
 
@@ -2596,19 +3689,23 @@ function injectProjectAssets(
                         /\bsrc\s*=\s*["']([^"']+)["']/i
                     );
 
+
                 /*
-                   Script déjà inline :
-                   on le conserve exactement.
+                   Script inline existant :
+                   conservation intégrale.
                 */
                 if (!srcMatch) {
                     return fullTag;
                 }
 
+
                 const src =
                     srcMatch[1].trim();
 
+
                 /*
-                   Les scripts externes restent inchangés.
+                   Script externe :
+                   conservation intégrale.
                 */
                 if (
                     /^(?:https?:|\/\/|data:|blob:)/i.test(src)
@@ -2616,20 +3713,18 @@ function injectProjectAssets(
                     return fullTag;
                 }
 
+
                 const jsFileName =
                     resolveProjectFileName(
                         project,
                         src
                     );
 
-                if (!jsFileName) {
 
-                    /*
-                       Si le fichier local n'existe pas,
-                       on conserve le script original.
-                    */
+                if (!jsFileName) {
                     return fullTag;
                 }
+
 
                 const jsContent =
                     getProjectFile(
@@ -2637,10 +3732,10 @@ function injectProjectAssets(
                         jsFileName
                     );
 
+
                 /*
-                   On conserve les attributs du script
-                   sauf src, puisque le code est maintenant
-                   intégré directement dans le preview.
+                   Suppression uniquement de src.
+                   Les autres attributs sont conservés.
                 */
                 const cleanedAttributes =
                     attributes
@@ -2650,10 +3745,12 @@ function injectProjectAssets(
                         )
                         .trim();
 
+
                 const attributeText =
                     cleanedAttributes
                         ? " " + cleanedAttributes
                         : "";
+
 
                 return (
                     "<script" +
@@ -2665,40 +3762,29 @@ function injectProjectAssets(
                     jsContent +
                     "\n</script>"
                 );
+
             }
         );
 
-
-    /*
-       ------------------------------------------------------------
-       CAS PARTICULIER :
-       certains fichiers peuvent avoir un script vide avec src
-       et être détectés correctement par le bloc ci-dessus.
-       Le contenu inline original n'est donc jamais perdu.
-       ------------------------------------------------------------
-    */
 
     return result;
 }
 
 
-/*
-   Exécute le projet.
+/* ================================================================
+   12I — EXÉCUTION DU PROJET
+   ================================================================ */
 
-   Le contenu actuellement présent dans l'éditeur est d'abord
-   sauvegardé, puis le HTML ACTIF est reconstruit et envoyé
-   directement dans l'iframe du laboratoire.
-
-   La construction est asynchrone car les images/vidéos
-   doivent être récupérées depuis IndexedDB.
-*/
 async function runProject() {
 
     saveCurrentEditorToState();
+
     saveStoredProjects();
+
 
     const project =
         getCurrentProject();
+
 
     if (!project) {
 
@@ -2709,7 +3795,9 @@ async function runProject() {
         return;
     }
 
+
     let html = "";
+
 
     try {
 
@@ -2730,17 +3818,31 @@ async function runProject() {
         return;
     }
 
+
     if (!dom.previewFrame) {
         return;
     }
 
+
+    /*
+       Le document final contient maintenant :
+       - HTML actif
+       - CSS local intégré
+       - JavaScript local intégré
+       - images IndexedDB préparées
+       - vidéos IndexedDB préparées
+       - audio IndexedDB préparé
+       - posters IndexedDB préparés
+    */
     dom.previewFrame.srcdoc =
         html;
+
 
     setStatus(
         "Projet exécuté : " +
         project.name
     );
+
 
     showToast(
         "Projet exécuté dans le laboratoire."
@@ -2748,13 +3850,10 @@ async function runProject() {
 }
 
 
-/*
-   Actualise le preview.
+/* ================================================================
+   12J — ACTUALISATION DU PREVIEW
+   ================================================================ */
 
-   runProject() reconstruit déjà entièrement le srcdoc.
-   Il n'est donc pas nécessaire de demander ensuite à
-   contentWindow.location.reload() de recharger l'ancien document.
-*/
 function refreshPreview() {
 
     runProject();
@@ -2765,26 +3864,33 @@ function refreshPreview() {
 }
 
 
-/*
-   Initialisation du laboratoire.
-*/
+/* ================================================================
+   12K — INITIALISATION DU LABORATOIRE
+   ================================================================ */
+
 function initializeLaboratory() {
 
     state.laboratoryZoom =
         FOBAS_WEB_LAB.defaultLaboratoryZoom;
 
+
     applyLaboratoryZoom();
 
+
     runProject();
+
 
     setStatus(
         "Laboratoire initialisé."
     );
 
+
     showToast(
         "Laboratoire initialisé."
     );
 }
+
+
 
 
 
