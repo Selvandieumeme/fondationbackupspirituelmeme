@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <meta
+        name="description"
+        content="Tableau de bord administratif de FUSION SCHOOL INTERNATIONAL."
+    >
+
+    <meta
+        name="author"
+        content="FUSION SCHOOL INTERNATIONAL"
+    >
+
+    <title>
+        FUSION SCHOOL INTERNATIONAL — Dashboard Admin
+    </title>
+
+    <!--
+        ============================================================
+        CSS EXTERNE
+        ============================================================
+    -->
+
+    <link
+        rel="stylesheet"
+        href="dashboardadminfusion.css"
+    >
+
+</head>
+
+
+<body>
+
+    <!-- ============================================================
+         APPLICATION PRINCIPALE
+         ============================================================ -->
+
+    <div
+        id="fusionAdminApp"
+        class="fusion-admin-app"
+    >
+
+
+        <!-- ========================================================
+             ÉCRAN DE CONNEXION ADMIN / FONDATEUR
+             ======================================================== -->
+
+        <section
+            id="adminLoginScreen"
+            class="admin-login-screen"
+            aria-labelledby="adminLoginTitle"
+        >
+
+            <div
+                class="admin-login-container"
+            >
+
+                <div
+                    class="admin-login-header"
+                >
+
+                    <div
+                        id="loginSchoolName"
+                        class="school-name"
+                    >
+                        FUSION SCHOOL INTERNATIONAL
+                    </div>
+
+                    <div
+                        id="loginSchoolSubtitle"
+                        class="school-subtitle"
+                    >
+                        Campus Numérique Intelligent
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="admin-login-card"
+                >
+
+                    <div
+                        class="admin-login-icon"
+                        aria-hidden="true"
+                    >
+                        🔐
+                    </div>
+
+
+                    <h1
+                        id="adminLoginTitle"
+                    >
+                        Connexion Administration
+                    </h1>
+
+
+                    <p
+                        id="adminLoginDescription"
+                    >
+                        Accès réservé à l'Administrateur et au Fondateur.
+                    </p>
+
+
+                    <form
+                        id="adminLoginForm"
+                        novalidate
+                    >
+
+                        <div
+                            class="form-group"
+                        >
+
+                            <label
+                                for="adminIdentifier"
+                                id="adminIdentifierLabel"
+                            >
+                                Identifiant Admin
+                            </label>
+
+                            <input
+                                id="adminIdentifier"
+                                name="identifier"
+                                type="text"
+                                autocomplete="username"
+                                placeholder="Identifiant"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div
+                            class="form-group"
+                        >
+
+                            <label
+                                for="adminPassword"
+                                id="adminPasswordLabel"
+                            >
+                                Mot de passe Admin
+                            </label>
+
+
+                            <div
+                                class="password-input-wrapper"
+                            >
+
+                                <input
+                                    id="adminPassword"
+                                    name="password"
+                                    type="password"
+                                    autocomplete="current-password"
+                                    placeholder="Mot de passe"
+                                    required
+                                >
+
+
+                                <button
+                                    id="toggleAdminPassword"
+                                    type="button"
+                                    class="password-toggle"
+                                    aria-label="Afficher ou masquer le mot de passe"
+                                >
+                                    👁
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="adminLoginMessage"
+                            class="admin-login-message"
+                            role="alert"
+                            aria-live="polite"
+                        ></div>
+
+
+                        <button
+                            id="adminLoginButton"
+                            type="submit"
+                        >
+                            Se connecter
+                        </button>
+
+                    </form>
+
+
+                    <div
+                        id="adminSecurityMessage"
+                        class="admin-security-message"
+                    >
+                        Accès sécurisé — FUSION SCHOOL INTERNATIONAL
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================================================
+             DASHBOARD ADMIN / FONDATEUR
+             ======================================================== -->
+
+        <section
+            id="adminDashboard"
+            class="admin-dashboard hidden"
+            aria-label="Dashboard Administration FUSION SCHOOL INTERNATIONAL"
+        >
+
+
+            <!-- ====================================================
+                 HEADER DU DASHBOARD
+                 ==================================================== -->
+
+            <header
+                id="adminDashboardHeader"
+                class="admin-dashboard-header"
+            >
+
+                <div
+                    class="dashboard-brand"
+                >
+
+                    <h1
+                        id="dashboardSchoolName"
+                    >
+                        FUSION SCHOOL INTERNATIONAL
+                    </h1>
+
+                    <p
+                        id="dashboardSchoolSubtitle"
+                    >
+                        Administration — Espace Admin & Fondateur
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="dashboard-user-area"
+                >
+
+                    <div
+                        id="adminUserInfo"
+                        class="admin-user-info"
+                    >
+
+                        <span
+                            id="adminUserName"
+                        >
+                            Admin
+                        </span>
+
+                        <span
+                            id="adminUserRole"
+                        >
+                            Administrateur
+                        </span>
+
+                    </div>
+
+
+                    <button
+                        id="adminLogoutButton"
+                        type="button"
+                    >
+                        Déconnexion
+                    </button>
+
+                </div>
+
+            </header>
+
+
+
+            <!-- ====================================================
+                 NAVIGATION PRINCIPALE
+                 ==================================================== -->
+
+            <nav
+                id="adminNavigation"
+                class="admin-navigation"
+                aria-label="Navigation administrative"
+            >
+
+                <button
+                    type="button"
+                    class="admin-nav-button active"
+                    data-admin-section="dashboard"
+                    id="navDashboard"
+                >
+                    📊 Tableau de bord
+                </button>
+
+
+                <button
+                    type="button"
+                    class="admin-nav-button"
+                    data-admin-section="etudiants"
+                    id="navEtudiants"
+                >
+                    👨‍🎓 Étudiants
+                </button>
+
+
+                <button
+                    type="button"
+                    class="admin-nav-button"
+                    data-admin-section="directeurs"
+                    id="navDirecteurs"
+                >
+                    👨‍💼 Directeurs
+                </button>
+
+
+                <button
+                    type="button"
+                    class="admin-nav-button"
+                    data-admin-section="professeurs"
+                    id="navProfesseurs"
+                >
+                    👨‍🏫 Professeurs
+                </button>
+
+
+                <button
+                    type="button"
+                    class="admin-nav-button"
+                    data-admin-section="agents"
+                    id="navAgents"
+                >
+                    👔 Agents
+                </button>
+
+
+                <button
+                    type="button"
+                    class="admin-nav-button"
+                    data-admin-section="inscriptions"
+                    id="navInscriptions"
+                >
+                    📝 Inscriptions
+                </button>
+
+
+                <button
+                    type="button"
+                    class="admin-nav-button"
+                    data-admin-section="statistiques"
+                    id="navStatistiques"
+                >
+                    📈 Statistiques
+                </button>
+
+
+                <button
+                    type="button"
+                    class="admin-nav-button"
+                    data-admin-section="parametres"
+                    id="navParametres"
+                >
+                    ⚙️ Paramètres
+                </button>
+
+            </nav>
+
+
+
+            <!-- ====================================================
+                 CONTENU PRINCIPAL
+                 ==================================================== -->
+
+            <main
+                id="adminMainContent"
+                class="admin-main-content"
+            >
+
+
+
+                <!-- =================================================
+                     SECTION TABLEAU DE BORD
+                     ================================================= -->
+
+                <section
+                    id="dashboardSection"
+                    class="admin-content-section active"
+                    data-section="dashboard"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Tableau de bord
+                            </h2>
+
+                            <p>
+                                Vue générale des comptes enregistrés dans FUSION SCHOOL INTERNATIONAL.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            id="refreshDashboardButton"
+                            type="button"
+                        >
+                            🔄 Actualiser
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                         COMPTEURS DYNAMIQUES
+                         ============================================= -->
+
+                    <div
+                        id="dynamicCounters"
+                        class="dynamic-counters"
+                    >
+
+
+                        <!-- ÉTUDIANTS -->
+
+                        <article
+                            id="studentCounterCard"
+                            class="counter-card"
+                            data-counter-role="etudiant"
+                        >
+
+                            <div
+                                class="counter-icon"
+                                aria-hidden="true"
+                            >
+                                👨‍🎓
+                            </div>
+
+
+                            <div
+                                class="counter-content"
+                            >
+
+                                <span
+                                    class="counter-label"
+                                >
+                                    Étudiants inscrits
+                                </span>
+
+
+                                <strong
+                                    id="studentCounter"
+                                    class="counter-value"
+                                    aria-live="polite"
+                                >
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+
+                        <!-- DIRECTEURS -->
+
+                        <article
+                            id="directorCounterCard"
+                            class="counter-card"
+                            data-counter-role="directeur"
+                        >
+
+                            <div
+                                class="counter-icon"
+                                aria-hidden="true"
+                            >
+                                👨‍💼
+                            </div>
+
+
+                            <div
+                                class="counter-content"
+                            >
+
+                                <span
+                                    class="counter-label"
+                                >
+                                    Directeurs inscrits
+                                </span>
+
+
+                                <strong
+                                    id="directorCounter"
+                                    class="counter-value"
+                                    aria-live="polite"
+                                >
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+
+                        <!-- PROFESSEURS -->
+
+                        <article
+                            id="professorCounterCard"
+                            class="counter-card"
+                            data-counter-role="professeur"
+                        >
+
+                            <div
+                                class="counter-icon"
+                                aria-hidden="true"
+                            >
+                                👨‍🏫
+                            </div>
+
+
+                            <div
+                                class="counter-content"
+                            >
+
+                                <span
+                                    class="counter-label"
+                                >
+                                    Professeurs inscrits
+                                </span>
+
+
+                                <strong
+                                    id="professorCounter"
+                                    class="counter-value"
+                                    aria-live="polite"
+                                >
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+
+                        <!-- AGENTS -->
+
+                        <article
+                            id="agentCounterCard"
+                            class="counter-card"
+                            data-counter-role="agent"
+                        >
+
+                            <div
+                                class="counter-icon"
+                                aria-hidden="true"
+                            >
+                                👔
+                            </div>
+
+
+                            <div
+                                class="counter-content"
+                            >
+
+                                <span
+                                    class="counter-label"
+                                >
+                                    Agents inscrits
+                                </span>
+
+
+                                <strong
+                                    id="agentCounter"
+                                    class="counter-value"
+                                    aria-live="polite"
+                                >
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+
+
+                        <!-- TOTAL -->
+
+                        <article
+                            id="totalCounterCard"
+                            class="counter-card total-counter-card"
+                        >
+
+                            <div
+                                class="counter-icon"
+                                aria-hidden="true"
+                            >
+                                👥
+                            </div>
+
+
+                            <div
+                                class="counter-content"
+                            >
+
+                                <span
+                                    class="counter-label"
+                                >
+                                    Total des comptes
+                                </span>
+
+
+                                <strong
+                                    id="totalCounter"
+                                    class="counter-value"
+                                    aria-live="polite"
+                                >
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </article>
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                         ÉTAT DE CONNEXION API
+                         ============================================= -->
+
+                    <div
+                        id="apiConnectionStatus"
+                        class="api-connection-status"
+                        role="status"
+                        aria-live="polite"
+                    >
+
+                        <span
+                            id="apiStatusIndicator"
+                            class="api-status-indicator"
+                        ></span>
+
+
+                        <span
+                            id="apiStatusText"
+                        >
+                            Connexion aux données en attente...
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                         DERNIÈRES INSCRIPTIONS
+                         ============================================= -->
+
+                    <section
+                        id="recentRegistrationsSection"
+                        class="dashboard-panel"
+                    >
+
+                        <div
+                            class="panel-header"
+                        >
+
+                            <div>
+
+                                <h3>
+                                    Dernières inscriptions
+                                </h3>
+
+                                <p>
+                                    Les comptes récemment enregistrés.
+                                </p>
+
+                            </div>
+
+
+                            <button
+                                id="viewAllRegistrationsButton"
+                                type="button"
+                            >
+                                Voir toutes les inscriptions
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="recentRegistrationsContainer"
+                            class="data-container"
+                        >
+
+                            <div
+                                id="recentRegistrationsEmpty"
+                                class="empty-state"
+                            >
+                                Aucune inscription à afficher.
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =============================================
+                         SYNCHRONISATION
+                         ============================================= -->
+
+                    <section
+                        id="synchronizationPanel"
+                        class="dashboard-panel"
+                    >
+
+                        <div
+                            class="panel-header"
+                        >
+
+                            <div>
+
+                                <h3>
+                                    Synchronisation des données
+                                </h3>
+
+                                <p>
+                                    Données provenant du système d'inscription FUSION SCHOOL INTERNATIONAL.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="lastSynchronization"
+                            class="synchronization-info"
+                        >
+                            Dernière synchronisation : —
+                        </div>
+
+                    </section>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION ÉTUDIANTS
+                     ================================================= -->
+
+                <section
+                    id="etudiantsSection"
+                    class="admin-content-section hidden"
+                    data-section="etudiants"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Étudiants
+                            </h2>
+
+                            <p>
+                                Gestion des étudiants inscrits.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="data-toolbar"
+                    >
+
+                        <label
+                            for="studentSearch"
+                        >
+                            Rechercher un étudiant
+                        </label>
+
+
+                        <input
+                            id="studentSearch"
+                            type="search"
+                            placeholder="Nom, email, WhatsApp, institution..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="studentsDataContainer"
+                        class="data-container"
+                    >
+
+                        <div
+                            id="studentsEmptyState"
+                            class="empty-state"
+                        >
+                            Aucun étudiant enregistré.
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION DIRECTEURS
+                     ================================================= -->
+
+                <section
+                    id="directeursSection"
+                    class="admin-content-section hidden"
+                    data-section="directeurs"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Directeurs
+                            </h2>
+
+                            <p>
+                                Gestion des directeurs inscrits.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="data-toolbar"
+                    >
+
+                        <label
+                            for="directorSearch"
+                        >
+                            Rechercher un directeur
+                        </label>
+
+
+                        <input
+                            id="directorSearch"
+                            type="search"
+                            placeholder="Nom, email, WhatsApp, institution..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="directorsDataContainer"
+                        class="data-container"
+                    >
+
+                        <div
+                            id="directorsEmptyState"
+                            class="empty-state"
+                        >
+                            Aucun directeur enregistré.
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION PROFESSEURS
+                     ================================================= -->
+
+                <section
+                    id="professeursSection"
+                    class="admin-content-section hidden"
+                    data-section="professeurs"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Professeurs
+                            </h2>
+
+                            <p>
+                                Gestion des professeurs inscrits.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="data-toolbar"
+                    >
+
+                        <label
+                            for="professorSearch"
+                        >
+                            Rechercher un professeur
+                        </label>
+
+
+                        <input
+                            id="professorSearch"
+                            type="search"
+                            placeholder="Nom, email, WhatsApp, institution..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="professorsDataContainer"
+                        class="data-container"
+                    >
+
+                        <div
+                            id="professorsEmptyState"
+                            class="empty-state"
+                        >
+                            Aucun professeur enregistré.
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION AGENTS
+                     ================================================= -->
+
+                <section
+                    id="agentsSection"
+                    class="admin-content-section hidden"
+                    data-section="agents"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Agents
+                            </h2>
+
+                            <p>
+                                Gestion des agents inscrits.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="data-toolbar"
+                    >
+
+                        <label
+                            for="agentSearch"
+                        >
+                            Rechercher un agent
+                        </label>
+
+
+                        <input
+                            id="agentSearch"
+                            type="search"
+                            placeholder="Nom, email, WhatsApp..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="agentsDataContainer"
+                        class="data-container"
+                    >
+
+                        <div
+                            id="agentsEmptyState"
+                            class="empty-state"
+                        >
+                            Aucun agent enregistré.
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION INSCRIPTIONS
+                     ================================================= -->
+
+                <section
+                    id="inscriptionsSection"
+                    class="admin-content-section hidden"
+                    data-section="inscriptions"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Inscriptions
+                            </h2>
+
+                            <p>
+                                Vue administrative de toutes les inscriptions.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            id="refreshRegistrationsButton"
+                            type="button"
+                        >
+                            🔄 Actualiser
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="allRegistrationsContainer"
+                        class="data-container"
+                    >
+
+                        <div
+                            id="allRegistrationsEmptyState"
+                            class="empty-state"
+                        >
+                            Aucune inscription enregistrée.
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION STATISTIQUES
+                     ================================================= -->
+
+                <section
+                    id="statistiquesSection"
+                    class="admin-content-section hidden"
+                    data-section="statistiques"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Statistiques
+                            </h2>
+
+                            <p>
+                                Analyse dynamique des données administratives.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="statisticsContainer"
+                        class="statistics-container"
+                    >
+
+                        <div
+                            id="statisticsEmptyState"
+                            class="empty-state"
+                        >
+                            Les statistiques seront générées à partir des données réelles.
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     SECTION PARAMÈTRES
+                     ================================================= -->
+
+                <section
+                    id="parametresSection"
+                    class="admin-content-section hidden"
+                    data-section="parametres"
+                >
+
+                    <div
+                        class="section-header"
+                    >
+
+                        <div>
+
+                            <h2>
+                                Paramètres
+                            </h2>
+
+                            <p>
+                                Configuration de l'espace administratif.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="settingsContainer"
+                        class="settings-container"
+                    >
+
+                        <div
+                            class="dashboard-panel"
+                        >
+
+                            <h3>
+                                Informations système
+                            </h3>
+
+                            <p>
+                                FUSION SCHOOL INTERNATIONAL
+                            </p>
+
+                            <p>
+                                API :
+                                <span id="apiEndpointDisplay">
+                                    API FUSION SCHOOL
+                                </span>
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="dashboard-panel"
+                        >
+
+                            <h3>
+                                Session
+                            </h3>
+
+                            <p
+                                id="sessionStatus"
+                            >
+                                Session administrative inactive.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+            </main>
+
+
+
+            <!-- ====================================================
+                 FOOTER
+                 ==================================================== -->
+
+            <footer
+                id="adminDashboardFooter"
+                class="admin-dashboard-footer"
+            >
+
+                <p>
+                    © FUSION SCHOOL INTERNATIONAL
+                </p>
+
+                <p>
+                    Administration — Espace Admin & Fondateur
+                </p>
+
+            </footer>
+
+
+        </section>
+
+    </div>
+
+
+
+    <!-- ============================================================
+         JAVASCRIPT EXTERNE
+         ============================================================ -->
+
+    <script
+        src="dashboardadminfusion.js"
+        defer
+    ></script>
+
+</body>
+
+</html>
