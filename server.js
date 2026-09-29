@@ -3682,6 +3682,2267 @@ await AuditLogs.insertOne(auditEntry).catch(err => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================================
+// FUSION SCHOOL INTERNATIONAL — ADMIN BACKEND
+// ISOLATED / PROTECTED / PRODUCTION SAFE
+// ============================================================================
+//
+// IMPORTANT:
+// - Uses the existing Express "app"
+// - Uses the existing mongoose connection
+// - Uses the existing express-session middleware
+// - Uses the existing Socket.IO instance if available
+// - Uses the EXISTING "academiques" collection
+// - Does NOT create a new FUSION user collection
+// - Does NOT create a second Express application
+// - Does NOT create a second Socket.IO server
+// - Does NOT expose passwordHash
+// - Does NOT modify existing FOBAS MASTER ADMIN routes
+// - Does NOT modify /academiques/register
+// - Does NOT modify existing academic login
+// ============================================================================
+
+
+// ============================================================================
+// 1 — FUSION ADMIN CONFIGURATION
+// ============================================================================
+
+const FUSION_ADMIN_ALLOWED_ROLES = [
+  "fondateur",
+  "administrateur"
+];
+
+
+// ============================================================================
+// 2 — ACADEMIC ROLES
+// ============================================================================
+
+const FUSION_ACADEMIC_ALLOWED_ROLES = [
+  "etudiant",
+  "directeur",
+  "professeur",
+  "agent"
+];
+
+
+// ============================================================================
+// 3 — FUSION ADMIN LOGIN RATE LIMITER
+// ============================================================================
+
+const fusionAdminLoginLimiter = rateLimit({
+
+  windowMs: 15 * 60 * 1000,
+
+  max: 10,
+
+  standardHeaders: true,
+
+  legacyHeaders: false,
+
+  message: {
+    success: false,
+    authenticated: false,
+    message:
+      "Trop de tentatives de connexion. Veuillez réessayer plus tard."
+  }
+
+});
+
+
+// ============================================================================
+// 4 — EXISTING ACADEMIQUES COLLECTION
+// ============================================================================
+
+function getFusionAcademiqueCollection() {
+
+  return mongoose.connection.collection(
+    "academiques"
+  );
+
+}
+
+
+// ============================================================================
+// 5 — VALIDATE MONGODB OBJECT ID
+// ============================================================================
+
+function isValidFusionObjectId(id) {
+
+  return (
+    typeof id === "string" &&
+    mongoose.Types.ObjectId.isValid(id)
+  );
+
+}
+
+
+// ============================================================================
+// 6 — SAFE REGEX VALUE
+// ============================================================================
+
+function escapeFusionRegex(value) {
+
+  return String(value)
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+}
+
+
+// ============================================================================
+// 7 — NORMALIZE ACADEMIC USER
+//    NEVER RETURN passwordHash
+// ============================================================================
+
+function normalizeFusionAcademicUser(user) {
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+
+    id:
+      user._id
+        ? String(user._id)
+        : "",
+
+    nomComplet:
+      user.nomComplet || "",
+
+    whatsapp:
+      user.whatsapp || "",
+
+    email:
+      user.email || "",
+
+    pays:
+      user.pays || null,
+
+    ville:
+      user.ville || null,
+
+    nomInstitution:
+      user.nomInstitution || null,
+
+    nomDirecteur:
+      user.nomDirecteur || null,
+
+    nomProfesseur:
+      user.nomProfesseur || null,
+
+    niveauEtude:
+      user.niveauEtude || null,
+
+    parcoursAcademique:
+      user.parcoursAcademique || null,
+
+    typeInstitution:
+      user.typeInstitution || null,
+
+    nombreProfesseurs:
+      Number(user.nombreProfesseurs) || 0,
+
+    professeurs:
+      Array.isArray(user.professeurs)
+        ? user.professeurs
+        : [],
+
+    domaineEnseignement:
+      user.domaineEnseignement || null,
+
+    niveauExperience:
+      user.niveauExperience || null,
+
+    campusLanguage:
+      user.campusLanguage || "fr",
+
+    campusStatus:
+      user.campusStatus || "actif",
+
+    campusProfileCompleted:
+      Boolean(user.campusProfileCompleted),
+
+    campusEmailVerified:
+      Boolean(user.campusEmailVerified),
+
+    campusWhatsappVerified:
+      Boolean(user.campusWhatsappVerified),
+
+    campusLastLogin:
+      user.campusLastLogin || null,
+
+    nombreParrainages:
+      Number(user.nombreParrainages) || 0,
+
+    revenus:
+      Number(user.revenus) || 0,
+
+    performance:
+      Number(user.performance) || 0,
+
+    institutionsAffiliees:
+      Array.isArray(user.institutionsAffiliees)
+        ? user.institutionsAffiliees
+        : [],
+
+    nombreFormations:
+      Number(user.nombreFormations) || 0,
+
+    nombreExamens:
+      Number(user.nombreExamens) || 0,
+
+    nombreCertificats:
+      Number(user.nombreCertificats) || 0,
+
+    progressionGlobale:
+      Number(user.progressionGlobale) || 0,
+
+    nombreEtudiants:
+      Number(user.nombreEtudiants) || 0,
+
+    nombreClasses:
+      Number(user.nombreClasses) || 0,
+
+    nombreExamensCrees:
+      Number(user.nombreExamensCrees) || 0,
+
+    role:
+      user.role || "",
+
+    createdAt:
+      user.createdAt || null,
+
+    updatedAt:
+      user.updatedAt || null
+
+  };
+
+}
+
+
+// ============================================================================
+// 8 — FUSION ADMIN PROTECTION
+// ============================================================================
+
+function requireFusionAdmin(req, res, next) {
+
+  try {
+
+    const admin =
+      req.session &&
+      req.session.fusionAdmin;
+
+    if (
+      !admin ||
+      admin.authenticated !== true ||
+      !FUSION_ADMIN_ALLOWED_ROLES.includes(
+        admin.role
+      )
+    ) {
+
+      return res.status(401).json({
+
+        success: false,
+
+        authenticated: false,
+
+        message:
+          "Session administrateur FUSION requise."
+
+      });
+
+    }
+
+    return next();
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "FUSION ADMIN AUTH ERROR:",
+      err
+    );
+
+    return res.status(401).json({
+
+      success: false,
+
+      authenticated: false,
+
+      message:
+        "Session administrateur invalide."
+
+    });
+
+  }
+
+}
+
+
+// ============================================================================
+// 9 — SOCKET.IO SAFE EMITTER
+// ============================================================================
+//
+// IMPORTANT:
+// This does NOT create Socket.IO.
+//
+// It only uses the existing backend Socket.IO variable "io"
+// if that variable already exists in the main backend.
+//
+// If Socket.IO is temporarily unavailable, database operations
+// continue normally.
+// ============================================================================
+
+function emitFusionSocket(
+  eventName,
+  payload
+) {
+
+  try {
+
+    if (
+      typeof io !== "undefined" &&
+      io &&
+      typeof io.emit === "function"
+    ) {
+
+      io.emit(
+        eventName,
+        payload
+      );
+
+    }
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "FUSION SOCKET EMIT ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+// ============================================================================
+// 10 — FUSION ADMIN LOGIN
+// ============================================================================
+
+app.post(
+  "/api/fusion/admin/login",
+  fusionAdminLoginLimiter,
+  async (req, res) => {
+
+    try {
+
+      const {
+        identifier,
+        password
+      } = req.body || {};
+
+
+      // ==========================================================
+      // VALIDATION
+      // ==========================================================
+
+      if (
+        typeof identifier !== "string" ||
+        typeof password !== "string" ||
+        !identifier.trim() ||
+        !password
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          authenticated: false,
+
+          message:
+            "Identifiant et mot de passe requis."
+
+        });
+
+      }
+
+
+      // ==========================================================
+      // ENV
+      // ==========================================================
+
+      const adminIdentifier =
+        process.env.ADMIN_IDENTIFIER;
+
+      const adminPassword =
+        process.env.ADMIN_PASSWORD;
+
+      const adminRole =
+        process.env.ADMIN_ROLE ||
+        "fondateur";
+
+
+      // ==========================================================
+      // ENV VALIDATION
+      // ==========================================================
+
+      if (
+        !adminIdentifier ||
+        !adminPassword
+      ) {
+
+        console.error(
+          "FUSION ADMIN ERROR: ADMIN_IDENTIFIER or ADMIN_PASSWORD missing in .env"
+        );
+
+        return res.status(500).json({
+
+          success: false,
+
+          authenticated: false,
+
+          message:
+            "Configuration administrateur indisponible."
+
+        });
+
+      }
+
+
+      // ==========================================================
+      // ROLE VALIDATION
+      // ==========================================================
+
+      if (
+        !FUSION_ADMIN_ALLOWED_ROLES.includes(
+          adminRole
+        )
+      ) {
+
+        console.error(
+          "FUSION ADMIN ERROR: invalid ADMIN_ROLE"
+        );
+
+        return res.status(500).json({
+
+          success: false,
+
+          authenticated: false,
+
+          message:
+            "Rôle administrateur invalide."
+
+        });
+
+      }
+
+
+      // ==========================================================
+      // DIRECT ENV CREDENTIAL CHECK
+      // ==========================================================
+
+      if (
+        identifier.trim() !==
+          adminIdentifier ||
+        password !==
+          adminPassword
+      ) {
+
+        return res.status(401).json({
+
+          success: false,
+
+          authenticated: false,
+
+          message:
+            "Identifiants invalides."
+
+        });
+
+      }
+
+
+      // ==========================================================
+      // SESSION CHECK
+      // ==========================================================
+
+      if (!req.session) {
+
+        console.error(
+          "FUSION ADMIN ERROR: express-session is not available."
+        );
+
+        return res.status(500).json({
+
+          success: false,
+
+          authenticated: false,
+
+          message:
+            "Session serveur indisponible."
+
+        });
+
+      }
+
+
+      // ==========================================================
+      // CREATE FUSION ADMIN SESSION
+      // ==========================================================
+
+      req.session.fusionAdmin = {
+
+        authenticated: true,
+
+        identifier:
+          adminIdentifier,
+
+        role:
+          adminRole,
+
+        loginAt:
+          new Date()
+
+      };
+
+
+      // ==========================================================
+      // SAVE SESSION
+      // ==========================================================
+
+      req.session.save((sessionError) => {
+
+        if (sessionError) {
+
+          console.error(
+            "FUSION ADMIN SESSION SAVE ERROR:",
+            sessionError
+          );
+
+          return res.status(500).json({
+
+            success: false,
+
+            authenticated: false,
+
+            message:
+              "Impossible d'enregistrer la session."
+
+          });
+
+        }
+
+
+        return res.json({
+
+          success: true,
+
+          authenticated: true,
+
+          user: {
+
+            id:
+              "fusion-admin",
+
+            nomComplet:
+              adminIdentifier,
+
+            email:
+              "",
+
+            role:
+              adminRole
+
+          }
+
+        });
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN LOGIN ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        authenticated: false,
+
+        message:
+          "Internal server error."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 11 — FUSION ADMIN SESSION
+// ============================================================================
+
+app.get(
+  "/api/fusion/admin/session",
+  async (req, res) => {
+
+    try {
+
+      const admin =
+        req.session &&
+        req.session.fusionAdmin;
+
+
+      if (
+        !admin ||
+        admin.authenticated !== true ||
+        !FUSION_ADMIN_ALLOWED_ROLES.includes(
+          admin.role
+        )
+      ) {
+
+        return res.json({
+
+          success: true,
+
+          authenticated: false,
+
+          user: null
+
+        });
+
+      }
+
+
+      return res.json({
+
+        success: true,
+
+        authenticated: true,
+
+        user: {
+
+          id:
+            "fusion-admin",
+
+          nomComplet:
+            admin.identifier ||
+            "Administrateur FUSION",
+
+          email:
+            "",
+
+          role:
+            admin.role
+
+        }
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN SESSION ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        authenticated: false,
+
+        message:
+          "Internal server error."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 12 — FUSION ADMIN LOGOUT
+// ============================================================================
+//
+// Only fusionAdmin is removed.
+// The global session is NOT destroyed.
+// ============================================================================
+
+app.post(
+  "/api/fusion/admin/logout",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      delete req.session.fusionAdmin;
+
+
+      req.session.save((sessionError) => {
+
+        if (sessionError) {
+
+          console.error(
+            "FUSION ADMIN LOGOUT SESSION ERROR:",
+            sessionError
+          );
+
+          return res.status(500).json({
+
+            success: false,
+
+            message:
+              "Impossible de fermer la session."
+
+          });
+
+        }
+
+
+        return res.json({
+
+          success: true,
+
+          authenticated: false,
+
+          message:
+            "Session administrateur FUSION fermée."
+
+        });
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN LOGOUT ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Internal server error."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 13 — FUSION ADMIN STATISTICS
+// ============================================================================
+
+app.get(
+  "/api/fusion/admin/statistics",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      const Academiques =
+        getFusionAcademiqueCollection();
+
+
+      const [
+        etudiants,
+        directeurs,
+        professeurs,
+        agents,
+        total
+      ] = await Promise.all([
+
+        Academiques.countDocuments({
+          role: "etudiant"
+        }),
+
+        Academiques.countDocuments({
+          role: "directeur"
+        }),
+
+        Academiques.countDocuments({
+          role: "professeur"
+        }),
+
+        Academiques.countDocuments({
+          role: "agent"
+        }),
+
+        Academiques.countDocuments()
+
+      ]);
+
+
+      return res.json({
+
+        success: true,
+
+        statistics: {
+
+          etudiants:
+            etudiants,
+
+          directeurs:
+            directeurs,
+
+          professeurs:
+            professeurs,
+
+          agents:
+            agents,
+
+          total:
+            total
+
+        }
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN STATISTICS ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Impossible de récupérer les statistiques."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 14 — FUSION ADMIN GET ALL REGISTRATIONS
+// ============================================================================
+
+app.get(
+  "/api/fusion/admin/registrations",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      const Academiques =
+        getFusionAcademiqueCollection();
+
+
+      const documents =
+        await Academiques
+          .find({})
+          .sort({
+            createdAt: -1
+          })
+          .toArray();
+
+
+      const registrations =
+        documents.map(
+          normalizeFusionAcademicUser
+        );
+
+
+      return res.json({
+
+        success: true,
+
+        total:
+          registrations.length,
+
+        registrations
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN REGISTRATIONS ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Impossible de récupérer les inscriptions."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 15 — FUSION ADMIN GET ALL USERS
+// ============================================================================
+
+app.get(
+  "/api/fusion/admin/users",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      const Academiques =
+        getFusionAcademiqueCollection();
+
+
+      const documents =
+        await Academiques
+          .find({})
+          .sort({
+            createdAt: -1
+          })
+          .toArray();
+
+
+      const users =
+        documents.map(
+          normalizeFusionAcademicUser
+        );
+
+
+      return res.json({
+
+        success: true,
+
+        total:
+          users.length,
+
+        users
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN USERS ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Impossible de récupérer les utilisateurs."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 16 — FUSION ADMIN SEARCH USERS
+// ============================================================================
+
+app.get(
+  "/api/fusion/admin/search-users",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      const {
+        role,
+        pays,
+        ville,
+        keyword
+      } = req.query || {};
+
+
+      const Academiques =
+        getFusionAcademiqueCollection();
+
+
+      const query = {};
+
+
+      // ==========================================================
+      // ROLE
+      // ==========================================================
+
+      if (
+        typeof role === "string" &&
+        role.trim()
+      ) {
+
+        query.role =
+          role.trim();
+
+      }
+
+
+      // ==========================================================
+      // PAYS
+      // ==========================================================
+
+      if (
+        typeof pays === "string" &&
+        pays.trim()
+      ) {
+
+        query.pays = {
+
+          $regex:
+            escapeFusionRegex(
+              pays.trim()
+            ),
+
+          $options:
+            "i"
+
+        };
+
+      }
+
+
+      // ==========================================================
+      // VILLE
+      // ==========================================================
+
+      if (
+        typeof ville === "string" &&
+        ville.trim()
+      ) {
+
+        query.ville = {
+
+          $regex:
+            escapeFusionRegex(
+              ville.trim()
+            ),
+
+          $options:
+            "i"
+
+        };
+
+      }
+
+
+      // ==========================================================
+      // KEYWORD
+      // ==========================================================
+
+      if (
+        typeof keyword === "string" &&
+        keyword.trim()
+      ) {
+
+        const safeKeyword =
+          escapeFusionRegex(
+            keyword.trim()
+          );
+
+
+        query.$or = [
+
+          {
+            nomComplet: {
+
+              $regex:
+                safeKeyword,
+
+              $options:
+                "i"
+
+            }
+
+          },
+
+          {
+            email: {
+
+              $regex:
+                safeKeyword,
+
+              $options:
+                "i"
+
+            }
+
+          },
+
+          {
+            whatsapp: {
+
+              $regex:
+                safeKeyword,
+
+              $options:
+                "i"
+
+            }
+
+          },
+
+          {
+            nomInstitution: {
+
+              $regex:
+                safeKeyword,
+
+              $options:
+                "i"
+
+            }
+
+          },
+
+          {
+            nomDirecteur: {
+
+              $regex:
+                safeKeyword,
+
+              $options:
+                "i"
+
+            }
+
+          },
+
+          {
+            nomProfesseur: {
+
+              $regex:
+                safeKeyword,
+
+              $options:
+                "i"
+
+            }
+
+          }
+
+        ];
+
+      }
+
+
+      // ==========================================================
+      // DATABASE QUERY
+      // ==========================================================
+
+      const documents =
+        await Academiques
+          .find(query)
+          .sort({
+            createdAt: -1
+          })
+          .toArray();
+
+
+      const users =
+        documents.map(
+          normalizeFusionAcademicUser
+        );
+
+
+      return res.json({
+
+        success: true,
+
+        total:
+          users.length,
+
+        users
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN SEARCH ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Erreur pendant la recherche."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 17 — FUSION ADMIN GET SINGLE USER
+// ============================================================================
+
+app.get(
+  "/api/fusion/admin/users/:id",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      const {
+        id
+      } = req.params;
+
+
+      if (
+        !isValidFusionObjectId(id)
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Identifiant utilisateur invalide."
+
+        });
+
+      }
+
+
+      const Academiques =
+        getFusionAcademiqueCollection();
+
+
+      const user =
+        await Academiques.findOne({
+
+          _id:
+            new mongoose.Types.ObjectId(id)
+
+        });
+
+
+      if (!user) {
+
+        return res.status(404).json({
+
+          success: false,
+
+          message:
+            "Utilisateur FUSION introuvable."
+
+        });
+
+      }
+
+
+      return res.json({
+
+        success: true,
+
+        user:
+          normalizeFusionAcademicUser(
+            user
+          )
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN USER DETAIL ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Impossible de récupérer cet utilisateur."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 18 — FUSION ADMIN UPDATE USER
+// ============================================================================
+//
+// Updates the SAME document in "academiques".
+// No second user database is created.
+// ============================================================================
+
+app.put(
+  "/api/fusion/admin/users/:id",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      const {
+        id
+      } = req.params;
+
+
+      if (
+        !isValidFusionObjectId(id)
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Identifiant utilisateur invalide."
+
+        });
+
+      }
+
+
+      const body =
+        req.body || {};
+
+
+      const Academiques =
+        getFusionAcademiqueCollection();
+
+
+      const userId =
+        new mongoose.Types.ObjectId(id);
+
+
+      // ==========================================================
+      // ALLOWED FIELDS ONLY
+      // ==========================================================
+
+      const allowedFields = [
+
+        "role",
+
+        "nomComplet",
+
+        "whatsapp",
+
+        "email",
+
+        "pays",
+
+        "ville",
+
+        "nomInstitution",
+
+        "nomDirecteur",
+
+        "nomProfesseur",
+
+        "niveauEtude",
+
+        "parcoursAcademique",
+
+        "typeInstitution",
+
+        "nombreProfesseurs",
+
+        "professeurs",
+
+        "domaineEnseignement",
+
+        "niveauExperience",
+
+        "campusLanguage",
+
+        "campusStatus",
+
+        "campusProfileCompleted",
+
+        "campusEmailVerified",
+
+        "campusWhatsappVerified",
+
+        "nombreParrainages",
+
+        "revenus",
+
+        "performance",
+
+        "institutionsAffiliees",
+
+        "nombreFormations",
+
+        "nombreExamens",
+
+        "nombreCertificats",
+
+        "progressionGlobale",
+
+        "nombreEtudiants",
+
+        "nombreClasses",
+
+        "nombreExamensCrees"
+
+      ];
+
+
+      const updateData = {};
+
+
+      // ==========================================================
+      // WHITELIST
+      // ==========================================================
+
+      for (
+        const field of allowedFields
+      ) {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            body,
+            field
+          )
+        ) {
+
+          updateData[field] =
+            body[field];
+
+        }
+
+      }
+
+
+      // ==========================================================
+      // NOTHING TO UPDATE
+      // ==========================================================
+
+      if (
+        Object.keys(updateData).length === 0
+      ) {
+
+        return res.status(400).json({
+
+          success: false,
+
+          message:
+            "Aucune donnée valide à modifier."
+
+        });
+
+      }
+
+
+      // ==========================================================
+      // STRING FIELDS
+      // ==========================================================
+
+      const stringFields = [
+
+        "nomComplet",
+
+        "whatsapp",
+
+        "email",
+
+        "pays",
+
+        "ville",
+
+        "nomInstitution",
+
+        "nomDirecteur",
+
+        "nomProfesseur",
+
+        "niveauEtude",
+
+        "parcoursAcademique",
+
+        "typeInstitution",
+
+        "domaineEnseignement",
+
+        "niveauExperience",
+
+        "campusLanguage",
+
+        "campusStatus"
+
+      ];
+
+
+      for (
+        const field of stringFields
+      ) {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            updateData,
+            field
+          )
+        ) {
+
+          if (
+            updateData[field] !== null &&
+            typeof updateData[field] !== "string"
+          ) {
+
+            return res.status(400).json({
+
+              success: false,
+
+              message:
+                `Valeur texte invalide: ${field}.`
+
+            });
+
+          }
+
+
+          if (
+            typeof updateData[field] === "string"
+          ) {
+
+            updateData[field] =
+              updateData[field].trim();
+
+          }
+
+        }
+
+      }
+
+
+      // ==========================================================
+      // EMAIL NORMALIZATION
+      // ==========================================================
+
+      if (
+        Object.prototype.hasOwnProperty.call(
+          updateData,
+          "email"
+        )
+      ) {
+
+        if (
+          !updateData.email
+        ) {
+
+          return res.status(400).json({
+
+            success: false,
+
+            message:
+              "Email invalide."
+
+          });
+
+        }
+
+        updateData.email =
+          updateData.email.toLowerCase();
+
+      }
+
+
+      // ==========================================================
+      // ROLE VALIDATION
+      // ==========================================================
+
+      if (
+        Object.prototype.hasOwnProperty.call(
+          updateData,
+          "role"
+        )
+      ) {
+
+        if (
+          !FUSION_ACADEMIC_ALLOWED_ROLES.includes(
+            updateData.role
+          )
+        ) {
+
+          return res.status(400).json({
+
+            success: false,
+
+            message:
+              "Rôle académique invalide."
+
+          });
+
+        }
+
+      }
+
+
+      // ==========================================================
+      // NUMERIC FIELDS
+      // ==========================================================
+
+      const numericFields = [
+
+        "nombreProfesseurs",
+
+        "nombreParrainages",
+
+        "revenus",
+
+        "performance",
+
+        "nombreFormations",
+
+        "nombreExamens",
+
+        "nombreCertificats",
+
+        "progressionGlobale",
+
+        "nombreEtudiants",
+
+        "nombreClasses",
+
+        "nombreExamensCrees"
+
+      ];
+
+
+      for (
+        const field of numericFields
+      ) {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            updateData,
+            field
+          )
+        ) {
+
+          const numericValue =
+            Number(
+              updateData[field]
+            );
+
+
+          if (
+            !Number.isFinite(
+              numericValue
+            )
+          ) {
+
+            return res.status(400).json({
+
+              success: false,
+
+              message:
+                `Valeur numérique invalide: ${field}.`
+
+            });
+
+          }
+
+
+          updateData[field] =
+            numericValue;
+
+        }
+
+      }
+
+
+      // ==========================================================
+      // BOOLEAN FIELDS
+      // ==========================================================
+
+      const booleanFields = [
+
+        "campusProfileCompleted",
+
+        "campusEmailVerified",
+
+        "campusWhatsappVerified"
+
+      ];
+
+
+      for (
+        const field of booleanFields
+      ) {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            updateData,
+            field
+          )
+        ) {
+
+          if (
+            typeof updateData[field] !==
+            "boolean"
+          ) {
+
+            return res.status(400).json({
+
+              success: false,
+
+              message:
+                `Valeur booléenne invalide: ${field}.`
+
+            });
+
+          }
+
+        }
+
+      }
+
+
+      // ==========================================================
+      // ARRAY FIELDS
+      // ==========================================================
+
+      const arrayFields = [
+
+        "professeurs",
+
+        "institutionsAffiliees"
+
+      ];
+
+
+      for (
+        const field of arrayFields
+      ) {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            updateData,
+            field
+          )
+        ) {
+
+          if (
+            !Array.isArray(
+              updateData[field]
+            )
+          ) {
+
+            return res.status(400).json({
+
+              success: false,
+
+              message:
+                `Valeur tableau invalide: ${field}.`
+
+            });
+
+          }
+
+        }
+
+      }
+
+
+      // ==========================================================
+      // PROTECT AGAINST MONGODB OPERATORS
+      // ==========================================================
+
+      const updateKeys =
+        Object.keys(updateData);
+
+
+      for (
+        const key of updateKeys
+      ) {
+
+        if (
+          key.startsWith("$") ||
+          key.includes(".")
+        ) {
+
+          return res.status(400).json({
+
+            success: false,
+
+            message:
+              "Champ de modification invalide."
+
+          });
+
+        }
+
+      }
+
+
+      // ==========================================================
+      // UPDATE SAME ACADEMIQUES DOCUMENT
+      // ==========================================================
+
+      updateData.updatedAt =
+        new Date();
+
+
+      const updateResult =
+        await Academiques.updateOne(
+
+          {
+            _id:
+              userId
+          },
+
+          {
+            $set:
+              updateData
+          }
+
+        );
+
+
+      if (
+        updateResult.matchedCount === 0
+      ) {
+
+        return res.status(404).json({
+
+          success: false,
+
+          message:
+            "Utilisateur FUSION introuvable."
+
+        });
+
+      }
+
+
+      // ==========================================================
+      // FETCH UPDATED DOCUMENT
+      // ==========================================================
+
+      const updatedUser =
+        await Academiques.findOne({
+
+          _id:
+            userId
+
+        });
+
+
+      // ==========================================================
+      // REAL-TIME NOTIFICATION
+      // ==========================================================
+
+      emitFusionSocket(
+        "academique:user-updated",
+        {
+          id:
+            String(userId)
+        }
+      );
+
+
+      // ==========================================================
+      // RESPONSE
+      // ==========================================================
+
+      return res.json({
+
+        success: true,
+
+        message:
+          "Utilisateur FUSION mis à jour avec succès.",
+
+        user:
+          normalizeFusionAcademicUser(
+            updatedUser
+          )
+
+      });
+
+    }
+
+    catch (err) {
+
+      // ==========================================================
+      // DUPLICATE EMAIL
+      // ==========================================================
+
+      if (
+        err &&
+        err.code === 11000
+      ) {
+
+        return res.status(409).json({
+
+          success: false,
+
+          message:
+            "Cette adresse email est déjà utilisée."
+
+        });
+
+      }
+
+
+      console.error(
+        "FUSION ADMIN UPDATE USER ERROR:",
+        err
+      );
+
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Impossible de modifier l'utilisateur."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 19 — FUSION ADMIN DASHBOARD SUMMARY
+// ============================================================================
+
+app.get(
+  "/api/fusion/admin/dashboard",
+  requireFusionAdmin,
+  async (req, res) => {
+
+    try {
+
+      const Academiques =
+        getFusionAcademiqueCollection();
+
+
+      const [
+        etudiants,
+        directeurs,
+        professeurs,
+        agents,
+        total,
+        recentDocuments
+      ] = await Promise.all([
+
+        Academiques.countDocuments({
+          role: "etudiant"
+        }),
+
+        Academiques.countDocuments({
+          role: "directeur"
+        }),
+
+        Academiques.countDocuments({
+          role: "professeur"
+        }),
+
+        Academiques.countDocuments({
+          role: "agent"
+        }),
+
+        Academiques.countDocuments(),
+
+        Academiques
+          .find({})
+          .sort({
+            createdAt: -1
+          })
+          .limit(10)
+          .toArray()
+
+      ]);
+
+
+      const recentRegistrations =
+        recentDocuments.map(
+          normalizeFusionAcademicUser
+        );
+
+
+      return res.json({
+
+        success: true,
+
+        statistics: {
+
+          etudiants:
+            etudiants,
+
+          directeurs:
+            directeurs,
+
+          professeurs:
+            professeurs,
+
+          agents:
+            agents,
+
+          total:
+            total
+
+        },
+
+        recentRegistrations
+
+      });
+
+    }
+
+    catch (err) {
+
+      console.error(
+        "FUSION ADMIN DASHBOARD ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Impossible de charger le dashboard FUSION."
+
+      });
+
+    }
+
+  }
+);
+
+
+// ============================================================================
+// 20 — FUSION REAL-TIME: ACADEMIC CREATED
+// ============================================================================
+//
+// IMPORTANT:
+// This is ONLY a notification helper.
+//
+// DO NOT create another /academiques/register route.
+//
+// In the EXISTING successful /academiques/register route,
+// after the new academic document is saved, call:
+//
+//     notifyFusionAcademicCreated(newUser._id);
+//
+// ============================================================================
+
+function notifyFusionAcademicCreated(
+  academicId
+) {
+
+  try {
+
+    if (!academicId) {
+      return;
+    }
+
+
+    emitFusionSocket(
+      "academique:user-created",
+      {
+        id:
+          String(academicId)
+      }
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "FUSION ACADEMIC CREATED SOCKET ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+// ============================================================================
+// 21 — FUSION REAL-TIME: ACADEMIC DELETED
+// ============================================================================
+//
+// Helper only.
+// It does NOT create a delete route.
+// ============================================================================
+
+function notifyFusionAcademicDeleted(
+  academicId
+) {
+
+  try {
+
+    if (!academicId) {
+      return;
+    }
+
+
+    emitFusionSocket(
+      "academique:user-deleted",
+      {
+        id:
+          String(academicId)
+      }
+    );
+
+  }
+
+  catch (err) {
+
+    console.error(
+      "FUSION ACADEMIC DELETED SOCKET ERROR:",
+      err
+    );
+
+  }
+
+}
+
+
+// ============================================================================
+// END — FUSION SCHOOL INTERNATIONAL ADMIN
+// ============================================================================
+//
+// DO NOT ADD:
+//
+// const app = express();
+//
+// app.use(cors());
+//
+// app.use(express.json());
+//
+// const { Server } = require("socket.io");
+//
+// new Server(...);
+//
+// These already belong to the existing backend.
+//
+// IMPORTANT:
+// This block does not modify the existing FOBAS MASTER ADMIN.
+//
+// Place this complete block BEFORE the existing:
+//
+// app.listen(...)
+//
+// ============================================================================
+
+
+// ============================================================================
+// REQUIRED .ENV STRUCTURE
+// ============================================================================
+//
+// The actual values must be entered by the administrator on the VPS.
+//
+// ADMIN_IDENTIFIER=
+// ADMIN_PASSWORD=
+// ADMIN_ROLE=
+//
+// ============================================================================ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =====================================================
 // FOBAS MASTER ADMIN ROUTES
 // SAFE VERSION — NO DUPLICATION
