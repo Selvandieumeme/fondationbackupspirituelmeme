@@ -3689,13 +3689,7 @@ await AuditLogs.insertOne(auditEntry).catch(err => {
 
 
 
-
-
-
-
-
-
-/ ============================================================================
+// ============================================================================
 // FUSION SCHOOL INTERNATIONAL — ADMIN BACKEND
 // ISOLATED / PROTECTED / PRODUCTION SAFE
 // ============================================================================
@@ -3704,6 +3698,7 @@ await AuditLogs.insertOne(auditEntry).catch(err => {
 // - Uses the existing Express "app"
 // - Uses the existing mongoose connection
 // - Does NOT use express-session for FUSION ADMIN
+// - Does NOT use cookies for FUSION ADMIN
 // - Uses the existing Socket.IO instance if available
 // - Uses the EXISTING "academiques" collection
 // - Does NOT create a new FUSION user collection
@@ -3714,21 +3709,37 @@ await AuditLogs.insertOne(auditEntry).catch(err => {
 // - Does NOT modify /academiques/register
 // - Does NOT modify existing academic login
 // - FUSION ADMIN credentials are verified directly against .env
+//
+// LOGIN:
+//
+// POST /api/fusion/admin/login
+//
+// Request:
+// {
+//   "identifier": "...",
+//   "password": "..."
+// }
+//
+// Success:
+// {
+//   "success": true
+// }
+//
+// Failure:
+// {
+//   "success": false
+// }
+//
+// REQUIRED .ENV:
+//
+// ADMIN_IDENTIFIER=
+// ADMIN_PASSWORD=
+//
 // ============================================================================
 
 
 // ============================================================================
-// 1 — FUSION ADMIN CONFIGURATION
-// ============================================================================
-
-const FUSION_ADMIN_ALLOWED_ROLES = [
-  "fondateur",
-  "administrateur"
-];
-
-
-// ============================================================================
-// 2 — ACADEMIC ROLES
+// 1 — ACADEMIC ROLES
 // ============================================================================
 
 const FUSION_ACADEMIC_ALLOWED_ROLES = [
@@ -3740,41 +3751,7 @@ const FUSION_ACADEMIC_ALLOWED_ROLES = [
 
 
 // ============================================================================
-// 3 — FUSION ADMIN LOGIN RATE LIMITER
-// ============================================================================
-
-const fusionAdminLoginLimiter = rateLimit({
-
-  windowMs:
-    15 * 60 * 1000,
-
-  max:
-    10,
-
-  standardHeaders:
-    true,
-
-  legacyHeaders:
-    false,
-
-  message: {
-
-    success:
-      false,
-
-    authenticated:
-      false,
-
-    message:
-      "Trop de tentatives de connexion. Veuillez réessayer plus tard."
-
-  }
-
-});
-
-
-// ============================================================================
-// 4 — EXISTING ACADEMIQUES COLLECTION
+// 2 — EXISTING ACADEMIQUES COLLECTION
 // ============================================================================
 
 function getFusionAcademiqueCollection() {
@@ -3787,7 +3764,7 @@ function getFusionAcademiqueCollection() {
 
 
 // ============================================================================
-// 5 — VALIDATE MONGODB OBJECT ID
+// 3 — VALIDATE MONGODB OBJECT ID
 // ============================================================================
 
 function isValidFusionObjectId(id) {
@@ -3804,7 +3781,7 @@ function isValidFusionObjectId(id) {
 
 
 // ============================================================================
-// 6 — SAFE REGEX VALUE
+// 4 — SAFE REGEX VALUE
 // ============================================================================
 
 function escapeFusionRegex(value) {
@@ -3816,8 +3793,8 @@ function escapeFusionRegex(value) {
 
 
 // ============================================================================
-// 7 — NORMALIZE ACADEMIC USER
-//    NEVER RETURN passwordHash
+// 5 — NORMALIZE ACADEMIC USER
+//     NEVER RETURN passwordHash
 // ============================================================================
 
 function normalizeFusionAcademicUser(user) {
@@ -3951,26 +3928,29 @@ function normalizeFusionAcademicUser(user) {
 
 
 // ============================================================================
-// 8 — FUSION ADMIN PROTECTION — NO SESSION
+// 6 — FUSION ADMIN PROTECTION
 // ============================================================================
 //
-// FUSION ADMIN DOES NOT USE req.session.
+// FUSION ADMIN DOES NOT USE:
+//
+// - req.session
+// - express-session
+// - cookies
+// - ADMIN_ROLE
+// - MongoDB admin account
 //
 // Protected requests must provide:
 //
 // x-fusion-admin-identifier
 // x-fusion-admin-password
 //
-// The values are verified directly against:
+// These values are compared directly against:
 //
 // ADMIN_IDENTIFIER
 // ADMIN_PASSWORD
-// ADMIN_ROLE
 //
-// IMPORTANT:
-// This does not create a session.
-// This does not create a cookie.
-// This does not store credentials in MongoDB.
+// from the VPS .env.
+//
 // ============================================================================
 
 function requireFusionAdmin(req, res, next) {
@@ -3983,16 +3963,14 @@ function requireFusionAdmin(req, res, next) {
     const adminPassword =
       process.env.ADMIN_PASSWORD;
 
-    const adminRole =
-      process.env.ADMIN_ROLE ||
-      "fondateur";
-
 
     // ==========================================================
-    // SERVER ENV VALIDATION
+    // SERVER .ENV VALIDATION
     // ==========================================================
 
     if (
+      typeof adminIdentifier !== "string" ||
+      typeof adminPassword !== "string" ||
       !adminIdentifier ||
       !adminPassword
     ) {
@@ -4006,9 +3984,6 @@ function requireFusionAdmin(req, res, next) {
         success:
           false,
 
-        authenticated:
-          false,
-
         message:
           "Configuration administrateur indisponible."
 
@@ -4018,37 +3993,7 @@ function requireFusionAdmin(req, res, next) {
 
 
     // ==========================================================
-    // ROLE VALIDATION
-    // ==========================================================
-
-    if (
-      !FUSION_ADMIN_ALLOWED_ROLES.includes(
-        adminRole
-      )
-    ) {
-
-      console.error(
-        "FUSION ADMIN AUTH ERROR: invalid ADMIN_ROLE"
-      );
-
-      return res.status(500).json({
-
-        success:
-          false,
-
-        authenticated:
-          false,
-
-        message:
-          "Rôle administrateur invalide."
-
-      });
-
-    }
-
-
-    // ==========================================================
-    // READ ADMIN CREDENTIALS FROM REQUEST HEADERS
+    // READ CREDENTIALS FROM REQUEST HEADERS
     // ==========================================================
 
     const requestIdentifier =
@@ -4058,9 +4003,10 @@ function requireFusionAdmin(req, res, next) {
 
         ? req.headers[
             "x-fusion-admin-identifier"
-          ]
+          ].trim()
 
         : "";
+
 
     const requestPassword =
       typeof req.headers[
@@ -4079,7 +4025,7 @@ function requireFusionAdmin(req, res, next) {
     // ==========================================================
 
     if (
-      requestIdentifier.trim() !==
+      requestIdentifier !==
         adminIdentifier ||
 
       requestPassword !==
@@ -4091,9 +4037,6 @@ function requireFusionAdmin(req, res, next) {
         success:
           false,
 
-        authenticated:
-          false,
-
         message:
           "Authentification administrateur FUSION requise."
 
@@ -4103,19 +4046,13 @@ function requireFusionAdmin(req, res, next) {
 
 
     // ==========================================================
-    // ADMIN AUTHENTICATED
+    // ADMIN AUTHORIZED
     // ==========================================================
 
     req.fusionAdmin = {
 
-      authenticated:
-        true,
-
       identifier:
-        adminIdentifier,
-
-      role:
-        adminRole
+        adminIdentifier
 
     };
 
@@ -4136,9 +4073,6 @@ function requireFusionAdmin(req, res, next) {
       success:
         false,
 
-      authenticated:
-        false,
-
       message:
         "Authentification administrateur invalide."
 
@@ -4150,7 +4084,7 @@ function requireFusionAdmin(req, res, next) {
 
 
 // ============================================================================
-// 9 — SOCKET.IO SAFE EMITTER
+// 7 — SOCKET.IO SAFE EMITTER
 // ============================================================================
 //
 // IMPORTANT:
@@ -4198,21 +4132,37 @@ function emitFusionSocket(
 
 
 // ============================================================================
-// 10 — FUSION ADMIN LOGIN
+// 8 — FUSION ADMIN LOGIN
 // ============================================================================
 //
-// IMPORTANT:
-// Login verifies credentials directly against .env.
+// SIMPLE LOGIN:
 //
-// NO req.session.
-// NO cookie.
-// NO session.save().
-// NO fusionAdmin session.
+// identifier + password
+//         |
+//         v
+// POST /api/fusion/admin/login
+//         |
+//         v
+// VPS .env
+//         |
+//         v
+// direct comparison
+//         |
+//    +----+----+
+//    |         |
+//    v         v
+// success     failure
+// true        false
+//
+// NO SESSION.
+// NO COOKIE.
+// NO ADMIN_ROLE.
+// NO USER OBJECT.
+// NO AUTHENTICATED FIELD.
 // ============================================================================
 
 app.post(
   "/api/fusion/admin/login",
-  fusionAdminLoginLimiter,
   async (req, res) => {
 
     try {
@@ -4224,7 +4174,7 @@ app.post(
 
 
       // ==========================================================
-      // VALIDATION
+      // BASIC INPUT VALIDATION
       // ==========================================================
 
       if (
@@ -4237,13 +4187,7 @@ app.post(
         return res.status(400).json({
 
           success:
-            false,
-
-          authenticated:
-            false,
-
-          message:
-            "Identifiant et mot de passe requis."
+            false
 
         });
 
@@ -4251,7 +4195,7 @@ app.post(
 
 
       // ==========================================================
-      // ENV
+      // READ ADMIN CREDENTIALS DIRECTLY FROM VPS .ENV
       // ==========================================================
 
       const adminIdentifier =
@@ -4260,34 +4204,26 @@ app.post(
       const adminPassword =
         process.env.ADMIN_PASSWORD;
 
-      const adminRole =
-        process.env.ADMIN_ROLE ||
-        "fondateur";
-
 
       // ==========================================================
-      // ENV VALIDATION
+      // .ENV VALIDATION
       // ==========================================================
 
       if (
+        typeof adminIdentifier !== "string" ||
+        typeof adminPassword !== "string" ||
         !adminIdentifier ||
         !adminPassword
       ) {
 
         console.error(
-          "FUSION ADMIN ERROR: ADMIN_IDENTIFIER or ADMIN_PASSWORD missing in .env"
+          "FUSION ADMIN LOGIN ERROR: ADMIN_IDENTIFIER or ADMIN_PASSWORD missing in .env"
         );
 
         return res.status(500).json({
 
           success:
-            false,
-
-          authenticated:
-            false,
-
-          message:
-            "Configuration administrateur indisponible."
+            false
 
         });
 
@@ -4295,37 +4231,7 @@ app.post(
 
 
       // ==========================================================
-      // ROLE VALIDATION
-      // ==========================================================
-
-      if (
-        !FUSION_ADMIN_ALLOWED_ROLES.includes(
-          adminRole
-        )
-      ) {
-
-        console.error(
-          "FUSION ADMIN ERROR: invalid ADMIN_ROLE"
-        );
-
-        return res.status(500).json({
-
-          success:
-            false,
-
-          authenticated:
-            false,
-
-          message:
-            "Rôle administrateur invalide."
-
-        });
-
-      }
-
-
-      // ==========================================================
-      // DIRECT ENV CREDENTIAL CHECK
+      // DIRECT IDENTIFIER + PASSWORD COMPARISON
       // ==========================================================
 
       if (
@@ -4339,13 +4245,7 @@ app.post(
         return res.status(401).json({
 
           success:
-            false,
-
-          authenticated:
-            false,
-
-          message:
-            "Identifiants invalides."
+            false
 
         });
 
@@ -4359,26 +4259,7 @@ app.post(
       return res.json({
 
         success:
-          true,
-
-        authenticated:
-          true,
-
-        user: {
-
-          id:
-            "fusion-admin",
-
-          nomComplet:
-            "FUSION SCHOOL INTERNATIONAL",
-
-          email:
-            null,
-
-          role:
-            adminRole
-
-        }
+          true
 
       });
 
@@ -4394,13 +4275,7 @@ app.post(
       return res.status(500).json({
 
         success:
-          false,
-
-        authenticated:
-          false,
-
-        message:
-          "Internal server error."
+          false
 
       });
 
@@ -4411,25 +4286,26 @@ app.post(
 
 
 // ============================================================================
-// 11 — NO FUSION ADMIN SESSION ROUTE
+// 9 — NO FUSION ADMIN SESSION ROUTE
 // ============================================================================
 //
-// IMPORTANT:
-// /api/fusion/admin/session has intentionally been removed.
+// There is intentionally NO:
 //
-// FUSION ADMIN does NOT use a session verification endpoint.
+// /api/fusion/admin/session
+//
+// FUSION ADMIN does not use a server session.
 // ============================================================================
 
 
 // ============================================================================
-// 12 — FUSION ADMIN LOGOUT
+// 10 — FUSION ADMIN LOGOUT
 // ============================================================================
 //
-// NO SESSION IS DESTROYED.
+// No server session is destroyed because there is no session.
 //
-// Logout is a client-side authentication-state reset.
-// The endpoint remains available for frontend compatibility,
-// but it does not create or destroy a server session.
+// The frontend clears its in-memory authentication state.
+//
+// This endpoint remains available for frontend compatibility.
 // ============================================================================
 
 app.post(
@@ -4443,9 +4319,6 @@ app.post(
 
         success:
           true,
-
-        authenticated:
-          false,
 
         message:
           "Déconnexion administrateur FUSION effectuée."
@@ -4464,10 +4337,7 @@ app.post(
       return res.status(500).json({
 
         success:
-          false,
-
-        message:
-          "Internal server error."
+          false
 
       });
 
@@ -4478,7 +4348,7 @@ app.post(
 
 
 // ============================================================================
-// 13 — FUSION ADMIN STATISTICS
+// 11 — FUSION ADMIN STATISTICS
 // ============================================================================
 
 app.get(
@@ -4577,7 +4447,7 @@ app.get(
 
 
 // ============================================================================
-// 14 — FUSION ADMIN GET ALL REGISTRATIONS
+// 12 — FUSION ADMIN GET ALL REGISTRATIONS
 // ============================================================================
 
 app.get(
@@ -4645,7 +4515,7 @@ app.get(
 
 
 // ============================================================================
-// 15 — FUSION ADMIN GET ALL USERS
+// 13 — FUSION ADMIN GET ALL USERS
 // ============================================================================
 
 app.get(
@@ -4713,7 +4583,7 @@ app.get(
 
 
 // ============================================================================
-// 16 — FUSION ADMIN SEARCH USERS
+// 14 — FUSION ADMIN SEARCH USERS
 // ============================================================================
 
 app.get(
@@ -4959,7 +4829,7 @@ app.get(
 
 
 // ============================================================================
-// 17 — FUSION ADMIN GET SINGLE USER
+// 15 — FUSION ADMIN GET SINGLE USER
 // ============================================================================
 
 app.get(
@@ -5057,7 +4927,7 @@ app.get(
 
 
 // ============================================================================
-// 18 — FUSION ADMIN UPDATE USER
+// 16 — FUSION ADMIN UPDATE USER
 // ============================================================================
 //
 // Updates the SAME document in "academiques".
@@ -5341,7 +5211,7 @@ app.put(
 
 
       // ==========================================================
-      // ROLE VALIDATION
+      // ACADEMIC ROLE VALIDATION
       // ==========================================================
 
       if (
@@ -5709,7 +5579,7 @@ app.put(
 
 
 // ============================================================================
-// 19 — FUSION ADMIN DASHBOARD SUMMARY
+// 17 — FUSION ADMIN DASHBOARD SUMMARY
 // ============================================================================
 
 app.get(
@@ -5826,7 +5696,7 @@ app.get(
 
 
 // ============================================================================
-// 20 — FUSION REAL-TIME: ACADEMIC CREATED
+// 18 — FUSION REAL-TIME: ACADEMIC CREATED
 // ============================================================================
 //
 // IMPORTANT:
@@ -5877,7 +5747,7 @@ function notifyFusionAcademicCreated(
 
 
 // ============================================================================
-// 21 — FUSION REAL-TIME: ACADEMIC DELETED
+// 19 — FUSION REAL-TIME: ACADEMIC DELETED
 // ============================================================================
 //
 // Helper only.
@@ -5951,13 +5821,18 @@ function notifyFusionAcademicDeleted(
 // REQUIRED .ENV STRUCTURE
 // ============================================================================
 //
-// The actual values must be entered by the administrator on the VPS.
+// ONLY THESE TWO VARIABLES ARE REQUIRED FOR FUSION ADMIN LOGIN:
 //
-// ADMIN_IDENTIFIER=
-// ADMIN_PASSWORD=
-// ADMIN_ROLE=
+// ADMIN_IDENTIFIER=Selvandieu
+// ADMIN_PASSWORD=YOUR_ADMIN_PASSWORD
 //
-// ============================================================================ 
+// DO NOT ADD:
+//
+// ADMIN_ROLE
+//
+// ============================================================================
+
+
 
 
 
