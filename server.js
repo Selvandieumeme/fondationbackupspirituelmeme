@@ -3695,8 +3695,7 @@ await AuditLogs.insertOne(auditEntry).catch(err => {
 
 
 
-
-// ============================================================================
+/ ============================================================================
 // FUSION SCHOOL INTERNATIONAL — ADMIN BACKEND
 // ISOLATED / PROTECTED / PRODUCTION SAFE
 // ============================================================================
@@ -3704,7 +3703,7 @@ await AuditLogs.insertOne(auditEntry).catch(err => {
 // IMPORTANT:
 // - Uses the existing Express "app"
 // - Uses the existing mongoose connection
-// - Uses the existing express-session middleware
+// - Does NOT use express-session for FUSION ADMIN
 // - Uses the existing Socket.IO instance if available
 // - Uses the EXISTING "academiques" collection
 // - Does NOT create a new FUSION user collection
@@ -3714,6 +3713,7 @@ await AuditLogs.insertOne(auditEntry).catch(err => {
 // - Does NOT modify existing FOBAS MASTER ADMIN routes
 // - Does NOT modify /academiques/register
 // - Does NOT modify existing academic login
+// - FUSION ADMIN credentials are verified directly against .env
 // ============================================================================
 
 
@@ -3745,19 +3745,29 @@ const FUSION_ACADEMIC_ALLOWED_ROLES = [
 
 const fusionAdminLoginLimiter = rateLimit({
 
-  windowMs: 15 * 60 * 1000,
+  windowMs:
+    15 * 60 * 1000,
 
-  max: 10,
+  max:
+    10,
 
-  standardHeaders: true,
+  standardHeaders:
+    true,
 
-  legacyHeaders: false,
+  legacyHeaders:
+    false,
 
   message: {
-    success: false,
-    authenticated: false,
+
+    success:
+      false,
+
+    authenticated:
+      false,
+
     message:
       "Trop de tentatives de connexion. Veuillez réessayer plus tard."
+
   }
 
 });
@@ -3783,8 +3793,11 @@ function getFusionAcademiqueCollection() {
 function isValidFusionObjectId(id) {
 
   return (
+
     typeof id === "string" &&
+
     mongoose.Types.ObjectId.isValid(id)
+
   );
 
 }
@@ -3810,8 +3823,11 @@ function escapeFusionRegex(value) {
 function normalizeFusionAcademicUser(user) {
 
   if (!user) {
+
     return null;
+
   }
+
 
   return {
 
@@ -3935,37 +3951,174 @@ function normalizeFusionAcademicUser(user) {
 
 
 // ============================================================================
-// 8 — FUSION ADMIN PROTECTION
+// 8 — FUSION ADMIN PROTECTION — NO SESSION
+// ============================================================================
+//
+// FUSION ADMIN DOES NOT USE req.session.
+//
+// Protected requests must provide:
+//
+// x-fusion-admin-identifier
+// x-fusion-admin-password
+//
+// The values are verified directly against:
+//
+// ADMIN_IDENTIFIER
+// ADMIN_PASSWORD
+// ADMIN_ROLE
+//
+// IMPORTANT:
+// This does not create a session.
+// This does not create a cookie.
+// This does not store credentials in MongoDB.
 // ============================================================================
 
 function requireFusionAdmin(req, res, next) {
 
   try {
 
-    const admin =
-      req.session &&
-      req.session.fusionAdmin;
+    const adminIdentifier =
+      process.env.ADMIN_IDENTIFIER;
+
+    const adminPassword =
+      process.env.ADMIN_PASSWORD;
+
+    const adminRole =
+      process.env.ADMIN_ROLE ||
+      "fondateur";
+
+
+    // ==========================================================
+    // SERVER ENV VALIDATION
+    // ==========================================================
 
     if (
-      !admin ||
-      admin.authenticated !== true ||
-      !FUSION_ADMIN_ALLOWED_ROLES.includes(
-        admin.role
-      )
+      !adminIdentifier ||
+      !adminPassword
     ) {
 
-      return res.status(401).json({
+      console.error(
+        "FUSION ADMIN AUTH ERROR: ADMIN_IDENTIFIER or ADMIN_PASSWORD missing in .env"
+      );
 
-        success: false,
+      return res.status(500).json({
 
-        authenticated: false,
+        success:
+          false,
+
+        authenticated:
+          false,
 
         message:
-          "Session administrateur FUSION requise."
+          "Configuration administrateur indisponible."
 
       });
 
     }
+
+
+    // ==========================================================
+    // ROLE VALIDATION
+    // ==========================================================
+
+    if (
+      !FUSION_ADMIN_ALLOWED_ROLES.includes(
+        adminRole
+      )
+    ) {
+
+      console.error(
+        "FUSION ADMIN AUTH ERROR: invalid ADMIN_ROLE"
+      );
+
+      return res.status(500).json({
+
+        success:
+          false,
+
+        authenticated:
+          false,
+
+        message:
+          "Rôle administrateur invalide."
+
+      });
+
+    }
+
+
+    // ==========================================================
+    // READ ADMIN CREDENTIALS FROM REQUEST HEADERS
+    // ==========================================================
+
+    const requestIdentifier =
+      typeof req.headers[
+        "x-fusion-admin-identifier"
+      ] === "string"
+
+        ? req.headers[
+            "x-fusion-admin-identifier"
+          ]
+
+        : "";
+
+    const requestPassword =
+      typeof req.headers[
+        "x-fusion-admin-password"
+      ] === "string"
+
+        ? req.headers[
+            "x-fusion-admin-password"
+          ]
+
+        : "";
+
+
+    // ==========================================================
+    // DIRECT .ENV VERIFICATION
+    // ==========================================================
+
+    if (
+      requestIdentifier.trim() !==
+        adminIdentifier ||
+
+      requestPassword !==
+        adminPassword
+    ) {
+
+      return res.status(401).json({
+
+        success:
+          false,
+
+        authenticated:
+          false,
+
+        message:
+          "Authentification administrateur FUSION requise."
+
+      });
+
+    }
+
+
+    // ==========================================================
+    // ADMIN AUTHENTICATED
+    // ==========================================================
+
+    req.fusionAdmin = {
+
+      authenticated:
+        true,
+
+      identifier:
+        adminIdentifier,
+
+      role:
+        adminRole
+
+    };
+
 
     return next();
 
@@ -3980,12 +4133,14 @@ function requireFusionAdmin(req, res, next) {
 
     return res.status(401).json({
 
-      success: false,
+      success:
+        false,
 
-      authenticated: false,
+      authenticated:
+        false,
 
       message:
-        "Session administrateur invalide."
+        "Authentification administrateur invalide."
 
     });
 
@@ -4045,6 +4200,15 @@ function emitFusionSocket(
 // ============================================================================
 // 10 — FUSION ADMIN LOGIN
 // ============================================================================
+//
+// IMPORTANT:
+// Login verifies credentials directly against .env.
+//
+// NO req.session.
+// NO cookie.
+// NO session.save().
+// NO fusionAdmin session.
+// ============================================================================
 
 app.post(
   "/api/fusion/admin/login",
@@ -4072,9 +4236,11 @@ app.post(
 
         return res.status(400).json({
 
-          success: false,
+          success:
+            false,
 
-          authenticated: false,
+          authenticated:
+            false,
 
           message:
             "Identifiant et mot de passe requis."
@@ -4114,9 +4280,11 @@ app.post(
 
         return res.status(500).json({
 
-          success: false,
+          success:
+            false,
 
-          authenticated: false,
+          authenticated:
+            false,
 
           message:
             "Configuration administrateur indisponible."
@@ -4142,9 +4310,11 @@ app.post(
 
         return res.status(500).json({
 
-          success: false,
+          success:
+            false,
 
-          authenticated: false,
+          authenticated:
+            false,
 
           message:
             "Rôle administrateur invalide."
@@ -4161,15 +4331,18 @@ app.post(
       if (
         identifier.trim() !==
           adminIdentifier ||
+
         password !==
           adminPassword
       ) {
 
         return res.status(401).json({
 
-          success: false,
+          success:
+            false,
 
-          authenticated: false,
+          authenticated:
+            false,
 
           message:
             "Identifiants invalides."
@@ -4180,99 +4353,32 @@ app.post(
 
 
       // ==========================================================
-      // SESSION CHECK
+      // LOGIN SUCCESS
       // ==========================================================
 
-      if (!req.session) {
+      return res.json({
 
-        console.error(
-          "FUSION ADMIN ERROR: express-session is not available."
-        );
+        success:
+          true,
 
-        return res.status(500).json({
+        authenticated:
+          true,
 
-          success: false,
+        user: {
 
-          authenticated: false,
+          id:
+            "fusion-admin",
 
-          message:
-            "Session serveur indisponible."
+          nomComplet:
+            "FUSION SCHOOL INTERNATIONAL",
 
-        });
+          email:
+            null,
 
-      }
-
-
-      // ==========================================================
-      // CREATE FUSION ADMIN SESSION
-      // ==========================================================
-
-      req.session.fusionAdmin = {
-
-        authenticated: true,
-
-        identifier:
-          adminIdentifier,
-
-        role:
-          adminRole,
-
-        loginAt:
-          new Date()
-
-      };
-
-
-      // ==========================================================
-      // SAVE SESSION
-      // ==========================================================
-
-      req.session.save((sessionError) => {
-
-        if (sessionError) {
-
-          console.error(
-            "FUSION ADMIN SESSION SAVE ERROR:",
-            sessionError
-          );
-
-          return res.status(500).json({
-
-            success: false,
-
-            authenticated: false,
-
-            message:
-              "Impossible d'enregistrer la session."
-
-          });
+          role:
+            adminRole
 
         }
-
-
-        return res.json({
-
-          success: true,
-
-          authenticated: true,
-
-          user: {
-
-            id:
-              "fusion-admin",
-
-            nomComplet:
-              adminIdentifier,
-
-            email:
-              "",
-
-            role:
-              adminRole
-
-          }
-
-        });
 
       });
 
@@ -4287,9 +4393,11 @@ app.post(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
-        authenticated: false,
+        authenticated:
+          false,
 
         message:
           "Internal server error."
@@ -4303,98 +4411,25 @@ app.post(
 
 
 // ============================================================================
-// 11 — FUSION ADMIN SESSION
+// 11 — NO FUSION ADMIN SESSION ROUTE
 // ============================================================================
-
-app.get(
-  "/api/fusion/admin/session",
-  async (req, res) => {
-
-    try {
-
-      const admin =
-        req.session &&
-        req.session.fusionAdmin;
-
-
-      if (
-        !admin ||
-        admin.authenticated !== true ||
-        !FUSION_ADMIN_ALLOWED_ROLES.includes(
-          admin.role
-        )
-      ) {
-
-        return res.json({
-
-          success: true,
-
-          authenticated: false,
-
-          user: null
-
-        });
-
-      }
-
-
-      return res.json({
-
-        success: true,
-
-        authenticated: true,
-
-        user: {
-
-          id:
-            "fusion-admin",
-
-          nomComplet:
-            admin.identifier ||
-            "Administrateur FUSION",
-
-          email:
-            "",
-
-          role:
-            admin.role
-
-        }
-
-      });
-
-    }
-
-    catch (err) {
-
-      console.error(
-        "FUSION ADMIN SESSION ERROR:",
-        err
-      );
-
-      return res.status(500).json({
-
-        success: false,
-
-        authenticated: false,
-
-        message:
-          "Internal server error."
-
-      });
-
-    }
-
-  }
-);
+//
+// IMPORTANT:
+// /api/fusion/admin/session has intentionally been removed.
+//
+// FUSION ADMIN does NOT use a session verification endpoint.
+// ============================================================================
 
 
 // ============================================================================
 // 12 — FUSION ADMIN LOGOUT
 // ============================================================================
 //
-// Only fusionAdmin is removed.
-// The global session is NOT destroyed.
+// NO SESSION IS DESTROYED.
+//
+// Logout is a client-side authentication-state reset.
+// The endpoint remains available for frontend compatibility,
+// but it does not create or destroy a server session.
 // ============================================================================
 
 app.post(
@@ -4404,40 +4439,16 @@ app.post(
 
     try {
 
-      delete req.session.fusionAdmin;
+      return res.json({
 
+        success:
+          true,
 
-      req.session.save((sessionError) => {
+        authenticated:
+          false,
 
-        if (sessionError) {
-
-          console.error(
-            "FUSION ADMIN LOGOUT SESSION ERROR:",
-            sessionError
-          );
-
-          return res.status(500).json({
-
-            success: false,
-
-            message:
-              "Impossible de fermer la session."
-
-          });
-
-        }
-
-
-        return res.json({
-
-          success: true,
-
-          authenticated: false,
-
-          message:
-            "Session administrateur FUSION fermée."
-
-        });
+        message:
+          "Déconnexion administrateur FUSION effectuée."
 
       });
 
@@ -4452,7 +4463,8 @@ app.post(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Internal server error."
@@ -4489,19 +4501,23 @@ app.get(
       ] = await Promise.all([
 
         Academiques.countDocuments({
-          role: "etudiant"
+          role:
+            "etudiant"
         }),
 
         Academiques.countDocuments({
-          role: "directeur"
+          role:
+            "directeur"
         }),
 
         Academiques.countDocuments({
-          role: "professeur"
+          role:
+            "professeur"
         }),
 
         Academiques.countDocuments({
-          role: "agent"
+          role:
+            "agent"
         }),
 
         Academiques.countDocuments()
@@ -4511,7 +4527,8 @@ app.get(
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         statistics: {
 
@@ -4545,7 +4562,8 @@ app.get(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Impossible de récupérer les statistiques."
@@ -4577,7 +4595,8 @@ app.get(
         await Academiques
           .find({})
           .sort({
-            createdAt: -1
+            createdAt:
+              -1
           })
           .toArray();
 
@@ -4590,7 +4609,8 @@ app.get(
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         total:
           registrations.length,
@@ -4610,7 +4630,8 @@ app.get(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Impossible de récupérer les inscriptions."
@@ -4642,7 +4663,8 @@ app.get(
         await Academiques
           .find({})
           .sort({
-            createdAt: -1
+            createdAt:
+              -1
           })
           .toArray();
 
@@ -4655,7 +4677,8 @@ app.get(
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         total:
           users.length,
@@ -4675,7 +4698,8 @@ app.get(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Impossible de récupérer les utilisateurs."
@@ -4885,7 +4909,8 @@ app.get(
         await Academiques
           .find(query)
           .sort({
-            createdAt: -1
+            createdAt:
+              -1
           })
           .toArray();
 
@@ -4898,7 +4923,8 @@ app.get(
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         total:
           users.length,
@@ -4918,7 +4944,8 @@ app.get(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Erreur pendant la recherche."
@@ -4953,7 +4980,8 @@ app.get(
 
         return res.status(400).json({
 
-          success: false,
+          success:
+            false,
 
           message:
             "Identifiant utilisateur invalide."
@@ -4980,7 +5008,8 @@ app.get(
 
         return res.status(404).json({
 
-          success: false,
+          success:
+            false,
 
           message:
             "Utilisateur FUSION introuvable."
@@ -4992,7 +5021,8 @@ app.get(
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         user:
           normalizeFusionAcademicUser(
@@ -5012,7 +5042,8 @@ app.get(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Impossible de récupérer cet utilisateur."
@@ -5051,7 +5082,8 @@ app.put(
 
         return res.status(400).json({
 
-          success: false,
+          success:
+            false,
 
           message:
             "Identifiant utilisateur invalide."
@@ -5182,7 +5214,8 @@ app.put(
 
         return res.status(400).json({
 
-          success: false,
+          success:
+            false,
 
           message:
             "Aucune donnée valide à modifier."
@@ -5249,7 +5282,8 @@ app.put(
 
             return res.status(400).json({
 
-              success: false,
+              success:
+                false,
 
               message:
                 `Valeur texte invalide: ${field}.`
@@ -5290,7 +5324,8 @@ app.put(
 
           return res.status(400).json({
 
-            success: false,
+            success:
+              false,
 
             message:
               "Email invalide."
@@ -5324,7 +5359,8 @@ app.put(
 
           return res.status(400).json({
 
-            success: false,
+            success:
+              false,
 
             message:
               "Rôle académique invalide."
@@ -5392,7 +5428,8 @@ app.put(
 
             return res.status(400).json({
 
-              success: false,
+              success:
+                false,
 
               message:
                 `Valeur numérique invalide: ${field}.`
@@ -5443,7 +5480,8 @@ app.put(
 
             return res.status(400).json({
 
-              success: false,
+              success:
+                false,
 
               message:
                 `Valeur booléenne invalide: ${field}.`
@@ -5489,7 +5527,8 @@ app.put(
 
             return res.status(400).json({
 
-              success: false,
+              success:
+                false,
 
               message:
                 `Valeur tableau invalide: ${field}.`
@@ -5522,7 +5561,8 @@ app.put(
 
           return res.status(400).json({
 
-            success: false,
+            success:
+              false,
 
             message:
               "Champ de modification invalide."
@@ -5564,7 +5604,8 @@ app.put(
 
         return res.status(404).json({
 
-          success: false,
+          success:
+            false,
 
           message:
             "Utilisateur FUSION introuvable."
@@ -5606,7 +5647,8 @@ app.put(
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         message:
           "Utilisateur FUSION mis à jour avec succès.",
@@ -5633,7 +5675,8 @@ app.put(
 
         return res.status(409).json({
 
-          success: false,
+          success:
+            false,
 
           message:
             "Cette adresse email est déjà utilisée."
@@ -5651,7 +5694,8 @@ app.put(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Impossible de modifier l'utilisateur."
@@ -5689,19 +5733,23 @@ app.get(
       ] = await Promise.all([
 
         Academiques.countDocuments({
-          role: "etudiant"
+          role:
+            "etudiant"
         }),
 
         Academiques.countDocuments({
-          role: "directeur"
+          role:
+            "directeur"
         }),
 
         Academiques.countDocuments({
-          role: "professeur"
+          role:
+            "professeur"
         }),
 
         Academiques.countDocuments({
-          role: "agent"
+          role:
+            "agent"
         }),
 
         Academiques.countDocuments(),
@@ -5709,7 +5757,8 @@ app.get(
         Academiques
           .find({})
           .sort({
-            createdAt: -1
+            createdAt:
+              -1
           })
           .limit(10)
           .toArray()
@@ -5725,7 +5774,8 @@ app.get(
 
       return res.json({
 
-        success: true,
+        success:
+          true,
 
         statistics: {
 
@@ -5761,7 +5811,8 @@ app.get(
 
       return res.status(500).json({
 
-        success: false,
+        success:
+          false,
 
         message:
           "Impossible de charger le dashboard FUSION."
@@ -5797,7 +5848,9 @@ function notifyFusionAcademicCreated(
   try {
 
     if (!academicId) {
+
       return;
+
     }
 
 
@@ -5838,7 +5891,9 @@ function notifyFusionAcademicDeleted(
   try {
 
     if (!academicId) {
+
       return;
+
     }
 
 
@@ -5903,6 +5958,15 @@ function notifyFusionAcademicDeleted(
 // ADMIN_ROLE=
 //
 // ============================================================================ 
+
+
+
+
+
+
+
+
+
 
 
 
