@@ -4,13 +4,13 @@
 
    Fichier : dashboardadminfusion.js
 
-   CONTRAT API OFFICIEL
+   ================================================================
+   API OFFICIELLE
    ================================================================
 
-   API :
    https://api.fondationbackupspirituel.com
 
-   Routes FUSION SCHOOL INTERNATIONAL :
+   Routes :
 
    POST /api/fusion/admin/login
    POST /api/fusion/admin/logout
@@ -19,31 +19,66 @@
    GET  /api/fusion/admin/users
    GET  /api/fusion/admin/statistics
 
-   AUTHENTIFICATION :
-   - Aucun secret permanent dans ce fichier.
-   - Aucun mot de passe dans localStorage.
-   - Aucun mot de passe dans sessionStorage.
-   - Aucun endpoint /session utilisé.
-   - Aucun cookie de session utilisé par FUSION Admin.
-   - Les identifiants administrateur sont conservés uniquement
-     en mémoire JavaScript pendant l'authentification active.
-   - Le backend vérifie directement les valeurs .env.
-   - Les routes protégées reçoivent les headers :
-       X-Fusion-Admin-Identifier
-       X-Fusion-Admin-Password
 
-   CONTRAT LOGIN :
+   ================================================================
+   AUTHENTIFICATION
+   ================================================================
+
+   Le frontend NE contient aucun secret .env.
+
+   L'utilisateur saisit simplement :
+
+       1. Identifiant
+       2. Mot de passe
+
+   Le frontend envoie :
+
+       POST /api/fusion/admin/login
+
+   avec :
+
+       {
+           identifier: "...",
+           password: "..."
+       }
+
+   Le BACKEND VPS lit :
+
+       process.env.ADMIN_IDENTIFIER
+       process.env.ADMIN_PASSWORD
+
+   puis compare les deux valeurs.
+
    Succès :
 
-   {
-       "success": true
-   }
+       {
+           "success": true
+       }
 
    Échec :
 
-   {
-       "success": false
-   }
+       {
+           "success": false
+       }
+
+   Le frontend ne demande PAS :
+
+       authenticated
+       user
+       admin
+       role
+       ADMIN_ROLE
+
+   Les credentials saisis restent uniquement en mémoire
+   JavaScript afin de permettre aux routes protégées existantes
+   de recevoir :
+
+       X-Fusion-Admin-Identifier
+       X-Fusion-Admin-Password
+
+   Aucun localStorage.
+   Aucun sessionStorage.
+   Aucun cookie de session.
 
    ================================================================ */
 
@@ -103,7 +138,7 @@ const ADMIN_STATE = {
         null,
 
     /*
-     * Les credentials restent uniquement en mémoire JavaScript.
+     * Conservés uniquement en mémoire.
      *
      * Aucun localStorage.
      * Aucun sessionStorage.
@@ -605,14 +640,19 @@ async function apiRequest(
 
 
     /*
-     * Le login reçoit uniquement :
+     * LOGIN :
+     *
+     * Le login envoie seulement le JSON :
      *
      * {
      *     identifier,
      *     password
      * }
      *
-     * Les routes protégées utilisent les credentials
+     *
+     * AUTRES ROUTES :
+     *
+     * Elles continuent d'utiliser les credentials
      * conservés uniquement en mémoire.
      */
 
@@ -973,13 +1013,17 @@ function togglePasswordVisibility() {
 
 
 /* ================================================================
-   16 — LOGIN ADMIN / FONDATEUR
+   16 — LOGIN ADMIN
    ================================================================ */
 
 async function loginAdmin(
     identifier,
     password
 ) {
+
+    /*
+     * Le login ne demande que deux valeurs.
+     */
 
     if (
         !identifier ||
@@ -995,9 +1039,15 @@ async function loginAdmin(
 
     setAPIStatus(
         "loading",
-        "Authentification administrateur..."
+        "Vérification des identifiants..."
     );
 
+
+    /*
+     * ============================================================
+     * APPEL UNIQUE DU LOGIN
+     * ============================================================
+     */
 
     const response =
         await apiRequest(
@@ -1023,25 +1073,22 @@ async function loginAdmin(
 
     /*
      * ============================================================
-     * CONTRAT LOGIN UNIQUE
+     * SEUL TEST DU LOGIN
      * ============================================================
      *
-     * Le backend retourne uniquement :
+     * Le backend doit retourner :
      *
      * {
-     *     "success": true
+     *     success: true
      * }
      *
      * ou :
      *
      * {
-     *     "success": false
+     *     success: false
      * }
      *
-     * Aucune propriété "authenticated".
-     * Aucun "user".
-     * Aucun "admin".
-     * Aucun "role".
+     * Rien d'autre n'est nécessaire.
      */
 
     if (
@@ -1050,10 +1097,7 @@ async function loginAdmin(
     ) {
 
         throw new Error(
-            extractAPIMessage(
-                response,
-                401
-            )
+            "Identifiant ou mot de passe incorrect."
         );
 
     }
@@ -1061,10 +1105,16 @@ async function loginAdmin(
 
     /*
      * ============================================================
-     * AUTHENTIFICATION RÉUSSIE
+     * LOGIN RÉUSSI
      * ============================================================
      *
-     * Les credentials sont conservés uniquement en mémoire.
+     * Les credentials restent uniquement en mémoire.
+     *
+     * Ils ne sont :
+     *
+     * - ni enregistrés dans localStorage
+     * - ni enregistrés dans sessionStorage
+     * - ni enregistrés dans un cookie
      */
 
     ADMIN_STATE.adminCredentials = {
@@ -1083,11 +1133,9 @@ async function loginAdmin(
 
 
     /*
-     * Le backend login ne retourne volontairement
-     * aucune information utilisateur.
+     * Identité locale uniquement pour l'affichage.
      *
-     * L'identifiant saisi est donc utilisé uniquement
-     * pour l'affichage du compte administrateur.
+     * Ce rôle ne participe PAS à l'authentification.
      */
 
     ADMIN_STATE.admin = {
@@ -1134,29 +1182,25 @@ async function loginAdmin(
     };
 
 
+    /*
+     * Entrée immédiate dans le dashboard.
+     */
+
     showDashboard();
 
 
     setAPIStatus(
         "online",
-        "Authentification administrative réussie."
+        "Connexion administrateur réussie."
     );
 
 
-    try {
+    /*
+     * Les données du dashboard sont chargées
+     * après la réussite du login.
+     */
 
-        await loadDashboardData();
-
-    } catch (error) {
-
-        /*
-         * loadDashboardData() gère déjà
-         * les erreurs de synchronisation.
-         */
-
-        throw error;
-
-    }
+    await loadDashboardData();
 
 }
 
@@ -1172,11 +1216,6 @@ async function logoutAdmin() {
 
     try {
 
-        /*
-         * Les credentials présents en mémoire
-         * sont automatiquement envoyés par apiRequest().
-         */
-
         await apiRequest(
             API_CONFIG.routes.logout,
             {
@@ -1188,8 +1227,8 @@ async function logoutAdmin() {
     } catch (error) {
 
         /*
-         * Même si le serveur ne répond pas,
-         * l'état local doit être nettoyé.
+         * Même si l'API logout échoue,
+         * les credentials locaux seront supprimés.
          */
 
     }
@@ -1386,11 +1425,10 @@ function updateAdminIdentity() {
 
 
     /*
-     * Le rôle n'est jamais utilisé pour authentifier
-     * l'administrateur.
+     * Élément HTML conservé intact.
      *
-     * Cet élément HTML existant est simplement conservé
-     * pour ne pas modifier la structure HTML fournie.
+     * Ce rôle n'est PAS utilisé pour décider
+     * si le login est accepté ou refusé.
      */
 
     if (
@@ -2886,6 +2924,10 @@ function initializeLoginEvents() {
                         ?.value;
 
 
+                /*
+                 * Seulement deux champs.
+                 */
+
                 if (
                     !identifier ||
                     !password
@@ -2909,6 +2951,16 @@ function initializeLoginEvents() {
 
                 try {
 
+                    /*
+                     * LOGIN SIMPLE :
+                     *
+                     * identifier
+                     * password
+                     *
+                     * Le backend vérifie les deux
+                     * valeurs dans .env.
+                     */
+
                     await loginAdmin(
                         identifier,
                         password
@@ -2916,10 +2968,11 @@ function initializeLoginEvents() {
 
 
                     /*
-                     * Le mot de passe visible est effacé.
+                     * On efface le mot de passe
+                     * du champ HTML.
                      *
-                     * Le credential nécessaire aux routes
-                     * protégées reste uniquement en mémoire.
+                     * Il reste uniquement en mémoire
+                     * pour les routes protégées.
                      */
 
                     if (
@@ -2933,11 +2986,6 @@ function initializeLoginEvents() {
 
                 } catch (error) {
 
-                    /*
-                     * En cas d'échec :
-                     * aucune authentification ne reste active.
-                     */
-
                     ADMIN_STATE.authenticated =
                         false;
 
@@ -2950,7 +2998,7 @@ function initializeLoginEvents() {
 
                     showLoginMessage(
                         error.message ||
-                        "Connexion impossible.",
+                        "Identifiant ou mot de passe incorrect.",
                         "error"
                     );
 
@@ -3168,7 +3216,6 @@ if (
 /* ================================================================
    FIN
    ================================================================ */
-
 
 
 
