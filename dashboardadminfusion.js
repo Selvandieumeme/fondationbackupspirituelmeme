@@ -37,6 +37,11 @@
 "use strict";
 
 
+
+
+
+
+
 /* ================================================================
    01 — CONFIGURATION API
    ================================================================ */
@@ -53,9 +58,6 @@ const API_CONFIG = Object.freeze({
 
         logout:
             "/api/fusion/admin/logout",
-
-        session:
-            "/api/fusion/admin/session",
 
         registrations:
             "/api/fusion/admin/registrations",
@@ -78,6 +80,10 @@ const API_CONFIG = Object.freeze({
         30000
 
 });
+
+
+
+
 
 
 /* ================================================================
@@ -1076,119 +1082,6 @@ async function loginAdmin(
 
 
     await loadDashboardData();
-
-}
-
-
-/* ================================================================
-   18 — VÉRIFICATION SESSION
-   ================================================================ */
-
-async function checkExistingSession() {
-
-    try {
-
-        setAPIStatus(
-            "loading",
-            "Vérification de la session administrative..."
-        );
-
-
-        const response =
-            await apiRequest(
-                API_CONFIG.routes.session,
-                {
-                    method:
-                        "GET"
-                }
-            );
-
-
-        if (
-            response?.success !== true ||
-            response?.authenticated !== true
-        ) {
-
-            throw new Error(
-                "Session inactive."
-            );
-
-        }
-
-
-        const user =
-            getSessionUser(
-                response
-            );
-
-
-        if (!user) {
-
-            throw new Error(
-                "Session valide mais compte administrateur absent."
-            );
-
-        }
-
-
-        const backendRole =
-            safeString(
-                response.user?.role
-            )
-                .trim()
-                .toLowerCase();
-
-
-        if (
-            backendRole !== "fondateur" &&
-            backendRole !== "administrateur"
-        ) {
-
-            throw new Error(
-                "Cette session ne possède pas les droits administrateur."
-            );
-
-        }
-
-
-        ADMIN_STATE.authenticated =
-            true;
-
-
-        ADMIN_STATE.admin =
-            user;
-
-
-        showDashboard();
-
-
-        setAPIStatus(
-            "online",
-            "Session administrative active."
-        );
-
-
-        await loadDashboardData();
-
-    } catch (error) {
-
-        ADMIN_STATE.authenticated =
-            false;
-
-
-        ADMIN_STATE.admin =
-            null;
-
-
-        showLoginScreen();
-
-
-        setAPIStatus(
-            "offline",
-            "Aucune session administrative active."
-        );
-
-    }
 
 }
 
@@ -3079,6 +2972,13 @@ function initializeVisibilityHandler() {
 }
 
 
+
+
+
+
+
+
+
 /* ================================================================
    49 — INITIALISATION
    ================================================================ */
@@ -3109,14 +3009,20 @@ async function initializeFusionAdminDashboard() {
 
 
     setAPIStatus(
-        "loading",
-        "Connexion au serveur API..."
+        "online",
+        "Serveur API prêt. Connectez-vous."
     );
 
-
-    await checkExistingSession();
-
 }
+
+
+
+
+
+
+
+
+
 
 
 /* ================================================================
