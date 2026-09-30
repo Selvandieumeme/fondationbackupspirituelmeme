@@ -1,3 +1,4 @@
+
 /* ================================================================
    FUSION SCHOOL INTERNATIONAL
    DASHBOARD ADMIN / FONDATEUR
@@ -10,28 +11,28 @@
    API :
    https://api.fondationbackupspirituel.com
 
-   Routes créées pour FUSION SCHOOL INTERNATIONAL :
+   Routes FUSION SCHOOL INTERNATIONAL :
 
    POST /api/fusion/admin/login
    POST /api/fusion/admin/logout
-   GET  /api/fusion/admin/session
 
    GET  /api/fusion/admin/registrations
    GET  /api/fusion/admin/users
    GET  /api/fusion/admin/statistics
 
-   SÉCURITÉ :
-   - Aucun secret dans ce fichier.
+   AUTHENTIFICATION :
+   - Aucun secret permanent dans ce fichier.
    - Aucun mot de passe dans localStorage.
    - Aucun mot de passe dans sessionStorage.
-   - .env exclusivement côté backend/VPS.
-   - Authentification par cookie de session HTTP sécurisé.
-   - credentials: "include".
-   - Les mots de passe sont envoyés uniquement au backend
-     via HTTPS.
-   - Le backend utilise bcrypt avec coût 12.
-   - Le frontend ne reçoit jamais le mot de passe ni son hash.
-   - Les données affichées proviennent du backend.
+   - Aucun endpoint /session utilisé.
+   - Aucun cookie de session utilisé par FUSION Admin.
+   - Les identifiants administrateur sont conservés uniquement
+     en mémoire JavaScript pendant l'authentification active.
+   - Le backend vérifie directement les valeurs .env.
+   - Les routes protégées reçoivent les headers :
+       X-Fusion-Admin-Identifier
+       X-Fusion-Admin-Password
+   - Les données utilisateur proviennent du backend.
    ================================================================ */
 
 "use strict";
@@ -96,6 +97,15 @@ const ADMIN_STATE = {
         false,
 
     admin:
+        null,
+
+    /*
+     * Les credentials ne sont jamais enregistrés
+     * dans localStorage ou sessionStorage.
+     *
+     * Ils existent uniquement en mémoire JavaScript.
+     */
+    adminCredentials:
         null,
 
     registrations:
@@ -304,7 +314,13 @@ function normalizeRole(role) {
             "professeur",
 
         agent:
-            "agent"
+            "agent",
+
+        administrateur:
+            "administrateur",
+
+        fondateur:
+            "fondateur"
 
     };
 
@@ -515,7 +531,7 @@ function extractAPIMessage(
             "La requête envoyée au serveur est incorrecte.",
 
         401:
-            "Identifiant ou mot de passe incorrect, ou session expirée.",
+            "Authentification administrateur requise ou identifiant/mot de passe incorrect.",
 
         403:
             "Accès administrateur refusé.",
@@ -576,13 +592,58 @@ async function apiRequest(
         );
 
 
+    const requestHeaders = {
+
+        "Accept":
+            "application/json"
+
+    };
+
+
+    /*
+     * Le login reçoit uniquement son body JSON.
+     *
+     * Pour toutes les autres routes FUSION Admin,
+     * les credentials conservés en mémoire sont envoyés
+     * dans les headers attendus par le nouveau backend.
+     *
+     * Aucun cookie/session n'est utilisé.
+     */
+
+    const isLoginRoute =
+        path === API_CONFIG.routes.login;
+
+
+    if (!isLoginRoute) {
+
+        if (
+            ADMIN_STATE.adminCredentials &&
+            typeof ADMIN_STATE.adminCredentials.identifier ===
+                "string" &&
+            typeof ADMIN_STATE.adminCredentials.password ===
+                "string"
+        ) {
+
+            requestHeaders[
+                "X-Fusion-Admin-Identifier"
+            ] =
+                ADMIN_STATE.adminCredentials.identifier;
+
+
+            requestHeaders[
+                "X-Fusion-Admin-Password"
+            ] =
+                ADMIN_STATE.adminCredentials.password;
+
+        }
+
+    }
+
+
     const requestOptions = {
 
         method:
             options.method || "GET",
-
-        credentials:
-            "include",
 
         cache:
             "no-store",
@@ -590,12 +651,8 @@ async function apiRequest(
         signal:
             controller.signal,
 
-        headers: {
-
-            "Accept":
-                "application/json"
-
-        }
+        headers:
+            requestHeaders
 
     };
 
@@ -910,10 +967,10 @@ function togglePasswordVisibility() {
 
 
 /* ================================================================
-   16 — EXTRACTION SESSION
+   16 — EXTRACTION ADMIN
    ================================================================ */
 
-function getSessionUser(response) {
+function getAdminUser(response) {
 
     if (!isObject(response)) {
 
@@ -972,7 +1029,7 @@ async function loginAdmin(
 
     setAPIStatus(
         "loading",
-        "Connexion sécurisée au serveur..."
+        "Authentification administrateur..."
     );
 
 
@@ -1030,7 +1087,7 @@ async function loginAdmin(
 
 
     const user =
-        getSessionUser(
+        getAdminUser(
             response
         );
 
@@ -1064,6 +1121,27 @@ async function loginAdmin(
     }
 
 
+    /*
+     * IMPORTANT :
+     *
+     * Les credentials sont conservés uniquement en mémoire.
+     *
+     * Aucun localStorage.
+     * Aucun sessionStorage.
+     * Aucun cookie.
+     */
+
+    ADMIN_STATE.adminCredentials = {
+
+        identifier:
+            identifier,
+
+        password:
+            password
+
+    };
+
+
     ADMIN_STATE.authenticated =
         true;
 
@@ -1077,17 +1155,30 @@ async function loginAdmin(
 
     setAPIStatus(
         "online",
-        "Connexion administrative réussie."
+        "Authentification administrative réussie."
     );
 
 
-    await loadDashboardData();
+    try {
+
+        await loadDashboardData();
+
+    } catch (error) {
+
+        /*
+         * loadDashboardData() gère déjà les erreurs
+         * de synchronisation.
+         */
+
+        throw error;
+
+    }
 
 }
 
 
 /* ================================================================
-   19 — LOGOUT
+   18 — LOGOUT
    ================================================================ */
 
 async function logoutAdmin() {
@@ -1096,6 +1187,16 @@ async function logoutAdmin() {
 
 
     try {
+
+        /*
+         * Le backend ne possède plus de session.
+         *
+         * La requête logout est néanmoins envoyée afin
+         * de conserver le contrat API FUSION.
+         *
+         * Les headers d'authentification sont ajoutés
+         * automatiquement par apiRequest().
+         */
 
         await apiRequest(
             API_CONFIG.routes.logout,
@@ -1108,8 +1209,8 @@ async function logoutAdmin() {
     } catch (error) {
 
         /*
-         * Le serveur reste responsable de détruire
-         * la session. L'interface est néanmoins nettoyée.
+         * Même si le serveur ne répond pas,
+         * l'état local doit être nettoyé.
          */
 
     }
@@ -1126,7 +1227,7 @@ async function logoutAdmin() {
 
     setAPIStatus(
         "offline",
-        "Session administrative fermée."
+        "Authentification administrateur fermée."
     );
 
 
@@ -1156,7 +1257,7 @@ async function logoutAdmin() {
 
 
 /* ================================================================
-   20 — RÉINITIALISATION ÉTAT ADMIN
+   19 — RÉINITIALISATION ÉTAT ADMIN
    ================================================================ */
 
 function resetAdminState() {
@@ -1166,6 +1267,15 @@ function resetAdminState() {
 
 
     ADMIN_STATE.admin =
+        null;
+
+
+    /*
+     * Suppression immédiate des credentials
+     * conservés uniquement en mémoire.
+     */
+
+    ADMIN_STATE.adminCredentials =
         null;
 
 
@@ -1196,11 +1306,15 @@ function resetAdminState() {
     ADMIN_STATE.lastSynchronization =
         null;
 
+
+    ADMIN_STATE.loading =
+        false;
+
 }
 
 
 /* ================================================================
-   21 — AFFICHAGE LOGIN
+   20 — AFFICHAGE LOGIN
    ================================================================ */
 
 function showLoginScreen() {
@@ -1233,7 +1347,7 @@ function showLoginScreen() {
 
 
 /* ================================================================
-   22 — AFFICHAGE DASHBOARD
+   21 — AFFICHAGE DASHBOARD
    ================================================================ */
 
 function showDashboard() {
@@ -1270,7 +1384,7 @@ function showDashboard() {
 
 
 /* ================================================================
-   23 — IDENTITÉ ADMIN
+   22 — IDENTITÉ ADMIN
    ================================================================ */
 
 function updateAdminIdentity() {
@@ -1313,7 +1427,7 @@ function updateAdminIdentity() {
 
 
 /* ================================================================
-   24 — SESSION STATUS
+   23 — STATUT AUTHENTIFICATION
    ================================================================ */
 
 function updateSessionStatus() {
@@ -1329,14 +1443,14 @@ function updateSessionStatus() {
 
     DOM.sessionStatus.textContent =
         ADMIN_STATE.authenticated
-            ? "Session administrative active."
-            : "Session administrative inactive.";
+            ? "Authentification administrateur active."
+            : "Authentification administrateur inactive.";
 
 }
 
 
 /* ================================================================
-   25 — CHARGEMENT DASHBOARD
+   24 — CHARGEMENT DASHBOARD
    ================================================================ */
 
 async function loadDashboardData() {
@@ -1344,6 +1458,26 @@ async function loadDashboardData() {
     if (
         !ADMIN_STATE.authenticated
     ) {
+
+        return;
+
+    }
+
+
+    if (
+        !ADMIN_STATE.adminCredentials
+    ) {
+
+        resetAdminState();
+
+        showLoginScreen();
+
+
+        setAPIStatus(
+            "offline",
+            "Authentification administrateur requise."
+        );
+
 
         return;
 
@@ -1482,12 +1616,12 @@ async function loadDashboardData() {
 
             setAPIStatus(
                 "offline",
-                "Session expirée. Veuillez vous reconnecter."
+                "Authentification administrateur requise. Veuillez vous reconnecter."
             );
 
 
             showLoginMessage(
-                "Votre session administrative a expiré.",
+                "L'authentification administrateur n'est plus valide. Veuillez vous reconnecter.",
                 "error"
             );
 
@@ -1514,7 +1648,7 @@ async function loadDashboardData() {
 
 
 /* ================================================================
-   26 — DISTRIBUTION DES UTILISATEURS
+   25 — DISTRIBUTION DES UTILISATEURS
    ================================================================ */
 
 function distributeUsers() {
@@ -1574,7 +1708,7 @@ function distributeUsers() {
 
 
 /* ================================================================
-   27 — COMPTEURS
+   26 — COMPTEURS
    ================================================================ */
 
 function updateCounters() {
@@ -1681,7 +1815,7 @@ function setCounter(
 
 
 /* ================================================================
-   28 — INSCRIPTIONS RÉCENTES
+   27 — INSCRIPTIONS RÉCENTES
    ================================================================ */
 
 function renderRecentRegistrations() {
@@ -1733,7 +1867,7 @@ function renderRecentRegistrations() {
 
 
 /* ================================================================
-   29 — TRI DATE
+   28 — TRI DATE
    ================================================================ */
 
 function sortByDateDescending(
@@ -1787,7 +1921,7 @@ function sortByDateDescending(
 
 
 /* ================================================================
-   30 — CARTE INSCRIPTION
+   29 — CARTE INSCRIPTION
    ================================================================ */
 
 function renderRegistrationCard(
@@ -1860,7 +1994,7 @@ function renderRegistrationCard(
 
 
 /* ================================================================
-   31 — RECHERCHE UTILISATEUR
+   30 — RECHERCHE UTILISATEUR
    ================================================================ */
 
 function userMatchesSearch(
@@ -1918,7 +2052,7 @@ function userMatchesSearch(
 
 
 /* ================================================================
-   32 — CARTE UTILISATEUR DÉTAILLÉE
+   31 — CARTE UTILISATEUR DÉTAILLÉE
    ================================================================ */
 
 function renderDetailedUserCard(
@@ -2081,7 +2215,7 @@ function renderDetailedUserCard(
 
 
 /* ================================================================
-   33 — COLLECTIONS
+   32 — COLLECTIONS
    ================================================================ */
 
 function renderUserCollection(
@@ -2145,7 +2279,7 @@ function renderUserCollection(
 
 
 /* ================================================================
-   34 — LISTES PAR PROFIL
+   33 — LISTES PAR PROFIL
    ================================================================ */
 
 function renderStudents() {
@@ -2197,7 +2331,7 @@ function renderAgents() {
 
 
 /* ================================================================
-   35 — TOUTES LES INSCRIPTIONS
+   34 — TOUTES LES INSCRIPTIONS
    ================================================================ */
 
 function renderAllRegistrations() {
@@ -2254,7 +2388,7 @@ function renderAllRegistrations() {
 
 
 /* ================================================================
-   36 — STATISTIQUES
+   35 — STATISTIQUES
    ================================================================ */
 
 function renderStatistics() {
@@ -2368,7 +2502,7 @@ function renderStatistics() {
 
 
 /* ================================================================
-   37 — LIGNE STATISTIQUE
+   36 — LIGNE STATISTIQUE
    ================================================================ */
 
 function renderStatisticLine(
@@ -2432,7 +2566,7 @@ function renderStatisticLine(
 
 
 /* ================================================================
-   38 — SYNCHRONISATION
+   37 — SYNCHRONISATION
    ================================================================ */
 
 function updateSynchronization() {
@@ -2457,7 +2591,7 @@ function updateSynchronization() {
 
 
 /* ================================================================
-   39 — SECTION COURANTE
+   38 — SECTION COURANTE
    ================================================================ */
 
 function renderCurrentDataSection() {
@@ -2513,7 +2647,7 @@ function renderCurrentDataSection() {
 
 
 /* ================================================================
-   40 — NAVIGATION
+   39 — NAVIGATION
    ================================================================ */
 
 function showSection(
@@ -2592,7 +2726,7 @@ function showSection(
 
 
 /* ================================================================
-   41 — ACTUALISATION
+   40 — ACTUALISATION
    ================================================================ */
 
 async function refreshDashboard() {
@@ -2612,7 +2746,7 @@ async function refreshDashboard() {
 
 
 /* ================================================================
-   42 — AUTO REFRESH
+   41 — AUTO REFRESH
    ================================================================ */
 
 function startAutoRefresh() {
@@ -2659,7 +2793,7 @@ function stopAutoRefresh() {
 
 
 /* ================================================================
-   43 — NAVIGATION EVENTS
+   42 — NAVIGATION EVENTS
    ================================================================ */
 
 function initializeNavigationEvents() {
@@ -2685,7 +2819,7 @@ function initializeNavigationEvents() {
 
 
 /* ================================================================
-   44 — RECHERCHE EVENTS
+   43 — RECHERCHE EVENTS
    ================================================================ */
 
 function initializeSearchEvents() {
@@ -2741,7 +2875,7 @@ function initializeSearchEvents() {
 
 
 /* ================================================================
-   45 — LOGIN EVENTS
+   44 — LOGIN EVENTS
    ================================================================ */
 
 function initializeLoginEvents() {
@@ -2801,8 +2935,11 @@ function initializeLoginEvents() {
 
 
                     /*
-                     * Le mot de passe ne reste jamais
-                     * dans le champ après authentification.
+                     * Le champ visible est nettoyé.
+                     *
+                     * Le credential nécessaire aux requêtes
+                     * protégées reste uniquement dans
+                     * ADMIN_STATE.adminCredentials.
                      */
 
                     if (
@@ -2815,6 +2952,21 @@ function initializeLoginEvents() {
                     }
 
                 } catch (error) {
+
+                    /*
+                     * En cas d'échec, aucune credential
+                     * ne doit rester dans l'état authentifié.
+                     */
+
+                    ADMIN_STATE.authenticated =
+                        false;
+
+                    ADMIN_STATE.admin =
+                        null;
+
+                    ADMIN_STATE.adminCredentials =
+                        null;
+
 
                     showLoginMessage(
                         error.message ||
@@ -2870,7 +3022,7 @@ function initializeLoginEvents() {
 
 
 /* ================================================================
-   46 — REFRESH EVENTS
+   45 — REFRESH EVENTS
    ================================================================ */
 
 function initializeRefreshEvents() {
@@ -2929,7 +3081,7 @@ function initializeRefreshEvents() {
 
 
 /* ================================================================
-   47 — PARAMÈTRES
+   46 — PARAMÈTRES
    ================================================================ */
 
 function initializeSettings() {
@@ -2947,7 +3099,7 @@ function initializeSettings() {
 
 
 /* ================================================================
-   48 — VISIBILITÉ PAGE
+   47 — VISIBILITÉ PAGE
    ================================================================ */
 
 function initializeVisibilityHandler() {
@@ -2972,15 +3124,8 @@ function initializeVisibilityHandler() {
 }
 
 
-
-
-
-
-
-
-
 /* ================================================================
-   49 — INITIALISATION
+   48 — INITIALISATION
    ================================================================ */
 
 async function initializeFusionAdminDashboard() {
@@ -3016,17 +3161,8 @@ async function initializeFusionAdminDashboard() {
 }
 
 
-
-
-
-
-
-
-
-
-
 /* ================================================================
-   50 — DÉMARRAGE
+   49 — DÉMARRAGE
    ================================================================ */
 
 if (
@@ -3052,3 +3188,23 @@ if (
 /* ================================================================
    FIN
    ================================================================ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
