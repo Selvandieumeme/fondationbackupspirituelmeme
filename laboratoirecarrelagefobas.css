@@ -1,0 +1,2559 @@
+/* ================================================================
+   FOBAS — LABORATOIRE PRATIQUE DE FORMATION EN CARRELAGE
+   Fichier : laboratoirecarrelagefobas.css
+   Version : 1.0.0
+   Architecture : CSS uniquement
+   Compatible avec : laboratoirecarrelagefobas.html
+
+   IMPORTANT
+   - Aucun JavaScript dans ce fichier.
+   - Aucun framework externe.
+   - Aucun Three.js.
+   - Préparé pour les SVG générés dynamiquement par JavaScript.
+   - Interface Android-first.
+   - Les zones de laboratoire sont volontairement très grandes
+     afin de permettre le zoom tactile à deux doigts.
+   ================================================================ */
+
+
+/* ================================================================
+   01 — VARIABLES GLOBALES
+   ================================================================ */
+
+:root {
+    --fobas-primary: #0f172a;
+    --fobas-primary-2: #172554;
+    --fobas-primary-3: #1e3a8a;
+
+    --fobas-accent: #0ea5e9;
+    --fobas-accent-2: #38bdf8;
+    --fobas-accent-soft: #e0f2fe;
+
+    --fobas-success: #16a34a;
+    --fobas-success-soft: #dcfce7;
+
+    --fobas-warning: #d97706;
+    --fobas-warning-soft: #fef3c7;
+
+    --fobas-danger: #dc2626;
+    --fobas-danger-soft: #fee2e2;
+
+    --fobas-info: #2563eb;
+    --fobas-info-soft: #dbeafe;
+
+    --fobas-white: #ffffff;
+    --fobas-bg: #f1f5f9;
+    --fobas-surface: #ffffff;
+    --fobas-surface-2: #f8fafc;
+
+    --fobas-border: #dbe3ec;
+    --fobas-border-strong: #c5d0dc;
+
+    --fobas-text: #0f172a;
+    --fobas-text-2: #334155;
+    --fobas-text-3: #64748b;
+    --fobas-text-inverse: #f8fafc;
+
+    --fobas-shadow-sm:
+        0 2px 8px rgba(15, 23, 42, 0.08);
+
+    --fobas-shadow:
+        0 8px 24px rgba(15, 23, 42, 0.10);
+
+    --fobas-shadow-lg:
+        0 18px 45px rgba(15, 23, 42, 0.16);
+
+    --fobas-radius-sm: 8px;
+    --fobas-radius: 14px;
+    --fobas-radius-lg: 20px;
+
+    --fobas-header-height: 76px;
+
+    --fobas-transition:
+        180ms ease;
+
+    --fobas-font:
+        Inter,
+        Roboto,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+}
+
+
+/* ================================================================
+   02 — RESET
+   ================================================================ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+
+html {
+    width: 100%;
+    min-height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    background: var(--fobas-bg);
+
+    font-size: 16px;
+
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    scroll-behavior: smooth;
+}
+
+
+body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100vh;
+
+    margin: 0;
+    padding: 0;
+
+    background:
+        linear-gradient(
+            145deg,
+            #eef4f9 0%,
+            #f8fafc 45%,
+            #eaf1f7 100%
+        );
+
+    color: var(--fobas-text);
+
+    font-family: var(--fobas-font);
+    font-size: 16px;
+    line-height: 1.5;
+
+    overflow-x: hidden;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(14, 165, 233, 0.30);
+    outline-offset: 2px;
+}
+
+
+img,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+
+/* ================================================================
+   03 — APPLICATION PRINCIPALE
+   ================================================================ */
+
+.fobas-tile-laboratory-app {
+    position: relative;
+
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(56, 189, 248, 0.10),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at bottom left,
+            rgba(30, 58, 138, 0.07),
+            transparent 30%
+        ),
+        var(--fobas-bg);
+}
+
+
+/* ================================================================
+   04 — HEADER
+   ================================================================ */
+
+.laboratory-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    min-height: var(--fobas-header-height);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding:
+        10px
+        clamp(14px, 3vw, 32px);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--fobas-primary) 0%,
+            var(--fobas-primary-2) 55%,
+            var(--fobas-primary-3) 100%
+        );
+
+    color: var(--fobas-white);
+
+    box-shadow:
+        0 5px 20px rgba(15, 23, 42, 0.22);
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.10);
+}
+
+
+.laboratory-brand {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.laboratory-brand-mark {
+    flex: 0 0 auto;
+
+    width: 48px;
+    height: 48px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #dbeafe
+        );
+
+    color: var(--fobas-primary);
+
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.9),
+        0 5px 15px rgba(0, 0, 0, 0.18);
+
+    transform:
+        perspective(120px)
+        rotateX(3deg)
+        rotateY(-3deg);
+}
+
+
+.laboratory-brand-text {
+    min-width: 0;
+}
+
+
+.laboratory-brand-text h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size:
+        clamp(0.98rem, 2.2vw, 1.35rem);
+
+    line-height: 1.2;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.laboratory-brand-text p {
+    margin: 3px 0 0;
+
+    color: rgba(255, 255, 255, 0.72);
+
+    font-size: 0.76rem;
+}
+
+
+.main-menu-toggle {
+    flex: 0 0 auto;
+
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+    place-items: center;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    color: #ffffff;
+
+    font-size: 1.35rem;
+
+    cursor: pointer;
+
+    transition:
+        background var(--fobas-transition),
+        transform var(--fobas-transition);
+}
+
+
+.main-menu-toggle:hover {
+    background:
+        rgba(255, 255, 255, 0.15);
+}
+
+
+.main-menu-toggle:active {
+    transform: scale(0.94);
+}
+
+
+/* ================================================================
+   05 — NAVIGATION
+   ================================================================ */
+
+.main-navigation {
+    position: sticky;
+    top: var(--fobas-header-height);
+    z-index: 900;
+
+    width: 100%;
+
+    display: flex;
+    align-items: stretch;
+
+    gap: 6px;
+
+    padding: 8px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    background:
+        rgba(255, 255, 255, 0.96);
+
+    border-bottom:
+        1px solid var(--fobas-border);
+
+    box-shadow:
+        0 4px 14px rgba(15, 23, 42, 0.06);
+
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+
+    overscroll-behavior-x: contain;
+}
+
+
+.main-navigation::-webkit-scrollbar {
+    height: 5px;
+}
+
+
+.main-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.main-navigation::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 20px;
+}
+
+
+.nav-button {
+    flex:
+        0 0 auto;
+
+    min-height: 46px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    padding:
+        9px 13px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius-sm);
+
+    background:
+        #ffffff;
+
+    color:
+        var(--fobas-text-2);
+
+    font-size:
+        0.86rem;
+
+    font-weight:
+        700;
+
+    white-space:
+        nowrap;
+
+    cursor:
+        pointer;
+
+    transition:
+        background var(--fobas-transition),
+        color var(--fobas-transition),
+        border-color var(--fobas-transition),
+        transform var(--fobas-transition),
+        box-shadow var(--fobas-transition);
+}
+
+
+.nav-button:hover {
+    border-color:
+        #93c5fd;
+
+    background:
+        #eff6ff;
+
+    color:
+        var(--fobas-primary-3);
+}
+
+
+.nav-button:active {
+    transform:
+        translateY(1px);
+}
+
+
+.nav-button.active {
+    border-color:
+        var(--fobas-accent);
+
+    background:
+        linear-gradient(
+            135deg,
+            #e0f2fe,
+            #dbeafe
+        );
+
+    color:
+        var(--fobas-primary-3);
+
+    box-shadow:
+        0 3px 9px rgba(37, 99, 235, 0.10);
+}
+
+
+.nav-icon {
+    width: 20px;
+    min-width: 20px;
+
+    display: inline-grid;
+    place-items: center;
+
+    font-size: 1rem;
+
+    line-height: 1;
+}
+
+
+/* ================================================================
+   06 — MAIN
+   ================================================================ */
+
+.laboratory-main {
+    position: relative;
+
+    width: 100%;
+
+    flex: 1 1 auto;
+
+    padding:
+        clamp(14px, 2.5vw, 28px);
+
+    overflow: visible;
+}
+
+
+.laboratory-section {
+    width: 100%;
+    max-width: 1800px;
+
+    margin:
+        0 auto;
+
+    animation:
+        sectionEnter 220ms ease both;
+}
+
+
+.laboratory-section[hidden] {
+    display: none !important;
+}
+
+
+@keyframes sectionEnter {
+    from {
+        opacity: 0;
+        transform:
+            translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* ================================================================
+   07 — SECTION HEADER
+   ================================================================ */
+
+.section-header {
+    margin-bottom: 20px;
+}
+
+
+.section-kicker {
+    display: inline-block;
+
+    margin-bottom: 5px;
+
+    color:
+        var(--fobas-accent);
+
+    font-size:
+        0.70rem;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        0.14em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.section-header h2 {
+    margin:
+        0 0 6px;
+
+    color:
+        var(--fobas-primary);
+
+    font-size:
+        clamp(1.35rem, 3vw, 2rem);
+
+    line-height:
+        1.15;
+
+    font-weight:
+        850;
+}
+
+
+.section-header p {
+    max-width:
+        900px;
+
+    margin:
+        0;
+
+    color:
+        var(--fobas-text-3);
+
+    font-size:
+        0.94rem;
+}
+
+
+/* ================================================================
+   08 — ACCUEIL
+   ================================================================ */
+
+.welcome-panel {
+    position: relative;
+
+    min-height:
+        320px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    overflow:
+        hidden;
+
+    padding:
+        clamp(24px, 5vw, 55px);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.45);
+
+    border-radius:
+        var(--fobas-radius-lg);
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a 0%,
+            #172554 52%,
+            #0369a1 100%
+        );
+
+    color:
+        #ffffff;
+
+    box-shadow:
+        var(--fobas-shadow-lg);
+}
+
+
+.welcome-panel::before {
+    content: "";
+
+    position: absolute;
+
+    width: 320px;
+    height: 320px;
+
+    right: -100px;
+    top: -130px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(56, 189, 248, 0.35),
+            transparent 68%
+        );
+
+    pointer-events: none;
+}
+
+
+.welcome-panel::after {
+    content: "";
+
+    position: absolute;
+
+    right: 5%;
+    bottom: -80px;
+
+    width: 240px;
+    height: 240px;
+
+    border-radius: 28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.10),
+            rgba(255, 255, 255, 0.02)
+        );
+
+    transform:
+        rotate(24deg)
+        skewX(-8deg);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.10);
+}
+
+
+.welcome-content {
+    position: relative;
+    z-index: 2;
+
+    max-width: 800px;
+}
+
+
+.welcome-content h3 {
+    margin:
+        0 0 12px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        clamp(1.4rem, 4vw, 2.4rem);
+
+    line-height:
+        1.15;
+
+    font-weight:
+        850;
+}
+
+
+.welcome-content p {
+    max-width:
+        720px;
+
+    margin:
+        0 0 24px;
+
+    color:
+        rgba(255, 255, 255, 0.80);
+
+    line-height:
+        1.7;
+}
+
+
+.primary-action-button {
+    min-height:
+        48px;
+
+    padding:
+        12px 20px;
+
+    border:
+        0;
+
+    border-radius:
+        12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #38bdf8,
+            #0284c7
+        );
+
+    color:
+        #ffffff;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 8px 20px rgba(2, 132, 199, 0.28);
+
+    transition:
+        transform var(--fobas-transition),
+        box-shadow var(--fobas-transition);
+}
+
+
+.primary-action-button:hover {
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 12px 25px rgba(2, 132, 199, 0.35);
+}
+
+
+.primary-action-button:active {
+    transform:
+        translateY(0)
+        scale(0.98);
+}
+
+
+/* ================================================================
+   09 — TABLEAU DE BORD
+   ================================================================ */
+
+.dashboard-overview {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap:
+        14px;
+
+    margin-bottom:
+        18px;
+}
+
+
+.dashboard-card {
+    position:
+        relative;
+
+    min-height:
+        130px;
+
+    padding:
+        20px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f8fafc
+        );
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+
+    transition:
+        transform var(--fobas-transition),
+        box-shadow var(--fobas-transition);
+}
+
+
+.dashboard-card::after {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        90px;
+
+    height:
+        90px;
+
+    right:
+        -32px;
+
+    bottom:
+        -35px;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(14, 165, 233, 0.08);
+}
+
+
+.dashboard-card:hover {
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        var(--fobas-shadow);
+}
+
+
+.dashboard-card-label {
+    display:
+        block;
+
+    margin-bottom:
+        10px;
+
+    color:
+        var(--fobas-text-3);
+
+    font-size:
+        0.82rem;
+
+    font-weight:
+        700;
+}
+
+
+.dashboard-card-value {
+    display:
+        block;
+
+    color:
+        var(--fobas-primary);
+
+    font-size:
+        clamp(1.55rem, 4vw, 2.1rem);
+
+    line-height:
+        1;
+
+    font-weight:
+        900;
+}
+
+
+.dashboard-panel {
+    padding:
+        20px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+}
+
+
+.dashboard-panel h3 {
+    margin:
+        0 0 15px;
+
+    font-size:
+        1.05rem;
+}
+
+
+.competency-progress-list {
+    display:
+        grid;
+
+    gap:
+        12px;
+}
+
+
+/* ================================================================
+   10 — PÉDAGOGIQUE
+   ================================================================ */
+
+.pedagogical-navigation {
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        16px;
+
+    padding:
+        7px;
+
+    overflow-x:
+        auto;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        14px;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+
+    -webkit-overflow-scrolling:
+        touch;
+}
+
+
+.pedagogical-tab {
+    flex:
+        0 0 auto;
+
+    min-height:
+        44px;
+
+    padding:
+        9px 15px;
+
+    border:
+        1px solid transparent;
+
+    border-radius:
+        10px;
+
+    background:
+        transparent;
+
+    color:
+        var(--fobas-text-2);
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        background var(--fobas-transition),
+        color var(--fobas-transition),
+        border-color var(--fobas-transition);
+}
+
+
+.pedagogical-tab:hover {
+    background:
+        var(--fobas-surface-2);
+}
+
+
+.pedagogical-tab.active {
+    border-color:
+        #bae6fd;
+
+    background:
+        #e0f2fe;
+
+    color:
+        #0369a1;
+}
+
+
+.pedagogical-workspace {
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(220px, 300px)
+        minmax(0, 1fr);
+
+    min-height:
+        520px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+}
+
+
+.pedagogical-chapter-panel {
+    min-width:
+        0;
+
+    padding:
+        16px;
+
+    background:
+        #f8fafc;
+
+    border-right:
+        1px solid var(--fobas-border);
+
+    overflow:
+        auto;
+}
+
+
+.pedagogical-chapter-panel h3 {
+    margin:
+        0 0 12px;
+
+    font-size:
+        0.98rem;
+}
+
+
+.pedagogical-chapter-list {
+    display:
+        grid;
+
+    gap:
+        7px;
+}
+
+
+.pedagogical-content-panel {
+    min-width:
+        0;
+
+    min-height:
+        520px;
+
+    overflow:
+        auto;
+
+    background:
+        #ffffff;
+}
+
+
+.pedagogical-content {
+    min-height:
+        100%;
+
+    padding:
+        clamp(18px, 3vw, 30px);
+}
+
+
+/* ================================================================
+   11 — BIBLIOTHÈQUE
+   ================================================================ */
+
+.library-filters {
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        16px;
+}
+
+
+.library-grid {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(180px, 1fr)
+        );
+
+    gap:
+        14px;
+}
+
+
+.library-detail-panel {
+    margin-top:
+        18px;
+
+    padding:
+        20px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        var(--fobas-shadow);
+}
+
+
+/* ================================================================
+   12 — CARTES DE RESSOURCES DYNAMIQUES
+   ================================================================ */
+
+.library-card,
+.mission-card {
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f8fafc
+        );
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+
+    transition:
+        transform var(--fobas-transition),
+        box-shadow var(--fobas-transition),
+        border-color var(--fobas-transition);
+}
+
+
+.library-card:hover,
+.mission-card:hover {
+    transform:
+        translateY(-3px);
+
+    border-color:
+        #bae6fd;
+
+    box-shadow:
+        var(--fobas-shadow);
+}
+
+
+.library-card-image,
+.mission-card-image {
+    min-height:
+        145px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    padding:
+        20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #e0f2fe,
+            #f8fafc
+        );
+
+    overflow:
+        hidden;
+}
+
+
+.library-card-image svg,
+.mission-card-image svg {
+    width:
+        100%;
+
+    height:
+        130px;
+
+    filter:
+        drop-shadow(
+            0 10px 8px rgba(15, 23, 42, 0.16)
+        );
+
+    transform:
+        perspective(600px)
+        rotateX(2deg)
+        rotateY(-3deg);
+}
+
+
+.library-card-content,
+.mission-card-content {
+    padding:
+        15px;
+}
+
+
+.library-card-content h3,
+.mission-card-content h3 {
+    margin:
+        0 0 5px;
+
+    color:
+        var(--fobas-primary);
+
+    font-size:
+        1rem;
+}
+
+
+.library-card-content p,
+.mission-card-content p {
+    margin:
+        0;
+
+    color:
+        var(--fobas-text-3);
+
+    font-size:
+        0.84rem;
+
+    line-height:
+        1.55;
+}
+
+
+/* ================================================================
+   13 — WORKSPACES DE SIMULATION
+   ================================================================ */
+
+.simulation-workspace,
+.calculator-workspace,
+.mission-workspace,
+.analysis-workspace,
+.evaluation-workspace {
+    position:
+        relative;
+
+    width:
+        100%;
+
+    min-height:
+        720px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid var(--fobas-border-strong);
+
+    border-radius:
+        var(--fobas-radius-lg);
+
+    background:
+        #e2e8f0;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.85),
+        var(--fobas-shadow);
+
+    /*
+       Préparation au zoom tactile.
+       Le moteur JavaScript pourra appliquer une transformation
+       scale() au canvas interne.
+    */
+    touch-action:
+        pan-x pan-y pinch-zoom;
+
+    -webkit-user-select:
+        none;
+
+    user-select:
+        none;
+
+    overscroll-behavior:
+        contain;
+
+    -webkit-overflow-scrolling:
+        touch;
+}
+
+
+/* ================================================================
+   14 — CANVAS DE LABORATOIRE
+   ================================================================ */
+
+.laboratory-canvas,
+#laboratoryCanvas {
+    position:
+        relative;
+
+    width:
+        2400px;
+
+    height:
+        1800px;
+
+    min-width:
+        2400px;
+
+    min-height:
+        1800px;
+
+    transform-origin:
+        0 0;
+
+    /*
+       Le canvas est volontairement immense.
+       JavaScript pourra modifier transform:
+       translate(...) scale(...).
+    */
+
+    background-color:
+        #eef2f7;
+
+    background-image:
+        linear-gradient(
+            rgba(100, 116, 139, 0.13) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(100, 116, 139, 0.13) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            rgba(100, 116, 139, 0.06) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(100, 116, 139, 0.06) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        100px 100px,
+        100px 100px,
+        20px 20px,
+        20px 20px;
+
+    cursor:
+        default;
+
+    touch-action:
+        none;
+
+    -webkit-user-select:
+        none;
+
+    user-select:
+        none;
+}
+
+
+/* ================================================================
+   15 — ZONE DE TRAVAIL 3D
+   ================================================================ */
+
+.tile-3d-object,
+.fobas-3d-object {
+    position:
+        absolute;
+
+    transform-style:
+        preserve-3d;
+
+    filter:
+        drop-shadow(
+            0 14px 12px rgba(15, 23, 42, 0.20)
+        );
+
+    cursor:
+        grab;
+
+    touch-action:
+        none;
+
+    -webkit-user-select:
+        none;
+
+    user-select:
+        none;
+}
+
+
+.tile-3d-object:active,
+.fobas-3d-object:active {
+    cursor:
+        grabbing;
+}
+
+
+.tile-3d-object svg,
+.fobas-3d-object svg {
+    overflow:
+        visible;
+
+    transform-style:
+        preserve-3d;
+}
+
+
+/* ================================================================
+   16 — APPARENCE CARREAU 3D
+   ================================================================ */
+
+.tile-surface-3d {
+    position:
+        relative;
+
+    transform:
+        perspective(700px)
+        rotateX(9deg)
+        rotateY(-7deg);
+
+    transform-style:
+        preserve-3d;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #e2e8f0
+        );
+
+    border:
+        1px solid #cbd5e1;
+
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.90),
+        8px 10px 0 rgba(148, 163, 184, 0.40),
+        13px 15px 18px rgba(15, 23, 42, 0.18);
+}
+
+
+.tile-surface-3d::after {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        8%;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.65);
+
+    pointer-events:
+        none;
+}
+
+
+/* ================================================================
+   17 — SOL / PIÈCE SIMULÉE
+   ================================================================ */
+
+.simulated-room,
+.simulated-floor {
+    position:
+        absolute;
+
+    background:
+        linear-gradient(
+            145deg,
+            #f8fafc,
+            #e2e8f0
+        );
+
+    border:
+        2px solid #cbd5e1;
+
+    box-shadow:
+        10px 14px 0 rgba(148, 163, 184, 0.35),
+        18px 22px 30px rgba(15, 23, 42, 0.15);
+
+    transform-style:
+        preserve-3d;
+}
+
+
+.simulated-floor {
+    background-color:
+        #f8fafc;
+
+    background-image:
+        linear-gradient(
+            90deg,
+            rgba(100, 116, 139, 0.16) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            rgba(100, 116, 139, 0.16) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        60px 60px;
+}
+
+
+/* ================================================================
+   18 — OBJETS SVG DYNAMIQUES
+   ================================================================ */
+
+svg.fobas-svg-object {
+    overflow:
+        visible;
+
+    shape-rendering:
+        geometricPrecision;
+
+    text-rendering:
+        geometricPrecision;
+
+    vector-effect:
+        non-scaling-stroke;
+}
+
+
+.fobas-svg-object .svg-shadow {
+    opacity:
+        0.18;
+
+    filter:
+        blur(5px);
+}
+
+
+.fobas-svg-object .svg-highlight {
+    opacity:
+        0.45;
+}
+
+
+.fobas-svg-object .svg-edge {
+    stroke:
+        rgba(15, 23, 42, 0.35);
+
+    stroke-width:
+        1.2;
+
+    vector-effect:
+        non-scaling-stroke;
+}
+
+
+/* ================================================================
+   19 — PANNEAUX DE LABORATOIRE
+   ================================================================ */
+
+.lab-panel {
+    padding:
+        16px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        rgba(255, 255, 255, 0.97);
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+}
+
+
+.lab-panel-title {
+    margin:
+        0 0 12px;
+
+    color:
+        var(--fobas-primary);
+
+    font-size:
+        1rem;
+
+    font-weight:
+        850;
+}
+
+
+.lab-toolbar {
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    padding:
+        10px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        12px;
+
+    background:
+        #f8fafc;
+}
+
+
+.lab-toolbar button,
+.lab-tool-button {
+    min-height:
+        42px;
+
+    padding:
+        8px 13px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        9px;
+
+    background:
+        #ffffff;
+
+    color:
+        var(--fobas-text-2);
+
+    font-weight:
+        750;
+
+    cursor:
+        pointer;
+
+    transition:
+        all var(--fobas-transition);
+}
+
+
+.lab-toolbar button:hover,
+.lab-tool-button:hover {
+    border-color:
+        #7dd3fc;
+
+    background:
+        #f0f9ff;
+
+    color:
+        #0369a1;
+}
+
+
+/* ================================================================
+   20 — BADGES / ÉTATS
+   ================================================================ */
+
+.status-badge {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        28px;
+
+    padding:
+        4px 9px;
+
+    border-radius:
+        999px;
+
+    font-size:
+        0.72rem;
+
+    font-weight:
+        850;
+}
+
+
+.status-badge.success {
+    background:
+        var(--fobas-success-soft);
+
+    color:
+        #166534;
+}
+
+
+.status-badge.warning {
+    background:
+        var(--fobas-warning-soft);
+
+    color:
+        #92400e;
+}
+
+
+.status-badge.danger {
+    background:
+        var(--fobas-danger-soft);
+
+    color:
+        #991b1b;
+}
+
+
+.status-badge.info {
+    background:
+        var(--fobas-info-soft);
+
+    color:
+        #1e40af;
+}
+
+
+/* ================================================================
+   21 — FORMULAIRES
+   ================================================================ */
+
+input,
+select,
+textarea {
+    width:
+        100%;
+
+    min-height:
+        44px;
+
+    padding:
+        9px 12px;
+
+    border:
+        1px solid var(--fobas-border-strong);
+
+    border-radius:
+        9px;
+
+    background:
+        #ffffff;
+
+    color:
+        var(--fobas-text);
+
+    outline:
+        none;
+
+    transition:
+        border-color var(--fobas-transition),
+        box-shadow var(--fobas-transition);
+}
+
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color:
+        var(--fobas-accent);
+
+    box-shadow:
+        0 0 0 3px rgba(14, 165, 233, 0.12);
+}
+
+
+textarea {
+    min-height:
+        120px;
+
+    resize:
+        vertical;
+}
+
+
+/* ================================================================
+   22 — MISSIONS
+   ================================================================ */
+
+.missions-list {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(230px, 1fr)
+        );
+
+    gap:
+        14px;
+}
+
+
+.mission-workspace {
+    margin-top:
+        18px;
+}
+
+
+/* ================================================================
+   23 — ANALYSE
+   ================================================================ */
+
+.analysis-workspace {
+    display:
+        grid;
+
+    gap:
+        14px;
+}
+
+
+.error-item {
+    padding:
+        14px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        12px;
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+}
+
+
+.error-item.error {
+    border-left:
+        5px solid var(--fobas-danger);
+}
+
+
+.error-item.warning {
+    border-left:
+        5px solid var(--fobas-warning);
+}
+
+
+.error-item.success {
+    border-left:
+        5px solid var(--fobas-success);
+}
+
+
+/* ================================================================
+   24 — ÉVALUATION
+   ================================================================ */
+
+.evaluation-workspace {
+    display:
+        grid;
+
+    gap:
+        16px;
+
+    padding:
+        16px;
+}
+
+
+.evaluation-score-card {
+    padding:
+        22px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f8fafc
+        );
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+}
+
+
+.evaluation-score {
+    font-size:
+        clamp(2rem, 8vw, 4rem);
+
+    font-weight:
+        900;
+
+    color:
+        var(--fobas-primary);
+}
+
+
+.progress-track {
+    width:
+        100%;
+
+    height:
+        10px;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        999px;
+
+    background:
+        #e2e8f0;
+}
+
+
+.progress-value {
+    height:
+        100%;
+
+    width:
+        0%;
+
+    border-radius:
+        inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #0284c7,
+            #38bdf8
+        );
+
+    transition:
+        width 300ms ease;
+}
+
+
+/* ================================================================
+   25 — CALCULATRICE
+   ================================================================ */
+
+.calculator-workspace {
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(0, 1.3fr)
+        minmax(280px, 0.7fr);
+
+    gap:
+        16px;
+
+    padding:
+        16px;
+}
+
+
+.calculator-panel {
+    padding:
+        18px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        var(--fobas-radius);
+
+    background:
+        #ffffff;
+
+    box-shadow:
+        var(--fobas-shadow-sm);
+}
+
+
+.calculator-display {
+    min-height:
+        75px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        flex-end;
+
+    padding:
+        12px 16px;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid #cbd5e1;
+
+    border-radius:
+        12px;
+
+    background:
+        #0f172a;
+
+    color:
+        #e0f2fe;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size:
+        1.5rem;
+
+    font-weight:
+        800;
+}
+
+
+.calculator-keyboard {
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap:
+        8px;
+
+    margin-top:
+        12px;
+}
+
+
+.calculator-key {
+    min-height:
+        48px;
+
+    border:
+        1px solid var(--fobas-border);
+
+    border-radius:
+        10px;
+
+    background:
+        #ffffff;
+
+    color:
+        var(--fobas-text);
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 2px 5px rgba(15, 23, 42, 0.06);
+}
+
+
+.calculator-key:active {
+    transform:
+        translateY(1px);
+}
+
+
+/* ================================================================
+   26 — BARRE D'ÉTAT
+   ================================================================ */
+
+.laboratory-footer {
+    min-height:
+        46px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    padding:
+        9px clamp(14px, 3vw, 28px);
+
+    border-top:
+        1px solid var(--fobas-border);
+
+    background:
+        #ffffff;
+
+    color:
+        var(--fobas-text-3);
+
+    font-size:
+        0.76rem;
+}
+
+
+.laboratory-status {
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+.laboratory-version {
+    flex:
+        0 0 auto;
+}
+
+
+/* ================================================================
+   27 — MODE MOBILE / ANDROID
+   ================================================================ */
+
+@media (max-width: 900px) {
+
+    .dashboard-overview {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .pedagogical-workspace {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .pedagogical-chapter-panel {
+        max-height:
+            230px;
+
+        border-right:
+            0;
+
+        border-bottom:
+            1px solid var(--fobas-border);
+    }
+
+
+    .calculator-workspace {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .simulation-workspace,
+    .calculator-workspace,
+    .mission-workspace,
+    .analysis-workspace,
+    .evaluation-workspace {
+        min-height:
+            650px;
+    }
+}
+
+
+@media (max-width: 640px) {
+
+    html {
+        font-size:
+            15px;
+    }
+
+
+    .laboratory-header {
+        min-height:
+            68px;
+
+        padding:
+            8px 11px;
+    }
+
+
+    .laboratory-brand-mark {
+        width:
+            42px;
+
+        height:
+            42px;
+    }
+
+
+    .laboratory-brand-text h1 {
+        font-size:
+            0.93rem;
+    }
+
+
+    .laboratory-brand-text p {
+        display:
+            none;
+    }
+
+
+    .main-navigation {
+        top:
+            68px;
+
+        padding:
+            7px;
+    }
+
+
+    .nav-button {
+        min-height:
+            44px;
+
+        padding:
+            8px 11px;
+
+        font-size:
+            0.80rem;
+    }
+
+
+    .laboratory-main {
+        padding:
+            12px;
+    }
+
+
+    .welcome-panel {
+        min-height:
+            390px;
+
+        padding:
+            24px 19px;
+    }
+
+
+    .dashboard-overview {
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:
+            9px;
+    }
+
+
+    .dashboard-card {
+        min-height:
+            112px;
+
+        padding:
+            15px;
+    }
+
+
+    .library-grid,
+    .missions-list {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+        gap:
+            9px;
+    }
+
+
+    .library-card-image,
+    .mission-card-image {
+        min-height:
+            110px;
+
+        padding:
+            10px;
+    }
+
+
+    .library-card-image svg,
+    .mission-card-image svg {
+        height:
+            95px;
+    }
+
+
+    .simulation-workspace,
+    .calculator-workspace,
+    .mission-workspace,
+    .analysis-workspace,
+    .evaluation-workspace {
+        min-height:
+            620px;
+
+        border-radius:
+            14px;
+    }
+
+
+    /*
+       IMPORTANT ANDROID
+       Le canvas interne reste très grand.
+       Le JavaScript appliquera le zoom à deux doigts.
+    */
+
+    .laboratory-canvas,
+    #laboratoryCanvas {
+        width:
+            2400px;
+
+        height:
+            1800px;
+
+        min-width:
+            2400px;
+
+        min-height:
+            1800px;
+    }
+
+
+    .laboratory-footer {
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+
+        gap:
+            3px;
+    }
+}
+
+
+@media (max-width: 430px) {
+
+    .dashboard-overview {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .library-grid,
+    .missions-list {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .calculator-key {
+        min-height:
+            46px;
+    }
+
+
+    .section-header h2 {
+        font-size:
+            1.35rem;
+    }
+}
+
+
+/* ================================================================
+   28 — ACCESSIBILITÉ / RÉDUCTION DES ANIMATIONS
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior:
+            auto !important;
+
+        transition:
+            none !important;
+
+        animation:
+            none !important;
+    }
+}
+
+
+/* ================================================================
+   29 — MODE IMPRESSION
+   ================================================================ */
+
+@media print {
+
+    .laboratory-header,
+    .main-navigation,
+    .laboratory-footer,
+    .main-menu-toggle {
+        display:
+            none !important;
+    }
+
+
+    .laboratory-main {
+        padding:
+            0;
+    }
+
+
+    .laboratory-section {
+        display:
+            block !important;
+
+        page-break-inside:
+            avoid;
+    }
+
+
+    .simulation-workspace,
+    .calculator-workspace,
+    .mission-workspace,
+    .analysis-workspace,
+    .evaluation-workspace {
+        box-shadow:
+            none;
+
+        border:
+            1px solid #999;
+    }
+}
+
+
+/* ================================================================
+   FIN DU FICHIER
+   laboratoirecarrelagefobas.css
+   ================================================================ */
