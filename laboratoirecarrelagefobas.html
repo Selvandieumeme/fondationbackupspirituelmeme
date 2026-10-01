@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS — Laboratoire Pratique de Formation en Carrelage"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0f172a"
+    >
+
+    <title>FOBAS — Laboratoire Pratique de Formation en Carrelage</title>
+
+    <!-- Feuille de style externe uniquement -->
+    <link
+        rel="stylesheet"
+        href="laboratoirecarrelagefobas.css"
+    >
+</head>
+
+<body>
+
+    <div
+        id="fobasTileLaboratoryApp"
+        class="fobas-tile-laboratory-app"
+    >
+
+        <!-- =========================================================
+             EN-TÊTE PRINCIPAL
+             ========================================================= -->
+
+        <header
+            id="laboratoryHeader"
+            class="laboratory-header"
+        >
+
+            <div
+                id="laboratoryBrand"
+                class="laboratory-brand"
+            >
+                <div
+                    id="laboratoryBrandMark"
+                    class="laboratory-brand-mark"
+                    aria-hidden="true"
+                >
+                    FOBAS
+                </div>
+
+                <div
+                    id="laboratoryBrandText"
+                    class="laboratory-brand-text"
+                >
+                    <h1>Laboratoire Pratique de Formation en Carrelage</h1>
+                    <p>Formation professionnelle — Simulation pratique</p>
+                </div>
+            </div>
+
+            <button
+                id="mainMenuToggle"
+                class="main-menu-toggle"
+                type="button"
+                aria-label="Ouvrir le menu principal"
+                aria-expanded="false"
+            >
+                ☰
+            </button>
+
+        </header>
+
+
+        <!-- =========================================================
+             NAVIGATION PRINCIPALE
+             ========================================================= -->
+
+        <nav
+            id="mainNavigation"
+            class="main-navigation"
+            aria-label="Navigation principale"
+        >
+
+            <button
+                id="navAccueil"
+                class="nav-button active"
+                type="button"
+                data-section="accueil"
+            >
+                <span class="nav-icon" aria-hidden="true">⌂</span>
+                <span>Accueil</span>
+            </button>
+
+            <button
+                id="navTableauBord"
+                class="nav-button"
+                type="button"
+                data-section="tableau-de-bord"
+            >
+                <span class="nav-icon" aria-hidden="true">▦</span>
+                <span>Tableau de Bord</span>
+            </button>
+
+            <button
+                id="navPedagogique"
+                class="nav-button"
+                type="button"
+                data-section="pedagogique"
+            >
+                <span class="nav-icon" aria-hidden="true">📘</span>
+                <span>Pédagogique</span>
+            </button>
+
+            <button
+                id="navBibliotheque"
+                class="nav-button"
+                type="button"
+                data-section="bibliotheque"
+            >
+                <span class="nav-icon" aria-hidden="true">▤</span>
+                <span>Bibliothèque</span>
+            </button>
+
+            <button
+                id="navPreparation"
+                class="nav-button"
+                type="button"
+                data-section="preparation"
+            >
+                <span class="nav-icon" aria-hidden="true">⚙</span>
+                <span>Préparation</span>
+            </button>
+
+            <button
+                id="navMesurage"
+                class="nav-button"
+                type="button"
+                data-section="mesurage"
+            >
+                <span class="nav-icon" aria-hidden="true">⌗</span>
+                <span>Mesurage &amp; Calcul</span>
+            </button>
+
+            <button
+                id="navTracage"
+                class="nav-button"
+                type="button"
+                data-section="tracage"
+            >
+                <span class="nav-icon" aria-hidden="true">╱</span>
+                <span>Traçage</span>
+            </button>
+
+            <button
+                id="navDecoupe"
+                class="nav-button"
+                type="button"
+                data-section="decoupe"
+            >
+                <span class="nav-icon" aria-hidden="true">◫</span>
+                <span>Découpe</span>
+            </button>
+
+            <button
+                id="navPose"
+                class="nav-button"
+                type="button"
+                data-section="pose"
+            >
+                <span class="nav-icon" aria-hidden="true">▦</span>
+                <span>Pose</span>
+            </button>
+
+            <button
+                id="navMursSurfaces"
+                class="nav-button"
+                type="button"
+                data-section="murs-surfaces"
+            >
+                <span class="nav-icon" aria-hidden="true">▥</span>
+                <span>Murs &amp; Surfaces</span>
+            </button>
+
+            <button
+                id="navCalculatrice"
+                class="nav-button"
+                type="button"
+                data-section="calculatrice"
+            >
+                <span class="nav-icon" aria-hidden="true">▣</span>
+                <span>Calculatrice</span>
+            </button>
+
+            <button
+                id="navControleQualite"
+                class="nav-button"
+                type="button"
+                data-section="controle-qualite"
+            >
+                <span class="nav-icon" aria-hidden="true">✓</span>
+                <span>Contrôle &amp; Qualité</span>
+            </button>
+
+            <button
+                id="navMissions"
+                class="nav-button"
+                type="button"
+                data-section="missions"
+            >
+                <span class="nav-icon" aria-hidden="true">◆</span>
+                <span>Missions</span>
+            </button>
+
+            <button
+                id="navAnalyseErreurs"
+                class="nav-button"
+                type="button"
+                data-section="analyse-erreurs"
+            >
+                <span class="nav-icon" aria-hidden="true">⚠</span>
+                <span>Analyse des Erreurs</span>
+            </button>
+
+            <button
+                id="navEvaluationCompetences"
+                class="nav-button"
+                type="button"
+                data-section="evaluation-competences"
+            >
+                <span class="nav-icon" aria-hidden="true">★</span>
+                <span>Évaluation des Compétences</span>
+            </button>
+
+        </nav>
+
+
+        <!-- =========================================================
+             ZONE PRINCIPALE
+             ========================================================= -->
+
+        <main
+            id="laboratoryMain"
+            class="laboratory-main"
+        >
+
+            <!-- =====================================================
+                 ACCUEIL
+                 ===================================================== -->
+
+            <section
+                id="sectionAccueil"
+                class="laboratory-section active"
+                data-section-content="accueil"
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">FOBAS</span>
+
+                    <h2>Accueil</h2>
+
+                    <p>
+                        Bienvenue dans le Laboratoire Pratique de Formation
+                        en Carrelage.
+                    </p>
+                </div>
+
+                <div
+                    id="welcomePanel"
+                    class="welcome-panel"
+                >
+
+                    <div class="welcome-content">
+                        <h3>
+                            Apprendre, pratiquer, simuler et maîtriser
+                            le métier du carrelage.
+                        </h3>
+
+                        <p>
+                            Cet environnement permet à l'apprenant de
+                            développer progressivement ses compétences
+                            techniques à travers des activités pédagogiques,
+                            des simulations pratiques, des exercices,
+                            des missions et des évaluations.
+                        </p>
+
+                        <button
+                            id="startLaboratoryButton"
+                            class="primary-action-button"
+                            type="button"
+                        >
+                            Commencer la formation
+                        </button>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 TABLEAU DE BORD
+                 ===================================================== -->
+
+            <section
+                id="sectionTableauDeBord"
+                class="laboratory-section"
+                data-section-content="tableau-de-bord"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">SUIVI</span>
+
+                    <h2>Tableau de Bord</h2>
+
+                    <p>
+                        Vue générale de la progression et des compétences
+                        de l'apprenant.
+                    </p>
+                </div>
+
+                <div
+                    id="dashboardOverview"
+                    class="dashboard-overview"
+                >
+
+                    <article class="dashboard-card">
+                        <span class="dashboard-card-label">
+                            Progression
+                        </span>
+
+                        <strong
+                            id="dashboardProgress"
+                            class="dashboard-card-value"
+                        >
+                            0 %
+                        </strong>
+                    </article>
+
+                    <article class="dashboard-card">
+                        <span class="dashboard-card-label">
+                            Modules terminés
+                        </span>
+
+                        <strong
+                            id="dashboardCompletedModules"
+                            class="dashboard-card-value"
+                        >
+                            0
+                        </strong>
+                    </article>
+
+                    <article class="dashboard-card">
+                        <span class="dashboard-card-label">
+                            Exercices réussis
+                        </span>
+
+                        <strong
+                            id="dashboardSuccessfulExercises"
+                            class="dashboard-card-value"
+                        >
+                            0
+                        </strong>
+                    </article>
+
+                    <article class="dashboard-card">
+                        <span class="dashboard-card-label">
+                            Missions réalisées
+                        </span>
+
+                        <strong
+                            id="dashboardCompletedMissions"
+                            class="dashboard-card-value"
+                        >
+                            0
+                        </strong>
+                    </article>
+
+                </div>
+
+                <div
+                    id="dashboardCompetencyPanel"
+                    class="dashboard-panel"
+                >
+                    <h3>Compétences</h3>
+
+                    <div
+                        id="competencyProgressList"
+                        class="competency-progress-list"
+                    >
+                        <!-- Généré dynamiquement par JavaScript -->
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 PÉDAGOGIQUE
+                 ===================================================== -->
+
+            <section
+                id="sectionPedagogique"
+                class="laboratory-section"
+                data-section-content="pedagogique"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">FORMATION</span>
+
+                    <h2>Pédagogique</h2>
+
+                    <p>
+                        Parcours pédagogique dynamique de formation
+                        professionnelle en carrelage.
+                    </p>
+                </div>
+
+                <div
+                    id="pedagogicalNavigation"
+                    class="pedagogical-navigation"
+                >
+
+                    <button
+                        id="pedagogicalTheoryButton"
+                        class="pedagogical-tab active"
+                        type="button"
+                        data-pedagogical-mode="theorie"
+                    >
+                        Théorie
+                    </button>
+
+                    <button
+                        id="pedagogicalPracticeButton"
+                        class="pedagogical-tab"
+                        type="button"
+                        data-pedagogical-mode="pratique"
+                    >
+                        Pratique
+                    </button>
+
+                    <button
+                        id="pedagogicalExercisesButton"
+                        class="pedagogical-tab"
+                        type="button"
+                        data-pedagogical-mode="exercices"
+                    >
+                        Exercices
+                    </button>
+
+                    <button
+                        id="pedagogicalAssignmentsButton"
+                        class="pedagogical-tab"
+                        type="button"
+                        data-pedagogical-mode="devoirs"
+                    >
+                        Devoirs
+                    </button>
+
+                    <button
+                        id="pedagogicalEvaluationButton"
+                        class="pedagogical-tab"
+                        type="button"
+                        data-pedagogical-mode="evaluation"
+                    >
+                        Évaluation
+                    </button>
+
+                </div>
+
+                <div
+                    id="pedagogicalWorkspace"
+                    class="pedagogical-workspace"
+                >
+
+                    <aside
+                        id="pedagogicalChapterPanel"
+                        class="pedagogical-chapter-panel"
+                    >
+
+                        <h3>Modules</h3>
+
+                        <div
+                            id="pedagogicalChapterList"
+                            class="pedagogical-chapter-list"
+                        >
+                            <!-- Généré dynamiquement -->
+                        </div>
+
+                    </aside>
+
+                    <div
+                        id="pedagogicalContentPanel"
+                        class="pedagogical-content-panel"
+                    >
+
+                        <div
+                            id="pedagogicalContent"
+                            class="pedagogical-content"
+                        >
+                            <!-- Généré dynamiquement -->
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 BIBLIOTHÈQUE
+                 ===================================================== -->
+
+            <section
+                id="sectionBibliotheque"
+                class="laboratory-section"
+                data-section-content="bibliotheque"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">RESSOURCES</span>
+
+                    <h2>Bibliothèque Professionnelle</h2>
+
+                    <p>
+                        Outils, matériaux, carreaux et équipements
+                        professionnels.
+                    </p>
+                </div>
+
+                <div
+                    id="libraryFilters"
+                    class="library-filters"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+                <div
+                    id="libraryGrid"
+                    class="library-grid"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+                <div
+                    id="libraryDetailPanel"
+                    class="library-detail-panel"
+                    hidden
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 PRÉPARATION
+                 ===================================================== -->
+
+            <section
+                id="sectionPreparation"
+                class="laboratory-section"
+                data-section-content="preparation"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">LABORATOIRE 01</span>
+
+                    <h2>Laboratoire de Préparation</h2>
+
+                    <p>
+                        Préparer le chantier avant l'exécution des travaux.
+                    </p>
+                </div>
+
+                <div
+                    id="preparationWorkspace"
+                    class="simulation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 MESURAGE & CALCUL
+                 ===================================================== -->
+
+            <section
+                id="sectionMesurage"
+                class="laboratory-section"
+                data-section-content="mesurage"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">LABORATOIRE 02</span>
+
+                    <h2>Mesurage &amp; Calcul</h2>
+
+                    <p>
+                        Mesurer les surfaces et effectuer les calculs
+                        nécessaires au chantier.
+                    </p>
+                </div>
+
+                <div
+                    id="measurementWorkspace"
+                    class="simulation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 TRAÇAGE
+                 ===================================================== -->
+
+            <section
+                id="sectionTracage"
+                class="laboratory-section"
+                data-section-content="tracage"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">LABORATOIRE 03</span>
+
+                    <h2>Laboratoire de Traçage</h2>
+
+                    <p>
+                        Tracer, aligner et préparer la disposition
+                        des carreaux.
+                    </p>
+                </div>
+
+                <div
+                    id="tracingWorkspace"
+                    class="simulation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 DÉCOUPE
+                 ===================================================== -->
+
+            <section
+                id="sectionDecoupe"
+                class="laboratory-section"
+                data-section-content="decoupe"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">LABORATOIRE 04</span>
+
+                    <h2>Laboratoire de Découpe</h2>
+
+                    <p>
+                        Apprendre à préparer et réaliser les différentes
+                        découpes nécessaires.
+                    </p>
+                </div>
+
+                <div
+                    id="cuttingWorkspace"
+                    class="simulation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 POSE
+                 ===================================================== -->
+
+            <section
+                id="sectionPose"
+                class="laboratory-section"
+                data-section-content="pose"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">LABORATOIRE 05</span>
+
+                    <h2>Laboratoire de Pose</h2>
+
+                    <p>
+                        Poser les carreaux avec précision et respecter
+                        les règles professionnelles.
+                    </p>
+                </div>
+
+                <div
+                    id="placementWorkspace"
+                    class="simulation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 MURS & SURFACES
+                 ===================================================== -->
+
+            <section
+                id="sectionMursSurfaces"
+                class="laboratory-section"
+                data-section-content="murs-surfaces"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">LABORATOIRE 06</span>
+
+                    <h2>Murs &amp; Surfaces</h2>
+
+                    <p>
+                        Réaliser des travaux sur les murs, sols,
+                        angles et surfaces complexes.
+                    </p>
+                </div>
+
+                <div
+                    id="wallsSurfacesWorkspace"
+                    class="simulation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 CALCULATRICE
+                 ===================================================== -->
+
+            <section
+                id="sectionCalculatrice"
+                class="laboratory-section"
+                data-section-content="calculatrice"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">OUTIL PROFESSIONNEL</span>
+
+                    <h2>Calculatrice Professionnelle</h2>
+
+                    <p>
+                        Calculs techniques, matériaux, quantités,
+                        pertes et coûts.
+                    </p>
+                </div>
+
+                <div
+                    id="professionalCalculatorWorkspace"
+                    class="calculator-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 CONTRÔLE & QUALITÉ
+                 ===================================================== -->
+
+            <section
+                id="sectionControleQualite"
+                class="laboratory-section"
+                data-section-content="controle-qualite"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">CONTRÔLE</span>
+
+                    <h2>Contrôle &amp; Qualité</h2>
+
+                    <p>
+                        Vérifier la conformité du travail réalisé.
+                    </p>
+                </div>
+
+                <div
+                    id="qualityControlWorkspace"
+                    class="simulation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 MISSIONS
+                 ===================================================== -->
+
+            <section
+                id="sectionMissions"
+                class="laboratory-section"
+                data-section-content="missions"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">PROJETS</span>
+
+                    <h2>Missions Professionnelles</h2>
+
+                    <p>
+                        Réaliser des projets pratiques inspirés
+                        de situations professionnelles.
+                    </p>
+                </div>
+
+                <div
+                    id="missionsList"
+                    class="missions-list"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+                <div
+                    id="missionWorkspace"
+                    class="mission-workspace"
+                    hidden
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 ANALYSE DES ERREURS
+                 ===================================================== -->
+
+            <section
+                id="sectionAnalyseErreurs"
+                class="laboratory-section"
+                data-section-content="analyse-erreurs"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">DIAGNOSTIC</span>
+
+                    <h2>Analyse des Erreurs</h2>
+
+                    <p>
+                        Identifier les erreurs techniques et comprendre
+                        comment les corriger.
+                    </p>
+                </div>
+
+                <div
+                    id="errorAnalysisWorkspace"
+                    class="analysis-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+
+            <!-- =====================================================
+                 ÉVALUATION DES COMPÉTENCES
+                 ===================================================== -->
+
+            <section
+                id="sectionEvaluationCompetences"
+                class="laboratory-section"
+                data-section-content="evaluation-competences"
+                hidden
+            >
+
+                <div class="section-header">
+                    <span class="section-kicker">CERTIFICATION</span>
+
+                    <h2>Évaluation des Compétences</h2>
+
+                    <p>
+                        Mesurer les compétences techniques acquises
+                        pendant la formation.
+                    </p>
+                </div>
+
+                <div
+                    id="competencyEvaluationWorkspace"
+                    class="evaluation-workspace"
+                >
+                    <!-- Généré dynamiquement -->
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- =========================================================
+             BARRE D'ÉTAT
+             ========================================================= -->
+
+        <footer
+            id="laboratoryFooter"
+            class="laboratory-footer"
+        >
+
+            <div
+                id="laboratoryStatus"
+                class="laboratory-status"
+                role="status"
+                aria-live="polite"
+            >
+                Laboratoire prêt.
+            </div>
+
+            <div
+                id="laboratoryVersion"
+                class="laboratory-version"
+            >
+                FOBAS — Laboratoire Carrelage
+            </div>
+
+        </footer>
+
+    </div>
+
+
+    <!-- JavaScript externe uniquement -->
+    <script
+        src="laboratoirecarrelagefobas.js"
+        defer
+    ></script>
+
+</body>
+</html>
