@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- =========================================================
+         MEME — APP THEOLOGIE FO BAS
+         FICHYE : apptheologiefobas.html
+         ========================================================= -->
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1,
+                   maximum-scale=5,
+                   user-scalable=yes,
+                   viewport-fit=cover">
+
+    <meta name="theme-color" content="#101827">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="application-name" content="MEME">
+    <meta name="description"
+          content="MEME — Tutor entèlijan pou etid Biblik ak teyoloji an bon Kreyòl.">
+
+    <title>MEME — Étude Biblique & Théologie</title>
+
+    <!-- =========================================================
+         CSS EXTERNE
+         ========================================================= -->
+    <link rel="stylesheet" href="apptheologiefobas.css">
+
+    <!-- =========================================================
+         ICON / FONT FALLBACK
+         ========================================================= -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Libre+Baskerville:wght@400;700&display=swap"
+          rel="stylesheet">
+</head>
+
+<body>
+
+<!-- ============================================================
+     APP ROOT
+     ============================================================= -->
+<div id="app" class="app-root">
+
+    <!-- ========================================================
+         LOADING SCREEN
+         ======================================================== -->
+    <section id="loadingScreen"
+             class="screen loading-screen"
+             aria-label="Applikasyon an ap chaje">
+
+        <div class="loading-container">
+
+            <div class="brand-mark loading-brand">
+                <span class="brand-symbol">M</span>
+            </div>
+
+            <h1>MEME</h1>
+
+            <p>
+                Tutor entèlijan pou etid Biblik ak teyoloji
+            </p>
+
+            <div class="loading-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <p id="loadingMessage" class="loading-message">
+                Preparasyon aplikasyon an...
+            </p>
+
+        </div>
+    </section>
+
+
+    <!-- ========================================================
+         MAIN APPLICATION
+         ======================================================== -->
+    <div id="mainApplication"
+         class="main-application"
+         hidden>
+
+        <!-- ====================================================
+             TOP HEADER
+             ==================================================== -->
+        <header id="appHeader"
+                class="app-header">
+
+            <div class="header-left">
+
+                <button id="menuButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Louvri meni"
+                        title="Meni">
+
+                    <span class="icon icon-menu">☰</span>
+
+                </button>
+
+                <div class="header-brand">
+
+                    <div class="brand-mark small">
+                        <span class="brand-symbol">M</span>
+                    </div>
+
+                    <div class="brand-text">
+                        <strong>MEME</strong>
+                        <small>Théologie</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <button id="searchButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Rechèch"
+                        title="Rechèch">
+
+                    <span>⌕</span>
+
+                </button>
+
+                <button id="themeButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Chanje aparans"
+                        title="Chanje aparans">
+
+                    <span id="themeIcon">☼</span>
+
+                </button>
+
+                <button id="profileButton"
+                        class="profile-button"
+                        type="button"
+                        aria-label="Pwofil">
+
+                    <span class="profile-avatar">M</span>
+
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- ====================================================
+             MOBILE SIDE DRAWER
+             ==================================================== -->
+        <aside id="sideDrawer"
+               class="side-drawer"
+               aria-label="Meni prensipal">
+
+            <div class="drawer-header">
+
+                <div class="drawer-brand">
+
+                    <div class="brand-mark">
+                        <span class="brand-symbol">M</span>
+                    </div>
+
+                    <div>
+                        <strong>MEME</strong>
+                        <small>Étude Biblique</small>
+                    </div>
+
+                </div>
+
+                <button id="closeDrawerButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fèmen meni">
+
+                    ✕
+
+                </button>
+
+            </div>
+
+
+            <nav class="main-navigation">
+
+                <button class="nav-item active"
+                        type="button"
+                        data-view="home">
+
+                    <span class="nav-icon">⌂</span>
+                    <span>Akèy</span>
+
+                </button>
+
+                <button class="nav-item"
+                        type="button"
+                        data-view="studies">
+
+                    <span class="nav-icon">▤</span>
+                    <span>Etid yo</span>
+
+                </button>
+
+                <button class="nav-item"
+                        type="button"
+                        data-view="dictionary">
+
+                    <span class="nav-icon">A</span>
+                    <span>Diksyonè Teyoloji</span>
+
+                </button>
+
+                <button class="nav-item"
+                        type="button"
+                        data-view="meme">
+
+                    <span class="nav-icon">✦</span>
+                    <span>MEME Tutor</span>
+
+                </button>
+
+                <button class="nav-item"
+                        type="button"
+                        data-view="bookmarks">
+
+                    <span class="nav-icon">☆</span>
+                    <span>Sa mwen sove yo</span>
+
+                </button>
+
+                <button class="nav-item"
+                        type="button"
+                        data-view="progress">
+
+                    <span class="nav-icon">◔</span>
+                    <span>Pwogrè mwen</span>
+
+                </button>
+
+            </nav>
+
+
+            <div class="drawer-footer">
+
+                <button class="nav-item"
+                        type="button"
+                        data-view="settings">
+
+                    <span class="nav-icon">⚙</span>
+                    <span>Paramèt</span>
+
+                </button>
+
+                <div class="drawer-version">
+                    MEME v1.0
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- ====================================================
+             DRAWER OVERLAY
+             ==================================================== -->
+        <div id="drawerOverlay"
+             class="drawer-overlay"
+             hidden>
+        </div>
+
+
+        <!-- ====================================================
+             SEARCH PANEL
+             ==================================================== -->
+        <section id="searchPanel"
+                 class="search-panel"
+                 hidden>
+
+            <div class="search-container">
+
+                <div class="search-header">
+
+                    <div>
+                        <span class="eyebrow">
+                            RECHÈCH
+                        </span>
+
+                        <h2>
+                            Chèche nan MEME
+                        </h2>
+                    </div>
+
+                    <button id="closeSearchButton"
+                            class="icon-button"
+                            type="button"
+                            aria-label="Fèmen rechèch">
+
+                        ✕
+
+                    </button>
+
+                </div>
+
+                <div class="search-input-wrapper">
+
+                    <span class="search-icon">⌕</span>
+
+                    <input id="globalSearchInput"
+                           type="search"
+                           autocomplete="off"
+                           placeholder="Chèche yon sijè, vèsè, mo teyolojik..."
+                           aria-label="Rechèch global">
+
+                    <button id="clearSearchButton"
+                            type="button"
+                            class="clear-search"
+                            aria-label="Efase rechèch">
+
+                        ✕
+
+                    </button>
+
+                </div>
+
+                <div id="searchResults"
+                     class="search-results">
+
+                    <div class="empty-state">
+                        <span class="empty-icon">⌕</span>
+
+                        <h3>Kòmanse yon rechèch</h3>
+
+                        <p>
+                            Chèche nan etid, chapit, definisyon ak lòt
+                            kontni ki disponib nan aplikasyon an.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ====================================================
+             CONTENT AREA
+             ==================================================== -->
+        <main id="appContent"
+              class="app-content">
+
+            <!-- =================================================
+                 HOME VIEW
+                 ================================================= -->
+            <section id="homeView"
+                     class="view active-view"
+                     data-view-section="home">
+
+                <div class="hero-section">
+
+                    <div class="hero-content">
+
+                        <span class="eyebrow">
+                            ETID BIBLIK & TEYOLOJI
+                        </span>
+
+                        <h1>
+                            Aprann pi fon.
+                            <br>
+                            Konprann pi byen.
+                            <br>
+                            <span>Viv sa w aprann.</span>
+                        </h1>
+
+                        <p class="hero-description">
+                            MEME ede w etidye Bib la ak gwo prensip
+                            teyoloji yo nan yon Kreyòl klè, estriktire,
+                            pedagogik epi pwofon.
+                        </p>
+
+                        <div class="hero-actions">
+
+                            <button id="startStudyButton"
+                                    class="primary-button"
+                                    type="button">
+
+                                Kòmanse etidye
+                                <span>→</span>
+
+                            </button>
+
+                            <button id="askMemeHeroButton"
+                                    class="secondary-button"
+                                    type="button">
+
+                                Pale ak MEME
+                                <span>✦</span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="hero-visual"
+                         aria-hidden="true">
+
+                        <div class="hero-orbit orbit-one"></div>
+                        <div class="hero-orbit orbit-two"></div>
+
+                        <div class="hero-book">
+
+                            <div class="book-cover">
+
+                                <span class="book-cross">✦</span>
+
+                                <strong>
+                                    MEME
+                                </strong>
+
+                                <small>
+                                    BIB & TEOLOJI
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     QUICK STATS
+                     ============================================= -->
+                <div class="stats-grid">
+
+                    <article class="stat-card">
+
+                        <span class="stat-icon">▤</span>
+
+                        <div>
+                            <strong id="totalStudiesCount">
+                                0
+                            </strong>
+
+                            <span>
+                                Etid
+                            </span>
+                        </div>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span class="stat-icon">✓</span>
+
+                        <div>
+                            <strong id="completedLessonsCount">
+                                0
+                            </strong>
+
+                            <span>
+                                Leson fini
+                            </span>
+                        </div>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span class="stat-icon">☆</span>
+
+                        <div>
+                            <strong id="savedItemsCount">
+                                0
+                            </strong>
+
+                            <span>
+                                Sove
+                            </span>
+                        </div>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span class="stat-icon">◔</span>
+
+                        <div>
+                            <strong id="studyProgressPercent">
+                                0%
+                            </strong>
+
+                            <span>
+                                Pwogrè
+                            </span>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <!-- =============================================
+                     CONTINUE STUDY
+                     ============================================= -->
+                <section class="content-section">
+
+                    <div class="section-heading">
+
+                        <div>
+                            <span class="eyebrow">
+                                KONTINYE
+                            </span>
+
+                            <h2>
+                                Kontinye kote ou te rete
+                            </h2>
+                        </div>
+
+                        <button class="text-button"
+                                type="button"
+                                data-view-target="studies">
+
+                            Tout etid yo →
+
+                        </button>
+
+                    </div>
+
+
+                    <div id="continueStudyContainer"
+                         class="continue-study-container">
+
+                        <div class="empty-card">
+
+                            <div class="empty-icon">
+                                ▤
+                            </div>
+
+                            <h3>
+                                Ou poko kòmanse yon etid
+                            </h3>
+
+                            <p>
+                                Chwazi yon etid pou MEME ka kòmanse
+                                swiv pwogrè ou.
+                            </p>
+
+                            <button class="primary-button"
+                                    type="button"
+                                    data-view-target="studies">
+
+                                Gade etid yo
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =============================================
+                     FEATURED STUDIES
+                     ============================================= -->
+                <section class="content-section">
+
+                    <div class="section-heading">
+
+                        <div>
+                            <span class="eyebrow">
+                                PWOGRAM
+                            </span>
+
+                            <h2>
+                                Gwo etid pou kòmanse
+                            </h2>
+                        </div>
+
+                    </div>
+
+
+                    <div id="featuredStudiesGrid"
+                         class="study-grid">
+
+                        <!-- JS pral ranpli seksyon sa a -->
+
+                    </div>
+
+                </section>
+
+
+                <!-- =============================================
+                     MEME INTRO
+                     ============================================= -->
+                <section class="meme-intro-card">
+
+                    <div class="meme-intro-symbol">
+                        ✦
+                    </div>
+
+                    <div class="meme-intro-content">
+
+                        <span class="eyebrow">
+                            TUTOR OU
+                        </span>
+
+                        <h2>
+                            Rankontre MEME
+                        </h2>
+
+                        <p>
+                            MEME se tutor tèks ou. Li fèt pou ede w
+                            konprann kesyon biblik ak teyolojik yo,
+                            eksplike konsèp yo etap pa etap epi,
+                            lè sistèm sous yo disponib, montre sous
+                            verifyab ki soutni repons lan.
+                        </p>
+
+                        <button id="openMemeButton"
+                                class="primary-button"
+                                type="button">
+
+                            Louvri MEME
+                            <span>✦</span>
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+
+            <!-- =================================================
+                 STUDIES VIEW
+                 ================================================= -->
+            <section id="studiesView"
+                     class="view"
+                     data-view-section="studies"
+                     hidden>
+
+                <div class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            BIBLIYOTÈK
+                        </span>
+
+                        <h1>
+                            Etid Biblique & Teyoloji
+                        </h1>
+
+                        <p>
+                            Chwazi yon pwogram epi avanse chapit pa chapit.
+                        </p>
+
+                    </div>
+
+                    <button id="studyFilterButton"
+                            class="secondary-button"
+                            type="button">
+
+                        Filtre
+
+                    </button>
+
+                </div>
+
+
+                <div id="studyCategories"
+                     class="category-tabs">
+
+                    <button class="category-tab active"
+                            type="button"
+                            data-category="all">
+
+                        Tout
+
+                    </button>
+
+                    <button class="category-tab"
+                            type="button"
+                            data-category="biblical">
+
+                        Etid Biblik
+
+                    </button>
+
+                    <button class="category-tab"
+                            type="button"
+                            data-category="theology">
+
+                        Teyoloji
+
+                    </button>
+
+                    <button class="category-tab"
+                            type="button"
+                            data-category="doctrine">
+
+                        Doktrin
+
+                    </button>
+
+                    <button class="category-tab"
+                            type="button"
+                            data-category="history">
+
+                        Istwa Legliz
+
+                    </button>
+
+                </div>
+
+
+                <div id="allStudiesGrid"
+                     class="study-grid large">
+
+                    <!-- JS pral mete etid yo isit -->
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 STUDY DETAIL VIEW
+                 ================================================= -->
+            <section id="studyDetailView"
+                     class="view lesson-view"
+                     data-view-section="study-detail"
+                     hidden>
+
+                <div class="lesson-topbar">
+
+                    <button id="backToStudiesButton"
+                            class="back-button"
+                            type="button">
+
+                        ←
+                        <span>
+                            Retounen
+                        </span>
+
+                    </button>
+
+                    <div class="lesson-top-actions">
+
+                        <button id="lessonSaveButton"
+                                class="toolbar-button"
+                                type="button"
+                                aria-label="Sauvegarder leson">
+
+                            ☆
+                            <span>
+                                Sauvegarder
+                            </span>
+
+                        </button>
+
+                        <button id="lessonCloseButton"
+                                class="toolbar-button"
+                                type="button"
+                                aria-label="Fèmen leson">
+
+                            ✕
+
+                            <span>
+                                Fèmen
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div id="lessonHeader"
+                     class="lesson-header">
+
+                    <!-- JS -->
+
+                </div>
+
+
+                <!-- =================================================
+                     LESSON READER
+                     ZÒN SA A PRAL SIPÒTE PINCH 2 DWÈT
+                     ================================================= -->
+                <article id="lessonReader"
+                         class="lesson-reader"
+                         tabindex="0"
+                         data-pinch-zoom="true">
+
+                    <div id="lessonContent"
+                         class="lesson-content">
+
+                        <!--
+                            Kontni chapit / leson an pral antre
+                            isit dinamikman.
+
+                            JavaScript ap kontwole:
+                            - zoom
+                            - pinch 2 dwèt
+                            - double tap
+                            - sauvegarde
+                            - pwogrè
+                            - chapit
+                            - navigation
+                        -->
+
+                    </div>
+
+                </article>
+
+
+                <!-- =================================================
+                     READING TOOLBAR
+                     ================================================= -->
+                <div id="readingToolbar"
+                     class="reading-toolbar">
+
+                    <div class="reading-toolbar-left">
+
+                        <button id="zoomOutButton"
+                                class="zoom-button"
+                                type="button"
+                                aria-label="Zoom soti">
+
+                            −
+
+                        </button>
+
+                        <span id="zoomLevel"
+                              class="zoom-level">
+
+                            100%
+
+                        </span>
+
+                        <button id="zoomInButton"
+                                class="zoom-button"
+                                type="button"
+                                aria-label="Zoom antre">
+
+                            +
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="reading-toolbar-center">
+
+                        <button id="resetZoomButton"
+                                class="toolbar-text-button"
+                                type="button">
+
+                            Reyajiste zoom
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="reading-toolbar-right">
+
+                        <button id="saveReadingButton"
+                                class="toolbar-text-button"
+                                type="button">
+
+                            ☆ Sauvegarder
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     CHAPTER NAVIGATION
+                     ================================================= -->
+                <div class="chapter-navigation">
+
+                    <button id="previousChapterButton"
+                            class="secondary-button"
+                            type="button">
+
+                        ← Chapit anvan
+
+                    </button>
+
+                    <button id="nextChapterButton"
+                            class="primary-button"
+                            type="button">
+
+                        Chapit apre →
+
+                    </button>
+
+                </div>
+
+
+                <!-- =================================================
+                     LESSON PROGRESS
+                     ================================================= -->
+                <div class="lesson-progress-container">
+
+                    <div class="progress-label">
+
+                        <span>
+                            Pwogrè nan etid sa a
+                        </span>
+
+                        <strong id="lessonProgressText">
+                            0%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress-track">
+
+                        <div id="lessonProgressBar"
+                             class="progress-fill"
+                             style="width:0%">
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 DICTIONARY VIEW
+                 ================================================= -->
+            <section id="dictionaryView"
+                     class="view"
+                     data-view-section="dictionary"
+                     hidden>
+
+                <div class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            REFERANS
+                        </span>
+
+                        <h1>
+                            Diksyonè Teyoloji
+                        </h1>
+
+                        <p>
+                            Chèche tèm biblik, teyolojik ak doktrinal
+                            yo avèk definisyon klè.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dictionary-search">
+
+                    <span>
+                        ⌕
+                    </span>
+
+                    <input id="dictionarySearchInput"
+                           type="search"
+                           placeholder="Chèche yon tèm..."
+                           autocomplete="off">
+
+                </div>
+
+
+                <div class="dictionary-layout">
+
+                    <aside id="dictionaryAlphabet"
+                           class="dictionary-alphabet">
+
+                        <!-- JS -->
+
+                    </aside>
+
+
+                    <div id="dictionaryEntries"
+                         class="dictionary-entries">
+
+                        <!-- JS -->
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 MEME VIEW
+                 ================================================= -->
+            <section id="memeView"
+                     class="view"
+                     data-view-section="meme"
+                     hidden>
+
+                <div class="meme-page">
+
+                    <div class="meme-header">
+
+                        <div class="meme-avatar-large">
+                            M
+                        </div>
+
+                        <div>
+
+                            <span class="eyebrow">
+                                TUTOR TEKS
+                            </span>
+
+                            <h1>
+                                MEME
+                            </h1>
+
+                            <p>
+                                Asistan etid Biblik ak teyoloji
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         IMPORTANT:
+                         MEME PA DWE ENVANTE SOUS.
+                         REZILTA ENTÈNÈT AK VERIFIKASYON AP FÈT
+                         NAN JAVASCRIPT / BACKEND.
+                         ================================================= -->
+
+                    <div id="memeSourceStatus"
+                         class="source-status">
+
+                        <span class="source-status-icon">
+                            ●
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Sistèm sous
+                            </strong>
+
+                            <p id="sourceStatusText">
+                                Preparasyon...
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div id="memeChat"
+                         class="meme-chat"
+                         aria-live="polite">
+
+                        <div class="meme-message assistant">
+
+                            <div class="message-avatar">
+                                M
+                            </div>
+
+                            <div class="message-body">
+
+                                <div class="message-name">
+                                    MEME
+                                </div>
+
+                                <p>
+                                    Bonjou. Mwen se MEME. Mwen ka ede w
+                                    eksplore kesyon biblik ak teyolojik
+                                    yo nan bon Kreyòl, etap pa etap.
+                                </p>
+
+                                <p>
+                                    Lè yon repons bezwen sous ekstèn,
+                                    sistèm nan dwe verifye enfòmasyon yo
+                                    anvan li prezante yo kòm repons.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         MEME SUGGESTIONS
+                         ================================================= -->
+                    <div class="meme-suggestions">
+
+                        <button class="suggestion-chip"
+                                type="button"
+                                data-prompt="Kisa teyoloji ye?">
+
+                            Kisa teyoloji ye?
+
+                        </button>
+
+                        <button class="suggestion-chip"
+                                type="button"
+                                data-prompt="Ki diferans ki genyen ant Ansyen Testaman ak Nouvo Testaman?">
+
+                            Ansyen vs Nouvo Testaman
+
+                        </button>
+
+                        <button class="suggestion-chip"
+                                type="button"
+                                data-prompt="Eksplike Trinite a avèk anpil detay.">
+
+                            Eksplike Trinite
+
+                        </button>
+
+                        <button class="suggestion-chip"
+                                type="button"
+                                data-prompt="Kisa jistifikasyon vle di nan teyoloji kretyèn?">
+
+                            Jistifikasyon
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         MEME INPUT
+                         ================================================= -->
+                    <form id="memeForm"
+                          class="meme-input-area">
+
+                        <div class="meme-input-wrapper">
+
+                            <textarea id="memeInput"
+                                      rows="1"
+                                      maxlength="12000"
+                                      placeholder="Ekri kesyon ou pou MEME..."
+                                      aria-label="Kesyon pou MEME"></textarea>
+
+                            <button id="memeSendButton"
+                                    class="meme-send-button"
+                                    type="submit"
+                                    aria-label="Voye kesyon">
+
+                                ↑
+
+                            </button>
+
+                        </div>
+
+                        <div class="meme-input-footer">
+
+                            <span>
+                                MEME reponn an tèks sèlman.
+                            </span>
+
+                            <span id="memeCharacterCount">
+                                0 / 12000
+                            </span>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 BOOKMARKS VIEW
+                 ================================================= -->
+            <section id="bookmarksView"
+                     class="view"
+                     data-view-section="bookmarks"
+                     hidden>
+
+                <div class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            BIBLIYOTÈK MWEN
+                        </span>
+
+                        <h1>
+                            Sa mwen sove yo
+                        </h1>
+
+                        <p>
+                            Tout leson, pasaj ak definisyon ou te sove.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div id="bookmarksContainer"
+                     class="saved-items-container">
+
+                    <div class="empty-card">
+
+                        <div class="empty-icon">
+                            ☆
+                        </div>
+
+                        <h3>
+                            Pa gen anyen sove pou kounye a
+                        </h3>
+
+                        <p>
+                            Lè ou jwenn yon pasaj ou vle konsève,
+                            peze bouton « Sauvegarder ».
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PROGRESS VIEW
+                 ================================================= -->
+            <section id="progressView"
+                     class="view"
+                     data-view-section="progress"
+                     hidden>
+
+                <div class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            PWOGRÈ
+                        </span>
+
+                        <h1>
+                            Pwogrè mwen
+                        </h1>
+
+                        <p>
+                            Suiv chemen ou nan etid Biblik ak teyoloji.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="progress-dashboard">
+
+                    <div class="progress-main-card">
+
+                        <div class="progress-circle"
+                             id="globalProgressCircle">
+
+                            <div>
+
+                                <strong id="globalProgressNumber">
+                                    0%
+                                </strong>
+
+                                <span>
+                                    total
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div>
+
+                            <span class="eyebrow">
+                                PWOGRÈ GLOBAL
+                            </span>
+
+                            <h2>
+                                Kontinye avanse
+                            </h2>
+
+                            <p id="progressMotivation">
+                                Chak etap ou fè nan etid la konte.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="progress-stat-grid">
+
+                        <div class="progress-stat">
+
+                            <strong id="progressStudies">
+                                0
+                            </strong>
+
+                            <span>
+                                Etid kòmanse
+                            </span>
+
+                        </div>
+
+                        <div class="progress-stat">
+
+                            <strong id="progressChapters">
+                                0
+                            </strong>
+
+                            <span>
+                                Chapit li
+                            </span>
+
+                        </div>
+
+                        <div class="progress-stat">
+
+                            <strong id="progressQuizzes">
+                                0
+                            </strong>
+
+                            <span>
+                                Quiz fini
+                            </span>
+
+                        </div>
+
+                        <div class="progress-stat">
+
+                            <strong id="progressBookmarks">
+                                0
+                            </strong>
+
+                            <span>
+                                Eleman sove
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <section class="content-section">
+
+                        <div class="section-heading">
+
+                            <div>
+                                <span class="eyebrow">
+                                    ETID
+                                </span>
+
+                                <h2>
+                                    Pwogrè pa pwogram
+                                </h2>
+                            </div>
+
+                        </div>
+
+                        <div id="studyProgressList"
+                             class="study-progress-list">
+
+                            <!-- JS -->
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SETTINGS VIEW
+                 ================================================= -->
+            <section id="settingsView"
+                     class="view"
+                     data-view-section="settings"
+                     hidden>
+
+                <div class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            SISTÈM
+                        </span>
+
+                        <h1>
+                            Paramèt
+                        </h1>
+
+                        <p>
+                            Kontwole fason MEME fonksyone sou aparèy ou.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="settings-list">
+
+                    <section class="settings-card">
+
+                        <div class="settings-card-header">
+
+                            <div>
+                                <h2>
+                                    Lekti
+                                </h2>
+
+                                <p>
+                                    Ajiste eksperyans lekti a.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="setting-row">
+
+                            <div>
+
+                                <strong>
+                                    Gwosè tèks
+                                </strong>
+
+                                <span>
+                                    Kontwole gwosè kontni leson yo.
+                                </span>
+
+                            </div>
+
+                            <div class="setting-control">
+
+                                <button id="settingsZoomOut"
+                                        type="button"
+                                        class="zoom-button">
+                                    −
+                                </button>
+
+                                <span id="settingsZoomValue">
+                                    100%
+                                </span>
+
+                                <button id="settingsZoomIn"
+                                        type="button"
+                                        class="zoom-button">
+                                    +
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="setting-row">
+
+                            <div>
+
+                                <strong>
+                                    Mòd nwa
+                                </strong>
+
+                                <span>
+                                    Chanje ant aparans klè ak nwa.
+                                </span>
+
+                            </div>
+
+                            <button id="darkModeToggle"
+                                    class="switch"
+                                    type="button"
+                                    role="switch"
+                                    aria-checked="false">
+
+                                <span></span>
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="settings-card">
+
+                        <div class="settings-card-header">
+
+                            <div>
+                                <h2>
+                                    Done
+                                </h2>
+
+                                <p>
+                                    Done lokal aplikasyon an.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="setting-row">
+
+                            <div>
+
+                                <strong>
+                                    IndexedDB
+                                </strong>
+
+                                <span>
+                                    Pwogrè ak done aplikasyon an
+                                    estoke lokalman.
+                                </span>
+
+                            </div>
+
+                            <span id="databaseStatus"
+                                  class="status-badge">
+
+                                Ap verifye...
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="setting-row">
+
+                            <div>
+
+                                <strong>
+                                    Reyajiste pwogrè
+                                </strong>
+
+                                <span>
+                                    Efase pwogrè lokal ou.
+                                </span>
+
+                            </div>
+
+                            <button id="resetProgressButton"
+                                    type="button"
+                                    class="danger-button">
+
+                                Reyajiste
+
+                            </button>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- ====================================================
+             GLOBAL MODAL
+             ==================================================== -->
+        <div id="globalModal"
+             class="modal"
+             hidden
+             role="dialog"
+             aria-modal="true">
+
+            <div class="modal-backdrop"
+                 data-modal-close="true">
+            </div>
+
+            <div class="modal-dialog">
+
+                <div class="modal-header">
+
+                    <div id="modalTitle">
+                        MEME
+                    </div>
+
+                    <button id="modalCloseButton"
+                            class="icon-button"
+                            type="button"
+                            aria-label="Fèmen">
+
+                        ✕
+
+                    </button>
+
+                </div>
+
+                <div id="modalBody"
+                     class="modal-body">
+
+                    <!-- JS -->
+
+                </div>
+
+                <div id="modalFooter"
+                     class="modal-footer">
+
+                    <!-- JS -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ====================================================
+             TOAST / NOTIFICATION
+             ==================================================== -->
+        <div id="toastContainer"
+             class="toast-container"
+             aria-live="polite"
+             aria-atomic="true">
+
+            <!-- JS ap mete notifikasyon yo isit -->
+
+        </div>
+
+
+        <!-- ====================================================
+             OFFLINE / CONNECTION STATUS
+             ==================================================== -->
+        <div id="connectionStatus"
+             class="connection-status"
+             hidden>
+
+            <span class="connection-dot"></span>
+
+            <span id="connectionStatusText">
+                Ou offline.
+            </span>
+
+        </div>
+
+
+        <!-- ====================================================
+             GLOBAL READER ZOOM OVERLAY
+             ==================================================== -->
+        <div id="zoomIndicator"
+             class="zoom-indicator"
+             hidden>
+
+            <span id="zoomIndicatorValue">
+                100%
+            </span>
+
+        </div>
+
+
+        <!-- ====================================================
+             QUIZ MODAL / FULL QUIZ CONTAINER
+             ==================================================== -->
+        <section id="quizView"
+                 class="quiz-view"
+                 hidden>
+
+            <div class="quiz-container">
+
+                <header class="quiz-header">
+
+                    <button id="closeQuizButton"
+                            class="icon-button"
+                            type="button"
+                            aria-label="Fèmen quiz">
+
+                        ✕
+
+                    </button>
+
+                    <div class="quiz-title-area">
+
+                        <span class="eyebrow">
+                            EVALYASYON
+                        </span>
+
+                        <h1 id="quizTitle">
+                            Quiz
+                        </h1>
+
+                    </div>
+
+                    <div class="quiz-counter">
+
+                        <span id="quizCurrentQuestion">
+                            1
+                        </span>
+
+                        /
+
+                        <span id="quizTotalQuestions">
+                            0
+                        </span>
+
+                    </div>
+
+                </header>
+
+
+                <div class="quiz-progress">
+
+                    <div id="quizProgressBar"
+                         class="progress-fill"
+                         style="width:0%">
+                    </div>
+
+                </div>
+
+
+                <main class="quiz-content">
+
+                    <div id="quizQuestionContainer"
+                         class="quiz-question-container">
+
+                        <!-- JS -->
+
+                    </div>
+
+                    <div id="quizAnswers"
+                         class="quiz-answers">
+
+                        <!-- JS -->
+
+                    </div>
+
+                    <div id="quizFeedback"
+                         class="quiz-feedback"
+                         hidden>
+
+                        <!-- JS -->
+
+                    </div>
+
+                </main>
+
+
+                <footer class="quiz-footer">
+
+                    <button id="quizPreviousButton"
+                            type="button"
+                            class="secondary-button">
+
+                        ← Anvan
+
+                    </button>
+
+                    <button id="quizNextButton"
+                            type="button"
+                            class="primary-button">
+
+                        Kontinye →
+
+                    </button>
+
+                </footer>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     ACCESSIBILITY LIVE REGION
+     ============================================================= -->
+<div id="liveRegion"
+     class="sr-only"
+     aria-live="polite"
+     aria-atomic="true">
+</div>
+
+
+<!-- ============================================================
+     NOSCRIPT
+     ============================================================= -->
+<noscript>
+
+    <div class="noscript-message">
+
+        <h1>MEME bezwen JavaScript</h1>
+
+        <p>
+            Pou aplikasyon an fonksyone dinamikman, tanpri aktive
+            JavaScript nan navigatè ou.
+        </p>
+
+    </div>
+
+</noscript>
+
+
+<!-- ============================================================
+     JAVASCRIPT EXTERNE
+     ============================================================= -->
+<script src="apptheologiefobas.js"
+        defer></script>
+
+</body>
+</html>
