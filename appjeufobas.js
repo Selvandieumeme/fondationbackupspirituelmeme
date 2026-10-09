@@ -1,1843 +1,3146 @@
 /* ============================================================
    FOBAS MISSION FORCE UNIE 3D
-   Version 1.0.0
-   Moteur : WebGL natif + géométrie 3D
-   SVG : interface et illustrations vectorielles
-   Stockage : IndexedDB
-   Sans Three.js, sans three.module.js, sans dépendance externe
+   Fichier : appjeufobas.js
+   Moteur  : WebGL natif + géométrie 3D personnalisée
+   Sauvegarde : IndexedDB
+   Compatibilité : appjeufobas.html
+   Dépendances externes : AUCUNE
+   Three.js : NON
    ============================================================ */
 
-(() => {
-  "use strict";
+'use strict';
+
+const FOBAS_GAME = (() => {
+  const VERSION = '1.0.0';
+  const DB_NAME = 'FOBAS_MISSION_FORCE_UNIE_3D';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'gameSaves';
+  const SAVE_KEY = 'mainSave';
 
   const $ = (id) => document.getElementById(id);
-  const $$ = (selector, root = document) =>
-    Array.from(root.querySelectorAll(selector));
 
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const now = () => performance.now();
+  const dom = {
+    app: $('gameApp'),
+    header: $('gameHeader'),
+    connectionStatus: $('connectionStatus'),
+    connectionStatusText: $('connectionStatusText'),
+    saveStatusButton: $('saveStatusButton'),
+    headerPauseButton: $('headerPauseButton'),
 
-  const APP = {
-    name: "FOBAS MISSION FORCE UNIE 3D",
-    version: "1.0.0",
-    dbName: "FOBAS_MISSION_FORCE_UNIE",
-    dbVersion: 1,
-    saveKey: "playerProgress"
+    loadingScreen: $('loadingScreen'),
+    loadingMessage: $('loadingMessage'),
+    loadingProgress: $('loadingProgress'),
+    loadingProgressBar: $('loadingProgressBar'),
+    loadingError: $('loadingError'),
+    loadingRetryButton: $('loadingRetryButton'),
+
+    mainMenu: $('mainMenu'),
+    newGameButton: $('newGameButton'),
+    continueGameButton: $('continueGameButton'),
+    saveSummary: $('saveSummary'),
+    missionsMenuButton: $('missionsMenuButton'),
+    garageMenuButton: $('garageMenuButton'),
+    settingsMenuButton: $('settingsMenuButton'),
+    helpMenuButton: $('helpMenuButton'),
+
+    gameScreen: $('gameScreen'),
+    gameViewport: $('gameViewport'),
+    sceneContainer: $('sceneContainer'),
+    sceneFallback: $('sceneFallback'),
+
+    missionNumber: $('missionNumber'),
+    missionTitle: $('missionTitle'),
+    missionObjective: $('missionObjective'),
+    backToMenuButton: $('backToMenuButton'),
+    gamePauseButton: $('gamePauseButton'),
+    speedValue: $('speedValue'),
+
+    vehicleHealthBar: $('vehicleHealthBar'),
+    vehicleHealthText: $('vehicleHealthText'),
+    teamHealthBar: $('teamHealthBar'),
+    teamHealthText: $('teamHealthText'),
+
+    objectivePanel: $('objectivePanel'),
+    toggleObjectivesButton: $('toggleObjectivesButton'),
+    objectiveList: $('objectiveList'),
+    objectiveEmptyMessage: $('objectiveEmptyMessage'),
+    missionProgressBar: $('missionProgressBar'),
+    missionProgressText: $('missionProgressText'),
+
+    minimapPanel: $('minimapPanel'),
+    toggleMinimapButton: $('toggleMinimapButton'),
+    minimapCanvas: $('minimapCanvas'),
+
+    teamStatusText: $('teamStatusText'),
+    memeStatus: $('memeStatus'),
+    novaStatus: $('novaStatus'),
+    axelStatus: $('axelStatus'),
+
+    memeAbilityButton: $('memeAbilityButton'),
+    novaAbilityButton: $('novaAbilityButton'),
+    axelAbilityButton: $('axelAbilityButton'),
+
+    navigationPrompt: $('navigationPrompt'),
+    navigationPromptText: $('navigationPromptText'),
+    gameNotification: $('gameNotification'),
+    notificationTitle: $('notificationTitle'),
+    notificationMessage: $('notificationMessage'),
+
+    touchControls: $('touchControls'),
+    steerLeftButton: $('steerLeftButton'),
+    steerRightButton: $('steerRightButton'),
+    brakeButton: $('brakeButton'),
+    accelerateButton: $('accelerateButton'),
+    reverseButton: $('reverseButton'),
+
+    cameraModeButton: $('cameraModeButton'),
+    handbrakeButton: $('handbrakeButton'),
+    interactButton: $('interactButton'),
+
+    missionsScreen: $('missionsScreen'),
+    missionList: $('missionList'),
+
+    garageScreen: $('garageScreen'),
+    garageVehicleName: $('garageVehicleName'),
+    garageVehicleDescription: $('garageVehicleDescription'),
+    garageSpeedBar: $('garageSpeedBar'),
+    garageSpeedValue: $('garageSpeedValue'),
+    garageArmorBar: $('garageArmorBar'),
+    garageArmorValue: $('garageArmorValue'),
+    garageHandlingBar: $('garageHandlingBar'),
+    garageHandlingValue: $('garageHandlingValue'),
+    repairVehicleButton: $('repairVehicleButton'),
+    upgradeVehicleButton: $('upgradeVehicleButton'),
+    garageMessage: $('garageMessage'),
+
+    settingsScreen: $('settingsScreen'),
+    graphicsQuality: $('graphicsQuality'),
+    cameraDistance: $('cameraDistance'),
+    cameraDistanceValue: $('cameraDistanceValue'),
+    steeringSensitivity: $('steeringSensitivity'),
+    steeringSensitivityValue: $('steeringSensitivityValue'),
+    gameVolume: $('gameVolume'),
+    gameVolumeValue: $('gameVolumeValue'),
+    vibrationEnabled: $('vibrationEnabled'),
+    touchZoomEnabled: $('touchZoomEnabled'),
+    showSubtitles: $('showSubtitles'),
+    saveSettingsButton: $('saveSettingsButton'),
+    resetSettingsButton: $('resetSettingsButton'),
+    settingsMessage: $('settingsMessage'),
+
+    helpScreen: $('helpScreen'),
+
+    pauseOverlay: $('pauseOverlay'),
+    resumeGameButton: $('resumeGameButton'),
+    pauseSaveButton: $('pauseSaveButton'),
+    pauseRestartButton: $('pauseRestartButton'),
+    pauseExitButton: $('pauseExitButton'),
+
+    resultOverlay: $('resultOverlay'),
+    resultEyebrow: $('resultEyebrow'),
+    resultTitle: $('resultTitle'),
+    resultMessage: $('resultMessage'),
+    resultProgress: $('resultProgress'),
+    resultReward: $('resultReward'),
+    nextMissionButton: $('nextMissionButton'),
+    replayMissionButton: $('replayMissionButton'),
+    resultMenuButton: $('resultMenuButton'),
+
+    confirmOverlay: $('confirmOverlay'),
+    confirmTitle: $('confirmTitle'),
+    confirmMessage: $('confirmMessage'),
+    confirmCancelButton: $('confirmCancelButton'),
+    confirmAcceptButton: $('confirmAcceptButton'),
+
+    globalToast: $('globalToast'),
+    globalToastMessage: $('globalToastMessage'),
+    closeToastButton: $('closeToastButton'),
+
+    footerSaveButton: $('footerSaveButton')
   };
 
   const missions = [
-    { title: "La première route", objective: "Rejoignez le point de rendez-vous.", distance: 650, reward: 100 },
-    { title: "Le véhicule disparu", objective: "Explorez la zone et suivez les indices.", distance: 850, reward: 180 },
-    { title: "Route endommagée", objective: "Franchissez les obstacles.", distance: 1000, reward: 260 },
-    { title: "La force du convoi", objective: "Conduisez l'équipe à destination.", distance: 1200, reward: 350 },
-    { title: "Mission en montagne", objective: "Atteignez la zone de secours.", distance: 1450, reward: 450 },
-    { title: "Unis pour réussir", objective: "Terminez l'opération finale.", distance: 1700, reward: 700 }
-  ];
-
-  const characters = [
-    { id: "meme", name: "MEME", role: "Chef de mission", color: "#23d6a0", skill: "Leadership" },
-    { id: "nova", name: "NOVA", role: "Spécialiste tactique", color: "#58a6ff", skill: "Protection" },
-    { id: "axel", name: "AXEL", role: "Pilote d'élite", color: "#ffb547", skill: "Accélération" }
-  ];
-
-  const game = {
-    screen: "mainMenu",
-    playing: false,
-    paused: false,
-    initialized: false,
-    webglAvailable: false,
-    db: null,
-    saveAvailable: false,
-
-    mission: 1,
-    unlockedMission: 1,
-    completed: [],
-    credits: 0,
-
-    distance: 0,
-    speed: 0,
-    maxSpeed: 110,
-    carX: 0,
-    steer: 0,
-    health: 100,
-    teamHealth: 100,
-
-    vehicleLevel: 0,
-    armorLevel: 0,
-    handlingLevel: 0,
-
-    cameraDistance: 8,
-    cameraHeight: 4.3,
-    cameraYaw: 0,
-    cameraPitch: 0.2,
-    cameraMode: 0,
-    quality: "high",
-    sensitivity: 1,
-    volume: 0.65,
-    vibration: true,
-    subtitles: true,
-    touchZoom: true,
-
-    objectivesOpen: true,
-    minimapOpen: true,
-
-    input: {
-      forward: false,
-      backward: false,
-      left: false,
-      right: false,
-      brake: false,
-      handbrake: false
+    {
+      id: 'mission-01',
+      number: 1,
+      title: 'La première route',
+      difficulty: 'INITIATION',
+      description: 'Rejoignez le point de rendez-vous.',
+      distance: 260,
+      reward: 100,
+      obstacles: 4
     },
+    {
+      id: 'mission-02',
+      number: 2,
+      title: 'Le véhicule disparu',
+      difficulty: 'EXPLORATION',
+      description: 'Explorez la zone et suivez les indices.',
+      distance: 400,
+      reward: 175,
+      obstacles: 6
+    },
+    {
+      id: 'mission-03',
+      number: 3,
+      title: 'Route endommagée',
+      difficulty: 'TECHNIQUE',
+      description: 'Traversez la route endommagée.',
+      distance: 520,
+      reward: 250,
+      obstacles: 8
+    },
+    {
+      id: 'mission-04',
+      number: 4,
+      title: 'La force du convoi',
+      difficulty: 'CONVOI',
+      description: 'Conduisez votre équipe à destination.',
+      distance: 680,
+      reward: 350,
+      obstacles: 10
+    },
+    {
+      id: 'mission-05',
+      number: 5,
+      title: 'Mission en montagne',
+      difficulty: 'SAUVETAGE',
+      description: 'Atteignez la zone de secours.',
+      distance: 820,
+      reward: 500,
+      obstacles: 12
+    },
+    {
+      id: 'mission-06',
+      number: 6,
+      title: 'Unis pour réussir',
+      difficulty: 'OPÉRATION FINALE',
+      description: 'Mobilisez les capacités des trois spécialistes.',
+      distance: 1000,
+      reward: 750,
+      obstacles: 15
+    }
+  ];
 
-    obstacles: [],
-    particles: [],
-    elapsed: 0,
-    lastFrame: 0,
-    lastSave: 0,
-    lastAutosave: 0,
-    collisionCooldown: 0,
-    toastTimer: 0,
-    notificationTimer: 0,
-    animationFrame: 0,
-
-    selectedVehicle: 0,
-    selectedCharacter: "meme",
-    currentModalAction: null
+  const defaultSettings = {
+    graphicsQuality: 'medium',
+    cameraDistance: 7,
+    steeringSensitivity: 1,
+    gameVolume: 65,
+    vibrationEnabled: true,
+    touchZoomEnabled: true,
+    showSubtitles: true
   };
 
-  /* ============================================================
-     UTILITAIRES DOM
-     ============================================================ */
+  const state = {
+    screen: 'loading',
+    running: false,
+    paused: false,
+    completed: false,
+    db: null,
+    dbAvailable: false,
+    saveAvailable: false,
+    saveTimer: null,
+    toastTimer: null,
+    notificationTimer: null,
 
-  function setText(id, value) {
-    const el = $(id);
-    if (el) el.textContent = String(value);
+    unlockedMission: 1,
+    currentMission: 0,
+    completedMissions: [],
+    credits: 0,
+
+    vehicle: {
+      x: 0,
+      z: 0,
+      speed: 0,
+      heading: 0,
+      health: 100,
+      armor: 75,
+      handling: 70,
+      engine: 65,
+      distance: 0,
+      collisions: 0
+    },
+
+    teamHealth: 100,
+    objectiveProgress: 0,
+    objectives: [],
+    obstacles: [],
+    collected: [],
+    abilities: {
+      memeReady: true,
+      novaReady: true,
+      axelReady: true,
+      shieldUntil: 0,
+      boostUntil: 0,
+      scanUntil: 0
+    },
+
+    settings: { ...defaultSettings },
+
+    camera: {
+      mode: 0,
+      zoom: 7,
+      targetZoom: 7,
+      sensitivity: 1
+    },
+
+    input: {
+      left: false,
+      right: false,
+      accelerate: false,
+      reverse: false,
+      brake: false,
+      handbrake: false,
+      keys: new Set()
+    },
+
+    lastFrame: 0,
+    animationFrame: 0,
+    worldTime: 0,
+    roadOffset: 0,
+    targetX: 0,
+    lastSave: null,
+    confirmAction: null,
+    renderer: null,
+    audioContext: null
+  };
+
+  /* ==========================================================
+     OUTILS
+     ========================================================== */
+
+  const clamp = (value, min, max) =>
+    Math.max(min, Math.min(max, value));
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  const random = (min, max) => min + Math.random() * (max - min);
+
+  function setText(element, value) {
+    if (element) element.textContent = String(value);
   }
 
-  function setHidden(id, hidden) {
-    const el = $(id);
-    if (el) el.hidden = Boolean(hidden);
-  }
-
-  function setWidth(id, percent) {
-    const el = $(id);
-    if (el) el.style.width = `${clamp(percent, 0, 100)}%`;
-  }
-
-  function formatNumber(n) {
-    return Math.max(0, Math.floor(n)).toLocaleString("fr-FR");
-  }
-
-  function toast(message, duration = 2600) {
-    const box = $("globalToast");
-    if (!box) {
-      console.info("[FOBAS]", message);
-      return;
+  function setWidth(element, value) {
+    if (element) {
+      element.style.width = `${clamp(value, 0, 100)}%`;
     }
+  }
 
-    const messageEl =
-      $("globalToastMessage") ||
-      box.querySelector(".toast-message") ||
-      box;
+  function show(element) {
+    if (element) element.hidden = false;
+  }
 
-    messageEl.textContent = message;
-    box.hidden = false;
+  function hide(element) {
+    if (element) element.hidden = true;
+  }
 
-    clearTimeout(game.toastTimer);
-    game.toastTimer = setTimeout(() => {
-      box.hidden = true;
+  function vibrate(pattern = 35) {
+    if (
+      state.settings.vibrationEnabled &&
+      navigator.vibrate
+    ) {
+      navigator.vibrate(pattern);
+    }
+  }
+
+  function formatNumber(value) {
+    return Math.round(value).toLocaleString('fr-FR');
+  }
+
+  function setConnection(text, good = true) {
+    setText(dom.connectionStatusText, text);
+
+    if (dom.connectionStatus) {
+      dom.connectionStatus.dataset.state = good ? 'online' : 'offline';
+    }
+  }
+
+  function toast(message, duration = 3000) {
+    if (!dom.globalToast || !dom.globalToastMessage) return;
+
+    setText(dom.globalToastMessage, message);
+    show(dom.globalToast);
+
+    clearTimeout(state.toastTimer);
+
+    state.toastTimer = setTimeout(() => {
+      hide(dom.globalToast);
     }, duration);
   }
 
-  function notify(title, message) {
-    if (!game.subtitles) return;
+  function notify(title, message, duration = 3000) {
+    if (!state.settings.showSubtitles) return;
 
-    const box = $("gameNotification");
-    if (!box) {
-      toast(`${title} — ${message}`);
-      return;
-    }
+    setText(dom.notificationTitle, title);
+    setText(dom.notificationMessage, message);
+    show(dom.gameNotification);
 
-    const titleEl = $("notificationTitle") ||
-      box.querySelector(".notification-title");
-    const messageEl = $("notificationMessage") ||
-      box.querySelector(".notification-message");
+    clearTimeout(state.notificationTimer);
 
-    if (titleEl) titleEl.textContent = title;
-    if (messageEl) messageEl.textContent = message;
-
-    box.hidden = false;
-
-    clearTimeout(game.notificationTimer);
-    game.notificationTimer = setTimeout(() => {
-      box.hidden = true;
-    }, 3200);
+    state.notificationTimer = setTimeout(() => {
+      hide(dom.gameNotification);
+    }, duration);
   }
 
-  function showScreen(id) {
-    const screenAliases = {
-      menu: "mainMenu",
-      game: "gameScreen",
-      missions: "missionsScreen",
-      garage: "garageScreen",
-      settings: "settingsScreen",
-      help: "helpScreen"
-    };
+  function setLoadingProgress(value, message) {
+    const percent = clamp(value, 0, 100);
 
-    id = screenAliases[id] || id;
+    if (dom.loadingProgress) {
+      dom.loadingProgress.setAttribute('aria-valuenow', String(percent));
+    }
 
-    const validScreens = [
-      "mainMenu",
-      "gameScreen",
-      "missionsScreen",
-      "garageScreen",
-      "settingsScreen",
-      "helpScreen"
-    ];
+    if (dom.loadingProgressBar) {
+      dom.loadingProgressBar.style.width = `${percent}%`;
+    }
 
-    if (!validScreens.includes(id)) {
-      console.warn("Écran inconnu :", id);
+    if (message) setText(dom.loadingMessage, message);
+  }
+
+  function showLoadingError(message) {
+    if (!dom.loadingError) return;
+
+    setText(dom.loadingError, message);
+    show(dom.loadingError);
+    show(dom.loadingRetryButton);
+  }
+
+  /* ==========================================================
+     NAVIGATION ENTRE LES ÉCRANS
+     ========================================================== */
+
+  const screens = [
+    'loadingScreen',
+    'mainMenu',
+    'gameScreen',
+    'missionsScreen',
+    'garageScreen',
+    'settingsScreen',
+    'helpScreen'
+  ];
+
+  function navigate(screenName) {
+    screens.forEach((id) => hide($(id)));
+
+    const element = $(screenName);
+
+    if (!element) {
+      console.warn(`Écran introuvable : ${screenName}`);
       return;
     }
 
-    validScreens.forEach((screenId) => {
-      const el = $(screenId);
-      if (el) el.hidden = screenId !== id;
+    show(element);
+    state.screen = screenName;
+
+    const inGame = screenName === 'gameScreen';
+
+    if (dom.header) {
+      dom.header.style.display = screenName === 'loadingScreen'
+        ? 'none'
+        : '';
+    }
+
+    if (dom.touchControls) {
+      dom.touchControls.style.display = inGame ? '' : 'none';
+    }
+
+    if (inGame) {
+      resizeRenderer();
+      updateHUD();
+    }
+
+    if (screenName === 'mainMenu') {
+      updateMenu();
+    }
+
+    if (screenName === 'missionsScreen') {
+      updateMissionCards();
+    }
+
+    if (screenName === 'garageScreen') {
+      updateGarage();
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant'
     });
-
-    game.screen = id;
-
-    if (id !== "gameScreen") {
-      game.playing = false;
-      game.paused = false;
-      releaseAllControls();
-    } else {
-      game.playing = true;
-      game.paused = false;
-      game.lastFrame = now();
-      requestPointerSetup();
-    }
-
-    updateInterface();
   }
 
-  function requestPointerSetup() {
-    if (!canvas) return;
-    canvas.style.cursor = "crosshair";
+  function openMainMenu() {
+    state.running = false;
+    state.paused = false;
+
+    hide(dom.pauseOverlay);
+    hide(dom.resultOverlay);
+    hide(dom.confirmOverlay);
+
+    releaseAllInputs();
+    navigate('mainMenu');
+
+    updateMenu();
   }
 
-  function openModal(id) {
-    const modal = $(id);
-    if (modal) modal.hidden = false;
+  function openConfirm(title, message, action) {
+    setText(dom.confirmTitle, title);
+    setText(dom.confirmMessage, message);
+
+    state.confirmAction = action;
+
+    show(dom.confirmOverlay);
   }
 
-  function closeModal(id) {
-    const modal = $(id);
-    if (modal) modal.hidden = true;
+  function closeConfirm() {
+    hide(dom.confirmOverlay);
+    state.confirmAction = null;
   }
 
-  /* ============================================================
+  /* ==========================================================
      INDEXEDDB
-     ============================================================ */
+     ========================================================== */
 
   function openDatabase() {
     return new Promise((resolve, reject) => {
-      if (!window.indexedDB) {
-        reject(new Error("IndexedDB indisponible"));
+      if (!('indexedDB' in window)) {
+        reject(new Error('IndexedDB non disponible.'));
         return;
       }
 
-      const request = indexedDB.open(APP.dbName, APP.dbVersion);
+      let request;
+
+      try {
+        request = indexedDB.open(DB_NAME, DB_VERSION);
+      } catch (error) {
+        reject(error);
+        return;
+      }
 
       request.onupgradeneeded = () => {
         const db = request.result;
 
-        if (!db.objectStoreNames.contains("saves")) {
-          db.createObjectStore("saves");
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, {
+            keyPath: 'id'
+          });
         }
       };
 
       request.onsuccess = () => resolve(request.result);
+
+      request.onerror = () => {
+        reject(request.error || new Error('Ouverture IndexedDB impossible.'));
+      };
+
+      request.onblocked = () => {
+        console.warn('Ouverture IndexedDB bloquée par un autre onglet.');
+      };
+    });
+  }
+
+  function readSave() {
+    return new Promise((resolve, reject) => {
+      if (!state.dbAvailable || !state.db) {
+        resolve(null);
+        return;
+      }
+
+      let transaction;
+
+      try {
+        transaction = state.db.transaction(STORE_NAME, 'readonly');
+      } catch (error) {
+        reject(error);
+        return;
+      }
+
+      const request = transaction.objectStore(STORE_NAME).get(SAVE_KEY);
+
+      request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => reject(request.error);
     });
   }
 
-  function dbRead(key) {
+  function writeSave(data) {
     return new Promise((resolve, reject) => {
-      if (!game.db) return reject(new Error("Base indisponible"));
+      if (!state.dbAvailable || !state.db) {
+        reject(new Error('La sauvegarde IndexedDB est indisponible.'));
+        return;
+      }
 
-      const tx = game.db.transaction("saves", "readonly");
-      const request = tx.objectStore("saves").get(key);
+      let transaction;
 
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      try {
+        transaction = state.db.transaction(STORE_NAME, 'readwrite');
+      } catch (error) {
+        reject(error);
+        return;
+      }
+
+      transaction.objectStore(STORE_NAME).put({
+        id: SAVE_KEY,
+        version: VERSION,
+        updatedAt: new Date().toISOString(),
+        data
+      });
+
+      transaction.oncomplete = () => resolve(true);
+
+      transaction.onerror = () => {
+        reject(transaction.error || new Error('Échec de sauvegarde.'));
+      };
+
+      transaction.onabort = () => {
+        reject(new Error('La sauvegarde a été interrompue.'));
+      };
     });
   }
 
-  function dbWrite(key, value) {
-    return new Promise((resolve, reject) => {
-      if (!game.db) return reject(new Error("Base indisponible"));
-
-      const tx = game.db.transaction("saves", "readwrite");
-      tx.objectStore("saves").put(value, key);
-
-      tx.oncomplete = () => resolve(true);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-  }
-
-  function serializeGame() {
+  function serializeState() {
     return {
-      version: APP.version,
-      mission: game.mission,
-      unlockedMission: game.unlockedMission,
-      completed: game.completed,
-      credits: game.credits,
-      distance: game.distance,
-      health: game.health,
-      teamHealth: game.teamHealth,
-      vehicleLevel: game.vehicleLevel,
-      armorLevel: game.armorLevel,
-      handlingLevel: game.handlingLevel,
-      selectedVehicle: game.selectedVehicle,
-      selectedCharacter: game.selectedCharacter,
-      settings: {
-        cameraDistance: game.cameraDistance,
-        cameraMode: game.cameraMode,
-        quality: game.quality,
-        sensitivity: game.sensitivity,
-        volume: game.volume,
-        vibration: game.vibration,
-        subtitles: game.subtitles,
-        touchZoom: game.touchZoom
+      version: VERSION,
+      unlockedMission: state.unlockedMission,
+      currentMission: state.currentMission,
+      completedMissions: [...state.completedMissions],
+      credits: state.credits,
+
+      vehicle: {
+        ...state.vehicle
       },
-      savedAt: new Date().toISOString()
+
+      teamHealth: state.teamHealth,
+      settings: {
+        ...state.settings
+      },
+
+      camera: {
+        mode: state.camera.mode,
+        zoom: state.camera.zoom
+      },
+
+      completed: state.completed
     };
   }
 
-  function restoreGame(data) {
-    if (!data || typeof data !== "object") return;
+  function restoreState(data) {
+    if (!data || typeof data !== 'object') return false;
 
-    game.mission = clamp(Number(data.mission) || 1, 1, missions.length);
-    game.unlockedMission = clamp(
-      Number(data.unlockedMission) || 1, 1, missions.length
+    state.unlockedMission = clamp(
+      Number(data.unlockedMission) || 1,
+      1,
+      missions.length
     );
 
-    game.completed = Array.isArray(data.completed)
-      ? data.completed.filter(Number.isFinite)
+    state.currentMission = clamp(
+      Number(data.currentMission) || 0,
+      0,
+      missions.length - 1
+    );
+
+    state.completedMissions = Array.isArray(data.completedMissions)
+      ? data.completedMissions.filter((id) =>
+          missions.some((mission) => mission.id === id)
+        )
       : [];
 
-    game.credits = Math.max(0, Number(data.credits) || 0);
-    game.distance = Math.max(0, Number(data.distance) || 0);
-    game.health = clamp(Number(data.health) || 100, 0, 100);
-    game.teamHealth = clamp(Number(data.teamHealth) || 100, 0, 100);
-    game.vehicleLevel = clamp(Number(data.vehicleLevel) || 0, 0, 10);
-    game.armorLevel = clamp(Number(data.armorLevel) || 0, 0, 10);
-    game.handlingLevel = clamp(Number(data.handlingLevel) || 0, 0, 10);
-    game.selectedVehicle = Math.max(0, Number(data.selectedVehicle) || 0);
-    game.selectedCharacter = data.selectedCharacter || "meme";
+    state.credits = Math.max(0, Number(data.credits) || 0);
 
-    const s = data.settings || {};
+    if (data.vehicle && typeof data.vehicle === 'object') {
+      Object.assign(state.vehicle, data.vehicle);
 
-    game.cameraDistance = clamp(Number(s.cameraDistance) || 8, 4, 15);
-    game.cameraMode = clamp(Number(s.cameraMode) || 0, 0, 2);
-    game.quality = s.quality || "high";
-    game.sensitivity = clamp(Number(s.sensitivity) || 1, 0.4, 2);
-    game.volume = clamp(Number(s.volume) || 0.65, 0, 1);
-    game.vibration = s.vibration !== false;
-    game.subtitles = s.subtitles !== false;
-    game.touchZoom = s.touchZoom !== false;
+      state.vehicle.health = clamp(state.vehicle.health, 0, 100);
+      state.vehicle.armor = clamp(state.vehicle.armor, 0, 100);
+      state.vehicle.handling = clamp(state.vehicle.handling, 0, 100);
+      state.vehicle.engine = clamp(state.vehicle.engine, 0, 100);
+    }
+
+    state.teamHealth = clamp(Number(data.teamHealth) || 100, 0, 100);
+
+    if (data.settings && typeof data.settings === 'object') {
+      state.settings = {
+        ...defaultSettings,
+        ...data.settings
+      };
+    }
+
+    if (data.camera && typeof data.camera === 'object') {
+      state.camera.mode = Number(data.camera.mode) || 0;
+
+      state.camera.zoom = clamp(
+        Number(data.camera.zoom) || 7,
+        4,
+        12
+      );
+
+      state.camera.targetZoom = state.camera.zoom;
+    }
+
+    applySettingsToControls();
+    updateMissionCards();
+    updateGarage();
+    updateMenu();
+
+    return true;
   }
 
   async function saveGame(showMessage = true) {
+    const data = serializeState();
+
     try {
-      if (!game.db) throw new Error("IndexedDB indisponible");
+      await writeSave(data);
 
-      await dbWrite(APP.saveKey, serializeGame());
-      game.lastSave = Date.now();
+      state.lastSave = Date.now();
+      state.saveAvailable = true;
 
-      setText("saveSummary", "Progression sauvegardée");
-      setText("saveStatus", "Sauvegarde réussie");
+      setConnection('Sauvegarde OK', true);
 
-      if (showMessage) toast("Progression sauvegardée.");
+      if (dom.saveSummary) {
+        setText(
+          dom.saveSummary,
+          `Progression enregistrée · ${formatNumber(state.credits)} crédits`
+        );
+      }
+
+      if (showMessage) toast('Progression sauvegardée dans IndexedDB.');
+
       return true;
     } catch (error) {
-      console.warn("Sauvegarde impossible :", error);
-      setText("saveStatus", "Sauvegarde indisponible");
+      console.error('Erreur de sauvegarde :', error);
+
+      setConnection('Sauvegarde indisponible', false);
 
       if (showMessage) {
-        toast("Impossible d'enregistrer. Vérifiez le navigateur.");
+        toast('La sauvegarde est indisponible dans ce navigateur.');
       }
+
       return false;
     }
   }
 
-  async function initializeStorage() {
-    try {
-      game.db = await openDatabase();
-      game.saveAvailable = true;
+  function scheduleSave() {
+    clearTimeout(state.saveTimer);
 
-      const data = await dbRead(APP.saveKey);
-      if (data) {
-        restoreGame(data);
-        setText("saveSummary", "Progression précédente restaurée");
-      } else {
-        setText("saveSummary", "Nouvelle partie");
-      }
-    } catch (error) {
-      game.db = null;
-      game.saveAvailable = false;
-      console.warn("Mode sans sauvegarde permanente :", error);
-      setText("saveSummary", "Mode temporaire");
-    }
-
-    updateInterface();
+    state.saveTimer = setTimeout(() => {
+      saveGame(false);
+    }, 1200);
   }
 
-  /* ============================================================
-     WEBGL NATIF
-     ============================================================ */
+  async function initializeStorage() {
+    try {
+      state.db = await openDatabase();
+      state.dbAvailable = true;
 
-  let canvas = null;
-  let gl = null;
-  let shaderProgram = null;
-  let vertexBuffer = null;
-  let aPosition = -1;
-  let uModel = null;
-  let uView = null;
-  let uProjection = null;
-  let uColor = null;
-  let uLight = null;
-  let vertexData = null;
+      const record = await readSave();
 
-  const mat4 = {
-    identity() {
-      return new Float32Array([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
-    },
-
-    multiply(a, b) {
-      const out = new Float32Array(16);
-
-      for (let c = 0; c < 4; c++) {
-        for (let r = 0; r < 4; r++) {
-          out[c * 4 + r] =
-            a[r] * b[c * 4] +
-            a[4 + r] * b[c * 4 + 1] +
-            a[8 + r] * b[c * 4 + 2] +
-            a[12 + r] * b[c * 4 + 3];
-        }
+      if (record && record.data) {
+        restoreState(record.data);
+        state.saveAvailable = true;
       }
 
-      return out;
-    },
+      setConnection('Système opérationnel', true);
+    } catch (error) {
+      console.warn('IndexedDB indisponible :', error);
 
-    translate(x, y, z) {
-      const m = mat4.identity();
-      m[12] = x;
-      m[13] = y;
-      m[14] = z;
-      return m;
-    },
+      state.dbAvailable = false;
+      state.saveAvailable = false;
 
-    scale(x, y, z) {
-      const m = mat4.identity();
-      m[0] = x;
-      m[5] = y;
-      m[10] = z;
-      return m;
-    },
+      setConnection('Mode sans sauvegarde', false);
 
-    rotateY(angle) {
-      const c = Math.cos(angle);
-      const s = Math.sin(angle);
-
-      return new Float32Array([
-        c, 0, -s, 0,
-        0, 1, 0, 0,
-        s, 0, c, 0,
-        0, 0, 0, 1
-      ]);
-    },
-
-    rotateX(angle) {
-      const c = Math.cos(angle);
-      const s = Math.sin(angle);
-
-      return new Float32Array([
-        1, 0, 0, 0,
-        0, c, s, 0,
-        0, -s, c, 0,
-        0, 0, 0, 1
-      ]);
-    },
-
-    perspective(fov, aspect, near, far) {
-      const f = 1 / Math.tan(fov / 2);
-      const nf = 1 / (near - far);
-
-      return new Float32Array([
-        f / aspect, 0, 0, 0,
-        0, f, 0, 0,
-        0, 0, (far + near) * nf, -1,
-        0, 0, 2 * far * near * nf, 0
-      ]);
-    },
-
-    lookAt(eye, target, up) {
-      let zx = eye[0] - target[0];
-      let zy = eye[1] - target[1];
-      let zz = eye[2] - target[2];
-
-      let len = Math.hypot(zx, zy, zz) || 1;
-      zx /= len; zy /= len; zz /= len;
-
-      let xx = up[1] * zz - up[2] * zy;
-      let xy = up[2] * zx - up[0] * zz;
-      let xz = up[0] * zy - up[1] * zx;
-
-      len = Math.hypot(xx, xy, xz) || 1;
-      xx /= len; xy /= len; xz /= len;
-
-      const yx = zy * xz - zz * xy;
-      const yy = zz * xx - zx * xz;
-      const yz = zx * xy - zy * xx;
-
-      return new Float32Array([
-        xx, yx, zx, 0,
-        xy, yy, zy, 0,
-        xz, yz, zz, 0,
-        -(xx * eye[0] + xy * eye[1] + xz * eye[2]),
-        -(yx * eye[0] + yy * eye[1] + yz * eye[2]),
-        -(zx * eye[0] + zy * eye[1] + zz * eye[2]),
-        1
-      ]);
+      if (dom.saveSummary) {
+        setText(
+          dom.saveSummary,
+          'Sauvegarde indisponible : votre progression pourrait être perdue.'
+        );
+      }
     }
-  };
 
-  function compileShader(type, source) {
+    updateMenu();
+  }
+
+  /* ==========================================================
+     MISSIONS
+     ========================================================== */
+
+  function getMission(index = state.currentMission) {
+    return missions[clamp(index, 0, missions.length - 1)];
+  }
+
+  function isMissionUnlocked(index) {
+    return index + 1 <= state.unlockedMission;
+  }
+
+  function updateMissionCards() {
+    if (!dom.missionList) return;
+
+    dom.missionList.querySelectorAll('[data-start-mission]').forEach((button) => {
+      const id = button.dataset.startMission;
+      const index = missions.findIndex((mission) => mission.id === id);
+
+      if (index < 0) return;
+
+      const unlocked = isMissionUnlocked(index);
+      const completed = state.completedMissions.includes(id);
+
+      button.disabled = !unlocked;
+
+      if (!unlocked) {
+        button.textContent = 'Verrouillée';
+        button.classList.remove('primary-button');
+        button.classList.add('secondary-button');
+      } else {
+        button.textContent = completed ? 'Rejouer' : 'Jouer';
+        button.classList.add('primary-button');
+        button.classList.remove('secondary-button');
+      }
+
+      const card = button.closest('.mission-card');
+
+      if (card) {
+        card.dataset.unlocked = String(unlocked);
+        card.dataset.completed = String(completed);
+      }
+    });
+  }
+
+  function updateMenu() {
+    if (dom.continueGameButton) {
+      dom.continueGameButton.disabled = !state.saveAvailable;
+    }
+
+    if (dom.saveSummary && !state.saveAvailable) {
+      setText(
+        dom.saveSummary,
+        state.dbAvailable
+          ? 'Aucune sauvegarde existante. Commencez votre première mission.'
+          : 'Mode sans sauvegarde : IndexedDB est indisponible.'
+      );
+    }
+
+    updateMissionCards();
+  }
+
+  function startMission(index) {
+    if (index < 0 || index >= missions.length) return;
+
+    if (!isMissionUnlocked(index)) {
+      toast('Cette mission est encore verrouillée.');
+      return;
+    }
+
+    state.currentMission = index;
+    state.running = true;
+    state.paused = false;
+    state.completed = false;
+
+    state.objectiveProgress = 0;
+    state.teamHealth = Math.max(state.teamHealth, 70);
+
+    state.vehicle.x = 0;
+    state.vehicle.z = 0;
+    state.vehicle.speed = 0;
+    state.vehicle.heading = 0;
+    state.vehicle.distance = 0;
+    state.vehicle.collisions = 0;
+    state.vehicle.health = Math.max(state.vehicle.health, 50);
+
+    state.abilities.memeReady = true;
+    state.abilities.novaReady = true;
+    state.abilities.axelReady = true;
+
+    createMissionWorld(index);
+    createObjectives(index);
+
+    hide(dom.pauseOverlay);
+    hide(dom.resultOverlay);
+    hide(dom.confirmOverlay);
+
+    navigate('gameScreen');
+
+    notify(
+      'Mission commencée',
+      `${getMission().title} — rejoignez le point de rendez-vous.`
+    );
+
+    updateHUD();
+    scheduleSave();
+    vibrate(40);
+  }
+
+  function createObjectives(index) {
+    const mission = getMission(index);
+
+    const definitions = [
+      {
+        title: 'Rejoindre la destination',
+        description: `${mission.distance} mètres à parcourir`,
+        done: false
+      },
+      {
+        title: 'Préserver le véhicule',
+        description: 'Maintenez la résistance au-dessus de zéro.',
+        done: false
+      },
+      {
+        title: 'Protéger l’équipe',
+        description: 'Terminez la mission avec votre équipe.',
+        done: false
+      }
+    ];
+
+    state.objectives = definitions;
+
+    if (!dom.objectiveList) return;
+
+    dom.objectiveList.replaceChildren();
+
+    definitions.forEach((objective, index) => {
+      const row = document.createElement('div');
+      row.className = 'objective-item';
+      row.dataset.objectiveIndex = String(index);
+
+      const indicator = document.createElement('span');
+      indicator.className = 'objective-indicator';
+      indicator.textContent = '○';
+
+      const copy = document.createElement('div');
+
+      const title = document.createElement('strong');
+      title.textContent = objective.title;
+
+      const description = document.createElement('small');
+      description.textContent = objective.description;
+
+      copy.append(title, description);
+      row.append(indicator, copy);
+
+      dom.objectiveList.append(row);
+    });
+
+    hide(dom.objectiveEmptyMessage);
+  }
+
+  function updateObjectives() {
+    const mission = getMission();
+
+    if (!mission) return;
+
+    const progress = clamp(
+      state.vehicle.distance / mission.distance * 100,
+      0,
+      100
+    );
+
+    state.objectiveProgress = progress;
+
+    if (state.objectives[0]) {
+      state.objectives[0].done = progress >= 100;
+    }
+
+    if (state.objectives[1]) {
+      state.objectives[1].done = state.vehicle.health > 0;
+    }
+
+    if (state.objectives[2]) {
+      state.objectives[2].done = state.teamHealth > 0;
+    }
+
+    if (dom.objectiveList) {
+      dom.objectiveList.querySelectorAll('.objective-item').forEach((row) => {
+        const index = Number(row.dataset.objectiveIndex);
+        const objective = state.objectives[index];
+
+        if (!objective) return;
+
+        row.classList.toggle('is-complete', objective.done);
+
+        const indicator = row.querySelector('.objective-indicator');
+
+        if (indicator) {
+          indicator.textContent = objective.done ? '✓' : '○';
+        }
+      });
+    }
+
+    setWidth(dom.missionProgressBar, progress);
+    setText(dom.missionProgressText, `${Math.floor(progress)} % terminé`);
+
+    if (progress >= 100 && state.running && !state.completed) {
+      completeMission();
+    }
+  }
+
+  function completeMission() {
+    if (state.completed) return;
+
+    state.completed = true;
+    state.running = false;
+    state.paused = false;
+
+    state.vehicle.speed = 0;
+
+    const mission = getMission();
+
+    if (!state.completedMissions.includes(mission.id)) {
+      state.completedMissions.push(mission.id);
+      state.credits += mission.reward;
+    }
+
+    state.unlockedMission = Math.min(
+      missions.length,
+      Math.max(state.unlockedMission, mission.number + 1)
+    );
+
+    setText(dom.resultEyebrow, 'RAPPORT DE MISSION');
+    setText(dom.resultTitle, 'Mission réussie !');
+    setText(
+      dom.resultMessage,
+      `L’unité Force Unie a terminé : ${mission.title}.`
+    );
+    setText(dom.resultProgress, '100 %');
+    setText(dom.resultReward, `${formatNumber(mission.reward)} crédits`);
+
+    const hasNext = state.currentMission < missions.length - 1;
+
+    if (dom.nextMissionButton) {
+      dom.nextMissionButton.disabled = !hasNext;
+      dom.nextMissionButton.textContent = hasNext
+        ? 'Mission suivante'
+        : 'Toutes les missions terminées';
+    }
+
+    show(dom.resultOverlay);
+
+    updateMissionCards();
+    updateMenu();
+
+    saveGame(false);
+
+    vibrate([100, 60, 100]);
+  }
+
+  function restartMission() {
+    startMission(state.currentMission);
+  }
+
+  function createMissionWorld(index) {
+    const mission = getMission(index);
+
+    state.obstacles = [];
+    state.collected = [];
+
+    const obstacleCount = mission.obstacles;
+
+    for (let i = 0; i < obstacleCount; i++) {
+      const side = Math.random() > 0.5 ? 1 : -1;
+
+      state.obstacles.push({
+        id: `obstacle-${index}-${i}`,
+        x: side * random(2.2, 4.4),
+        z: -18 - i * random(18, 28),
+        type: i % 3 === 0 ? 'barrier' : i % 3 === 1 ? 'rock' : 'crate',
+        hit: false,
+        size: random(0.8, 1.4)
+      });
+    }
+
+    for (let i = 0; i < 8; i++) {
+      state.collected.push({
+        x: random(-2.5, 2.5),
+        z: -35 - i * 65,
+        collected: false
+      });
+    }
+
+    state.targetX = 0;
+  }
+
+  /* ==========================================================
+     MOTEUR WEBGL NATIF
+     ========================================================== */
+
+  const vertexShaderSource = `
+    attribute vec3 aPosition;
+    attribute vec3 aNormal;
+    attribute vec3 aColor;
+
+    uniform mat4 uProjection;
+    uniform mat4 uView;
+    uniform mat4 uModel;
+
+    varying vec3 vNormal;
+    varying vec3 vColor;
+    varying vec3 vWorldPosition;
+
+    void main() {
+      vec4 worldPosition = uModel * vec4(aPosition, 1.0);
+      vWorldPosition = worldPosition.xyz;
+      vNormal = mat3(uModel) * aNormal;
+      vColor = aColor;
+
+      gl_Position = uProjection * uView * worldPosition;
+    }
+  `;
+
+  const fragmentShaderSource = `
+    precision mediump float;
+
+    varying vec3 vNormal;
+    varying vec3 vColor;
+    varying vec3 vWorldPosition;
+
+    uniform vec3 uLightDirection;
+    uniform vec3 uFogColor;
+    uniform float uFogNear;
+    uniform float uFogFar;
+
+    void main() {
+      vec3 normal = normalize(vNormal);
+      float diffuse = max(dot(normal, normalize(uLightDirection)), 0.0);
+      float lighting = 0.36 + diffuse * 0.78;
+
+      vec3 color = vColor * lighting;
+
+      float distanceFromCamera = length(vWorldPosition);
+      float fog = clamp(
+        (distanceFromCamera - uFogNear) / (uFogFar - uFogNear),
+        0.0,
+        0.78
+      );
+
+      color = mix(color, uFogColor, fog);
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+
+  function createShader(gl, type, source) {
     const shader = gl.createShader(type);
+
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
       const message = gl.getShaderInfoLog(shader);
+
       gl.deleteShader(shader);
-      throw new Error(message || "Erreur de compilation shader");
+
+      throw new Error(`Erreur shader : ${message}`);
     }
 
     return shader;
   }
 
-  function createCubeVertices() {
-    const faces = [
-      // Face avant
-      [-1,-1, 1,  1,-1, 1,  1, 1, 1,  -1,-1, 1,  1, 1, 1,  -1, 1, 1],
-      // Face arrière
-      [1,-1,-1, -1,-1,-1, -1,1,-1,  1,-1,-1, -1,1,-1, 1,1,-1],
-      // Face droite
-      [1,-1,1, 1,-1,-1, 1,1,-1,  1,-1,1, 1,1,-1, 1,1,1],
-      // Face gauche
-      [-1,-1,-1, -1,-1,1, -1,1,1,  -1,-1,-1, -1,1,1, -1,1,-1],
-      // Face supérieure
-      [-1,1,1, 1,1,1, 1,1,-1,  -1,1,1, 1,1,-1, -1,1,-1],
-      // Face inférieure
-      [-1,-1,-1, 1,-1,-1, 1,-1,1,  -1,-1,-1, 1,-1,1, -1,-1,1]
-    ];
+  function createProgram(gl) {
+    const vertex = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragment = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-    return new Float32Array(faces.flat());
+    const program = gl.createProgram();
+
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
+
+    gl.deleteShader(vertex);
+    gl.deleteShader(fragment);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      const message = gl.getProgramInfoLog(program);
+
+      gl.deleteProgram(program);
+
+      throw new Error(`Erreur programme WebGL : ${message}`);
+    }
+
+    return program;
   }
 
-  function initWebGL() {
-    const container = $("sceneContainer");
-    if (!container) {
-      throw new Error("Le conteneur #sceneContainer est absent du HTML.");
-    }
+  function createCubeGeometry() {
+    const faces = [
+      {
+        normal: [0, 0, 1],
+        vertices: [
+          [-0.5, -0.5, 0.5],
+          [0.5, -0.5, 0.5],
+          [0.5, 0.5, 0.5],
+          [-0.5, 0.5, 0.5]
+        ]
+      },
+      {
+        normal: [0, 0, -1],
+        vertices: [
+          [0.5, -0.5, -0.5],
+          [-0.5, -0.5, -0.5],
+          [-0.5, 0.5, -0.5],
+          [0.5, 0.5, -0.5]
+        ]
+      },
+      {
+        normal: [1, 0, 0],
+        vertices: [
+          [0.5, -0.5, 0.5],
+          [0.5, -0.5, -0.5],
+          [0.5, 0.5, -0.5],
+          [0.5, 0.5, 0.5]
+        ]
+      },
+      {
+        normal: [-1, 0, 0],
+        vertices: [
+          [-0.5, -0.5, -0.5],
+          [-0.5, -0.5, 0.5],
+          [-0.5, 0.5, 0.5],
+          [-0.5, 0.5, -0.5]
+        ]
+      },
+      {
+        normal: [0, 1, 0],
+        vertices: [
+          [-0.5, 0.5, 0.5],
+          [0.5, 0.5, 0.5],
+          [0.5, 0.5, -0.5],
+          [-0.5, 0.5, -0.5]
+        ]
+      },
+      {
+        normal: [0, -1, 0],
+        vertices: [
+          [-0.5, -0.5, -0.5],
+          [0.5, -0.5, -0.5],
+          [0.5, -0.5, 0.5],
+          [-0.5, -0.5, 0.5]
+        ]
+      }
+    ];
 
-    canvas = document.createElement("canvas");
-    canvas.id = "fobas3DCanvas";
-    canvas.setAttribute("aria-label", "Univers 3D interactif FOBAS");
+    const positions = [];
+    const normals = [];
+    const colors = [];
 
-    Object.assign(canvas.style, {
-      position: "absolute",
-      inset: "0",
-      width: "100%",
-      height: "100%",
-      display: "block",
-      touchAction: "none",
-      outline: "none"
+    const indices = [0, 1, 2, 0, 2, 3];
+
+    faces.forEach((face) => {
+      face.vertices.forEach((vertex) => {
+        positions.push(...vertex);
+        normals.push(...face.normal);
+        colors.push(1, 1, 1);
+      });
     });
 
-    if (getComputedStyle(container).position === "static") {
-      container.style.position = "relative";
+    const expandedIndices = [];
+
+    for (let face = 0; face < 6; face++) {
+      const offset = face * 4;
+
+      indices.forEach((index) => {
+        expandedIndices.push(offset + index);
+      });
     }
 
-    container.style.overflow = "hidden";
-    container.appendChild(canvas);
+    return {
+      positions: new Float32Array(positions),
+      normals: new Float32Array(normals),
+      colors: new Float32Array(colors),
+      indices: new Uint16Array(expandedIndices)
+    };
+  }
 
-    gl = canvas.getContext("webgl", {
+  function identityMatrix() {
+    return new Float32Array([
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ]);
+  }
+
+  function multiplyMatrix(a, b) {
+    const out = new Float32Array(16);
+
+    for (let column = 0; column < 4; column++) {
+      for (let row = 0; row < 4; row++) {
+        out[column * 4 + row] =
+          a[row] * b[column * 4] +
+          a[4 + row] * b[column * 4 + 1] +
+          a[8 + row] * b[column * 4 + 2] +
+          a[12 + row] * b[column * 4 + 3];
+      }
+    }
+
+    return out;
+  }
+
+  function perspectiveMatrix(fov, aspect, near, far) {
+    const f = 1 / Math.tan(fov / 2);
+    const range = 1 / (near - far);
+
+    return new Float32Array([
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (far + near) * range, -1,
+      0, 0, 2 * far * near * range, 0
+    ]);
+  }
+
+  function lookAtMatrix(eye, target, up) {
+    const normalize = (v) => {
+      const length = Math.hypot(v[0], v[1], v[2]) || 1;
+
+      return [
+        v[0] / length,
+        v[1] / length,
+        v[2] / length
+      ];
+    };
+
+    const subtract = (a, b) => [
+      a[0] - b[0],
+      a[1] - b[1],
+      a[2] - b[2]
+    ];
+
+    const cross = (a, b) => [
+      a[1] * b[2] - a[2] * b[1],
+      a[2] * b[0] - a[0] * b[2],
+      a[0] * b[1] - a[1] * b[0]
+    ];
+
+    const z = normalize(subtract(eye, target));
+    const x = normalize(cross(up, z));
+    const y = cross(z, x);
+
+    return new Float32Array([
+      x[0], y[0], z[0], 0,
+      x[1], y[1], z[1], 0,
+      x[2], y[2], z[2], 0,
+      -x[0] * eye[0] - x[1] * eye[1] - x[2] * eye[2],
+      -y[0] * eye[0] - y[1] * eye[1] - y[2] * eye[2],
+      -z[0] * eye[0] - z[1] * eye[1] - z[2] * eye[2],
+      1
+    ]);
+  }
+
+  function modelMatrix(position, scale, rotationY = 0) {
+    const c = Math.cos(rotationY);
+    const s = Math.sin(rotationY);
+
+    return new Float32Array([
+      c * scale[0], 0, -s * scale[0], 0,
+      0, scale[1], 0, 0,
+      s * scale[2], 0, c * scale[2], 0,
+      position[0], position[1], position[2], 1
+    ]);
+  }
+
+  function hexColor(hex) {
+    const value = hex.replace('#', '');
+
+    const number = parseInt(value, 16);
+
+    return [
+      ((number >> 16) & 255) / 255,
+      ((number >> 8) & 255) / 255,
+      (number & 255) / 255
+    ];
+  }
+
+  function initializeRenderer() {
+    if (!dom.sceneContainer) {
+      throw new Error('L’élément sceneContainer est introuvable.');
+    }
+
+    const canvas = document.createElement('canvas');
+
+    canvas.id = 'fobasWebGLCanvas';
+    canvas.setAttribute('aria-label', 'Monde 3D du jeu');
+    canvas.style.position = 'absolute';
+    canvas.style.inset = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    canvas.style.touchAction = 'none';
+
+    const gl = canvas.getContext('webgl', {
       alpha: false,
       antialias: true,
       depth: true,
-      powerPreference: "high-performance"
+      powerPreference: 'high-performance'
     });
 
     if (!gl) {
-      throw new Error("WebGL n'est pas pris en charge par ce navigateur.");
+      throw new Error('WebGL n’est pas disponible sur cet appareil.');
     }
 
-    const vertexSource = `
-      attribute vec3 aPosition;
-      uniform mat4 uModel;
-      uniform mat4 uView;
-      uniform mat4 uProjection;
-      varying vec3 vPosition;
+    const program = createProgram(gl);
 
-      void main() {
-        vPosition = aPosition;
-        gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
-      }
-    `;
+    const cube = createCubeGeometry();
 
-    const fragmentSource = `
-      precision mediump float;
-      uniform vec4 uColor;
-      uniform vec3 uLight;
-      varying vec3 vPosition;
+    const buffers = {
+      position: gl.createBuffer(),
+      normal: gl.createBuffer(),
+      color: gl.createBuffer(),
+      indices: gl.createBuffer()
+    };
 
-      void main() {
-        float shade = 0.78 + 0.22 * max(dot(normalize(vPosition + vec3(0.001)), normalize(uLight)), 0.0);
-        gl_FragColor = vec4(uColor.rgb * shade, uColor.a);
-      }
-    `;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+    gl.bufferData(gl.ARRAY_BUFFER, cube.positions, gl.STATIC_DRAW);
 
-    const vs = compileShader(gl.VERTEX_SHADER, vertexSource);
-    const fs = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+    gl.bufferData(gl.ARRAY_BUFFER, cube.normals, gl.STATIC_DRAW);
 
-    shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vs);
-    gl.attachShader(shaderProgram, fs);
-    gl.linkProgram(shaderProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+    gl.bufferData(gl.ARRAY_BUFFER, cube.colors, gl.STATIC_DRAW);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-      throw new Error(gl.getProgramInfoLog(shaderProgram) || "Erreur WebGL");
-    }
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+    gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      cube.indices,
+      gl.STATIC_DRAW
+    );
 
-    gl.useProgram(shaderProgram);
+    const attributes = {
+      position: gl.getAttribLocation(program, 'aPosition'),
+      normal: gl.getAttribLocation(program, 'aNormal'),
+      color: gl.getAttribLocation(program, 'aColor')
+    };
 
-    aPosition = gl.getAttribLocation(shaderProgram, "aPosition");
-    uModel = gl.getUniformLocation(shaderProgram, "uModel");
-    uView = gl.getUniformLocation(shaderProgram, "uView");
-    uProjection = gl.getUniformLocation(shaderProgram, "uProjection");
-    uColor = gl.getUniformLocation(shaderProgram, "uColor");
-    uLight = gl.getUniformLocation(shaderProgram, "uLight");
-
-    vertexBuffer = gl.createBuffer();
-    vertexData = createCubeVertices();
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(aPosition);
-    gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0);
+    const uniforms = {
+      projection: gl.getUniformLocation(program, 'uProjection'),
+      view: gl.getUniformLocation(program, 'uView'),
+      model: gl.getUniformLocation(program, 'uModel'),
+      light: gl.getUniformLocation(program, 'uLightDirection'),
+      fog: gl.getUniformLocation(program, 'uFogColor'),
+      fogNear: gl.getUniformLocation(program, 'uFogNear'),
+      fogFar: gl.getUniformLocation(program, 'uFogFar')
+    };
 
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
-    gl.clearColor(0.39, 0.67, 0.84, 1);
+    dom.sceneContainer.appendChild(canvas);
 
-    game.webglAvailable = true;
-    resizeCanvas();
-    createWorld();
+    if (dom.sceneFallback) {
+      hide(dom.sceneFallback);
+    }
+
+    state.renderer = {
+      canvas,
+      gl,
+      program,
+      buffers,
+      attributes,
+      uniforms,
+      cube
+    };
+
+    canvas.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault();
+
+      state.running = false;
+
+      notify(
+        'Moteur graphique interrompu',
+        'Le contexte 3D a été perdu. Rechargez la page si nécessaire.',
+        5000
+      );
+    });
+
+    canvas.addEventListener('webglcontextrestored', () => {
+      toast('Contexte graphique restauré. Rechargez si le jeu ne reprend pas.');
+    });
+
+    resizeRenderer();
   }
 
-  function resizeCanvas() {
-    if (!canvas || !gl) return;
+  function resizeRenderer() {
+    const renderer = state.renderer;
 
-    const rect = canvas.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
+    if (!renderer) return;
 
-    const dpr = Math.min(
-      window.devicePixelRatio || 1,
-      game.quality === "low" ? 1 : game.quality === "medium" ? 1.5 : 2
-    );
+    const { canvas, gl } = renderer;
 
-    const width = Math.floor(rect.width * dpr);
-    const height = Math.floor(rect.height * dpr);
+    const width = Math.max(1, dom.gameViewport?.clientWidth || window.innerWidth);
+    const height = Math.max(1, dom.gameViewport?.clientHeight || window.innerHeight);
 
-    if (canvas.width !== width || canvas.height !== height) {
-      canvas.width = width;
-      canvas.height = height;
-    }
+    const ratio = Math.min(window.devicePixelRatio || 1, 1.7);
+
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
 
     gl.viewport(0, 0, canvas.width, canvas.height);
   }
 
-  function drawCube(x, y, z, sx, sy, sz, color, rotationY = 0) {
-    if (!gl) return;
+  function drawCube(position, scale, color, rotationY = 0) {
+    const renderer = state.renderer;
 
-    let model = mat4.translate(x, y, z);
-    model = mat4.multiply(model, mat4.rotateY(rotationY));
-    model = mat4.multiply(model, mat4.scale(sx, sy, sz));
+    if (!renderer) return;
 
-    gl.uniformMatrix4fv(uModel, false, model);
-    gl.uniform4fv(uColor, color);
-    gl.drawArrays(gl.TRIANGLES, 0, 36);
+    const { gl, uniforms } = renderer;
+
+    gl.uniformMatrix4fv(
+      uniforms.model,
+      false,
+      modelMatrix(position, scale, rotationY)
+    );
+
+    const rgb = Array.isArray(color) ? color : hexColor(color);
+
+    gl.vertexAttrib3f(
+      renderer.attributes.color,
+      rgb[0],
+      rgb[1],
+      rgb[2]
+    );
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.buffers.position);
+
+    gl.enableVertexAttribArray(renderer.attributes.position);
+
+    gl.vertexAttribPointer(
+      renderer.attributes.position,
+      3,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, renderer.buffers.normal);
+
+    gl.enableVertexAttribArray(renderer.attributes.normal);
+
+    gl.vertexAttribPointer(
+      renderer.attributes.normal,
+      3,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
+
+    gl.disableVertexAttribArray(renderer.attributes.color);
+
+    gl.vertexAttrib3f(
+      renderer.attributes.color,
+      rgb[0],
+      rgb[1],
+      rgb[2]
+    );
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, renderer.buffers.indices);
+
+    gl.drawElements(
+      gl.TRIANGLES,
+      renderer.cube.indices.length,
+      gl.UNSIGNED_SHORT,
+      0
+    );
   }
 
-  const COLORS = {
-    grass: [0.10, 0.34, 0.20, 1],
-    grassLight: [0.14, 0.43, 0.25, 1],
-    road: [0.18, 0.20, 0.23, 1],
-    roadLine: [0.95, 0.83, 0.45, 1],
-    tire: [0.045, 0.05, 0.06, 1],
-    rubber: [0.12, 0.13, 0.14, 1],
-    white: [0.88, 0.91, 0.94, 1],
-    window: [0.12, 0.34, 0.46, 1],
-    red: [0.82, 0.10, 0.12, 1],
-    green: [0.04, 0.64, 0.38, 1],
-    blue: [0.12, 0.40, 0.92, 1],
-    yellow: [0.95, 0.66, 0.10, 1],
-    tree: [0.08, 0.29, 0.16, 1],
-    trunk: [0.30, 0.18, 0.11, 1],
-    building: [0.55, 0.58, 0.60, 1],
-    buildingLight: [0.76, 0.78, 0.77, 1],
-    obstacle: [0.91, 0.36, 0.08, 1]
-  };
+  function drawCar() {
+    const vehicle = state.vehicle;
 
-  /* ============================================================
-     MONDE 3D : ROUTE, VÉHICULE, ARBRES, BÂTIMENTS
-     ============================================================ */
+    const x = vehicle.x;
+    const z = 0;
 
-  function createWorld() {
-    game.obstacles = [];
+    const green = [0.08, 0.65, 0.38];
+    const dark = [0.04, 0.10, 0.10];
+    const glass = [0.12, 0.24, 0.28];
+    const silver = [0.58, 0.70, 0.69];
 
-    for (let i = 0; i < 22; i++) {
-      game.obstacles.push({
-        z: -18 - i * 17 - Math.random() * 9,
-        x: Math.random() > 0.5 ? -3.7 : 3.7,
-        type: Math.random() > 0.5 ? "barrier" : "cone",
-        passed: false
-      });
-    }
+    drawCube([x, 0.5, z], [1.9, 0.48, 3.4], green, vehicle.heading);
+
+    drawCube(
+      [x, 0.92, z - 0.12],
+      [1.35, 0.48, 1.65],
+      glass,
+      vehicle.heading
+    );
+
+    drawCube(
+      [x, 0.78, z + 1.12],
+      [1.65, 0.24, 0.62],
+      silver,
+      vehicle.heading
+    );
+
+    drawCube(
+      [x, 0.34, z - 1.4],
+      [0.38, 0.45, 0.65],
+      dark,
+      vehicle.heading
+    );
+
+    drawCube(
+      [x, 0.34, z + 1.4],
+      [0.38, 0.45, 0.65],
+      dark,
+      vehicle.heading
+    );
+
+    drawCube(
+      [x - 0.83, 0.32, z - 1.08],
+      [0.28, 0.48, 0.76],
+      dark,
+      vehicle.heading
+    );
+
+    drawCube(
+      [x + 0.83, 0.32, z - 1.08],
+      [0.28, 0.48, 0.76],
+      dark,
+      vehicle.heading
+    );
+
+    drawCube(
+      [x - 0.83, 0.32, z + 1.08],
+      [0.28, 0.48, 0.76],
+      dark,
+      vehicle.heading
+    );
+
+    drawCube(
+      [x + 0.83, 0.32, z + 1.08],
+      [0.28, 0.48, 0.76],
+      dark,
+      vehicle.heading
+    );
   }
 
-  function drawVehicle() {
-    const x = game.carX;
-    const yaw = -game.steer * 0.18;
+  function renderScene() {
+    const renderer = state.renderer;
 
-    // Ombre géométrique
-    drawCube(x, 0.05, 0.2, 0.98, 0.035, 1.65, [0.04, 0.05, 0.06, 0.35], yaw);
+    if (!renderer) return;
 
-    // Châssis
-    drawCube(x, 0.48, 0.15, 0.88, 0.25, 1.55, COLORS.green, yaw);
+    const { gl, program, uniforms } = renderer;
 
-    // Capot avant
-    drawCube(x, 0.62, -0.92, 0.79, 0.19, 0.55, [0.06, 0.77, 0.46, 1], yaw);
+    if (gl.isContextLost()) return;
 
-    // Habitacle
-    drawCube(x, 0.89, 0.35, 0.60, 0.38, 0.78, [0.06, 0.49, 0.34, 1], yaw);
+    const canvas = renderer.canvas;
 
-    // Pare-brise
-    drawCube(x, 1.00, -0.26, 0.52, 0.23, 0.045, COLORS.window, yaw);
+    const width = canvas.width;
+    const height = canvas.height;
 
-    // Vitre arrière
-    drawCube(x, 1.00, 0.90, 0.51, 0.22, 0.045, COLORS.window, yaw);
+    if (!width || !height) return;
 
-    // Pare-chocs
-    drawCube(x, 0.35, -1.63, 0.87, 0.12, 0.11, COLORS.white, yaw);
-    drawCube(x, 0.35, 1.77, 0.87, 0.12, 0.11, COLORS.white, yaw);
+    gl.viewport(0, 0, width, height);
 
-    // Roues
-    [-0.91, 0.91].forEach((wx) => {
-      [-1.05, 1.10].forEach((wz) => {
-        drawCube(x + wx, 0.34, wz, 0.19, 0.34, 0.35, COLORS.tire, yaw);
-        drawCube(x + wx * 1.015, 0.34, wz, 0.09, 0.19, 0.19, COLORS.rubber, yaw);
-      });
-    });
-
-    // Phares
-    drawCube(x - 0.56, 0.58, -1.51, 0.16, 0.09, 0.035, [1, 0.94, 0.65, 1], yaw);
-    drawCube(x + 0.56, 0.58, -1.51, 0.16, 0.09, 0.035, [1, 0.94, 0.65, 1], yaw);
-
-    // Feux arrière
-    drawCube(x - 0.57, 0.57, 1.73, 0.12, 0.08, 0.035, [1, 0.08, 0.06, 1], yaw);
-    drawCube(x + 0.57, 0.57, 1.73, 0.12, 0.08, 0.035, [1, 0.08, 0.06, 1], yaw);
-  }
-
-  function drawTree(x, z, scale = 1) {
-    drawCube(x, 0.65 * scale, z, 0.18 * scale, 0.72 * scale, 0.18 * scale, COLORS.trunk);
-    drawCube(x, 1.65 * scale, z, 0.68 * scale, 0.78 * scale, 0.68 * scale, COLORS.tree);
-    drawCube(x, 2.25 * scale, z, 0.45 * scale, 0.52 * scale, 0.45 * scale, COLORS.grassLight);
-  }
-
-  function drawBuilding(x, z, scale = 1) {
-    drawCube(x, 0.95 * scale, z, 0.95 * scale, 0.95 * scale, 0.85 * scale, COLORS.building);
-    drawCube(x, 1.95 * scale, z, 1.00 * scale, 0.10 * scale, 0.90 * scale, COLORS.buildingLight);
-
-    [-0.48, 0.48].forEach((wx) => {
-      drawCube(
-        x + wx * scale,
-        1.05 * scale,
-        z - 0.87 * scale,
-        0.16 * scale,
-        0.23 * scale,
-        0.035 * scale,
-        COLORS.window
-      );
-    });
-  }
-
-  function drawObstacle(obstacle) {
-    const z = obstacle.z;
-
-    if (obstacle.type === "barrier") {
-      drawCube(obstacle.x, 0.48, z, 0.80, 0.15, 0.17, COLORS.obstacle);
-      drawCube(obstacle.x - 0.55, 0.22, z, 0.09, 0.28, 0.10, COLORS.white);
-      drawCube(obstacle.x + 0.55, 0.22, z, 0.09, 0.28, 0.10, COLORS.white);
-    } else {
-      drawCube(obstacle.x, 0.28, z, 0.25, 0.28, 0.25, COLORS.yellow);
-      drawCube(obstacle.x, 0.56, z, 0.15, 0.06, 0.15, COLORS.white);
-    }
-  }
-
-  function drawRoad() {
-    // Terrain de chaque côté de la chaussée
-    drawCube(-11, -0.20, -42, 9.5, 0.12, 62, COLORS.grass);
-    drawCube(11, -0.20, -42, 9.5, 0.12, 62, COLORS.grassLight);
-
-    // Chaussée
-    drawCube(0, -0.08, -42, 4.0, 0.10, 65, COLORS.road);
-
-    // Accotements
-    drawCube(-4.05, -0.04, -42, 0.12, 0.08, 65, COLORS.white);
-    drawCube(4.05, -0.04, -42, 0.12, 0.08, 65, COLORS.white);
-
-    // Marquage central animé
-    const offset = (game.distance * 0.12) % 5;
-
-    for (let i = 0; i < 14; i++) {
-      drawCube(
-        0,
-        0.035,
-        -i * 5 + offset - 10,
-        0.055,
-        0.025,
-        1.35,
-        COLORS.roadLine
-      );
-    }
-  }
-
-  function drawScenery() {
-    for (let i = 0; i < 9; i++) {
-      const z = -i * 9 - 8 + ((game.distance * 0.1) % 9);
-
-      drawTree(-6.4, z, 0.85 + (i % 3) * 0.08);
-      drawTree(6.6, z - 3, 0.90 + (i % 2) * 0.12);
-
-      if (i % 3 === 0) {
-        drawBuilding(-9.4, z - 5, 0.75);
-        drawBuilding(9.5, z - 7, 0.85);
-      }
-    }
-  }
-
-  function drawWorld3D() {
-    if (!gl || !canvas) return;
-
-    resizeCanvas();
-
+    gl.clearColor(0.42, 0.68, 0.73, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-    gl.useProgram(shaderProgram);
 
-    const aspect = canvas.width / Math.max(1, canvas.height);
-    const projection = mat4.perspective(
-      Math.PI / 3.2,
+    gl.useProgram(program);
+
+    const aspect = width / height;
+
+    const projection = perspectiveMatrix(
+      Math.PI / 3,
       aspect,
       0.1,
-      160
+      180
     );
 
-    const d = game.cameraDistance;
-    const yaw = game.cameraYaw;
+    const vehicle = state.vehicle;
 
-    const eye = [
-      game.carX + Math.sin(yaw) * d,
-      game.cameraHeight + game.cameraPitch * 2,
-      3.2 + Math.cos(yaw) * d
-    ];
+    let eye;
+    let target;
 
-    const target = [game.carX, 0.7, -5];
+    if (state.camera.mode === 1) {
+      eye = [
+        vehicle.x,
+        2.5,
+        4.2
+      ];
 
-    const view = mat4.lookAt(eye, target, [0, 1, 0]);
-
-    gl.uniformMatrix4fv(uProjection, false, projection);
-    gl.uniformMatrix4fv(uView, false, view);
-    gl.uniform3fv(uLight, new Float32Array([-0.4, 0.9, 0.5]));
-
-    drawRoad();
-    drawScenery();
-
-    for (const obstacle of game.obstacles) {
-      drawObstacle(obstacle);
-    }
-
-    drawVehicle();
-  }
-
-  /* ============================================================
-     SCÈNE DE SECOURS SI WEBGL N'EST PAS DISPONIBLE
-     ============================================================ */
-
-  function showGraphicsError(error) {
-    console.error("FOBAS 3D :", error);
-
-    const fallback = $("sceneFallback");
-    if (fallback) fallback.hidden = false;
-
-    const message = fallback?.querySelector(".fallback-message");
-    if (message) {
-      message.textContent =
-        "Le rendu 3D WebGL est indisponible. Activez WebGL dans le navigateur ou utilisez un appareil compatible.";
-    }
-
-    toast("Impossible d'initialiser le moteur WebGL.");
-  }
-
-  /* ============================================================
-     CONTRÔLES DU JEU
-     ============================================================ */
-
-  function setInput(name, active) {
-    if (!(name in game.input)) return;
-    game.input[name] = active;
-  }
-
-  function releaseAllControls() {
-    Object.keys(game.input).forEach((key) => {
-      game.input[key] = false;
-    });
-
-    game.steer = 0;
-  }
-
-  function bindHoldButton(id, inputName) {
-    const el = $(id);
-    if (!el) return;
-
-    const start = (event) => {
-      event.preventDefault();
-      setInput(inputName, true);
-      el.classList.add("is-active");
-    };
-
-    const stop = (event) => {
-      if (event) event.preventDefault();
-      setInput(inputName, false);
-      el.classList.remove("is-active");
-    };
-
-    el.addEventListener("pointerdown", start);
-    el.addEventListener("pointerup", stop);
-    el.addEventListener("pointercancel", stop);
-    el.addEventListener("lostpointercapture", stop);
-    el.addEventListener("contextmenu", (e) => e.preventDefault());
-  }
-
-  function setupKeyboard() {
-    window.addEventListener("keydown", (event) => {
-      if (event.repeat) return;
-
-      const key = event.key.toLowerCase();
-
-      if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(key)) {
-        if (game.screen === "gameScreen") event.preventDefault();
-      }
-
-      if (key === "w" || key === "arrowup") setInput("forward", true);
-      if (key === "s" || key === "arrowdown") setInput("backward", true);
-      if (key === "a" || key === "arrowleft") setInput("left", true);
-      if (key === "d" || key === "arrowright") setInput("right", true);
-      if (key === " ") setInput("brake", true);
-
-      if (key === "escape" || key === "p") {
-        if (game.screen === "gameScreen") togglePause();
-      }
-
-      if (key === "c") cycleCamera();
-    });
-
-    window.addEventListener("keyup", (event) => {
-      const key = event.key.toLowerCase();
-
-      if (key === "w" || key === "arrowup") setInput("forward", false);
-      if (key === "s" || key === "arrowdown") setInput("backward", false);
-      if (key === "a" || key === "arrowleft") setInput("left", false);
-      if (key === "d" || key === "arrowright") setInput("right", false);
-      if (key === " ") setInput("brake", false);
-    });
-
-    window.addEventListener("blur", releaseAllControls);
-  }
-
-  function setupTouchControls() {
-    bindHoldButton("accelerateButton", "forward");
-    bindHoldButton("reverseButton", "backward");
-    bindHoldButton("brakeButton", "brake");
-    bindHoldButton("leftButton", "left");
-    bindHoldButton("rightButton", "right");
-
-    bindHoldButton("driveForwardButton", "forward");
-    bindHoldButton("driveReverseButton", "backward");
-    bindHoldButton("steerLeftButton", "left");
-    bindHoldButton("steerRightButton", "right");
-  }
-
-  /* ============================================================
-     ZOOM À DEUX DOIGTS SUR ANDROID
-     ============================================================ */
-
-  function setupPinchZoom() {
-    const viewport = $("gameViewport") || $("sceneContainer");
-    if (!viewport) return;
-
-    const points = new Map();
-    let initialDistance = 0;
-    let initialZoom = game.cameraDistance;
-
-    function distance(a, b) {
-      return Math.hypot(a.x - b.x, a.y - b.y);
-    }
-
-    viewport.addEventListener("pointerdown", (event) => {
-      points.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY
-      });
-
-      if (points.size === 2 && game.touchZoom) {
-        const arr = [...points.values()];
-        initialDistance = distance(arr[0], arr[1]);
-        initialZoom = game.cameraDistance;
-      }
-    }, { passive: true });
-
-    viewport.addEventListener("pointermove", (event) => {
-      if (!points.has(event.pointerId)) return;
-
-      points.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY
-      });
-
-      if (points.size === 2 && game.touchZoom && initialDistance > 0) {
-        const arr = [...points.values()];
-        const currentDistance = distance(arr[0], arr[1]);
-        const ratio = initialDistance / Math.max(1, currentDistance);
-
-        game.cameraDistance = clamp(initialZoom * ratio, 4, 15);
-      }
-    }, { passive: true });
-
-    ["pointerup", "pointercancel", "pointerleave"].forEach((type) => {
-      viewport.addEventListener(type, (event) => {
-        points.delete(event.pointerId);
-
-        if (points.size < 2) initialDistance = 0;
-      }, { passive: true });
-    });
-
-    viewport.addEventListener("wheel", (event) => {
-      if (game.screen !== "gameScreen") return;
-
-      game.cameraDistance = clamp(
-        game.cameraDistance + Math.sign(event.deltaY) * 0.5,
-        4,
-        15
-      );
-    }, { passive: true });
-  }
-
-  /* ============================================================
-     CAMÉRA
-     ============================================================ */
-
-  function cycleCamera() {
-    game.cameraMode = (game.cameraMode + 1) % 3;
-
-    if (game.cameraMode === 0) {
-      game.cameraDistance = 8;
-      game.cameraHeight = 4.3;
-      game.cameraPitch = 0.2;
-    } else if (game.cameraMode === 1) {
-      game.cameraDistance = 5.2;
-      game.cameraHeight = 2.9;
-      game.cameraPitch = 0.12;
+      target = [
+        vehicle.x,
+        0.6,
+        -12
+      ];
     } else {
-      game.cameraDistance = 11;
-      game.cameraHeight = 6.4;
-      game.cameraPitch = 0.35;
+      const cameraDistance = state.camera.zoom;
+
+      eye = [
+        vehicle.x + Math.sin(vehicle.heading) * 1.5,
+        3.6 + cameraDistance * 0.18,
+        cameraDistance + 1.5
+      ];
+
+      target = [
+        vehicle.x,
+        0.5,
+        -10
+      ];
     }
 
-    toast(`Caméra ${game.cameraMode + 1}/3`);
-  }
+    const view = lookAtMatrix(
+      eye,
+      target,
+      [0, 1, 0]
+    );
 
-  /* ============================================================
-     PHYSIQUE, COLLISIONS, MISSIONS
-     ============================================================ */
+    gl.uniformMatrix4fv(uniforms.projection, false, projection);
+    gl.uniformMatrix4fv(uniforms.view, false, view);
 
-  function spawnObstacle() {
-    const side = Math.random() < 0.5 ? -3.1 : 3.1;
+    gl.uniform3fv(uniforms.light, [0.4, 0.9, 0.5]);
+    gl.uniform3fv(uniforms.fog, [0.42, 0.68, 0.73]);
 
-    game.obstacles.push({
-      x: side + (Math.random() - 0.5) * 0.8,
-      z: -125,
-      type: Math.random() > 0.45 ? "barrier" : "cone",
-      passed: false
+    gl.uniform1f(uniforms.fogNear, 22);
+    gl.uniform1f(uniforms.fogFar, 110);
+
+    /*
+      Sol et route.
+      Le monde utilise une route qui se prolonge vers -Z.
+    */
+
+    drawCube(
+      [0, -0.28, -35],
+      [150, 0.4, 150],
+      [0.16, 0.38, 0.20]
+    );
+
+    drawCube(
+      [0, -0.04, -40],
+      [8, 0.16, 140],
+      [0.19, 0.20, 0.21]
+    );
+
+    /*
+      Bords de route.
+    */
+
+    drawCube(
+      [-4.15, 0.02, -40],
+      [0.16, 0.1, 140],
+      [0.85, 0.84, 0.68]
+    );
+
+    drawCube(
+      [4.15, 0.02, -40],
+      [0.16, 0.1, 140],
+      [0.85, 0.84, 0.68]
+    );
+
+    /*
+      Marquages centraux animés.
+    */
+
+    for (let i = 0; i < 18; i++) {
+      const z = -i * 8 - (state.vehicle.distance % 8);
+
+      drawCube(
+        [0, 0.055, z - 3],
+        [0.13, 0.025, 3],
+        [0.93, 0.91, 0.70]
+      );
+    }
+
+    /*
+      Arbres et bâtiments procéduraux.
+    */
+
+    for (let i = 0; i < 22; i++) {
+      const z = -12 - i * 7;
+
+      const side = i % 2 === 0 ? -1 : 1;
+
+      const x = side * (7 + (i % 4) * 2);
+
+      if (i % 3 === 0) {
+        drawCube(
+          [x, 1.3, z],
+          [2.2, 2.6, 2.2],
+          [0.42, 0.45, 0.43]
+        );
+
+        drawCube(
+          [x, 2.85, z],
+          [2.25, 0.45, 2.25],
+          [0.25, 0.30, 0.29]
+        );
+      } else {
+        drawCube(
+          [x, 0.8, z],
+          [0.42, 1.6, 0.42],
+          [0.30, 0.20, 0.12]
+        );
+
+        drawCube(
+          [x, 2.0, z],
+          [1.8, 2.1, 1.8],
+          [0.10, 0.39, 0.20]
+        );
+
+        drawCube(
+          [x, 2.8, z],
+          [1.35, 1.1, 1.35],
+          [0.12, 0.45, 0.22]
+        );
+      }
+    }
+
+    /*
+      Obstacles de la mission.
+    */
+
+    state.obstacles.forEach((obstacle) => {
+      if (obstacle.hit) return;
+
+      const relativeZ = obstacle.z + state.vehicle.distance;
+
+      if (relativeZ > 15 || relativeZ < -120) return;
+
+      if (obstacle.type === 'barrier') {
+        drawCube(
+          [obstacle.x, 0.55, relativeZ],
+          [1.9, 1.1, 0.45],
+          [0.88, 0.39, 0.10]
+        );
+
+        drawCube(
+          [obstacle.x, 0.56, relativeZ - 0.24],
+          [1.7, 0.12, 0.08],
+          [0.95, 0.92, 0.77]
+        );
+      } else if (obstacle.type === 'rock') {
+        drawCube(
+          [obstacle.x, 0.55, relativeZ],
+          [
+            obstacle.size,
+            obstacle.size,
+            obstacle.size
+          ],
+          [0.42, 0.43, 0.40],
+          0.3
+        );
+      } else {
+        drawCube(
+          [obstacle.x, 0.48, relativeZ],
+          [1, 0.95, 1],
+          [0.53, 0.31, 0.16]
+        );
+      }
     });
+
+    /*
+      Objets à collecter.
+    */
+
+    state.collected.forEach((item) => {
+      if (item.collected) return;
+
+      const relativeZ = item.z + state.vehicle.distance;
+
+      if (relativeZ > 10 || relativeZ < -120) return;
+
+      drawCube(
+        [item.x, 0.65, relativeZ],
+        [0.45, 0.45, 0.45],
+        [0.97, 0.78, 0.19],
+        state.worldTime * 0.7
+      );
+    });
+
+    /*
+      Véhicule du joueur.
+    */
+
+    drawCar();
   }
 
-  function updateObstacles(dt) {
-    const move = game.speed * dt * 0.16;
+  /* ==========================================================
+     PHYSIQUE ET COLLISIONS
+     ========================================================== */
 
-    game.obstacles.forEach((obstacle) => {
-      obstacle.z += move;
+  function updatePhysics(delta) {
+    if (!state.running || state.paused || state.completed) return;
+
+    const dt = Math.min(delta, 0.05);
+
+    const vehicle = state.vehicle;
+
+    const maxSpeed = 25 + vehicle.engine * 0.15;
+
+    if (state.input.accelerate) {
+      vehicle.speed += 13 * dt;
+    } else if (state.input.reverse) {
+      vehicle.speed -= 9 * dt;
+    } else {
+      vehicle.speed *= Math.pow(0.984, dt * 60);
+    }
+
+    if (state.input.brake || state.input.handbrake) {
+      vehicle.speed *= Math.pow(
+        state.input.handbrake ? 0.90 : 0.82,
+        dt * 60
+      );
+    }
+
+    if (Date.now() < state.abilities.boostUntil) {
+      vehicle.speed += 8 * dt;
+    }
+
+    vehicle.speed = clamp(vehicle.speed, -8, maxSpeed);
+
+    const steering = state.settings.steeringSensitivity;
+
+    const speedFactor = 0.3 + Math.abs(vehicle.speed) / Math.max(maxSpeed, 1);
+
+    if (state.input.left) {
+      vehicle.heading += 1.5 * steering * speedFactor * dt;
+      vehicle.x -= 4.0 * steering * speedFactor * dt;
+    }
+
+    if (state.input.right) {
+      vehicle.heading -= 1.5 * steering * speedFactor * dt;
+      vehicle.x += 4.0 * steering * speedFactor * dt;
+    }
+
+    vehicle.heading = clamp(vehicle.heading, -0.65, 0.65);
+    vehicle.x = clamp(vehicle.x, -3.1, 3.1);
+
+    /*
+      La distance de progression augmente uniquement
+      lorsque le véhicule avance.
+    */
+
+    if (vehicle.speed > 0) {
+      vehicle.distance += vehicle.speed * dt * 0.55;
+    } else if (vehicle.speed < 0) {
+      vehicle.distance = Math.max(
+        0,
+        vehicle.distance + vehicle.speed * dt * 0.2
+      );
+    }
+
+    state.roadOffset += vehicle.speed * dt;
+    state.worldTime += dt;
+
+    checkCollisions();
+    updateObjectives();
+    updateHUD();
+    updateMinimap();
+  }
+
+  function checkCollisions() {
+    const vehicle = state.vehicle;
+
+    for (const obstacle of state.obstacles) {
+      if (obstacle.hit) continue;
+
+      const relativeZ = obstacle.z + vehicle.distance;
 
       if (
-        !obstacle.passed &&
-        obstacle.z > -2.2 &&
-        obstacle.z < 2.0 &&
-        Math.abs(obstacle.x - game.carX) < 1.35 &&
-        game.collisionCooldown <= 0
+        Math.abs(relativeZ) < 2.1 &&
+        Math.abs(obstacle.x - vehicle.x) < 1.4
       ) {
-        obstacle.passed = true;
-        game.collisionCooldown = 1.3;
+        obstacle.hit = true;
 
-        const damage = Math.max(5, 15 - game.armorLevel);
-        game.health = clamp(game.health - damage, 0, 100);
-        game.speed *= 0.35;
+        if (Date.now() < state.abilities.shieldUntil) {
+          notify('Bouclier tactique', 'MEME a protégé le véhicule.');
+        } else {
+          vehicle.health = Math.max(
+            0,
+            vehicle.health - random(7, 14) * (1 - vehicle.armor / 150)
+          );
 
-        notify("Collision !", `Le véhicule a perdu ${damage}% de santé.`);
+          state.teamHealth = Math.max(
+            0,
+            state.teamHealth - random(2, 5)
+          );
 
-        if (game.vibration && navigator.vibrate) {
-          navigator.vibrate(100);
+          vehicle.collisions += 1;
+
+          notify(
+            'Collision !',
+            'Ralentissez et évitez les obstacles suivants.'
+          );
+
+          vibrate(80);
         }
 
-        if (game.health <= 0) {
-          finishMission(false);
+        vehicle.speed *= 0.45;
+
+        if (vehicle.health <= 0 || state.teamHealth <= 0) {
+          failMission();
         }
       }
-    });
-
-    game.obstacles = game.obstacles.filter((obstacle) => obstacle.z < 12);
-
-    if (game.obstacles.length < 15 && Math.random() < 0.04) {
-      spawnObstacle();
-    }
-  }
-
-  function updatePhysics(dt) {
-    if (!game.playing || game.paused) return;
-
-    const input = game.input;
-    const maxSpeed = game.maxSpeed + game.vehicleLevel * 4;
-
-    if (input.forward) {
-      game.speed += 34 * dt;
-    } else if (input.backward) {
-      game.speed -= 22 * dt;
-    } else {
-      game.speed -= 9 * dt;
     }
 
-    if (input.brake || input.handbrake) {
-      game.speed -= 48 * dt;
-    }
+    for (const item of state.collected) {
+      if (item.collected) continue;
 
-    game.speed = clamp(game.speed, 0, maxSpeed);
+      const relativeZ = item.z + vehicle.distance;
 
-    let direction = 0;
-    if (input.left) direction -= 1;
-    if (input.right) direction += 1;
+      if (
+        Math.abs(relativeZ) < 1.8 &&
+        Math.abs(item.x - vehicle.x) < 1.4
+      ) {
+        item.collected = true;
 
-    game.steer = lerp(
-      game.steer,
-      direction,
-      clamp(dt * 6 * game.sensitivity, 0, 1)
-    );
+        state.credits += 10;
 
-    const steeringPower = 2.1 + game.handlingLevel * 0.12;
-    game.carX += game.steer * steeringPower * dt * (0.4 + game.speed / 80);
-    game.carX = clamp(game.carX, -3.05, 3.05);
+        notify(
+          'Objet récupéré',
+          '+10 crédits pour l’unité Force Unie.'
+        );
 
-    game.distance += game.speed * dt * 0.36;
-    game.collisionCooldown = Math.max(0, game.collisionCooldown - dt);
-
-    updateObstacles(dt);
-
-    game.elapsed += dt;
-
-    if (game.distance >= missions[game.mission - 1].distance) {
-      finishMission(true);
-    }
-
-    if (Date.now() - game.lastAutosave > 20000) {
-      game.lastAutosave = Date.now();
-      saveGame(false);
-    }
-
-    updateHUD();
-  }
-
-  function startMission(missionNumber = game.mission) {
-    const n = clamp(Number(missionNumber) || 1, 1, missions.length);
-
-    if (n > game.unlockedMission) {
-      toast("Terminez la mission précédente pour la débloquer.");
-      return;
-    }
-
-    game.mission = n;
-    game.distance = 0;
-    game.speed = 0;
-    game.carX = 0;
-    game.steer = 0;
-    game.health = 100;
-    game.teamHealth = 100;
-    game.collisionCooldown = 0;
-    game.lastFrame = now();
-
-    createWorld();
-    updateMissionInterface();
-    showScreen("gameScreen");
-
-    notify(
-      `Mission ${n}`,
-      missions[n - 1].objective
-    );
-  }
-
-  async function finishMission(success) {
-    if (!game.playing) return;
-
-    game.playing = false;
-    game.paused = false;
-    releaseAllControls();
-
-    if (success) {
-      const mission = missions[game.mission - 1];
-
-      if (!game.completed.includes(game.mission)) {
-        game.completed.push(game.mission);
-        game.credits += mission.reward;
+        scheduleSave();
       }
-
-      game.unlockedMission = Math.min(
-        missions.length,
-        Math.max(game.unlockedMission, game.mission + 1)
-      );
-
-      setText("resultTitle", "Mission réussie !");
-      setText("resultMessage", mission.title);
-      setText("resultReward", `${mission.reward} crédits`);
-    } else {
-      setText("resultTitle", "Mission terminée");
-      setText("resultMessage", "Votre véhicule doit être réparé.");
-      setText("resultReward", "0 crédit");
-    }
-
-    setText("resultDistance", `${Math.floor(game.distance)} m`);
-    setText("resultHealth", `${Math.floor(game.health)}%`);
-
-    updateInterface();
-    await saveGame(false);
-
-    if ($("resultOverlay")) {
-      $("resultOverlay").hidden = false;
-    } else {
-      showScreen("mainMenu");
-      toast(success ? "Mission réussie !" : "Mission échouée.");
     }
   }
 
-  function restartCurrentMission() {
-    closeModal("resultOverlay");
-    startMission(game.mission);
-  }
+  function failMission() {
+    state.running = false;
+    state.paused = false;
+    state.vehicle.speed = 0;
 
-  /* ============================================================
-     PAUSE ET REPRISE
-     ============================================================ */
+    setText(dom.resultEyebrow, 'RAPPORT DE MISSION');
+    setText(dom.resultTitle, 'Mission échouée');
+    setText(
+      dom.resultMessage,
+      'Le véhicule ou l’équipe ne peut plus continuer. Réparez votre véhicule et réessayez.'
+    );
+    setText(
+      dom.resultProgress,
+      `${Math.floor(state.objectiveProgress)} %`
+    );
+    setText(dom.resultReward, '0 crédit');
 
-  function togglePause(force) {
-    if (game.screen !== "gameScreen") return;
-
-    game.paused = typeof force === "boolean" ? force : !game.paused;
-
-    if (game.paused) {
-      releaseAllControls();
-      setHidden("pauseOverlay", false);
-    } else {
-      setHidden("pauseOverlay", true);
-      game.lastFrame = now();
+    if (dom.nextMissionButton) {
+      dom.nextMissionButton.disabled = true;
     }
+
+    show(dom.resultOverlay);
+
+    scheduleSave();
   }
 
-  /* ============================================================
-     HUD, BARRES, MINIMAP
-     ============================================================ */
+  /* ==========================================================
+     HUD ET RADAR
+     ========================================================== */
 
   function updateHUD() {
-    const mission = missions[game.mission - 1];
-    const progress = mission
-      ? clamp((game.distance / mission.distance) * 100, 0, 100)
-      : 0;
+    const mission = getMission();
 
-    setText("speedValue", Math.round(game.speed));
-    setText("speedDisplay", Math.round(game.speed));
-    setText("distanceValue", `${Math.floor(game.distance)} m`);
-    setText("missionNumber", `MISSION ${String(game.mission).padStart(2, "0")}`);
-    setText("missionTitle", mission?.title || "Mission");
-    setText("objectiveText", mission?.objective || "");
-    setText("creditValue", formatNumber(game.credits));
-    setText("creditsValue", formatNumber(game.credits));
+    setText(dom.missionNumber, `MISSION ${String(mission.number).padStart(2, '0')}`);
+    setText(dom.missionTitle, mission.title);
+    setText(dom.missionObjective, mission.description);
 
-    setWidth("healthFill", game.health);
-    setWidth("healthBar", game.health);
-    setWidth("teamFill", game.teamHealth);
-    setWidth("teamHealthFill", game.teamHealth);
-    setWidth("missionProgressFill", progress);
-    setWidth("missionProgressBar", progress);
-    setWidth("speedMeterFill", (game.speed / game.maxSpeed) * 100);
+    setText(
+      dom.speedValue,
+      formatNumber(Math.abs(state.vehicle.speed) * 3.6)
+    );
 
-    drawMinimap();
+    setWidth(dom.vehicleHealthBar, state.vehicle.health);
+    setText(dom.vehicleHealthText, `${Math.round(state.vehicle.health)} %`);
+
+    setWidth(dom.teamHealthBar, state.teamHealth);
+    setText(dom.teamHealthText, `${Math.round(state.teamHealth)} %`);
+
+    setText(
+      dom.teamStatusText,
+      state.teamHealth > 70
+        ? 'Équipe prête'
+        : state.teamHealth > 30
+          ? 'Équipe sous pression'
+          : 'Équipe en danger'
+    );
+
+    setText(
+      dom.memeStatus,
+      state.abilities.memeReady ? 'Prêt' : 'Utilisé'
+    );
+
+    setText(
+      dom.novaStatus,
+      state.abilities.novaReady ? 'Prête' : 'Utilisée'
+    );
+
+    setText(
+      dom.axelStatus,
+      state.abilities.axelReady ? 'Prêt' : 'Utilisé'
+    );
+
+    if (dom.navigationPromptText) {
+      const remaining = Math.max(
+        0,
+        mission.distance - state.vehicle.distance
+      );
+
+      setText(
+        dom.navigationPromptText,
+        `Destination à ${formatNumber(remaining)} m`
+      );
+    }
   }
 
-  function drawMinimap() {
-    const map = $("minimapCanvas");
-    if (!map) return;
+  function updateMinimap() {
+    const canvas = dom.minimapCanvas;
 
-    const ctx = map.getContext("2d");
+    if (!canvas || canvas.width === 0) return;
+
+    const ctx = canvas.getContext('2d');
+
     if (!ctx) return;
 
-    const w = map.width;
-    const h = map.height;
+    const width = canvas.width;
+    const height = canvas.height;
 
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, width, height);
 
-    ctx.fillStyle = "#102b24";
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#071a15';
+    ctx.fillRect(0, 0, width, height);
 
-    ctx.fillStyle = "#353b40";
-    ctx.fillRect(w * 0.34, 0, w * 0.32, h);
+    ctx.strokeStyle = 'rgba(99, 255, 180, 0.08)';
+    ctx.lineWidth = 1;
 
-    ctx.strokeStyle = "#e4cf75";
-    ctx.lineWidth = 2;
+    for (let x = 0; x <= width; x += 22) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+
+    for (let y = 0; y <= height; y += 22) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#34443f';
+    ctx.fillRect(width * 0.34, 0, width * 0.32, height);
+
+    ctx.strokeStyle = '#d5d2a1';
     ctx.setLineDash([8, 8]);
+
     ctx.beginPath();
-    ctx.moveTo(w * 0.5, 0);
-    ctx.lineTo(w * 0.5, h);
+    ctx.moveTo(width / 2, 0);
+    ctx.lineTo(width / 2, height);
     ctx.stroke();
+
     ctx.setLineDash([]);
 
-    ctx.fillStyle = "#38e4ad";
+    state.obstacles.forEach((obstacle) => {
+      if (obstacle.hit) return;
+
+      const relativeZ = obstacle.z + state.vehicle.distance;
+
+      if (relativeZ < -100 || relativeZ > 20) return;
+
+      const x = width / 2 + obstacle.x * 12;
+      const y = height * 0.65 + relativeZ * 1.5;
+
+      ctx.fillStyle = '#ff865f';
+      ctx.fillRect(x - 3, y - 3, 6, 6);
+    });
+
+    const mission = getMission();
+
+    const remaining = Math.max(
+      0,
+      mission.distance - state.vehicle.distance
+    );
+
+    const targetY = clamp(
+      height * 0.25 + remaining * 0.10,
+      18,
+      height - 18
+    );
+
+    ctx.fillStyle = '#ffda5b';
+    ctx.beginPath();
+    ctx.arc(width / 2, targetY, 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#68ffbd';
     ctx.beginPath();
     ctx.arc(
-      w * (0.5 + game.carX / 15),
-      h * 0.76,
-      Math.max(4, w * 0.035),
+      width / 2 + state.vehicle.x * 12,
+      height * 0.78,
+      7,
       0,
       Math.PI * 2
     );
     ctx.fill();
 
-    ctx.fillStyle = "#ffba52";
-    game.obstacles.forEach((o) => {
-      if (o.z < -2 && o.z > -110) {
-        const x = w * (0.5 + o.x / 15);
-        const y = h * (0.75 + o.z / 150);
-        ctx.fillRect(x - 2, y - 2, 4, 4);
-      }
-    });
+    ctx.strokeStyle = '#68ffbd';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(
+      width / 2 + state.vehicle.x * 12,
+      height * 0.78,
+      11,
+      0,
+      Math.PI * 2
+    );
+    ctx.stroke();
   }
 
-  function updateMissionInterface() {
-    const grid = $("missionGrid");
-    if (!grid) return;
-
-    const existing = grid.querySelectorAll("[data-generated-mission]");
-    existing.forEach((el) => el.remove());
-
-    missions.forEach((mission, index) => {
-      const n = index + 1;
-      const card = document.createElement("article");
-
-      card.className = "mission-card";
-      card.dataset.generatedMission = "true";
-
-      const isLocked = n > game.unlockedMission;
-      const isCompleted = game.completed.includes(n);
-
-      const title = document.createElement("h3");
-      title.textContent = `${String(n).padStart(2, "0")} · ${mission.title}`;
-
-      const description = document.createElement("p");
-      description.textContent = mission.objective;
-
-      const reward = document.createElement("p");
-      reward.textContent = `Récompense : ${mission.reward} crédits`;
-
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "mission-start-button";
-      button.textContent = isCompleted
-        ? "Rejouer"
-        : isLocked
-          ? "Verrouillée"
-          : "Commencer";
-
-      button.disabled = isLocked;
-      button.addEventListener("click", () => startMission(n));
-
-      card.append(title, description, reward, button);
-
-      if (isCompleted) card.classList.add("is-completed");
-      if (isLocked) card.classList.add("is-locked");
-
-      grid.appendChild(card);
-    });
-  }
-
-  function updateInterface() {
-    setText("creditValue", formatNumber(game.credits));
-    setText("creditsValue", formatNumber(game.credits));
-    setText("completedMissions", game.completed.length);
-    setText("unlockedMissions", game.unlockedMission);
-    setText("vehicleLevel", game.vehicleLevel);
-    setText("vehicleSpeed", game.maxSpeed + game.vehicleLevel * 4);
-    setText("vehicleArmor", 75 + game.armorLevel * 3);
-    setText("vehicleHandling", 70 + game.handlingLevel * 3);
-
-    updateHUD();
-    updateMissionInterface();
-    updateSettingsUI();
-  }
-
-  /* ============================================================
-     GARAGE ET AMÉLIORATIONS
-     ============================================================ */
-
-  function upgradeVehicle(type) {
-    const levelMap = {
-      speed: "vehicleLevel",
-      armor: "armorLevel",
-      handling: "handlingLevel"
-    };
-
-    const property = levelMap[type];
-    if (!property) return;
-
-    const level = game[property];
-    if (level >= 10) {
-      toast("Amélioration maximale atteinte.");
-      return;
-    }
-
-    const cost = 100 + level * 125;
-
-    if (game.credits < cost) {
-      toast(`Il vous faut ${cost} crédits.`);
-      return;
-    }
-
-    game.credits -= cost;
-    game[property]++;
-
-    toast(`Amélioration achetée : ${type}.`);
-    updateInterface();
-    saveGame(false);
-  }
-
-  /* ============================================================
-     CAPACITÉS DES PERSONNAGES
-     ============================================================ */
-
-  function activateAbility(characterId) {
-    if (game.abilityUsed && game.abilityUsed[characterId]) {
-      toast("Cette capacité est déjà utilisée pendant cette mission.");
-      return;
-    }
-
-    if (!game.abilityUsed) game.abilityUsed = {};
-    game.abilityUsed[characterId] = true;
-
-    if (characterId === "meme") {
-      game.teamHealth = clamp(game.teamHealth + 30, 0, 100);
-      notify("MEME", "L'équipe reprend des forces.");
-    } else if (characterId === "nova") {
-      game.health = clamp(game.health + 35, 0, 100);
-      notify("NOVA", "Protection du véhicule renforcée.");
-    } else if (characterId === "axel") {
-      game.speed = Math.min(game.maxSpeed + 20, game.speed + 25);
-      notify("AXEL", "Boost de vitesse activé.");
-    }
-
-    updateHUD();
-  }
-
-  /* ============================================================
-     PARAMÈTRES
-     ============================================================ */
-
-  function updateSettingsUI() {
-    const quality = $("qualitySelect");
-    if (quality) quality.value = game.quality;
-
-    const sensitivity = $("sensitivitySlider");
-    if (sensitivity) sensitivity.value = String(game.sensitivity);
-
-    const volume = $("volumeSlider");
-    if (volume) volume.value = String(game.volume * 100);
-
-    const zoom = $("touchZoomToggle");
-    if (zoom) zoom.checked = game.touchZoom;
-
-    const vibration = $("vibrationToggle");
-    if (vibration) vibration.checked = game.vibration;
-
-    const subtitles = $("subtitlesToggle");
-    if (subtitles) subtitles.checked = game.subtitles;
-  }
-
-  function bindSettings() {
-    const quality = $("qualitySelect");
-    if (quality) {
-      quality.addEventListener("change", () => {
-        game.quality = quality.value;
-        resizeCanvas();
-        toast("Qualité graphique mise à jour.");
-        saveGame(false);
-      });
-    }
-
-    const sensitivity = $("sensitivitySlider");
-    if (sensitivity) {
-      sensitivity.addEventListener("input", () => {
-        game.sensitivity = clamp(Number(sensitivity.value), 0.4, 2);
-      });
-      sensitivity.addEventListener("change", () => saveGame(false));
-    }
-
-    const volume = $("volumeSlider");
-    if (volume) {
-      volume.addEventListener("input", () => {
-        game.volume = clamp(Number(volume.value) / 100, 0, 1);
-      });
-      volume.addEventListener("change", () => saveGame(false));
-    }
-
-    const zoom = $("touchZoomToggle");
-    if (zoom) {
-      zoom.addEventListener("change", () => {
-        game.touchZoom = zoom.checked;
-        saveGame(false);
-      });
-    }
-
-    const vibration = $("vibrationToggle");
-    if (vibration) {
-      vibration.addEventListener("change", () => {
-        game.vibration = vibration.checked;
-        saveGame(false);
-      });
-    }
-
-    const subtitles = $("subtitlesToggle");
-    if (subtitles) {
-      subtitles.addEventListener("change", () => {
-        game.subtitles = subtitles.checked;
-        saveGame(false);
-      });
-    }
-  }
-
-  /* ============================================================
-     BOUTONS ET NAVIGATION
-     ============================================================ */
-
-  function onClick(id, callback) {
-    const el = $(id);
-    if (el) el.addEventListener("click", callback);
-  }
-
-  function bindButtons() {
-    // Menu principal
-    onClick("playButton", () => startMission(game.unlockedMission));
-    onClick("startGameButton", () => startMission(game.unlockedMission));
-    onClick("continueButton", () => startMission(game.mission));
-    onClick("missionsButton", () => showScreen("missionsScreen"));
-    onClick("garageButton", () => showScreen("garageScreen"));
-    onClick("settingsButton", () => showScreen("settingsScreen"));
-    onClick("helpButton", () => showScreen("helpScreen"));
-
-    // Retour au menu
-    onClick("backToMenuButton", () => showScreen("mainMenu"));
-    onClick("backFromMissionsButton", () => showScreen("mainMenu"));
-    onClick("backFromGarageButton", () => showScreen("mainMenu"));
-    onClick("backFromSettingsButton", () => showScreen("mainMenu"));
-    onClick("backFromHelpButton", () => showScreen("mainMenu"));
-
-    // Pause
-    onClick("pauseButton", () => togglePause());
-    onClick("headerPauseButton", () => togglePause());
-    onClick("resumeButton", () => togglePause(false));
-    onClick("restartButton", restartCurrentMission);
-    onClick("quitMissionButton", () => {
-      closeModal("pauseOverlay");
-      showScreen("mainMenu");
-    });
-    onClick("quitToMenuButton", () => {
-      closeModal("pauseOverlay");
-      showScreen("mainMenu");
-    });
-
-    // Résultat
-    onClick("resultContinueButton", () => {
-      closeModal("resultOverlay");
-
-      if (game.mission < missions.length) {
-        startMission(Math.min(game.mission + 1, game.unlockedMission));
-      } else {
-        showScreen("mainMenu");
-      }
-    });
-    onClick("resultRetryButton", restartCurrentMission);
-    onClick("resultMenuButton", () => {
-      closeModal("resultOverlay");
-      showScreen("mainMenu");
-    });
-
-    // Sauvegarde
-    onClick("saveButton", () => saveGame(true));
-    onClick("manualSaveButton", () => saveGame(true));
-
-    // Caméra et objectifs
-    onClick("cameraButton", cycleCamera);
-    onClick("cameraSwitchButton", cycleCamera);
-    onClick("objectivesToggle", () => {
-      game.objectivesOpen = !game.objectivesOpen;
-      setHidden("objectiveList", !game.objectivesOpen);
-    });
-    onClick("minimapToggle", () => {
-      game.minimapOpen = !game.minimapOpen;
-      setHidden("minimapPanel", !game.minimapOpen);
-    });
-
-    // Capacités
-    onClick("memeAbilityButton", () => activateAbility("meme"));
-    onClick("novaAbilityButton", () => activateAbility("nova"));
-    onClick("axelAbilityButton", () => activateAbility("axel"));
-
-    // Garage
-    onClick("upgradeSpeedButton", () => upgradeVehicle("speed"));
-    onClick("upgradeArmorButton", () => upgradeVehicle("armor"));
-    onClick("upgradeHandlingButton", () => upgradeVehicle("handling"));
-
-    // Dialogues
-    onClick("confirmCancelButton", () => closeConfirm("confirmOverlay", false));
-    onClick("confirmNoButton", () => closeConfirm("confirmOverlay", false));
-    onClick("confirmAcceptButton", () => closeConfirm("confirmOverlay", true));
-    onClick("confirmYesButton", () => closeConfirm("confirmOverlay", true));
-    onClick("closeHelpButton", () => showScreen("mainMenu"));
-
-    // Boutons génériques déclaratifs
-    $$("[data-screen]").forEach((el) => {
-      el.addEventListener("click", () => showScreen(el.dataset.screen));
-    });
-
-    $$("[data-mission]").forEach((el) => {
-      el.addEventListener("click", () => {
-        startMission(Number(el.dataset.mission));
-      });
-    });
-
-    $$("[data-upgrade]").forEach((el) => {
-      el.addEventListener("click", () => {
-        upgradeVehicle(el.dataset.upgrade);
-      });
-    });
-
-    $$("[data-ability]").forEach((el) => {
-      el.addEventListener("click", () => {
-        activateAbility(el.dataset.ability);
-      });
-    });
-
-    $$("[data-action='pause']").forEach((el) => {
-      el.addEventListener("click", () => togglePause());
-    });
-
-    $$("[data-action='save']").forEach((el) => {
-      el.addEventListener("click", () => saveGame(true));
-    });
-
-    $$("[data-action='camera']").forEach((el) => {
-      el.addEventListener("click", cycleCamera);
-    });
-  }
-
-  function closeConfirm(overlayId, accept) {
-    const overlay = $(overlayId);
-    if (overlay) overlay.hidden = true;
-
-    const callback = game.currentModalAction;
-    game.currentModalAction = null;
-
-    if (accept && typeof callback === "function") callback();
-  }
-
-  /* ============================================================
-     BOUCLE D'ANIMATION
-     ============================================================ */
+  /* ==========================================================
+     BOUCLE DE JEU
+     ========================================================== */
 
   function frame(timestamp) {
-    game.animationFrame = requestAnimationFrame(frame);
+    state.animationFrame = requestAnimationFrame(frame);
 
-    if (!game.lastFrame) game.lastFrame = timestamp;
-
-    const dt = clamp((timestamp - game.lastFrame) / 1000, 0, 0.05);
-    game.lastFrame = timestamp;
-
-    if (game.screen === "gameScreen" && game.playing && !game.paused) {
-      updatePhysics(dt);
+    if (!state.lastFrame) {
+      state.lastFrame = timestamp;
     }
 
-    if (game.webglAvailable && gl) {
-      try {
-        drawWorld3D();
-      } catch (error) {
-        console.error("Erreur de rendu :", error);
+    const delta = (timestamp - state.lastFrame) / 1000;
+
+    state.lastFrame = timestamp;
+
+    if (document.hidden) return;
+
+    updatePhysics(delta);
+    renderScene();
+  }
+
+  function startGameLoop() {
+    if (state.animationFrame) {
+      cancelAnimationFrame(state.animationFrame);
+    }
+
+    state.lastFrame = 0;
+    state.animationFrame = requestAnimationFrame(frame);
+  }
+
+  /* ==========================================================
+     CAPACITÉS DE L'ÉQUIPE
+     ========================================================== */
+
+  function useMemeAbility() {
+    if (!state.running || state.paused) {
+      toast('Commencez une mission pour utiliser cette capacité.');
+      return;
+    }
+
+    if (!state.abilities.memeReady) {
+      toast('La capacité de MEME a déjà été utilisée.');
+      return;
+    }
+
+    state.abilities.memeReady = false;
+    state.abilities.shieldUntil = Date.now() + 10000;
+
+    notify(
+      'MEME — Vision tactique',
+      'Bouclier tactique actif pendant 10 secondes.'
+    );
+
+    updateHUD();
+    vibrate(50);
+  }
+
+  function useNovaAbility() {
+    if (!state.running || state.paused) {
+      toast('Commencez une mission pour utiliser cette capacité.');
+      return;
+    }
+
+    if (!state.abilities.novaReady) {
+      toast('La capacité de NOVA a déjà été utilisée.');
+      return;
+    }
+
+    state.abilities.novaReady = false;
+
+    state.vehicle.health = Math.min(
+      100,
+      state.vehicle.health + 35
+    );
+
+    state.teamHealth = Math.min(
+      100,
+      state.teamHealth + 12
+    );
+
+    notify(
+      'NOVA — Réparation rapide',
+      'Le véhicule et l’équipe ont été réparés.'
+    );
+
+    updateHUD();
+    scheduleSave();
+    vibrate(60);
+  }
+
+  function useAxelAbility() {
+    if (!state.running || state.paused) {
+      toast('Commencez une mission pour utiliser cette capacité.');
+      return;
+    }
+
+    if (!state.abilities.axelReady) {
+      toast('La capacité d’AXEL a déjà été utilisée.');
+      return;
+    }
+
+    state.abilities.axelReady = false;
+    state.abilities.scanUntil = Date.now() + 10000;
+
+    state.obstacles.forEach((obstacle) => {
+      if (
+        obstacle.z + state.vehicle.distance < 0 &&
+        obstacle.z + state.vehicle.distance > -90
+      ) {
+        obstacle.scanned = true;
       }
+    });
+
+    notify(
+      'AXEL — Scan de la zone',
+      'Les obstacles proches ont été détectés sur le radar.'
+    );
+
+    updateHUD();
+    updateMinimap();
+    vibrate(45);
+  }
+
+  /* ==========================================================
+     GARAGE
+     ========================================================== */
+
+  function updateGarage() {
+    setText(dom.garageVehicleName, 'Force One');
+
+    setText(
+      dom.garageVehicleDescription,
+      'Véhicule polyvalent de l’équipe Force Unie.'
+    );
+
+    setWidth(dom.garageSpeedBar, state.vehicle.engine);
+    setText(
+      dom.garageSpeedValue,
+      `${Math.round(state.vehicle.engine)}/100`
+    );
+
+    setWidth(dom.garageArmorBar, state.vehicle.armor);
+    setText(
+      dom.garageArmorValue,
+      `${Math.round(state.vehicle.armor)}/100`
+    );
+
+    setWidth(dom.garageHandlingBar, state.vehicle.handling);
+    setText(
+      dom.garageHandlingValue,
+      `${Math.round(state.vehicle.handling)}/100`
+    );
+  }
+
+  function repairVehicle() {
+    const price = 50;
+
+    if (state.vehicle.health >= 100) {
+      setText(dom.garageMessage, 'Le véhicule est déjà en parfait état.');
+      return;
+    }
+
+    if (state.credits < price) {
+      setText(
+        dom.garageMessage,
+        `Il vous faut ${price} crédits pour réparer le véhicule.`
+      );
+
+      return;
+    }
+
+    state.credits -= price;
+    state.vehicle.health = 100;
+
+    setText(
+      dom.garageMessage,
+      'Véhicule réparé. Résistance : 100 %.'
+    );
+
+    updateGarage();
+    updateMenu();
+    scheduleSave();
+    toast('Véhicule réparé.');
+  }
+
+  function upgradeVehicle() {
+    const price = 100;
+
+    if (
+      state.vehicle.engine >= 100 &&
+      state.vehicle.armor >= 100 &&
+      state.vehicle.handling >= 100
+    ) {
+      setText(dom.garageMessage, 'Toutes les améliorations sont au maximum.');
+      return;
+    }
+
+    if (state.credits < price) {
+      setText(
+        dom.garageMessage,
+        `Il vous faut ${price} crédits pour cette amélioration.`
+      );
+
+      return;
+    }
+
+    state.credits -= price;
+
+    state.vehicle.engine = Math.min(
+      100,
+      state.vehicle.engine + 8
+    );
+
+    state.vehicle.armor = Math.min(
+      100,
+      state.vehicle.armor + 8
+    );
+
+    state.vehicle.handling = Math.min(
+      100,
+      state.vehicle.handling + 8
+    );
+
+    setText(
+      dom.garageMessage,
+      'Amélioration effectuée avec succès.'
+    );
+
+    updateGarage();
+    updateMenu();
+    scheduleSave();
+
+    toast('Véhicule amélioré.');
+  }
+
+  /* ==========================================================
+     PARAMÈTRES
+     ========================================================== */
+
+  function applySettingsToControls() {
+    const settings = state.settings;
+
+    if (dom.graphicsQuality) {
+      dom.graphicsQuality.value = settings.graphicsQuality;
+    }
+
+    if (dom.cameraDistance) {
+      dom.cameraDistance.value = settings.cameraDistance;
+    }
+
+    if (dom.steeringSensitivity) {
+      dom.steeringSensitivity.value = settings.steeringSensitivity;
+    }
+
+    if (dom.gameVolume) {
+      dom.gameVolume.value = settings.gameVolume;
+    }
+
+    if (dom.vibrationEnabled) {
+      dom.vibrationEnabled.checked = settings.vibrationEnabled;
+    }
+
+    if (dom.touchZoomEnabled) {
+      dom.touchZoomEnabled.checked = settings.touchZoomEnabled;
+    }
+
+    if (dom.showSubtitles) {
+      dom.showSubtitles.checked = settings.showSubtitles;
+    }
+
+    updateSettingOutputs();
+  }
+
+  function updateSettingOutputs() {
+    setText(
+      dom.cameraDistanceValue,
+      Number(state.settings.cameraDistance).toFixed(1)
+    );
+
+    setText(
+      dom.steeringSensitivityValue,
+      Number(state.settings.steeringSensitivity).toFixed(1)
+    );
+
+    setText(
+      dom.gameVolumeValue,
+      `${state.settings.gameVolume} %`
+    );
+  }
+
+  function readSettingsControls() {
+    state.settings.graphicsQuality = dom.graphicsQuality?.value || 'medium';
+
+    state.settings.cameraDistance = clamp(
+      Number(dom.cameraDistance?.value) || 7,
+      4,
+      12
+    );
+
+    state.settings.steeringSensitivity = clamp(
+      Number(dom.steeringSensitivity?.value) || 1,
+      0.5,
+      2
+    );
+
+    state.settings.gameVolume = clamp(
+      Number(dom.gameVolume?.value) || 0,
+      0,
+      100
+    );
+
+    state.settings.vibrationEnabled = Boolean(
+      dom.vibrationEnabled?.checked
+    );
+
+    state.settings.touchZoomEnabled = Boolean(
+      dom.touchZoomEnabled?.checked
+    );
+
+    state.settings.showSubtitles = Boolean(
+      dom.showSubtitles?.checked
+    );
+
+    state.camera.zoom = state.settings.cameraDistance;
+    state.camera.targetZoom = state.settings.cameraDistance;
+    state.camera.sensitivity = state.settings.steeringSensitivity;
+
+    updateSettingOutputs();
+  }
+
+  function saveSettings() {
+    readSettingsControls();
+
+    if (dom.settingsMessage) {
+      setText(dom.settingsMessage, 'Paramètres enregistrés.');
+    }
+
+    scheduleSave();
+
+    toast('Paramètres enregistrés.');
+  }
+
+  function resetSettings() {
+    state.settings = { ...defaultSettings };
+
+    applySettingsToControls();
+
+    state.camera.zoom = defaultSettings.cameraDistance;
+    state.camera.targetZoom = defaultSettings.cameraDistance;
+
+    if (dom.settingsMessage) {
+      setText(dom.settingsMessage, 'Paramètres réinitialisés.');
+    }
+
+    scheduleSave();
+  }
+
+  /* ==========================================================
+     COMMANDES CLAVIER
+     ========================================================== */
+
+  function isTypingTarget(target) {
+    if (!target) return false;
+
+    return Boolean(
+      target.closest(
+        'input, textarea, select, button, a, [contenteditable="true"]'
+      )
+    );
+  }
+
+  function releaseAllInputs() {
+    Object.keys(state.input).forEach((key) => {
+      if (key === 'keys') return;
+
+      state.input[key] = false;
+    });
+
+    state.input.keys.clear();
+  }
+
+  function handleKeyDown(event) {
+    if (isTypingTarget(event.target)) return;
+
+    const key = event.key.toLowerCase();
+
+    const controls = [
+      'arrowup',
+      'arrowdown',
+      'arrowleft',
+      'arrowright',
+      ' ',
+      'shift'
+    ];
+
+    if (controls.includes(key)) {
+      event.preventDefault();
+    }
+
+    state.input.keys.add(key);
+
+    if (key === 'w' || key === 'arrowup') {
+      state.input.accelerate = true;
+    }
+
+    if (key === 's' || key === 'arrowdown') {
+      state.input.reverse = true;
+    }
+
+    if (key === 'a' || key === 'arrowleft') {
+      state.input.left = true;
+    }
+
+    if (key === 'd' || key === 'arrowright') {
+      state.input.right = true;
+    }
+
+    if (key === ' ') {
+      state.input.brake = true;
+    }
+
+    if (key === 'shift') {
+      state.input.handbrake = true;
+    }
+
+    if (key === 'escape') {
+      if (state.running && !state.paused) {
+        pauseGame();
+      } else if (state.paused) {
+        resumeGame();
+      }
+    }
+
+    if (key === 'e') {
+      interact();
     }
   }
 
-  /* ============================================================
-     SVG : AMÉLIORATIONS VISUELLES SANS BIBLIOTHÈQUE
-     ============================================================ */
+  function handleKeyUp(event) {
+    const key = event.key.toLowerCase();
 
-  function enhanceInlineSVG() {
-    $$("svg").forEach((svg) => {
-      if (!svg.getAttribute("viewBox")) {
-        const width = Number(svg.getAttribute("width")) || 100;
-        const height = Number(svg.getAttribute("height")) || 100;
-        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    state.input.keys.delete(key);
+
+    if (key === 'w' || key === 'arrowup') {
+      state.input.accelerate = false;
+    }
+
+    if (key === 's' || key === 'arrowdown') {
+      state.input.reverse = false;
+    }
+
+    if (key === 'a' || key === 'arrowleft') {
+      state.input.left = false;
+    }
+
+    if (key === 'd' || key === 'arrowright') {
+      state.input.right = false;
+    }
+
+    if (key === ' ') {
+      state.input.brake = false;
+    }
+
+    if (key === 'shift') {
+      state.input.handbrake = false;
+    }
+  }
+
+  function bindHoldButton(element, inputName) {
+    if (!element) return;
+
+    const start = (event) => {
+      event.preventDefault();
+
+      state.input[inputName] = true;
+
+      try {
+        element.setPointerCapture(event.pointerId);
+      } catch (_) {
+        // Capture facultative selon le navigateur.
       }
+    };
 
-      if (!svg.hasAttribute("preserveAspectRatio")) {
-        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-      }
+    const end = (event) => {
+      if (event) event.preventDefault();
 
-      svg.style.maxWidth = svg.style.maxWidth || "100%";
-      svg.style.height = svg.style.height || "auto";
+      state.input[inputName] = false;
+    };
+
+    element.addEventListener('pointerdown', start);
+    element.addEventListener('pointerup', end);
+    element.addEventListener('pointercancel', end);
+    element.addEventListener('lostpointercapture', end);
+    element.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
     });
   }
 
-  /* ============================================================
-     ACCESSIBILITÉ ET SÉCURITÉ DES COMMANDES
-     ============================================================ */
+  /* ==========================================================
+     ZOOM TACTILE À DEUX DOIGTS
+     ========================================================== */
 
-  function setupGlobalSafety() {
-    document.addEventListener("visibilitychange", () => {
+  function initializePinchZoom() {
+    const canvas = () => state.renderer?.canvas;
+
+    let initialDistance = 0;
+    let initialZoom = state.camera.zoom;
+
+    function distanceBetweenTouches(touches) {
+      const a = touches[0];
+      const b = touches[1];
+
+      return Math.hypot(
+        b.clientX - a.clientX,
+        b.clientY - a.clientY
+      );
+    }
+
+    document.addEventListener(
+      'touchstart',
+      (event) => {
+        if (!state.settings.touchZoomEnabled) return;
+        if (state.screen !== 'gameScreen') return;
+        if (event.touches.length !== 2) return;
+
+        initialDistance = distanceBetweenTouches(event.touches);
+        initialZoom = state.camera.targetZoom;
+      },
+      { passive: true }
+    );
+
+    document.addEventListener(
+      'touchmove',
+      (event) => {
+        if (!state.settings.touchZoomEnabled) return;
+        if (state.screen !== 'gameScreen') return;
+        if (event.touches.length !== 2) return;
+
+        const currentCanvas = canvas();
+
+        if (!currentCanvas) return;
+
+        const distance = distanceBetweenTouches(event.touches);
+
+        if (initialDistance <= 0) return;
+
+        const ratio = initialDistance / Math.max(distance, 1);
+
+        state.camera.targetZoom = clamp(
+          initialZoom * ratio,
+          4,
+          12
+        );
+
+        state.camera.zoom = lerp(
+          state.camera.zoom,
+          state.camera.targetZoom,
+          0.3
+        );
+
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    document.addEventListener('touchend', (event) => {
+      if (event.touches.length < 2) {
+        initialDistance = 0;
+      }
+    });
+  }
+
+  /* ==========================================================
+     CAMÉRA ET INTERACTION
+     ========================================================== */
+
+  function toggleCamera() {
+    state.camera.mode = state.camera.mode === 0 ? 1 : 0;
+
+    toast(
+      state.camera.mode === 0
+        ? 'Caméra arrière'
+        : 'Caméra rapprochée'
+    );
+  }
+
+  function interact() {
+    if (!state.running || state.paused) return;
+
+    const nearest = state.collected.find((item) => {
+      const z = item.z + state.vehicle.distance;
+
+      return (
+        !item.collected &&
+        Math.abs(z) < 8 &&
+        Math.abs(item.x - state.vehicle.x) < 3
+      );
+    });
+
+    if (nearest) {
+      nearest.collected = true;
+      state.credits += 10;
+
+      notify('Interaction réussie', 'Vous avez récupéré 10 crédits.');
+
+      scheduleSave();
+
+      return;
+    }
+
+    notify(
+      'Aucune interaction',
+      'Continuez sur la route et approchez-vous des objets.'
+    );
+  }
+
+  /* ==========================================================
+     PAUSE ET RÉSULTATS
+     ========================================================== */
+
+  function pauseGame() {
+    if (!state.running || state.paused) return;
+
+    state.paused = true;
+
+    releaseAllInputs();
+    show(dom.pauseOverlay);
+  }
+
+  function resumeGame() {
+    if (state.completed) return;
+
+    state.paused = false;
+
+    hide(dom.pauseOverlay);
+
+    state.lastFrame = performance.now();
+  }
+
+  function exitToMenu() {
+    openConfirm(
+      'Quitter la mission ?',
+      'Votre progression sera sauvegardée si IndexedDB est disponible.',
+      async () => {
+        await saveGame(false);
+        openMainMenu();
+      }
+    );
+  }
+
+  /* ==========================================================
+     ÉVÉNEMENTS ET BOUTONS HTML
+     ========================================================== */
+
+  function bindEvents() {
+    dom.brandHomeButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      if (state.running) {
+        exitToMenu();
+      } else {
+        openMainMenu();
+      }
+    });
+
+    dom.newGameButton?.addEventListener('click', () => {
+      startMission(0);
+    });
+
+    dom.continueGameButton?.addEventListener('click', () => {
+      if (!state.saveAvailable) {
+        toast('Aucune sauvegarde disponible.');
+        return;
+      }
+
+      startMission(
+        clamp(state.currentMission, 0, missions.length - 1)
+      );
+    });
+
+    dom.missionsMenuButton?.addEventListener('click', () => {
+      navigate('missionsScreen');
+    });
+
+    dom.garageMenuButton?.addEventListener('click', () => {
+      navigate('garageScreen');
+    });
+
+    dom.settingsMenuButton?.addEventListener('click', () => {
+      navigate('settingsScreen');
+    });
+
+    dom.helpMenuButton?.addEventListener('click', () => {
+      navigate('helpScreen');
+    });
+
+    document.querySelectorAll('[data-back-menu]').forEach((button) => {
+      button.addEventListener('click', openMainMenu);
+    });
+
+    document.querySelectorAll('[data-start-mission]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const id = button.dataset.startMission;
+
+        const index = missions.findIndex((mission) => mission.id === id);
+
+        if (index !== -1) {
+          startMission(index);
+        }
+      });
+    });
+
+    dom.headerPauseButton?.addEventListener('click', pauseGame);
+    dom.gamePauseButton?.addEventListener('click', pauseGame);
+
+    dom.backToMenuButton?.addEventListener('click', exitToMenu);
+
+    dom.resumeGameButton?.addEventListener('click', resumeGame);
+
+    dom.pauseSaveButton?.addEventListener('click', async () => {
+      await saveGame(true);
+    });
+
+    dom.pauseRestartButton?.addEventListener('click', () => {
+      openConfirm(
+        'Recommencer la mission ?',
+        'La progression de cette mission sera remise à zéro.',
+        restartMission
+      );
+    });
+
+    dom.pauseExitButton?.addEventListener('click', exitToMenu);
+
+    dom.resultMenuButton?.addEventListener('click', openMainMenu);
+
+    dom.replayMissionButton?.addEventListener('click', restartMission);
+
+    dom.nextMissionButton?.addEventListener('click', () => {
+      if (state.currentMission < missions.length - 1) {
+        startMission(state.currentMission + 1);
+      }
+    });
+
+    dom.confirmCancelButton?.addEventListener('click', closeConfirm);
+
+    dom.confirmAcceptButton?.addEventListener('click', async () => {
+      const action = state.confirmAction;
+
+      closeConfirm();
+
+      if (typeof action === 'function') {
+        await action();
+      }
+    });
+
+    dom.closeToastButton?.addEventListener('click', () => {
+      hide(dom.globalToast);
+    });
+
+    dom.saveStatusButton?.addEventListener('click', () => {
+      saveGame(true);
+    });
+
+    dom.footerSaveButton?.addEventListener('click', () => {
+      saveGame(true);
+    });
+
+    dom.repairVehicleButton?.addEventListener('click', repairVehicle);
+    dom.upgradeVehicleButton?.addEventListener('click', upgradeVehicle);
+
+    dom.saveSettingsButton?.addEventListener('click', saveSettings);
+    dom.resetSettingsButton?.addEventListener('click', resetSettings);
+
+    [
+      dom.graphicsQuality,
+      dom.cameraDistance,
+      dom.steeringSensitivity,
+      dom.gameVolume,
+      dom.vibrationEnabled,
+      dom.touchZoomEnabled,
+      dom.showSubtitles
+    ].forEach((element) => {
+      element?.addEventListener('input', () => {
+        readSettingsControls();
+      });
+
+      element?.addEventListener('change', () => {
+        readSettingsControls();
+      });
+    });
+
+    dom.toggleObjectivesButton?.addEventListener('click', () => {
+      const isHidden = dom.objectiveList?.hidden || false;
+
+      if (dom.objectiveList) {
+        dom.objectiveList.hidden = !isHidden;
+      }
+
+      const expanded = isHidden;
+
+      dom.toggleObjectivesButton.setAttribute(
+        'aria-expanded',
+        String(expanded)
+      );
+
+      dom.toggleObjectivesButton.textContent = expanded ? '−' : '+';
+    });
+
+    dom.toggleMinimapButton?.addEventListener('click', () => {
+      const isHidden = dom.minimapCanvas?.hidden || false;
+
+      if (dom.minimapCanvas) {
+        dom.minimapCanvas.hidden = !isHidden;
+      }
+
+      const expanded = isHidden;
+
+      dom.toggleMinimapButton.setAttribute(
+        'aria-pressed',
+        String(expanded)
+      );
+    });
+
+    dom.memeAbilityButton?.addEventListener('click', useMemeAbility);
+    dom.novaAbilityButton?.addEventListener('click', useNovaAbility);
+    dom.axelAbilityButton?.addEventListener('click', useAxelAbility);
+
+    dom.cameraModeButton?.addEventListener('click', toggleCamera);
+
+    dom.handbrakeButton?.addEventListener('pointerdown', () => {
+      state.input.handbrake = true;
+    });
+
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((name) => {
+      dom.handbrakeButton?.addEventListener(name, () => {
+        state.input.handbrake = false;
+      });
+    });
+
+    dom.interactButton?.addEventListener('click', interact);
+
+    bindHoldButton(dom.steerLeftButton, 'left');
+    bindHoldButton(dom.steerRightButton, 'right');
+    bindHoldButton(dom.brakeButton, 'brake');
+    bindHoldButton(dom.accelerateButton, 'accelerate');
+    bindHoldButton(dom.reverseButton, 'reverse');
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    window.addEventListener('blur', releaseAllInputs);
+
+    document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        releaseAllControls();
+        releaseAllInputs();
 
-        if (game.screen === "gameScreen" && game.playing) {
-          togglePause(true);
+        if (state.running && !state.paused) {
+          pauseGame();
         }
 
         saveGame(false);
       }
     });
 
-    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener('resize', resizeRenderer);
 
-    window.addEventListener("beforeunload", () => {
-      releaseAllControls();
+    window.addEventListener('beforeunload', () => {
+      releaseAllInputs();
     });
 
-    document.addEventListener("contextmenu", (event) => {
-      if (event.target.closest(".touch-controls")) {
-        event.preventDefault();
-      }
+    dom.loadingRetryButton?.addEventListener('click', () => {
+      location.reload();
     });
   }
 
-  /* ============================================================
+  /* ==========================================================
      INITIALISATION
-     ============================================================ */
+     ========================================================== */
 
   async function init() {
     try {
+      setLoadingProgress(8, 'Initialisation des systèmes…');
+
+      bindEvents();
+
+      setLoadingProgress(22, 'Chargement de la sauvegarde…');
+
       await initializeStorage();
+
+      setLoadingProgress(48, 'Création du monde 3D…');
+
+      initializeRenderer();
+
+      setLoadingProgress(70, 'Préparation des commandes…');
+
+      initializePinchZoom();
+
+      applySettingsToControls();
+
+      createMissionWorld(0);
+      createObjectives(0);
+
+      setLoadingProgress(90, 'Synchronisation de l’interface…');
+
+      updateHUD();
+      updateMinimap();
+      updateGarage();
+      updateMissionCards();
+      updateMenu();
+
+      setLoadingProgress(100, 'Prêt à jouer !');
+
+      setTimeout(() => {
+        navigate('mainMenu');
+      }, 250);
+
+      startGameLoop();
+
+      console.info(
+        `FOBAS MISSION FORCE UNIE 3D — version ${VERSION} initialisée.`
+      );
     } catch (error) {
-      console.warn(error);
+      console.error('Erreur initialisation FOBAS :', error);
+
+      setConnection('Erreur graphique', false);
+
+      showLoadingError(
+        `Impossible d’initialiser le jeu : ${error.message}`
+      );
+
+      if (dom.sceneFallback) {
+        show(dom.sceneFallback);
+      }
     }
-
-    try {
-      initWebGL();
-
-      const fallback = $("sceneFallback");
-      if (fallback) fallback.hidden = true;
-    } catch (error) {
-      showGraphicsError(error);
-    }
-
-    bindButtons();
-    bindSettings();
-    setupKeyboard();
-    setupTouchControls();
-    setupPinchZoom();
-    setupGlobalSafety();
-    enhanceInlineSVG();
-
-    updateInterface();
-
-    if ($("loadingScreen")) {
-      $("loadingScreen").hidden = true;
-    }
-
-    showScreen("mainMenu");
-
-    if (!game.webglAvailable) {
-      toast("Mode de secours : le moteur WebGL n'a pas démarré.");
-    }
-
-    game.initialized = true;
-    game.lastFrame = now();
-
-    if (!game.animationFrame) {
-      game.animationFrame = requestAnimationFrame(frame);
-    }
-
-    console.info(`${APP.name} ${APP.version} initialisé.`);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init, { once: true });
-  } else {
-    init();
-  }
-
+  return {
+    init,
+    startMission,
+    saveGame,
+    pauseGame,
+    resumeGame,
+    getState: () => state
+  };
 })();
+
+/* ============================================================
+   DÉMARRAGE
+   ============================================================ */
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    FOBAS_GAME.init();
+  }, { once: true });
+} else {
+  FOBAS_GAME.init();
+}
+
+
+
+
+
+
 
 
