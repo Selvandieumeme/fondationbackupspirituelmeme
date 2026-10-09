@@ -1428,3 +1428,302 @@
         gap: 5px;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =====================================================
+   FOBAS DOMINO 3D — KOREKSYON VIZIBILITE SOU TAB LA
+   Mete blòk sa a nan TOUT FEN fichye CSS la.
+   ===================================================== */
+
+/* Viewport kote tab jwèt la ye */
+#tableViewport,
+.table-viewport {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+/* Tab la ak sifas vèt la pa dwe kouvri chèn pyès yo */
+#tableWorld,
+#dominoApp #tableWorld {
+    position: absolute;
+    inset: 0;
+}
+
+/* Dekorasyon tab yo pa dwe bloke domino yo */
+.table-rim,
+.table-felt,
+.felt-texture,
+.table-logo,
+.table-center-mark {
+    pointer-events: none;
+}
+
+/* Chèn domino yo dwe rete vizib anlè dekorasyon tab la */
+#dominoChain,
+.domino-chain {
+    position: absolute;
+    z-index: 20;
+    top: 50%;
+    left: 50%;
+    width: 82%;
+    max-width: 82%;
+    max-height: 42%;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    align-content: center;
+    gap: 7px;
+
+    padding: 10px;
+    overflow-x: auto;
+    overflow-y: auto;
+
+    transform: translate(-50%, -50%);
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+}
+
+/* Chak domino ki deja jwe dwe gen yon bwat vizib */
+#dominoChain .domino-tile,
+.domino-chain .domino-tile,
+.played-domino .domino-tile {
+    position: relative;
+    z-index: 21;
+
+    display: inline-flex;
+    flex: 0 0 43px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+
+    width: 43px;
+    height: 76px;
+    min-width: 43px;
+    min-height: 76px;
+    box-sizing: border-box;
+
+    padding: 3px;
+    overflow: visible;
+
+    border: 2px solid #c3b99f;
+    border-radius: 7px;
+    background: linear-gradient(145deg, #fffef8, #e8e2d3);
+    color: #17231d;
+
+    box-shadow:
+        0 3px 6px rgba(0, 0, 0, .30),
+        inset 0 1px 2px rgba(255, 255, 255, .95);
+
+    opacity: 1;
+    visibility: visible;
+    filter: none;
+}
+
+/* Mwatye domino yo dwe rete andedan pyès la */
+#dominoChain .domino-half,
+.domino-chain .domino-half,
+.played-domino .domino-half {
+    position: relative;
+    display: block;
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Liy separasyon ant de mwatye yo */
+#dominoChain .domino-divider,
+.domino-chain .domino-divider,
+.played-domino .domino-divider,
+#dominoChain .tile-divider,
+.domino-chain .tile-divider {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    left: 7%;
+    width: 86%;
+    height: 2px;
+    min-height: 2px;
+    margin: 0;
+    transform: translateY(-50%);
+    background: #a59b84;
+    pointer-events: none;
+}
+
+/* Pwen yo rete nwa, vizib epi byen defini */
+#dominoChain .pip,
+.domino-chain .pip,
+.played-domino .pip {
+    position: absolute;
+    display: block;
+    width: 7px;
+    height: 7px;
+    min-width: 7px;
+    min-height: 7px;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+
+    border: 1px solid rgba(0, 0, 0, .25);
+    border-radius: 50%;
+    background: #101b14;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .30);
+
+    opacity: 1;
+    visibility: visible;
+    filter: none;
+    pointer-events: none;
+}
+
+/* Non jwè ki parèt anba domino a */
+#dominoChain .played-domino,
+.domino-chain .played-domino {
+    position: relative;
+    z-index: 22;
+    display: inline-flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    overflow: visible;
+}
+
+#dominoChain .played-owner,
+.domino-chain .played-owner {
+    position: relative;
+    z-index: 23;
+    display: block;
+    max-width: 70px;
+    color: #fff8e8;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-shadow: 0 1px 3px #000;
+    overflow-wrap: anywhere;
+}
+
+/* Chèn domino a dwe vizib menm lè JavaScript la mete klas sa yo */
+#dominoChain .hidden,
+.domino-chain .hidden {
+    display: none !important;
+}
+
+/* Men jwè a rete separe ak domino ki sou tab la */
+#handTiles,
+.hand-tiles {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Pi gwo domino nan men jwè a */
+#handTiles .domino-tile,
+.hand-tiles .domino-tile {
+    position: relative;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 86px;
+    min-width: 48px;
+    min-height: 86px;
+    box-sizing: border-box;
+}
+
+/* Pozisyon jwè yo pa dwe pase devan chèn nan */
+.opponent,
+.human-seat {
+    z-index: 5;
+}
+
+/* Endikatè tou a rete anlè tab la, san li pa kouvri tout chèn nan */
+.turn-indicator {
+    z-index: 6;
+    max-width: 75%;
+    white-space: normal;
+    pointer-events: none;
+}
+
+/* Telefòn Android */
+@media (max-width: 760px) {
+    #dominoChain,
+    .domino-chain {
+        width: 88%;
+        max-width: 88%;
+        max-height: 39%;
+        gap: 5px;
+        padding: 6px;
+    }
+
+    #dominoChain .domino-tile,
+    .domino-chain .domino-tile,
+    .played-domino .domino-tile {
+        flex-basis: 37px;
+        width: 37px;
+        height: 65px;
+        min-width: 37px;
+        min-height: 65px;
+    }
+
+    #dominoChain .pip,
+    .domino-chain .pip,
+    .played-domino .pip {
+        width: 5px;
+        height: 5px;
+        min-width: 5px;
+        min-height: 5px;
+    }
+}
+
+@media (max-width: 390px) {
+    #dominoChain,
+    .domino-chain {
+        gap: 4px;
+        padding: 4px;
+    }
+
+    #dominoChain .domino-tile,
+    .domino-chain .domino-tile,
+    .played-domino .domino-tile {
+        flex-basis: 33px;
+        width: 33px;
+        height: 59px;
+        min-width: 33px;
+        min-height: 59px;
+    }
+}
