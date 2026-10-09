@@ -1220,3 +1220,211 @@
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   FOBAS DOMINO 3D — KOREKSYON VIZIBILITE PYES YO
+   Konpatib ak tileMarkup() ak halfMarkup() nan JavaScript
+   ========================================================= */
+
+#dominoApp .domino-tile {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+
+    width: 52px;
+    height: 92px;
+    min-width: 52px;
+    min-height: 92px;
+
+    box-sizing: border-box;
+    padding: 4px;
+    gap: 0;
+    overflow: visible;
+
+    background: linear-gradient(145deg, #fffef8 0%, #e8e2d3 100%);
+    color: #17231d;
+    border: 2px solid #c3b99f;
+    border-radius: 8px;
+
+    box-shadow:
+        0 3px 6px rgba(0, 0, 0, 0.24),
+        inset 0 1px 1px rgba(255, 255, 255, 0.95);
+
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#dominoApp .domino-tile .domino-half {
+    position: relative;
+    display: block;
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+#dominoApp .domino-tile .domino-divider {
+    position: relative;
+    display: block;
+    flex: 0 0 2px;
+    width: 88%;
+    height: 2px;
+    min-height: 2px;
+    align-self: center;
+    margin: 0;
+    background: #8f8877;
+    border-radius: 2px;
+    z-index: 2;
+}
+
+/* Pwen yo dwe rete vizib epi santre sou chak pozisyon. */
+#dominoApp .domino-tile .pip {
+    position: absolute !important;
+    display: block !important;
+
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px;
+    min-height: 8px;
+
+    padding: 0;
+    margin: 0;
+    border: 1px solid rgba(0, 0, 0, 0.24);
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle at 32% 28%,
+        #46564b 0%,
+        #15251c 52%,
+        #050b07 100%
+    ) !important;
+
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Seleksyon: mete pyès ou chwazi a an evidans. */
+#dominoApp .domino-tile.is-selected {
+    border: 3px solid #ffd166;
+    box-shadow:
+        0 0 0 3px rgba(255, 209, 102, 0.3),
+        0 5px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-5px);
+}
+
+#dominoApp .domino-tile:disabled {
+    cursor: default;
+}
+
+#dominoApp .domino-tile.is-disabled {
+    opacity: 0.85;
+}
+
+/* Men jwè a: konsève bon espasman ant pyès yo. */
+#dominoApp .hand-tiles {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+    padding: 12px 8px 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+#dominoApp .hand-tiles .domino-tile {
+    flex-shrink: 0;
+}
+
+/* Chèn domino ki sou tab la. */
+#dominoApp .domino-chain {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    overflow: auto;
+    scrollbar-width: thin;
+}
+
+#dominoApp .played-domino {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    gap: 3px;
+}
+
+#dominoApp .played-domino .domino-tile {
+    width: 43px;
+    height: 76px;
+    min-width: 43px;
+    min-height: 76px;
+    padding: 3px;
+}
+
+#dominoApp .played-owner {
+    color: #fff;
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 700;
+    text-shadow: 0 1px 3px #000;
+}
+
+/* Telefòn Android ki gen ekran etwat. */
+@media (max-width: 480px) {
+    #dominoApp .hand-tiles .domino-tile {
+        width: 48px;
+        height: 86px;
+        min-width: 48px;
+        min-height: 86px;
+    }
+
+    #dominoApp .hand-tiles .domino-tile .pip {
+        width: 7px !important;
+        height: 7px !important;
+        min-width: 7px;
+        min-height: 7px;
+    }
+
+    #dominoApp .played-domino .domino-tile {
+        width: 39px;
+        height: 68px;
+        min-width: 39px;
+        min-height: 68px;
+    }
+
+    #dominoApp .domino-chain {
+        gap: 5px;
+    }
+}
