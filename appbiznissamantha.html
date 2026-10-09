@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+
+    <meta name="theme-color" content="#101827">
+    <meta name="description"
+          content="AppBiznis Samantha - Gestion des achats, ventes, stocks et bénéfices.">
+
+    <title>AppBiznis Samantha | Gestion commerciale</title>
+
+    <!-- Fichye CSS prensipal la -->
+    <link rel="stylesheet" href="appbiznissamantha.css">
+
+    <!-- Ikon SVG lokal, san depandans sou bibliyotèk ekstèn -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%236ee7b7'/%3E%3Cstop offset='1' stop-color='%23059669'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='25' fill='%23101827'/%3E%3Cpath d='M50 17 78 33 78 67 50 83 22 67 22 33Z' fill='url(%23g)'/%3E%3Cpath d='M36 62 49 34 64 62 M41 52 H59' fill='none' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <!--
+      Aplikasyon an sèvi ak IndexedDB nan premye vèsyon an.
+      Pa gen koneksyon backend ki obligatwa nan fichye HTML sa a.
+    -->
+</head>
+
+<body>
+<div class="app-shell" id="app">
+
+    <!-- ==========================================
+         SIDEBAR / NAVIGATION PRINCIPALE
+    =========================================== -->
+    <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
+
+        <a class="brand" href="#dashboard" data-page="dashboard"
+           aria-label="AppBiznis Samantha - Accueil">
+
+            <span class="brand-icon icon-3d" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none">
+                    <defs>
+                        <linearGradient id="brandGrad" x1="10" y1="8" x2="54" y2="58">
+                            <stop stop-color="#A7F3D0"/>
+                            <stop offset="1" stop-color="#059669"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M32 4 57 18V46L32 60 7 46V18L32 4Z"
+                          fill="url(#brandGrad)"/>
+                    <path d="M20 44 31 19 44 44M24 36H40"
+                          stroke="#FFFFFF" stroke-width="4"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M32 4 57 18 32 32 7 18 32 4Z"
+                          fill="#FFFFFF" fill-opacity=".18"/>
+                </svg>
+            </span>
+
+            <span class="brand-text">
+                <strong>AppBiznis</strong>
+                <span>SAMANTHA</span>
+            </span>
+        </a>
+
+        <div class="sidebar-label">MENU PRINCIPAL</div>
+
+        <nav class="main-navigation" aria-label="Menu principal">
+
+            <button type="button" class="nav-item active"
+                    data-page="dashboard" aria-current="page">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="3" width="8" height="8" rx="2"/>
+                    <rect x="13" y="3" width="8" height="5" rx="2"/>
+                    <rect x="13" y="10" width="8" height="11" rx="2"/>
+                    <rect x="3" y="13" width="8" height="8" rx="2"/>
+                </svg>
+                <span>Dashboard</span>
+            </button>
+
+            <button type="button" class="nav-item" data-page="purchases">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 7h18l-2 13H5L3 7Z"/>
+                    <path d="M8 9V6a4 4 0 0 1 8 0v3"/>
+                    <path d="M12 11v6m-3-3h6"/>
+                </svg>
+                <span>Achats en gros</span>
+            </button>
+
+            <button type="button" class="nav-item" data-page="sales">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="17" rx="3"/>
+                    <path d="M7 8h10M7 12h3m4 0h3M7 16h3m4 0h3"/>
+                    <path d="M8 2v4m8-4v4"/>
+                </svg>
+                <span>Ventes du jour</span>
+                <span class="nav-counter" id="todaySalesCount">0</span>
+            </button>
+
+            <button type="button" class="nav-item" data-page="products">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m12 3 9 5-9 5-9-5 9-5Z"/>
+                    <path d="m3 12 9 5 9-5M3 16l9 5 9-5"/>
+                </svg>
+                <span>Mes 50 produits</span>
+            </button>
+
+            <button type="button" class="nav-item" data-page="inventory">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 7h16v14H4z"/>
+                    <path d="M8 7V4h8v3M8 12h8m-8 4h5"/>
+                    <path d="M2 7h20"/>
+                </svg>
+                <span>Gestion du stock</span>
+            </button>
+
+            <div class="sidebar-label sidebar-label-spaced">
+                FINANCES &amp; RAPPORTS
+            </div>
+
+            <button type="button" class="nav-item" data-page="expenses">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="15" rx="3"/>
+                    <path d="M3 10h18m-13 5h4"/>
+                    <path d="M7 5V3h10v2"/>
+                </svg>
+                <span>Dépenses</span>
+            </button>
+
+            <button type="button" class="nav-item" data-page="reports">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 20V10m6 10V4m6 16v-7m5 7H2"/>
+                    <path d="m3 7 5-4 5 5 7-6"/>
+                </svg>
+                <span>Rapports détaillés</span>
+            </button>
+
+            <button type="button" class="nav-item" data-page="history">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3 2M3 4v5h5"/>
+                </svg>
+                <span>Historique</span>
+            </button>
+
+            <div class="sidebar-label sidebar-label-spaced">
+                SYSTÈME
+            </div>
+
+            <button type="button" class="nav-item" data-page="settings">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="m19 13 2 1-2 4-2-1-2 1v3H9v-3l-2-1-2 1-2-4 2-1v-2L3 10l2-4 2 1 2-1V3h6v3l2 1 2-1 2 4-2 1v2Z"/>
+                </svg>
+                <span>Paramètres</span>
+            </button>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-status">
+                <span class="status-dot"></span>
+                <span>
+                    <strong>Mode local</strong>
+                    <small>IndexedDB · Préparation</small>
+                </span>
+            </div>
+            <p>AppBiznis Samantha</p>
+            <p class="version-text">Version 1.0.0</p>
+        </div>
+    </aside>
+
+
+    <!-- ==========================================
+         CONTENU PRINCIPAL
+    =========================================== -->
+    <main class="main-content">
+
+        <!-- BARRE SUPÉRIEURE -->
+        <header class="topbar">
+
+            <div class="topbar-left">
+                <button type="button" class="icon-button menu-toggle"
+                        id="menuToggle" aria-label="Ouvrir le menu"
+                        aria-expanded="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+
+                <div class="breadcrumb">
+                    <span>AppBiznis Samantha</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <strong id="breadcrumbCurrent">Dashboard</strong>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="local-date" id="headerDate">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="3"/>
+                        <path d="M7 3v4m10-4v4M3 10h18"/>
+                    </svg>
+                    <span>Date du jour</span>
+                </div>
+
+                <!-- NOUVEAU BOUTON : SAUVEGARDE MANUELLE -->
+                <button type="button"
+                        class="btn btn-primary save-now-button"
+                        id="saveNowButton"
+                        aria-label="Sauvegarder maintenant les données de l'application"
+                        title="Sauvegarder les données de l'application">
+                    <svg viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/>
+                        <path d="M17 21v-8H7v8"/>
+                        <path d="M7 3v5h8"/>
+                    </svg>
+                    <span>Sauvegarder maintenant</span>
+                </button>
+
+                <!-- Montre la dernière sauvegarde une fois JS connecté -->
+                <span id="lastSavedAt"
+                      class="last-saved-at"
+                      aria-live="polite">
+                    Aucune sauvegarde récente
+                </span>
+
+                <button type="button" class="icon-button"
+                        id="refreshButton" aria-label="Actualiser les données">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20 7v5h-5M4 17v-5h5"/>
+                        <path d="M5.5 9a7 7 0 0 1 12-2L20 12M4 12l2.5 5a7 7 0 0 0 12-2"/>
+                    </svg>
+                </button>
+
+                <button type="button" class="profile-button"
+                        data-page="settings" aria-label="Paramètres du compte">
+                    <span class="profile-avatar">S</span>
+                    <span class="profile-name">Administrateur</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m7 10 5 5 5-5"/>
+                    </svg>
+                </button>
+
+            </div>
+        </header>
+
+
+        <!-- ZONE DE NOTIFICATIONS -->
+        <div id="appNotifications" class="notification-region"
+             aria-live="polite" aria-atomic="true"></div>
+
+
+        <!-- ======================================
+             PAGE 1 : DASHBOARD
+        ======================================= -->
+        <section class="page-section active"
+                 id="page-dashboard"
+                 data-section="dashboard">
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">VOTRE ACTIVITÉ COMMERCIALE</span>
+                    <h1>Dashboard</h1>
+                    <p>Suivez vos ventes, vos achats et votre stock en un seul endroit.</p>
+                </div>
+
+                <div class="heading-actions">
+                    <button type="button" class="btn btn-primary"
+                            data-page="sales">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Nouvelle vente
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARTES STATISTIQUES -->
+            <div class="stats-grid">
+
+                <article class="stat-card stat-card-sales">
+                    <div class="stat-top">
+                        <span class="stat-label">Ventes du jour</span>
+                        <span class="stat-icon icon-3d icon-green">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 7h18l-2 13H5L3 7Z"/>
+                                <path d="M8 9V6a4 4 0 0 1 8 0v3"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <strong class="stat-value" id="dashboardTodaySales">0 G</strong>
+                    <span class="stat-description">Montant total encaissé</span>
+                </article>
+
+                <article class="stat-card stat-card-profit">
+                    <div class="stat-top">
+                        <span class="stat-label">Bénéfice brut du jour</span>
+                        <span class="stat-icon icon-3d icon-blue">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 17 9 11l4 4 8-9"/>
+                                <path d="M15 6h6v6"/>
+                                <path d="M4 21h16"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <strong class="stat-value" id="dashboardTodayProfit">0 G</strong>
+                    <span class="stat-description">Avant déduction des dépenses</span>
+                </article>
+
+                <article class="stat-card stat-card-stock">
+                    <div class="stat-top">
+                        <span class="stat-label">Valeur du stock</span>
+                        <span class="stat-icon icon-3d icon-purple">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m12 3 9 5-9 5-9-5 9-5Z"/>
+                                <path d="m3 12 9 5 9-5m-18 4 9 5 9-5"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <strong class="stat-value" id="dashboardStockValue">0 G</strong>
+                    <span class="stat-description">Évaluée au coût d'achat</span>
+                </article>
+
+                <article class="stat-card stat-card-alert">
+                    <div class="stat-top">
+                        <span class="stat-label">Produits en rupture</span>
+                        <span class="stat-icon icon-3d icon-orange">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 3 22 20H2L12 3Z"/>
+                                <path d="M12 9v5m0 3h.01"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <strong class="stat-value" id="dashboardOutOfStock">0</strong>
+                    <span class="stat-description">Produits à réapprovisionner</span>
+                </article>
+
+            </div>
+
+
+            <!-- RACCOURCIS -->
+            <div class="section-title-row">
+                <div>
+                    <h2>Accès rapides</h2>
+                    <p>Les opérations essentielles de votre commerce.</p>
+                </div>
+            </div>
+
+            <div class="quick-actions-grid">
+
+                <button type="button" class="quick-action-card"
+                        data-page="purchases">
+                    <span class="quick-action-icon icon-3d icon-green">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M3 7h18l-2 13H5L3 7Z"/>
+                            <path d="M8 9V6a4 4 0 0 1 8 0v3"/>
+                            <path d="M12 11v5m-2.5-2.5h5"/>
+                        </svg>
+                    </span>
+                    <strong>Nouvel achat</strong>
+                    <span>Enregistrer une livraison</span>
+                </button>
+
+                <button type="button" class="quick-action-card"
+                        data-page="sales">
+                    <span class="quick-action-icon icon-3d icon-blue">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="3"/>
+                            <path d="M7 8h10M7 12h3m4 0h3M7 16h3m4 0h3"/>
+                        </svg>
+                    </span>
+                    <strong>Enregistrer une vente</strong>
+                    <span>Choisir un produit et sa quantité</span>
+                </button>
+
+                <button type="button" class="quick-action-card"
+                        data-page="inventory">
+                    <span class="quick-action-icon icon-3d icon-purple">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m12 3 9 5-9 5-9-5 9-5Z"/>
+                            <path d="m3 12 9 5 9-5m-18 4 9 5 9-5"/>
+                        </svg>
+                    </span>
+                    <strong>Vérifier le stock</strong>
+                    <span>Quantités restantes et ruptures</span>
+                </button>
+
+                <button type="button" class="quick-action-card"
+                        data-page="reports">
+                    <span class="quick-action-icon icon-3d icon-orange">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 20V10m6 10V4m6 16v-7m5 7H2"/>
+                        </svg>
+                    </span>
+                    <strong>Voir les rapports</strong>
+                    <span>Résultats par période</span>
+                </button>
+
+            </div>
+
+
+            <!-- ACTIVITÉ RÉCENTE -->
+            <div class="content-grid dashboard-bottom">
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Dernières ventes</h2>
+                            <p>Historique des transactions récentes</p>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-small"
+                                data-page="history">Tout voir</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Produit</th>
+                                <th>Qté</th>
+                                <th>Montant</th>
+                                <th>Bénéfice</th>
+                            </tr>
+                            </thead>
+                            <tbody id="dashboardRecentSales">
+                            <tr class="empty-row">
+                                <td colspan="5">Aucune vente enregistrée.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Alertes de stock</h2>
+                            <p>Produits à surveiller</p>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-small"
+                                data-page="inventory">Voir le stock</button>
+                    </div>
+
+                    <div class="stock-alert-list" id="dashboardStockAlerts">
+                        <div class="empty-state">
+                            <span class="empty-state-icon">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="m12 3 9 5-9 5-9-5 9-5Z"/>
+                                    <path d="m3 12 9 5 9-5m-18 4 9 5 9-5"/>
+                                </svg>
+                            </span>
+                            <p>Les alertes apparaîtront ici.</p>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 2 : ACHATS EN GROS
+        ======================================= -->
+        <section class="page-section"
+                 id="page-purchases"
+                 data-section="purchases" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">APPROVISIONNEMENT</span>
+                    <h1>Achats en gros</h1>
+                    <p>Enregistrez vos achats et mettez le stock à jour.</p>
+                </div>
+                <span class="section-badge">Espace 1</span>
+            </div>
+
+            <div class="notice-card notice-info">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 11v5m0-8h.01"/>
+                </svg>
+                <p>
+                    Les achats validés augmenteront automatiquement le stock
+                    disponible des produits concernés.
+                </p>
+            </div>
+
+            <article class="panel form-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Nouvel achat</h2>
+                        <p>Informations sur la livraison ou l'achat en gros.</p>
+                    </div>
+                </div>
+
+                <form id="purchaseForm">
+
+                    <div class="form-grid">
+
+                        <div class="form-field">
+                            <label for="purchaseDate">Date de l'achat</label>
+                            <input type="date" id="purchaseDate"
+                                   name="purchaseDate" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="purchaseSupplier">Fournisseur</label>
+                            <input type="text" id="purchaseSupplier"
+                                   name="supplier"
+                                   placeholder="Nom du fournisseur">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="purchaseReference">Référence / facture</label>
+                            <input type="text" id="purchaseReference"
+                                   name="reference"
+                                   placeholder="N° de facture, facultatif">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="purchaseCurrency">Devise</label>
+                            <select id="purchaseCurrency" name="currency">
+                                <option value="HTG">Gourde haïtienne (HTG)</option>
+                                <option value="USD">Dollar américain (USD)</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="form-divider"></div>
+
+                    <div class="panel-subheading">
+                        <div>
+                            <h3>Produits achetés</h3>
+                            <p>Ajoutez les produits de cette livraison.</p>
+                        </div>
+
+                        <button type="button" class="btn btn-outline btn-small"
+                                id="addPurchaseItem">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Ajouter un produit
+                        </button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table editable-table">
+                            <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Qté achetée</th>
+                                <th>Prix d'achat / unité</th>
+                                <th>Total achat</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody id="purchaseItemsBody">
+                            <!-- Lignes ajoutées dynamiquement par JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="purchase-summary">
+                        <span>Montant total de l'achat</span>
+                        <strong id="purchaseGrandTotal">0,00 G</strong>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-outline"
+                                id="resetPurchaseForm">
+                            Réinitialiser
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m5 12 4 4L19 6"/>
+                            </svg>
+                            Enregistrer l'achat
+                        </button>
+                    </div>
+
+                </form>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Historique des achats</h2>
+                        <p>Les livraisons enregistrées dans le système.</p>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-small"
+                            id="exportPurchasesButton">
+                        Exporter
+                    </button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Référence</th>
+                            <th>Fournisseur</th>
+                            <th>Articles</th>
+                            <th>Montant total</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="purchaseHistoryBody">
+                        <tr class="empty-row">
+                            <td colspan="6">Aucun achat enregistré.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 3 : VENTES DU JOUR
+        ======================================= -->
+        <section class="page-section"
+                 id="page-sales"
+                 data-section="sales" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">POINT DE VENTE</span>
+                    <h1>Ventes du jour</h1>
+                    <p>Sélectionnez un produit et saisissez la quantité vendue.</p>
+                </div>
+                <span class="section-badge section-badge-green">Espace 2</span>
+            </div>
+
+            <div class="notice-card notice-success">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="m8 12 3 3 5-6"/>
+                </svg>
+                <p>
+                    La liste des produits provient du catalogue unique.
+                    Chaque vente validée mettra le stock à jour automatiquement.
+                </p>
+            </div>
+
+            <!-- RÉSUMÉ DES VENTES -->
+            <div class="sales-summary-grid">
+
+                <article class="mini-stat-card">
+                    <span>Ventes enregistrées aujourd'hui</span>
+                    <strong id="salesTransactionCount">0</strong>
+                </article>
+
+                <article class="mini-stat-card">
+                    <span>Montant total des ventes</span>
+                    <strong id="salesRevenueTotal">0 G</strong>
+                </article>
+
+                <article class="mini-stat-card">
+                    <span>Bénéfice brut total</span>
+                    <strong id="salesProfitTotal">0 G</strong>
+                </article>
+
+            </div>
+
+            <!-- DATE DE LA TRANSACTION -->
+            <article class="panel sales-date-panel">
+                <div class="form-grid sales-date-grid">
+
+                    <div class="form-field">
+                        <label for="saleDate">Date de vente</label>
+                        <input type="date" id="saleDate"
+                               name="saleDate" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="saleCustomer">Client (facultatif)</label>
+                        <input type="text" id="saleCustomer"
+                               name="customer"
+                               placeholder="Nom du client">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="salePaymentMethod">Mode de paiement</label>
+                        <select id="salePaymentMethod" name="paymentMethod">
+                            <option value="cash">Espèces</option>
+                            <option value="moncash">MonCash</option>
+                            <option value="transfer">Virement / transfert</option>
+                            <option value="credit">Vente à crédit</option>
+                            <option value="other">Autre</option>
+                        </select>
+                    </div>
+
+                </div>
+            </article>
+
+
+            <!-- CATALOGUE DES 50 PRODUITS -->
+            <article class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Catalogue des produits</h2>
+                        <p>Choisissez le produit acheté par votre client.</p>
+                    </div>
+
+                    <span class="product-count-badge" id="salesProductCount">
+                        50 produits
+                    </span>
+                </div>
+
+                <div class="catalogue-toolbar">
+
+                    <div class="search-field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="m16 16 5 5"/>
+                        </svg>
+                        <input type="search" id="salesProductSearch"
+                               placeholder="Rechercher un produit..."
+                               aria-label="Rechercher un produit">
+                    </div>
+
+                    <div class="catalogue-filters">
+                        <select id="salesStockFilter"
+                                aria-label="Filtrer par disponibilité">
+                            <option value="all">Tous les produits</option>
+                            <option value="available">Disponibles</option>
+                            <option value="low">Stock faible</option>
+                            <option value="rupture">En rupture</option>
+                        </select>
+
+                        <select id="salesSortOrder"
+                                aria-label="Trier les produits">
+                            <option value="name">Nom A–Z</option>
+                            <option value="priceAsc">Prix croissant</option>
+                            <option value="priceDesc">Prix décroissant</option>
+                            <option value="stockAsc">Stock croissant</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="product-catalogue" id="salesProductCatalogue"
+                     aria-live="polite">
+
+                    <div class="loading-state">
+                        <span class="loading-spinner" aria-hidden="true"></span>
+                        <p>Chargement du catalogue des produits...</p>
+                    </div>
+
+                </div>
+
+                <div class="catalogue-footer">
+                    <span id="catalogueResultsText">Chargement des produits...</span>
+                </div>
+
+            </article>
+
+
+            <!-- FORMULAIRE DE VENTE -->
+            <article class="panel sale-entry-panel" id="saleEntryPanel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Enregistrer une vente</h2>
+                        <p>Choisissez un produit dans le catalogue ci-dessus.</p>
+                    </div>
+                    <span class="selection-indicator" id="saleSelectionStatus">
+                        Aucun produit sélectionné
+                    </span>
+                </div>
+
+                <form id="saleForm">
+
+                    <input type="hidden" id="saleProductId"
+                           name="productId" value="">
+
+                    <div class="selected-product-card" id="selectedProductCard">
+
+                        <div class="selected-product-icon icon-3d">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m12 3 9 5-9 5-9-5 9-5Z"/>
+                                <path d="m3 12 9 5 9-5m-18 4 9 5 9-5"/>
+                            </svg>
+                        </div>
+
+                        <div class="selected-product-details">
+                            <span class="selected-product-label">Produit sélectionné</span>
+                            <strong id="selectedProductName">Aucun produit</strong>
+                            <span id="selectedProductPrice">Prix de vente : —</span>
+                        </div>
+
+                        <div class="selected-product-stock">
+                            <span>Stock avant vente</span>
+                            <strong id="selectedProductStock">—</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="sale-input-grid">
+
+                        <div class="form-field">
+                            <label for="saleQuantity">Quantité vendue *</label>
+                            <input type="number" id="saleQuantity"
+                                   name="quantity" min="1" step="1"
+                                   placeholder="Ex. : 4" required>
+                            <small>Entrez le nombre d'unités vendues.</small>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="saleUnitPrice">Prix de vente unitaire</label>
+                            <input type="number" id="saleUnitPrice"
+                                   name="unitPrice" min="0" step="0.01"
+                                   placeholder="Prix du produit" required>
+                            <small>Prérempli depuis le catalogue.</small>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="saleDiscount">Remise totale (facultatif)</label>
+                            <input type="number" id="saleDiscount"
+                                   name="discount" min="0" step="0.01"
+                                   value="0">
+                        </div>
+
+                        <div class="form-field">
+                            <label for="saleAmountPaid">Montant reçu</label>
+                            <input type="number" id="saleAmountPaid"
+                                   name="amountPaid" min="0" step="0.01"
+                                   placeholder="Montant payé par le client">
+                        </div>
+
+                    </div>
+
+                    <div class="sale-calculation-grid">
+
+                        <div class="calculation-card">
+                            <span>Stock avant vente</span>
+                            <strong id="saleStockBefore">0</strong>
+                        </div>
+
+                        <div class="calculation-card calculation-card-highlight">
+                            <span>Stock après vente</span>
+                            <strong id="saleStockAfter">—</strong>
+                            <span id="saleStockStatus" class="stock-status">
+                                En attente
+                            </span>
+                        </div>
+
+                        <div class="calculation-card">
+                            <span>Montant total de la vente</span>
+                            <strong id="saleCalculatedTotal">0 G</strong>
+                        </div>
+
+                        <div class="calculation-card">
+                            <span>Bénéfice brut estimé</span>
+                            <strong id="saleCalculatedProfit">0 G</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="notice-card notice-warning"
+                         id="saleStockWarning" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m12 3 9 17H3l9-17Z"/>
+                            <path d="M12 9v5m0 3h.01"/>
+                        </svg>
+                        <p id="saleStockWarningText">
+                            Vérifiez la quantité disponible.
+                        </p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-outline"
+                                id="resetSaleForm">
+                            Annuler la saisie
+                        </button>
+
+                        <button type="submit" class="btn btn-primary"
+                                id="confirmSaleButton" disabled>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="m5 12 4 4L19 6"/>
+                            </svg>
+                            Confirmer la vente
+                        </button>
+                    </div>
+
+                </form>
+
+            </article>
+
+
+            <!-- HISTORIQUE DES VENTES DU JOUR -->
+            <article class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Historique des ventes du jour</h2>
+                        <p>Chaque transaction client reste identifiable.</p>
+                    </div>
+
+                    <button type="button" class="btn btn-outline btn-small"
+                            id="exportSalesButton">
+                        Exporter
+                    </button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Heure</th>
+                            <th>Produit</th>
+                            <th>Qté</th>
+                            <th>Prix unitaire</th>
+                            <th>Total</th>
+                            <th>Bénéfice brut</th>
+                            <th>Stock après</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="todaySalesHistoryBody">
+                        <tr class="empty-row">
+                            <td colspan="8">Aucune vente enregistrée aujourd'hui.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="daily-total-footer">
+                    <span>Total des ventes affichées</span>
+                    <strong id="todaySalesHistoryTotal">0 G</strong>
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 4 : CATALOGUE DES 50 PRODUITS
+        ======================================= -->
+        <section class="page-section"
+                 id="page-products"
+                 data-section="products" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">RÉFÉRENTIEL COMMERCIAL</span>
+                    <h1>Mes 50 produits</h1>
+                    <p>Gérez votre catalogue unique de produits cosmétiques.</p>
+                </div>
+
+                <button type="button" class="btn btn-primary"
+                        id="addProductButton">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Ajouter un produit
+                </button>
+            </div>
+
+            <div class="stats-grid stats-grid-compact">
+
+                <article class="stat-card">
+                    <span class="stat-label">Produits référencés</span>
+                    <strong class="stat-value" id="productsTotalCount">0 / 50</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Produits disponibles</span>
+                    <strong class="stat-value" id="productsAvailableCount">0</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Produits en rupture</span>
+                    <strong class="stat-value" id="productsRuptureCount">0</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Valeur d'achat du stock</span>
+                    <strong class="stat-value" id="productsStockValue">0 G</strong>
+                </article>
+
+            </div>
+
+            <article class="panel">
+
+                <div class="catalogue-toolbar">
+                    <div class="search-field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="m16 16 5 5"/>
+                        </svg>
+                        <input type="search" id="productsSearch"
+                               placeholder="Nom, code ou catégorie..."
+                               aria-label="Rechercher dans les produits">
+                    </div>
+
+                    <button type="button" class="btn btn-outline btn-small"
+                            id="exportProductsButton">
+                        Exporter le catalogue
+                    </button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Produit</th>
+                            <th>Catégorie</th>
+                            <th>Prix d'achat</th>
+                            <th>Prix de vente</th>
+                            <th>Bénéfice / unité</th>
+                            <th>Stock actuel</th>
+                            <th>Valeur du stock</th>
+                            <th>Statut</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                        <tr class="empty-row">
+                            <td colspan="10">Chargement du catalogue...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 5 : INVENTAIRE
+        ======================================= -->
+        <section class="page-section"
+                 id="page-inventory"
+                 data-section="inventory" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">CONTRÔLE DES MARCHANDISES</span>
+                    <h1>Gestion du stock</h1>
+                    <p>Suivez les quantités avant et après chaque mouvement.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid stats-grid-compact">
+
+                <article class="stat-card">
+                    <span class="stat-label">Unités en stock</span>
+                    <strong class="stat-value" id="inventoryUnits">0</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Stock faible</span>
+                    <strong class="stat-value" id="inventoryLowCount">0</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Ruptures de stock</span>
+                    <strong class="stat-value" id="inventoryRuptureCount">0</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Valeur du stock</span>
+                    <strong class="stat-value" id="inventoryStockValue">0 G</strong>
+                </article>
+
+            </div>
+
+            <article class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>État actuel des 50 produits</h2>
+                        <p>Le stock est partagé avec les espaces achats et ventes.</p>
+                    </div>
+
+                    <button type="button" class="btn btn-outline btn-small"
+                            id="exportInventoryButton">
+                        Exporter
+                    </button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Stock initial</th>
+                            <th>Total acheté</th>
+                            <th>Total vendu</th>
+                            <th>Stock actuel</th>
+                            <th>Valeur du stock</th>
+                            <th>Statut</th>
+                        </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody">
+                        <tr class="empty-row">
+                            <td colspan="7">Chargement de l'inventaire...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Journal des mouvements de stock</h2>
+                        <p>Achats, ventes, retours et corrections.</p>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Produit</th>
+                            <th>Type de mouvement</th>
+                            <th>Entrée</th>
+                            <th>Sortie</th>
+                            <th>Stock après</th>
+                            <th>Référence</th>
+                        </tr>
+                        </thead>
+                        <tbody id="stockMovementsBody">
+                        <tr class="empty-row">
+                            <td colspan="7">Aucun mouvement enregistré.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 6 : DÉPENSES
+        ======================================= -->
+        <section class="page-section"
+                 id="page-expenses"
+                 data-section="expenses" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">GESTION FINANCIÈRE</span>
+                    <h1>Dépenses</h1>
+                    <p>Enregistrez les frais liés à votre activité.</p>
+                </div>
+            </div>
+
+            <article class="panel form-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Nouvelle dépense</h2>
+                        <p>Les dépenses seront prises en compte dans le résultat net.</p>
+                    </div>
+                </div>
+
+                <form id="expenseForm">
+
+                    <div class="form-grid">
+
+                        <div class="form-field">
+                            <label for="expenseDate">Date</label>
+                            <input type="date" id="expenseDate"
+                                   name="date" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="expenseCategory">Catégorie</label>
+                            <select id="expenseCategory" name="category" required>
+                                <option value="transport">Transport</option>
+                                <option value="rent">Loyer</option>
+                                <option value="electricity">Électricité</option>
+                                <option value="communication">Communication</option>
+                                <option value="packaging">Emballage</option>
+                                <option value="salary">Salaire</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="expenseDescription">Description</label>
+                            <input type="text" id="expenseDescription"
+                                   name="description"
+                                   placeholder="Détail de la dépense" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="expenseAmount">Montant</label>
+                            <input type="number" id="expenseAmount"
+                                   name="amount" min="0.01"
+                                   step="0.01" required>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Enregistrer la dépense
+                        </button>
+                    </div>
+
+                </form>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Historique des dépenses</h2>
+                        <p>Liste des frais enregistrés.</p>
+                    </div>
+                    <strong id="expensesTotal">Total : 0 G</strong>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Catégorie</th>
+                            <th>Description</th>
+                            <th>Montant</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="expensesTableBody">
+                        <tr class="empty-row">
+                            <td colspan="5">Aucune dépense enregistrée.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 7 : RAPPORTS
+        ======================================= -->
+        <section class="page-section"
+                 id="page-reports"
+                 data-section="reports" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">ANALYSE COMMERCIALE</span>
+                    <h1>Rapports détaillés</h1>
+                    <p>Analysez vos ventes, bénéfices, dépenses et mouvements de stock.</p>
+                </div>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Choisir une période</h2>
+                        <p>Les résultats seront calculés à partir des transactions enregistrées.</p>
+                    </div>
+                </div>
+
+                <form id="reportFilterForm" class="report-filter-form">
+
+                    <div class="form-field">
+                        <label for="reportStartDate">Date de début</label>
+                        <input type="date" id="reportStartDate"
+                               name="startDate" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="reportEndDate">Date de fin</label>
+                        <input type="date" id="reportEndDate"
+                               name="endDate" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="reportPeriod">Période prédéfinie</label>
+                        <select id="reportPeriod" name="period">
+                            <option value="custom">Personnalisée</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                            <option value="year">Cette année</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Générer le rapport
+                    </button>
+
+                </form>
+            </article>
+
+            <div class="stats-grid stats-grid-compact">
+
+                <article class="stat-card">
+                    <span class="stat-label">Chiffre d'affaires</span>
+                    <strong class="stat-value" id="reportRevenue">0 G</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Coût des produits vendus</span>
+                    <strong class="stat-value" id="reportCostOfGoods">0 G</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Bénéfice brut</span>
+                    <strong class="stat-value" id="reportGrossProfit">0 G</strong>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-label">Résultat après dépenses</span>
+                    <strong class="stat-value" id="reportNetProfit">0 G</strong>
+                </article>
+
+            </div>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Ventes par produit</h2>
+                        <p>Quantités vendues et bénéfices réalisés sur la période.</p>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-small"
+                            id="exportReportsButton">
+                        Exporter le rapport
+                    </button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Quantité vendue</th>
+                            <th>Chiffre d'affaires</th>
+                            <th>Coût des ventes</th>
+                            <th>Bénéfice brut</th>
+                        </tr>
+                        </thead>
+                        <tbody id="reportProductsBody">
+                        <tr class="empty-row">
+                            <td colspan="5">Sélectionnez une période pour générer un rapport.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 8 : HISTORIQUE
+        ======================================= -->
+        <section class="page-section"
+                 id="page-history"
+                 data-section="history" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">JOURNAL COMMERCIAL</span>
+                    <h1>Historique des transactions</h1>
+                    <p>Retrouvez les ventes enregistrées dans votre système.</p>
+                </div>
+            </div>
+
+            <article class="panel">
+
+                <div class="catalogue-toolbar">
+                    <div class="search-field">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="m16 16 5 5"/>
+                        </svg>
+                        <input type="search" id="historySearch"
+                               placeholder="Rechercher une transaction..."
+                               aria-label="Rechercher dans l'historique">
+                    </div>
+
+                    <select id="historyTypeFilter"
+                            aria-label="Type de transaction">
+                        <option value="all">Toutes les opérations</option>
+                        <option value="sale">Ventes</option>
+                        <option value="purchase">Achats</option>
+                        <option value="expense">Dépenses</option>
+                        <option value="return">Retours</option>
+                    </select>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Référence</th>
+                            <th>Opération</th>
+                            <th>Détail</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                        <tr class="empty-row">
+                            <td colspan="7">Aucune transaction enregistrée.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- ======================================
+             PAGE 9 : PARAMÈTRES
+        ======================================= -->
+        <section class="page-section"
+                 id="page-settings"
+                 data-section="settings" hidden>
+
+            <div class="page-heading">
+                <div>
+                    <span class="eyebrow">CONFIGURATION</span>
+                    <h1>Paramètres</h1>
+                    <p>Personnalisez votre système de gestion.</p>
+                </div>
+            </div>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Préférences commerciales</h2>
+                        <p>Informations utilisées pour les affichages et les calculs.</p>
+                    </div>
+                </div>
+
+                <form id="settingsForm">
+
+                    <div class="form-grid">
+
+                        <div class="form-field">
+                            <label for="businessName">Nom du commerce</label>
+                            <input type="text" id="businessName"
+                                   name="businessName"
+                                   value="AppBiznis Samantha" required>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="defaultCurrency">Devise principale</label>
+                            <select id="defaultCurrency" name="currency">
+                                <option value="HTG">Gourde haïtienne (HTG)</option>
+                                <option value="USD">Dollar américain (USD)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="lowStockThreshold">Seuil de stock faible</label>
+                            <input type="number" id="lowStockThreshold"
+                                   name="lowStockThreshold"
+                                   min="0" step="1" value="5" required>
+                            <small>Une alerte apparaîtra lorsque le stock atteindra ce seuil.</small>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="businessLanguage">Langue</label>
+                            <select id="businessLanguage" name="language">
+                                <option value="fr">Français</option>
+                                <option value="ht">Kreyòl ayisyen</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Enregistrer les paramètres
+                        </button>
+                    </div>
+
+                </form>
+            </article>
+
+            <article class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Base de données locale</h2>
+                        <p>Informations sur le stockage de vos données sur cet appareil.</p>
+                    </div>
+                    <span class="section-badge">IndexedDB</span>
+                </div>
+
+                <div class="database-status-card">
+                    <span class="database-status-icon icon-3d">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <ellipse cx="12" cy="5" rx="8" ry="3"/>
+                            <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/>
+                            <path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>
+                        </svg>
+                    </span>
+
+                    <div>
+                        <strong>Stockage local du navigateur</strong>
+                        <p id="databaseStatus">
+                            En attente de l'initialisation par JavaScript.
+                        </p>
+                        <small>
+                            Les données locales ne sont pas automatiquement synchronisées
+                            avec un serveur distant.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline"
+                            id="exportBackupButton">
+                        Exporter une sauvegarde
+                    </button>
+
+                    <button type="button" class="btn btn-outline"
+                            id="importBackupButton">
+                        Importer une sauvegarde
+                    </button>
+
+                    <input type="file" id="backupFileInput"
+                           accept=".json,application/json" hidden>
+                </div>
+
+                <div class="notice-card notice-warning">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m12 3 9 17H3l9-17Z"/>
+                        <path d="M12 9v5m0 3h.01"/>
+                    </svg>
+                    <p>
+                        Ne supprimez pas les données du navigateur sans avoir
+                        vérifié votre sauvegarde.
+                    </p>
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- PIED DE PAGE -->
+        <footer class="app-footer">
+            <span>© <span id="footerYear">2026</span> AppBiznis Samantha</span>
+            <span>Gestion commerciale · Version 1.0.0</span>
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     MODALE : AJOUT / MODIFICATION D'UN PRODUIT
+=========================================== -->
+<dialog class="app-modal" id="productModal"
+        aria-labelledby="productModalTitle">
+
+    <div class="modal-header">
+        <div>
+            <span class="eyebrow">CATALOGUE PRODUITS</span>
+            <h2 id="productModalTitle">Ajouter un produit</h2>
+        </div>
+
+        <button type="button" class="icon-button"
+                data-close-modal="productModal"
+                aria-label="Fermer">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18"/>
+            </svg>
+        </button>
+    </div>
+
+    <form id="productForm">
+
+        <input type="hidden" id="editProductId" name="productId">
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                <label for="productCode">Code produit</label>
+                <input type="text" id="productCode"
+                       name="code" placeholder="COS-001" required>
+            </div>
+
+            <div class="form-field">
+                <label for="productName">Nom du produit</label>
+                <input type="text" id="productName"
+                       name="name" placeholder="Nom du produit" required>
+            </div>
+
+            <div class="form-field">
+                <label for="productCategory">Catégorie</label>
+                <select id="productCategory" name="category" required>
+                    <option value="soin-visage">Soins du visage</option>
+                    <option value="maquillage">Maquillage</option>
+                    <option value="cheveux">Soins capillaires</option>
+                    <option value="corps">Soins du corps</option>
+                    <option value="parfum">Parfums</option>
+                    <option value="hygiene">Hygiène</option>
+                    <option value="autre">Autre</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="productPurchasePrice">Prix d'achat unitaire</label>
+                <input type="number" id="productPurchasePrice"
+                       name="purchasePrice" min="0" step="0.01" required>
+            </div>
+
+            <div class="form-field">
+                <label for="productSellingPrice">Prix de vente unitaire</label>
+                <input type="number" id="productSellingPrice"
+                       name="sellingPrice" min="0" step="0.01" required>
+            </div>
+
+            <div class="form-field">
+                <label for="productInitialStock">Stock initial</label>
+                <input type="number" id="productInitialStock"
+                       name="initialStock" min="0" step="1" value="0" required>
+            </div>
+
+        </div>
+
+        <div class="form-field">
+            <label for="productDescription">Description (facultatif)</label>
+            <textarea id="productDescription" name="description"
+                      rows="3" placeholder="Informations supplémentaires"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-outline"
+                    data-close-modal="productModal">
+                Annuler
+            </button>
+
+            <button type="submit" class="btn btn-primary">
+                Enregistrer le produit
+            </button>
+        </div>
+
+    </form>
+</dialog>
+
+
+<!-- ==========================================
+     MODALE : CONFIRMATION GÉNÉRIQUE
+=========================================== -->
+<dialog class="app-modal app-modal-small" id="confirmModal"
+        aria-labelledby="confirmModalTitle">
+
+    <div class="modal-header">
+        <h2 id="confirmModalTitle">Confirmer l'action</h2>
+
+        <button type="button" class="icon-button"
+                data-close-modal="confirmModal"
+                aria-label="Fermer">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18"/>
+            </svg>
+        </button>
+    </div>
+
+    <p id="confirmModalMessage">
+        Voulez-vous confirmer cette opération ?
+    </p>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-outline"
+                data-close-modal="confirmModal">
+            Annuler
+        </button>
+
+        <button type="button" class="btn btn-primary"
+                id="confirmModalAction">
+            Confirmer
+        </button>
+    </div>
+
+</dialog>
+
+
+<!-- Zone accessible pour les messages dynamiques -->
+<div id="liveAnnouncement" class="visually-hidden"
+     aria-live="polite" aria-atomic="true"></div>
+
+
+<!-- Fichye JavaScript prensipal la -->
+<script src="appbiznissamantha.js" defer></script>
+
+</body>
+</html>
