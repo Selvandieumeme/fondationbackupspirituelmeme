@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#0b382a">
+    <meta name="description" content="FOBAS Domino 3D — Jeu de dominos à quatre joueurs avec trois IA.">
+    <title>FOBAS DOMINO 3D</title>
+    <link rel="stylesheet" href="appdominosfobas.css">
+</head>
+<body>
+<div class="app" id="dominoApp">
+
+    <header class="app-header">
+        <div class="brand">
+            <span class="brand-logo">F</span>
+            <div class="brand-copy">
+                <strong>FOBAS <em>DOMINO</em></strong>
+                <small>TABLE 3D · 4 JOUEURS</small>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button type="button" id="soundButton" aria-label="Son">♫</button>
+            <button type="button" id="rulesButton" aria-label="Règles">?</button>
+            <button type="button" id="newGameButton" aria-label="Nouvelle partie">↻</button>
+            <button type="button" id="menuButton" aria-label="Options">☰</button>
+        </div>
+    </header>
+
+    <main class="main-layout">
+        <section class="play-column">
+            <div class="section-toolbar">
+                <div class="game-status">
+                    <span id="statusIndicator"></span>
+                    <span id="statusMessage">Préparation de la partie...</span>
+                </div>
+                <div class="view-controls">
+                    <button type="button" id="zoomOutButton">−</button>
+                    <output id="zoomValue">100%</output>
+                    <button type="button" id="zoomInButton">+</button>
+                    <button type="button" id="resetViewButton">⌂</button>
+                </div>
+            </div>
+
+            <div class="table-viewport" id="tableViewport">
+                <div class="table-world" id="tableWorld">
+                    <div class="table-shadow"></div>
+                    <div class="domino-table" id="dominoTable">
+                        <div class="table-rim"></div>
+                        <div class="table-felt">
+                            <div class="felt-texture"></div>
+
+                            <div class="table-logo">
+                                <span>F</span>
+                                <small>FOBAS DOMINO</small>
+                            </div>
+
+                            <div class="opponent opponent-top" id="opponentTop">
+                                <div class="player-avatar ai-avatar">IA</div>
+                                <div class="opponent-details">
+                                    <strong>Alex</strong>
+                                    <small>IA · STRATÈGE</small>
+                                </div>
+                                <span class="tile-count" id="countAi1">7 pièces</span>
+                            </div>
+
+                            <div class="opponent opponent-left" id="opponentLeft">
+                                <div class="player-avatar ai-avatar">IA</div>
+                                <div class="opponent-details">
+                                    <strong>Chris</strong>
+                                    <small>IA · TACTICIEN</small>
+                                </div>
+                                <span class="tile-count" id="countAi2">7 pièces</span>
+                            </div>
+
+                            <div class="opponent opponent-right" id="opponentRight">
+                                <div class="player-avatar ai-avatar">IA</div>
+                                <div class="opponent-details">
+                                    <strong>Jordan</strong>
+                                    <small>IA · EXPERT</small>
+                                </div>
+                                <span class="tile-count" id="countAi3">7 pièces</span>
+                            </div>
+
+                            <div class="table-center-mark"></div>
+
+                            <div class="domino-chain" id="dominoChain">
+                                <div class="chain-placeholder" id="chainPlaceholder">
+                                    <span class="placeholder-symbol">◇</span>
+                                    <strong>La partie commence ici</strong>
+                                    <small>Le premier domino sera posé au centre.</small>
+                                </div>
+                            </div>
+
+                            <div class="turn-indicator" id="turnIndicator">
+                                À vous de jouer
+                            </div>
+
+                            <div class="human-seat" id="humanSeat">
+                                <div class="player-avatar human-avatar">VOUS</div>
+                                <div class="human-details">
+                                    <strong>Votre main</strong>
+                                    <small id="humanTurnHint">Choisissez un domino</small>
+                                </div>
+                                <span class="tile-count" id="countHuman">7 pièces</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="gesture-hint" id="gestureHint">
+                    Deux doigts pour zoomer · Glisser pour déplacer
+                </div>
+            </div>
+
+            <section class="hand-panel">
+                <div class="hand-heading">
+                    <div>
+                        <span class="eyebrow">VOTRE MAIN</span>
+                        <h2>Vos dominos <span id="handCount">(7)</span></h2>
+                    </div>
+                    <span id="handInstructions">Touchez un domino pour le sélectionner.</span>
+                </div>
+
+                <div class="hand-tiles" id="handTiles"></div>
+
+                <div class="play-controls">
+                    <div id="selectedInfo">Aucun domino sélectionné</div>
+                    <div class="play-buttons">
+                        <button type="button" id="passButton" disabled>Passer</button>
+                        <button type="button" id="playLeftButton" disabled>
+                            ← Jouer à gauche
+                        </button>
+                        <button type="button" id="playRightButton" disabled>
+                            Jouer à droite →
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <aside class="side-panel">
+            <section class="panel-card">
+                <h3>Tableau de partie</h3>
+                <div class="score-grid">
+                    <div><span>Manche</span><strong id="roundNumber">01</strong></div>
+                    <div><span>Votre score</span><strong id="humanScore">0</strong></div>
+                    <div><span>Dominos joués</span><strong id="playedCount">0</strong></div>
+                </div>
+                <p id="turnText">À vous de jouer</p>
+            </section>
+
+            <section class="panel-card">
+                <h3>Les quatre joueurs</h3>
+                <div class="player-list">
+                    <div class="player-row" id="rowHuman">
+                        <span>V</span><b>Vous</b>
+                        <strong id="listHumanCount">7</strong>
+                    </div>
+                    <div class="player-row" id="rowAi1">
+                        <span>A</span><b>Alex — IA</b>
+                        <strong id="listAi1Count">7</strong>
+                    </div>
+                    <div class="player-row" id="rowAi2">
+                        <span>C</span><b>Chris — IA</b>
+                        <strong id="listAi2Count">7</strong>
+                    </div>
+                    <div class="player-row" id="rowAi3">
+                        <span>J</span><b>Jordan — IA</b>
+                        <strong id="listAi3Count">7</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel-card">
+                <h3>Historique des coups</h3>
+                <ol id="moveLog">
+                    <li>La partie va commencer.</li>
+                </ol>
+            </section>
+
+            <section class="panel-card">
+                <h3>Commandes rapides</h3>
+                <button type="button" id="sortButton">Trier mes dominos</button>
+                <button type="button" id="hintButton">Suggérer un coup</button>
+                <button type="button" id="saveButton">Sauvegarder la partie</button>
+                <button type="button" id="loadButton">Reprendre la sauvegarde</button>
+                <button type="button" id="fullscreenButton">Plein écran</button>
+                <p id="saveStatus">Sauvegarde locale disponible avec IndexedDB.</p>
+            </section>
+        </aside>
+    </main>
+
+    <footer class="app-footer">
+        <span>FOBAS DOMINO 3D</span>
+        <span>HTML · CSS · JavaScript · IndexedDB</span>
+        <span id="gameStateFooter">Prêt à jouer</span>
+    </footer>
+</div>
+
+<div class="modal-backdrop hidden" id="modalBackdrop">
+    <section class="modal" role="dialog" aria-modal="true">
+        <button type="button" id="modalClose" aria-label="Fermer">×</button>
+        <h2 id="modalTitle">Règles du domino</h2>
+        <div id="modalContent">
+            <p>Chaque joueur reçoit sept dominos.</p>
+            <p>Associez une extrémité de votre domino à une extrémité de même valeur sur la chaîne.</p>
+            <p>Si aucun domino ne peut être joué, passez votre tour lorsque cette option est autorisée.</p>
+            <p>Le premier joueur qui pose tous ses dominos gagne la manche, sous réserve des règles de blocage.</p>
+        </div>
+        <button type="button" id="modalOk">Compris</button>
+    </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="appdominosfobas.js"></script>
+</body>
+</html>
