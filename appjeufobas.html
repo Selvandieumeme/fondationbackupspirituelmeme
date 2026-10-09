@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071c17">
+  <meta name="description" content="FOBAS Mission Force Unie 3D — Jeu de conduite et missions collectives avec MEME, NOVA et AXEL.">
+  <title>FOBAS MISSION FORCE UNIE 3D</title>
+  <link rel="stylesheet" href="appjeufobas.css">
+</head>
+<body>
+<div id="gameApp" class="game-app">
+
+  <header id="gameHeader" class="game-header">
+    <a href="#mainMenu" id="brandHomeButton" class="brand" aria-label="Menu principal">
+      <span class="brand-emblem" aria-hidden="true">⬡</span>
+      <span class="brand-copy"><strong>FOBAS</strong><span>MISSION FORCE UNIE 3D</span></span>
+    </a>
+    <div class="header-status">
+      <span id="connectionStatus" class="status-indicator">
+        <span class="status-dot"></span><span id="connectionStatusText">Initialisation</span>
+      </span>
+      <button id="saveStatusButton" class="icon-button" type="button" aria-label="État de sauvegarde">▣</button>
+      <button id="headerPauseButton" class="icon-button" type="button" aria-label="Pause">Ⅱ</button>
+    </div>
+  </header>
+
+  <main id="gameMain" class="game-main">
+
+    <section id="loadingScreen" class="screen loading-screen" aria-live="polite">
+      <div class="loading-brand">
+        <div class="loading-logo" aria-hidden="true">⬡</div>
+        <p class="eyebrow">UNE FORCE. TROIS HÉROS. UNE MISSION.</p>
+        <h1>MISSION FORCE UNIE <span>3D</span></h1>
+        <p id="loadingMessage">Préparation de l'environnement de jeu…</p>
+      </div>
+      <div id="loadingProgress" class="loading-progress" role="progressbar" aria-label="Chargement" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="loadingProgressBar" class="loading-progress-bar"></div>
+      </div>
+      <p id="loadingError" class="error-message" role="alert" hidden></p>
+      <button id="loadingRetryButton" class="primary-button" type="button" hidden>Réessayer</button>
+      <p class="loading-footer">FOBAS TECHNOLOGY · ÉDITION WEB</p>
+    </section>
+
+    <section id="mainMenu" class="screen main-menu" aria-label="Menu principal" hidden>
+      <div class="menu-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">JEU D'ACTION · CONDUITE 3D</p>
+          <h1>MISSION <span>FORCE UNIE</span></h1>
+          <p class="hero-description">Trois spécialistes, des véhicules puissants et des missions où la coopération fait la différence.</p>
+          <div class="hero-actions">
+            <button id="newGameButton" class="primary-button" type="button">▶ Nouvelle partie</button>
+            <button id="continueGameButton" class="secondary-button" type="button" disabled>Continuer</button>
+          </div>
+          <p id="saveSummary" class="save-summary">Recherche de sauvegarde…</p>
+        </div>
+        <div class="hero-visual" aria-label="Véhicule de l'équipe">
+          <div class="hero-grid" aria-hidden="true"></div>
+          <div class="hero-car-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 420 210">
+              <defs><linearGradient id="heroPaint" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#c8ffe5"/><stop offset=".5" stop-color="#21b77c"/><stop offset="1" stop-color="#07563d"/>
+              </linearGradient></defs>
+              <ellipse cx="210" cy="172" rx="160" ry="18" fill="#020907" opacity=".5"/>
+              <path d="M48 135 69 105 123 88 163 48 253 48 305 90 355 105 378 136 365 158 329 165 90 165 55 155Z" fill="url(#heroPaint)" stroke="#d0ffe9" stroke-width="2"/>
+              <path d="M139 88 173 57 245 57 283 88Z" fill="#102c32" stroke="#9df5d3" stroke-width="2"/>
+              <path d="M207 58v29" stroke="#8decc5" stroke-width="2"/>
+              <path d="M70 118 118 107 146 111 125 124 69 131Z" fill="#142b29"/>
+              <path d="M296 109 349 120 358 133 311 129Z" fill="#142b29"/>
+              <path d="M55 143h40M325 144h38" stroke="#e9fff4" stroke-width="5" stroke-linecap="round"/>
+              <g fill="#101a19" stroke="#71867e" stroke-width="4">
+                <circle cx="112" cy="157" r="28"/><circle cx="112" cy="157" r="12"/>
+                <circle cx="310" cy="157" r="28"/><circle cx="310" cy="157" r="12"/>
+              </g>
+            </svg>
+          </div>
+          <div class="hero-visual-label"><span class="status-dot"></span> ÉQUIPE OPÉRATIONNELLE</div>
+        </div>
+      </div>
+
+      <div class="menu-section-heading">
+        <div><p class="eyebrow">VOTRE ÉQUIPE</p><h2>Les trois spécialistes</h2></div>
+        <span class="team-count">03 AGENTS</span>
+      </div>
+
+      <div id="menuCharacterList" class="character-grid">
+        <article class="character-card character-meme">
+          <div class="character-portrait" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="35" r="21" fill="#b87c54"/>
+              <path d="M29 34 31 17 47 10 67 18 73 36 63 29 45 27Z" fill="#18201d"/>
+              <path d="M17 94 22 68 39 57 61 57 79 68 84 94Z" fill="#d6ad53"/>
+              <path d="m39 58 11 12 11-12" fill="none" stroke="#fff0be" stroke-width="3"/>
+            </svg>
+          </div>
+          <div class="character-card-copy">
+            <span class="character-role">LE STRATÈGE</span><h3>MEME</h3>
+            <p>Leadership, conduite et coordination tactique.</p>
+            <span class="character-skill">Capacité : Vision tactique</span>
+          </div>
+        </article>
+
+        <article class="character-card character-nova">
+          <div class="character-portrait" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="34" r="20" fill="#d6a17f"/>
+              <path d="M29 34 31 18 44 11 65 16 72 34 62 27 40 27Z" fill="#34231f"/>
+              <path d="M17 94 22 67 38 56 62 56 79 67 84 94Z" fill="#e27d39"/>
+              <path d="m38 57 12 11 12-11" fill="none" stroke="#ffe0bd" stroke-width="3"/>
+            </svg>
+          </div>
+          <div class="character-card-copy">
+            <span class="character-role">L'INGÉNIEURE</span><h3>NOVA</h3>
+            <p>Réparation, amélioration et maîtrise mécanique.</p>
+            <span class="character-skill">Capacité : Réparation rapide</span>
+          </div>
+        </article>
+
+        <article class="character-card character-axel">
+          <div class="character-portrait" aria-hidden="true">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="34" r="20" fill="#b98e70"/>
+              <path d="M29 34 31 17 48 11 67 18 72 34 63 26 42 27Z" fill="#25252b"/>
+              <path d="M17 94 22 67 38 56 62 56 79 67 84 94Z" fill="#327bc4"/>
+              <path d="M39 58 50 69 61 58" fill="none" stroke="#c8e6ff" stroke-width="3"/>
+            </svg>
+          </div>
+          <div class="character-card-copy">
+            <span class="character-role">L'ANALYSTE IA</span><h3>AXEL</h3>
+            <p>Navigation, détection et analyse des risques.</p>
+            <span class="character-skill">Capacité : Scan de la zone</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="menu-bottom-actions">
+        <button id="missionsMenuButton" class="secondary-button" type="button">◎ Missions</button>
+        <button id="garageMenuButton" class="secondary-button" type="button">⚙ Garage</button>
+        <button id="settingsMenuButton" class="secondary-button" type="button">☷ Paramètres</button>
+        <button id="helpMenuButton" class="secondary-button" type="button">? Comment jouer</button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen" aria-label="Jeu 3D" hidden>
+      <div id="gameViewport" class="game-viewport">
+        <div id="sceneContainer" class="scene-container" aria-label="Environnement 3D">
+          <div id="sceneFallback" class="scene-fallback">
+            <div class="fallback-road"><div class="fallback-road-center"></div></div>
+            <div class="fallback-message"><strong>Préparation du monde 3D</strong><span>Initialisation du moteur graphique…</span></div>
+          </div>
+        </div>
+
+        <div id="gameHUD" class="game-hud">
+          <div class="hud-top-row">
+            <button id="backToMenuButton" class="hud-icon-button" type="button" aria-label="Menu principal">⌂</button>
+            <div class="mission-hud-card">
+              <span id="missionNumber" class="mission-number">MISSION 01</span>
+              <strong id="missionTitle">La première route</strong>
+              <span id="missionObjective">Rejoignez le point de rendez-vous.</span>
+            </div>
+            <button id="gamePauseButton" class="hud-icon-button" type="button" aria-label="Pause">Ⅱ</button>
+          </div>
+
+          <div class="hud-status-row">
+            <div class="hud-stat-card">
+              <span class="hud-label">VITESSE</span>
+              <div class="speed-display"><strong id="speedValue">0</strong><span>KM/H</span></div>
+            </div>
+            <div class="hud-stat-card">
+              <span class="hud-label">VÉHICULE</span>
+              <div class="meter-track"><div id="vehicleHealthBar" class="meter-fill health-fill" style="width:100%"></div></div>
+              <span id="vehicleHealthText">100 %</span>
+            </div>
+            <div class="hud-stat-card">
+              <span class="hud-label">ÉQUIPE</span>
+              <div class="meter-track"><div id="teamHealthBar" class="meter-fill team-fill" style="width:100%"></div></div>
+              <span id="teamHealthText">100 %</span>
+            </div>
+          </div>
+
+          <div id="objectivePanel" class="objective-panel">
+            <div class="objective-panel-heading">
+              <span>◆</span><strong>OBJECTIFS</strong>
+              <button id="toggleObjectivesButton" class="mini-icon-button" type="button" aria-label="Réduire les objectifs" aria-expanded="true">−</button>
+            </div>
+            <div id="objectiveList" class="objective-list"><p id="objectiveEmptyMessage">Les objectifs apparaîtront ici.</p></div>
+            <div class="mission-progress-track"><div id="missionProgressBar" class="meter-fill" style="width:0%"></div></div>
+            <span id="missionProgressText">0 % terminé</span>
+          </div>
+
+          <div id="minimapPanel" class="minimap-panel">
+            <div class="minimap-heading">
+              <span>RADAR</span>
+              <button id="toggleMinimapButton" class="mini-icon-button" type="button" aria-label="Afficher ou masquer le radar" aria-pressed="false">⌁</button>
+            </div>
+            <canvas id="minimapCanvas" width="220" height="220" aria-label="Carte de navigation"></canvas>
+            <div class="minimap-legend"><span><i class="legend-player"></i> Équipe</span><span><i class="legend-target"></i> Objectif</span></div>
+          </div>
+
+          <div id="teamHUDPanel" class="team-hud-panel">
+            <div class="team-hud-heading"><strong>UNITÉ FORCE UNIE</strong><span id="teamStatusText">Équipe prête</span></div>
+            <div class="team-member-row">
+              <span class="team-avatar avatar-meme">M</span>
+              <span class="team-member-name"><strong>MEME</strong><small>Stratège</small></span>
+              <span id="memeStatus" class="member-status">Prêt</span>
+              <button id="memeAbilityButton" class="ability-button" type="button" aria-label="Capacité de MEME" title="Vision tactique">◎</button>
+            </div>
+            <div class="team-member-row">
+              <span class="team-avatar avatar-nova">N</span>
+              <span class="team-member-name"><strong>NOVA</strong><small>Ingénieure</small></span>
+              <span id="novaStatus" class="member-status">Prête</span>
+              <button id="novaAbilityButton" class="ability-button" type="button" aria-label="Capacité de NOVA" title="Réparation rapide">✚</button>
+            </div>
+            <div class="team-member-row">
+              <span class="team-avatar avatar-axel">A</span>
+              <span class="team-member-name"><strong>AXEL</strong><small>Analyste IA</small></span>
+              <span id="axelStatus" class="member-status">Prêt</span>
+              <button id="axelAbilityButton" class="ability-button" type="button" aria-label="Capacité d'AXEL" title="Scanner la zone">⌖</button>
+            </div>
+          </div>
+
+          <div id="navigationPrompt" class="navigation-prompt" role="status">
+            <span>➤</span><span id="navigationPromptText">Suivez la route vers l'objectif.</span>
+          </div>
+
+          <div id="gameNotification" class="game-notification" role="status" aria-live="polite" hidden>
+            <strong id="notificationTitle">Information</strong><span id="notificationMessage"></span>
+          </div>
+
+          <div id="touchControls" class="touch-controls" aria-label="Commandes tactiles">
+            <div class="steering-controls">
+              <button id="steerLeftButton" class="drive-button steering-button" type="button" aria-label="Tourner à gauche">◀</button>
+              <button id="steerRightButton" class="drive-button steering-button" type="button" aria-label="Tourner à droite">▶</button>
+            </div>
+            <div class="pedal-controls">
+              <button id="brakeButton" class="drive-button brake-button" type="button" aria-label="Freiner"><span>▰</span><small>FREIN</small></button>
+              <button id="accelerateButton" class="drive-button accelerate-button" type="button" aria-label="Accélérer"><span>▲</span><small>ACCÉLÉRER</small></button>
+              <button id="reverseButton" class="drive-button reverse-button" type="button" aria-label="Marche arrière"><span>▼</span><small>RECULER</small></button>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <button id="cameraModeButton" class="quick-action-button" type="button" aria-label="Changer la caméra"><span>◉</span><small>CAMÉRA</small></button>
+            <button id="handbrakeButton" class="quick-action-button" type="button" aria-label="Frein à main"><span>H</span><small>FREIN À MAIN</small></button>
+            <button id="interactButton" class="quick-action-button" type="button" aria-label="Interagir"><span>E</span><small>INTERAGIR</small></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISSIONS -->
+    <section id="missionsScreen" class="screen secondary-screen" aria-label="Missions" hidden>
+      <div class="screen-heading">
+        <button class="back-button" type="button" data-back-menu>← Retour</button>
+        <p class="eyebrow">OPÉRATIONS</p><h2>Choisir une mission</h2>
+        <p>Chaque victoire renforce votre unité.</p>
+      </div>
+      <div id="missionList" class="mission-grid">
+        <article class="mission-card" data-mission-id="mission-01">
+          <span class="mission-card-number">01</span><div><span class="mission-difficulty">INITIATION</span><h3>La première route</h3><p>Apprenez à conduire et rejoignez le point de rendez-vous.</p></div>
+          <button class="primary-button mission-start-button" type="button" data-start-mission="mission-01">Jouer</button>
+        </article>
+        <article class="mission-card" data-mission-id="mission-02">
+          <span class="mission-card-number">02</span><div><span class="mission-difficulty">EXPLORATION</span><h3>Le véhicule disparu</h3><p>Explorez la zone et suivez les indices de l'équipe.</p></div>
+          <button class="secondary-button mission-start-button" type="button" data-start-mission="mission-02" disabled>Verrouillée</button>
+        </article>
+        <article class="mission-card" data-mission-id="mission-03">
+          <span class="mission-card-number">03</span><div><span class="mission-difficulty">TECHNIQUE</span><h3>Route endommagée</h3><p>Réparez les obstacles et trouvez un itinéraire alternatif.</p></div>
+          <button class="secondary-button mission-start-button" type="button" data-start-mission="mission-03" disabled>Verrouillée</button>
+        </article>
+        <article class="mission-card" data-mission-id="mission-04">
+          <span class="mission-card-number">04</span><div><span class="mission-difficulty">CONVOI</span><h3>La force du convoi</h3><p>Conduisez l'équipe jusqu'à sa destination.</p></div>
+          <button class="secondary-button mission-start-button" type="button" data-start-mission="mission-04" disabled>Verrouillée</button>
+        </article>
+        <article class="mission-card" data-mission-id="mission-05">
+          <span class="mission-card-number">05</span><div><span class="mission-difficulty">SAUVETAGE</span><h3>Mission en montagne</h3><p>Atteignez la zone de secours sur une route difficile.</p></div>
+          <button class="secondary-button mission-start-button" type="button" data-start-mission="mission-05" disabled>Verrouillée</button>
+        </article>
+        <article class="mission-card" data-mission-id="mission-06">
+          <span class="mission-card-number">06</span><div><span class="mission-difficulty">OPÉRATION FINALE</span><h3>Unis pour réussir</h3><p>Réunissez les capacités des trois spécialistes.</p></div>
+          <button class="secondary-button mission-start-button" type="button" data-start-mission="mission-06" disabled>Verrouillée</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- GARAGE -->
+    <section id="garageScreen" class="screen secondary-screen" aria-label="Garage" hidden>
+      <div class="screen-heading">
+        <button class="back-button" type="button" data-back-menu>← Retour</button>
+        <p class="eyebrow">ATELIER FORCE UNIE</p><h2>Garage</h2>
+        <p>Préparez votre véhicule avant le départ.</p>
+      </div>
+      <div class="garage-layout">
+        <div id="garageVehiclePreview" class="garage-vehicle-preview">
+          <div class="garage-car-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 420 210">
+              <ellipse cx="210" cy="170" rx="155" ry="17" fill="#000" opacity=".35"/>
+              <path d="M48 135 69 105 123 88 163 48 253 48 305 90 355 105 378 136 365 158 329 165 90 165 55 155Z" fill="#18a66e" stroke="#b7ffdd" stroke-width="2"/>
+              <path d="M139 88 173 57 245 57 283 88Z" fill="#132c30"/>
+              <g fill="#101a19" stroke="#71867e" stroke-width="4"><circle cx="112" cy="157" r="28"/><circle cx="112" cy="157" r="12"/><circle cx="310" cy="157" r="28"/><circle cx="310" cy="157" r="12"/></g>
+            </svg>
+          </div>
+          <h3 id="garageVehicleName">Force One</h3><p id="garageVehicleDescription">Véhicule polyvalent de l'équipe.</p>
+        </div>
+        <div class="garage-stats">
+          <div class="garage-stat"><span>Vitesse</span><div class="meter-track"><div id="garageSpeedBar" class="meter-fill" style="width:65%"></div></div><strong id="garageSpeedValue">65/100</strong></div>
+          <div class="garage-stat"><span>Résistance</span><div class="meter-track"><div id="garageArmorBar" class="meter-fill" style="width:75%"></div></div><strong id="garageArmorValue">75/100</strong></div>
+          <div class="garage-stat"><span>Maniabilité</span><div class="meter-track"><div id="garageHandlingBar" class="meter-fill" style="width:70%"></div></div><strong id="garageHandlingValue">70/100</strong></div>
+        </div>
+        <button id="repairVehicleButton" class="primary-button" type="button">✚ Réparer le véhicule</button>
+        <button id="upgradeVehicleButton" class="secondary-button" type="button">↑ Améliorer le véhicule</button>
+        <p id="garageMessage" class="status-message" role="status"></p>
+      </div>
+    </section>
+
+    <!-- PARAMÈTRES -->
+    <section id="settingsScreen" class="screen secondary-screen" aria-label="Paramètres" hidden>
+      <div class="screen-heading">
+        <button class="back-button" type="button" data-back-menu>← Retour</button>
+        <p class="eyebrow">CONFIGURATION</p><h2>Paramètres du jeu</h2>
+      </div>
+      <div class="settings-panel">
+        <label class="setting-row" for="graphicsQuality">
+          <span><strong>Qualité graphique</strong><small>Adapter les détails aux performances.</small></span>
+          <select id="graphicsQuality" name="graphicsQuality"><option value="low">Économique</option><option value="medium" selected>Équilibrée</option><option value="high">Élevée</option></select>
+        </label>
+        <label class="setting-row" for="cameraDistance">
+          <span><strong>Distance de caméra</strong><small>Position derrière la voiture.</small></span>
+          <input id="cameraDistance" type="range" min="4" max="12" value="7" step=".5"><output id="cameraDistanceValue" for="cameraDistance">7</output>
+        </label>
+        <label class="setting-row" for="steeringSensitivity">
+          <span><strong>Sensibilité de direction</strong><small>Réactivité du volant tactile.</small></span>
+          <input id="steeringSensitivity" type="range" min=".5" max="2" value="1" step=".1"><output id="steeringSensitivityValue" for="steeringSensitivity">1.0</output>
+        </label>
+        <label class="setting-row" for="gameVolume">
+          <span><strong>Volume sonore</strong><small>Volume général du jeu.</small></span>
+          <input id="gameVolume" type="range" min="0" max="100" value="65"><output id="gameVolumeValue" for="gameVolume">65 %</output>
+        </label>
+        <label class="setting-row" for="vibrationEnabled">
+          <span><strong>Vibrations</strong><small>Sur appareils compatibles.</small></span><input id="vibrationEnabled" type="checkbox" checked>
+        </label>
+        <label class="setting-row" for="touchZoomEnabled">
+          <span><strong>Zoom à deux doigts</strong><small>Zoom tactile dans le jeu.</small></span><input id="touchZoomEnabled" type="checkbox" checked>
+        </label>
+        <label class="setting-row" for="showSubtitles">
+          <span><strong>Sous-titres</strong><small>Afficher les messages du jeu.</small></span><input id="showSubtitles" type="checkbox" checked>
+        </label>
+        <div class="settings-actions">
+          <button id="saveSettingsButton" class="primary-button" type="button">Enregistrer les paramètres</button>
+          <button id="resetSettingsButton" class="secondary-button" type="button">Réinitialiser</button>
+        </div>
+        <p id="settingsMessage" class="status-message" role="status"></p>
+      </div>
+    </section>
+
+    <!-- ÈD -->
+    <section id="helpScreen" class="screen secondary-screen" aria-label="Aide" hidden>
+      <div class="screen-heading">
+        <button class="back-button" type="button" data-back-menu>← Retour</button>
+        <p class="eyebrow">GUIDE DU JOUEUR</p><h2>Comment jouer</h2>
+      </div>
+      <div class="help-grid">
+        <article class="help-card"><h3>🚗 Conduire</h3><p>Sur Android, utilisez les boutons tactiles. Sur ordinateur, W ou ↑ accélère, S ou ↓ recule, A ou ← tourne à gauche, D ou → tourne à droite et E interagit.</p></article>
+        <article class="help-card"><h3>📷 Caméra et zoom</h3><p>La caméra suit la voiture depuis l'arrière. Sur écran tactile, écartez ou rapprochez deux doigts pour ajuster le zoom.</p></article>
+        <article class="help-card"><h3>🤝 Coopération</h3><p>MEME dirige l'équipe, NOVA s'occupe de la mécanique et AXEL analyse la navigation. Utilisez leurs capacités au bon moment.</p></article>
+        <article class="help-card"><h3>💾 Sauvegarde</h3><p>La progression sera enregistrée dans IndexedDB lorsque le navigateur le permet. Évitez d'effacer les données du site.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <!-- PAUSE -->
+  <div id="pauseOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" hidden>
+    <div class="modal-card">
+      <p class="eyebrow">MISSION SUSPENDUE</p><h2 id="pauseTitle">Pause</h2>
+      <p>Vous pouvez reprendre ou sauvegarder votre progression.</p>
+      <button id="resumeGameButton" class="primary-button" type="button">▶ Reprendre la partie</button>
+      <button id="pauseSaveButton" class="secondary-button" type="button">▣ Sauvegarder</button>
+      <button id="pauseRestartButton" class="secondary-button" type="button">↻ Recommencer la mission</button>
+      <button id="pauseExitButton" class="danger-button" type="button">Quitter vers le menu</button>
+    </div>
+  </div>
+
+  <!-- RÉSULTATS -->
+  <div id="resultOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
+    <div class="modal-card result-card">
+      <p id="resultEyebrow" class="eyebrow">RAPPORT DE MISSION</p>
+      <h2 id="resultTitle">Mission terminée</h2>
+      <p id="resultMessage">Votre équipe a terminé l'opération.</p>
+      <div class="result-stat-grid">
+        <div><span>Progression</span><strong id="resultProgress">100 %</strong></div>
+        <div><span>Récompense</span><strong id="resultReward">0</strong></div>
+      </div>
+      <button id="nextMissionButton" class="primary-button" type="button">Mission suivante</button>
+      <button id="replayMissionButton" class="secondary-button" type="button">Rejouer</button>
+      <button id="resultMenuButton" class="secondary-button" type="button">Menu principal</button>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION -->
+  <div id="confirmOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+    <div class="modal-card">
+      <h2 id="confirmTitle">Confirmer l'action</h2><p id="confirmMessage">Voulez-vous continuer ?</p>
+      <div class="modal-actions">
+        <button id="confirmCancelButton" class="secondary-button" type="button">Annuler</button>
+        <button id="confirmAcceptButton" class="danger-button" type="button">Confirmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION -->
+  <div id="globalToast" class="global-toast" role="status" aria-live="polite" hidden>
+    <span id="globalToastMessage"></span>
+    <button id="closeToastButton" type="button" aria-label="Fermer">×</button>
+  </div>
+
+  <footer id="gameFooter" class="game-footer">
+    <span>FOBAS TECHNOLOGY</span>
+    <span>MISSION FORCE UNIE 3D</span>
+    <button id="footerSaveButton" type="button">Sauvegarder</button>
+  </footer>
+</div>
+
+<script type="module" src="appjeufobas.js"></script>
+</body>
+</html>
