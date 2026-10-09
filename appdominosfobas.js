@@ -2,10 +2,9 @@
     "use strict";
 
     /* =========================================================
-       FOBAS DOMINO 3D
-       Version corrigee : 2.0.0
-       4 joueurs | 3 IA | Double-Six | IndexedDB
-       Compatible avec les identifiants HTML existants
+       FOBAS DOMINO 3D — VERSION CORRIGÉE
+       4 joueurs • 3 IA • Double-Six • IndexedDB
+       Android tactile • Drag & Drop • Zoom à deux doigts
        ========================================================= */
 
     const $ = id => document.getElementById(id);
@@ -30,7 +29,6 @@
         viewport: $("tableViewport"),
         world: $("tableWorld"),
         chain: $("dominoChain"),
-        placeholder: $("chainPlaceholder"),
         turn: $("turnIndicator"),
         humanHint: $("humanTurnHint"),
         hand: $("handTiles"),
@@ -55,25 +53,30 @@
     };
 
     let db = null;
+    let state = null;
     let soundEnabled = true;
     let selectedTileId = null;
     let busy = false;
     let toastTimer = null;
     let aiTimer = null;
+    let audioContext = null;
+
+    /* Zoom et déplacement de la table */
     let zoom = 1;
     let panX = 0;
     let panY = 0;
-    let pointers = new Map();
+    const pointers = new Map();
     let gestureStart = null;
-    let audioContext = null;
-    let state = null;
+    let tableGesture = false;
+
+    /* Drag-and-drop des dominos */
+    let drag = null;
+    let dragGhost = null;
+    let dragPreview = null;
+    let suppressNextClick = false;
+    const DRAG_THRESHOLD = 8;
 
     /* ======================== OUTILS ======================== */
-
-    function randomId() {
-        return Math.random().toString(36).slice(2, 10) +
-            Date.now().toString(36);
-    }
 
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -88,7 +91,10 @@
     }
 
     function showToast(message) {
-        if (!elements.toast) return;
+        if (!elements.toast) {
+            console.info("[FOBAS DOMINO]", message);
+            return;
+        }
 
         elements.toast.textContent = message;
         elements.toast.classList.add("show");
@@ -100,13 +106,8 @@
     }
 
     function setStatus(message) {
-        if (elements.status) {
-            elements.status.textContent = message;
-        }
-
-        if (elements.footer) {
-            elements.footer.textContent = message;
-        }
+        if (elements.status) elements.status.textContent = message;
+        if (elements.footer) elements.footer.textContent = message;
     }
 
     function logAction(message) {
@@ -124,6 +125,39 @@
         }
     }
 
+    function playSound(frequency = 520, duration = 0.07) {
+        if (!soundEnabled) return;
+
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+
+            audioContext = audioContext || new AudioCtx();
+
+            if (audioContext.state === "suspended") {
+                audioContext.resume();
+            }
+
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.value = frequency;
+            gain.gain.setValueAtTime(0.055, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                audioContext.currentTime + duration
+            );
+
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration);
+        } catch (error) {
+            console.warn("Audio indisponible :", error);
+        }
+    }
+
     function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, char => ({
             "&": "&amp;",
@@ -134,99 +168,16 @@
         })[char]);
     }
 
-    function cleanPlayerName(value, fallback) {
-        const name = String(value || "").trim().replace(/\s+/g, " ");
-        return name.slice(0, 24) || fallback;
+    function getPlayer(id) {
+        return state?.players?.find(player => player.id === id) || null;
     }
 
-    function syncNamesFromState() {
-        if (!state || !Array.isArray(state.players)) return;
-
-        for (const id of ordre) {
-            const player = state.players.find(item => item.id === id);
-
-            if (player && typeof player.name === "string") {
-                noms[id] = cleanPlayerName(player.name, noms[id]);
-            }
-
-            if (player) player.name = noms[id];
-        }
+    function nextPlayer(id) {
+        return ordre[(ordre.indexOf(id) + 1) % ordre.length];
     }
 
-    function syncNamesToState() {
-        if (!state || !Array.isArray(state.players)) return;
-
-        state.players.forEach(player => {
-            if (noms[player.id]) {
-                player.name = noms[player.id];
-            }
-        });
-    }
-
-    function updatePlayerNameLabels() {
-        /*
-         * Les éléments HTML qui utilisent data-player-name="human",
-         * "ai1", "ai2" ou "ai3" sont automatiquement actualisés.
-         */
-        document.querySelectorAll("[data-player-name]").forEach(node => {
-            const id = node.getAttribute("data-player-name");
-
-            if (noms[id]) {
-                node.textContent = noms[id];
-            }
-        });
-
-        /*
-         * Actualisation facultative des noms présents dans les sièges.
-         * Le code ne remplace que les éléments explicitement identifiés.
-         */
-        ordre.forEach(id => {
-            const seat = $(id === "human" ? "humanSeat" : id + "Seat");
-            if (!seat) return;
-
-            const label = seat.querySelector(
-                "[data-name-label], .player-name, .seat-name"
-            );
-
-            if (label) label.textContent = noms[id];
-        });
-    }
-
-    function playSound(frequency = 520, duration = 0.07) {
-        if (!soundEnabled) return;
-
-        try {
-            const AudioCtx =
-                window.AudioContext || window.webkitAudioContext;
-
-            if (!AudioCtx) return;
-
-            audioContext = audioContext || new AudioCtx();
-
-            if (audioContext.state === "suspended") {
-                audioContext.resume().catch(() => {});
-            }
-
-            const oscillator = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-
-            oscillator.type = "sine";
-            oscillator.frequency.value = frequency;
-
-            gain.gain.setValueAtTime(0.055, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(
-                0.001,
-                audioContext.currentTime + duration
-            );
-
-            oscillator.connect(gain);
-            gain.connect(audioContext.destination);
-
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + duration);
-        } catch (error) {
-            console.warn("Audio indisponible :", error);
-        }
+    function pipCount(tile) {
+        return Number(tile.a) + Number(tile.b);
     }
 
     /* ======================== INDEXEDDB ======================== */
@@ -257,14 +208,7 @@
             };
 
             request.onerror = () => {
-                reject(
-                    request.error ||
-                    new Error("Impossible d'ouvrir IndexedDB.")
-                );
-            };
-
-            request.onblocked = () => {
-                console.warn("Ouverture IndexedDB bloquée.");
+                reject(request.error || new Error("Ouverture IndexedDB impossible."));
             };
         });
     }
@@ -276,65 +220,39 @@
                 return;
             }
 
-            let transaction;
-
-            try {
-                transaction = db.transaction(STORE_NAME, mode);
-            } catch (error) {
-                reject(error);
-                return;
-            }
-
+            const transaction = db.transaction(STORE_NAME, mode);
             const store = transaction.objectStore(STORE_NAME);
-            let request = null;
+            let result;
 
             try {
-                request = callback(store);
+                result = callback(store);
             } catch (error) {
                 reject(error);
                 return;
             }
 
             transaction.oncomplete = () => {
-                if (request && "result" in request) {
-                    resolve(request.result);
-                } else {
-                    resolve(request);
-                }
+                resolve(result && "result" in result ? result.result : result);
             };
 
-            transaction.onerror = () => {
-                reject(
-                    transaction.error ||
-                    new Error("Erreur de transaction.")
-                );
-            };
-
-            transaction.onabort = () => {
-                reject(
-                    transaction.error ||
-                    new Error("Transaction annulée.")
-                );
-            };
+            transaction.onerror = () => reject(transaction.error);
+            transaction.onabort = () => reject(
+                transaction.error || new Error("Transaction annulée.")
+            );
         });
     }
 
     async function saveGame(silent = false) {
-        if (!state) return false;
+        if (!state) return;
 
         try {
             if (!db) await openDatabase();
-
-            syncNamesToState();
 
             const snapshot = clone(state);
             snapshot.savedAt = new Date().toISOString();
 
             await databaseOperation("readwrite", store => {
-                return store.put({
-                    id: SAVE_KEY,
-                    state: snapshot
-                });
+                store.put({ id: SAVE_KEY, state: snapshot });
             });
 
             if (elements.saveStatus) {
@@ -343,231 +261,85 @@
                     new Date(snapshot.savedAt).toLocaleTimeString();
             }
 
-            if (!silent) {
-                showToast("Partie sauvegardée avec succès.");
-            }
-
-            return true;
+            if (!silent) showToast("Partie sauvegardée avec succès.");
         } catch (error) {
-            console.error("Erreur de sauvegarde :", error);
+            console.error("Sauvegarde impossible :", error);
 
             if (elements.saveStatus) {
                 elements.saveStatus.textContent =
-                    "Échec de la sauvegarde. Vérifiez le navigateur.";
+                    "Échec de la sauvegarde IndexedDB.";
             }
 
-            if (!silent) {
-                showToast(
-                    "Sauvegarde impossible. Vérifiez les permissions du navigateur."
-                );
-            }
-
-            return false;
+            if (!silent) showToast("Sauvegarde impossible dans ce navigateur.");
         }
     }
 
-    function validateState(candidate) {
-        if (
-            !candidate ||
-            !Array.isArray(candidate.players) ||
-            !Array.isArray(candidate.chain) ||
-            !Array.isArray(candidate.log) ||
-            !ordre.includes(candidate.currentPlayer)
-        ) {
-            return false;
-        }
+    async function readSavedGame() {
+        if (!db) await openDatabase();
 
-        if (candidate.players.length !== 4) return false;
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(STORE_NAME, "readonly");
+            const request = transaction.objectStore(STORE_NAME).get(SAVE_KEY);
 
-        const playerIds = candidate.players.map(player => player && player.id);
-
-        if (new Set(playerIds).size !== 4) return false;
-
-        if (!ordre.every(id => playerIds.includes(id))) return false;
-
-        if (!candidate.players.every(player =>
-            player &&
-            ordre.includes(player.id) &&
-            Array.isArray(player.hand)
-        )) {
-            return false;
-        }
-
-        if (!["playing", "finished"].includes(candidate.phase)) {
-            return false;
-        }
-
-        if (!Number.isFinite(Number(candidate.round))) return false;
-
-        for (const player of candidate.players) {
-            for (const tile of player.hand) {
-                if (
-                    !tile ||
-                    tile.id == null ||
-                    !Number.isInteger(tile.a) ||
-                    !Number.isInteger(tile.b) ||
-                    tile.a < 0 || tile.a > 6 ||
-                    tile.b < 0 || tile.b > 6
-                ) {
-                    return false;
-                }
-            }
-        }
-
-        for (const item of candidate.chain) {
-            if (
-                !item ||
-                !item.tile ||
-                !ordre.includes(item.player) ||
-                !Number.isInteger(item.tile.a) ||
-                !Number.isInteger(item.tile.b)
-            ) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function migrateSavedState(savedState) {
-        if (!validateState(savedState)) return false;
-
-        /*
-         * Compatibilité avec les anciennes sauvegardes.
-         */
-        if (!Array.isArray(savedState.log)) {
-            savedState.log = [];
-        }
-
-        if (!Number.isFinite(Number(savedState.playedCount))) {
-            savedState.playedCount = savedState.chain.length;
-        }
-
-        if (!Number.isFinite(Number(savedState.consecutivePasses))) {
-            savedState.consecutivePasses = 0;
-        }
-
-        if (!Number.isFinite(Number(savedState.round))) {
-            savedState.round = 1;
-        }
-
-        if (!("winner" in savedState)) {
-            savedState.winner = null;
-        }
-
-        if (!("lastMove" in savedState)) {
-            savedState.lastMove = null;
-        }
-
-        savedState.version = 2;
-
-        syncNamesFromStateFor(savedState);
-
-        /*
-         * Une chaîne déjà commencée n'a plus besoin de la règle
-         * spéciale du double-six d'ouverture.
-         */
-        if (savedState.chain.length > 0) {
-            savedState.openingTileId = null;
-            return true;
-        }
-
-        /*
-         * Ancienne sauvegarde sans chaîne : retrouver le double-six.
-         */
-        if (!savedState.openingTileId) {
-            for (const player of savedState.players) {
-                const doubleSix = player.hand.find(tile =>
-                    tile.a === 6 && tile.b === 6
-                );
-
-                if (doubleSix) {
-                    savedState.openingTileId = doubleSix.id;
-                    savedState.currentPlayer = player.id;
-                    savedState.leftEnd = null;
-                    savedState.rightEnd = null;
-                    return true;
-                }
-            }
-
-            /*
-             * Si une ancienne sauvegarde vide ne contient plus le
-             * double-six, elle ne peut pas reprendre légalement.
-             */
-            return false;
-        }
-
-        return true;
-    }
-
-    function syncNamesFromStateFor(candidate) {
-        if (!candidate || !Array.isArray(candidate.players)) return;
-
-        candidate.players.forEach(player => {
-            if (player && ordre.includes(player.id)) {
-                player.name = cleanPlayerName(
-                    player.name,
-                    noms[player.id]
-                );
-            }
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => reject(request.error);
         });
     }
 
     async function loadGame() {
         try {
-            if (!db) await openDatabase();
+            const saved = await readSavedGame();
 
-            const saved = await new Promise((resolve, reject) => {
-                const transaction = db.transaction(
-                    STORE_NAME,
-                    "readonly"
-                );
-
-                const request = transaction
-                    .objectStore(STORE_NAME)
-                    .get(SAVE_KEY);
-
-                request.onsuccess = () => resolve(request.result || null);
-                request.onerror = () => reject(request.error);
-            });
-
-            if (!saved || !saved.state) {
+            if (!saved?.state) {
                 showToast("Aucune sauvegarde trouvée.");
                 return;
             }
 
-            const restored = clone(saved.state);
-
-            if (!migrateSavedState(restored)) {
-                showToast(
-                    "Cette ancienne sauvegarde est incompatible. Commencez une nouvelle manche."
-                );
+            if (!validateState(saved.state)) {
+                showToast("La sauvegarde est invalide ou incompatible.");
                 return;
             }
 
-            state = restored;
-            syncNamesFromState();
+            clearTimeout(aiTimer);
+            cancelDrag();
+
+            state = saved.state;
             selectedTileId = null;
             busy = false;
-            clearTimeout(aiTimer);
 
             renderAll();
             showToast("Sauvegarde chargée.");
             setStatus("Partie restaurée");
 
-            if (
-                state.phase === "playing" &&
-                state.currentPlayer !== "human"
-            ) {
+            if (state.phase === "playing" &&
+                state.currentPlayer !== "human") {
                 scheduleAI();
             }
         } catch (error) {
-            console.error("Erreur de chargement :", error);
+            console.error(error);
             showToast("Impossible de lire la sauvegarde.");
         }
     }
 
-    /* ======================== RÈGLES ET DISTRIBUTION ======================== */
+    function validateState(candidate) {
+        if (!candidate ||
+            !Array.isArray(candidate.players) ||
+            !Array.isArray(candidate.chain) ||
+            !Array.isArray(candidate.log) ||
+            !ordre.includes(candidate.currentPlayer)) {
+            return false;
+        }
+
+        if (candidate.players.length !== 4) return false;
+
+        return candidate.players.every(player =>
+            player &&
+            ordre.includes(player.id) &&
+            Array.isArray(player.hand)
+        );
+    }
+
+    /* ======================== CRÉATION DE PARTIE ======================== */
 
     function createSet() {
         const tiles = [];
@@ -575,11 +347,7 @@
 
         for (let a = 0; a <= 6; a++) {
             for (let b = a; b <= 6; b++) {
-                tiles.push({
-                    id: "d" + id++,
-                    a,
-                    b
-                });
+                tiles.push({ id: "d" + id++, a, b });
             }
         }
 
@@ -588,28 +356,18 @@
 
     function newGame() {
         clearTimeout(aiTimer);
-        busy = false;
+        cancelDrag();
 
-        const previousRound = state ? Number(state.round) || 0 : 0;
+        const previousRound = state?.round || 0;
         const tiles = createSet();
 
-        const players = ordre.map(id => {
-            const oldPlayer = state && Array.isArray(state.players)
-                ? state.players.find(player => player.id === id)
-                : null;
+        const players = ordre.map(id => ({
+            id,
+            name: noms[id],
+            hand: [],
+            score: getPlayer(id)?.score || 0
+        }));
 
-            return {
-                id,
-                name: noms[id],
-                hand: [],
-                score: oldPlayer ? Number(oldPlayer.score) || 0 : 0
-            };
-        });
-
-        /*
-         * Chaque joueur reçoit exactement 7 dominos.
-         * Le double-six reste dans la main du joueur qui le possède.
-         */
         for (let i = 0; i < 7; i++) {
             for (const player of players) {
                 player.hand.push(tiles.pop());
@@ -617,83 +375,58 @@
         }
 
         const opening = players
-            .flatMap(player => player.hand.map(tile => ({
-                player,
-                tile
-            })))
+            .flatMap(player => player.hand.map(tile => ({ player, tile })))
             .find(item => item.tile.a === 6 && item.tile.b === 6);
 
-        const startingPlayer = opening
-            ? opening.player.id
-            : "human";
+        let startingPlayer = opening ? opening.player.id : "human";
+
+        if (opening) {
+            const owner = players.find(p => p.id === startingPlayer);
+            owner.hand = owner.hand.filter(t => t.id !== opening.tile.id);
+        }
 
         state = {
             version: 2,
             round: previousRound + 1,
             players,
-            chain: [],
-            leftEnd: null,
-            rightEnd: null,
-            currentPlayer: startingPlayer,
+            chain: opening ? [{
+                tile: { ...opening.tile },
+                player: startingPlayer,
+                side: "center"
+            }] : [],
+            leftEnd: opening ? opening.tile.a : null,
+            rightEnd: opening ? opening.tile.b : null,
+            currentPlayer: opening ? nextPlayer(startingPlayer) : startingPlayer,
             consecutivePasses: 0,
             phase: "playing",
             winner: null,
-            openingTileId: opening ? opening.tile.id : null,
-            selectedTileId: null,
             log: [],
-            playedCount: 0,
+            playedCount: opening ? 1 : 0,
             lastMove: null
         };
 
         selectedTileId = null;
-        pointers.clear();
-        gestureStart = null;
+        busy = false;
 
         const message = opening
-            ? `${noms[startingPlayer]} détient le double-six et ouvre la manche.`
-            : "Nouvelle manche : chaque joueur reçoit 7 dominos.";
+            ? "Le double-six ouvre la partie."
+            : "Nouvelle manche : 7 dominos par joueur.";
 
         state.log.push(message);
 
         renderAll();
-        setStatus(message);
-        logAction(message);
-
-        if (opening && startingPlayer !== "human") {
-            scheduleAI();
-        }
-
+        setStatus("Nouvelle manche — " + noms[state.currentPlayer] + " joue");
         saveGame(true);
+
+        if (state.currentPlayer !== "human") scheduleAI();
     }
 
-    function nextPlayer(id) {
-        const index = ordre.indexOf(id);
-        return ordre[(index + 1 + ordre.length) % ordre.length];
-    }
-
-    function getPlayer(id) {
-        if (!state || !Array.isArray(state.players)) return null;
-        return state.players.find(player => player.id === id) || null;
-    }
-
-    function pipCount(tile) {
-        return Number(tile.a) + Number(tile.b);
-    }
+    /* ======================== RÈGLES ======================== */
 
     function legalSides(tile) {
         if (!state || state.phase !== "playing" || !tile) return [];
 
-        /*
-         * Tant que la chaîne est vide, seul le double-six peut être joué.
-         */
-        if (state.chain.length === 0) {
-            return state.openingTileId &&
-                tile.id === state.openingTileId &&
-                tile.a === 6 &&
-                tile.b === 6
-                ? ["left", "right"]
-                : [];
-        }
+        if (state.chain.length === 0) return ["left", "right"];
 
         const sides = [];
 
@@ -718,7 +451,22 @@
         );
     }
 
-    /* ======================== AFFICHAGE DES DOMINOS ======================== */
+    function orientTile(tile, side, endValue) {
+        let a = tile.a;
+        let b = tile.b;
+
+        if (state.chain.length > 0) {
+            if (side === "left" && a === endValue && b !== endValue) {
+                [a, b] = [b, a];
+            } else if (side === "right" && b === endValue && a !== endValue) {
+                [a, b] = [b, a];
+            }
+        }
+
+        return { ...tile, a, b };
+    }
+
+    /* ======================== DOMINOS ET POINTS ======================== */
 
     const pipPositions = {
         0: [],
@@ -735,66 +483,47 @@
             `<i class="pip" style="left:${x}%;top:${y}%"></i>`
         ).join("");
 
-        return `
-            <span class="domino-half value-${value}"
-                aria-label="${value} points">
-                ${dots}
-            </span>`;
+        return `<span class="domino-half value-${value}" aria-label="${value} points">${dots}</span>`;
     }
 
     function tileMarkup(tile, options = {}) {
         const selected = options.selected ? " is-selected" : "";
         const disabled = options.disabled ? " is-disabled" : "";
-        const orientation = options.vertical ? " domino-vertical" : "";
+        const vertical = options.vertical ? " domino-vertical" : "";
+        const dragging = options.dragging ? " domino-dragging" : "";
 
         return `
             <button type="button"
-                class="domino-tile${selected}${disabled}${orientation}"
+                class="domino-tile${selected}${disabled}${vertical}${dragging}"
                 data-tile-id="${escapeHtml(tile.id)}"
                 aria-label="Domino ${tile.a} et ${tile.b}"
-                ${options.disabled ? "disabled" : ""}>
+                ${options.disabled ? "disabled" : ""}
+                draggable="false">
                 ${halfMarkup(tile.a)}
                 <span class="domino-divider"></span>
                 ${halfMarkup(tile.b)}
             </button>`;
     }
 
-    /*
-     * Sur la table, les dominos sont des DIV, et non des boutons.
-     * Cela évite de créer des boutons de sélection dans la chaîne.
-     */
-    function playedTileMarkup(tile, vertical = false) {
-        return `
-            <div class="domino-tile played-tile${vertical ? " domino-vertical" : ""}"
-                aria-label="Domino posé ${tile.a} et ${tile.b}">
-                ${halfMarkup(tile.a)}
-                <span class="domino-divider"></span>
-                ${halfMarkup(tile.b)}
-            </div>`;
-    }
-
     function renderHand() {
         const player = getPlayer("human");
         if (!player || !elements.hand) return;
 
-        const hand = player.hand;
-        const disabled = state.phase !== "playing" ||
-            state.currentPlayer !== "human" ||
-            busy;
-
-        elements.hand.innerHTML = hand.map(tile =>
+        elements.hand.innerHTML = player.hand.map(tile =>
             tileMarkup(tile, {
                 selected: tile.id === selectedTileId,
-                disabled
+                disabled: state.phase !== "playing" ||
+                    state.currentPlayer !== "human" ||
+                    busy
             })
         ).join("");
 
         if (elements.handCount) {
-            elements.handCount.textContent = `(${hand.length})`;
+            elements.handCount.textContent = `(${player.hand.length})`;
         }
 
         if (elements.selectedInfo) {
-            const tile = hand.find(item => item.id === selectedTileId);
+            const tile = player.hand.find(t => t.id === selectedTileId);
 
             elements.selectedInfo.textContent = tile
                 ? `Domino sélectionné : ${tile.a} | ${tile.b}`
@@ -804,46 +533,37 @@
         updatePlayButtons();
     }
 
+    /*
+     * La chaîne reste rendue dans le conteneur dominoChain existant.
+     * Les zones de dépôt sont calculées à partir de ses extrémités réelles.
+     */
     function renderChain() {
         if (!elements.chain || !state) return;
 
-        const chain = state.chain;
-
-        if (chain.length === 0) {
+        if (state.chain.length === 0) {
             elements.chain.innerHTML = `
                 <div class="chain-placeholder" id="chainPlaceholder">
                     <span class="placeholder-symbol">◇</span>
                     <strong>La partie commence ici</strong>
-                    <small>
-                        ${state.openingTileId
-                            ? "Le détenteur du double-six peut le poser."
-                            : "Nouvelle partie en attente."}
-                    </small>
+                    <small>Déposez un domino pour commencer.</small>
                 </div>`;
             return;
         }
 
-        elements.chain.innerHTML = chain.map((item, index) => {
+        elements.chain.innerHTML = state.chain.map((item, index) => {
             const tile = item.tile;
             const vertical = tile.a === tile.b;
-            const playerName = noms[item.player] || item.player;
 
             return `
                 <div class="played-domino ${vertical ? "played-double" : ""}"
-                    data-played-index="${index}"
-                    title="${escapeHtml(playerName)} : ${tile.a}-${tile.b}">
-                    <span class="played-owner">
-                        ${escapeHtml(playerName)}
-                    </span>
-                    ${playedTileMarkup(tile, vertical)}
+                     data-played-index="${index}"
+                     data-chain-side="${index === 0 ? "left" :
+                        index === state.chain.length - 1 ? "right" : "middle"}"
+                     title="${escapeHtml(noms[item.player] || item.player)} : ${tile.a}-${tile.b}">
+                    <span class="played-owner">${escapeHtml(noms[item.player] || item.player)}</span>
+                    ${tileMarkup(tile, { vertical, disabled: true })}
                 </div>`;
         }).join("");
-
-        /*
-         * Placer la vue près du dernier domino ajouté sans masquer
-         * la main du joueur.
-         */
-        elements.chain.scrollLeft = elements.chain.scrollWidth;
     }
 
     function renderCounts() {
@@ -861,9 +581,7 @@
                     `${player.hand.length} pièce${player.hand.length === 1 ? "" : "s"}`;
             }
 
-            if (listEl) {
-                listEl.textContent = String(player.hand.length);
-            }
+            if (listEl) listEl.textContent = player.hand.length;
 
             if (row) {
                 row.classList.toggle(
@@ -872,38 +590,29 @@
                 );
             }
         }
-
-        updatePlayerNameLabels();
     }
 
     function renderScores() {
-        const human = getPlayer("human");
-
         if (elements.round) {
-            elements.round.textContent =
-                String(state.round || 1).padStart(2, "0");
+            elements.round.textContent = String(state.round).padStart(2, "0");
         }
 
-        if (elements.score && human) {
-            elements.score.textContent = String(human.score || 0);
+        if (elements.score) {
+            elements.score.textContent = getPlayer("human")?.score ?? 0;
         }
 
         if (elements.played) {
-            elements.played.textContent = String(state.playedCount || 0);
+            elements.played.textContent = state.playedCount;
         }
     }
 
     function renderTurn() {
-        if (!state) return;
-
         const current = state.currentPlayer;
 
         const message = state.phase === "finished"
-            ? (
-                state.winner
-                    ? `${noms[state.winner]} a gagné la manche !`
-                    : "Manche bloquée."
-            )
+            ? (state.winner
+                ? `${noms[state.winner]} a gagné la manche !`
+                : "Manche bloquée.")
             : current === "human"
                 ? "À vous de jouer"
                 : `${noms[current]} réfléchit…`;
@@ -912,16 +621,9 @@
         if (elements.turnText) elements.turnText.textContent = message;
 
         if (elements.humanHint) {
-            elements.humanHint.textContent =
-                state.phase === "finished"
-                    ? "Manche terminée"
-                    : current === "human"
-                        ? (
-                            state.chain.length === 0
-                                ? "Sélectionnez le double-six pour commencer."
-                                : "Choisissez un domino jouable."
-                        )
-                        : "Attendez votre tour";
+            elements.humanHint.textContent = current === "human"
+                ? "Glissez un domino vers le bout choisi."
+                : "Attendez votre tour";
         }
 
         if (elements.indicator) {
@@ -938,12 +640,10 @@
         if (!elements.log) return;
 
         elements.log.innerHTML = "";
-
         const recent = (state.log || []).slice(-12).reverse();
 
         if (!recent.length) {
-            elements.log.innerHTML =
-                '<li class="log-empty">La partie va commencer.</li>';
+            elements.log.innerHTML = "<li>La partie va commencer.</li>";
             return;
         }
 
@@ -957,7 +657,6 @@
     function renderAll() {
         if (!state) return;
 
-        syncNamesToState();
         renderHand();
         renderChain();
         renderCounts();
@@ -967,20 +666,15 @@
         updatePlayButtons();
     }
 
-    /* ======================== ACTIONS DE JEU ======================== */
+    /* ======================== BOUTONS DE JEU ======================== */
 
     function updatePlayButtons() {
         if (!state) return;
 
         const human = getPlayer("human");
-        const tile = human
-            ? human.hand.find(item => item.id === selectedTileId)
-            : null;
-
-        const isHumanTurn =
-            state.phase === "playing" &&
-            state.currentPlayer === "human" &&
-            !busy;
+        const tile = human?.hand.find(t => t.id === selectedTileId);
+        const isHumanTurn = state.phase === "playing" &&
+            state.currentPlayer === "human" && !busy;
 
         const sides = tile ? legalSides(tile) : [];
 
@@ -995,79 +689,36 @@
         }
 
         if (elements.pass) {
-            elements.pass.disabled =
-                !isHumanTurn || !canPass("human");
+            elements.pass.disabled = !isHumanTurn || !canPass("human");
         }
     }
 
     function selectTile(id) {
-        if (
-            !state ||
-            state.phase !== "playing" ||
-            state.currentPlayer !== "human" ||
-            busy
-        ) {
-            return;
-        }
+        if (!state || state.phase !== "playing" ||
+            state.currentPlayer !== "human" || busy) return;
 
-        const player = getPlayer("human");
-        const tile = player && player.hand.find(item => item.id === id);
-
+        const tile = getPlayer("human").hand.find(t => t.id === id);
         if (!tile) return;
 
         selectedTileId = selectedTileId === id ? null : id;
 
-        if (selectedTileId) {
-            const selected = player.hand.find(item =>
-                item.id === selectedTileId
-            );
-
-            const sides = selected ? legalSides(selected) : [];
-
-            if (elements.instructions) {
-                elements.instructions.textContent = sides.length
-                    ? (
-                        state.chain.length === 0
-                            ? "Le double-six peut ouvrir la partie."
-                            : "Choisissez le côté où poser votre domino."
-                    )
-                    : "Ce domino ne peut pas être joué maintenant.";
+        if (elements.instructions) {
+            if (!selectedTileId) {
+                elements.instructions.textContent =
+                    "Touchez ou glissez un domino pour le jouer.";
+            } else {
+                elements.instructions.textContent =
+                    legalSides(tile).length
+                        ? "Glissez le domino vers le bout gauche ou droit."
+                        : "Ce domino ne peut pas être joué maintenant.";
             }
-        } else if (elements.instructions) {
-            elements.instructions.textContent =
-                "Touchez un domino pour le sélectionner.";
         }
 
         renderHand();
         playSound(420, 0.04);
     }
 
-    function orientTile(tile, side, endValue) {
-        let a = tile.a;
-        let b = tile.b;
-
-        if (state.chain.length > 0) {
-            if (side === "left") {
-                /*
-                 * À gauche, la valeur raccordée doit se trouver
-                 * sur le côté droit du domino posé.
-                 */
-                if (b !== endValue && a === endValue) {
-                    [a, b] = [b, a];
-                }
-            } else if (side === "right") {
-                /*
-                 * À droite, la valeur raccordée doit se trouver
-                 * sur le côté gauche du domino posé.
-                 */
-                if (a !== endValue && b === endValue) {
-                    [a, b] = [b, a];
-                }
-            }
-        }
-
-        return { ...tile, a, b };
-    }
+    /* ======================== PLACEMENT RÉEL ======================== */
 
     function playTile(playerId, tileId, side) {
         if (!state || state.phase !== "playing") return false;
@@ -1076,7 +727,7 @@
         const player = getPlayer(playerId);
         if (!player) return false;
 
-        const tileIndex = player.hand.findIndex(tile => tile.id === tileId);
+        const tileIndex = player.hand.findIndex(t => t.id === tileId);
         if (tileIndex < 0) return false;
 
         const original = player.hand[tileIndex];
@@ -1084,21 +735,13 @@
 
         if (!sides.includes(side)) {
             if (playerId === "human") {
-                showToast(
-                    state.chain.length === 0
-                        ? "Seul le double-six peut ouvrir la partie."
-                        : "Ce domino ne correspond pas à cette extrémité."
-                );
+                showToast("Ce domino ne correspond pas à cette extrémité.");
             }
-
             return false;
         }
 
         const isFirst = state.chain.length === 0;
-        const endValue = side === "left"
-            ? state.leftEnd
-            : state.rightEnd;
-
+        const endValue = side === "left" ? state.leftEnd : state.rightEnd;
         const oriented = orientTile(original, side, endValue);
 
         player.hand.splice(tileIndex, 1);
@@ -1112,7 +755,6 @@
 
             state.leftEnd = original.a;
             state.rightEnd = original.b;
-            state.openingTileId = null;
         } else if (side === "left") {
             state.chain.unshift({
                 tile: oriented,
@@ -1131,19 +773,18 @@
             state.rightEnd = oriented.b;
         }
 
-        state.playedCount = (state.playedCount || 0) + 1;
+        state.playedCount++;
         state.consecutivePasses = 0;
         state.lastMove = {
             player: playerId,
             tile: { ...original },
-            side
+            side,
+            at: Date.now()
         };
 
         const sideText = isFirst
             ? "au centre"
-            : side === "left"
-                ? "à gauche"
-                : "à droite";
+            : side === "left" ? "à gauche" : "à droite";
 
         const message =
             `${noms[playerId]} joue ${original.a}-${original.b} ${sideText}.`;
@@ -1166,36 +807,27 @@
         renderAll();
         saveGame(true);
 
-        if (state.currentPlayer !== "human") {
-            scheduleAI();
-        }
+        if (state.currentPlayer !== "human") scheduleAI();
 
         return true;
     }
 
     function passTurn(playerId) {
-        if (
-            !state ||
-            state.phase !== "playing" ||
-            state.currentPlayer !== playerId
-        ) {
-            return;
-        }
+        if (!state || state.phase !== "playing" ||
+            state.currentPlayer !== playerId) return;
 
         if (!canPass(playerId)) {
             if (playerId === "human") {
                 showToast("Vous avez au moins un domino jouable.");
             }
-
             return;
         }
 
         const message = `${noms[playerId]} passe son tour.`;
-
         state.log.push(message);
         logAction(message);
 
-        state.consecutivePasses = (state.consecutivePasses || 0) + 1;
+        state.consecutivePasses++;
         selectedTileId = null;
 
         if (state.consecutivePasses >= 4) {
@@ -1206,13 +838,10 @@
         }
 
         state.currentPlayer = nextPlayer(playerId);
-
         renderAll();
         saveGame(true);
 
-        if (state.currentPlayer !== "human") {
-            scheduleAI();
-        }
+        if (state.currentPlayer !== "human") scheduleAI();
     }
 
     function finishRound(winnerId) {
@@ -1222,13 +851,10 @@
         const remaining = state.players
             .filter(player => player.id !== winnerId)
             .reduce((sum, player) =>
-                sum + player.hand.reduce(
-                    (subtotal, tile) => subtotal + pipCount(tile),
-                    0
-                ), 0);
+                sum + player.hand.reduce((total, tile) =>
+                    total + pipCount(tile), 0), 0);
 
-        const winner = getPlayer(winnerId);
-        winner.score = (Number(winner.score) || 0) + remaining;
+        getPlayer(winnerId).score += remaining;
 
         const message =
             `${noms[winnerId]} gagne la manche et marque ${remaining} points.`;
@@ -1238,13 +864,9 @@
         playSound(780, 0.2);
 
         showModal("Fin de manche", `
-            <p><strong>${escapeHtml(noms[winnerId])}</strong>
-            a posé tous ses dominos !</p>
+            <p><strong>${escapeHtml(noms[winnerId])}</strong> a posé tous ses dominos !</p>
             <p>Points gagnés : <strong>${remaining}</strong></p>
-            <p>Choisissez « Nouvelle partie » pour commencer une nouvelle manche.</p>
-            <button type="button" data-menu-action="new-game">
-                Commencer une nouvelle manche
-            </button>
+            <p>Choisissez « Nouvelle partie » pour recommencer.</p>
         `);
     }
 
@@ -1254,27 +876,20 @@
 
         const totals = state.players.map(player => ({
             id: player.id,
-            total: player.hand.reduce(
-                (sum, tile) => sum + pipCount(tile),
-                0
-            )
+            total: player.hand.reduce((sum, tile) =>
+                sum + pipCount(tile), 0)
         })).sort((a, b) => a.total - b.total);
 
         const best = totals[0];
         const tied = totals.filter(item => item.total === best.total).length > 1;
 
         if (!tied) {
-            const winner = getPlayer(best.id);
-
-            const points = state.players
+            getPlayer(best.id).score += state.players
                 .filter(player => player.id !== best.id)
                 .reduce((sum, player) =>
-                    sum + player.hand.reduce(
-                        (subtotal, tile) => subtotal + pipCount(tile),
-                        0
-                    ), 0);
+                    sum + player.hand.reduce((total, tile) =>
+                        total + pipCount(tile), 0), 0);
 
-            winner.score = (Number(winner.score) || 0) + points;
             state.winner = best.id;
         }
 
@@ -1287,104 +902,58 @@
 
         showModal("Partie bloquée", `
             <p>${escapeHtml(message)}</p>
-            <p>Le joueur qui conserve le plus petit total de points gagne,
-            sauf en cas d'égalité.</p>
-            <button type="button" data-menu-action="new-game">
-                Commencer une nouvelle manche
-            </button>
+            <p>Le total des points restants détermine le gagnant.</p>
         `);
-
-        playSound(360, 0.15);
     }
 
-    /* ======================== INTELLIGENCE ARTIFICIELLE ======================== */
+    /* ======================== IA ======================== */
 
     function chooseAIMove(player) {
-        if (!player || !Array.isArray(player.hand)) return null;
-
         const candidates = [];
 
         for (const tile of player.hand) {
             for (const side of legalSides(tile)) {
                 let score = pipCount(tile);
 
-                /*
-                 * Défausser les dominos lourds en priorité.
-                 */
                 if (tile.a === tile.b) score += 2;
 
                 const matchingAfter = player.hand.filter(other =>
                     other.id !== tile.id &&
-                    (
-                        other.a === tile.a ||
-                        other.b === tile.a ||
-                        other.a === tile.b ||
-                        other.b === tile.b
-                    )
+                    (other.a === tile.a || other.b === tile.a ||
+                     other.a === tile.b || other.b === tile.b)
                 ).length;
 
                 score += matchingAfter * 0.25;
 
-                if (
-                    side === "left" &&
-                    state.chain.length > 0 &&
-                    (tile.a === state.leftEnd || tile.b === state.leftEnd)
-                ) {
-                    score += 0.1;
-                }
-
-                if (
-                    side === "right" &&
-                    state.chain.length > 0 &&
-                    (tile.a === state.rightEnd || tile.b === state.rightEnd)
-                ) {
-                    score += 0.1;
-                }
+                if (side === "left" && tile.a === state.leftEnd) score += 0.1;
+                if (side === "right" && tile.b === state.rightEnd) score += 0.1;
 
                 candidates.push({ tile, side, score });
             }
         }
 
         candidates.sort((a, b) => b.score - a.score);
-
         return candidates[0] || null;
     }
 
     function scheduleAI() {
         clearTimeout(aiTimer);
 
-        if (
-            !state ||
-            state.phase !== "playing" ||
-            state.currentPlayer === "human" ||
-            busy
-        ) {
-            return;
-        }
+        if (!state || state.phase !== "playing" ||
+            state.currentPlayer === "human" || busy) return;
 
         busy = true;
         renderHand();
         renderTurn();
-        updatePlayButtons();
 
         aiTimer = setTimeout(() => {
             busy = false;
 
-            if (
-                !state ||
-                state.phase !== "playing" ||
-                state.currentPlayer === "human"
-            ) {
-                renderAll();
-                return;
-            }
+            if (!state || state.phase !== "playing" ||
+                state.currentPlayer === "human") return;
 
             const player = getPlayer(state.currentPlayer);
-
-            if (!player) {
-                renderAll();
-                return;
-            }
+            if (!player) return;
 
             const move = chooseAIMove(player);
 
@@ -1396,21 +965,14 @@
         }, 650 + Math.random() * 650);
     }
 
-    /* ======================== SUGGESTION ET TRI ======================== */
-
     function suggestMove() {
-        if (
-            !state ||
-            state.phase !== "playing" ||
-            state.currentPlayer !== "human" ||
-            busy
-        ) {
+        if (!state || state.phase !== "playing" ||
+            state.currentPlayer !== "human") {
             showToast("Attendez votre tour pour demander une suggestion.");
             return;
         }
 
-        const player = getPlayer("human");
-        const move = chooseAIMove(player);
+        const move = chooseAIMove(getPlayer("human"));
 
         if (!move) {
             showToast("Aucun domino jouable. Vous pouvez passer.");
@@ -1429,35 +991,346 @@
     function sortHand() {
         if (!state) return;
 
-        const player = getPlayer("human");
-        if (!player) return;
-
-        player.hand.sort((a, b) => {
-            const sumDifference = pipCount(b) - pipCount(a);
-
-            return sumDifference ||
-                b.a - a.a ||
-                b.b - a.b;
-        });
+        getPlayer("human").hand.sort((a, b) =>
+            pipCount(b) - pipCount(a) || b.a - a.a || b.b - a.b
+        );
 
         renderHand();
         saveGame(true);
         showToast("Vos dominos sont triés.");
     }
 
-    /* ======================== ZOOM TACTILE ANDROID ======================== */
+    /* =========================================================
+       DRAG & DROP ANDROID
+       Le joueur prend une pièce en main, la déplace et la dépose
+       près de l'extrémité gauche ou droite de la chaîne.
+       ========================================================= */
+
+    function createDragGhost(tile, x, y) {
+        removeDragGhost();
+
+        dragGhost = document.createElement("div");
+        dragGhost.className = "fobas-domino-drag-ghost";
+        dragGhost.innerHTML = tileMarkup(tile, {
+            selected: true,
+            vertical: tile.a === tile.b
+        });
+
+        Object.assign(dragGhost.style, {
+            position: "fixed",
+            left: `${x}px`,
+            top: `${y}px`,
+            zIndex: "2147483647",
+            pointerEvents: "none",
+            opacity: "0.96",
+            transform: "translate(-50%, -50%) scale(1.08)",
+            filter: "drop-shadow(0 10px 12px rgba(0,0,0,.35))",
+            margin: "0",
+            width: "max-content"
+        });
+
+        document.body.appendChild(dragGhost);
+    }
+
+    function moveDragGhost(x, y) {
+        if (!dragGhost) return;
+
+        dragGhost.style.left = `${x}px`;
+        dragGhost.style.top = `${y}px`;
+    }
+
+    function removeDragGhost() {
+        if (dragGhost) {
+            dragGhost.remove();
+            dragGhost = null;
+        }
+    }
+
+    function clearDropPreview() {
+        if (dragPreview) {
+            dragPreview.classList.remove("fobas-drop-left", "fobas-drop-right");
+            dragPreview = null;
+        }
+
+        if (elements.chain) {
+            elements.chain.classList.remove(
+                "fobas-drop-zone-left",
+                "fobas-drop-zone-right"
+            );
+        }
+    }
+
+    /*
+     * Renvoie le côté de dépôt d'après la position réelle du doigt.
+     * Si la chaîne est vide, le premier domino est posé au centre.
+     */
+    function getDropSide(x, y) {
+        if (!elements.viewport || !elements.chain) return null;
+
+        const viewportRect = elements.viewport.getBoundingClientRect();
+
+        if (
+            x < viewportRect.left ||
+            x > viewportRect.right ||
+            y < viewportRect.top ||
+            y > viewportRect.bottom
+        ) {
+            return null;
+        }
+
+        if (state.chain.length === 0) {
+            return "left";
+        }
+
+        const chainRect = elements.chain.getBoundingClientRect();
+
+        /*
+         * Les extrémités utilisent une zone de dépôt généreuse.
+         * Cela fonctionne aussi quand la table est agrandie.
+         */
+        const first = elements.chain.querySelector(
+            '[data-chain-side="left"]'
+        );
+
+        const last = elements.chain.querySelector(
+            '[data-chain-side="right"]'
+        );
+
+        if (!first || !last) {
+            return x < chainRect.left + chainRect.width / 2
+                ? "left"
+                : "right";
+        }
+
+        const leftRect = first.getBoundingClientRect();
+        const rightRect = last.getBoundingClientRect();
+
+        const leftZone = {
+            left: Math.max(viewportRect.left, leftRect.left - 70),
+            right: leftRect.right + Math.min(100, leftRect.width * 0.8),
+            top: Math.max(viewportRect.top, leftRect.top - 55),
+            bottom: Math.min(viewportRect.bottom, leftRect.bottom + 55)
+        };
+
+        const rightZone = {
+            left: rightRect.left - Math.min(100, rightRect.width * 0.8),
+            right: Math.min(viewportRect.right, rightRect.right + 70),
+            top: Math.max(viewportRect.top, rightRect.top - 55),
+            bottom: Math.min(viewportRect.bottom, rightRect.bottom + 55)
+        };
+
+        const inLeft =
+            x >= leftZone.left && x <= leftZone.right &&
+            y >= leftZone.top && y <= leftZone.bottom;
+
+        const inRight =
+            x >= rightZone.left && x <= rightZone.right &&
+            y >= rightZone.top && y <= rightZone.bottom;
+
+        if (inLeft && inRight) {
+            const leftDistance = Math.hypot(
+                x - (leftRect.left + leftRect.right) / 2,
+                y - (leftRect.top + leftRect.bottom) / 2
+            );
+
+            const rightDistance = Math.hypot(
+                x - (rightRect.left + rightRect.right) / 2,
+                y - (rightRect.top + rightRect.bottom) / 2
+            );
+
+            return leftDistance <= rightDistance ? "left" : "right";
+        }
+
+        if (inLeft) return "left";
+        if (inRight) return "right";
+
+        /*
+         * Si le doigt est directement au-dessus de la chaîne,
+         * on choisit l'extrémité la plus proche.
+         */
+        if (
+            x >= chainRect.left - 25 &&
+            x <= chainRect.right + 25 &&
+            y >= chainRect.top - 45 &&
+            y <= chainRect.bottom + 45
+        ) {
+            const leftDistance = Math.abs(x - leftRect.left);
+            const rightDistance = Math.abs(x - rightRect.right);
+
+            return leftDistance <= rightDistance ? "left" : "right";
+        }
+
+        return null;
+    }
+
+    function updateDropPreview(side) {
+        clearDropPreview();
+
+        if (!side || !elements.chain) return;
+
+        elements.chain.classList.add(
+            side === "left"
+                ? "fobas-drop-zone-left"
+                : "fobas-drop-zone-right"
+        );
+
+        dragPreview = elements.chain.querySelector(
+            side === "left"
+                ? '[data-chain-side="left"]'
+                : '[data-chain-side="right"]'
+        );
+
+        if (dragPreview) {
+            dragPreview.classList.add(
+                side === "left" ? "fobas-drop-left" : "fobas-drop-right"
+            );
+        }
+    }
+
+    function startDrag(event, tileButton) {
+        if (event.button !== undefined && event.button !== 0) return;
+        if (!state || state.phase !== "playing" ||
+            state.currentPlayer !== "human" || busy) return;
+
+        const tileId = tileButton.dataset.tileId;
+        const tile = getPlayer("human")?.hand.find(t => t.id === tileId);
+
+        if (!tile) return;
+
+        drag = {
+            pointerId: event.pointerId,
+            tileId,
+            tile,
+            startX: event.clientX,
+            startY: event.clientY,
+            x: event.clientX,
+            y: event.clientY,
+            started: false,
+            source: tileButton
+        };
+
+        /*
+         * Empêche le navigateur Android de transformer le geste
+         * en scroll de la rangée de dominos.
+         */
+        if (event.cancelable) event.preventDefault();
+    }
+
+    function beginActualDrag() {
+        if (!drag || drag.started) return;
+
+        drag.started = true;
+        selectedTileId = drag.tileId;
+        suppressNextClick = true;
+
+        if (drag.source) {
+            drag.source.classList.add("is-drag-source");
+        }
+
+        createDragGhost(drag.tile, drag.x, drag.y);
+        playSound(420, 0.04);
+
+        if (elements.instructions) {
+            elements.instructions.textContent =
+                "Déposez le domino sur l'extrémité gauche ou droite.";
+        }
+    }
+
+    function handleDragMove(event) {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+
+        drag.x = event.clientX;
+        drag.y = event.clientY;
+
+        const distance = Math.hypot(
+            drag.x - drag.startX,
+            drag.y - drag.startY
+        );
+
+        if (!drag.started && distance >= DRAG_THRESHOLD) {
+            beginActualDrag();
+        }
+
+        if (!drag.started) return;
+
+        if (event.cancelable) event.preventDefault();
+
+        moveDragGhost(drag.x, drag.y);
+
+        const side = getDropSide(drag.x, drag.y);
+        const legal = side && legalSides(drag.tile).includes(side)
+            ? side
+            : null;
+
+        updateDropPreview(legal);
+    }
+
+    function finishDrag(event) {
+        if (!drag || event.pointerId !== drag.pointerId) return;
+
+        const currentDrag = drag;
+        drag = null;
+
+        const moved = currentDrag.started;
+        const side = moved
+            ? getDropSide(event.clientX, event.clientY)
+            : null;
+
+        removeDragGhost();
+        clearDropPreview();
+
+        if (currentDrag.source) {
+            currentDrag.source.classList.remove("is-drag-source");
+        }
+
+        if (!moved) {
+            /*
+             * Un simple toucher sélectionne la pièce comme avant.
+             */
+            selectTile(currentDrag.tileId);
+            return;
+        }
+
+        suppressNextClick = true;
+
+        if (!side) {
+            showToast("Déposez le domino près d'une extrémité de la chaîne.");
+            return;
+        }
+
+        if (!legalSides(currentDrag.tile).includes(side)) {
+            showToast("Valeur incompatible : choisissez l'autre extrémité.");
+            return;
+        }
+
+        const played = playTile("human", currentDrag.tileId, side);
+
+        if (!played) {
+            showToast("Ce déplacement n'a pas pu être validé.");
+        }
+    }
+
+    function cancelDrag() {
+        if (drag?.source) {
+            drag.source.classList.remove("is-drag-source");
+        }
+
+        drag = null;
+        removeDragGhost();
+        clearDropPreview();
+    }
+
+    /* ======================== ZOOM TACTILE ======================== */
 
     function applyView() {
         if (!elements.world) return;
 
+        elements.world.style.transformOrigin = "center center";
         elements.world.style.transform =
             `translate(${panX}px, ${panY}px) scale(${zoom})`;
 
-        elements.world.style.transformOrigin = "center center";
-
         if (elements.zoomValue) {
-            elements.zoomValue.textContent =
-                `${Math.round(zoom * 100)}%`;
+            elements.zoomValue.textContent = `${Math.round(zoom * 100)}%`;
         }
     }
 
@@ -1484,13 +1357,19 @@
         };
     }
 
-    function onPointerDown(event) {
-        if (!elements.viewport) return;
+    function onViewportPointerDown(event) {
+        /*
+         * Si le doigt touche une pièce de domino déjà jouée,
+         * ce n'est pas un geste de déplacement de la table.
+         */
+        if (event.target.closest(".domino-tile")) return;
 
         pointers.set(event.pointerId, {
             x: event.clientX,
             y: event.clientY
         });
+
+        tableGesture = true;
 
         if (pointers.size === 1) {
             gestureStart = {
@@ -1500,28 +1379,20 @@
                 panY
             };
         } else if (pointers.size === 2) {
-            const points = [...pointers.values()];
+            const pts = [...pointers.values()];
 
             gestureStart = {
-                distance: pointerDistance(points[0], points[1]),
-                center: pointerCenter(points[0], points[1]),
+                distance: pointerDistance(pts[0], pts[1]),
+                center: pointerCenter(pts[0], pts[1]),
                 zoom,
                 panX,
                 panY
             };
         }
-
-        if (elements.viewport.setPointerCapture) {
-            try {
-                elements.viewport.setPointerCapture(event.pointerId);
-            } catch (_) {
-                // Le navigateur peut refuser la capture du pointeur.
-            }
-        }
     }
 
-    function onPointerMove(event) {
-        if (!pointers.has(event.pointerId)) return;
+    function onViewportPointerMove(event) {
+        if (!tableGesture || !pointers.has(event.pointerId)) return;
 
         pointers.set(event.pointerId, {
             x: event.clientX,
@@ -1529,22 +1400,21 @@
         });
 
         if (pointers.size >= 2) {
-            const points = [...pointers.values()].slice(0, 2);
+            const pts = [...pointers.values()].slice(0, 2);
 
-            if (!gestureStart || !gestureStart.distance) {
+            if (!gestureStart?.distance) {
                 gestureStart = {
-                    distance: pointerDistance(points[0], points[1]),
-                    center: pointerCenter(points[0], points[1]),
+                    distance: pointerDistance(pts[0], pts[1]),
+                    center: pointerCenter(pts[0], pts[1]),
                     zoom,
                     panX,
                     panY
                 };
-
                 return;
             }
 
-            const distance = pointerDistance(points[0], points[1]);
-            const center = pointerCenter(points[0], points[1]);
+            const distance = pointerDistance(pts[0], pts[1]);
+            const center = pointerCenter(pts[0], pts[1]);
             const ratio = distance / Math.max(1, gestureStart.distance);
 
             zoom = Math.max(
@@ -1552,25 +1422,18 @@
                 Math.min(2.4, gestureStart.zoom * ratio)
             );
 
-            panX = gestureStart.panX +
-                center.x - gestureStart.center.x;
-
-            panY = gestureStart.panY +
-                center.y - gestureStart.center.y;
+            panX = gestureStart.panX + center.x - gestureStart.center.x;
+            panY = gestureStart.panY + center.y - gestureStart.center.y;
 
             applyView();
         } else if (pointers.size === 1 && gestureStart) {
-            panX = gestureStart.panX +
-                event.clientX - gestureStart.x;
-
-            panY = gestureStart.panY +
-                event.clientY - gestureStart.y;
-
+            panX = gestureStart.panX + event.clientX - gestureStart.x;
+            panY = gestureStart.panY + event.clientY - gestureStart.y;
             applyView();
         }
     }
 
-    function onPointerUp(event) {
+    function onViewportPointerUp(event) {
         pointers.delete(event.pointerId);
 
         if (pointers.size === 1) {
@@ -1584,10 +1447,11 @@
             };
         } else {
             gestureStart = null;
+            tableGesture = false;
         }
     }
 
-    /* ======================== MODALE ET PLEIN ÉCRAN ======================== */
+    /* ======================== MODALE ======================== */
 
     function showModal(title, html) {
         if (!elements.modal) {
@@ -1595,226 +1459,51 @@
             return;
         }
 
-        if (elements.modalTitle) {
-            elements.modalTitle.textContent = title;
-        }
-
-        if (elements.modalContent) {
-            elements.modalContent.innerHTML = html;
-        }
+        if (elements.modalTitle) elements.modalTitle.textContent = title;
+        if (elements.modalContent) elements.modalContent.innerHTML = html;
 
         elements.modal.classList.remove("hidden");
-        elements.modal.setAttribute("aria-hidden", "false");
     }
 
     function hideModal() {
-        if (elements.modal) {
-            elements.modal.classList.add("hidden");
-            elements.modal.setAttribute("aria-hidden", "true");
-        }
+        if (elements.modal) elements.modal.classList.add("hidden");
     }
 
     function showRules() {
         showModal("Règles du domino Double-Six", `
-            <p><strong>Distribution :</strong>
-            les 28 dominos sont mélangés. Chaque joueur reçoit 7 pièces.</p>
-
-            <p><strong>Départ :</strong>
-            le joueur qui détient le double-six doit le jouer en premier.</p>
-
-            <p><strong>Jouer :</strong>
-            raccordez une extrémité de votre domino à une extrémité
-            de même valeur de la chaîne.</p>
-
-            <p><strong>Passer :</strong>
-            vous ne pouvez passer que si aucun de vos dominos ne correspond
-            aux extrémités ouvertes.</p>
-
-            <p><strong>Victoire :</strong>
-            le premier joueur qui n'a plus de dominos gagne.
-            Si les quatre joueurs passent successivement, le plus petit
-            total de points restants détermine le gagnant.</p>
-
-            <p><strong>Score :</strong>
-            le gagnant marque la somme des points présents dans les mains
-            adverses.</p>
+            <p><strong>Distribution :</strong> 28 dominos, 7 par joueur.</p>
+            <p><strong>Départ :</strong> le détenteur du double-six ouvre la manche.</p>
+            <p><strong>Jouer :</strong> glissez votre domino vers le bout gauche
+            ou droit de la chaîne. La valeur doit correspondre.</p>
+            <p><strong>Passer :</strong> uniquement si aucun domino de votre main
+            ne peut être joué.</p>
+            <p><strong>Victoire :</strong> le premier joueur sans domino gagne.
+            Si la partie est bloquée, le plus petit total restant l'emporte.</p>
+            <p><strong>Score :</strong> le gagnant marque les points restants
+            dans les mains adverses.</p>
         `);
     }
 
     async function toggleFullscreen() {
         try {
             if (!document.fullscreenElement) {
-                if (!document.documentElement.requestFullscreen) {
-                    showToast("Le plein écran n'est pas pris en charge.");
-                    return;
-                }
-
                 await document.documentElement.requestFullscreen();
             } else {
                 await document.exitFullscreen();
             }
         } catch (error) {
-            showToast(
-                "Le plein écran n'est pas autorisé par ce navigateur."
-            );
+            showToast("Le plein écran n'est pas autorisé par ce navigateur.");
         }
     }
-
-    /* ======================== MODIFICATION DES NOMS ======================== */
-
-    function showRenamePlayers() {
-        showModal("Modifier les noms des joueurs", `
-            <form id="renamePlayersForm">
-                <label for="nameHuman">Votre nom</label>
-                <input
-                    id="nameHuman"
-                    name="nameHuman"
-                    type="text"
-                    maxlength="24"
-                    value="${escapeHtml(noms.human)}"
-                    autocomplete="off"
-                    required>
-
-                <label for="nameAi1">Joueur IA 1</label>
-                <input
-                    id="nameAi1"
-                    name="nameAi1"
-                    type="text"
-                    maxlength="24"
-                    value="${escapeHtml(noms.ai1)}"
-                    autocomplete="off"
-                    required>
-
-                <label for="nameAi2">Joueur IA 2</label>
-                <input
-                    id="nameAi2"
-                    name="nameAi2"
-                    type="text"
-                    maxlength="24"
-                    value="${escapeHtml(noms.ai2)}"
-                    autocomplete="off"
-                    required>
-
-                <label for="nameAi3">Joueur IA 3</label>
-                <input
-                    id="nameAi3"
-                    name="nameAi3"
-                    type="text"
-                    maxlength="24"
-                    value="${escapeHtml(noms.ai3)}"
-                    autocomplete="off"
-                    required>
-
-                <div class="rename-actions">
-                    <button type="submit">Enregistrer les noms</button>
-                    <button type="button" data-menu-action="cancel">
-                        Annuler
-                    </button>
-                </div>
-            </form>
-        `);
-    }
-
-    function savePlayerNames() {
-        const humanInput = $("nameHuman");
-        const ai1Input = $("nameAi1");
-        const ai2Input = $("nameAi2");
-        const ai3Input = $("nameAi3");
-
-        if (!humanInput || !ai1Input || !ai2Input || !ai3Input) {
-            showToast("Les champs de nom sont introuvables.");
-            return;
-        }
-
-        noms.human = cleanPlayerName(humanInput.value, "Vous");
-        noms.ai1 = cleanPlayerName(ai1Input.value, "Alex");
-        noms.ai2 = cleanPlayerName(ai2Input.value, "Chris");
-        noms.ai3 = cleanPlayerName(ai3Input.value, "Jordan");
-
-        syncNamesToState();
-        updatePlayerNameLabels();
-        renderAll();
-        hideModal();
-        saveGame(true);
-
-        showToast("Les noms des quatre joueurs ont été enregistrés.");
-    }
-
-    /* ======================== MENU ======================== */
 
     function showMenu() {
         showModal("Options de jeu", `
-            <p>Choisissez une action :</p>
-
-            <p>
-                <button type="button" data-menu-action="save">
-                    Sauvegarder la partie
-                </button>
-            </p>
-
-            <p>
-                <button type="button" data-menu-action="load">
-                    Reprendre la sauvegarde
-                </button>
-            </p>
-
-            <p>
-                <button type="button" data-menu-action="rename">
-                    Modifier les noms des joueurs
-                </button>
-            </p>
-
-            <p>
-                <button type="button" data-menu-action="sort">
-                    Trier mes dominos
-                </button>
-            </p>
-
-            <p>
-                <button type="button" data-menu-action="sound">
-                    ${soundEnabled ? "Couper le son" : "Activer le son"}
-                </button>
-            </p>
-
-            <p>
-                <button type="button" data-menu-action="fullscreen">
-                    Plein écran
-                </button>
-            </p>
-
-            <p>
-                <button type="button" data-menu-action="reset-view">
-                    Réinitialiser la vue
-                </button>
-            </p>
+            <p><button type="button" data-menu-action="save">Sauvegarder la partie</button></p>
+            <p><button type="button" data-menu-action="load">Reprendre la sauvegarde</button></p>
+            <p><button type="button" data-menu-action="sort">Trier mes dominos</button></p>
+            <p><button type="button" data-menu-action="sound">Activer / couper le son</button></p>
+            <p><button type="button" data-menu-action="fullscreen">Plein écran</button></p>
         `);
-    }
-
-    function handleMenuAction(action) {
-        if (action === "save") {
-            saveGame(false);
-        } else if (action === "load") {
-            loadGame();
-        } else if (action === "rename") {
-            showRenamePlayers();
-        } else if (action === "sort") {
-            sortHand();
-        } else if (action === "sound") {
-            soundEnabled = !soundEnabled;
-            showToast(soundEnabled ? "Son activé." : "Son coupé.");
-
-            if (soundEnabled) playSound();
-        } else if (action === "fullscreen") {
-            toggleFullscreen();
-        } else if (action === "reset-view") {
-            resetView();
-            showToast("Vue réinitialisée.");
-        } else if (action === "new-game") {
-            hideModal();
-            newGame();
-        } else if (action === "cancel") {
-            hideModal();
-        }
     }
 
     /* ======================== ÉVÉNEMENTS ======================== */
@@ -1826,21 +1515,18 @@
 
     function bindEvents() {
         bind("newGameButton", "click", () => {
-            if (state && state.phase === "playing") {
+            if (state?.phase === "playing") {
                 showModal("Nouvelle partie ?", `
-                    <p>
-                        Une nouvelle manche va remplacer la manche actuelle.
-                        Sauvegardez d'abord si vous souhaitez la conserver.
-                    </p>
-
-                    <button type="button" data-menu-action="new-game">
+                    <p>Une nouvelle manche va remplacer la manche actuelle.</p>
+                    <button type="button" id="confirmNewGame">
                         Commencer une nouvelle manche
                     </button>
-
-                    <button type="button" data-menu-action="cancel">
-                        Annuler
-                    </button>
                 `);
+
+                bind("confirmNewGame", "click", () => {
+                    hideModal();
+                    newGame();
+                });
             } else {
                 newGame();
             }
@@ -1850,21 +1536,14 @@
             soundEnabled = !soundEnabled;
 
             const button = $("soundButton");
-
             if (button) {
                 button.setAttribute(
                     "aria-label",
                     soundEnabled ? "Couper le son" : "Activer le son"
                 );
-
-                button.setAttribute(
-                    "aria-pressed",
-                    soundEnabled ? "true" : "false"
-                );
             }
 
             showToast(soundEnabled ? "Son activé." : "Son coupé.");
-
             if (soundEnabled) playSound();
         });
 
@@ -1878,15 +1557,11 @@
         bind("passButton", "click", () => passTurn("human"));
 
         bind("playLeftButton", "click", () => {
-            if (selectedTileId) {
-                playTile("human", selectedTileId, "left");
-            }
+            if (selectedTileId) playTile("human", selectedTileId, "left");
         });
 
         bind("playRightButton", "click", () => {
-            if (selectedTileId) {
-                playTile("human", selectedTileId, "right");
-            }
+            if (selectedTileId) playTile("human", selectedTileId, "right");
         });
 
         bind("sortButton", "click", sortHand);
@@ -1905,71 +1580,87 @@
                     return;
                 }
 
-                const actionButton = event.target.closest(
-                    "[data-menu-action]"
-                );
-
+                const actionButton = event.target.closest("[data-menu-action]");
                 if (!actionButton) return;
 
                 const action = actionButton.dataset.menuAction;
-                handleMenuAction(action);
-            });
+                hideModal();
 
-            elements.modal.addEventListener("submit", event => {
-                if (event.target && event.target.id === "renamePlayersForm") {
-                    event.preventDefault();
-                    savePlayerNames();
+                if (action === "save") saveGame(false);
+                if (action === "load") loadGame();
+                if (action === "sort") sortHand();
+
+                if (action === "sound") {
+                    soundEnabled = !soundEnabled;
+                    showToast(soundEnabled ? "Son activé." : "Son coupé.");
                 }
+
+                if (action === "fullscreen") toggleFullscreen();
             });
         }
 
+        /*
+         * Gestion des pièces dans la main :
+         * pointerdown démarre le suivi ; pointermove déclenche le drag ;
+         * pointerup valide le dépôt.
+         */
         if (elements.hand) {
+            elements.hand.addEventListener("pointerdown", event => {
+                const tileButton = event.target.closest("[data-tile-id]");
+                if (!tileButton || !elements.hand.contains(tileButton)) return;
+
+                startDrag(event, tileButton);
+            });
+
+            document.addEventListener("pointermove", handleDragMove, {
+                passive: false
+            });
+
+            document.addEventListener("pointerup", finishDrag);
+            document.addEventListener("pointercancel", event => {
+                if (drag && event.pointerId === drag.pointerId) {
+                    cancelDrag();
+                }
+            });
+
             elements.hand.addEventListener("click", event => {
                 const tileButton = event.target.closest("[data-tile-id]");
+                if (!tileButton || !elements.hand.contains(tileButton)) return;
 
-                if (
-                    tileButton &&
-                    elements.hand.contains(tileButton)
-                ) {
-                    selectTile(tileButton.dataset.tileId);
+                if (suppressNextClick) {
+                    suppressNextClick = false;
+                    event.preventDefault();
+                    return;
                 }
+
+                selectTile(tileButton.dataset.tileId);
             });
         }
 
         if (elements.viewport) {
-            elements.viewport.style.touchAction = "none";
-
             elements.viewport.addEventListener(
                 "pointerdown",
-                onPointerDown
+                onViewportPointerDown
             );
 
             elements.viewport.addEventListener(
                 "pointermove",
-                onPointerMove
+                onViewportPointerMove
             );
 
             elements.viewport.addEventListener(
                 "pointerup",
-                onPointerUp
+                onViewportPointerUp
             );
 
             elements.viewport.addEventListener(
                 "pointercancel",
-                onPointerUp
-            );
-
-            elements.viewport.addEventListener(
-                "lostpointercapture",
-                onPointerUp
+                onViewportPointerUp
             );
 
             elements.viewport.addEventListener("wheel", event => {
                 event.preventDefault();
-
-                setZoom(
-                    zoom + (event.deltaY < 0 ? 0.06 : -0.06)
-                );
+                setZoom(zoom + (event.deltaY < 0 ? 0.06 : -0.06));
             }, { passive: false });
 
             elements.viewport.addEventListener("contextmenu", event => {
@@ -1978,7 +1669,10 @@
         }
 
         document.addEventListener("keydown", event => {
-            if (event.key === "Escape") hideModal();
+            if (event.key === "Escape") {
+                hideModal();
+                cancelDrag();
+            }
 
             if (event.key === "+" || event.key === "=") {
                 setZoom(zoom + 0.1);
@@ -1988,29 +1682,17 @@
                 setZoom(zoom - 0.1);
             }
 
-            if (
-                event.key === "ArrowLeft" &&
-                selectedTileId &&
-                state &&
-                state.currentPlayer === "human"
-            ) {
+            if (event.key === "ArrowLeft" && selectedTileId) {
                 playTile("human", selectedTileId, "left");
             }
 
-            if (
-                event.key === "ArrowRight" &&
-                selectedTileId &&
-                state &&
-                state.currentPlayer === "human"
-            ) {
+            if (event.key === "ArrowRight" && selectedTileId) {
                 playTile("human", selectedTileId, "right");
             }
         });
 
         document.addEventListener("visibilitychange", () => {
-            if (document.hidden && state) {
-                saveGame(true);
-            }
+            if (document.hidden && state) saveGame(true);
         });
 
         window.addEventListener("beforeunload", () => {
@@ -2023,6 +1705,18 @@
     async function init() {
         bindEvents();
         applyView();
+
+        /*
+         * CSS tactile complémentaire appliqué par JavaScript,
+         * sans exiger de modifier les fichiers HTML existants.
+         */
+        if (elements.hand) {
+            elements.hand.style.touchAction = "pan-x";
+        }
+
+        if (elements.viewport) {
+            elements.viewport.style.touchAction = "none";
+        }
 
         try {
             await openDatabase();
@@ -2039,42 +1733,23 @@
 
         if (db) {
             try {
-                const saved = await new Promise((resolve, reject) => {
-                    const request = db
-                        .transaction(STORE_NAME, "readonly")
-                        .objectStore(STORE_NAME)
-                        .get(SAVE_KEY);
+                const saved = await readSavedGame();
 
-                    request.onsuccess = () => {
-                        resolve(request.result || null);
-                    };
-
-                    request.onerror = () => reject(request.error);
-                });
-
-                if (saved && saved.state) {
-                    const candidate = clone(saved.state);
-
-                    if (migrateSavedState(candidate)) {
-                        state = candidate;
-                        syncNamesFromState();
-                        restored = true;
-
-                        renderAll();
-                        setStatus("Sauvegarde précédente restaurée.");
-                    }
+                if (saved?.state && validateState(saved.state)) {
+                    state = saved.state;
+                    restored = true;
+                    selectedTileId = null;
+                    busy = false;
+                    renderAll();
+                    setStatus("Sauvegarde précédente restaurée");
                 }
             } catch (error) {
-                console.warn(
-                    "Restauration automatique impossible :",
-                    error
-                );
+                console.warn("Restauration automatique impossible :", error);
             }
         }
 
         if (!restored) {
             state = {
-                version: 2,
                 round: 0,
                 players: ordre.map(id => ({
                     id,
@@ -2089,10 +1764,8 @@
                 consecutivePasses: 0,
                 phase: "playing",
                 winner: null,
-                openingTileId: null,
                 log: [],
-                playedCount: 0,
-                lastMove: null
+                playedCount: 0
             };
 
             newGame();
@@ -2104,33 +1777,13 @@
         }
 
         renderAll();
-        updatePlayerNameLabels();
     }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", init, {
-            once: true
-        });
+        document.addEventListener("DOMContentLoaded", init, { once: true });
     } else {
         init();
     }
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
