@@ -2680,6 +2680,896 @@
 
 
 
+// ============================================================
+// PATI 5/6 — MENI, PARAMÈT, SOVGAD, HUD AK REZILTA MISYON
+// Kole pati sa a dirèkteman apre Pati 4.
+// Pa mete yon lòt IIFE epi pa ajoute })(); nan pati sa a.
+// ============================================================
 
+const SAVE_KEY = "fobasMission3D_save_v1";
+
+let menuControlsReady = false;
+let saveSystemReady = false;
+let notificationElement = null;
+let notificationHideTimer = null;
+
+// ------------------------------------------------------------
+// 1. ZOUTI POU KONTWOLE AFICHAY ELEMAN HTML YO
+// ------------------------------------------------------------
+
+function setElementVisible(element, visible, displayMode = "flex") {
+    if (!element) return;
+
+    element.hidden = !visible;
+    element.style.display = visible ? displayMode : "none";
+    element.setAttribute("aria-hidden", visible ? "false" : "true");
+}
+
+function showScreen(screenName) {
+    const screens = [
+        { name: "menu", element: ui.menu },
+        { name: "game", element: ui.game },
+        { name: "missions", element: ui.missionMenu },
+        { name: "characters", element: ui.characterMenu },
+        { name: "settings", element: ui.settingsMenu },
+        { name: "pause", element: ui.pauseMenu },
+        { name: "result", element: ui.result }
+    ];
+
+    screens.forEach((screen) => {
+        const visible = screen.name === screenName;
+        if (screen.element) {
+            setElementVisible(screen.element, visible);
+        }
+    });
+
+    if (ui.loading) {
+        setElementVisible(ui.loading, false);
+    }
+}
+
+function openMenu(menuName) {
+    if (state.active && menuName !== "game" && menuName !== "pause") {
+        state.active = false;
+    }
+
+    if (menuName === "missions") {
+        showScreen("missions");
+    } else if (menuName === "characters") {
+        showScreen("characters");
+        updateCharacterSelectionUI();
+    } else if (menuName === "settings") {
+        showScreen("settings");
+        syncSettingsControls();
+    } else if (menuName === "pause") {
+        showScreen("pause");
+    } else if (menuName === "game") {
+        showScreen("game");
+    } else {
+        showScreen("menu");
+    }
+}
+
+// ------------------------------------------------------------
+// 2. NOTIFIKASYON AK MESAJ ERÈ
+// ------------------------------------------------------------
+
+function showNotification(message, duration = 2600) {
+    const text = String(message || "");
+
+    if (ui.notifications) {
+        ui.notifications.textContent = text;
+        setElementVisible(ui.notifications, true, "block");
+
+        if (notificationHideTimer !== null) {
+            clearTimeout(notificationHideTimer);
+        }
+
+        notificationHideTimer = setTimeout(() => {
+            if (ui.notifications) {
+                setElementVisible(ui.notifications, false);
+            }
+            notificationHideTimer = null;
+        }, Math.max(500, Number(duration) || 2600));
+
+        return;
+    }
+
+    if (!notificationElement) {
+        notificationElement = document.createElement("div");
+        notificationElement.id = "runtime-notification";
+        notificationElement.setAttribute("role", "status");
+        notificationElement.style.position = "fixed";
+        notificationElement.style.left = "50%";
+        notificationElement.style.bottom = "22px";
+        notificationElement.style.transform = "translateX(-50%)";
+        notificationElement.style.zIndex = "9999";
+        notificationElement.style.maxWidth = "90%";
+        notificationElement.style.padding = "12px 18px";
+        notificationElement.style.borderRadius = "10px";
+        notificationElement.style.background = "rgba(10, 18, 30, 0.94)";
+        notificationElement.style.color = "#ffffff";
+        notificationElement.style.fontFamily = "sans-serif";
+        notificationElement.style.fontSize = "14px";
+        notificationElement.style.textAlign = "center";
+        notificationElement.style.pointerEvents = "none";
+        document.body.appendChild(notificationElement);
+    }
+
+    notificationElement.textContent = text;
+    notificationElement.style.display = "block";
+
+    if (notificationHideTimer !== null) {
+        clearTimeout(notificationHideTimer);
+    }
+
+    notificationHideTimer = setTimeout(() => {
+        if (notificationElement) {
+            notificationElement.style.display = "none";
+        }
+        notificationHideTimer = null;
+    }, Math.max(500, Number(duration) || 2600));
+}
+
+function showAppError(message) {
+    const errorText = String(message || "Yon erè rive pandan jwèt la t ap fonksyone.");
+
+    if (ui.errorMessage) {
+        ui.errorMessage.textContent = errorText;
+    }
+
+    if (ui.error) {
+        setElementVisible(ui.error, true);
+    } else {
+        showNotification(errorText, 5000);
+    }
+}
+
+function hideAppError() {
+    if (ui.error) {
+        setElementVisible(ui.error, false);
+    }
+}
+
+// ------------------------------------------------------------
+// 3. SOVGAD AK CHAJMAN PWOGRÈ JWE A
+// ------------------------------------------------------------
+
+function getSafeSavedData() {
+    return {
+        version: 1,
+        mission: Number(state.mission) || 1,
+        character: String(state.character || "FOBAS"),
+        selectedCharacter: String(
+            state.selectedCharacter || state.character || "FOBAS"
+        ),
+        score: Math.max(0, Number(state.score) || 0),
+        settings: {
+            quality: state.settings.quality || "high",
+            sensitivity: clamp(
+                Number(state.settings.sensitivity) || 5,
+                1,
+                10
+            ),
+            volume: clamp(
+                Number(state.settings.volume) || 0,
+                0,
+                100
+            ),
+            sound: state.settings.sound !== false
+        },
+        savedAt: Date.now()
+    };
+}
+
+function saveGameData() {
+    try {
+        const data = getSafeSavedData();
+        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        saveSystemReady = true;
+
+        if (ui.saveStatus) {
+            ui.saveStatus.textContent = "Sovgad la reyisi.";
+        }
+
+        return true;
+    } catch (error) {
+        console.warn("Sovgad lokal la pa disponib:", error);
+
+        if (ui.saveStatus) {
+            ui.saveStatus.textContent =
+                "Sovgad pa disponib sou aparèy sa a.";
+        }
+
+        return false;
+    }
+}
+
+function loadGameData() {
+    try {
+        const rawData = localStorage.getItem(SAVE_KEY);
+
+        if (!rawData) {
+            saveSystemReady = true;
+            syncSettingsControls();
+            return false;
+        }
+
+        const data = JSON.parse(rawData);
+
+        if (!data || typeof data !== "object") {
+            throw new Error("Done sovgad yo pa nan bon fòma.");
+        }
+
+        const missionNumber = Number(data.mission);
+        const missionExists = MISSIONS.some(
+            (mission) => Number(mission.id) === missionNumber
+        );
+
+        if (missionExists) {
+            state.mission = missionNumber;
+        }
+
+        const savedCharacter = String(data.character || "");
+        const selectedCharacter = String(
+            data.selectedCharacter || savedCharacter
+        );
+
+        if (CHARACTERS[savedCharacter]) {
+            state.character = savedCharacter;
+        }
+
+        if (CHARACTERS[selectedCharacter]) {
+            state.selectedCharacter = selectedCharacter;
+        } else if (CHARACTERS[state.character]) {
+            state.selectedCharacter = state.character;
+        }
+
+        if (Number.isFinite(Number(data.score))) {
+            state.score = Math.max(0, Number(data.score));
+        }
+
+        if (data.settings && typeof data.settings === "object") {
+            const savedSettings = data.settings;
+
+            if (["low", "medium", "high"].includes(savedSettings.quality)) {
+                state.settings.quality = savedSettings.quality;
+            }
+
+            if (Number.isFinite(Number(savedSettings.sensitivity))) {
+                state.settings.sensitivity = clamp(
+                    Number(savedSettings.sensitivity),
+                    1,
+                    10
+                );
+            }
+
+            if (Number.isFinite(Number(savedSettings.volume))) {
+                state.settings.volume = clamp(
+                    Number(savedSettings.volume),
+                    0,
+                    100
+                );
+            }
+
+            if (typeof savedSettings.sound === "boolean") {
+                state.settings.sound = savedSettings.sound;
+            }
+        }
+
+        saveSystemReady = true;
+        syncSettingsControls();
+        updateCharacterSelectionUI();
+
+        return true;
+    } catch (error) {
+        console.warn("Pa t kapab chaje sovgad la:", error);
+        saveSystemReady = false;
+
+        if (ui.saveStatus) {
+            ui.saveStatus.textContent =
+                "Sovgad la pa t kapab chaje; jwèt la ap itilize paramèt nòmal yo.";
+        }
+
+        return false;
+    }
+}
+
+// ------------------------------------------------------------
+// 4. PARAMÈT JWÈT LA
+// ------------------------------------------------------------
+
+function syncSettingsControls() {
+    if (ui.quality) {
+        ui.quality.value = state.settings.quality || "high";
+    }
+
+    if (ui.sensitivity) {
+        ui.sensitivity.value = String(
+            clamp(Number(state.settings.sensitivity) || 5, 1, 10)
+        );
+    }
+
+    if (ui.volume) {
+        ui.volume.value = String(
+            clamp(Number(state.settings.volume) || 0, 0, 100)
+        );
+    }
+
+    if (ui.sound) {
+        ui.sound.checked = state.settings.sound !== false;
+    }
+}
+
+function readSettingsControls() {
+    if (ui.quality) {
+        const qualityValue = String(ui.quality.value || "high");
+
+        if (["low", "medium", "high"].includes(qualityValue)) {
+            state.settings.quality = qualityValue;
+        }
+    }
+
+    if (ui.sensitivity) {
+        state.settings.sensitivity = clamp(
+            Number(ui.sensitivity.value) || 5,
+            1,
+            10
+        );
+    }
+
+    if (ui.volume) {
+        state.settings.volume = clamp(
+            Number(ui.volume.value) || 0,
+            0,
+            100
+        );
+    }
+
+    if (ui.sound) {
+        state.settings.sound = Boolean(ui.sound.checked);
+    }
+}
+
+function applySettings() {
+    state.settings.sensitivity = clamp(
+        Number(state.settings.sensitivity) || 5,
+        1,
+        10
+    );
+
+    state.settings.volume = clamp(
+        Number(state.settings.volume) || 0,
+        0,
+        100
+    );
+
+    state.settings.sound = state.settings.sound !== false;
+
+    if (canvas) {
+        resizeCanvas();
+    }
+
+    if (ui.saveStatus) {
+        ui.saveStatus.textContent = "Paramèt yo aplike.";
+    }
+}
+
+// ------------------------------------------------------------
+// 5. CHWA PÈSONAJ
+// ------------------------------------------------------------
+
+function updateCharacterSelectionUI() {
+    const selectedId = String(
+        state.selectedCharacter || state.character || "FOBAS"
+    );
+
+    if (ui.selectedCharacter) {
+        const characterData = CHARACTERS[selectedId];
+
+        ui.selectedCharacter.textContent = characterData
+            ? String(characterData.name || selectedId)
+            : selectedId;
+    }
+
+    document.querySelectorAll("[data-character]").forEach((element) => {
+        const characterId = String(element.dataset.character || "");
+        const selected = characterId === selectedId;
+
+        element.classList.toggle("selected", selected);
+        element.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+}
+
+function selectCharacter(characterId) {
+    const id = String(characterId || "");
+
+    if (!CHARACTERS[id]) {
+        showNotification("Pèsonaj sa a pa disponib.");
+        return;
+    }
+
+    state.selectedCharacter = id;
+    updateCharacterSelectionUI();
+    saveGameData();
+}
+
+function confirmCharacterSelection() {
+    const id = String(
+        state.selectedCharacter || state.character || "FOBAS"
+    );
+
+    if (!CHARACTERS[id]) {
+        showNotification("Chwazi yon pèsonaj ki disponib anvan.");
+        return;
+    }
+
+    state.character = id;
+    saveGameData();
+    showNotification("Pèsonaj chwazi: " + id);
+    openMenu("menu");
+}
+
+// ------------------------------------------------------------
+// 6. CHWA MISYON
+// ------------------------------------------------------------
+
+function selectMission(missionId) {
+    const id = Number(missionId);
+    const mission = MISSIONS.find(
+        (item) => Number(item.id) === id
+    );
+
+    if (!mission) {
+        showNotification("Misyon sa a pa disponib.");
+        return;
+    }
+
+    state.mission = id;
+    saveGameData();
+    startGame();
+}
+
+// ------------------------------------------------------------
+// 7. HUD AK ENFÒMASYON JWÈ A
+// ------------------------------------------------------------
+
+function updateMainHUD() {
+    const characterId = String(state.character || "FOBAS");
+    const characterData = CHARACTERS[characterId] || {};
+    const mission = MISSIONS.find(
+        (item) => Number(item.id) === Number(state.mission)
+    );
+
+    if (ui.hudCharacter) {
+        ui.hudCharacter.textContent = String(
+            characterData.name || characterId
+        );
+    }
+
+    if (ui.hudLevel) {
+        ui.hudLevel.textContent = String(state.mission || 1);
+    }
+
+    if (ui.hudHealth) {
+        ui.hudHealth.textContent = String(
+            Math.round(clamp(Number(state.health) || 0, 0, 100))
+        );
+    }
+
+    if (ui.hudEnergy) {
+        ui.hudEnergy.textContent = String(
+            Math.round(clamp(Number(state.energy) || 0, 0, 100))
+        );
+    }
+
+    if (ui.hudScore) {
+        ui.hudScore.textContent = String(
+            Math.max(0, Math.round(Number(state.score) || 0))
+        );
+    }
+
+    if (ui.hudMissionTitle && mission) {
+        ui.hudMissionTitle.textContent = String(mission.title || "Misyon");
+    }
+
+    if (ui.hudObjective && mission) {
+        ui.hudObjective.textContent = String(
+            mission.description || "Kontinye misyon an."
+        );
+    }
+
+    if (ui.location) {
+        ui.location.textContent =
+            "X: " + Math.round(Number(state.x) || 0) +
+            " | Z: " + Math.round(Number(state.z) || 0);
+    }
+
+    if (ui.timer) {
+        const elapsed = Math.max(0, Number(state.elapsed) || 0);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = Math.floor(elapsed % 60);
+
+        ui.timer.textContent =
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(seconds).padStart(2, "0");
+    }
+}
+
+// ------------------------------------------------------------
+// 8. KÒMANSE, REKÒMANSE AK KONTINYE MISYON
+// ------------------------------------------------------------
+
+function startGame() {
+    const chosenMission = MISSIONS.find(
+        (item) => Number(item.id) === Number(state.mission)
+    );
+
+    if (!chosenMission) {
+        state.mission = Number(MISSIONS[0].id) || 1;
+    }
+
+    if (!CHARACTERS[state.character]) {
+        state.character = CHARACTERS[state.selectedCharacter]
+            ? state.selectedCharacter
+            : "FOBAS";
+    }
+
+    state.selectedCharacter = state.character;
+    state.paused = false;
+    state.finished = false;
+    state.active = false;
+
+    if (typeof resetMissionSystems === "function") {
+        resetMissionSystems();
+    } else if (typeof createWorld === "function") {
+        createWorld();
+    }
+
+    if (typeof setupMovementControls === "function") {
+        setupMovementControls();
+    }
+
+    if (typeof setupMissionSystems === "function") {
+        setupMissionSystems();
+    }
+
+    state.active = true;
+    state.paused = false;
+    state.finished = false;
+
+    if (ui.result) {
+        setElementVisible(ui.result, false);
+    }
+
+    if (ui.pauseMenu) {
+        setElementVisible(ui.pauseMenu, false);
+    }
+
+    showScreen("game");
+    updateMainHUD();
+    updateMissionHUD();
+
+    saveGameData();
+
+    if (typeof startAnimation === "function") {
+        startAnimation();
+    }
+
+    showNotification("Misyon an kòmanse!");
+}
+
+function restartMission() {
+    startGame();
+}
+
+function continueGame() {
+    startGame();
+}
+
+// ------------------------------------------------------------
+// 9. POZ, REPRANN AK RETOUNEN NAN MENI
+// ------------------------------------------------------------
+
+function pauseGame() {
+    if (!state.active || state.finished) return;
+
+    state.paused = true;
+    state.active = false;
+
+    openMenu("pause");
+}
+
+function resumeGame() {
+    if (state.finished) return;
+
+    state.paused = false;
+    state.active = true;
+
+    showScreen("game");
+
+    if (typeof startAnimation === "function") {
+        startAnimation();
+    }
+}
+
+function returnToMenu() {
+    state.active = false;
+    state.paused = false;
+
+    saveGameData();
+
+    showScreen("menu");
+    updateCharacterSelectionUI();
+}
+
+// ------------------------------------------------------------
+// 10. REZILTA MISYON
+// ------------------------------------------------------------
+
+function finishMission(success = true) {
+    if (state.finished && ui.result && !ui.result.hidden) {
+        return;
+    }
+
+    state.finished = true;
+    state.active = false;
+    state.paused = false;
+
+    const mission = MISSIONS.find(
+        (item) => Number(item.id) === Number(state.mission)
+    );
+
+    if (success && mission) {
+        const reward = Math.max(0, Number(mission.reward) || 0);
+        state.score = Math.max(0, Number(state.score) || 0) + reward;
+    }
+
+    if (ui.resultTitle) {
+        ui.resultTitle.textContent = success
+            ? "MISYON REYISI!"
+            : "MISYON FINI";
+    }
+
+    if (ui.resultDescription) {
+        ui.resultDescription.textContent = success
+            ? "Bon travay! Ou fini misyon an."
+            : "Misyon sa a fini. Ou ka eseye ankò.";
+    }
+
+    if (ui.resultScore) {
+        ui.resultScore.textContent = String(
+            Math.max(0, Math.round(Number(state.score) || 0))
+        );
+    }
+
+    if (ui.nextMission) {
+        const hasNextMission = MISSIONS.some(
+            (item) => Number(item.id) === Number(state.mission) + 1
+        );
+
+        setElementVisible(ui.nextMission, success && hasNextMission, "inline-flex");
+    }
+
+    if (ui.result) {
+        setElementVisible(ui.result, true);
+    } else {
+        showNotification(
+            success ? "Misyon reyisi!" : "Misyon fini.",
+            4000
+        );
+    }
+
+    saveGameData();
+}
+
+function goToNextMission() {
+    const nextId = Number(state.mission) + 1;
+    const nextMission = MISSIONS.find(
+        (item) => Number(item.id) === nextId
+    );
+
+    if (!nextMission) {
+        showNotification("Ou fini tout misyon ki disponib yo!");
+        returnToMenu();
+        return;
+    }
+
+    state.mission = nextId;
+    startGame();
+}
+
+// ------------------------------------------------------------
+// 11. KONEKTE TOUT BOUTON AK MENI YO
+// ------------------------------------------------------------
+
+function bindMenuControls() {
+    if (menuControlsReady) return;
+    menuControlsReady = true;
+
+    if (ui.enter) {
+        ui.enter.addEventListener("click", () => {
+            openMenu("menu");
+        });
+    }
+
+    if (ui.play) {
+        ui.play.addEventListener("click", () => {
+            openMenu("missions");
+        });
+    }
+
+    if (ui.continue) {
+        ui.continue.addEventListener("click", () => {
+            continueGame();
+        });
+    }
+
+    if (ui.missions) {
+        ui.missions.addEventListener("click", () => {
+            openMenu("missions");
+        });
+    }
+
+    if (ui.characters) {
+        ui.characters.addEventListener("click", () => {
+            openMenu("characters");
+        });
+    }
+
+    if (ui.settings) {
+        ui.settings.addEventListener("click", () => {
+            openMenu("settings");
+        });
+    }
+
+    document.querySelectorAll("[data-select-mission]").forEach((element) => {
+        element.addEventListener("click", () => {
+            const missionId = element.dataset.selectMission;
+            selectMission(missionId);
+        });
+    });
+
+    document.querySelectorAll("[data-back-menu]").forEach((element) => {
+        element.addEventListener("click", () => {
+            openMenu("menu");
+        });
+    });
+
+    document.querySelectorAll("[data-character]").forEach((element) => {
+        element.addEventListener("click", () => {
+            selectCharacter(element.dataset.character);
+        });
+    });
+
+    if (ui.confirmCharacter) {
+        ui.confirmCharacter.addEventListener("click", () => {
+            confirmCharacterSelection();
+        });
+    }
+
+    if (ui.saveSettings) {
+        ui.saveSettings.addEventListener("click", () => {
+            readSettingsControls();
+            applySettings();
+            saveGameData();
+            showNotification("Paramèt yo sove.");
+        });
+    }
+
+    if (ui.pause) {
+        ui.pause.addEventListener("click", () => {
+            if (state.paused) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        });
+    }
+
+    if (ui.resume) {
+        ui.resume.addEventListener("click", () => {
+            resumeGame();
+        });
+    }
+
+    if (ui.restart) {
+        ui.restart.addEventListener("click", () => {
+            restartMission();
+        });
+    }
+
+    if (ui.backMenu) {
+        ui.backMenu.addEventListener("click", () => {
+            returnToMenu();
+        });
+    }
+
+    if (ui.nextMission) {
+        ui.nextMission.addEventListener("click", () => {
+            goToNextMission();
+        });
+    }
+
+    if (ui.resultMenu) {
+        ui.resultMenu.addEventListener("click", () => {
+            returnToMenu();
+        });
+    }
+
+    if (ui.errorClose) {
+        ui.errorClose.addEventListener("click", () => {
+            hideAppError();
+        });
+    }
+
+    if (ui.quality) {
+        ui.quality.addEventListener("change", () => {
+            readSettingsControls();
+            applySettings();
+        });
+    }
+
+    if (ui.sensitivity) {
+        ui.sensitivity.addEventListener("input", () => {
+            readSettingsControls();
+        });
+    }
+
+    if (ui.volume) {
+        ui.volume.addEventListener("input", () => {
+            readSettingsControls();
+        });
+    }
+
+    if (ui.sound) {
+        ui.sound.addEventListener("change", () => {
+            readSettingsControls();
+        });
+    }
+
+    window.addEventListener("beforeunload", () => {
+        saveGameData();
+    });
+
+    window.addEventListener("keydown", (event) => {
+        const key = String(event.key || "").toLowerCase();
+
+        if (key === "escape" || key === "p") {
+            if (state.active && !state.finished) {
+                pauseGame();
+            } else if (state.paused && !state.finished) {
+                resumeGame();
+            }
+        }
+    });
+}
+
+// ------------------------------------------------------------
+// 12. PREPARE SISTÈM MENI AK SOVGAD YO
+// Apèl fonksyon sa yo ap fèt nan Pati 6.
+// ------------------------------------------------------------
+
+function setupMenuSystems() {
+    loadGameData();
+    syncSettingsControls();
+    updateCharacterSelectionUI();
+    bindMenuControls();
+
+    if (ui.result) {
+        setElementVisible(ui.result, false);
+    }
+
+    if (ui.pauseMenu) {
+        setElementVisible(ui.pauseMenu, false);
+    }
+
+    if (ui.error) {
+        setElementVisible(ui.error, false);
+    }
+
+    updateMainHUD();
+}
 
 
