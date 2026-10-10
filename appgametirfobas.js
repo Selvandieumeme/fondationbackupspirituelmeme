@@ -3573,3 +3573,539 @@ function setupMenuSystems() {
 }
 
 
+
+
+
+
+
+
+
+
+
+// ============================================================
+// PATI 6/6 — WEBGL, BOUK ANIMASYON, SON, ERÈ AK DEMARAJ
+// Dènye blòk appgametirfobas.js
+// Kole li dirèkteman apre Pati 5.
+// ============================================================
+
+// ------------------------------------------------------------
+// 1. SHADER WEBGL
+// ------------------------------------------------------------
+
+const FINAL_VERTEX_SHADER_SOURCE = `
+    attribute vec3 aPosition;
+
+    uniform mat4 uProjection;
+    uniform mat4 uView;
+    uniform mat4 uModel;
+
+    void main() {
+        gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
+    }
+`;
+
+const FINAL_FRAGMENT_SHADER_SOURCE = `
+    precision mediump float;
+
+    uniform vec4 uColor;
+
+    void main() {
+        gl_FragColor = uColor;
+    }
+`;
+
+// ------------------------------------------------------------
+// 2. KREYE YON PWOGRAM SHADER WEBGL
+// ------------------------------------------------------------
+
+function finalCompileShader(type, source) {
+    const shader = gl.createShader(type);
+
+    if (!shader) {
+        throw new Error("WebGL pa t kapab kreye shader la.");
+    }
+
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const message = gl.getShaderInfoLog(shader) || "Erè konpilasyon shader.";
+        gl.deleteShader(shader);
+        throw new Error(message);
+    }
+
+    return shader;
+}
+
+function finalCreateProgram() {
+    const vertexShader = finalCompileShader(
+        gl.VERTEX_SHADER,
+        FINAL_VERTEX_SHADER_SOURCE
+    );
+
+    const fragmentShader = finalCompileShader(
+        gl.FRAGMENT_SHADER,
+        FINAL_FRAGMENT_SHADER_SOURCE
+    );
+
+    const newProgram = gl.createProgram();
+
+    if (!newProgram) {
+        gl.deleteShader(vertexShader);
+        gl.deleteShader(fragmentShader);
+        throw new Error("WebGL pa t kapab kreye pwogram grafik la.");
+    }
+
+    gl.attachShader(newProgram, vertexShader);
+    gl.attachShader(newProgram, fragmentShader);
+
+    gl.bindAttribLocation(newProgram, 0, "aPosition");
+    gl.linkProgram(newProgram);
+
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+
+    if (!gl.getProgramParameter(newProgram, gl.LINK_STATUS)) {
+        const message =
+            gl.getProgramInfoLog(newProgram) || "Erè lyen pwogram WebGL.";
+        gl.deleteProgram(newProgram);
+        throw new Error(message);
+    }
+
+    return newProgram;
+}
+
+// ------------------------------------------------------------
+// 3. CHÈCHE ADRES ATRIBI AK UNIFORM YO
+// ------------------------------------------------------------
+
+function finalSetupLocations() {
+    locations = locations || {};
+
+    const positionLocation = gl.getAttribLocation(program, "aPosition");
+    const projectionLocation = gl.getUniformLocation(program, "uProjection");
+    const viewLocation = gl.getUniformLocation(program, "uView");
+    const modelLocation = gl.getUniformLocation(program, "uModel");
+    const colorLocation = gl.getUniformLocation(program, "uColor");
+
+    // Non estanda yo.
+    locations.aPosition = positionLocation;
+    locations.uProjection = projectionLocation;
+    locations.uView = viewLocation;
+    locations.uModel = modelLocation;
+    locations.uColor = colorLocation;
+
+    // Alias pou fonksyon desen ki ka itilize non kout.
+    locations.position = positionLocation;
+    locations.projection = projectionLocation;
+    locations.view = viewLocation;
+    locations.model = modelLocation;
+    locations.color = colorLocation;
+}
+
+// ------------------------------------------------------------
+// 4. INISYALIZE WEBGL
+// ------------------------------------------------------------
+
+function initWebGL() {
+    if (!ui.canvas) {
+        throw new Error("Eleman canvas #game-canvas pa jwenn nan HTML la.");
+    }
+
+    canvas = ui.canvas;
+
+    const contextOptions = {
+        alpha: false,
+        antialias: true,
+        depth: true,
+        stencil: false,
+        powerPreference: "high-performance"
+    };
+
+    gl =
+        canvas.getContext("webgl", contextOptions) ||
+        canvas.getContext("experimental-webgl", contextOptions);
+
+    if (!gl) {
+        throw new Error(
+            "Navigatè sa a pa sipòte WebGL. Eseye yon navigatè ki pi resan."
+        );
+    }
+
+    program = finalCreateProgram();
+
+    gl.useProgram(program);
+
+    finalSetupLocations();
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clearColor(0.48, 0.72, 0.91, 1.0);
+
+    if (typeof setupMeshes === "function") {
+        setupMeshes();
+    }
+
+    resizeCanvas();
+
+    lostContext = false;
+
+    return true;
+}
+
+// ------------------------------------------------------------
+// 5. AJISTE CANVAS LA AK GWOSÈ EKRAN AN
+// ------------------------------------------------------------
+
+function finalResizeCanvas() {
+    if (!canvas || !gl) return;
+
+    const pixelRatio = Math.min(
+        Math.max(window.devicePixelRatio || 1, 1),
+        state.settings.quality === "low" ? 1 : 1.75
+    );
+
+    const rect = canvas.getBoundingClientRect();
+
+    const displayWidth = Math.max(
+        1,
+        Math.floor((rect.width || window.innerWidth) * pixelRatio)
+    );
+
+    const displayHeight = Math.max(
+        1,
+        Math.floor((rect.height || window.innerHeight) * pixelRatio)
+    );
+
+    if (
+        canvas.width !== displayWidth ||
+        canvas.height !== displayHeight
+    ) {
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
+    }
+
+    canvasWidth = canvas.width;
+    canvasHeight = canvas.height;
+
+    gl.viewport(0, 0, canvasWidth, canvasHeight);
+}
+
+function installResizeHandler() {
+    window.addEventListener("resize", () => {
+        if (typeof resizeCanvas === "function") {
+            resizeCanvas();
+        } else {
+            finalResizeCanvas();
+        }
+    });
+}
+
+// ------------------------------------------------------------
+// 6. BOUK ANIMASYON JWÈ A
+// ------------------------------------------------------------
+
+let finalAnimationFrame = 0;
+let finalLoopLastTime = 0;
+let finalLoopStarted = false;
+
+function startAnimation() {
+    if (finalLoopStarted) return;
+
+    finalLoopStarted = true;
+    animationStarted = true;
+    finalLoopLastTime = 0;
+
+    finalAnimationFrame = requestAnimationFrame(finalAnimationLoop);
+}
+
+function stopAnimation() {
+    finalLoopStarted = false;
+    animationStarted = false;
+
+    if (finalAnimationFrame) {
+        cancelAnimationFrame(finalAnimationFrame);
+        finalAnimationFrame = 0;
+    }
+}
+
+function finalAnimationLoop(timestamp) {
+    if (!finalLoopStarted) return;
+
+    finalAnimationFrame = requestAnimationFrame(finalAnimationLoop);
+
+    const currentTime = Number(timestamp) || 0;
+
+    let deltaTime = finalLoopLastTime > 0
+        ? (currentTime - finalLoopLastTime) / 1000
+        : 1 / 60;
+
+    finalLoopLastTime = currentTime;
+
+    // Evite gwo so nan mouvman apre yon telefòn retounen nan jwèt la.
+    deltaTime = clamp(deltaTime, 0, 0.05);
+
+    if (lostContext || !gl || !program) {
+        return;
+    }
+
+    try {
+        if (state.active && !state.paused && !state.finished) {
+            if (typeof updateMovement === "function") {
+                updateMovement(deltaTime);
+            }
+
+            if (typeof updateMissionSystems === "function") {
+                updateMissionSystems(deltaTime);
+            }
+
+            if (Number(state.health) <= 0 && !state.finished) {
+                state.health = 0;
+                finishMission(false);
+            }
+        }
+
+        if (typeof resizeCanvas === "function") {
+            resizeCanvas();
+        } else {
+            finalResizeCanvas();
+        }
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        if (typeof renderScene === "function") {
+            renderScene(currentTime / 1000);
+        }
+
+        if (typeof renderMissionEnemies === "function") {
+            renderMissionEnemies(currentTime / 1000);
+        }
+
+        if (typeof renderMissionParticles === "function") {
+            renderMissionParticles();
+        }
+
+        if (typeof updateMainHUD === "function") {
+            updateMainHUD();
+        }
+    } catch (error) {
+        console.error("Erè nan bouk animasyon an:", error);
+        showAppError(
+            "Yon erè rive pandan jwèt la t ap mache. Tcheke konsòl navigatè a pou plis detay."
+        );
+        state.active = false;
+    }
+}
+
+// ------------------------------------------------------------
+// 7. SIPÒ POU SON, SAN OBLIGASYON POU JWÈ A
+// ------------------------------------------------------------
+
+function playGameTone(frequency = 440, duration = 0.08, volume = 0.08) {
+    if (!state.settings.sound) return;
+
+    const audioVolume = clamp(
+        (Number(state.settings.volume) || 0) / 100,
+        0,
+        1
+    );
+
+    if (audioVolume <= 0) return;
+
+    const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    try {
+        if (!state.audio) {
+            state.audio = new AudioContextClass();
+        }
+
+        const audioContext = state.audio;
+
+        if (audioContext.state === "suspended") {
+            audioContext.resume().catch(() => {});
+        }
+
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(
+            clamp(Number(frequency) || 440, 80, 1500),
+            audioContext.currentTime
+        );
+
+        gainNode.gain.setValueAtTime(
+            clamp(Number(volume) || 0.08, 0, 0.15) * audioVolume,
+            audioContext.currentTime
+        );
+
+        gainNode.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioContext.currentTime + Math.max(0.03, duration)
+        );
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.start();
+        oscillator.stop(
+            audioContext.currentTime + Math.max(0.03, duration)
+        );
+    } catch (error) {
+        console.warn("Son pa disponib:", error);
+    }
+}
+
+// ------------------------------------------------------------
+// 8. JERE PÈT KONTÈKS WEBGL
+// ------------------------------------------------------------
+
+function installWebGLContextHandlers() {
+    if (!canvas) return;
+
+    canvas.addEventListener("webglcontextlost", (event) => {
+        event.preventDefault();
+
+        lostContext = true;
+        state.active = false;
+
+        showAppError(
+            "Grafik jwèt la te entèwonp. Eseye rechaje paj la pou rekòmanse."
+        );
+    });
+
+    canvas.addEventListener("webglcontextrestored", () => {
+        lostContext = false;
+
+        try {
+            initWebGL();
+            createWorld();
+            startAnimation();
+
+            showNotification("Grafik yo retabli.");
+        } catch (error) {
+            console.error("WebGL pa t kapab retabli:", error);
+            showAppError(
+                "Jwèt la pa t kapab retabli grafik yo. Rechaje paj la."
+            );
+        }
+    });
+}
+
+// ------------------------------------------------------------
+// 9. DEMARAJ JWÈT LA
+// ------------------------------------------------------------
+
+let finalGameInitialized = false;
+
+function initializeGame() {
+    if (finalGameInitialized) return;
+
+    finalGameInitialized = true;
+
+    try {
+        if (ui.progress) {
+            ui.progress.style.width = "10%";
+        }
+
+        if (ui.loadingStatus) {
+            ui.loadingStatus.textContent = "Preparasyon grafik yo...";
+        }
+
+        initWebGL();
+
+        if (ui.progress) {
+            ui.progress.style.width = "45%";
+        }
+
+        if (ui.loadingStatus) {
+            ui.loadingStatus.textContent = "Kreyasyon mond lan...";
+        }
+
+        createWorld();
+
+        if (ui.progress) {
+            ui.progress.style.width = "70%";
+        }
+
+        if (ui.loadingStatus) {
+            ui.loadingStatus.textContent = "Chajman meni ak paramèt yo...";
+        }
+
+        setupMenuSystems();
+        setupMovementControls();
+        setupMissionSystems();
+
+        installResizeHandler();
+        installWebGLContextHandlers();
+
+        if (ui.progress) {
+            ui.progress.style.width = "100%";
+        }
+
+        if (ui.loadingStatus) {
+            ui.loadingStatus.textContent = "Jwèt la pare!";
+        }
+
+        if (ui.fallback) {
+            setElementVisible(ui.fallback, false);
+        }
+
+        showScreen("menu");
+        updateMainHUD();
+        updateCharacterSelectionUI();
+
+        startAnimation();
+
+        if (ui.loading) {
+            setTimeout(() => {
+                setElementVisible(ui.loading, false);
+            }, 350);
+        }
+    } catch (error) {
+        finalGameInitialized = false;
+
+        console.error("Erè pandan demaraj jwèt la:", error);
+
+        if (ui.loadingStatus) {
+            ui.loadingStatus.textContent = "Jwèt la pa t kapab demare.";
+        }
+
+        if (ui.fallback) {
+            setElementVisible(ui.fallback, true);
+        }
+
+        showAppError(
+            error && error.message
+                ? error.message
+                : "Yon erè enkoni anpeche jwèt la demare."
+        );
+    }
+}
+
+// ------------------------------------------------------------
+// 10. EVITE DEMARAJ ANPLIS E KONEKTE PAJ LA
+// ------------------------------------------------------------
+
+function finalBootGame() {
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeGame,
+            { once: true }
+        );
+    } else {
+        initializeGame();
+    }
+}
+
+finalBootGame();
+
+// ============================================================
+// FIN FICHYE APPGAMETIRFOBAS.JS
+// Fèmen IIFE prensipal ki te kòmanse nan Pati 1.
+// ============================================================
+})();
