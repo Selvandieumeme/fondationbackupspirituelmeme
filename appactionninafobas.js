@@ -2554,13 +2554,43 @@ const damage =
   function damagePlayer(amount) {
     if (!state.running || state.paused) return;
 
-    let remaining = amount;
 
-    if (state.armor > 0) {
-      const absorbed = Math.min(state.armor, remaining * 0.75);
-      state.armor -= absorbed;
-      remaining -= absorbed;
-    }
+
+
+
+
+
+let remaining = amount;
+
+// Bouclier énergétique actif pendant sa durée.
+if (performance.now() < state.arsenal.shieldUntil) {
+  remaining = 0;
+}
+
+// Protection passive de l'équipement.
+const defense = Math.min(
+  0.6,
+  getNinaEquipmentEffect('defense')
+);
+
+remaining *= 1 - defense;
+
+// L'armure absorbe ensuite une partie des dégâts restants.
+if (state.armor > 0 && remaining > 0) {
+  const absorbed = Math.min(state.armor, remaining * 0.75);
+
+  state.armor -= absorbed;
+  remaining -= absorbed;
+}
+
+
+
+
+
+
+
+
+
 
     state.health = Math.max(0, state.health - remaining);
 
