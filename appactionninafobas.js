@@ -3825,6 +3825,11 @@ state.arsenal.ammoInventory[state.arsenal.selectedAmmo] =
 
     bindControls();
 
+
+createNinaArsenalUI();
+
+
+
     setProgress(90);
     setText(dom.loadingMessage, 'Finalisation du système...');
 
