@@ -285,6 +285,14 @@
 
 
 
+const ammoType = getNinaAmmo();
+
+
+
+
+
+
+
 
   const state = {
     THREE: null,
