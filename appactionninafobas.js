@@ -2430,7 +2430,21 @@ const ammoType = getNinaAmmo();
 
     const now = performance.now();
 
-    if (now - state.lastShot < weapon.rate) return;
+
+
+
+
+
+
+const cadenceBonus = getNinaEquipmentEffect('rate');
+
+if (now - state.lastShot < weapon.rate * ammoType.rate * (1 - cadenceBonus)) {
+  return;
+}
+
+
+
+    
 
     state.lastShot = now;
 
