@@ -786,7 +786,5 @@
   }
 
   // Kontinye ak pati 2 nan menm fichye a.
-})();
-
 
 
