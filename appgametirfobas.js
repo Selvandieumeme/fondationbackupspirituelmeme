@@ -788,3 +788,616 @@
   // Kontinye ak pati 2 nan menm fichye a.
 
 
+
+
+
+  /* =========================================================
+     PATI 2 — MOND 3D, TÈREN, OBJE AK KAMERA
+     Kontinye nan menm IIFE pati 1 an.
+  ========================================================= */
+
+  /* ===================== KREYE MOND LAN ===================== */
+
+  const WORLD_SIZE = 100;
+  const WORLD_LIMIT = 44;
+
+  function createWorld() {
+    state.crystals = [];
+    state.trees = [];
+    state.buildings = [];
+    state.particles = [];
+    state.enemies = [];
+
+    const mission = MISSIONS[state.mission] || MISSIONS[1];
+    const crystalCount = mission.target + 8;
+
+    // Kreye kristal yo nan diferan zòn.
+    for (let i = 0; i < crystalCount; i++) {
+      let x = 0;
+      let z = 0;
+      let attempts = 0;
+
+      do {
+        x = rand(-WORLD_LIMIT + 4, WORLD_LIMIT - 4);
+        z = rand(-WORLD_LIMIT + 4, WORLD_LIMIT - 4);
+        attempts++;
+      } while (
+        Math.hypot(x, z) < 7 &&
+        attempts < 30
+      );
+
+      state.crystals.push({
+        x,
+        y: 0.95,
+        z,
+        size: rand(0.65, 1.05),
+        phase: rand(0, Math.PI * 2),
+        collected: false
+      });
+    }
+
+    // Kreye pyebwa yo.
+    for (let i = 0; i < 65; i++) {
+      const x = rand(-WORLD_LIMIT, WORLD_LIMIT);
+      const z = rand(-WORLD_LIMIT, WORLD_LIMIT);
+
+      if (Math.hypot(x, z) < 6) continue;
+
+      state.trees.push({
+        x,
+        z,
+        height: rand(1.7, 3.2),
+        width: rand(0.8, 1.4)
+      });
+    }
+
+    // Kreye bilding nan vil la.
+    for (let i = 0; i < 18; i++) {
+      const side = i % 4;
+      let x;
+      let z;
+
+      if (side === 0) {
+        x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+        z = rand(-WORLD_LIMIT, -18);
+      } else if (side === 1) {
+        x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+        z = rand(18, WORLD_LIMIT);
+      } else if (side === 2) {
+        x = rand(-WORLD_LIMIT, -18);
+        z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+      } else {
+        x = rand(18, WORLD_LIMIT);
+        z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+      }
+
+      state.buildings.push({
+        x,
+        z,
+        width: rand(3, 6),
+        height: rand(3, 8),
+        depth: rand(3, 6),
+        color: [
+          rand(0.25, 0.55),
+          rand(0.28, 0.50),
+          rand(0.32, 0.58)
+        ]
+      });
+    }
+  }
+
+  /* ===================== DIMANSYON CANVAS ===================== */
+
+  function resizeCanvas() {
+    if (!canvas || !gl || lostContext) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    if (!rect.width || !rect.height) return;
+
+    const quality = state.settings.quality;
+    let pixelRatio = window.devicePixelRatio || 1;
+
+    if (quality === "low") {
+      pixelRatio = Math.min(pixelRatio, 1);
+    } else if (quality === "medium") {
+      pixelRatio = Math.min(pixelRatio, 1.5);
+    } else {
+      pixelRatio = Math.min(pixelRatio, 2);
+    }
+
+    const width = Math.max(
+      1,
+      Math.floor(rect.width * pixelRatio)
+    );
+
+    const height = Math.max(
+      1,
+      Math.floor(rect.height * pixelRatio)
+    );
+
+    if (
+      canvas.width !== width ||
+      canvas.height !== height
+    ) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    canvasWidth = width;
+    canvasHeight = height;
+
+    gl.viewport(0, 0, width, height);
+  }
+
+  /* ===================== DESEN OBJE 3D ===================== */
+
+  function drawCube(
+    x,
+    y,
+    z,
+    sx,
+    sy,
+    sz,
+    color,
+    rotationY = 0,
+    emissive = 0
+  ) {
+    drawMesh(
+      meshes.cube,
+      modelMatrix(
+        x,
+        y,
+        z,
+        sx,
+        sy,
+        sz,
+        rotationY
+      ),
+      color,
+      emissive
+    );
+  }
+
+  function drawCrystal(crystal, time) {
+    if (crystal.collected) return;
+
+    const bob = Math.sin(
+      time * 2.2 + crystal.phase
+    ) * 0.14;
+
+    const rotation = time * 0.8 + crystal.phase;
+    const size = crystal.size;
+
+    drawMesh(
+      meshes.crystal,
+      modelMatrix(
+        crystal.x,
+        crystal.y + bob,
+        crystal.z,
+        size,
+        size * 1.45,
+        size,
+        rotation
+      ),
+      [0.12, 0.92, 1.0],
+      0.45
+    );
+
+    // Ti baz vizyèl anba kristal la.
+    drawCube(
+      crystal.x,
+      0.035,
+      crystal.z,
+      0.9,
+      0.06,
+      0.9,
+      [0.05, 0.32, 0.43],
+      0,
+      0.15
+    );
+  }
+
+  function drawTree(tree) {
+    // Kò pyebwa a.
+    drawCube(
+      tree.x,
+      tree.height * 0.25,
+      tree.z,
+      0.28,
+      tree.height * 0.5,
+      0.28,
+      [0.35, 0.20, 0.11]
+    );
+
+    // Fèy yo an fòm kòn.
+    drawMesh(
+      meshes.cone,
+      modelMatrix(
+        tree.x,
+        tree.height * 0.75,
+        tree.z,
+        tree.width,
+        tree.height * 0.8,
+        tree.width
+      ),
+      [0.12, 0.48, 0.25]
+    );
+
+    drawMesh(
+      meshes.cone,
+      modelMatrix(
+        tree.x,
+        tree.height * 1.05,
+        tree.z,
+        tree.width * 0.72,
+        tree.height * 0.65,
+        tree.width * 0.72
+      ),
+      [0.16, 0.60, 0.30]
+    );
+  }
+
+  function drawBuilding(building) {
+    // Kò bilding lan.
+    drawCube(
+      building.x,
+      building.height * 0.5,
+      building.z,
+      building.width,
+      building.height,
+      building.depth,
+      building.color
+    );
+
+    // Twati a.
+    drawCube(
+      building.x,
+      building.height + 0.08,
+      building.z,
+      building.width + 0.25,
+      0.16,
+      building.depth + 0.25,
+      [0.16, 0.22, 0.29]
+    );
+
+    // Ti fenèt devan bilding lan.
+    const windowColor = [0.25, 0.80, 1.0];
+    const rows = Math.max(
+      1,
+      Math.floor(building.height / 1.6)
+    );
+
+    const columns = Math.max(
+      1,
+      Math.floor(building.width / 1.5)
+    );
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        const wx =
+          building.x -
+          building.width * 0.3 +
+          col * 1.1;
+
+        const wy = 0.8 + row * 1.45;
+
+        if (wy > building.height - 0.25) continue;
+
+        drawCube(
+          wx,
+          wy,
+          building.z + building.depth * 0.5 + 0.012,
+          0.35,
+          0.45,
+          0.035,
+          windowColor,
+          0,
+          0.12
+        );
+      }
+    }
+  }
+
+  /* ===================== PÈSONAJ JWÈ A ===================== */
+
+  function drawPlayer(time) {
+    const character =
+      CHARACTERS[state.character] || CHARACTERS.MEME;
+
+    const bob = state.jumping
+      ? state.jumpY
+      : Math.abs(Math.sin(time * 8)) * 0.035;
+
+    const x = state.x;
+    const z = state.z;
+    const bodyColor = character.color;
+
+    // Lonbraj senp anba pèsonaj la.
+    drawCube(
+      x,
+      0.025,
+      z,
+      0.95,
+      0.035,
+      0.72,
+      [0.035, 0.055, 0.065]
+    );
+
+    // Janm yo.
+    drawCube(
+      x - 0.19,
+      0.40 + bob,
+      z,
+      0.22,
+      0.72,
+      0.26,
+      [0.12, 0.17, 0.23],
+      state.facing
+    );
+
+    drawCube(
+      x + 0.19,
+      0.40 + bob,
+      z,
+      0.22,
+      0.72,
+      0.26,
+      [0.12, 0.17, 0.23],
+      state.facing
+    );
+
+    // Kò pèsonaj la.
+    drawCube(
+      x,
+      1.02 + bob,
+      z,
+      0.72,
+      0.82,
+      0.42,
+      bodyColor,
+      state.facing
+    );
+
+    // Tèt pèsonaj la.
+    drawCube(
+      x,
+      1.68 + bob,
+      z,
+      0.48,
+      0.48,
+      0.44,
+      [0.94, 0.77, 0.62],
+      state.facing
+    );
+
+    // De je devan tèt la.
+    const eyeOffsetX = 0.12;
+    const eyeY = 1.73 + bob;
+    const eyeZ = z + 0.226;
+
+    drawCube(
+      x - eyeOffsetX,
+      eyeY,
+      eyeZ,
+      0.065,
+      0.075,
+      0.025,
+      [0.025, 0.035, 0.05]
+    );
+
+    drawCube(
+      x + eyeOffsetX,
+      eyeY,
+      eyeZ,
+      0.065,
+      0.075,
+      0.025,
+      [0.025, 0.035, 0.05]
+    );
+
+    // Bras yo.
+    drawCube(
+      x - 0.48,
+      1.00 + bob,
+      z,
+      0.22,
+      0.70,
+      0.25,
+      bodyColor,
+      state.facing
+    );
+
+    drawCube(
+      x + 0.48,
+      1.00 + bob,
+      z,
+      0.22,
+      0.70,
+      0.25,
+      bodyColor,
+      state.facing
+    );
+  }
+
+  /* ===================== KAMERA 3D ===================== */
+
+  function getCameraPosition() {
+    const distance = state.cameraDistance;
+
+    const pitch = clamp(
+      state.cameraPitch,
+      -0.05,
+      1.05
+    );
+
+    const horizontalDistance =
+      Math.cos(pitch) * distance;
+
+    const verticalDistance =
+      Math.sin(pitch) * distance;
+
+    return [
+      state.x +
+        Math.sin(state.cameraAngle) *
+        horizontalDistance,
+
+      2.0 + verticalDistance,
+
+      state.z +
+        Math.cos(state.cameraAngle) *
+        horizontalDistance
+    ];
+  }
+
+  function updateCameraMatrices() {
+    const camera = getCameraPosition();
+
+    const target = [
+      state.x,
+      1.0 + state.jumpY * 0.35,
+      state.z
+    ];
+
+    const projection = perspective(
+      Math.PI / 3,
+      canvasWidth / Math.max(1, canvasHeight),
+      0.1,
+      150
+    );
+
+    const view = lookAt(
+      camera,
+      target,
+      [0, 1, 0]
+    );
+
+    gl.uniformMatrix4fv(
+      locations.projection,
+      false,
+      projection
+    );
+
+    gl.uniformMatrix4fv(
+      locations.view,
+      false,
+      view
+    );
+
+    gl.uniform3fv(
+      locations.camera,
+      camera
+    );
+  }
+
+  /* ===================== RANN MOND LAN ===================== */
+
+  function renderScene(timeSeconds) {
+    if (
+      !gl ||
+      !program ||
+      lostContext ||
+      !meshes.cube
+    ) {
+      return;
+    }
+
+    resizeCanvas();
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    gl.clearColor(
+      0.10,
+      0.22,
+      0.29,
+      1.0
+    );
+
+    gl.clear(
+      gl.COLOR_BUFFER_BIT |
+      gl.DEPTH_BUFFER_BIT
+    );
+
+    gl.useProgram(program);
+
+    updateCameraMatrices();
+
+    // Tè prensipal la.
+    drawCube(
+      0,
+      -0.32,
+      0,
+      WORLD_SIZE,
+      0.5,
+      WORLD_SIZE,
+      [0.20, 0.34, 0.26]
+    );
+
+    // Wout prensipal yo.
+    drawCube(
+      0,
+      -0.045,
+      0,
+      5,
+      0.035,
+      WORLD_SIZE,
+      [0.16, 0.19, 0.22]
+    );
+
+    drawCube(
+      0,
+      -0.04,
+      0,
+      WORLD_SIZE,
+      0.035,
+      5,
+      [0.16, 0.19, 0.22]
+    );
+
+    // Mak wout yo.
+    for (let i = -40; i <= 40; i += 5) {
+      drawCube(
+        0,
+        -0.018,
+        i,
+        0.12,
+        0.02,
+        1.8,
+        [0.85, 0.79, 0.48]
+      );
+
+      drawCube(
+        i,
+        -0.018,
+        0,
+        1.8,
+        0.02,
+        0.12,
+        [0.85, 0.79, 0.48]
+      );
+    }
+
+    // Bilding yo.
+    for (const building of state.buildings) {
+      drawBuilding(building);
+    }
+
+    // Pyebwa yo.
+    for (const tree of state.trees) {
+      drawTree(tree);
+    }
+
+    // Kristal yo.
+    for (const crystal of state.crystals) {
+      drawCrystal(crystal, timeSeconds);
+    }
+
+    // Pèsonaj jwè a.
+    drawPlayer(timeSeconds);
+  }
+
+  /* ===================== FIN PATI 2 ===================== */
+
+  // Pa fèmen IIFE a isit la.
+  // Pati 3 dwe kontinye nan menm estrikti JavaScript la.
