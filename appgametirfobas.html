@@ -1,246 +1,295 @@
-
 <!DOCTYPE html>
 <html lang="ht">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
   <meta name="theme-color" content="#101820">
-  <meta name="description" content="FOBAS MISSION 3D — MEME & TEAM. Antre nan misyon an, eksplore mond lan epi travay ak ekip ou.">
+  <meta name="description" content="FOBAS MISSION 3D — MEME & TEAM. Yon jwèt tir 3D kolaboratif.">
   <meta name="color-scheme" content="dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <title>FOBAS MISSION 3D — MEME &amp; TEAM</title>
 
   <link rel="stylesheet" href="./appgametirfobas.css">
 </head>
 
 <body>
-  <div id="game-app">
+<div id="game-app">
 
-    <!-- EKRAN CHAJMAN -->
-    <section id="loading-screen" class="screen">
-      <h1>FOBAS MISSION 3D</h1>
-      <h2>MEME &amp; TEAM</h2>
+  <!-- EKRAN CHAJMAN -->
+  <section id="loading-screen" class="screen">
+    <h1>FOBAS MISSION 3D</h1>
+    <h2>MEME &amp; TEAM</h2>
 
-      <div class="loading-bar">
-        <div id="loading-progress"></div>
-      </div>
-
-      <p id="loading-status" role="status" aria-live="polite">
-        Preparasyon jwèt la...
-      </p>
-
-      <button id="btn-enter" type="button">
-        ANTRE NAN JWÈT LA
-      </button>
-    </section>
-
-    <!-- MENI PRENSIPAL -->
-    <main id="main-menu" class="screen" hidden>
-      <header>
-        <h1>FOBAS <span>MISSION 3D</span></h1>
-        <p>MEME &amp; TEAM</p>
-      </header>
-
-      <nav class="main-buttons" aria-label="Meni prensipal">
-        <button id="btn-play" type="button">▶ KÒMANSE JWE</button>
-        <button id="btn-missions" type="button">🎯 MISYON YO</button>
-        <button id="btn-characters" type="button">👥 PÈSONAJ YO</button>
-        <button id="btn-settings" type="button">⚙ PARAMÈT</button>
-        <button id="btn-continue" type="button">↻ KONTINYE</button>
-      </nav>
-
-      <!-- MISYON YO -->
-      <section id="mission-menu" hidden>
-        <h2>CHWAZI MISYON</h2>
-
-        <article class="mission-card">
-          <h3>Misyon 1 — Premye Kontak</h3>
-          <p>Aprann deplase epi eksplore mond lan.</p>
-          <button type="button" data-select-mission="1">CHWAZI</button>
-        </article>
-
-        <article class="mission-card">
-          <h3>Misyon 2 — Meme &amp; Team</h3>
-          <p>Travay ansanm ak ekip ou.</p>
-          <button type="button" data-select-mission="2">CHWAZI</button>
-        </article>
-
-        <article class="mission-card">
-          <h3>Misyon 3 — Defi Final</h3>
-          <p>Konplete objektif final la.</p>
-          <button type="button" data-select-mission="3">CHWAZI</button>
-        </article>
-
-        <button type="button" data-back-menu>RETOUNEN</button>
-      </section>
-
-      <!-- PÈSONAJ YO -->
-      <section id="character-menu" hidden>
-        <h2>EKIP FOBAS</h2>
-
-        <div id="character-list">
-          <button class="character-card selected" type="button" data-character="MEME" aria-pressed="true">
-            <span aria-hidden="true">😎</span>
-            <strong>MEME</strong>
-            <small>Lidè ekip la</small>
-          </button>
-
-          <button class="character-card" type="button" data-character="FOBAS" aria-pressed="false">
-            <span aria-hidden="true">🦾</span>
-            <strong>FOBAS</strong>
-            <small>Espesyalis ekipman</small>
-          </button>
-
-          <button class="character-card" type="button" data-character="SHADOW" aria-pressed="false">
-            <span aria-hidden="true">🥷</span>
-            <strong>SHADOW</strong>
-            <small>Eksploratè</small>
-          </button>
-
-          <button class="character-card" type="button" data-character="BLAZE" aria-pressed="false">
-            <span aria-hidden="true">🔥</span>
-            <strong>BLAZE</strong>
-            <small>Ekspè vitès</small>
-          </button>
-
-          <button class="character-card" type="button" data-character="TITAN" aria-pressed="false">
-            <span aria-hidden="true">🛡️</span>
-            <strong>TITAN</strong>
-            <small>Defansè ekip la</small>
-          </button>
-        </div>
-
-        <p id="selected-character" aria-live="polite">Pèsonaj: MEME</p>
-
-        <button id="btn-confirm-character" type="button">KONFIME</button>
-        <button type="button" data-back-menu>RETOUNEN</button>
-      </section>
-
-      <!-- PARAMÈT -->
-      <section id="settings-menu" hidden>
-        <h2>PARAMÈT JWÈT</h2>
-
-        <label for="graphics-quality">Kalite grafik</label>
-        <select id="graphics-quality">
-          <option value="low">Ba</option>
-          <option value="medium" selected>Mwayen</option>
-          <option value="high">Wo</option>
-        </select>
-
-        <label for="camera-sensitivity">Sansiblite kamera</label>
-        <input id="camera-sensitivity" type="range" min="1" max="10" value="5">
-
-        <label for="game-volume">Volim son</label>
-        <input id="game-volume" type="range" min="0" max="100" value="70">
-
-        <label for="sound-enabled">
-          <input id="sound-enabled" type="checkbox" checked>
-          Aktive son
-        </label>
-
-        <button id="btn-save-settings" type="button">SOVE PARAMÈT</button>
-        <button type="button" data-back-menu>RETOUNEN</button>
-      </section>
-
-      <footer>
-        <p>FOBAS MISSION 3D &copy; MEME &amp; TEAM</p>
-        <p id="save-status" role="status">Sistèm sove: pare</p>
-      </footer>
-    </main>
-
-    <!-- MOND JEU -->
-    <section id="game-screen" class="screen" hidden>
-      <div id="game-world">
-        <canvas id="game-canvas" aria-label="Mond jwèt FOBAS MISSION 3D">
-          Navigatè ou a pa sipòte eleman canvas la.
-        </canvas>
-
-        <div id="world-fallback" hidden>
-          Mond jwèt la poko chaje.
-        </div>
-      </div>
-
-      <!-- HUD -->
-      <div id="game-hud">
-        <div class="hud-top">
-          <div>
-            <strong id="hud-character">MEME</strong>
-            <span id="hud-level">Nivo 1</span>
-          </div>
-
-          <div class="hud-stats">
-            <span>VI: <b id="hud-health">100</b></span>
-            <span>ENÈJI: <b id="hud-energy">100</b></span>
-            <span>NÒT: <b id="hud-score">0</b></span>
-          </div>
-
-          <button id="btn-pause" type="button" aria-label="Mete jwèt la an poz">Ⅱ</button>
-        </div>
-
-        <div class="hud-mission">
-          <strong id="hud-mission-title">Premye Kontak</strong>
-          <p id="hud-objective">Eksplore teren an.</p>
-
-          <div class="progress-track">
-            <div id="objective-progress"></div>
-          </div>
-
-          <span id="objective-count">0 / 1</span>
-        </div>
-
-        <div class="hud-bottom">
-          <span id="hud-location">Baz prensipal</span>
-          <span id="hud-timer">00:00</span>
-        </div>
-      </div>
-
-      <!-- KONTWÒL MOBIL -->
-      <div id="mobile-controls">
-        <div id="joystick-zone" aria-label="Kontwòl deplasman">
-          <div id="joystick-base">
-            <div id="joystick-knob"></div>
-          </div>
-        </div>
-
-        <div class="action-controls">
-          <button id="btn-jump" type="button">SOTE</button>
-          <button id="btn-run" type="button">KOURI</button>
-          <button id="btn-action" type="button">AKSYON</button>
-          <button id="btn-camera" type="button">KAMERA</button>
-        </div>
-      </div>
-
-      <!-- MENI POZ -->
-      <section id="pause-menu" class="overlay-panel" hidden>
-        <h2>JWÈT AN POZ</h2>
-        <button id="btn-resume" type="button">KONTINYE</button>
-        <button id="btn-restart" type="button">REKÒMANSE</button>
-        <button id="btn-back-to-menu" type="button">MENI PRENSIPAL</button>
-      </section>
-
-      <!-- REZILTA MISYON -->
-      <section id="mission-result" class="overlay-panel" hidden>
-        <h2 id="result-title">MISYON FINI</h2>
-        <p id="result-description">Gade rezilta misyon an.</p>
-        <p>Nòt: <strong id="result-score">0</strong></p>
-        <button id="btn-next-mission" type="button">PWOCHEN MISYON</button>
-        <button id="btn-result-menu" type="button">MENI PRENSIPAL</button>
-      </section>
-
-      <div id="game-notifications" role="status" aria-live="polite"></div>
-    </section>
-
-    <!-- MESAJ ERÈ -->
-    <div id="app-error" role="alert" hidden>
-      <p id="app-error-message"></p>
-      <button id="btn-error-close" type="button">FÈMEN</button>
+    <div class="loading-bar">
+      <div id="loading-progress"></div>
     </div>
 
+    <p id="loading-status" role="status" aria-live="polite">
+      Preparasyon motè grafik 3D...
+    </p>
+
+    <button id="btn-enter" type="button">
+      ANTRE NAN JWÈT LA
+    </button>
+  </section>
+
+  <!-- MENI PRENSIPAL -->
+  <main id="main-menu" class="screen" hidden>
+    <header>
+      <h1>FOBAS <span>MISSION 3D</span></h1>
+      <p>MEME &amp; TEAM</p>
+    </header>
+
+    <nav class="main-buttons" aria-label="Meni prensipal">
+      <button id="btn-play" type="button">▶ KÒMANSE JWE</button>
+      <button id="btn-missions" type="button">🎯 MISYON YO</button>
+      <button id="btn-characters" type="button">👥 PÈSONAJ YO</button>
+      <button id="btn-settings" type="button">⚙ PARAMÈT</button>
+      <button id="btn-continue" type="button">↻ KONTINYE</button>
+    </nav>
+
+    <!-- MISYON YO -->
+    <section id="mission-menu" hidden>
+      <h2>CHWAZI MISYON</h2>
+
+      <article class="mission-card">
+        <h3>Misyon 1 — Premye Kontak</h3>
+        <p>Aprann deplase epi eksplore mond lan.</p>
+        <button type="button" data-select-mission="1">CHWAZI</button>
+      </article>
+
+      <article class="mission-card">
+        <h3>Misyon 2 — Meme &amp; Team</h3>
+        <p>Travay ansanm ak ekip ou.</p>
+        <button type="button" data-select-mission="2">CHWAZI</button>
+      </article>
+
+      <article class="mission-card">
+        <h3>Misyon 3 — Defi Final</h3>
+        <p>Konplete objektif final la.</p>
+        <button type="button" data-select-mission="3">CHWAZI</button>
+      </article>
+
+      <button type="button" data-back-menu>RETOUNEN</button>
+    </section>
+
+    <!-- PÈSONAJ YO -->
+    <section id="character-menu" hidden>
+      <h2>EKIP FOBAS</h2>
+
+      <div id="character-list">
+        <button class="character-card selected"
+                type="button"
+                data-character="MEME"
+                aria-pressed="true">
+          <span aria-hidden="true">😎</span>
+          <strong>MEME</strong>
+          <small>Lidè ekip la</small>
+        </button>
+
+        <button class="character-card"
+                type="button"
+                data-character="FOBAS"
+                aria-pressed="false">
+          <span aria-hidden="true">🦾</span>
+          <strong>FOBAS</strong>
+          <small>Espesyalis ekipman</small>
+        </button>
+
+        <button class="character-card"
+                type="button"
+                data-character="SHADOW"
+                aria-pressed="false">
+          <span aria-hidden="true">🥷</span>
+          <strong>SHADOW</strong>
+          <small>Eksploratè</small>
+        </button>
+
+        <button class="character-card"
+                type="button"
+                data-character="BLAZE"
+                aria-pressed="false">
+          <span aria-hidden="true">🔥</span>
+          <strong>BLAZE</strong>
+          <small>Ekspè vitès</small>
+        </button>
+
+        <button class="character-card"
+                type="button"
+                data-character="TITAN"
+                aria-pressed="false">
+          <span aria-hidden="true">🛡️</span>
+          <strong>TITAN</strong>
+          <small>Defansè ekip la</small>
+        </button>
+      </div>
+
+      <p id="selected-character" aria-live="polite">Pèsonaj: MEME</p>
+
+      <button id="btn-confirm-character" type="button">KONFIME</button>
+      <button type="button" data-back-menu>RETOUNEN</button>
+    </section>
+
+    <!-- PARAMÈT -->
+    <section id="settings-menu" hidden>
+      <h2>PARAMÈT JWÈT</h2>
+
+      <label for="graphics-quality">Kalite grafik</label>
+      <select id="graphics-quality">
+        <option value="low">Ba</option>
+        <option value="medium" selected>Mwayen</option>
+        <option value="high">Wo</option>
+      </select>
+
+      <label for="camera-sensitivity">Sansiblite kamera</label>
+      <input id="camera-sensitivity"
+             type="range"
+             min="1"
+             max="10"
+             value="5">
+
+      <label for="game-volume">Volim son</label>
+      <input id="game-volume"
+             type="range"
+             min="0"
+             max="100"
+             value="70">
+
+      <label for="sound-enabled">
+        <input id="sound-enabled" type="checkbox" checked>
+        Aktive son
+      </label>
+
+      <button id="btn-save-settings" type="button">SOVE PARAMÈT</button>
+      <button type="button" data-back-menu>RETOUNEN</button>
+    </section>
+
+    <footer>
+      <p>FOBAS MISSION 3D &copy; MEME &amp; TEAM</p>
+      <p id="save-status" role="status">Sistèm sove: pare</p>
+    </footer>
+  </main>
+
+  <!-- MOND JEU: CANVAS SA A SE POU WEBGL SÈLMAN -->
+  <section id="game-screen" class="screen" hidden>
+    <div id="game-world">
+      <canvas id="game-canvas"
+              aria-label="Mond jwèt 3D FOBAS MISSION"
+              tabindex="0">
+        Navigatè ou a pa sipòte eleman canvas la.
+      </canvas>
+
+      <div id="world-fallback" hidden>
+        Mond jwèt la poko chaje oswa WebGL pa disponib.
+      </div>
+    </div>
+
+    <!-- HUD -->
+    <div id="game-hud">
+      <div class="hud-top">
+        <div>
+          <strong id="hud-character">MEME</strong>
+          <span id="hud-level">Nivo 1</span>
+        </div>
+
+        <div class="hud-stats">
+          <span>VI: <b id="hud-health">100</b></span>
+          <span>ENÈJI: <b id="hud-energy">100</b></span>
+          <span>NÒT: <b id="hud-score">0</b></span>
+        </div>
+
+        <button id="btn-pause"
+                type="button"
+                aria-label="Mete jwèt la an poz">Ⅱ</button>
+      </div>
+
+      <div class="hud-mission">
+        <strong id="hud-mission-title">Premye Kontak</strong>
+        <p id="hud-objective">Eksplore teren an.</p>
+
+        <div class="progress-track">
+          <div id="objective-progress"></div>
+        </div>
+
+        <span id="objective-count">0 / 1</span>
+      </div>
+
+      <div class="hud-bottom">
+        <span id="hud-location">Baz prensipal</span>
+        <span id="hud-timer">00:00</span>
+      </div>
+    </div>
+
+    <!-- KONTWÒL ANDROID -->
+    <div id="mobile-controls" aria-label="Kontwòl jwèt mobil">
+
+      <!-- JOYSTICK: DEPLASMAN -->
+      <div id="joystick-zone" aria-label="Kontwòl deplasman">
+        <div id="joystick-base">
+          <div id="joystick-knob"></div>
+        </div>
+      </div>
+
+      <!-- BOUTON AKSYON -->
+      <div class="action-controls">
+        <button id="btn-jump" type="button">SOTE</button>
+        <button id="btn-run" type="button">KOURI</button>
+        <button id="btn-action" type="button">TIRE / AKSYON</button>
+        <button id="btn-camera" type="button">KAMERA</button>
+
+        <!-- PITCH 2: KONTWÒL ANG KAMERA SOU ANDROID -->
+        <button id="btn-pitch-2"
+                type="button"
+                data-camera-pitch="2"
+                aria-label="Pitch 2: chanje ang kamera">
+          PITCH 2
+        </button>
+      </div>
+    </div>
+
+    <!-- MENI POZ -->
+    <section id="pause-menu" class="overlay-panel" hidden>
+      <h2>JWÈT AN POZ</h2>
+      <button id="btn-resume" type="button">KONTINYE</button>
+      <button id="btn-restart" type="button">REKÒMANSE</button>
+      <button id="btn-back-to-menu" type="button">MENI PRENSIPAL</button>
+    </section>
+
+    <!-- REZILTA MISYON -->
+    <section id="mission-result" class="overlay-panel" hidden>
+      <h2 id="result-title">MISYON FINI</h2>
+      <p id="result-description">Gade rezilta misyon an.</p>
+      <p>Nòt: <strong id="result-score">0</strong></p>
+      <button id="btn-next-mission" type="button">PWOCHEN MISYON</button>
+      <button id="btn-result-menu" type="button">MENI PRENSIPAL</button>
+    </section>
+
+    <div id="game-notifications" role="status" aria-live="polite"></div>
+  </section>
+
+  <!-- MESAJ ERÈ -->
+  <div id="app-error" role="alert" hidden>
+    <p id="app-error-message"></p>
+    <button id="btn-error-close" type="button">FÈMEN</button>
   </div>
 
-  <!-- JAVASCRIPT JWÈT LA -->
-  <script src="./appgametirfobas.js" defer></script>
+</div>
+
+<!-- MOTÈ JWÈT LA -->
+<script src="./appgametirfobas.js" defer></script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 
