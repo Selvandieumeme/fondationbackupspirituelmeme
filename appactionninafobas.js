@@ -2065,6 +2065,14 @@ function useNinaEquipment(id) {
     state.elapsed = 0;
     state.ammo = weapons[state.weaponIndex].magazine;
     state.reserve = weapons[state.weaponIndex].reserve;
+
+
+
+
+
+state.reserve =
+  state.arsenal.ammoInventory[state.arsenal.selectedAmmo] || 0;
+
     state.reloadInProgress = false;
 
     state.playerVelocityY = 0;
