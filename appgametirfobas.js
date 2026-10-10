@@ -1401,3 +1401,618 @@
 
   // Pa fèmen IIFE a isit la.
   // Pati 3 dwe kontinye nan menm estrikti JavaScript la.
+
+
+
+
+
+
+
+
+
+  /* =========================================================
+     PATI 3 — MOUVMAN, JOYSTICK, SOTE AK KAMERA
+     Kontinye apre pati 2 a.
+  ========================================================= */
+
+  /* ===================== PARAMÈT MOUVMAN ===================== */
+
+  const MOVEMENT = {
+    gravity: 18,
+    jumpPower: 7.2,
+    walkSpeed: 1,
+    sprintMultiplier: 1.65,
+    joystickRadius: 48,
+    cameraTurnSpeed: 2.2,
+    pitchSpeed: 0.08,
+    minPitch: -0.05,
+    maxPitch: 1.05
+  };
+
+  let movementControlsReady = false;
+  let sprintPointer = null;
+  let jumpPointer = null;
+  let cameraPointer = null;
+  let lastMoveNotice = 0;
+
+  /* ===================== MESAJ JWÈ A ===================== */
+
+  function movementNotice(message) {
+    if (typeof showNotification === "function") {
+      showNotification(message);
+      return;
+    }
+
+    if (ui.notifications) {
+      ui.notifications.textContent = message;
+      ui.notifications.classList.add("show");
+
+      window.clearTimeout(state.notifyTimer);
+
+      state.notifyTimer = window.setTimeout(() => {
+        if (ui.notifications) {
+          ui.notifications.classList.remove("show");
+        }
+      }, 1800);
+    }
+  }
+
+  /* ===================== KONTWÒL KAMERA VÈTIKAL ===================== */
+
+  function createPitchControls() {
+    if (!ui.game) return;
+
+    let panel = document.getElementById("camera-pitch-controls");
+
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "camera-pitch-controls";
+
+      Object.assign(panel.style, {
+        position: "absolute",
+        right: "14px",
+        top: "35%",
+        zIndex: "20",
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
+        pointerEvents: "auto"
+      });
+
+      const makeButton = (id, text, label) => {
+        const button = document.createElement("button");
+
+        button.id = id;
+        button.type = "button";
+        button.textContent = text;
+        button.setAttribute("aria-label", label);
+
+        Object.assign(button.style, {
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          border: "1px solid rgba(255,255,255,.55)",
+          background: "rgba(10,25,40,.72)",
+          color: "#ffffff",
+          fontSize: "22px",
+          fontWeight: "bold",
+          touchAction: "none",
+          userSelect: "none"
+        });
+
+        panel.appendChild(button);
+        return button;
+      };
+
+      makeButton(
+        "btn-pitch-up",
+        "▲",
+        "Gade anlè"
+      );
+
+      makeButton(
+        "btn-pitch-down",
+        "▼",
+        "Gade anba"
+      );
+
+      if (getComputedStyle(ui.game).position === "static") {
+        ui.game.style.position = "relative";
+      }
+
+      ui.game.appendChild(panel);
+    }
+
+    const up = document.getElementById("btn-pitch-up");
+    const down = document.getElementById("btn-pitch-down");
+
+    if (!up || !down) return;
+
+    const changePitch = amount => {
+      if (!state.active || state.paused || state.finished) return;
+
+      state.cameraPitch = clamp(
+        state.cameraPitch + amount,
+        MOVEMENT.minPitch,
+        MOVEMENT.maxPitch
+      );
+    };
+
+    up.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      changePitch(MOVEMENT.pitchSpeed);
+    });
+
+    down.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      changePitch(-MOVEMENT.pitchSpeed);
+    });
+
+    panel.style.display = "flex";
+  }
+
+  /* ===================== JOYSTICK ANDROID ===================== */
+
+  function updateJoystickFromPointer(event) {
+    if (!ui.joystickBase || !ui.joystickKnob) return;
+
+    const rect = ui.joystickBase.getBoundingClientRect();
+
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    let dx = event.clientX - centerX;
+    let dy = event.clientY - centerY;
+
+    const radius = Math.max(
+      20,
+      Math.min(rect.width, rect.height) * 0.38
+    );
+
+    const length = Math.hypot(dx, dy);
+
+    if (length > radius) {
+      dx = dx / length * radius;
+      dy = dy / length * radius;
+    }
+
+    state.joyX = clamp(dx / radius, -1, 1);
+    state.joyY = clamp(dy / radius, -1, 1);
+    state.joyActive = true;
+
+    ui.joystickKnob.style.transform =
+      `translate(${dx}px, ${dy}px)`;
+  }
+
+  function resetJoystick() {
+    state.joyX = 0;
+    state.joyY = 0;
+    state.joyActive = false;
+    state.joyPointer = null;
+
+    if (ui.joystickKnob) {
+      ui.joystickKnob.style.transform =
+        "translate(0px, 0px)";
+    }
+  }
+
+  function bindJoystick() {
+    if (!ui.joystickZone || !ui.joystickBase) return;
+
+    ui.joystickZone.style.touchAction = "none";
+    ui.joystickBase.style.touchAction = "none";
+
+    ui.joystickZone.addEventListener("pointerdown", event => {
+      if (!state.active || state.paused || state.finished) return;
+
+      event.preventDefault();
+
+      state.joyPointer = event.pointerId;
+
+      try {
+        ui.joystickZone.setPointerCapture(event.pointerId);
+      } catch (_) {
+        // Gen kèk navigatè ki pa sipòte pointer capture.
+      }
+
+      updateJoystickFromPointer(event);
+    });
+
+    ui.joystickZone.addEventListener("pointermove", event => {
+      if (event.pointerId !== state.joyPointer) return;
+
+      event.preventDefault();
+      updateJoystickFromPointer(event);
+    });
+
+    const releaseJoystick = event => {
+      if (
+        state.joyPointer !== null &&
+        event.pointerId !== state.joyPointer
+      ) {
+        return;
+      }
+
+      resetJoystick();
+    };
+
+    ui.joystickZone.addEventListener(
+      "pointerup",
+      releaseJoystick
+    );
+
+    ui.joystickZone.addEventListener(
+      "pointercancel",
+      releaseJoystick
+    );
+
+    ui.joystickZone.addEventListener(
+      "lostpointercapture",
+      resetJoystick
+    );
+  }
+
+  /* ===================== BOUTON SOTE ===================== */
+
+  function startJump() {
+    if (
+      !state.active ||
+      state.paused ||
+      state.finished ||
+      state.jumping
+    ) {
+      return;
+    }
+
+    state.jumping = true;
+    state.jumpVelocity = MOVEMENT.jumpPower;
+  }
+
+  function bindJumpButton() {
+    if (!ui.jump) return;
+
+    ui.jump.style.touchAction = "none";
+
+    ui.jump.addEventListener("pointerdown", event => {
+      event.preventDefault();
+
+      jumpPointer = event.pointerId;
+      startJump();
+    });
+
+    const releaseJump = event => {
+      if (
+        jumpPointer !== null &&
+        event.pointerId !== jumpPointer
+      ) {
+        return;
+      }
+
+      jumpPointer = null;
+    };
+
+    ui.jump.addEventListener("pointerup", releaseJump);
+    ui.jump.addEventListener("pointercancel", releaseJump);
+  }
+
+  /* ===================== BOUTON KOURI ===================== */
+
+  function bindSprintButton() {
+    if (!ui.run) return;
+
+    ui.run.style.touchAction = "none";
+
+    ui.run.addEventListener("pointerdown", event => {
+      event.preventDefault();
+
+      sprintPointer = event.pointerId;
+      state.sprint = true;
+    });
+
+    const stopSprint = event => {
+      if (
+        sprintPointer !== null &&
+        event.pointerId !== sprintPointer
+      ) {
+        return;
+      }
+
+      sprintPointer = null;
+      state.sprint = false;
+    };
+
+    ui.run.addEventListener("pointerup", stopSprint);
+    ui.run.addEventListener("pointercancel", stopSprint);
+    ui.run.addEventListener("lostpointercapture", () => {
+      sprintPointer = null;
+      state.sprint = false;
+    });
+  }
+
+  /* ===================== KAMERA AK SOURIT ===================== */
+
+  function bindCameraControl() {
+    if (!canvas) return;
+
+    canvas.style.touchAction = "none";
+
+    let lastX = 0;
+    let lastY = 0;
+
+    canvas.addEventListener("pointerdown", event => {
+      if (!state.active || state.paused || state.finished) return;
+
+      if (event.pointerType === "mouse" && event.button !== 2) {
+        return;
+      }
+
+      cameraPointer = event.pointerId;
+      lastX = event.clientX;
+      lastY = event.clientY;
+
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch (_) {
+        // Pointer capture pa obligatwa.
+      }
+    });
+
+    canvas.addEventListener("pointermove", event => {
+      if (event.pointerId !== cameraPointer) return;
+      if (!state.active || state.paused || state.finished) return;
+
+      const dx = event.clientX - lastX;
+      const dy = event.clientY - lastY;
+
+      lastX = event.clientX;
+      lastY = event.clientY;
+
+      const sensitivity = clamp(
+        Number(state.settings.sensitivity) || 5,
+        1,
+        10
+      );
+
+      const factor = sensitivity * 0.0018;
+
+      state.cameraAngle -= dx * factor;
+      state.cameraPitch = clamp(
+        state.cameraPitch - dy * factor,
+        MOVEMENT.minPitch,
+        MOVEMENT.maxPitch
+      );
+    });
+
+    const releaseCamera = event => {
+      if (event.pointerId === cameraPointer) {
+        cameraPointer = null;
+      }
+    };
+
+    canvas.addEventListener("pointerup", releaseCamera);
+    canvas.addEventListener("pointercancel", releaseCamera);
+
+    canvas.addEventListener("contextmenu", event => {
+      event.preventDefault();
+    });
+
+    if (ui.camera) {
+      ui.camera.addEventListener("click", () => {
+        state.cameraAngle += Math.PI / 4;
+      });
+    }
+  }
+
+  /* ===================== KLAVYE PC ===================== */
+
+  function bindMovementKeyboard() {
+    window.addEventListener("keydown", event => {
+      const key = event.key.toLowerCase();
+
+      state.keys[key] = true;
+
+      if (
+        [
+          "arrowup",
+          "arrowdown",
+          "arrowleft",
+          "arrowright",
+          " "
+        ].includes(key)
+      ) {
+        event.preventDefault();
+      }
+
+      if (
+        key === " " &&
+        !event.repeat
+      ) {
+        startJump();
+      }
+
+      if (
+        key === "shift" &&
+        state.active &&
+        !state.paused
+      ) {
+        state.sprint = true;
+      }
+
+      if (
+        key === "q" &&
+        state.active &&
+        !state.paused
+      ) {
+        state.cameraPitch = clamp(
+          state.cameraPitch + MOVEMENT.pitchSpeed,
+          MOVEMENT.minPitch,
+          MOVEMENT.maxPitch
+        );
+      }
+
+      if (
+        key === "e" &&
+        state.active &&
+        !state.paused
+      ) {
+        state.cameraPitch = clamp(
+          state.cameraPitch - MOVEMENT.pitchSpeed,
+          MOVEMENT.minPitch,
+          MOVEMENT.maxPitch
+        );
+      }
+    });
+
+    window.addEventListener("keyup", event => {
+      const key = event.key.toLowerCase();
+
+      state.keys[key] = false;
+
+      if (key === "shift") {
+        state.sprint = false;
+      }
+    });
+
+    window.addEventListener("blur", () => {
+      state.keys = Object.create(null);
+      state.sprint = false;
+      resetJoystick();
+    });
+  }
+
+  /* ===================== KALKILE DIREKSYON ===================== */
+
+  function getMovementInput() {
+    let x = state.joyX;
+    let y = state.joyY;
+
+    if (state.keys.a || state.keys.arrowleft) x -= 1;
+    if (state.keys.d || state.keys.arrowright) x += 1;
+    if (state.keys.w || state.keys.arrowup) y -= 1;
+    if (state.keys.s || state.keys.arrowdown) y += 1;
+
+    const length = Math.hypot(x, y);
+
+    if (length > 1) {
+      x /= length;
+      y /= length;
+    }
+
+    return { x, y };
+  }
+
+  /* ===================== METE JWÈ A AN MOUVMAN ===================== */
+
+  function updateMovement(deltaTime) {
+    if (
+      !state.active ||
+      state.paused ||
+      state.finished ||
+      lostContext
+    ) {
+      return;
+    }
+
+    const dt = clamp(deltaTime, 0, 0.05);
+    const input = getMovementInput();
+
+    const hasInput =
+      Math.abs(input.x) > 0.01 ||
+      Math.abs(input.y) > 0.01;
+
+    const character =
+      CHARACTERS[state.character] || CHARACTERS.MEME;
+
+    let speed = character.speed * MOVEMENT.walkSpeed;
+
+    if (state.sprint && state.energy > 0 && hasInput) {
+      speed *= MOVEMENT.sprintMultiplier;
+      state.energy = Math.max(0, state.energy - 24 * dt);
+    } else {
+      state.energy = Math.min(100, state.energy + 12 * dt);
+    }
+
+    // Mouvman an suiv direksyon kamera a.
+    const forwardX = -Math.sin(state.cameraAngle);
+    const forwardZ = -Math.cos(state.cameraAngle);
+
+    const rightX = Math.cos(state.cameraAngle);
+    const rightZ = -Math.sin(state.cameraAngle);
+
+    const moveX =
+      rightX * input.x +
+      forwardX * -input.y;
+
+    const moveZ =
+      rightZ * input.x +
+      forwardZ * -input.y;
+
+    if (hasInput) {
+      state.x += moveX * speed * dt;
+      state.z += moveZ * speed * dt;
+
+      state.facing = Math.atan2(moveX, moveZ);
+    }
+
+    // Kenbe pèsonaj la andedan limit mond lan.
+    state.x = clamp(state.x, -WORLD_LIMIT, WORLD_LIMIT);
+    state.z = clamp(state.z, -WORLD_LIMIT, WORLD_LIMIT);
+
+    // Fizik sote a.
+    if (state.jumping) {
+      state.jumpY += state.jumpVelocity * dt;
+      state.jumpVelocity -= MOVEMENT.gravity * dt;
+
+      if (state.jumpY <= 0) {
+        state.jumpY = 0;
+        state.jumpVelocity = 0;
+        state.jumping = false;
+      }
+    }
+
+    // Rejenere enèji piti piti lè jwè a pa kouri.
+    if (ui.hudEnergy) {
+      ui.hudEnergy.textContent =
+        `${Math.round(state.energy)}%`;
+    }
+
+    // Mete pozisyon HUD la ajou si eleman yo egziste.
+    if (ui.location) {
+      ui.location.textContent =
+        `X: ${state.x.toFixed(1)} | Z: ${state.z.toFixed(1)}`;
+    }
+  }
+
+  /* ===================== INISYALIZE KONTWÒL ===================== */
+
+  function setupMovementControls() {
+    if (movementControlsReady) return;
+
+    movementControlsReady = true;
+
+    createPitchControls();
+    bindJoystick();
+    bindJumpButton();
+    bindSprintButton();
+    bindCameraControl();
+    bindMovementKeyboard();
+
+    window.addEventListener("resize", resizeCanvas);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        state.sprint = false;
+        resetJoystick();
+      }
+    });
+  }
+
+  /* ===================== FIN PATI 3 ===================== */
+
+  // Pa mete })(); isit la.
+  // Pati 4 dwe kontinye nan menm fichye a.
+
+
+
+
+
