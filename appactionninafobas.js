@@ -278,6 +278,14 @@
     }
   ];
 
+
+
+
+
+
+
+
+
   const state = {
     THREE: null,
     renderer: null,
@@ -359,6 +367,553 @@
 
     disposed: false
   };
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   FOBAS ACTION NINA 3D — ARSENAL DYNAMIQUE
+   20 munitions + 10 équipements
+========================================================== */
+
+const NINA_AMMO_TYPES = [
+  { id: 'standard', name: 'Munitions standard', category: 'BASE', damage: 1, range: 1, rate: 1, stock: 180, description: 'Munition polyvalente pour les combats courants.' },
+  { id: 'perforante', name: 'Munitions perforantes', category: 'PÉNÉTRATION', damage: 1.35, range: 1.1, rate: 1.05, stock: 100, description: 'Augmente les dégâts contre les cibles résistantes.' },
+  { id: 'explosive', name: 'Munitions explosives', category: 'EXPLOSIF', damage: 1.8, range: 0.9, rate: 1.25, stock: 55, description: 'Dégâts élevés à chaque impact.' },
+  { id: 'incendiaire', name: 'Munitions incendiaires', category: 'FEU', damage: 1.55, range: 1, rate: 1.1, stock: 65, description: 'Munitions à forte puissance thermique.' },
+  { id: 'cryo', name: 'Munitions cryogéniques', category: 'GLACE', damage: 1.2, range: 1, rate: 1.1, stock: 65, description: 'Munition spéciale adaptée au contrôle des menaces.' },
+  { id: 'electrique', name: 'Munitions électriques', category: 'ÉLECTRIQUE', damage: 1.45, range: 1.05, rate: 1.15, stock: 60, description: 'Décharge énergétique concentrée.' },
+  { id: 'plasma', name: 'Munitions plasma', category: 'ÉNERGIE', damage: 2, range: 1.15, rate: 1.35, stock: 40, description: 'Énergie concentrée pour infliger de lourds dégâts.' },
+  { id: 'uranium', name: 'Munitions denses', category: 'LOURDE', damage: 2.2, range: 1.2, rate: 1.5, stock: 35, description: 'Munition lourde, puissante mais plus lente.' },
+  { id: 'precision', name: 'Munitions de précision', category: 'PRÉCISION', damage: 1.7, range: 1.5, rate: 1.15, stock: 50, description: 'Portée augmentée pour les cibles éloignées.' },
+  { id: 'chasse', name: 'Munitions de chasse', category: 'IMPACT', damage: 1.4, range: 0.75, rate: 0.95, stock: 80, description: 'Dégâts renforcés à courte portée.' },
+  { id: 'emp', name: 'Munitions IEM', category: 'IEM', damage: 1.25, range: 1.1, rate: 1.1, stock: 45, description: 'Munition technologique contre les menaces avancées.' },
+  { id: 'toxique', name: 'Munitions toxiques', category: 'TOXIQUE', damage: 1.6, range: 0.95, rate: 1.2, stock: 45, description: 'Charge spécialisée à dégâts élevés.' },
+  { id: 'anti-boss', name: 'Munitions anti-boss', category: 'ANTI-BOSS', damage: 2.5, range: 1.1, rate: 1.6, stock: 25, description: 'Optimisées pour les grandes menaces.' },
+  { id: 'rapide', name: 'Munitions légères', category: 'RAPIDITÉ', damage: 0.85, range: 0.95, rate: 0.72, stock: 160, description: 'Tir plus rapide avec des dégâts réduits.' },
+  { id: 'renforcee', name: 'Munitions renforcées', category: 'RENFORCÉE', damage: 1.65, range: 1.05, rate: 1.2, stock: 55, description: 'Équilibre entre portée et puissance.' },
+  { id: 'ricochet', name: 'Munitions à impact', category: 'IMPACT+', damage: 1.3, range: 1.2, rate: 1.05, stock: 65, description: 'Conçues pour les tirs soutenus à distance.' },
+  { id: 'sonique', name: 'Munitions soniques', category: 'SONIQUE', damage: 1.35, range: 1.1, rate: 1.1, stock: 45, description: 'Munition expérimentale à énergie vibratoire.' },
+  { id: 'nanite', name: 'Munitions nanotechnologiques', category: 'NANOTECH', damage: 1.9, range: 1.1, rate: 1.3, stock: 30, description: 'Technologie avancée à haute puissance.' },
+  { id: 'quantique', name: 'Munitions quantiques', category: 'QUANTIQUE', damage: 2.3, range: 1.3, rate: 1.45, stock: 20, description: 'Munition rare destinée aux combats difficiles.' },
+  { id: 'ultime', name: 'Munitions ultimes', category: 'ULTIME', damage: 3, range: 1.25, rate: 1.7, stock: 12, description: 'Munition de puissance maximale, à utiliser stratégiquement.' }
+];
+
+const NINA_EQUIPMENT = [
+  { id: 'vest', name: 'Gilet renforcé', category: 'DÉFENSE', kind: 'passive', icon: '🛡️', description: 'Réduit les dégâts reçus de 15 %.', effect: 'defense', value: 0.15 },
+  { id: 'visor', name: 'Viseur tactique', category: 'ATTAQUE', kind: 'passive', icon: '🎯', description: 'Augmente la portée de tir de 15 %.', effect: 'range', value: 0.15 },
+  { id: 'damage', name: 'Module de puissance', category: 'ATTAQUE', kind: 'passive', icon: '⚡', description: 'Augmente les dégâts infligés de 20 %.', effect: 'damage', value: 0.2 },
+  { id: 'trigger', name: 'Déclencheur rapide', category: 'ATTAQUE', kind: 'passive', icon: '🔫', description: 'Améliore la cadence de tir de 12 %.', effect: 'rate', value: 0.12 },
+  { id: 'boots', name: 'Bottes tactiques', category: 'MOBILITÉ', kind: 'passive', icon: '👢', description: 'Augmente la vitesse de déplacement de 15 %.', effect: 'speed', value: 0.15 },
+  { id: 'medkit', name: 'Kit médical', category: 'SOINS', kind: 'consumable', icon: '❤️', quantity: 5, description: 'Restaure 35 points de santé.', effect: 'heal', value: 35 },
+  { id: 'armorpack', name: 'Recharge d’armure', category: 'DÉFENSE', kind: 'consumable', icon: '🛡️', quantity: 5, description: 'Restaure 40 points d’armure.', effect: 'armor', value: 40 },
+  { id: 'shield', name: 'Bouclier énergétique', category: 'DÉFENSE', kind: 'consumable', icon: '🔰', quantity: 3, description: 'Absorbe les dégâts pendant 8 secondes.', effect: 'shield', value: 8000 },
+  { id: 'grenade', name: 'Grenade tactique', category: 'ATTAQUE', kind: 'consumable', icon: '💥', quantity: 5, description: 'Inflige 120 dégâts à chaque créature vivante.', effect: 'grenade', value: 120 },
+  { id: 'pulse', name: 'Impulsion de combat', category: 'ATTAQUE', kind: 'consumable', icon: '🌟', quantity: 3, description: 'Inflige 220 dégâts à chaque créature vivante.', effect: 'pulse', value: 220 }
+];
+
+const ninaAmmoInventory = {};
+
+for (const ammoType of NINA_AMMO_TYPES) {
+  ninaAmmoInventory[ammoType.id] = ammoType.stock;
+}
+
+state.arsenal = {
+  selectedAmmo: 'standard',
+  ammoInventory: ninaAmmoInventory,
+  equipmentInventory: Object.fromEntries(
+    NINA_EQUIPMENT.map(item => [
+      item.id,
+      item.kind === 'consumable' ? item.quantity : 1
+    ])
+  ),
+  equippedEquipment: ['vest'],
+  shieldUntil: 0,
+  activeTab: 'ammo'
+};
+
+function getNinaAmmo() {
+  return NINA_AMMO_TYPES.find(
+    item => item.id === state.arsenal.selectedAmmo
+  ) || NINA_AMMO_TYPES[0];
+}
+
+function getNinaEquipmentEffect(effect) {
+  let total = 0;
+
+  for (const id of state.arsenal.equippedEquipment) {
+    const item = NINA_EQUIPMENT.find(entry => entry.id === id);
+
+    if (item && item.effect === effect) {
+      total += item.value;
+    }
+  }
+
+  return total;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================
+   INTERFACE DYNAMIQUE DE L'ARSENAL
+========================================================== */
+
+function createNinaArsenalUI() {
+  if (document.getElementById('ninaArsenalPanel')) return;
+
+  const style = document.createElement('style');
+
+  style.id = 'ninaArsenalStyles';
+
+  style.textContent = `
+    #ninaArsenalOpenBtn {
+      position: fixed;
+      z-index: 500;
+      right: 14px;
+      top: 88px;
+      border: 1px solid rgba(125,255,190,.65);
+      border-radius: 12px;
+      padding: 11px 14px;
+      color: #eafff2;
+      background: linear-gradient(145deg,#126b49,#092e22);
+      box-shadow: 0 6px 20px #0008;
+      font-weight: 900;
+      font-size: 12px;
+      touch-action: manipulation;
+    }
+
+    #ninaArsenalPanel {
+      position: fixed;
+      z-index: 1000;
+      inset: max(10px,env(safe-area-inset-top))
+             max(10px,env(safe-area-inset-right))
+             max(10px,env(safe-area-inset-bottom))
+             max(10px,env(safe-area-inset-left));
+      display: none;
+      flex-direction: column;
+      color: #effff5;
+      background: rgba(5,18,14,.97);
+      border: 1px solid #38b77b;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 16px 60px #000c;
+      font-family: Arial,sans-serif;
+    }
+
+    #ninaArsenalPanel.open { display:flex; }
+
+    .nina-arsenal-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:14px;
+      background:linear-gradient(120deg,#124f39,#091f18);
+      border-bottom:1px solid #28754f;
+    }
+
+    .nina-arsenal-head strong { font-size:16px; }
+
+    .nina-arsenal-close {
+      border:1px solid #5bc993;
+      background:#183d2d;
+      color:white;
+      border-radius:9px;
+      padding:9px 12px;
+      font-weight:900;
+    }
+
+    .nina-arsenal-tabs {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      padding:10px;
+    }
+
+    .nina-arsenal-tabs button {
+      padding:11px 6px;
+      color:#d9f9e6;
+      background:#132c22;
+      border:1px solid #315d45;
+      border-radius:10px;
+      font-weight:800;
+    }
+
+    .nina-arsenal-tabs button.active {
+      background:#1b8054;
+      border-color:#6bffb0;
+    }
+
+    .nina-arsenal-status {
+      padding:0 12px 10px;
+      color:#b8e7cc;
+      font-size:12px;
+    }
+
+    .nina-arsenal-list {
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      overscroll-behavior:contain;
+      padding:10px;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:9px;
+      align-content:start;
+    }
+
+    .nina-arsenal-card {
+      min-width:0;
+      padding:11px;
+      border:1px solid #28553e;
+      border-radius:12px;
+      background:linear-gradient(145deg,#132b20,#0a1913);
+    }
+
+    .nina-arsenal-card.selected {
+      border-color:#70ffad;
+      box-shadow:inset 0 0 0 1px #70ffad55;
+    }
+
+    .nina-arsenal-card h4 {
+      margin:0 0 6px;
+      font-size:13px;
+      line-height:1.35;
+      overflow-wrap:anywhere;
+    }
+
+    .nina-arsenal-card p {
+      color:#b5d6c1;
+      font-size:11px;
+      line-height:1.45;
+      margin:6px 0;
+    }
+
+    .nina-arsenal-tag {
+      display:inline-block;
+      margin:2px 0 5px;
+      padding:4px 6px;
+      border-radius:6px;
+      color:#b7ffd2;
+      background:#174832;
+      font-size:9px;
+      font-weight:900;
+    }
+
+    .nina-arsenal-card button {
+      width:100%;
+      margin-top:7px;
+      padding:10px 6px;
+      border:1px solid #48c58a;
+      border-radius:8px;
+      color:white;
+      background:#17613f;
+      font-weight:800;
+      font-size:11px;
+      touch-action:manipulation;
+    }
+
+    .nina-arsenal-card button:disabled {
+      opacity:.45;
+    }
+
+    @media(max-width:420px) {
+      .nina-arsenal-list { grid-template-columns:1fr; }
+      #ninaArsenalOpenBtn { top:78px; right:8px; }
+    }
+  `;
+
+  document.head.appendChild(style);
+
+  const openButton = document.createElement('button');
+
+  openButton.id = 'ninaArsenalOpenBtn';
+  openButton.type = 'button';
+  openButton.textContent = '⚔ ARSENAL';
+  openButton.setAttribute('aria-label', 'Ouvrir la bibliothèque arsenal');
+
+  const panel = document.createElement('section');
+
+  panel.id = 'ninaArsenalPanel';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', 'Bibliothèque arsenal');
+
+  panel.innerHTML = `
+    <div class="nina-arsenal-head">
+      <strong>⚔ ARSENAL NINA</strong>
+      <button type="button" class="nina-arsenal-close"
+              data-arsenal-action="close">FERMER ✕</button>
+    </div>
+    <div class="nina-arsenal-tabs">
+      <button type="button" data-arsenal-tab="ammo">🔫 MUNITIONS</button>
+      <button type="button" data-arsenal-tab="equipment">🛡 ÉQUIPEMENTS</button>
+    </div>
+    <div class="nina-arsenal-status" id="ninaArsenalStatus"></div>
+    <div class="nina-arsenal-list" id="ninaArsenalList"></div>
+  `;
+
+  app.appendChild(openButton);
+  app.appendChild(panel);
+
+  openButton.addEventListener('click', () => {
+    panel.classList.add('open');
+    renderNinaArsenal();
+  });
+
+  panel.addEventListener('click', event => {
+    const button = event.target.closest('button');
+
+    if (!button) return;
+
+    if (button.dataset.arsenalAction === 'close') {
+      panel.classList.remove('open');
+      return;
+    }
+
+    if (button.dataset.arsenalTab) {
+      state.arsenal.activeTab = button.dataset.arsenalTab;
+      renderNinaArsenal();
+      return;
+    }
+
+    if (button.dataset.selectAmmo) {
+      selectNinaAmmo(button.dataset.selectAmmo);
+      return;
+    }
+
+    if (button.dataset.equipItem) {
+      toggleNinaEquipment(button.dataset.equipItem);
+      return;
+    }
+
+    if (button.dataset.useItem) {
+      useNinaEquipment(button.dataset.useItem);
+    }
+  });
+
+  renderNinaArsenal();
+}
+
+function renderNinaArsenal() {
+  const panel = document.getElementById('ninaArsenalPanel');
+  const list = document.getElementById('ninaArsenalList');
+  const status = document.getElementById('ninaArsenalStatus');
+
+  if (!panel || !list || !status) return;
+
+  const tab = state.arsenal.activeTab;
+
+  panel.querySelectorAll('[data-arsenal-tab]').forEach(button => {
+    button.classList.toggle('active', button.dataset.arsenalTab === tab);
+  });
+
+  if (tab === 'ammo') {
+    const current = getNinaAmmo();
+
+    status.textContent =
+      `Munition équipée : ${current.name} • Chargeur : ${state.ammo} • Réserve : ${state.reserve}`;
+
+    list.innerHTML = NINA_AMMO_TYPES.map(item => {
+      const quantity = state.arsenal.ammoInventory[item.id] || 0;
+      const selected = item.id === state.arsenal.selectedAmmo;
+
+      return `
+        <article class="nina-arsenal-card ${selected ? 'selected' : ''}">
+          <h4>🔫 ${item.name}</h4>
+          <span class="nina-arsenal-tag">${item.category}</span>
+          <p>${item.description}</p>
+          <p>
+            Puissance : ×${item.damage.toFixed(2)}<br>
+            Portée : ×${item.range.toFixed(2)}<br>
+            Cadence : ×${item.rate.toFixed(2)}<br>
+            Réserve disponible : ${quantity}
+          </p>
+          <button type="button" data-select-ammo="${item.id}"
+                  ${selected ? 'disabled' : ''}>
+            ${selected ? '✓ MUNITION ÉQUIPÉE' : 'ÉQUIPER'}
+          </button>
+        </article>
+      `;
+    }).join('');
+
+    return;
+  }
+
+  status.textContent =
+    `Équipements actifs : ${state.arsenal.equippedEquipment.length} • Maximum : 3`;
+
+  list.innerHTML = NINA_EQUIPMENT.map(item => {
+    const quantity = state.arsenal.equipmentInventory[item.id] || 0;
+    const equipped = state.arsenal.equippedEquipment.includes(item.id);
+
+    let actionButton = '';
+
+    if (item.kind === 'passive') {
+      actionButton = `
+        <button type="button" data-equip-item="${item.id}"
+                ${!equipped && state.arsenal.equippedEquipment.length >= 3 ? 'disabled' : ''}>
+          ${equipped ? 'RETIRER' : 'ÉQUIPER'}
+        </button>
+      `;
+    } else {
+      actionButton = `
+        <button type="button" data-use-item="${item.id}"
+                ${quantity <= 0 ? 'disabled' : ''}>
+          UTILISER (${quantity})
+        </button>
+      `;
+    }
+
+    return `
+      <article class="nina-arsenal-card ${equipped ? 'selected' : ''}">
+        <h4>${item.icon} ${item.name}</h4>
+        <span class="nina-arsenal-tag">${item.category}</span>
+        <p>${item.description}</p>
+        <p>${item.kind === 'passive'
+          ? (equipped ? 'Statut : équipé' : 'Statut : disponible')
+          : `Quantité : ${quantity}`}</p>
+        ${actionButton}
+      </article>
+    `;
+  }).join('');
+}
+
+function selectNinaAmmo(id) {
+  const ammo = NINA_AMMO_TYPES.find(item => item.id === id);
+
+  if (!ammo) return;
+
+  if ((state.arsenal.ammoInventory[id] || 0) <= 0) {
+    toast('Cette munition est épuisée.');
+    return;
+  }
+
+  state.arsenal.selectedAmmo = id;
+  state.reserve = state.arsenal.ammoInventory[id] || 0;
+
+  updateHUD();
+  renderNinaArsenal();
+
+  toast(`Munition équipée : ${ammo.name}`);
+}
+
+function toggleNinaEquipment(id) {
+  const item = NINA_EQUIPMENT.find(entry => entry.id === id);
+
+  if (!item || item.kind !== 'passive') return;
+
+  const equipped = state.arsenal.equippedEquipment;
+  const index = equipped.indexOf(id);
+
+  if (index >= 0) {
+    equipped.splice(index, 1);
+    toast(`${item.name} retiré.`);
+  } else {
+    if (equipped.length >= 3) {
+      toast('Maximum de trois équipements passifs.');
+      return;
+    }
+
+    equipped.push(id);
+    toast(`${item.name} équipé.`);
+  }
+
+  updateHUD();
+  renderNinaArsenal();
+}
+
+function useNinaEquipment(id) {
+  const item = NINA_EQUIPMENT.find(entry => entry.id === id);
+
+  if (!item || item.kind !== 'consumable') return;
+
+  if ((state.arsenal.equipmentInventory[id] || 0) <= 0) {
+    toast('Cet équipement est épuisé.');
+    return;
+  }
+
+  if (!state.running || state.paused || !state.player) {
+    toast('Lancez une mission pour utiliser cet équipement.');
+    return;
+  }
+
+  switch (item.effect) {
+    case 'heal':
+      if (state.health >= 100) {
+        toast('Votre santé est déjà au maximum.');
+        return;
+      }
+
+      state.health = Math.min(100, state.health + item.value);
+      break;
+
+    case 'armor':
+      if (state.armor >= 100) {
+        toast('Votre armure est déjà au maximum.');
+        return;
+      }
+
+      state.armor = Math.min(100, state.armor + item.value);
+      break;
+
+    case 'shield':
+      state.arsenal.shieldUntil = performance.now() + item.value;
+      break;
+
+    case 'grenade':
+    case 'pulse': {
+      const enemies = state.enemies.filter(enemy => !enemy.dead);
+
+      if (!enemies.length) {
+        toast('Aucune créature à attaquer.');
+        return;
+      }
+
+      for (const enemy of enemies) {
+        enemy.health -= item.value;
+
+        if (enemy.health <= 0) {
+          killEnemy(enemy);
+        }
+      }
+
+      break;
+    }
+
+    default:
+      return;
+  }
+
+  state.arsenal.equipmentInventory[id]--;
+
+  updateHUD();
+  renderNinaArsenal();
+
+  toast(`${item.name} utilisé.`);
+  saveGame(false);
+}
+
+
+
+
+
+
+
+
 
   /* ==========================================================
      2. OUTILS DOM ET INTERFACE
