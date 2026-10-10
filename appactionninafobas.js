@@ -2270,7 +2270,21 @@ function useNinaEquipment(id) {
     const THREE = state.THREE;
 
     state.raycaster.setFromCamera(state.screenCenter, state.camera);
-    state.raycaster.far = weapons[state.weaponIndex].range;
+
+
+
+
+const ammoType = getNinaAmmo();
+const rangeBonus = getNinaEquipmentEffect('range');
+
+state.raycaster.far =
+  weapons[state.weaponIndex].range *
+  ammoType.range *
+  (1 + rangeBonus);
+
+
+
+
 
     const meshes = [];
 
