@@ -2654,6 +2654,11 @@ if (state.armor > 0 && remaining > 0) {
 
       state.ammo += loaded;
       state.reserve -= loaded;
+
+
+state.arsenal.ammoInventory[state.arsenal.selectedAmmo] =
+  state.reserve;
+
       state.reloadInProgress = false;
 
       dom.reloadBtn?.classList.remove('is-active');
