@@ -285,7 +285,6 @@
 
 
 
-const ammoType = getNinaAmmo();
 
 
 
@@ -2410,11 +2409,25 @@ function useNinaEquipment(id) {
     }
   }
 
+
+
+
+
+
+
+
+
+
+
+
   function shoot() {
     if (!state.running || state.paused || !state.player) return;
     if (state.reloadInProgress) return;
 
     const weapon = weapons[state.weaponIndex];
+
+const ammoType = getNinaAmmo();
+
     const now = performance.now();
 
     if (now - state.lastShot < weapon.rate) return;
