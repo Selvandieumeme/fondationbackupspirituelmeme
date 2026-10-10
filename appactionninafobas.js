@@ -2774,7 +2774,17 @@ state.arsenal.ammoInventory[state.arsenal.selectedAmmo] =
     if (direction.lengthSq() > 0) {
       direction.normalize();
 
-      const baseSpeed = state.sprinting ? 8.2 : 4.7;
+
+
+
+const speedBonus = getNinaEquipmentEffect('speed');
+
+const baseSpeed =
+  (state.sprinting ? 8.2 : 4.7) * (1 + speedBonus);
+
+
+
+
 
       state.player.position.addScaledVector(
         direction,
