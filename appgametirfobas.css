@@ -1,23 +1,25 @@
+
 /* =========================================================
    FOBAS MISSION 3D — MEME & TEAM
-   CSS adapte ak HTML aktyèl la
-   Pa bezwen bibliyotèk oswa CDN ekstèn
+   CSS PROFESYONÈL — WEBGL 3D
+   Konpatib ak id HTML ki te bay yo
+   Pa gen Three.js, CDN oswa desen Canvas 2D
    ========================================================= */
 
 :root {
   color-scheme: dark;
-  --bg: #101820;
-  --panel: #172630;
-  --panel-light: #203743;
-  --primary: #19d3a2;
-  --primary-dark: #0a9476;
-  --accent: #ffc857;
-  --danger: #ff5c68;
-  --text: #f4f8fb;
-  --muted: #a8bbc6;
-  --border: rgba(255, 255, 255, 0.13);
+  --bg: #08141b;
+  --panel: #11232d;
+  --panel-light: #1b3542;
+  --primary: #20e0ad;
+  --primary-dark: #078966;
+  --accent: #ffd166;
+  --danger: #ff5263;
+  --text: #f4f8fc;
+  --muted: #a8bdc9;
+  --border: rgba(255,255,255,.14);
   --radius: 16px;
-  --shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
+  --shadow: 0 18px 48px rgba(0,0,0,.38);
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -30,12 +32,13 @@
 html,
 body {
   width: 100%;
+  height: 100%;
   min-height: 100%;
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 }
 
 body {
@@ -53,7 +56,7 @@ select {
 
 button {
   min-height: 44px;
-  padding: 12px 18px;
+  padding: 11px 16px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--panel-light);
@@ -61,29 +64,31 @@ button {
   font-weight: 800;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background 0.18s ease, transform 0.18s ease,
-    border-color 0.18s ease;
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease;
 }
 
 button:hover {
   border-color: var(--primary);
-  background: #294655;
+  background: #294b59;
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: scale(.97);
 }
 
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-canvas:focus-visible {
+#game-canvas:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: .5;
   cursor: not-allowed;
   transform: none;
 }
@@ -95,11 +100,17 @@ button:disabled {
 #game-app {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(25, 211, 162, 0.10), transparent 48%),
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(32,224,173,.10),
+      transparent 50%
+    ),
     var(--bg);
 }
 
@@ -111,12 +122,15 @@ button:disabled {
   position: absolute;
   inset: 0;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: calc(24px + var(--safe-top)) 18px
+  padding:
+    calc(24px + var(--safe-top))
+    18px
     calc(24px + var(--safe-bottom));
+  overscroll-behavior: contain;
 }
 
 #loading-screen {
@@ -128,43 +142,51 @@ button:disabled {
   gap: 16px;
   text-align: center;
   background:
-    radial-gradient(ellipse at center, rgba(25, 211, 162, 0.13), transparent 65%),
-    linear-gradient(145deg, #101820, #132b37);
+    radial-gradient(
+      ellipse at center,
+      rgba(32,224,173,.14),
+      transparent 65%
+    ),
+    linear-gradient(145deg,#08141b,#15313d);
 }
 
 #loading-screen h1 {
   margin: 0;
   color: var(--primary);
-  font-size: clamp(2rem, 8vw, 4.5rem);
+  font-size: clamp(2rem,8vw,4.5rem);
   font-weight: 1000;
-  letter-spacing: 0.06em;
-  text-shadow: 0 0 28px rgba(25, 211, 162, 0.2);
+  letter-spacing: .06em;
+  text-shadow: 0 0 28px rgba(32,224,173,.24);
 }
 
 #loading-screen h2 {
   margin: 0;
   color: var(--accent);
-  font-size: clamp(1rem, 4vw, 1.5rem);
-  letter-spacing: 0.24em;
+  font-size: clamp(1rem,4vw,1.5rem);
+  letter-spacing: .24em;
 }
 
 .loading-bar {
-  width: min(420px, 85vw);
+  width: min(420px,85vw);
   height: 12px;
   margin-top: 18px;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 99px;
-  background: #071116;
+  background: #050d12;
 }
 
 #loading-progress {
   width: 0%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary-dark), var(--primary));
-  box-shadow: 0 0 18px rgba(25, 211, 162, 0.4);
-  transition: width 0.25s ease;
+  background: linear-gradient(
+    90deg,
+    var(--primary-dark),
+    var(--primary)
+  );
+  box-shadow: 0 0 18px rgba(32,224,173,.4);
+  transition: width .25s ease;
 }
 
 #loading-status {
@@ -174,12 +196,12 @@ button:disabled {
 }
 
 #btn-enter {
-  min-width: min(280px, 85vw);
+  min-width: min(280px,85vw);
   margin-top: 12px;
   border: 0;
   background: var(--primary);
   color: #06251e;
-  box-shadow: 0 8px 28px rgba(25, 211, 162, 0.2);
+  box-shadow: 0 8px 28px rgba(32,224,173,.22);
 }
 
 /* =========================================================
@@ -194,7 +216,11 @@ button:disabled {
   gap: 24px;
   text-align: center;
   background:
-    radial-gradient(ellipse at 50% 15%, rgba(25, 211, 162, 0.12), transparent 50%),
+    radial-gradient(
+      ellipse at 50% 15%,
+      rgba(32,224,173,.12),
+      transparent 50%
+    ),
     var(--bg);
 }
 
@@ -206,9 +232,9 @@ button:disabled {
 
 #main-menu > header h1 {
   margin: 0;
-  font-size: clamp(2rem, 7vw, 4rem);
+  font-size: clamp(2rem,7vw,4rem);
   font-weight: 1000;
-  letter-spacing: -0.04em;
+  letter-spacing: -.04em;
 }
 
 #main-menu > header h1 span {
@@ -219,14 +245,14 @@ button:disabled {
   margin-top: 8px;
   color: var(--accent);
   font-weight: 900;
-  letter-spacing: 0.3em;
+  letter-spacing: .3em;
 }
 
 .main-buttons {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0,1fr);
   gap: 12px;
-  width: min(420px, 100%);
+  width: min(420px,100%);
 }
 
 .main-buttons button {
@@ -242,7 +268,7 @@ button:disabled {
 }
 
 #btn-continue {
-  border-color: rgba(255, 200, 87, 0.35);
+  border-color: rgba(255,209,102,.4);
   color: var(--accent);
 }
 
@@ -251,7 +277,7 @@ button:disabled {
   margin-top: auto;
   padding-top: 20px;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: .82rem;
 }
 
 #main-menu footer p {
@@ -259,18 +285,18 @@ button:disabled {
 }
 
 /* =========================================================
-   SEKSYON MISYON, PÈSONAJ AK PARAMÈT
+   MISYON, PÈSONAJ AK PARAMÈT
    ========================================================= */
 
 #mission-menu,
 #character-menu,
 #settings-menu {
-  width: min(680px, 100%);
+  width: min(680px,100%);
   margin: 0 auto;
   padding: 22px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: rgba(23, 38, 48, 0.96);
+  background: rgba(17,35,45,.97);
   box-shadow: var(--shadow);
   text-align: left;
 }
@@ -288,7 +314,7 @@ button:disabled {
   padding: 18px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: #12212a;
+  background: #0d202a;
 }
 
 .mission-card h3 {
@@ -310,7 +336,7 @@ button:disabled {
 
 #character-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2,minmax(0,1fr));
   gap: 12px;
 }
 
@@ -322,7 +348,7 @@ button:disabled {
   gap: 8px;
   min-height: 130px;
   padding: 14px 8px;
-  background: #12212a;
+  background: #0d202a;
   text-align: center;
 }
 
@@ -331,18 +357,18 @@ button:disabled {
 }
 
 .character-card strong {
-  letter-spacing: 0.08em;
+  letter-spacing: .08em;
 }
 
 .character-card small {
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: .76rem;
 }
 
 .character-card.selected,
 .character-card[aria-pressed="true"] {
   border-color: var(--primary);
-  background: rgba(25, 211, 162, 0.13);
+  background: rgba(32,224,173,.13);
   box-shadow: inset 0 0 0 1px var(--primary);
 }
 
@@ -377,7 +403,7 @@ button:disabled {
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: #0e1b22;
+  background: #0a1921;
   color: var(--text);
 }
 
@@ -398,32 +424,60 @@ button:disabled {
 }
 
 /* =========================================================
-   MOND 3D AK CANVAS WEBGL
+   MOND 3D — SIFAS RANN WEBGL
+   NÒT: CSS PA KREYE JEYOMETRI 3D.
+   JAVASCRIPT LA DWE KREYE KONTÈKS WEBGL LA.
    ========================================================= */
 
 #game-screen {
   z-index: 5;
   padding: 0;
   overflow: hidden;
-  background: #0b141a;
+  background: #071117;
 }
 
 #game-world {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse at 50% 30%, #263d49, #0b141a 80%);
+  isolation: isolate;
+  background: #10232b;
 }
 
+/*
+  Eleman sa a se sifas rann grafik la.
+  WebGL dwe inisyalize nan JavaScript.
+  Pa sèvi ak getContext("2d").
+*/
+
 #game-canvas {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
   outline: none;
+  z-index: 1;
+  visibility: visible;
+  opacity: 1;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
+
+/*
+  Fallback la pa dwe kouvri mond lan lè li kache.
+  JavaScript dwe mete hidden lè WebGL pare.
+*/
 
 #world-fallback {
   position: absolute;
@@ -432,18 +486,25 @@ button:disabled {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(8, 15, 20, 0.94);
+  background: rgba(8,15,20,.94);
   color: var(--accent);
   text-align: center;
 }
 
+#world-fallback[hidden] {
+  display: none !important;
+}
+
 /* =========================================================
-   HUD
+   HUD JWÈ A
    ========================================================= */
 
 #game-hud {
   position: absolute;
-  inset: calc(8px + var(--safe-top)) 10px auto;
+  inset:
+    calc(8px + var(--safe-top))
+    10px
+    auto;
   z-index: 3;
   display: flex;
   flex-direction: column;
@@ -458,13 +519,14 @@ button:disabled {
 
 .hud-top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0,1fr) auto;
   align-items: start;
   gap: 10px;
   padding: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255,255,255,.13);
   border-radius: 14px;
-  background: rgba(8, 18, 24, 0.82);
+  background: rgba(5,15,21,.84);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -481,22 +543,22 @@ button:disabled {
 
 #hud-level {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: .78rem;
 }
 
 .hud-stats {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 6px;
   align-items: center;
+  gap: 6px;
 }
 
 .hud-stats span {
   padding: 6px 8px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
-  font-size: 0.72rem;
+  background: rgba(255,255,255,.07);
+  font-size: .72rem;
   white-space: nowrap;
 }
 
@@ -518,29 +580,30 @@ button:disabled {
   min-width: 42px;
   min-height: 42px;
   padding: 6px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255,255,255,.12);
   font-size: 1.2rem;
 }
 
 .hud-mission {
   align-self: flex-start;
-  width: min(340px, 76%);
+  width: min(340px,76%);
   padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255,255,255,.12);
   border-radius: 12px;
-  background: rgba(8, 18, 24, 0.78);
+  background: rgba(5,15,21,.8);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
 #hud-mission-title {
   color: var(--accent);
-  font-size: 0.9rem;
+  font-size: .9rem;
 }
 
 #hud-objective {
   margin: 6px 0;
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: .82rem;
   line-height: 1.4;
 }
 
@@ -549,7 +612,7 @@ button:disabled {
   height: 7px;
   overflow: hidden;
   border-radius: 99px;
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255,255,255,.14);
 }
 
 #objective-progress {
@@ -557,28 +620,30 @@ button:disabled {
   height: 100%;
   border-radius: inherit;
   background: var(--primary);
-  transition: width 0.2s ease;
+  transition: width .2s ease;
 }
 
 #objective-count {
   display: block;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 0.74rem;
+  font-size: .74rem;
   text-align: right;
 }
 
 .hud-bottom {
-  position: fixed;
+  position: absolute;
   right: 12px;
   bottom: calc(12px + var(--safe-bottom));
   left: 12px;
+  z-index: 3;
   display: flex;
   justify-content: space-between;
   gap: 12px;
   color: white;
-  font-size: 0.78rem;
+  font-size: .78rem;
   text-shadow: 0 2px 5px #000;
+  pointer-events: none;
 }
 
 /* =========================================================
@@ -601,12 +666,13 @@ button:disabled {
   position: relative;
   display: grid;
   place-items: center;
-  width: clamp(115px, 32vw, 165px);
-  height: clamp(115px, 32vw, 165px);
+  width: clamp(115px,32vw,165px);
+  height: clamp(115px,32vw,165px);
   flex: 0 0 auto;
   pointer-events: auto;
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 #joystick-base {
@@ -615,10 +681,10 @@ button:disabled {
   place-items: center;
   width: 100%;
   height: 100%;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255,255,255,.25);
   border-radius: 50%;
-  background: rgba(12, 26, 34, 0.5);
-  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.3);
+  background: rgba(12,26,34,.5);
+  box-shadow: inset 0 0 25px rgba(0,0,0,.3);
 }
 
 #joystick-knob {
@@ -627,19 +693,19 @@ button:disabled {
   top: 50%;
   width: 42%;
   height: 42%;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255,255,255,.5);
   border-radius: 50%;
-  background: rgba(25, 211, 162, 0.55);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  transform: translate(-50%, -50%);
+  background: rgba(32,224,173,.58);
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  transform: translate(-50%,-50%);
   pointer-events: none;
 }
 
 .action-controls {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2,minmax(0,1fr));
   gap: 8px;
-  width: min(250px, 54vw);
+  width: min(250px,54vw);
   pointer-events: auto;
 }
 
@@ -647,33 +713,35 @@ button:disabled {
   min-width: 0;
   min-height: 48px;
   padding: 9px 6px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(13, 31, 40, 0.85);
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(9,26,34,.9);
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  font-size: clamp(0.66rem, 2.5vw, 0.82rem);
+  font-size: clamp(.66rem,2.5vw,.82rem);
   font-weight: 900;
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 #btn-action {
   border-color: var(--primary);
-  background: rgba(10, 148, 118, 0.88);
+  background: rgba(7,137,102,.94);
   color: white;
 }
 
 #btn-run {
-  border-color: rgba(255, 200, 87, 0.5);
+  border-color: rgba(255,209,102,.5);
   color: var(--accent);
 }
 
 #btn-pitch-2 {
-  border-color: rgba(99, 216, 255, 0.5);
+  border-color: rgba(99,216,255,.5);
   color: #8ce5ff;
 }
 
 /* =========================================================
-   MENI POZ AK REZILTA
+   MENI POZ / REZILTA / PAUZ
    ========================================================= */
 
 .overlay-panel {
@@ -681,16 +749,20 @@ button:disabled {
   top: 50%;
   left: 50%;
   z-index: 12;
-  width: min(420px, calc(100% - 32px));
-  max-height: calc(100% - 40px - var(--safe-top) - var(--safe-bottom));
+  width: min(420px,calc(100% - 32px));
+  max-height: calc(
+    100% - 40px - var(--safe-top) - var(--safe-bottom)
+  );
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 24px;
-  border: 1px solid rgba(25, 211, 162, 0.35);
+  border: 1px solid rgba(32,224,173,.38);
   border-radius: 18px;
-  background: rgba(12, 25, 33, 0.97);
+  background: rgba(8,22,30,.97);
   box-shadow: var(--shadow);
   text-align: center;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%,-50%);
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
 
@@ -730,7 +802,7 @@ button:disabled {
   top: 38%;
   left: 50%;
   z-index: 15;
-  width: min(360px, calc(100% - 32px));
+  width: min(360px,calc(100% - 32px));
   color: white;
   font-weight: 800;
   text-align: center;
@@ -748,7 +820,7 @@ button:disabled {
   max-width: 560px;
   margin: 0 auto;
   padding: 18px;
-  border: 1px solid rgba(255, 92, 104, 0.6);
+  border: 1px solid rgba(255,82,99,.65);
   border-radius: 14px;
   background: #351b22;
   box-shadow: var(--shadow);
@@ -756,7 +828,7 @@ button:disabled {
 
 #app-error p {
   overflow-wrap: anywhere;
-  color: #fff;
+  color: white;
   line-height: 1.5;
 }
 
@@ -766,10 +838,10 @@ button:disabled {
 }
 
 /* =========================================================
-   RESPONSIVE: TELEFÒN AK TI EKRAN
+   RESPONSIVE — TELEFÒN AK TI EKRAN
    ========================================================= */
 
-@media (max-width: 600px) {
+@media (max-width:600px) {
   .screen {
     padding-right: 14px;
     padding-left: 14px;
@@ -807,7 +879,7 @@ button:disabled {
   }
 
   .hud-top {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0,1fr) auto;
     gap: 7px;
     padding: 8px;
   }
@@ -824,7 +896,7 @@ button:disabled {
   }
 
   .hud-mission {
-    width: min(300px, 84%);
+    width: min(300px,84%);
     padding: 9px;
   }
 
@@ -834,12 +906,12 @@ button:disabled {
   }
 
   #joystick-zone {
-    width: clamp(100px, 29vw, 135px);
-    height: clamp(100px, 29vw, 135px);
+    width: clamp(100px,29vw,135px);
+    height: clamp(100px,29vw,135px);
   }
 
   .action-controls {
-    width: min(220px, 53vw);
+    width: min(220px,53vw);
     gap: 6px;
   }
 
@@ -850,11 +922,15 @@ button:disabled {
 
   .hud-bottom {
     bottom: calc(4px + var(--safe-bottom));
-    font-size: 0.7rem;
+    font-size: .7rem;
   }
 }
 
-@media (max-height: 500px) and (orientation: landscape) {
+/* =========================================================
+   TELEFÒN AN MÒD PEYIZAJ
+   ========================================================= */
+
+@media (max-height:500px) and (orientation:landscape) {
   .screen {
     padding-top: calc(8px + var(--safe-top));
     padding-bottom: calc(8px + var(--safe-bottom));
@@ -877,15 +953,15 @@ button:disabled {
   }
 
   .main-buttons {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: min(600px, 100%);
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    width: min(600px,100%);
     gap: 7px;
   }
 
   .main-buttons button {
     min-height: 38px;
     padding: 7px 10px;
-    font-size: 0.8rem;
+    font-size: .8rem;
   }
 
   #main-menu footer {
@@ -899,12 +975,12 @@ button:disabled {
 
   .action-controls {
     width: 220px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3,minmax(0,1fr));
   }
 
   .action-controls button {
     min-height: 38px;
-    font-size: 0.68rem;
+    font-size: .68rem;
   }
 
   .hud-mission {
@@ -916,20 +992,20 @@ button:disabled {
   }
 }
 
-/* Preferans aksesib ak mouvman redui */
-@media (prefers-reduced-motion: reduce) {
+/* =========================================================
+   AKSESIBILITE
+   ========================================================= */
+
+@media (prefers-reduced-motion:reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
+    animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: .01ms !important;
   }
 }
-
-
-
 
 
 
