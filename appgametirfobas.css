@@ -1,51 +1,85 @@
 
+
 /* =========================================================
    FOBAS MISSION 3D — MEME & TEAM
-   CSS PROFESYONÈL — WEBGL 3D
-   Konpatib ak id HTML ki te bay yo
-   Pa gen Three.js, CDN oswa desen Canvas 2D
+   Main stylesheet | Responsive | Mobile + Desktop
+   File: appgametirfobas.css
    ========================================================= */
+
+/* ---------- 1. VARIABLES ---------- */
 
 :root {
   color-scheme: dark;
-  --bg: #08141b;
-  --panel: #11232d;
-  --panel-light: #1b3542;
-  --primary: #20e0ad;
-  --primary-dark: #078966;
-  --accent: #ffd166;
+
+  --bg: #071019;
+  --bg-soft: #0c1723;
+  --panel: rgba(13, 27, 42, 0.94);
+  --panel-light: rgba(21, 40, 59, 0.94);
+
+  --primary: #19d9ff;
+  --primary-dark: #087fa8;
+  --secondary: #7b61ff;
+  --accent: #00f5a0;
+
+  --text: #f1f7ff;
+  --muted: #a4b6ca;
   --danger: #ff5263;
-  --text: #f4f8fc;
-  --muted: #a8bdc9;
-  --border: rgba(255,255,255,.14);
-  --radius: 16px;
-  --shadow: 0 18px 48px rgba(0,0,0,.38);
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --warning: #ffca58;
+  --success: #00e59b;
+
+  --border: rgba(83, 191, 255, 0.24);
+  --shadow: 0 18px 55px rgba(0, 0, 0, 0.42);
+  --glow: 0 0 24px rgba(25, 217, 255, 0.2);
+
+  --radius: 18px;
+  --radius-small: 11px;
+
+  --top-safe: env(safe-area-inset-top, 0px);
+  --bottom-safe: env(safe-area-inset-bottom, 0px);
+
+  font-family:
+    Inter,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
 }
+
+/* ---------- 2. RESET ---------- */
 
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
+html {
   width: 100%;
-  height: 100%;
+  min-width: 320px;
   min-height: 100%;
-  margin: 0;
   background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  scroll-behavior: smooth;
 }
 
 body {
+  width: 100%;
+  min-width: 320px;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow: hidden;
-  overscroll-behavior: none;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(17, 96, 137, 0.2),
+      transparent 50%
+    ),
+    linear-gradient(145deg, #071019, #0b1421 55%, #080d16);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -55,125 +89,221 @@ select {
 }
 
 button {
-  min-height: 44px;
-  padding: 11px 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--panel-light);
   color: var(--text);
-  font-weight: 800;
-  cursor: pointer;
+}
+
+button,
+select,
+input[type="range"],
+input[type="checkbox"] {
   touch-action: manipulation;
-  transition:
-    background .18s ease,
-    border-color .18s ease,
-    transform .18s ease;
-}
-
-button:hover {
-  border-color: var(--primary);
-  background: #294b59;
-}
-
-button:active {
-  transform: scale(.97);
 }
 
 button:focus-visible,
-input:focus-visible,
 select:focus-visible,
-#game-canvas:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
+input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
 }
 
 button:disabled {
-  opacity: .5;
+  opacity: 0.45;
   cursor: not-allowed;
-  transform: none;
+  filter: grayscale(0.5);
+}
+
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 [hidden] {
   display: none !important;
 }
 
+/* ---------- 3. APP CONTAINER ---------- */
+
 #game-app {
   position: relative;
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
   isolation: isolate;
-  background:
-    radial-gradient(
-      ellipse at 50% 0%,
-      rgba(32,224,173,.10),
-      transparent 50%
-    ),
-    var(--bg);
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
 }
-
-/* =========================================================
-   EKRAN JENERAL
-   ========================================================= */
 
 .screen {
-  position: absolute;
-  inset: 0;
+  position: relative;
   width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
   padding:
-    calc(24px + var(--safe-top))
-    18px
-    calc(24px + var(--safe-bottom));
-  overscroll-behavior: contain;
+    max(24px, var(--top-safe))
+    max(18px, env(safe-area-inset-right, 0px))
+    max(24px, var(--bottom-safe))
+    max(18px, env(safe-area-inset-left, 0px));
 }
 
+/* ---------- 4. BUTTONS ---------- */
+
+button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 12px 18px;
+  overflow: hidden;
+
+  border: 1px solid rgba(65, 205, 255, 0.38);
+  border-radius: var(--radius-small);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(22, 67, 94, 0.96),
+      rgba(14, 31, 49, 0.98)
+    );
+
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  text-align: center;
+  text-decoration: none;
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2);
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.07) 48%,
+    transparent 75%
+  );
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+button:hover {
+  border-color: var(--primary);
+  box-shadow: var(--glow);
+  transform: translateY(-2px);
+}
+
+button:hover::before {
+  opacity: 1;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(25, 217, 255, 0.18);
+}
+
+#btn-play,
+#btn-enter,
+#btn-confirm-character,
+#btn-save-settings {
+  border-color: rgba(0, 245, 160, 0.7);
+  background: linear-gradient(135deg, #00c98a, #087e8b);
+  color: #041b1b;
+  box-shadow: 0 8px 28px rgba(0, 229, 155, 0.16);
+}
+
+#btn-play:hover,
+#btn-enter:hover,
+#btn-confirm-character:hover,
+#btn-save-settings:hover {
+  border-color: #70ffd0;
+  box-shadow: 0 0 28px rgba(0, 245, 160, 0.28);
+}
+
+#btn-pause {
+  flex: 0 0 46px;
+  width: 46px;
+  min-height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.15rem;
+}
+
+#btn-error-close {
+  border-color: rgba(255, 82, 99, 0.6);
+  background: rgba(115, 27, 43, 0.8);
+}
+
+/* ---------- 5. LOADING SCREEN ---------- */
+
 #loading-screen {
-  z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 18px;
   text-align: center;
+
   background:
     radial-gradient(
       ellipse at center,
-      rgba(32,224,173,.14),
-      transparent 65%
+      rgba(11, 116, 160, 0.22),
+      transparent 56%
     ),
-    linear-gradient(145deg,#08141b,#15313d);
+    linear-gradient(145deg, #071019, #0b1725);
 }
 
 #loading-screen h1 {
+  max-width: 900px;
   margin: 0;
   color: var(--primary);
-  font-size: clamp(2rem,8vw,4.5rem);
+  font-size: clamp(2rem, 7vw, 5.2rem);
   font-weight: 1000;
-  letter-spacing: .06em;
-  text-shadow: 0 0 28px rgba(32,224,173,.24);
+  letter-spacing: 0.055em;
+  text-shadow:
+    0 0 12px rgba(25, 217, 255, 0.45),
+    0 0 42px rgba(25, 217, 255, 0.16);
 }
 
 #loading-screen h2 {
-  margin: 0;
-  color: var(--accent);
-  font-size: clamp(1rem,4vw,1.5rem);
-  letter-spacing: .24em;
+  margin: -7px 0 14px;
+  color: #dbeaff;
+  font-size: clamp(1rem, 3vw, 1.7rem);
+  letter-spacing: 0.45em;
 }
 
 .loading-bar {
-  width: min(420px,85vw);
+  width: min(440px, 88vw);
   height: 12px;
-  margin-top: 18px;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 99px;
-  background: #050d12;
+  border-radius: 999px;
+  background: #07111b;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
 }
 
 #loading-progress {
@@ -183,160 +313,165 @@ button:disabled {
   background: linear-gradient(
     90deg,
     var(--primary-dark),
-    var(--primary)
+    var(--primary),
+    var(--accent)
   );
-  box-shadow: 0 0 18px rgba(32,224,173,.4);
-  transition: width .25s ease;
+  box-shadow: 0 0 20px rgba(25, 217, 255, 0.55);
+  transition: width 250ms ease;
 }
 
 #loading-status {
-  max-width: 90%;
+  min-height: 24px;
+  margin: 0;
   color: var(--muted);
-  line-height: 1.6;
 }
 
 #btn-enter {
-  min-width: min(280px,85vw);
+  width: min(340px, 90%);
+  min-height: 54px;
   margin-top: 12px;
-  border: 0;
-  background: var(--primary);
-  color: #06251e;
-  box-shadow: 0 8px 28px rgba(32,224,173,.22);
+  font-size: 1rem;
 }
 
-/* =========================================================
-   MENI PRENSIPAL
-   ========================================================= */
+/* ---------- 6. MAIN MENU ---------- */
 
 #main-menu {
-  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  text-align: center;
-  background:
-    radial-gradient(
-      ellipse at 50% 15%,
-      rgba(32,224,173,.12),
-      transparent 50%
-    ),
-    var(--bg);
+  gap: 26px;
+  padding-top: max(36px, var(--top-safe));
+  padding-bottom: max(28px, var(--bottom-safe));
 }
 
 #main-menu > header {
-  width: 100%;
-  max-width: 680px;
-  padding-top: 12px;
+  width: min(850px, 100%);
+  padding: 18px 10px 10px;
+  text-align: center;
 }
 
 #main-menu > header h1 {
   margin: 0;
-  font-size: clamp(2rem,7vw,4rem);
+  color: var(--text);
+  font-size: clamp(2.1rem, 7vw, 4.8rem);
   font-weight: 1000;
-  letter-spacing: -.04em;
+  letter-spacing: -0.045em;
+  text-shadow: 0 0 28px rgba(25, 217, 255, 0.14);
 }
 
 #main-menu > header h1 span {
+  display: block;
+  margin-top: 5px;
   color: var(--primary);
+  font-size: 0.78em;
+  letter-spacing: 0.04em;
 }
 
 #main-menu > header p {
-  margin-top: 8px;
+  margin: 13px 0 0;
   color: var(--accent);
+  font-size: clamp(0.8rem, 2vw, 1rem);
   font-weight: 900;
-  letter-spacing: .3em;
+  letter-spacing: 0.55em;
 }
 
 .main-buttons {
   display: grid;
-  grid-template-columns: minmax(0,1fr);
+  grid-template-columns: 1fr;
   gap: 12px;
-  width: min(420px,100%);
+  width: min(440px, 100%);
 }
 
 .main-buttons button {
   width: 100%;
   min-height: 54px;
-  text-align: left;
+  justify-content: flex-start;
+  padding-inline: 22px;
+  font-size: 0.95rem;
 }
 
-#btn-play {
-  border-color: transparent;
-  background: var(--primary);
-  color: #06251e;
-}
-
-#btn-continue {
-  border-color: rgba(255,209,102,.4);
-  color: var(--accent);
-}
-
-#main-menu footer {
-  width: 100%;
+#main-menu > footer {
+  width: min(900px, 100%);
   margin-top: auto;
   padding-top: 20px;
-  color: var(--muted);
-  font-size: .82rem;
+  color: #7f94aa;
+  font-size: 0.78rem;
+  text-align: center;
 }
 
-#main-menu footer p {
-  margin: 6px 0;
+#main-menu > footer p {
+  margin: 5px 0;
 }
 
-/* =========================================================
-   MISYON, PÈSONAJ AK PARAMÈT
-   ========================================================= */
+/* ---------- 7. MENU PANELS ---------- */
 
 #mission-menu,
 #character-menu,
 #settings-menu {
-  width: min(680px,100%);
-  margin: 0 auto;
-  padding: 22px;
+  width: min(760px, 100%);
+  padding: clamp(18px, 4vw, 30px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: rgba(17,35,45,.97);
+  background: var(--panel);
   box-shadow: var(--shadow);
-  text-align: left;
+  animation: panel-enter 220ms ease both;
 }
 
 #mission-menu h2,
 #character-menu h2,
 #settings-menu h2 {
-  margin-top: 0;
+  margin: 0 0 22px;
   color: var(--primary);
-  font-size: 1.35rem;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  letter-spacing: 0.025em;
+}
+
+#mission-menu > button[data-back-menu],
+#character-menu > button[data-back-menu],
+#settings-menu > button[data-back-menu] {
+  margin-top: 14px;
 }
 
 .mission-card {
-  margin: 12px 0;
-  padding: 18px;
+  margin-bottom: 14px;
+  padding: 19px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: #0d202a;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(24, 49, 72, 0.82),
+      rgba(9, 22, 36, 0.92)
+    );
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.mission-card:hover {
+  border-color: rgba(25, 217, 255, 0.58);
+  transform: translateY(-2px);
 }
 
 .mission-card h3 {
   margin: 0 0 8px;
-  font-size: 1rem;
+  color: #f3f8ff;
+  font-size: 1.05rem;
 }
 
 .mission-card p {
+  margin: 0 0 15px;
   color: var(--muted);
-  line-height: 1.55;
+  font-size: 0.9rem;
 }
 
 .mission-card button {
-  width: 100%;
-  margin-top: 8px;
-  background: var(--primary);
-  color: #06251e;
+  min-width: 130px;
 }
+
+/* ---------- 8. CHARACTERS ---------- */
 
 #character-list {
   display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -346,169 +481,158 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 130px;
-  padding: 14px 8px;
-  background: #0d202a;
-  text-align: center;
+  min-width: 0;
+  min-height: 150px;
+  padding: 16px 10px;
+  border-color: rgba(116, 154, 190, 0.23);
+  background: rgba(11, 24, 39, 0.94);
 }
 
 .character-card > span {
-  font-size: 2rem;
+  font-size: clamp(2rem, 7vw, 3rem);
+  line-height: 1.15;
 }
 
 .character-card strong {
-  letter-spacing: .08em;
+  color: var(--text);
+  font-size: 0.96rem;
+  letter-spacing: 0.08em;
 }
 
 .character-card small {
   color: var(--muted);
-  font-size: .76rem;
+  font-size: 0.74rem;
+  font-weight: 500;
 }
 
-.character-card.selected,
-.character-card[aria-pressed="true"] {
+.character-card.selected {
   border-color: var(--primary);
-  background: rgba(32,224,173,.13);
-  box-shadow: inset 0 0 0 1px var(--primary);
+  background: linear-gradient(
+    145deg,
+    rgba(14, 90, 119, 0.48),
+    rgba(13, 27, 44, 0.96)
+  );
+  box-shadow: inset 0 0 0 1px rgba(25, 217, 255, 0.2), var(--glow);
 }
 
 #selected-character {
+  margin: 20px 0 12px;
   color: var(--accent);
   font-weight: 800;
 }
 
-#btn-confirm-character,
-#btn-save-settings {
-  width: 100%;
-  margin: 10px 0;
-  border: 0;
-  background: var(--primary);
-  color: #06251e;
+/* ---------- 9. SETTINGS ---------- */
+
+#settings-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
 }
 
 #settings-menu label {
-  display: block;
-  margin: 18px 0 8px;
-  color: var(--muted);
+  margin-top: 5px;
+  color: #d6e6f7;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
-#settings-menu select,
-#settings-menu input[type="range"] {
+#graphics-quality {
   width: 100%;
-  min-height: 42px;
-}
-
-#settings-menu select {
-  padding: 10px;
+  min-height: 46px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #0a1921;
+  border-radius: var(--radius-small);
+  background: #0b1827;
   color: var(--text);
 }
 
-#settings-menu input[type="range"] {
+#camera-sensitivity,
+#game-volume {
+  width: 100%;
+  margin: 5px 0 12px;
   accent-color: var(--primary);
+  cursor: pointer;
 }
 
-#settings-menu label:has(input[type="checkbox"]) {
+#settings-menu label:has(#sound-enabled) {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin: 6px 0 12px;
 }
 
-#settings-menu input[type="checkbox"] {
+#sound-enabled {
   width: 20px;
   height: 20px;
-  accent-color: var(--primary);
+  accent-color: var(--success);
 }
 
-/* =========================================================
-   MOND 3D — SIFAS RANN WEBGL
-   NÒT: CSS PA KREYE JEYOMETRI 3D.
-   JAVASCRIPT LA DWE KREYE KONTÈKS WEBGL LA.
-   ========================================================= */
+/* ---------- 10. GAME WORLD / CANVAS ---------- */
 
 #game-screen {
-  z-index: 5;
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   padding: 0;
   overflow: hidden;
-  background: #071117;
+  background: #071019;
 }
 
 #game-world {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
+  z-index: 0;
   overflow: hidden;
-  isolation: isolate;
-  background: #10232b;
+  background:
+    radial-gradient(
+      ellipse at 50% 35%,
+      rgba(14, 72, 103, 0.35),
+      transparent 65%
+    ),
+    #071019;
 }
 
-/*
-  Eleman sa a se sifas rann grafik la.
-  WebGL dwe inisyalize nan JavaScript.
-  Pa sèvi ak getContext("2d").
-*/
-
 #game-canvas {
-  position: absolute;
-  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  min-width: 0;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
   border: 0;
   outline: none;
-  z-index: 1;
-  visibility: visible;
-  opacity: 1;
   touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
 }
-
-/*
-  Fallback la pa dwe kouvri mond lan lè li kache.
-  JavaScript dwe mete hidden lè WebGL pare.
-*/
 
 #world-fallback {
   position: absolute;
   inset: 0;
   z-index: 2;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: rgba(8,15,20,.94);
-  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+  background: rgba(5, 12, 21, 0.9);
+  color: var(--warning);
   text-align: center;
 }
 
-#world-fallback[hidden] {
-  display: none !important;
-}
-
-/* =========================================================
-   HUD JWÈ A
-   ========================================================= */
+/* ---------- 11. HUD ---------- */
 
 #game-hud {
   position: absolute;
-  inset:
-    calc(8px + var(--safe-top))
-    10px
-    auto;
-  z-index: 3;
+  z-index: 5;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
+  padding:
+    max(12px, var(--top-safe))
+    max(12px, env(safe-area-inset-right, 0px))
+    max(12px, var(--bottom-safe))
+    max(12px, env(safe-area-inset-left, 0px));
   pointer-events: none;
 }
 
@@ -518,157 +642,170 @@ button:disabled {
 }
 
 .hud-top {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
-  align-items: start;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 10px;
-  padding: 10px;
-  border: 1px solid rgba(255,255,255,.13);
-  border-radius: 14px;
-  background: rgba(5,15,21,.84);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  width: 100%;
 }
 
 .hud-top > div:first-child {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  min-width: 65px;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: rgba(4, 13, 24, 0.8);
+  backdrop-filter: blur(12px);
 }
 
 #hud-character {
   color: var(--primary);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
 }
 
 #hud-level {
   color: var(--muted);
-  font-size: .78rem;
+  font-size: 0.75rem;
 }
 
 .hud-stats {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 7px;
+  max-width: calc(100% - 120px);
 }
 
 .hud-stats span {
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.07);
-  font-size: .72rem;
-  white-space: nowrap;
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid rgba(92, 174, 220, 0.25);
+  border-radius: 10px;
+  background: rgba(4, 13, 24, 0.82);
+  color: #d8e7f8;
+  font-size: clamp(0.68rem, 2vw, 0.82rem);
+  backdrop-filter: blur(12px);
 }
 
 #hud-health {
-  color: #ff777e;
+  color: #ff7380;
 }
 
 #hud-energy {
-  color: #63d8ff;
-}
-
-#hud-score {
   color: var(--accent);
 }
 
-#btn-pause {
-  grid-column: 2;
-  grid-row: 1;
-  min-width: 42px;
-  min-height: 42px;
-  padding: 6px;
-  background: rgba(255,255,255,.12);
-  font-size: 1.2rem;
+#hud-score {
+  color: var(--warning);
 }
 
 .hud-mission {
   align-self: flex-start;
-  width: min(340px,76%);
-  padding: 12px;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px;
-  background: rgba(5,15,21,.8);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  width: min(320px, 76%);
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(25, 217, 255, 0.27);
+  border-radius: 14px;
+  background: rgba(4, 14, 25, 0.82);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(12px);
 }
 
 #hud-mission-title {
-  color: var(--accent);
-  font-size: .9rem;
+  display: block;
+  color: var(--primary);
+  font-size: 0.91rem;
 }
 
 #hud-objective {
-  margin: 6px 0;
-  color: var(--text);
-  font-size: .82rem;
-  line-height: 1.4;
+  margin: 7px 0 10px;
+  color: #d2dfed;
+  font-size: 0.8rem;
 }
 
 .progress-track {
   width: 100%;
-  height: 7px;
+  height: 6px;
   overflow: hidden;
-  border-radius: 99px;
-  background: rgba(255,255,255,.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.13);
 }
 
 #objective-progress {
   width: 0%;
   height: 100%;
   border-radius: inherit;
-  background: var(--primary);
-  transition: width .2s ease;
+  background: linear-gradient(90deg, var(--primary-dark), var(--accent));
+  box-shadow: 0 0 12px rgba(0, 245, 160, 0.4);
+  transition: width 220ms ease;
 }
 
 #objective-count {
   display: block;
   margin-top: 6px;
   color: var(--muted);
-  font-size: .74rem;
+  font-size: 0.72rem;
   text-align: right;
 }
 
 .hud-bottom {
-  position: absolute;
-  right: 12px;
-  bottom: calc(12px + var(--safe-bottom));
-  left: 12px;
-  z-index: 3;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  color: white;
-  font-size: .78rem;
-  text-shadow: 0 2px 5px #000;
-  pointer-events: none;
+  align-self: stretch;
+  margin-bottom: 8px;
 }
 
-/* =========================================================
-   KONTWÒL MOBIL / ANDROID
-   ========================================================= */
+.hud-bottom span {
+  padding: 8px 12px;
+  border: 1px solid rgba(92, 174, 220, 0.22);
+  border-radius: 10px;
+  background: rgba(4, 13, 24, 0.78);
+  color: #e1edf8;
+  font-size: 0.76rem;
+  backdrop-filter: blur(10px);
+}
+
+#hud-timer {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 12. MOBILE GAME CONTROLS ---------- */
 
 #mobile-controls {
   position: absolute;
-  inset: auto 0 calc(12px + var(--safe-bottom));
-  z-index: 6;
+  z-index: 7;
+  inset: auto 0 0;
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
-  gap: 12px;
-  padding: 12px;
+  justify-content: space-between;
+  gap: 14px;
+  padding:
+    0
+    max(18px, env(safe-area-inset-right, 0px))
+    max(22px, calc(var(--bottom-safe) + 12px))
+    max(18px, env(safe-area-inset-left, 0px));
   pointer-events: none;
 }
 
 #joystick-zone {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: clamp(115px,32vw,165px);
-  height: clamp(115px,32vw,165px);
-  flex: 0 0 auto;
+  display: flex;
+  flex: 0 0 clamp(120px, 29vw, 170px);
+  align-items: center;
+  justify-content: center;
+  width: clamp(120px, 29vw, 170px);
+  height: clamp(120px, 29vw, 170px);
+  min-width: 0;
+  border-radius: 50%;
   pointer-events: auto;
   touch-action: none;
   user-select: none;
@@ -677,197 +814,331 @@ button:disabled {
 
 #joystick-base {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
-  border: 2px solid rgba(255,255,255,.25);
+  border: 2px solid rgba(116, 208, 255, 0.38);
   border-radius: 50%;
-  background: rgba(12,26,34,.5);
-  box-shadow: inset 0 0 25px rgba(0,0,0,.3);
+  background: rgba(5, 19, 32, 0.38);
+  box-shadow:
+    inset 0 0 24px rgba(25, 217, 255, 0.08),
+    0 0 25px rgba(0, 0, 0, 0.14);
+  backdrop-filter: blur(4px);
+}
+
+#joystick-base::after {
+  content: "";
+  position: absolute;
+  inset: 20%;
+  border: 1px dashed rgba(116, 208, 255, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 #joystick-knob {
   position: absolute;
-  left: 50%;
+  z-index: 1;
   top: 50%;
-  width: 42%;
-  height: 42%;
-  border: 2px solid rgba(255,255,255,.5);
+  left: 50%;
+  width: 43%;
+  height: 43%;
+  border: 2px solid rgba(163, 235, 255, 0.8);
   border-radius: 50%;
-  background: rgba(32,224,173,.58);
-  box-shadow: 0 4px 16px rgba(0,0,0,.35);
-  transform: translate(-50%,-50%);
+  background: linear-gradient(
+    145deg,
+    rgba(34, 180, 231, 0.8),
+    rgba(13, 76, 116, 0.92)
+  );
+  box-shadow:
+    0 0 18px rgba(25, 217, 255, 0.25),
+    inset 0 0 12px rgba(255, 255, 255, 0.12);
+  transform: translate(-50%, -50%);
+  will-change: left, top;
   pointer-events: none;
 }
 
 .action-controls {
   display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  gap: 8px;
-  width: min(250px,54vw);
+  grid-template-columns: repeat(2, minmax(62px, 1fr));
+  gap: 9px;
+  width: min(240px, 54vw);
   pointer-events: auto;
 }
 
 .action-controls button {
   min-width: 0;
-  min-height: 48px;
-  padding: 9px 6px;
-  border: 1px solid rgba(255,255,255,.25);
-  background: rgba(9,26,34,.9);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  font-size: clamp(.66rem,2.5vw,.82rem);
-  font-weight: 900;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
+  min-height: clamp(46px, 11vw, 58px);
+  padding: 9px 7px;
+  border-radius: 14px;
+  background: rgba(9, 27, 44, 0.88);
+  font-size: clamp(0.67rem, 2.5vw, 0.8rem);
+  backdrop-filter: blur(8px);
+  touch-action: manipulation;
 }
 
-#btn-action {
-  border-color: var(--primary);
-  background: rgba(7,137,102,.94);
-  color: white;
+#btn-jump {
+  border-color: rgba(25, 217, 255, 0.6);
 }
 
 #btn-run {
-  border-color: rgba(255,209,102,.5);
-  color: var(--accent);
+  border-color: rgba(0, 245, 160, 0.55);
 }
 
-#btn-pitch-2 {
-  border-color: rgba(99,216,255,.5);
-  color: #8ce5ff;
+#btn-action {
+  border-color: rgba(255, 202, 88, 0.6);
 }
 
-/* =========================================================
-   MENI POZ / REZILTA / PAUZ
-   ========================================================= */
+#btn-camera {
+  border-color: rgba(158, 133, 255, 0.6);
+}
+
+/* ---------- 13. PAUSE / RESULT OVERLAYS ---------- */
 
 .overlay-panel {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 12;
-  width: min(420px,calc(100% - 32px));
-  max-height: calc(
-    100% - 40px - var(--safe-top) - var(--safe-bottom)
-  );
-  overflow-x: hidden;
+  z-index: 20;
+  inset: 50% auto auto 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+
+  width: min(430px, calc(100% - 32px));
+  max-height: calc(100% - 36px);
   overflow-y: auto;
-  padding: 24px;
-  border: 1px solid rgba(32,224,173,.38);
-  border-radius: 18px;
-  background: rgba(8,22,30,.97);
-  box-shadow: var(--shadow);
-  text-align: center;
-  transform: translate(-50%,-50%);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  padding: clamp(22px, 5vw, 32px);
+
+  border: 1px solid rgba(25, 217, 255, 0.36);
+  border-radius: 20px;
+  background: rgba(7, 17, 30, 0.97);
+  box-shadow:
+    0 24px 90px rgba(0, 0, 0, 0.65),
+    0 0 45px rgba(25, 217, 255, 0.08);
+
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(18px);
+  animation: panel-enter 200ms ease both;
 }
 
 .overlay-panel h2 {
-  margin-top: 0;
+  margin: 0 0 8px;
   color: var(--primary);
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  text-align: center;
 }
 
 .overlay-panel p {
-  color: var(--muted);
-  line-height: 1.55;
+  color: #c0d0e2;
+  text-align: center;
 }
 
-.overlay-panel button {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
+#result-score {
+  color: var(--warning);
+  font-size: 1.2em;
 }
 
-#btn-resume,
 #btn-next-mission {
-  border-color: transparent;
-  background: var(--primary);
-  color: #06251e;
+  border-color: rgba(0, 245, 160, 0.6);
 }
 
-#btn-restart {
-  color: var(--accent);
-}
-
-/* =========================================================
-   NOTIFIKASYON AK ERÈ
-   ========================================================= */
+/* ---------- 14. NOTIFICATIONS ---------- */
 
 #game-notifications {
   position: absolute;
-  top: 38%;
+  z-index: 30;
+  top: max(100px, calc(var(--top-safe) + 92px));
   left: 50%;
-  z-index: 15;
-  width: min(360px,calc(100% - 32px));
-  color: white;
-  font-weight: 800;
+  width: min(360px, calc(100% - 32px));
+  color: var(--text);
   text-align: center;
-  text-shadow: 0 2px 8px #000;
   pointer-events: none;
   transform: translateX(-50%);
 }
 
+#game-notifications:empty {
+  display: none;
+}
+
+#game-notifications > * {
+  margin: 0 0 8px;
+  padding: 12px 16px;
+  border: 1px solid rgba(25, 217, 255, 0.36);
+  border-radius: 12px;
+  background: rgba(5, 19, 33, 0.94);
+  box-shadow: var(--shadow);
+  animation: notification-enter 220ms ease both;
+}
+
+/* ---------- 15. ERROR PANEL ---------- */
+
 #app-error {
   position: fixed;
-  right: 14px;
-  bottom: calc(14px + var(--safe-bottom));
-  left: 14px;
-  z-index: 100;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 18px;
-  border: 1px solid rgba(255,82,99,.65);
-  border-radius: 14px;
-  background: #351b22;
-  box-shadow: var(--shadow);
+  z-index: 1000;
+  inset: auto 16px max(16px, var(--bottom-safe));
+  width: min(520px, calc(100% - 32px));
+  margin-inline: auto;
+  padding: 20px;
+  border: 1px solid rgba(255, 82, 99, 0.65);
+  border-radius: 16px;
+  background: rgba(39, 13, 23, 0.98);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
 }
 
 #app-error p {
+  margin: 0 0 14px;
+  color: #ffe4e8;
   overflow-wrap: anywhere;
-  color: white;
-  line-height: 1.5;
 }
 
-#btn-error-close {
-  border-color: var(--danger);
-  background: #51232c;
+/* ---------- 16. SCROLLBARS ---------- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #28536d #09131f;
 }
 
-/* =========================================================
-   RESPONSIVE — TELEFÒN AK TI EKRAN
-   ========================================================= */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
-@media (max-width:600px) {
+*::-webkit-scrollbar-track {
+  background: #09131f;
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid #09131f;
+  border-radius: 999px;
+  background: #28536d;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #3986a8;
+}
+
+/* ---------- 17. ANIMATIONS ---------- */
+
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes notification-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- 18. TABLET ---------- */
+
+@media (min-width: 600px) {
   .screen {
-    padding-right: 14px;
-    padding-left: 14px;
+    padding-inline: 30px;
   }
 
   #main-menu {
-    gap: 16px;
-  }
-
-  #main-menu > header {
-    padding-top: 4px;
+    gap: 32px;
   }
 
   .main-buttons {
-    gap: 9px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(680px, 100%);
+  }
+
+  .main-buttons button:first-child {
+    grid-column: 1 / -1;
+  }
+
+  #character-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mission-card {
+    padding: 22px;
+  }
+
+  .hud-mission {
+    width: min(350px, 42%);
+  }
+
+  .action-controls {
+    width: 230px;
+  }
+}
+
+/* ---------- 19. DESKTOP ---------- */
+
+@media (min-width: 900px) {
+  #main-menu > header {
+    padding-top: 28px;
+  }
+
+  .main-buttons {
+    width: min(760px, 100%);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
   }
 
   .main-buttons button {
-    min-height: 48px;
-    padding: 11px 14px;
+    min-height: 58px;
+    padding-inline: 24px;
   }
 
-  #mission-menu,
-  #character-menu,
-  #settings-menu {
-    padding: 16px;
+  #character-list {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .character-card {
+    min-height: 170px;
+  }
+
+  #game-hud {
+    padding: 22px;
+  }
+
+  .hud-mission {
+    width: 330px;
+  }
+
+  #mobile-controls {
+    padding: 0 34px 30px;
+  }
+
+  #joystick-zone {
+    width: 160px;
+    height: 160px;
+  }
+
+  .action-controls {
+    width: 260px;
+    gap: 12px;
+  }
+
+  .action-controls button {
+    min-height: 54px;
+  }
+}
+
+/* ---------- 20. SMALL MOBILE ---------- */
+
+@media (max-width: 380px) {
+  .screen {
+    padding-inline: 13px;
   }
 
   #character-list {
@@ -875,135 +1146,166 @@ button:disabled {
   }
 
   .character-card {
-    min-height: 112px;
+    min-height: 128px;
+    padding: 12px 6px;
   }
 
-  .hud-top {
-    grid-template-columns: minmax(0,1fr) auto;
-    gap: 7px;
-    padding: 8px;
+  .character-card small {
+    font-size: 0.68rem;
   }
 
   .hud-stats {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .hud-stats span {
+    gap: 3px;
+    padding: 7px 6px;
+    font-size: 0.64rem;
   }
 
   #btn-pause {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .hud-mission {
-    width: min(300px,84%);
-    padding: 9px;
+    flex-basis: 40px;
+    width: 40px;
+    min-height: 40px;
   }
 
   #mobile-controls {
     gap: 8px;
-    padding: 8px;
+    padding-inline: 10px;
   }
 
   #joystick-zone {
-    width: clamp(100px,29vw,135px);
-    height: clamp(100px,29vw,135px);
+    flex-basis: 112px;
+    width: 112px;
+    height: 112px;
   }
 
   .action-controls {
-    width: min(220px,53vw);
+    width: min(48vw, 190px);
     gap: 6px;
   }
 
   .action-controls button {
     min-height: 43px;
-    padding: 7px 4px;
+    padding-inline: 4px;
+    font-size: 0.64rem;
   }
 
-  .hud-bottom {
-    bottom: calc(4px + var(--safe-bottom));
-    font-size: .7rem;
+  .hud-mission {
+    width: 72%;
+    padding: 10px 12px;
   }
 }
 
-/* =========================================================
-   TELEFÒN AN MÒD PEYIZAJ
-   ========================================================= */
+/* ---------- 21. LANDSCAPE MOBILE ---------- */
 
-@media (max-height:500px) and (orientation:landscape) {
-  .screen {
-    padding-top: calc(8px + var(--safe-top));
-    padding-bottom: calc(8px + var(--safe-bottom));
+@media (orientation: landscape) and (max-height: 560px) {
+  #loading-screen {
+    gap: 10px;
+  }
+
+  #loading-screen h1 {
+    font-size: clamp(1.8rem, 6vh, 3rem);
+  }
+
+  #loading-screen h2 {
+    margin: 0 0 5px;
+    font-size: 0.9rem;
+  }
+
+  #btn-enter {
+    min-height: 42px;
+    margin-top: 3px;
   }
 
   #main-menu {
-    gap: 8px;
+    gap: 15px;
+    padding-top: 16px;
   }
 
   #main-menu > header {
-    padding-top: 0;
+    padding: 5px;
   }
 
   #main-menu > header h1 {
-    font-size: 1.8rem;
+    font-size: clamp(1.8rem, 6vh, 3rem);
   }
 
   #main-menu > header p {
-    margin: 3px 0;
+    margin-top: 5px;
   }
 
-  .main-buttons {
-    grid-template-columns: repeat(2,minmax(0,1fr));
-    width: min(600px,100%);
-    gap: 7px;
+  #game-hud {
+    padding: 8px 12px;
   }
 
-  .main-buttons button {
-    min-height: 38px;
-    padding: 7px 10px;
-    font-size: .8rem;
+  .hud-mission {
+    width: 260px;
+    margin-top: 6px;
+    padding: 9px 12px;
   }
 
-  #main-menu footer {
-    padding-top: 4px;
+  #hud-objective {
+    margin: 4px 0 6px;
+  }
+
+  #mobile-controls {
+    padding: 0 16px max(10px, var(--bottom-safe));
   }
 
   #joystick-zone {
+    flex-basis: 105px;
     width: 105px;
     height: 105px;
   }
 
   .action-controls {
-    width: 220px;
-    grid-template-columns: repeat(3,minmax(0,1fr));
+    width: 210px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .action-controls button {
-    min-height: 38px;
-    font-size: .68rem;
-  }
-
-  .hud-mission {
-    width: 250px;
+    min-height: 42px;
+    padding: 5px 3px;
+    font-size: 0.65rem;
   }
 
   .overlay-panel {
-    padding: 16px;
+    padding: 18px;
+    gap: 8px;
   }
 }
 
-/* =========================================================
-   AKSESIBILITE
-   ========================================================= */
+/* ---------- 22. ACCESSIBILITY ---------- */
 
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
-    animation-duration: .01ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- 23. OPTIONAL HIGH CONTRAST ---------- */
+
+@media (prefers-contrast: more) {
+  :root {
+    --border: rgba(130, 221, 255, 0.65);
+    --muted: #d1deec;
+  }
+
+  button {
+    border-width: 2px;
+  }
+
+  .hud-stats span,
+  .hud-mission,
+  .hud-bottom span {
+    border-color: rgba(130, 221, 255, 0.65);
   }
 }
 
