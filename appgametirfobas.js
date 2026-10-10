@@ -785,8 +785,6 @@
     );
   }
 
-  // Kontinye ak pati 2 nan menm fichye a.
-
 
 
 
@@ -1399,9 +1397,6 @@
 
   /* ===================== FIN PATI 2 ===================== */
 
-  // Pa fèmen IIFE a isit la.
-  // Pati 3 dwe kontinye nan menm estrikti JavaScript la.
-
 
 
 
@@ -2009,8 +2004,6 @@
 
   /* ===================== FIN PATI 3 ===================== */
 
-  // Pa mete })(); isit la.
-  // Pati 4 dwe kontinye nan menm fichye a.
 
 
 
@@ -2668,8 +2661,8 @@
 
   /* ===================== FIN PATI 4 ===================== */
 
-  // Pa mete })(); isit la.
-  // Pati 5 dwe kontinye nan menm estrikti JavaScript la.
+
+
 
 
 
