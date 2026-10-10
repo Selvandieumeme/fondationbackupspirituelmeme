@@ -1,391 +1,752 @@
 
+
+
+"use strict";
+
 /* ============================================================
    FOBAS MISSION 3D — MEME & TEAM
-   Native WebGL 3D Engine
-   Pa gen Three.js | Pa gen CDN | Pa gen bibliyotèk ekstèn
-   Android + PC | IndexedDB + localStorage
-   Fichye: appgametirfobas.js
-============================================================ */
+   Version 2.0.0
+   Native WebGL | Android + Desktop | IndexedDB
+   San Three.js, san CDN, san Canvas 2D
+   Konpatib ak ID ki nan appgametirfobas.html
+   ============================================================ */
 
 (() => {
-  "use strict";
+  const APP = "FOBAS MISSION 3D";
+  const VERSION = "2.0.0";
+  const SAVE_DB = "FOBAS_MISSION_3D_DB";
+  const SAVE_STORE = "game_saves";
+  const SAVE_KEY = "main_save";
 
-  const $ = id => document.getElementById(id);
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const rand = (a, b) => a + Math.random() * (b - a);
-  const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+  const $ = (id) => document.getElementById(id);
 
-  const ui = {
-    loading: $("loading-screen"),
-    progress: $("loading-progress"),
+  const dom = {
+    loadingScreen: $("loading-screen"),
+    loadingProgress: $("loading-progress"),
     loadingStatus: $("loading-status"),
-    enter: $("btn-enter"),
-    menu: $("main-menu"),
-    game: $("game-screen"),
-    canvas: $("game-canvas"),
-    world: $("game-world"),
-    fallback: $("world-fallback"),
+    btnEnter: $("btn-enter"),
 
-    play: $("btn-play"),
-    continue: $("btn-continue"),
-    missions: $("btn-missions"),
-    characters: $("btn-characters"),
-    settings: $("btn-settings"),
+    mainMenu: $("main-menu"),
+    btnPlay: $("btn-play"),
+    btnMissions: $("btn-missions"),
+    btnCharacters: $("btn-characters"),
+    btnSettings: $("btn-settings"),
+    btnContinue: $("btn-continue"),
 
     missionMenu: $("mission-menu"),
     characterMenu: $("character-menu"),
     settingsMenu: $("settings-menu"),
     selectedCharacter: $("selected-character"),
-    confirmCharacter: $("btn-confirm-character"),
+    btnConfirmCharacter: $("btn-confirm-character"),
 
-    quality: $("graphics-quality"),
-    sensitivity: $("camera-sensitivity"),
-    volume: $("game-volume"),
-    sound: $("sound-enabled"),
-    saveSettings: $("btn-save-settings"),
+    graphicsQuality: $("graphics-quality"),
+    cameraSensitivity: $("camera-sensitivity"),
+    gameVolume: $("game-volume"),
+    soundEnabled: $("sound-enabled"),
+    btnSaveSettings: $("btn-save-settings"),
     saveStatus: $("save-status"),
+
+    gameScreen: $("game-screen"),
+    canvas: $("game-canvas"),
+    fallback: $("world-fallback"),
 
     hudCharacter: $("hud-character"),
     hudLevel: $("hud-level"),
     hudHealth: $("hud-health"),
     hudEnergy: $("hud-energy"),
     hudScore: $("hud-score"),
+    btnPause: $("btn-pause"),
+
     hudMissionTitle: $("hud-mission-title"),
     hudObjective: $("hud-objective"),
     objectiveProgress: $("objective-progress"),
     objectiveCount: $("objective-count"),
-    location: $("hud-location"),
-    timer: $("hud-timer"),
+    hudLocation: $("hud-location"),
+    hudTimer: $("hud-timer"),
 
-    pause: $("btn-pause"),
-    pauseMenu: $("pause-menu"),
-    resume: $("btn-resume"),
-    restart: $("btn-restart"),
-    backMenu: $("btn-back-to-menu"),
-
-    result: $("mission-result"),
-    resultTitle: $("result-title"),
-    resultDescription: $("result-description"),
-    resultScore: $("result-score"),
-    nextMission: $("btn-next-mission"),
-    resultMenu: $("btn-result-menu"),
-
+    mobileControls: $("mobile-controls"),
     joystickZone: $("joystick-zone"),
     joystickBase: $("joystick-base"),
     joystickKnob: $("joystick-knob"),
-    jump: $("btn-jump"),
-    run: $("btn-run"),
-    action: $("btn-action"),
-    camera: $("btn-camera"),
+
+    btnJump: $("btn-jump"),
+    btnRun: $("btn-run"),
+    btnAction: $("btn-action"),
+    btnCamera: $("btn-camera"),
+    btnPitch2: $("btn-pitch-2"),
+
+    pauseMenu: $("pause-menu"),
+    btnResume: $("btn-resume"),
+    btnRestart: $("btn-restart"),
+    btnBackToMenu: $("btn-back-to-menu"),
+
+    missionResult: $("mission-result"),
+    resultTitle: $("result-title"),
+    resultDescription: $("result-description"),
+    resultScore: $("result-score"),
+    btnNextMission: $("btn-next-mission"),
+    btnResultMenu: $("btn-result-menu"),
 
     notifications: $("game-notifications"),
-    error: $("app-error"),
-    errorMessage: $("app-error-message"),
-    errorClose: $("btn-error-close")
+
+    appError: $("app-error"),
+    appErrorMessage: $("app-error-message"),
+    btnErrorClose: $("btn-error-close")
   };
+
+  const MISSIONS = [
+    {
+      id: 1,
+      title: "Misyon 1 — Premye Kontak",
+      objective: "Eksplore teren an epi avanse omwen 35 mèt.",
+      type: "explore",
+      target: 35,
+      reward: 100
+    },
+    {
+      id: 2,
+      title: "Misyon 2 — Meme & Team",
+      objective: "Jwenn 3 baliz ekip la epi aktive yo.",
+      type: "beacons",
+      target: 3,
+      reward: 250
+    },
+    {
+      id: 3,
+      title: "Misyon 3 — Defi Final",
+      objective: "Elimine 6 advèsè pou sekirize baz la.",
+      type: "combat",
+      target: 6,
+      reward: 500
+    }
+  ];
 
   const CHARACTERS = {
     MEME: {
-      color: [0.12, 0.91, 0.91],
-      speed: 4.5
+      name: "MEME",
+      health: 100,
+      energy: 100,
+      speed: 5.2,
+      color: [0.15, 0.72, 0.92]
     },
     FOBAS: {
-      color: [1.00, 0.56, 0.15],
-      speed: 4.0
+      name: "FOBAS",
+      health: 120,
+      energy: 100,
+      speed: 4.7,
+      color: [0.22, 0.85, 0.47]
     },
     SHADOW: {
-      color: [0.55, 0.39, 1.00],
-      speed: 5.0
+      name: "SHADOW",
+      health: 90,
+      energy: 120,
+      speed: 6.2,
+      color: [0.55, 0.36, 0.90]
     },
     BLAZE: {
-      color: [1.00, 0.20, 0.31],
-      speed: 5.4
+      name: "BLAZE",
+      health: 95,
+      energy: 110,
+      speed: 6.8,
+      color: [0.98, 0.36, 0.12]
     },
     TITAN: {
-      color: [0.27, 0.83, 0.45],
-      speed: 3.8
-    }
-  };
-
-  const MISSIONS = {
-    1: {
-      title: "Premye Kontak",
-      description: "Kolekte 5 kristal.",
-      target: 5,
-      reward: 100
-    },
-    2: {
-      title: "Meme & Team",
-      description: "Kolekte 8 kristal.",
-      target: 8,
-      reward: 250
-    },
-    3: {
-      title: "Defi Final",
-      description: "Kolekte 12 kristal.",
-      target: 12,
-      reward: 500
-    },
-    4: {
-      title: "Zòn Sekrè",
-      description: "Kolekte 10 kristal nan zòn sekre a.",
-      target: 10,
-      reward: 700
-    },
-    5: {
-      title: "Ekip An Aksyon",
-      description: "Kolekte 14 kristal.",
-      target: 14,
-      reward: 1000
-    },
-    6: {
-      title: "Dènye Misyon",
-      description: "Kolekte 18 kristal pou fini misyon an.",
-      target: 18,
-      reward: 1500
+      name: "TITAN",
+      health: 150,
+      energy: 90,
+      speed: 4.1,
+      color: [0.88, 0.72, 0.20]
     }
   };
 
   const state = {
-    mission: 1,
-    character: "MEME",
-    selectedCharacter: "MEME",
-
-    active: false,
+    initialized: false,
+    entered: false,
+    running: false,
     paused: false,
-    finished: false,
-    sprint: false,
+    completed: false,
+    gameOver: false,
 
-    x: 0,
-    z: 0,
-    facing: 0,
+    missionIndex: 0,
+    character: "MEME",
 
-    cameraAngle: 0,
-    cameraPitch: 0.35,
-    cameraDistance: 8,
-    targetCameraDistance: 8,
-
+    score: 0,
     health: 100,
     energy: 100,
-    score: 0,
-    collected: 0,
-    elapsed: 0,
 
-    jumping: false,
-    jumpY: 0,
-    jumpVelocity: 0,
+    progress: 0,
+    objectiveTarget: 35,
+    enemiesEliminated: 0,
+    beaconsActivated: 0,
 
-    joyX: 0,
-    joyY: 0,
-    joyActive: false,
-    joyPointer: null,
+    startTime: 0,
+    elapsedTime: 0,
+    lastFrame: 0,
+    raf: 0,
 
     keys: Object.create(null),
 
-    crystals: [],
-    trees: [],
-    buildings: [],
-    particles: [],
+    player: {
+      x: 0,
+      y: 0,
+      z: 5,
+      yaw: 0,
+      pitch: 0,
+      speed: 5.2,
+      jumpHeight: 0,
+      jumpVelocity: 0,
+      isJumping: false,
+      runningFast: false,
+      cameraMode: 0
+    },
+
     enemies: [],
+    beacons: [],
+    bullets: [],
+    effects: [],
+
+    joystick: {
+      active: false,
+      pointerId: null,
+      x: 0,
+      y: 0,
+      forward: 0,
+      strafe: 0
+    },
+
+    look: {
+      active: false,
+      pointerId: null,
+      x: 0,
+      y: 0
+    },
 
     settings: {
-      quality: "high",
+      quality: "medium",
       sensitivity: 5,
       volume: 70,
       sound: true
     },
 
-    lastTime: 0,
-    saveTimer: 0,
-    audio: null,
-    notifyTimer: null,
-    shotCooldown: 0
+    saved: {
+      unlockedMission: 1,
+      bestScore: 0,
+      totalMissionsCompleted: 0
+    },
+
+    db: null,
+    audioContext: null
   };
 
-  /* ===================== WEBGL ENGINE ===================== */
-
-  const canvas = ui.canvas;
-
   let gl = null;
-  let program = null;
-  let locations = {};
-  let meshes = {};
+  let shaderProgram = null;
+  let cubeMesh = null;
+  let planeMesh = null;
+  let gridMesh = null;
+  let lastSaveTime = 0;
+  let lastShotTime = 0;
+  let messageTimer = null;
 
-  let canvasWidth = 1;
-  let canvasHeight = 1;
-  let animationStarted = false;
-  let lostContext = false;
+  /* ============================================================
+     ERÈ AK NOTIFIKASYON
+     ============================================================ */
 
-  const vertexShaderSource = `
+  function notify(message, duration = 2600) {
+    if (!dom.notifications) return;
+
+    dom.notifications.textContent = message;
+    dom.notifications.classList.add("visible");
+
+    if (messageTimer) clearTimeout(messageTimer);
+
+    messageTimer = setTimeout(() => {
+      if (dom.notifications) {
+        dom.notifications.classList.remove("visible");
+      }
+    }, duration);
+  }
+
+  function showError(message) {
+    if (dom.appError && dom.appErrorMessage) {
+      dom.appErrorMessage.textContent = message;
+      dom.appError.hidden = false;
+    } else {
+      console.error(`[${APP}] ${message}`);
+    }
+  }
+
+  function hideError() {
+    if (dom.appError) dom.appError.hidden = true;
+  }
+
+  function setLoading(percent, message) {
+    if (dom.loadingProgress) {
+      dom.loadingProgress.style.width =
+        `${Math.max(0, Math.min(100, percent))}%`;
+    }
+
+    if (dom.loadingStatus) {
+      dom.loadingStatus.textContent = message;
+    }
+  }
+
+  /* ============================================================
+     NAVIGASYON AK MENI
+     ============================================================ */
+
+  function hideAllScreens() {
+    if (dom.loadingScreen) dom.loadingScreen.hidden = true;
+    if (dom.mainMenu) dom.mainMenu.hidden = true;
+    if (dom.gameScreen) dom.gameScreen.hidden = true;
+  }
+
+  function hideMainSubmenus() {
+    if (dom.missionMenu) dom.missionMenu.hidden = true;
+    if (dom.characterMenu) dom.characterMenu.hidden = true;
+    if (dom.settingsMenu) dom.settingsMenu.hidden = true;
+  }
+
+  function showMainMenu(section = null) {
+    stopGameLoop();
+    state.running = false;
+    state.paused = false;
+
+    hideAllScreens();
+    hideMainSubmenus();
+
+    if (dom.mainMenu) dom.mainMenu.hidden = false;
+
+    if (section === "missions" && dom.missionMenu) {
+      dom.missionMenu.hidden = false;
+    }
+
+    if (section === "characters" && dom.characterMenu) {
+      dom.characterMenu.hidden = false;
+    }
+
+    if (section === "settings" && dom.settingsMenu) {
+      dom.settingsMenu.hidden = false;
+    }
+
+    if (dom.pauseMenu) dom.pauseMenu.hidden = true;
+    if (dom.missionResult) dom.missionResult.hidden = true;
+
+    updateCharacterSelection();
+    updateSaveStatus("Meni prensipal");
+  }
+
+  function showGameScreen() {
+    hideAllScreens();
+
+    if (dom.gameScreen) dom.gameScreen.hidden = false;
+
+    if (dom.pauseMenu) dom.pauseMenu.hidden = true;
+    if (dom.missionResult) dom.missionResult.hidden = true;
+
+    updateMobileControls();
+    resizeRenderer();
+    renderFrame();
+  }
+
+  function enterGame() {
+    state.entered = true;
+    showMainMenu();
+    notify("Byenveni nan FOBAS MISSION 3D!");
+  }
+
+  /* ============================================================
+     SOVGAD INDEXEDDB
+     ============================================================ */
+
+  function openDatabase() {
+    return new Promise((resolve, reject) => {
+      if (!("indexedDB" in window)) {
+        reject(new Error("IndexedDB pa disponib."));
+        return;
+      }
+
+      let request;
+
+      try {
+        request = indexedDB.open(SAVE_DB, 1);
+      } catch (error) {
+        reject(error);
+        return;
+      }
+
+      request.onupgradeneeded = () => {
+        const database = request.result;
+
+        if (!database.objectStoreNames.contains(SAVE_STORE)) {
+          database.createObjectStore(SAVE_STORE, {
+            keyPath: "id"
+          });
+        }
+      };
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(
+        request.error || new Error("Erè IndexedDB.")
+      );
+    });
+  }
+
+  function databaseRead(key) {
+    return new Promise((resolve, reject) => {
+      if (!state.db) {
+        reject(new Error("Bazdone poko ouvri."));
+        return;
+      }
+
+      const transaction = state.db.transaction(
+        SAVE_STORE,
+        "readonly"
+      );
+
+      const request = transaction
+        .objectStore(SAVE_STORE)
+        .get(key);
+
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function databaseWrite(record) {
+    return new Promise((resolve, reject) => {
+      if (!state.db) {
+        reject(new Error("Bazdone poko ouvri."));
+        return;
+      }
+
+      const transaction = state.db.transaction(
+        SAVE_STORE,
+        "readwrite"
+      );
+
+      transaction.objectStore(SAVE_STORE).put(record);
+
+      transaction.oncomplete = () => resolve(true);
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  }
+
+  function createSaveRecord() {
+    return {
+      id: SAVE_KEY,
+      version: VERSION,
+      updatedAt: Date.now(),
+
+      character: state.character,
+      missionIndex: state.missionIndex,
+      score: state.score,
+
+      health: state.health,
+      energy: state.energy,
+
+      settings: { ...state.settings },
+
+      unlockedMission: state.saved.unlockedMission,
+      bestScore: state.saved.bestScore,
+      totalMissionsCompleted: state.saved.totalMissionsCompleted
+    };
+  }
+
+  async function saveGame(showMessageAfter = false) {
+    const record = createSaveRecord();
+
+    try {
+      await databaseWrite(record);
+
+      updateSaveStatus("Pwogrè sove nan IndexedDB.");
+
+      if (showMessageAfter) {
+        notify("Pwogrè ou sove avèk siksè.");
+      }
+
+      return true;
+    } catch (error) {
+      console.warn(`${APP}: sovgad IndexedDB echwe.`, error);
+
+      updateSaveStatus(
+        "Sovgad pa disponib nan navigatè sa a."
+      );
+
+      if (showMessageAfter) {
+        notify("Navigatè a pa t kapab sove pwogrè a.");
+      }
+
+      return false;
+    }
+  }
+
+  async function loadGameSave() {
+    try {
+      const record = await databaseRead(SAVE_KEY);
+
+      if (!record) {
+        updateSaveStatus("Premye jwèt — pa gen sovgad anvan.");
+        return false;
+      }
+
+      if (record.character && CHARACTERS[record.character]) {
+        state.character = record.character;
+      }
+
+      if (Number.isFinite(record.missionIndex)) {
+        state.missionIndex = Math.max(
+          0,
+          Math.min(MISSIONS.length - 1, record.missionIndex)
+        );
+      }
+
+      if (Number.isFinite(record.score)) {
+        state.score = Math.max(0, record.score);
+      }
+
+      if (record.settings) {
+        state.settings = {
+          ...state.settings,
+          ...record.settings
+        };
+      }
+
+      state.saved.unlockedMission = Math.max(
+        1,
+        Math.min(
+          MISSIONS.length,
+          Number(record.unlockedMission) || 1
+        )
+      );
+
+      state.saved.bestScore = Math.max(
+        0,
+        Number(record.bestScore) || 0
+      );
+
+      state.saved.totalMissionsCompleted = Math.max(
+        0,
+        Number(record.totalMissionsCompleted) || 0
+      );
+
+      applySettingsToControls();
+      updateCharacterSelection();
+      updateSaveStatus("Sovgad chaje avèk siksè.");
+
+      return true;
+    } catch (error) {
+      console.warn(`${APP}: pa t kapab chaje sovgad la.`, error);
+      updateSaveStatus("Sovgad poko disponib.");
+      return false;
+    }
+  }
+
+  function updateSaveStatus(message) {
+    if (dom.saveStatus) dom.saveStatus.textContent = message;
+  }
+
+  /* ============================================================
+     PARAMÈT
+     ============================================================ */
+
+  function applySettingsToControls() {
+    if (dom.graphicsQuality) {
+      dom.graphicsQuality.value = state.settings.quality;
+    }
+
+    if (dom.cameraSensitivity) {
+      dom.cameraSensitivity.value = String(
+        state.settings.sensitivity
+      );
+    }
+
+    if (dom.gameVolume) {
+      dom.gameVolume.value = String(state.settings.volume);
+    }
+
+    if (dom.soundEnabled) {
+      dom.soundEnabled.checked = Boolean(state.settings.sound);
+    }
+
+    updateGraphicsQuality();
+  }
+
+  function readSettingsFromControls() {
+    if (dom.graphicsQuality) {
+      state.settings.quality = dom.graphicsQuality.value;
+    }
+
+    if (dom.cameraSensitivity) {
+      state.settings.sensitivity = Number(
+        dom.cameraSensitivity.value
+      );
+    }
+
+    if (dom.gameVolume) {
+      state.settings.volume = Number(dom.gameVolume.value);
+    }
+
+    if (dom.soundEnabled) {
+      state.settings.sound = dom.soundEnabled.checked;
+    }
+
+    updateGraphicsQuality();
+  }
+
+  function updateGraphicsQuality() {
+    if (!gl) return;
+
+    const quality = state.settings.quality;
+
+    if (quality === "low") {
+      gl.disable(gl.DITHER);
+    } else {
+      gl.enable(gl.DITHER);
+    }
+
+    resizeRenderer();
+    renderFrame();
+  }
+
+  async function saveSettings() {
+    readSettingsFromControls();
+    await saveGame(false);
+
+    notify("Paramèt jwèt la sove.");
+    showMainMenu();
+  }
+
+  /* ============================================================
+     CHWAZI PÈSONAJ
+     ============================================================ */
+
+  function selectCharacter(name) {
+    if (!CHARACTERS[name]) return;
+
+    state.character = name;
+    updateCharacterSelection();
+    notify(`Ou chwazi ${name}.`);
+  }
+
+  function updateCharacterSelection() {
+    if (dom.selectedCharacter) {
+      dom.selectedCharacter.textContent =
+        `Pèsonaj: ${state.character}`;
+    }
+
+    document.querySelectorAll("[data-character]").forEach((button) => {
+      const selected =
+        button.getAttribute("data-character") === state.character;
+
+      button.classList.toggle("selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+  }
+
+  function confirmCharacter() {
+    const character = CHARACTERS[state.character];
+
+    state.health = character.health;
+    state.energy = character.energy;
+    state.player.speed = character.speed;
+
+    saveGame(false);
+    showMainMenu();
+    notify(`Pèsonaj ${state.character} konfime.`);
+  }
+
+  /* ============================================================
+     WEBGL — SHADERS
+     ============================================================ */
+
+  const VERTEX_SHADER = `
     attribute vec3 aPosition;
-    attribute vec3 aNormal;
+    attribute vec3 aColor;
 
     uniform mat4 uProjection;
     uniform mat4 uView;
     uniform mat4 uModel;
 
-    varying vec3 vNormal;
-    varying vec3 vWorldPosition;
+    varying vec3 vColor;
 
-    void main() {
-      vec4 world = uModel * vec4(aPosition, 1.0);
+    void main(void) {
+      gl_Position =
+        uProjection * uView * uModel * vec4(aPosition, 1.0);
 
-      vWorldPosition = world.xyz;
-      vNormal = mat3(uModel) * aNormal;
-
-      gl_Position = uProjection * uView * world;
+      vColor = aColor;
     }
   `;
 
-  const fragmentShaderSource = `
+  const FRAGMENT_SHADER = `
     precision mediump float;
 
-    uniform vec3 uColor;
-    uniform vec3 uCamera;
-    uniform float uEmissive;
+    varying vec3 vColor;
 
-    varying vec3 vNormal;
-    varying vec3 vWorldPosition;
-
-    void main() {
-      vec3 normal = normalize(vNormal);
-
-      vec3 lightDirection =
-        normalize(vec3(-0.45, 0.9, 0.35));
-
-      float diffuse =
-        max(dot(normal, lightDirection), 0.0);
-
-      float hemisphere =
-        normal.y * 0.5 + 0.5;
-
-      vec3 ambient = mix(
-        vec3(0.10, 0.16, 0.22),
-        vec3(0.37, 0.50, 0.48),
-        hemisphere
-      );
-
-      float light = 0.40 + diffuse * 0.75;
-
-      vec3 color =
-        uColor * (ambient + light * 0.55);
-
-      float distanceFog =
-        length(uCamera - vWorldPosition);
-
-      float fog = smoothstep(
-        18.0,
-        42.0,
-        distanceFog
-      );
-
-      vec3 fogColor = vec3(0.10, 0.22, 0.29);
-
-      color = mix(
-        color,
-        fogColor,
-        fog * 0.68
-      );
-
-      color += uColor * uEmissive;
-
-      gl_FragColor = vec4(color, 1.0);
+    void main(void) {
+      gl_FragColor = vec4(vColor, 1.0);
     }
   `;
 
   function compileShader(type, source) {
     const shader = gl.createShader(type);
 
+    if (!shader) {
+      throw new Error("WebGL pa t kapab kreye shader la.");
+    }
+
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const message =
-        gl.getShaderInfoLog(shader) || "Shader error";
+      const error = gl.getShaderInfoLog(shader) || "Erè enkoni.";
 
       gl.deleteShader(shader);
-
-      throw new Error(message);
+      throw new Error(error);
     }
 
     return shader;
   }
 
-  function createProgram() {
-    const vs = compileShader(
+  function createShaderProgram() {
+    const vertex = compileShader(
       gl.VERTEX_SHADER,
-      vertexShaderSource
+      VERTEX_SHADER
     );
 
-    const fs = compileShader(
+    const fragment = compileShader(
       gl.FRAGMENT_SHADER,
-      fragmentShaderSource
+      FRAGMENT_SHADER
     );
 
-    const p = gl.createProgram();
+    const program = gl.createProgram();
 
-    gl.attachShader(p, vs);
-    gl.attachShader(p, fs);
-    gl.linkProgram(p);
-
-    gl.deleteShader(vs);
-    gl.deleteShader(fs);
-
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
-      throw new Error(
-        gl.getProgramInfoLog(p) || "WebGL link error"
-      );
+    if (!program) {
+      throw new Error("WebGL pa t kapab kreye pwogram nan.");
     }
 
-    program = p;
-    gl.useProgram(program);
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
 
-    locations = {
-      position: gl.getAttribLocation(
-        program,
-        "aPosition"
-      ),
+    gl.deleteShader(vertex);
+    gl.deleteShader(fragment);
 
-      normal: gl.getAttribLocation(
-        program,
-        "aNormal"
-      ),
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      const error = gl.getProgramInfoLog(program) || "Erè enkoni.";
 
-      projection: gl.getUniformLocation(
-        program,
-        "uProjection"
-      ),
+      gl.deleteProgram(program);
+      throw new Error(error);
+    }
 
-      view: gl.getUniformLocation(
-        program,
-        "uView"
-      ),
-
-      model: gl.getUniformLocation(
-        program,
-        "uModel"
-      ),
-
-      color: gl.getUniformLocation(
-        program,
-        "uColor"
-      ),
-
-      camera: gl.getUniformLocation(
-        program,
-        "uCamera"
-      ),
-
-      emissive: gl.getUniformLocation(
-        program,
-        "uEmissive"
-      )
-    };
+    return program;
   }
 
-  /* ===================== MATEMATIK 3D ===================== */
+  /* ============================================================
+     MATRIS 3D
+     ============================================================ */
 
-  function identity() {
+  function mat4Identity() {
     return new Float32Array([
       1, 0, 0, 0,
       0, 1, 0, 0,
@@ -394,30 +755,57 @@
     ]);
   }
 
-  function multiply(a, b) {
+  function mat4Multiply(a, b) {
     const out = new Float32Array(16);
 
-    for (let col = 0; col < 4; col++) {
+    for (let column = 0; column < 4; column++) {
       for (let row = 0; row < 4; row++) {
-        let sum = 0;
-
-        for (let k = 0; k < 4; k++) {
-          sum +=
-            a[k * 4 + row] *
-            b[col * 4 + k];
-        }
-
-        out[col * 4 + row] = sum;
+        out[column * 4 + row] =
+          a[row] * b[column * 4] +
+          a[4 + row] * b[column * 4 + 1] +
+          a[8 + row] * b[column * 4 + 2] +
+          a[12 + row] * b[column * 4 + 3];
       }
     }
 
     return out;
   }
 
-  function perspective(fov, aspect, near, far) {
+  function mat4Translation(x, y, z) {
+    const out = mat4Identity();
+
+    out[12] = x;
+    out[13] = y;
+    out[14] = z;
+
+    return out;
+  }
+
+  function mat4Scale(x, y, z) {
+    const out = mat4Identity();
+
+    out[0] = x;
+    out[5] = y;
+    out[10] = z;
+
+    return out;
+  }
+
+  function mat4RotationY(angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+
+    return new Float32Array([
+      c, 0, -s, 0,
+      0, 1, 0, 0,
+      s, 0, c, 0,
+      0, 0, 0, 1
+    ]);
+  }
+
+  function mat4Perspective(fov, aspect, near, far) {
     const f = 1 / Math.tan(fov / 2);
     const nf = 1 / (near - far);
-
     const out = new Float32Array(16);
 
     out[0] = f / aspect;
@@ -429,112 +817,66 @@
     return out;
   }
 
-  function lookAt(eye, target, up) {
-    let zx = eye[0] - target[0];
-    let zy = eye[1] - target[1];
-    let zz = eye[2] - target[2];
+  function normalize3(vector) {
+    const length = Math.hypot(
+      vector[0],
+      vector[1],
+      vector[2]
+    ) || 1;
 
-    let len = Math.hypot(zx, zy, zz) || 1;
+    return [
+      vector[0] / length,
+      vector[1] / length,
+      vector[2] / length
+    ];
+  }
 
-    zx /= len;
-    zy /= len;
-    zz /= len;
+  function cross3(a, b) {
+    return [
+      a[1] * b[2] - a[2] * b[1],
+      a[2] * b[0] - a[0] * b[2],
+      a[0] * b[1] - a[1] * b[0]
+    ];
+  }
 
-    let xx = up[1] * zz - up[2] * zy;
-    let xy = up[2] * zx - up[0] * zz;
-    let xz = up[0] * zy - up[1] * zx;
+  function dot3(a, b) {
+    return (
+      a[0] * b[0] +
+      a[1] * b[1] +
+      a[2] * b[2]
+    );
+  }
 
-    len = Math.hypot(xx, xy, xz) || 1;
+  function mat4LookAt(eye, target, up) {
+    const z = normalize3([
+      eye[0] - target[0],
+      eye[1] - target[1],
+      eye[2] - target[2]
+    ]);
 
-    xx /= len;
-    xy /= len;
-    xz /= len;
-
-    const yx = zy * xz - zz * xy;
-    const yy = zz * xx - zx * xz;
-    const yz = zx * xy - zy * xx;
+    const x = normalize3(cross3(up, z));
+    const y = cross3(z, x);
 
     return new Float32Array([
-      xx, yx, zx, 0,
-      xy, yy, zy, 0,
-      xz, yz, zz, 0,
-
-      -(xx * eye[0] + xy * eye[1] + xz * eye[2]),
-      -(yx * eye[0] + yy * eye[1] + yz * eye[2]),
-      -(zx * eye[0] + zy * eye[1] + zz * eye[2]),
+      x[0], y[0], z[0], 0,
+      x[1], y[1], z[1], 0,
+      x[2], y[2], z[2], 0,
+      -dot3(x, eye),
+      -dot3(y, eye),
+      -dot3(z, eye),
       1
     ]);
   }
 
-  function modelMatrix(
-    x,
-    y,
-    z,
-    sx,
-    sy,
-    sz,
-    rotationY = 0
-  ) {
-    const c = Math.cos(rotationY);
-    const s = Math.sin(rotationY);
+  /* ============================================================
+     GEOMETRI 3D
+     ============================================================ */
 
-    return new Float32Array([
-      c * sx, 0, -s * sx, 0,
-      0, sy, 0, 0,
-      s * sz, 0, c * sz, 0,
-      x, y, z, 1
-    ]);
-  }
-
-  /* ===================== JEYOMETRI ===================== */
-
-  function createMesh(vertices, normals, indices) {
-    const vertexBuffer = gl.createBuffer();
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(vertices),
-      gl.STATIC_DRAW
-    );
-
-    const normalBuffer = gl.createBuffer();
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(normals),
-      gl.STATIC_DRAW
-    );
-
-    const indexBuffer = gl.createBuffer();
-
-    gl.bindBuffer(
-      gl.ELEMENT_ARRAY_BUFFER,
-      indexBuffer
-    );
-
-    gl.bufferData(
-      gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(indices),
-      gl.STATIC_DRAW
-    );
-
-    return {
-      vertexBuffer,
-      normalBuffer,
-      indexBuffer,
-      count: indices.length
-    };
-  }
-
-  function makeCube() {
+  function createCubeGeometry() {
     const faces = [
       {
-        n: [0, 0, 1],
-        v: [
+        color: [0.16, 0.62, 0.38],
+        vertices: [
           [-0.5, -0.5, 0.5],
           [0.5, -0.5, 0.5],
           [0.5, 0.5, 0.5],
@@ -542,8 +884,8 @@
         ]
       },
       {
-        n: [0, 0, -1],
-        v: [
+        color: [0.09, 0.30, 0.22],
+        vertices: [
           [0.5, -0.5, -0.5],
           [-0.5, -0.5, -0.5],
           [-0.5, 0.5, -0.5],
@@ -551,8 +893,8 @@
         ]
       },
       {
-        n: [1, 0, 0],
-        v: [
+        color: [0.12, 0.43, 0.28],
+        vertices: [
           [0.5, -0.5, 0.5],
           [0.5, -0.5, -0.5],
           [0.5, 0.5, -0.5],
@@ -560,8 +902,8 @@
         ]
       },
       {
-        n: [-1, 0, 0],
-        v: [
+        color: [0.10, 0.37, 0.25],
+        vertices: [
           [-0.5, -0.5, -0.5],
           [-0.5, -0.5, 0.5],
           [-0.5, 0.5, 0.5],
@@ -569,8 +911,8 @@
         ]
       },
       {
-        n: [0, 1, 0],
-        v: [
+        color: [0.30, 0.72, 0.42],
+        vertices: [
           [-0.5, 0.5, 0.5],
           [0.5, 0.5, 0.5],
           [0.5, 0.5, -0.5],
@@ -578,8 +920,8 @@
         ]
       },
       {
-        n: [0, -1, 0],
-        v: [
+        color: [0.07, 0.20, 0.14],
+        vertices: [
           [-0.5, -0.5, -0.5],
           [0.5, -0.5, -0.5],
           [0.5, -0.5, 0.5],
@@ -588,149 +930,161 @@
       }
     ];
 
-    const vertices = [];
-    const normals = [];
+    const positions = [];
+    const colors = [];
     const indices = [];
 
-    for (const face of faces) {
-      const base = vertices.length / 3;
+    const baseIndices = [0, 1, 2, 0, 2, 3];
 
-      for (const v of face.v) {
-        vertices.push(...v);
-        normals.push(...face.n);
-      }
+    faces.forEach((face, faceIndex) => {
+      face.vertices.forEach((vertex) => {
+        positions.push(vertex[0], vertex[1], vertex[2]);
+        colors.push(
+          face.color[0],
+          face.color[1],
+          face.color[2]
+        );
+      });
 
-      indices.push(
-        base, base + 1, base + 2,
-        base, base + 2, base + 3
-      );
-    }
+      baseIndices.forEach((index) => {
+        indices.push(faceIndex * 4 + index);
+      });
+    });
 
-    return createMesh(
-      vertices,
-      normals,
-      indices
-    );
+    return {
+      positions: new Float32Array(positions),
+      colors: new Float32Array(colors),
+      indices: new Uint16Array(indices)
+    };
   }
 
-  function makeOctahedron() {
-    const vertices = [
-      0, 1, 0,  1, 0, 0,  0, 0, 1,
-      0, 1, 0,  0, 0, 1, -1, 0, 0,
-      0, 1, 0, -1, 0, 0,  0, 0, -1,
-      0, 1, 0,  0, 0, -1, 1, 0, 0,
-
-      0, -1, 0, 0, 0, 1, 1, 0, 0,
-      0, -1, 0, -1, 0, 0, 0, 0, 1,
-      0, -1, 0, 0, 0, -1, -1, 0, 0,
-      0, -1, 0, 1, 0, 0, 0, 0, -1
-    ];
-
-    const normals = [];
-
-    for (let i = 0; i < vertices.length; i += 3) {
-      const x = vertices[i];
-      const y = vertices[i + 1];
-      const z = vertices[i + 2];
-
-      const len = Math.hypot(x, y, z) || 1;
-
-      normals.push(
-        x / len,
-        y / len,
-        z / len
-      );
-    }
-
-    const indices = Array.from(
-      { length: vertices.length / 3 },
-      (_, i) => i
-    );
-
-    return createMesh(
-      vertices,
-      normals,
-      indices
-    );
-  }
-
-  function makeCone(segments = 8) {
-    const vertices = [];
-    const normals = [];
+  function createPlaneGeometry(size = 180, divisions = 60) {
+    const positions = [];
+    const colors = [];
     const indices = [];
+    const half = size / 2;
+    const step = size / divisions;
 
-    for (let i = 0; i < segments; i++) {
-      const a = i / segments * Math.PI * 2;
-      const b = (i + 1) / segments * Math.PI * 2;
+    for (let z = 0; z <= divisions; z++) {
+      for (let x = 0; x <= divisions; x++) {
+        positions.push(
+          -half + x * step,
+          -1.1,
+          -half + z * step
+        );
 
-      const p1 = [
-        Math.cos(a) * 0.5,
-        -0.5,
-        Math.sin(a) * 0.5
-      ];
+        const alternate = (x + z) % 2 === 0;
+        const brightness = alternate ? 0.10 : 0.12;
 
-      const p2 = [
-        Math.cos(b) * 0.5,
-        -0.5,
-        Math.sin(b) * 0.5
-      ];
-
-      const tip = [0, 0.5, 0];
-
-      const base = vertices.length / 3;
-
-      vertices.push(...p1, ...p2, ...tip);
-
-      for (const p of [p1, p2, tip]) {
-        const len =
-          Math.hypot(p[0], p[1], p[2]) || 1;
-
-        normals.push(
-          p[0] / len,
-          p[1] / len,
-          p[2] / len
+        colors.push(
+          brightness,
+          brightness + 0.11,
+          brightness + 0.05
         );
       }
+    }
+
+    const rowSize = divisions + 1;
+
+    for (let z = 0; z < divisions; z++) {
+      for (let x = 0; x < divisions; x++) {
+        const a = z * rowSize + x;
+        const b = a + 1;
+        const c = a + rowSize;
+        const d = c + 1;
+
+        indices.push(a, c, b, b, c, d);
+      }
+    }
+
+    return {
+      positions: new Float32Array(positions),
+      colors: new Float32Array(colors),
+      indices: new Uint16Array(indices)
+    };
+  }
+
+  function createGridGeometry(size = 100, divisions = 50) {
+    const positions = [];
+    const colors = [];
+    const indices = [];
+    const half = size / 2;
+    const step = size / divisions;
+
+    for (let i = 0; i <= divisions; i++) {
+      const offset = -half + i * step;
+
+      const start = positions.length / 3;
+
+      positions.push(
+        -half, -1.085, offset,
+        half, -1.085, offset,
+        offset, -1.085, -half,
+        offset, -1.085, half
+      );
+
+      for (let j = 0; j < 4; j++) {
+        colors.push(0.18, 0.30, 0.23);
+      }
 
       indices.push(
-        base,
-        base + 1,
-        base + 2
+        start, start + 1,
+        start + 2, start + 3
       );
     }
 
-    return createMesh(
-      vertices,
-      normals,
-      indices
-    );
+    return {
+      positions: new Float32Array(positions),
+      colors: new Float32Array(colors),
+      indices: new Uint16Array(indices),
+      mode: gl.LINES
+    };
   }
 
-  function setupMeshes() {
-    meshes.cube = makeCube();
-    meshes.crystal = makeOctahedron();
-    meshes.cone = makeCone(10);
-  }
+  function createMesh(geometry) {
+    const positionBuffer = gl.createBuffer();
+    const colorBuffer = gl.createBuffer();
+    const indexBuffer = gl.createBuffer();
 
-  function drawMesh(
-    mesh,
-    model,
-    color,
-    emissive = 0
-  ) {
-    if (!mesh || lostContext || !gl) return;
-
-    gl.bindBuffer(
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(
       gl.ARRAY_BUFFER,
-      mesh.vertexBuffer
+      geometry.positions,
+      gl.STATIC_DRAW
     );
 
-    gl.enableVertexAttribArray(
-      locations.position
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      geometry.colors,
+      gl.STATIC_DRAW
     );
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      geometry.indices,
+      gl.STATIC_DRAW
+    );
+
+    return {
+      positionBuffer,
+      colorBuffer,
+      indexBuffer,
+      indexCount: geometry.indices.length,
+      mode: geometry.mode || gl.TRIANGLES
+    };
+  }
+
+  function drawMesh(mesh, modelMatrix) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.positionBuffer);
+    gl.enableVertexAttribArray(gl.getAttribLocation(
+      shaderProgram,
+      "aPosition"
+    ));
 
     gl.vertexAttribPointer(
-      locations.position,
+      gl.getAttribLocation(shaderProgram, "aPosition"),
       3,
       gl.FLOAT,
       false,
@@ -738,17 +1092,14 @@
       0
     );
 
-    gl.bindBuffer(
-      gl.ARRAY_BUFFER,
-      mesh.normalBuffer
-    );
-
-    gl.enableVertexAttribArray(
-      locations.normal
-    );
+    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.colorBuffer);
+    gl.enableVertexAttribArray(gl.getAttribLocation(
+      shaderProgram,
+      "aColor"
+    ));
 
     gl.vertexAttribPointer(
-      locations.normal,
+      gl.getAttribLocation(shaderProgram, "aColor"),
       3,
       gl.FLOAT,
       false,
@@ -762,796 +1113,1255 @@
     );
 
     gl.uniformMatrix4fv(
-      locations.model,
+      gl.getUniformLocation(shaderProgram, "uModel"),
       false,
-      model
-    );
-
-    gl.uniform3fv(
-      locations.color,
-      color
-    );
-
-    gl.uniform1f(
-      locations.emissive,
-      emissive
+      modelMatrix
     );
 
     gl.drawElements(
-      gl.TRIANGLES,
-      mesh.count,
+      mesh.mode,
+      mesh.indexCount,
       gl.UNSIGNED_SHORT,
       0
     );
   }
 
+  function drawCube(
+    x, y, z,
+    sx, sy, sz,
+    rotation = 0
+  ) {
+    const translation = mat4Translation(x, y, z);
+    const scale = mat4Scale(sx, sy, sz);
+    const rotate = mat4RotationY(rotation);
 
+    const model = mat4Multiply(
+      translation,
+      mat4Multiply(rotate, scale)
+    );
 
-
-
-  /* =========================================================
-     PATI 2 — MOND 3D, TÈREN, OBJE AK KAMERA
-     Kontinye nan menm IIFE pati 1 an.
-  ========================================================= */
-
-  /* ===================== KREYE MOND LAN ===================== */
-
-  const WORLD_SIZE = 100;
-  const WORLD_LIMIT = 44;
-
-  function createWorld() {
-    state.crystals = [];
-    state.trees = [];
-    state.buildings = [];
-    state.particles = [];
-    state.enemies = [];
-
-    const mission = MISSIONS[state.mission] || MISSIONS[1];
-    const crystalCount = mission.target + 8;
-
-    // Kreye kristal yo nan diferan zòn.
-    for (let i = 0; i < crystalCount; i++) {
-      let x = 0;
-      let z = 0;
-      let attempts = 0;
-
-      do {
-        x = rand(-WORLD_LIMIT + 4, WORLD_LIMIT - 4);
-        z = rand(-WORLD_LIMIT + 4, WORLD_LIMIT - 4);
-        attempts++;
-      } while (
-        Math.hypot(x, z) < 7 &&
-        attempts < 30
-      );
-
-      state.crystals.push({
-        x,
-        y: 0.95,
-        z,
-        size: rand(0.65, 1.05),
-        phase: rand(0, Math.PI * 2),
-        collected: false
-      });
-    }
-
-    // Kreye pyebwa yo.
-    for (let i = 0; i < 65; i++) {
-      const x = rand(-WORLD_LIMIT, WORLD_LIMIT);
-      const z = rand(-WORLD_LIMIT, WORLD_LIMIT);
-
-      if (Math.hypot(x, z) < 6) continue;
-
-      state.trees.push({
-        x,
-        z,
-        height: rand(1.7, 3.2),
-        width: rand(0.8, 1.4)
-      });
-    }
-
-    // Kreye bilding nan vil la.
-    for (let i = 0; i < 18; i++) {
-      const side = i % 4;
-      let x;
-      let z;
-
-      if (side === 0) {
-        x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-        z = rand(-WORLD_LIMIT, -18);
-      } else if (side === 1) {
-        x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-        z = rand(18, WORLD_LIMIT);
-      } else if (side === 2) {
-        x = rand(-WORLD_LIMIT, -18);
-        z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-      } else {
-        x = rand(18, WORLD_LIMIT);
-        z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-      }
-
-      state.buildings.push({
-        x,
-        z,
-        width: rand(3, 6),
-        height: rand(3, 8),
-        depth: rand(3, 6),
-        color: [
-          rand(0.25, 0.55),
-          rand(0.28, 0.50),
-          rand(0.32, 0.58)
-        ]
-      });
-    }
+    drawMesh(cubeMesh, model);
   }
 
-  /* ===================== DIMANSYON CANVAS ===================== */
+  /* ============================================================
+     INISYAL MOTÈ WEBGL
+     ============================================================ */
 
-  function resizeCanvas() {
-    if (!canvas || !gl || lostContext) return;
+  function initializeWebGL() {
+    if (!dom.canvas) {
+      throw new Error("Eleman #game-canvas pa jwenn nan HTML la.");
+    }
 
-    const rect = canvas.getBoundingClientRect();
+    gl =
+      dom.canvas.getContext("webgl", {
+        alpha: false,
+        antialias: true,
+        depth: true,
+        powerPreference: "high-performance"
+      }) ||
+      dom.canvas.getContext("experimental-webgl");
 
-    if (!rect.width || !rect.height) return;
+    if (!gl) {
+      throw new Error(
+        "WebGL pa disponib. Verifye sipò navigatè a."
+      );
+    }
 
-    const quality = state.settings.quality;
-    let pixelRatio = window.devicePixelRatio || 1;
+    shaderProgram = createShaderProgram();
+    gl.useProgram(shaderProgram);
 
-    if (quality === "low") {
-      pixelRatio = Math.min(pixelRatio, 1);
-    } else if (quality === "medium") {
-      pixelRatio = Math.min(pixelRatio, 1.5);
+    cubeMesh = createMesh(createCubeGeometry());
+    planeMesh = createMesh(createPlaneGeometry());
+
+    if (state.settings.quality === "high") {
+      gridMesh = createMesh(createGridGeometry(100, 70));
     } else {
-      pixelRatio = Math.min(pixelRatio, 2);
+      gridMesh = createMesh(createGridGeometry(80, 35));
     }
 
-    const width = Math.max(
-      1,
-      Math.floor(rect.width * pixelRatio)
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clearColor(0.035, 0.085, 0.075, 1);
+
+    resizeRenderer();
+
+    if (dom.fallback) dom.fallback.hidden = true;
+  }
+
+  function resizeRenderer() {
+    if (!gl || !dom.canvas) return;
+
+    const rect = dom.canvas.getBoundingClientRect();
+    const dpr = Math.min(
+      window.devicePixelRatio || 1,
+      state.settings.quality === "high" ? 2 : 1.5
     );
 
-    const height = Math.max(
-      1,
-      Math.floor(rect.height * pixelRatio)
-    );
+    const width = Math.max(1, Math.round(rect.width * dpr));
+    const height = Math.max(1, Math.round(rect.height * dpr));
 
-    if (
-      canvas.width !== width ||
-      canvas.height !== height
-    ) {
-      canvas.width = width;
-      canvas.height = height;
-    }
-
-    canvasWidth = width;
-    canvasHeight = height;
+    if (dom.canvas.width !== width) dom.canvas.width = width;
+    if (dom.canvas.height !== height) dom.canvas.height = height;
 
     gl.viewport(0, 0, width, height);
   }
 
-  /* ===================== DESEN OBJE 3D ===================== */
+  /* ============================================================
+     MOND JEU
+     ============================================================ */
 
-  function drawCube(
-    x,
-    y,
-    z,
-    sx,
-    sy,
-    sz,
-    color,
-    rotationY = 0,
-    emissive = 0
-  ) {
-    drawMesh(
-      meshes.cube,
-      modelMatrix(
-        x,
-        y,
-        z,
-        sx,
-        sy,
-        sz,
-        rotationY
+  function getCameraMatrices() {
+    const p = state.player;
+
+    const direction = [
+      Math.sin(p.yaw) * Math.cos(p.pitch),
+      Math.sin(p.pitch),
+      -Math.cos(p.yaw) * Math.cos(p.pitch)
+    ];
+
+    const eye = [
+      p.x,
+      p.y + 1.45 + p.jumpHeight,
+      p.z
+    ];
+
+    let target;
+    let up = [0, 1, 0];
+
+    if (p.cameraMode === 1) {
+      eye[0] -= Math.sin(p.yaw) * 4;
+      eye[1] += 1.4;
+      eye[2] += Math.cos(p.yaw) * 4;
+
+      target = [
+        p.x,
+        p.y + 1.3 + p.jumpHeight,
+        p.z
+      ];
+    } else {
+      target = [
+        eye[0] + direction[0],
+        eye[1] + direction[1],
+        eye[2] + direction[2]
+      ];
+    }
+
+    return {
+      projection: mat4Perspective(
+        Math.PI / 3,
+        dom.canvas.width / Math.max(1, dom.canvas.height),
+        0.1,
+        250
       ),
-      color,
-      emissive
+      view: mat4LookAt(eye, target, up)
+    };
+  }
+
+  function drawEnvironment() {
+    drawMesh(planeMesh, mat4Identity());
+
+    if (gridMesh) {
+      drawMesh(gridMesh, mat4Identity());
+    }
+
+    // Wout ki mennen nan baz la
+    drawCube(0, -0.98, -18, 5, 0.04, 45);
+    drawCube(-2.55, -0.96, -18, 0.08, 0.04, 45);
+    drawCube(2.55, -0.96, -18, 0.08, 0.04, 45);
+
+    // Bilding prensipal yo
+    const buildings = [
+      [-9, 1.4, -10, 4, 5, 4],
+      [9, 1.2, -14, 4, 4, 4],
+      [-14, 1.7, -23, 4, 6, 4],
+      [14, 1.8, -28, 5, 6, 5],
+      [-6, 1.1, -34, 6, 3.5, 5],
+      [7, 2.1, -42, 5, 7, 5],
+      [-19, 1.4, -48, 4, 5, 4],
+      [20, 1.5, -55, 5, 5, 5],
+      [-24, 1.0, -15, 4, 3.5, 4],
+      [25, 1.2, -20, 4, 4, 4]
+    ];
+
+    buildings.forEach((item) => drawCube(...item));
+
+    // Kolòn limyè nan baz la
+    for (let i = 0; i < 7; i++) {
+      const z = -8 - i * 8;
+
+      drawCube(-5, 0.6, z, 0.16, 1.5, 0.16);
+      drawCube(5, 0.6, z, 0.16, 1.5, 0.16);
+    }
+
+    // Eleman ki reprezante ekip jwè a nan mòd kamera dèyè
+    if (state.player.cameraMode === 1) {
+      const c = CHARACTERS[state.character].color;
+
+      drawCube(
+        state.player.x,
+        state.player.y + 0.7 + state.player.jumpHeight,
+        state.player.z,
+        0.65,
+        1.35,
+        0.45,
+        state.player.yaw
+      );
+
+      drawCube(
+        state.player.x,
+        state.player.y + 1.55 + state.player.jumpHeight,
+        state.player.z,
+        0.42,
+        0.42,
+        0.42,
+        state.player.yaw
+      );
+
+      // Mak vizyèl pou koulè pèsonaj la
+      void c;
+    }
+  }
+
+  function drawBeacons() {
+    state.beacons.forEach((beacon) => {
+      if (beacon.active) return;
+
+      const pulse = 1 + Math.sin(performance.now() * 0.004) * 0.1;
+
+      drawCube(
+        beacon.x,
+        -0.35,
+        beacon.z,
+        0.75 * pulse,
+        1.5 * pulse,
+        0.75 * pulse
+      );
+
+      drawCube(
+        beacon.x,
+        0.55,
+        beacon.z,
+        0.95,
+        0.12,
+        0.95
+      );
+    });
+  }
+
+  function drawEnemies() {
+    state.enemies.forEach((enemy) => {
+      if (!enemy.alive) return;
+
+      drawCube(
+        enemy.x,
+        enemy.y + 0.75,
+        enemy.z,
+        0.72,
+        1.5,
+        0.62,
+        enemy.rotation
+      );
+
+      drawCube(
+        enemy.x,
+        enemy.y + 1.65,
+        enemy.z,
+        0.44,
+        0.44,
+        0.44,
+        enemy.rotation
+      );
+    });
+  }
+
+  function drawBullets() {
+    state.bullets.forEach((bullet) => {
+      drawCube(
+        bullet.x,
+        bullet.y,
+        bullet.z,
+        0.10,
+        0.10,
+        0.35,
+        bullet.yaw
+      );
+    });
+
+    state.effects.forEach((effect) => {
+      drawCube(
+        effect.x,
+        effect.y,
+        effect.z,
+        effect.size,
+        effect.size,
+        effect.size
+      );
+    });
+  }
+
+  function renderFrame() {
+    if (!gl || !shaderProgram || !dom.canvas) return;
+
+    resizeRenderer();
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(shaderProgram);
+
+    const camera = getCameraMatrices();
+
+    gl.uniformMatrix4fv(
+      gl.getUniformLocation(shaderProgram, "uProjection"),
+      false,
+      camera.projection
+    );
+
+    gl.uniformMatrix4fv(
+      gl.getUniformLocation(shaderProgram, "uView"),
+      false,
+      camera.view
+    );
+
+    drawEnvironment();
+    drawBeacons();
+    drawEnemies();
+    drawBullets();
+  }
+
+  /* ============================================================
+     KREYE MOND MISYON
+     ============================================================ */
+
+  function spawnEnemies(count) {
+    state.enemies = [];
+
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 12 + Math.random() * 25;
+
+      state.enemies.push({
+        id: i + 1,
+        x: Math.cos(angle) * distance,
+        y: -1.1,
+        z: -Math.abs(Math.sin(angle) * distance) - 5,
+        health: 100,
+        alive: true,
+        rotation: Math.random() * Math.PI * 2,
+        attackCooldown: 1 + Math.random() * 2
+      });
+    }
+  }
+
+  function spawnBeacons() {
+    state.beacons = [
+      { id: 1, x: -8, z: -15, active: false },
+      { id: 2, x: 9, z: -30, active: false },
+      { id: 3, x: -5, z: -45, active: false }
+    ];
+  }
+
+  function resetPlayer() {
+    const character = CHARACTERS[state.character];
+
+    state.player.x = 0;
+    state.player.y = 0;
+    state.player.z = 5;
+    state.player.yaw = 0;
+    state.player.pitch = 0;
+    state.player.speed = character.speed;
+    state.player.jumpHeight = 0;
+    state.player.jumpVelocity = 0;
+    state.player.isJumping = false;
+    state.player.runningFast = false;
+    state.player.cameraMode = 0;
+
+    state.health = character.health;
+    state.energy = character.energy;
+  }
+
+  function selectMission(missionNumber) {
+    const index = Number(missionNumber) - 1;
+
+    if (!Number.isInteger(index)) return false;
+    if (index < 0 || index >= MISSIONS.length) return false;
+
+    if (index + 1 > state.saved.unlockedMission) {
+      notify("Ou dwe fini misyon anvan yo anvan ou debloke sa a.");
+      return false;
+    }
+
+    state.missionIndex = index;
+    state.completed = false;
+    state.gameOver = false;
+    state.paused = false;
+    state.progress = 0;
+    state.enemiesEliminated = 0;
+    state.beaconsActivated = 0;
+    state.elapsedTime = 0;
+
+    state.bullets = [];
+    state.effects = [];
+
+    resetPlayer();
+
+    const mission = MISSIONS[index];
+    state.objectiveTarget = mission.target;
+
+    spawnEnemies(index === 2 ? 6 : index === 1 ? 3 : 2);
+    spawnBeacons();
+
+    updateHUD();
+    saveGame(false);
+
+    return true;
+  }
+
+  /* ============================================================
+     DEMARAJ / POZ / REKÒMANSE
+     ============================================================ */
+
+  function startGame() {
+    if (!state.initialized) {
+      showError("Motè jwèt la poko pare.");
+      return;
+    }
+
+    if (state.running && !state.paused) return;
+
+    if (state.completed || state.gameOver) {
+      selectMission(state.missionIndex + 1);
+    }
+
+    state.running = true;
+    state.paused = false;
+    state.completed = false;
+    state.gameOver = false;
+
+    if (state.startTime === 0 || state.elapsedTime === 0) {
+      state.startTime = performance.now();
+    } else {
+      state.startTime = performance.now() - state.elapsedTime * 1000;
+    }
+
+    state.lastFrame = performance.now();
+
+    showGameScreen();
+    updateHUD();
+    notify("Misyon an kòmanse!");
+
+    startGameLoop();
+  }
+
+  function pauseGame() {
+    if (!state.running || state.completed || state.gameOver) return;
+
+    state.running = false;
+    state.paused = true;
+
+    stopGameLoop();
+
+    if (dom.pauseMenu) dom.pauseMenu.hidden = false;
+    if (dom.missionResult) dom.missionResult.hidden = true;
+
+    notify("Jwèt la an poz.");
+    saveGame(false);
+  }
+
+  function resumeGame() {
+    if (!state.paused) return;
+
+    state.paused = false;
+    state.running = true;
+
+    if (dom.pauseMenu) dom.pauseMenu.hidden = true;
+
+    state.lastFrame = performance.now();
+    startGameLoop();
+
+    notify("Jwèt la kontinye.");
+  }
+
+  function restartMission() {
+    selectMission(state.missionIndex + 1);
+    startGame();
+  }
+
+  function stopGameLoop() {
+    if (state.raf) {
+      cancelAnimationFrame(state.raf);
+      state.raf = 0;
+    }
+  }
+
+  function startGameLoop() {
+    if (state.raf) return;
+
+    state.lastFrame = performance.now();
+    state.raf = requestAnimationFrame(gameLoop);
+  }
+
+  function backToMainMenu() {
+    state.running = false;
+    state.paused = false;
+
+    stopGameLoop();
+    resetInputState();
+    saveGame(false);
+    showMainMenu();
+  }
+
+  /* ============================================================
+     HUD
+     ============================================================ */
+
+  function updateHUD() {
+    const mission = MISSIONS[state.missionIndex];
+
+    if (!mission) return;
+
+    if (dom.hudCharacter) {
+      dom.hudCharacter.textContent = state.character;
+    }
+
+    if (dom.hudLevel) {
+      dom.hudLevel.textContent = `Nivo ${state.missionIndex + 1}`;
+    }
+
+    if (dom.hudHealth) {
+      dom.hudHealth.textContent = String(
+        Math.max(0, Math.round(state.health))
+      );
+    }
+
+    if (dom.hudEnergy) {
+      dom.hudEnergy.textContent = String(
+        Math.max(0, Math.round(state.energy))
+      );
+    }
+
+    if (dom.hudScore) {
+      dom.hudScore.textContent = String(state.score);
+    }
+
+    if (dom.hudMissionTitle) {
+      dom.hudMissionTitle.textContent = mission.title;
+    }
+
+    if (dom.hudObjective) {
+      dom.hudObjective.textContent = mission.objective;
+    }
+
+    if (dom.objectiveCount) {
+      dom.objectiveCount.textContent =
+        `${Math.min(state.progress, mission.target)} / ${mission.target}`;
+    }
+
+    if (dom.objectiveProgress) {
+      const percent = Math.min(
+        100,
+        (state.progress / mission.target) * 100
+      );
+
+      dom.objectiveProgress.style.width = `${percent}%`;
+    }
+
+    if (dom.hudLocation) {
+      const x = Math.round(state.player.x);
+      const z = Math.round(state.player.z);
+
+      dom.hudLocation.textContent = `Pozisyon: ${x}, ${z}`;
+    }
+
+    if (dom.hudTimer) {
+      dom.hudTimer.textContent = formatTime(state.elapsedTime);
+    }
+
+    if (dom.btnNextMission) {
+      dom.btnNextMission.hidden =
+        state.missionIndex >= MISSIONS.length - 1;
+    }
+  }
+
+  function formatTime(seconds) {
+    const total = Math.max(0, Math.floor(seconds));
+    const minutes = Math.floor(total / 60);
+    const secs = total % 60;
+
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
+
+  /* ============================================================
+     PWOGRÈ MISYON
+     ============================================================ */
+
+  function updateMissionProgress() {
+    const mission = MISSIONS[state.missionIndex];
+
+    if (!mission) return;
+
+    if (mission.type === "explore") {
+      state.progress = Math.min(
+        mission.target,
+        Math.floor(Math.hypot(state.player.x, state.player.z - 5))
+      );
+    }
+
+    if (mission.type === "beacons") {
+      state.progress = state.beaconsActivated;
+    }
+
+    if (mission.type === "combat") {
+      state.progress = state.enemiesEliminated;
+    }
+
+    if (state.progress >= mission.target && !state.completed) {
+      completeMission();
+    }
+  }
+
+  function completeMission() {
+    if (state.completed) return;
+
+    const mission = MISSIONS[state.missionIndex];
+
+    state.completed = true;
+    state.running = false;
+    state.paused = false;
+    state.score += mission.reward;
+
+    state.saved.unlockedMission = Math.max(
+      state.saved.unlockedMission,
+      Math.min(MISSIONS.length, state.missionIndex + 2)
+    );
+
+    state.saved.bestScore = Math.max(
+      state.saved.bestScore,
+      state.score
+    );
+
+    state.saved.totalMissionsCompleted += 1;
+
+    stopGameLoop();
+
+    if (dom.pauseMenu) dom.pauseMenu.hidden = true;
+    if (dom.missionResult) dom.missionResult.hidden = false;
+
+    if (dom.resultTitle) {
+      dom.resultTitle.textContent = "MISYON REYISI!";
+    }
+
+    if (dom.resultDescription) {
+      dom.resultDescription.textContent =
+        `${mission.title} fini. Ou resevwa ${mission.reward} pwen rekonpans.`;
+    }
+
+    if (dom.resultScore) {
+      dom.resultScore.textContent = String(state.score);
+    }
+
+    updateHUD();
+    saveGame(false);
+    notify("Felisitasyon! Ou reyisi misyon an.", 4000);
+  }
+
+  function failMission(message) {
+    if (state.gameOver || state.completed) return;
+
+    state.gameOver = true;
+    state.running = false;
+    state.paused = false;
+
+    stopGameLoop();
+
+    if (dom.pauseMenu) dom.pauseMenu.hidden = true;
+    if (dom.missionResult) dom.missionResult.hidden = false;
+
+    if (dom.resultTitle) {
+      dom.resultTitle.textContent = "MISYON ECHWE";
+    }
+
+    if (dom.resultDescription) {
+      dom.resultDescription.textContent = message;
+    }
+
+    if (dom.resultScore) {
+      dom.resultScore.textContent = String(state.score);
+    }
+
+    if (dom.btnNextMission) {
+      dom.btnNextMission.hidden = true;
+    }
+
+    updateHUD();
+    notify(message, 4000);
+  }
+
+  function nextMission() {
+    if (state.missionIndex >= MISSIONS.length - 1) {
+      notify("Ou rive nan dènye misyon an. Felisitasyon!");
+      backToMainMenu();
+      return;
+    }
+
+    const nextNumber = state.missionIndex + 2;
+
+    if (!selectMission(nextNumber)) return;
+
+    startGame();
+  }
+
+  /* ============================================================
+     AKSYON PÈSONAJ
+     ============================================================ */
+
+  function activateBeaconIfNear() {
+    if (MISSIONS[state.missionIndex].type !== "beacons") {
+      return false;
+    }
+
+    let nearest = null;
+    let nearestDistance = Infinity;
+
+    state.beacons.forEach((beacon) => {
+      if (beacon.active) return;
+
+      const distance = Math.hypot(
+        state.player.x - beacon.x,
+        state.player.z - beacon.z
+      );
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearest = beacon;
+      }
+    });
+
+    if (!nearest || nearestDistance > 3.2) {
+      notify("Pwoche bò kote yon baliz pou aktive li.");
+      return false;
+    }
+
+    nearest.active = true;
+    state.beaconsActivated += 1;
+    state.score += 50;
+    state.energy = Math.min(100, state.energy + 10);
+
+    playSound("beacon");
+    updateMissionProgress();
+    updateHUD();
+
+    notify(
+      `Baliz aktive! ${state.beaconsActivated}/3`
+    );
+
+    return true;
+  }
+
+  function jump() {
+    if (!state.running || state.paused) return;
+    if (state.player.isJumping) return;
+    if (state.energy < 5) {
+      notify("Ou pa gen ase enèji pou sote.");
+      return;
+    }
+
+    state.energy -= 5;
+    state.player.isJumping = true;
+    state.player.jumpVelocity = 6.5;
+
+    playSound("jump");
+    updateHUD();
+  }
+
+  function toggleRun() {
+    state.player.runningFast = !state.player.runningFast;
+
+    if (dom.btnRun) {
+      dom.btnRun.classList.toggle(
+        "active",
+        state.player.runningFast
+      );
+    }
+
+    notify(
+      state.player.runningFast
+        ? "Kouri aktive."
+        : "Kouri dezaktive."
     );
   }
 
-  function drawCrystal(crystal, time) {
-    if (crystal.collected) return;
+  function toggleCamera() {
+    state.player.cameraMode =
+      state.player.cameraMode === 0 ? 1 : 0;
 
-    const bob = Math.sin(
-      time * 2.2 + crystal.phase
-    ) * 0.14;
-
-    const rotation = time * 0.8 + crystal.phase;
-    const size = crystal.size;
-
-    drawMesh(
-      meshes.crystal,
-      modelMatrix(
-        crystal.x,
-        crystal.y + bob,
-        crystal.z,
-        size,
-        size * 1.45,
-        size,
-        rotation
-      ),
-      [0.12, 0.92, 1.0],
-      0.45
+    notify(
+      state.player.cameraMode === 0
+        ? "Kamera premye pèsonn."
+        : "Kamera dèyè pèsonaj la."
     );
 
-    // Ti baz vizyèl anba kristal la.
-    drawCube(
-      crystal.x,
-      0.035,
-      crystal.z,
-      0.9,
-      0.06,
-      0.9,
-      [0.05, 0.32, 0.43],
-      0,
-      0.15
-    );
+    renderFrame();
   }
 
-  function drawTree(tree) {
-    // Kò pyebwa a.
-    drawCube(
-      tree.x,
-      tree.height * 0.25,
-      tree.z,
-      0.28,
-      tree.height * 0.5,
-      0.28,
-      [0.35, 0.20, 0.11]
-    );
+  function pitchCamera() {
+    state.player.pitch += 0.18;
 
-    // Fèy yo an fòm kòn.
-    drawMesh(
-      meshes.cone,
-      modelMatrix(
-        tree.x,
-        tree.height * 0.75,
-        tree.z,
-        tree.width,
-        tree.height * 0.8,
-        tree.width
-      ),
-      [0.12, 0.48, 0.25]
-    );
+    if (state.player.pitch > 0.8) {
+      state.player.pitch = -0.4;
+    }
 
-    drawMesh(
-      meshes.cone,
-      modelMatrix(
-        tree.x,
-        tree.height * 1.05,
-        tree.z,
-        tree.width * 0.72,
-        tree.height * 0.65,
-        tree.width * 0.72
-      ),
-      [0.16, 0.60, 0.30]
-    );
+    renderFrame();
+    notify("Ang kamera a chanje.");
   }
 
-  function drawBuilding(building) {
-    // Kò bilding lan.
-    drawCube(
-      building.x,
-      building.height * 0.5,
-      building.z,
-      building.width,
-      building.height,
-      building.depth,
-      building.color
-    );
+  function performAction() {
+    if (!state.running || state.paused) return;
 
-    // Twati a.
-    drawCube(
-      building.x,
-      building.height + 0.08,
-      building.z,
-      building.width + 0.25,
-      0.16,
-      building.depth + 0.25,
-      [0.16, 0.22, 0.29]
-    );
+    if (MISSIONS[state.missionIndex].type === "beacons") {
+      activateBeaconIfNear();
+      return;
+    }
 
-    // Ti fenèt devan bilding lan.
-    const windowColor = [0.25, 0.80, 1.0];
-    const rows = Math.max(
-      1,
-      Math.floor(building.height / 1.6)
-    );
+    shoot();
+  }
 
-    const columns = Math.max(
-      1,
-      Math.floor(building.width / 1.5)
-    );
+  /* ============================================================
+     TIRE
+     ============================================================ */
 
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < columns; col++) {
-        const wx =
-          building.x -
-          building.width * 0.3 +
-          col * 1.1;
+  function shoot() {
+    if (!state.running || state.paused || state.completed) return;
 
-        const wy = 0.8 + row * 1.45;
+    const now = performance.now();
 
-        if (wy > building.height - 0.25) continue;
+    if (now - lastShotTime < 250) return;
+    lastShotTime = now;
 
-        drawCube(
-          wx,
-          wy,
-          building.z + building.depth * 0.5 + 0.012,
-          0.35,
-          0.45,
-          0.035,
-          windowColor,
-          0,
-          0.12
-        );
+    state.bullets.push({
+      x: state.player.x,
+      y: state.player.y + 1.4 + state.player.jumpHeight,
+      z: state.player.z,
+      yaw: state.player.yaw,
+      pitch: state.player.pitch,
+      speed: 35,
+      life: 1.7
+    });
+
+    playSound("shoot");
+  }
+
+  function updateBullets(dt) {
+    for (let i = state.bullets.length - 1; i >= 0; i--) {
+      const bullet = state.bullets[i];
+
+      const cosPitch = Math.cos(bullet.pitch);
+
+      bullet.x += Math.sin(bullet.yaw) *
+        bullet.speed * cosPitch * dt;
+
+      bullet.y += Math.sin(bullet.pitch) *
+        bullet.speed * dt;
+
+      bullet.z -= Math.cos(bullet.yaw) *
+        bullet.speed * cosPitch * dt;
+
+      bullet.life -= dt;
+
+      let hit = false;
+
+      for (const enemy of state.enemies) {
+        if (!enemy.alive) continue;
+
+        const dx = bullet.x - enemy.x;
+        const dy = bullet.y - (enemy.y + 1);
+        const dz = bullet.z - enemy.z;
+
+        const distance = Math.hypot(dx, dy, dz);
+
+        if (distance < 1.05) {
+          enemy.health -= 50;
+          hit = true;
+
+          if (enemy.health <= 0) {
+            enemy.alive = false;
+            state.enemiesEliminated += 1;
+            state.score += 20;
+
+            state.effects.push({
+              x: enemy.x,
+              y: enemy.y + 1,
+              z: enemy.z,
+              size: 0.8,
+              life: 0.35
+            });
+
+            playSound("hit");
+            updateMissionProgress();
+            updateHUD();
+
+            notify(
+              `Advèsè elimine: ${state.enemiesEliminated}`
+            );
+          }
+
+          break;
+        }
+      }
+
+      if (hit || bullet.life <= 0) {
+        state.bullets.splice(i, 1);
       }
     }
   }
 
-  /* ===================== PÈSONAJ JWÈ A ===================== */
+  /* ============================================================
+     MOUVMAN JWÈ A
+     ============================================================ */
 
-  function drawPlayer(time) {
-    const character =
-      CHARACTERS[state.character] || CHARACTERS.MEME;
+  function updatePlayer(dt) {
+    const player = state.player;
 
-    const bob = state.jumping
-      ? state.jumpY
-      : Math.abs(Math.sin(time * 8)) * 0.035;
+    let forward =
+      (state.keys.KeyW || state.keys.ArrowUp ? 1 : 0) -
+      (state.keys.KeyS || state.keys.ArrowDown ? 1 : 0);
 
-    const x = state.x;
-    const z = state.z;
-    const bodyColor = character.color;
+    let strafe =
+      (state.keys.KeyD || state.keys.ArrowRight ? 1 : 0) -
+      (state.keys.KeyA || state.keys.ArrowLeft ? 1 : 0);
 
-    // Lonbraj senp anba pèsonaj la.
-    drawCube(
-      x,
-      0.025,
-      z,
-      0.95,
-      0.035,
-      0.72,
-      [0.035, 0.055, 0.065]
-    );
+    forward += -state.joystick.forward;
+    strafe += state.joystick.strafe;
 
-    // Janm yo.
-    drawCube(
-      x - 0.19,
-      0.40 + bob,
-      z,
-      0.22,
-      0.72,
-      0.26,
-      [0.12, 0.17, 0.23],
-      state.facing
-    );
+    const magnitude = Math.hypot(forward, strafe);
 
-    drawCube(
-      x + 0.19,
-      0.40 + bob,
-      z,
-      0.22,
-      0.72,
-      0.26,
-      [0.12, 0.17, 0.23],
-      state.facing
-    );
+    if (magnitude > 1) {
+      forward /= magnitude;
+      strafe /= magnitude;
+    }
 
-    // Kò pèsonaj la.
-    drawCube(
-      x,
-      1.02 + bob,
-      z,
-      0.72,
-      0.82,
-      0.42,
-      bodyColor,
-      state.facing
-    );
+    const baseSpeed = player.speed;
+    const runMultiplier = player.runningFast ? 1.65 : 1;
+    const energyFactor = state.energy <= 0 ? 0.7 : 1;
 
-    // Tèt pèsonaj la.
-    drawCube(
-      x,
-      1.68 + bob,
-      z,
-      0.48,
-      0.48,
-      0.44,
-      [0.94, 0.77, 0.62],
-      state.facing
-    );
+    const speed = baseSpeed * runMultiplier * energyFactor * dt;
 
-    // De je devan tèt la.
-    const eyeOffsetX = 0.12;
-    const eyeY = 1.73 + bob;
-    const eyeZ = z + 0.226;
+    player.x += (
+      Math.sin(player.yaw) * forward +
+      Math.cos(player.yaw) * strafe
+    ) * speed;
 
-    drawCube(
-      x - eyeOffsetX,
-      eyeY,
-      eyeZ,
-      0.065,
-      0.075,
-      0.025,
-      [0.025, 0.035, 0.05]
-    );
+    player.z += (
+      -Math.cos(player.yaw) * forward +
+      Math.sin(player.yaw) * strafe
+    ) * speed;
 
-    drawCube(
-      x + eyeOffsetX,
-      eyeY,
-      eyeZ,
-      0.065,
-      0.075,
-      0.025,
-      [0.025, 0.035, 0.05]
-    );
+    player.x = Math.max(-45, Math.min(45, player.x));
+    player.z = Math.max(-80, Math.min(15, player.z));
 
-    // Bras yo.
-    drawCube(
-      x - 0.48,
-      1.00 + bob,
-      z,
-      0.22,
-      0.70,
-      0.25,
-      bodyColor,
-      state.facing
-    );
+    if (player.runningFast && magnitude > 0.1) {
+      state.energy = Math.max(0, state.energy - 8 * dt);
+    } else {
+      state.energy = Math.min(100, state.energy + 3 * dt);
+    }
 
-    drawCube(
-      x + 0.48,
-      1.00 + bob,
-      z,
-      0.22,
-      0.70,
-      0.25,
-      bodyColor,
-      state.facing
-    );
+    if (player.isJumping) {
+      player.jumpHeight += player.jumpVelocity * dt;
+      player.jumpVelocity -= 16 * dt;
+
+      if (player.jumpHeight <= 0) {
+        player.jumpHeight = 0;
+        player.jumpVelocity = 0;
+        player.isJumping = false;
+      }
+    }
+
+    updateMissionProgress();
   }
 
-  /* ===================== KAMERA 3D ===================== */
+  /* ============================================================
+     IA ADVÈSÈ
+     ============================================================ */
 
-  function getCameraPosition() {
-    const distance = state.cameraDistance;
+  function updateEnemies(dt) {
+    const player = state.player;
 
-    const pitch = clamp(
-      state.cameraPitch,
-      -0.05,
-      1.05
-    );
+    state.enemies.forEach((enemy) => {
+      if (!enemy.alive) return;
 
-    const horizontalDistance =
-      Math.cos(pitch) * distance;
+      const dx = player.x - enemy.x;
+      const dz = player.z - enemy.z;
+      const distance = Math.hypot(dx, dz);
 
-    const verticalDistance =
-      Math.sin(pitch) * distance;
+      enemy.rotation = Math.atan2(dx, dz);
 
-    return [
-      state.x +
-        Math.sin(state.cameraAngle) *
-        horizontalDistance,
+      if (distance > 3.2) {
+        const enemySpeed = 0.55 * dt;
 
-      2.0 + verticalDistance,
+        enemy.x += dx / Math.max(distance, 0.001) * enemySpeed;
+        enemy.z += dz / Math.max(distance, 0.001) * enemySpeed;
+      } else {
+        enemy.attackCooldown -= dt;
 
-      state.z +
-        Math.cos(state.cameraAngle) *
-        horizontalDistance
-    ];
-  }
+        if (enemy.attackCooldown <= 0) {
+          state.health = Math.max(0, state.health - 5);
+          enemy.attackCooldown = 1.5;
 
-  function updateCameraMatrices() {
-    const camera = getCameraPosition();
+          updateHUD();
 
-    const target = [
-      state.x,
-      1.0 + state.jumpY * 0.35,
-      state.z
-    ];
-
-    const projection = perspective(
-      Math.PI / 3,
-      canvasWidth / Math.max(1, canvasHeight),
-      0.1,
-      150
-    );
-
-    const view = lookAt(
-      camera,
-      target,
-      [0, 1, 0]
-    );
-
-    gl.uniformMatrix4fv(
-      locations.projection,
-      false,
-      projection
-    );
-
-    gl.uniformMatrix4fv(
-      locations.view,
-      false,
-      view
-    );
-
-    gl.uniform3fv(
-      locations.camera,
-      camera
-    );
-  }
-
-  /* ===================== RANN MOND LAN ===================== */
-
-  function renderScene(timeSeconds) {
-    if (
-      !gl ||
-      !program ||
-      lostContext ||
-      !meshes.cube
-    ) {
-      return;
-    }
-
-    resizeCanvas();
-
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-
-    gl.clearColor(
-      0.10,
-      0.22,
-      0.29,
-      1.0
-    );
-
-    gl.clear(
-      gl.COLOR_BUFFER_BIT |
-      gl.DEPTH_BUFFER_BIT
-    );
-
-    gl.useProgram(program);
-
-    updateCameraMatrices();
-
-    // Tè prensipal la.
-    drawCube(
-      0,
-      -0.32,
-      0,
-      WORLD_SIZE,
-      0.5,
-      WORLD_SIZE,
-      [0.20, 0.34, 0.26]
-    );
-
-    // Wout prensipal yo.
-    drawCube(
-      0,
-      -0.045,
-      0,
-      5,
-      0.035,
-      WORLD_SIZE,
-      [0.16, 0.19, 0.22]
-    );
-
-    drawCube(
-      0,
-      -0.04,
-      0,
-      WORLD_SIZE,
-      0.035,
-      5,
-      [0.16, 0.19, 0.22]
-    );
-
-    // Mak wout yo.
-    for (let i = -40; i <= 40; i += 5) {
-      drawCube(
-        0,
-        -0.018,
-        i,
-        0.12,
-        0.02,
-        1.8,
-        [0.85, 0.79, 0.48]
-      );
-
-      drawCube(
-        i,
-        -0.018,
-        0,
-        1.8,
-        0.02,
-        0.12,
-        [0.85, 0.79, 0.48]
-      );
-    }
-
-    // Bilding yo.
-    for (const building of state.buildings) {
-      drawBuilding(building);
-    }
-
-    // Pyebwa yo.
-    for (const tree of state.trees) {
-      drawTree(tree);
-    }
-
-    // Kristal yo.
-    for (const crystal of state.crystals) {
-      drawCrystal(crystal, timeSeconds);
-    }
-
-    // Pèsonaj jwè a.
-    drawPlayer(timeSeconds);
-  }
-
-  /* ===================== FIN PATI 2 ===================== */
-
-
-
-
-
-
-
-
-
-  /* =========================================================
-     PATI 3 — MOUVMAN, JOYSTICK, SOTE AK KAMERA
-     Kontinye apre pati 2 a.
-  ========================================================= */
-
-  /* ===================== PARAMÈT MOUVMAN ===================== */
-
-  const MOVEMENT = {
-    gravity: 18,
-    jumpPower: 7.2,
-    walkSpeed: 1,
-    sprintMultiplier: 1.65,
-    joystickRadius: 48,
-    cameraTurnSpeed: 2.2,
-    pitchSpeed: 0.08,
-    minPitch: -0.05,
-    maxPitch: 1.05
-  };
-
-  let movementControlsReady = false;
-  let sprintPointer = null;
-  let jumpPointer = null;
-  let cameraPointer = null;
-  let lastMoveNotice = 0;
-
-  /* ===================== MESAJ JWÈ A ===================== */
-
-  function movementNotice(message) {
-    if (typeof showNotification === "function") {
-      showNotification(message);
-      return;
-    }
-
-    if (ui.notifications) {
-      ui.notifications.textContent = message;
-      ui.notifications.classList.add("show");
-
-      window.clearTimeout(state.notifyTimer);
-
-      state.notifyTimer = window.setTimeout(() => {
-        if (ui.notifications) {
-          ui.notifications.classList.remove("show");
+          if (state.health <= 0) {
+            failMission(
+              "Enèji lavi ou fini. Rekòmanse misyon an pou eseye ankò."
+            );
+          }
         }
-      }, 1800);
+      }
+    });
+  }
+
+  function updateEffects(dt) {
+    for (let i = state.effects.length - 1; i >= 0; i--) {
+      const effect = state.effects[i];
+
+      effect.life = (effect.life || 0.35) - dt;
+      effect.size = Math.max(0.1, effect.size - dt * 1.2);
+
+      if (effect.life <= 0) {
+        state.effects.splice(i, 1);
+      }
     }
   }
 
-  /* ===================== KONTWÒL KAMERA VÈTIKAL ===================== */
+  /* ============================================================
+     BOUK ANIMASYON
+     ============================================================ */
 
-  function createPitchControls() {
-    if (!ui.game) return;
+  function gameLoop(timestamp) {
+    state.raf = 0;
 
-    let panel = document.getElementById("camera-pitch-controls");
+    if (!state.running || state.paused) {
+      renderFrame();
+      return;
+    }
 
-    if (!panel) {
-      panel = document.createElement("div");
-      panel.id = "camera-pitch-controls";
+    const dt = Math.min(
+      Math.max(0, (timestamp - state.lastFrame) / 1000),
+      0.04
+    );
 
-      Object.assign(panel.style, {
-        position: "absolute",
-        right: "14px",
-        top: "35%",
-        zIndex: "20",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        pointerEvents: "auto"
-      });
+    state.lastFrame = timestamp;
+    state.elapsedTime = Math.max(
+      0,
+      (timestamp - state.startTime) / 1000
+    );
 
-      const makeButton = (id, text, label) => {
-        const button = document.createElement("button");
+    updatePlayer(dt);
+    updateEnemies(dt);
+    updateBullets(dt);
+    updateEffects(dt);
 
-        button.id = id;
-        button.type = "button";
-        button.textContent = text;
-        button.setAttribute("aria-label", label);
+    renderFrame();
+    updateHUD();
 
-        Object.assign(button.style, {
-          width: "48px",
-          height: "48px",
-          borderRadius: "50%",
-          border: "1px solid rgba(255,255,255,.55)",
-          background: "rgba(10,25,40,.72)",
-          color: "#ffffff",
-          fontSize: "22px",
-          fontWeight: "bold",
-          touchAction: "none",
-          userSelect: "none"
-        });
+    if (timestamp - lastSaveTime > 15000) {
+      lastSaveTime = timestamp;
+      saveGame(false);
+    }
 
-        panel.appendChild(button);
-        return button;
+    if (state.running && !state.paused) {
+      state.raf = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  /* ============================================================
+     SON JWE A
+     ============================================================ */
+
+  function playSound(type) {
+    if (!state.settings.sound) return;
+
+    try {
+      const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+      if (!AudioContextClass) return;
+
+      if (!state.audioContext) {
+        state.audioContext = new AudioContextClass();
+      }
+
+      const audio = state.audioContext;
+
+      if (audio.state === "suspended") {
+        audio.resume().catch(() => {});
+      }
+
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+
+      const volume = Math.max(
+        0,
+        Math.min(1, state.settings.volume / 100)
+      );
+
+      const sounds = {
+        shoot: { frequency: 170, duration: 0.08, wave: "square" },
+        hit: { frequency: 500, duration: 0.11, wave: "triangle" },
+        jump: { frequency: 340, duration: 0.12, wave: "sine" },
+        beacon: { frequency: 720, duration: 0.20, wave: "sine" }
       };
 
-      makeButton(
-        "btn-pitch-up",
-        "▲",
-        "Gade anlè"
+      const sound = sounds[type] || sounds.hit;
+
+      oscillator.type = sound.wave;
+      oscillator.frequency.setValueAtTime(
+        sound.frequency,
+        audio.currentTime
       );
 
-      makeButton(
-        "btn-pitch-down",
-        "▼",
-        "Gade anba"
+      gain.gain.setValueAtTime(
+        volume * 0.07,
+        audio.currentTime
       );
 
-      if (getComputedStyle(ui.game).position === "static") {
-        ui.game.style.position = "relative";
-      }
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audio.currentTime + sound.duration
+      );
 
-      ui.game.appendChild(panel);
+      oscillator.connect(gain);
+      gain.connect(audio.destination);
+
+      oscillator.start();
+      oscillator.stop(audio.currentTime + sound.duration);
+    } catch (error) {
+      console.debug("Son pa disponib:", error);
     }
-
-    const up = document.getElementById("btn-pitch-up");
-    const down = document.getElementById("btn-pitch-down");
-
-    if (!up || !down) return;
-
-    const changePitch = amount => {
-      if (!state.active || state.paused || state.finished) return;
-
-      state.cameraPitch = clamp(
-        state.cameraPitch + amount,
-        MOVEMENT.minPitch,
-        MOVEMENT.maxPitch
-      );
-    };
-
-    up.addEventListener("pointerdown", event => {
-      event.preventDefault();
-      changePitch(MOVEMENT.pitchSpeed);
-    });
-
-    down.addEventListener("pointerdown", event => {
-      event.preventDefault();
-      changePitch(-MOVEMENT.pitchSpeed);
-    });
-
-    panel.style.display = "flex";
   }
 
-  /* ===================== JOYSTICK ANDROID ===================== */
+  /* ============================================================
+     KONTWÒL KLAVYE
+     ============================================================ */
 
-  function updateJoystickFromPointer(event) {
-    if (!ui.joystickBase || !ui.joystickKnob) return;
+  function onKeyDown(event) {
+    state.keys[event.code] = true;
 
-    const rect = ui.joystickBase.getBoundingClientRect();
+    if (
+      [
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "Space"
+      ].includes(event.code)
+    ) {
+      event.preventDefault();
+    }
+
+    if (event.repeat) return;
+
+    if (event.code === "Escape") {
+      if (state.running) pauseGame();
+      else if (state.paused) resumeGame();
+    }
+
+    if (event.code === "Space") jump();
+    if (event.code === "KeyF") performAction();
+    if (event.code === "KeyE") activateBeaconIfNear();
+    if (event.code === "KeyC") toggleCamera();
+    if (event.code === "ShiftLeft" || event.code === "ShiftRight") {
+      toggleRun();
+    }
+  }
+
+  function onKeyUp(event) {
+    state.keys[event.code] = false;
+
+    if (
+      event.code === "ShiftLeft" ||
+      event.code === "ShiftRight"
+    ) {
+      state.player.runningFast = false;
+
+      if (dom.btnRun) dom.btnRun.classList.remove("active");
+    }
+  }
+
+  function resetInputState() {
+    state.keys = Object.create(null);
+
+    state.joystick.active = false;
+    state.joystick.pointerId = null;
+    state.joystick.x = 0;
+    state.joystick.y = 0;
+    state.joystick.forward = 0;
+    state.joystick.strafe = 0;
+
+    state.look.active = false;
+    state.look.pointerId = null;
+
+    if (dom.joystickKnob) {
+      dom.joystickKnob.style.transform = "translate(0, 0)";
+    }
+  }
+
+  /* ============================================================
+     JOYSTICK TACTILE
+     ============================================================ */
+
+  function setupJoystick() {
+    if (!dom.joystickZone || !dom.joystickBase) return;
+
+    dom.joystickZone.style.touchAction = "none";
+    dom.joystickBase.style.touchAction = "none";
+
+    dom.joystickZone.addEventListener("pointerdown", (event) => {
+      if (!state.running || state.paused) return;
+
+      event.preventDefault();
+
+      state.joystick.active = true;
+      state.joystick.pointerId = event.pointerId;
+
+      try {
+        dom.joystickZone.setPointerCapture(event.pointerId);
+      } catch (_) {}
+
+      updateJoystickPosition(event);
+    });
+
+    dom.joystickZone.addEventListener("pointermove", (event) => {
+      if (
+        !state.joystick.active ||
+        event.pointerId !== state.joystick.pointerId
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      updateJoystickPosition(event);
+    });
+
+    const release = (event) => {
+      if (event.pointerId !== state.joystick.pointerId) return;
+
+      state.joystick.active = false;
+      state.joystick.pointerId = null;
+      state.joystick.x = 0;
+      state.joystick.y = 0;
+      state.joystick.forward = 0;
+      state.joystick.strafe = 0;
+
+      if (dom.joystickKnob) {
+        dom.joystickKnob.style.transform = "translate(0, 0)";
+      }
+    };
+
+    dom.joystickZone.addEventListener("pointerup", release);
+    dom.joystickZone.addEventListener("pointercancel", release);
+    dom.joystickZone.addEventListener("lostpointercapture", release);
+  }
+
+  function updateJoystickPosition(event) {
+    const rect = dom.joystickBase.getBoundingClientRect();
 
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -1559,2546 +2369,376 @@
     let dx = event.clientX - centerX;
     let dy = event.clientY - centerY;
 
-    const radius = Math.max(
-      20,
-      Math.min(rect.width, rect.height) * 0.38
-    );
+    const maxRadius = Math.max(20, rect.width * 0.34);
+    const distance = Math.hypot(dx, dy) || 1;
 
-    const length = Math.hypot(dx, dy);
-
-    if (length > radius) {
-      dx = dx / length * radius;
-      dy = dy / length * radius;
+    if (distance > maxRadius) {
+      dx = dx / distance * maxRadius;
+      dy = dy / distance * maxRadius;
     }
 
-    state.joyX = clamp(dx / radius, -1, 1);
-    state.joyY = clamp(dy / radius, -1, 1);
-    state.joyActive = true;
+    state.joystick.x = dx / maxRadius;
+    state.joystick.y = dy / maxRadius;
 
-    ui.joystickKnob.style.transform =
-      `translate(${dx}px, ${dy}px)`;
-  }
+    state.joystick.strafe = state.joystick.x;
+    state.joystick.forward = state.joystick.y;
 
-  function resetJoystick() {
-    state.joyX = 0;
-    state.joyY = 0;
-    state.joyActive = false;
-    state.joyPointer = null;
-
-    if (ui.joystickKnob) {
-      ui.joystickKnob.style.transform =
-        "translate(0px, 0px)";
+    if (dom.joystickKnob) {
+      dom.joystickKnob.style.transform =
+        `translate(${dx}px, ${dy}px)`;
     }
   }
 
-  function bindJoystick() {
-    if (!ui.joystickZone || !ui.joystickBase) return;
+  /* ============================================================
+     KAMERA TACTILE AK PITCH 2
+     ============================================================ */
 
-    ui.joystickZone.style.touchAction = "none";
-    ui.joystickBase.style.touchAction = "none";
+  function setupCameraTouch() {
+    if (!dom.canvas) return;
 
-    ui.joystickZone.addEventListener("pointerdown", event => {
-      if (!state.active || state.paused || state.finished) return;
+    dom.canvas.style.touchAction = "none";
 
-      event.preventDefault();
+    dom.canvas.addEventListener("pointerdown", (event) => {
+      if (!state.running || state.paused) return;
+      if (event.pointerType === "mouse") return;
 
-      state.joyPointer = event.pointerId;
+      const rect = dom.canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+
+      // Bò dwat ekran an sèvi pou vire kamera.
+      if (x < rect.width * 0.45) return;
+
+      state.look.active = true;
+      state.look.pointerId = event.pointerId;
+      state.look.x = event.clientX;
+      state.look.y = event.clientY;
 
       try {
-        ui.joystickZone.setPointerCapture(event.pointerId);
-      } catch (_) {
-        // Gen kèk navigatè ki pa sipòte pointer capture.
-      }
-
-      updateJoystickFromPointer(event);
+        dom.canvas.setPointerCapture(event.pointerId);
+      } catch (_) {}
     });
 
-    ui.joystickZone.addEventListener("pointermove", event => {
-      if (event.pointerId !== state.joyPointer) return;
-
-      event.preventDefault();
-      updateJoystickFromPointer(event);
-    });
-
-    const releaseJoystick = event => {
+    dom.canvas.addEventListener("pointermove", (event) => {
       if (
-        state.joyPointer !== null &&
-        event.pointerId !== state.joyPointer
+        !state.look.active ||
+        state.look.pointerId !== event.pointerId
       ) {
         return;
       }
 
-      resetJoystick();
+      const dx = event.clientX - state.look.x;
+      const dy = event.clientY - state.look.y;
+
+      const sensitivity =
+        Number(state.settings.sensitivity || 5) * 0.0009;
+
+      state.player.yaw += dx * sensitivity;
+      state.player.pitch -= dy * sensitivity;
+
+      state.player.pitch = Math.max(
+        -1.15,
+        Math.min(1.15, state.player.pitch)
+      );
+
+      state.look.x = event.clientX;
+      state.look.y = event.clientY;
+    });
+
+    const release = (event) => {
+      if (event.pointerId !== state.look.pointerId) return;
+
+      state.look.active = false;
+      state.look.pointerId = null;
     };
 
-    ui.joystickZone.addEventListener(
-      "pointerup",
-      releaseJoystick
-    );
-
-    ui.joystickZone.addEventListener(
-      "pointercancel",
-      releaseJoystick
-    );
-
-    ui.joystickZone.addEventListener(
-      "lostpointercapture",
-      resetJoystick
-    );
+    dom.canvas.addEventListener("pointerup", release);
+    dom.canvas.addEventListener("pointercancel", release);
+    dom.canvas.addEventListener("lostpointercapture", release);
   }
 
-  /* ===================== BOUTON SOTE ===================== */
+  /* ============================================================
+     KONTWÒL SOURIS
+     ============================================================ */
 
-  function startJump() {
-    if (
-      !state.active ||
-      state.paused ||
-      state.finished ||
-      state.jumping
-    ) {
-      return;
-    }
+  function setupMouseControls() {
+    if (!dom.canvas) return;
 
-    state.jumping = true;
-    state.jumpVelocity = MOVEMENT.jumpPower;
-  }
+    dom.canvas.addEventListener("click", () => {
+      if (!state.running || state.paused) return;
 
-  function bindJumpButton() {
-    if (!ui.jump) return;
-
-    ui.jump.style.touchAction = "none";
-
-    ui.jump.addEventListener("pointerdown", event => {
-      event.preventDefault();
-
-      jumpPointer = event.pointerId;
-      startJump();
-    });
-
-    const releaseJump = event => {
-      if (
-        jumpPointer !== null &&
-        event.pointerId !== jumpPointer
-      ) {
-        return;
-      }
-
-      jumpPointer = null;
-    };
-
-    ui.jump.addEventListener("pointerup", releaseJump);
-    ui.jump.addEventListener("pointercancel", releaseJump);
-  }
-
-  /* ===================== BOUTON KOURI ===================== */
-
-  function bindSprintButton() {
-    if (!ui.run) return;
-
-    ui.run.style.touchAction = "none";
-
-    ui.run.addEventListener("pointerdown", event => {
-      event.preventDefault();
-
-      sprintPointer = event.pointerId;
-      state.sprint = true;
-    });
-
-    const stopSprint = event => {
-      if (
-        sprintPointer !== null &&
-        event.pointerId !== sprintPointer
-      ) {
-        return;
-      }
-
-      sprintPointer = null;
-      state.sprint = false;
-    };
-
-    ui.run.addEventListener("pointerup", stopSprint);
-    ui.run.addEventListener("pointercancel", stopSprint);
-    ui.run.addEventListener("lostpointercapture", () => {
-      sprintPointer = null;
-      state.sprint = false;
-    });
-  }
-
-  /* ===================== KAMERA AK SOURIT ===================== */
-
-  function bindCameraControl() {
-    if (!canvas) return;
-
-    canvas.style.touchAction = "none";
-
-    let lastX = 0;
-    let lastY = 0;
-
-    canvas.addEventListener("pointerdown", event => {
-      if (!state.active || state.paused || state.finished) return;
-
-      if (event.pointerType === "mouse" && event.button !== 2) {
-        return;
-      }
-
-      cameraPointer = event.pointerId;
-      lastX = event.clientX;
-      lastY = event.clientY;
-
-      try {
-        canvas.setPointerCapture(event.pointerId);
-      } catch (_) {
-        // Pointer capture pa obligatwa.
+      if (dom.canvas.requestPointerLock) {
+        dom.canvas.requestPointerLock();
       }
     });
 
-    canvas.addEventListener("pointermove", event => {
-      if (event.pointerId !== cameraPointer) return;
-      if (!state.active || state.paused || state.finished) return;
+    document.addEventListener("mousemove", (event) => {
+      if (document.pointerLockElement !== dom.canvas) return;
+      if (!state.running || state.paused) return;
 
-      const dx = event.clientX - lastX;
-      const dy = event.clientY - lastY;
+      const sensitivity =
+        Number(state.settings.sensitivity || 5) * 0.0007;
 
-      lastX = event.clientX;
-      lastY = event.clientY;
+      state.player.yaw += event.movementX * sensitivity;
+      state.player.pitch -= event.movementY * sensitivity;
 
-      const sensitivity = clamp(
-        Number(state.settings.sensitivity) || 5,
-        1,
-        10
-      );
-
-      const factor = sensitivity * 0.0018;
-
-      state.cameraAngle -= dx * factor;
-      state.cameraPitch = clamp(
-        state.cameraPitch - dy * factor,
-        MOVEMENT.minPitch,
-        MOVEMENT.maxPitch
+      state.player.pitch = Math.max(
+        -1.15,
+        Math.min(1.15, state.player.pitch)
       );
     });
-
-    const releaseCamera = event => {
-      if (event.pointerId === cameraPointer) {
-        cameraPointer = null;
-      }
-    };
-
-    canvas.addEventListener("pointerup", releaseCamera);
-    canvas.addEventListener("pointercancel", releaseCamera);
-
-    canvas.addEventListener("contextmenu", event => {
-      event.preventDefault();
-    });
-
-    if (ui.camera) {
-      ui.camera.addEventListener("click", () => {
-        state.cameraAngle += Math.PI / 4;
-      });
-    }
   }
 
-  /* ===================== KLAVYE PC ===================== */
-
-  function bindMovementKeyboard() {
-    window.addEventListener("keydown", event => {
-      const key = event.key.toLowerCase();
-
-      state.keys[key] = true;
-
-      if (
-        [
-          "arrowup",
-          "arrowdown",
-          "arrowleft",
-          "arrowright",
-          " "
-        ].includes(key)
-      ) {
-        event.preventDefault();
-      }
-
-      if (
-        key === " " &&
-        !event.repeat
-      ) {
-        startJump();
-      }
-
-      if (
-        key === "shift" &&
-        state.active &&
-        !state.paused
-      ) {
-        state.sprint = true;
-      }
-
-      if (
-        key === "q" &&
-        state.active &&
-        !state.paused
-      ) {
-        state.cameraPitch = clamp(
-          state.cameraPitch + MOVEMENT.pitchSpeed,
-          MOVEMENT.minPitch,
-          MOVEMENT.maxPitch
-        );
-      }
-
-      if (
-        key === "e" &&
-        state.active &&
-        !state.paused
-      ) {
-        state.cameraPitch = clamp(
-          state.cameraPitch - MOVEMENT.pitchSpeed,
-          MOVEMENT.minPitch,
-          MOVEMENT.maxPitch
-        );
-      }
-    });
-
-    window.addEventListener("keyup", event => {
-      const key = event.key.toLowerCase();
-
-      state.keys[key] = false;
-
-      if (key === "shift") {
-        state.sprint = false;
-      }
-    });
-
-    window.addEventListener("blur", () => {
-      state.keys = Object.create(null);
-      state.sprint = false;
-      resetJoystick();
-    });
-  }
-
-  /* ===================== KALKILE DIREKSYON ===================== */
-
-  function getMovementInput() {
-    let x = state.joyX;
-    let y = state.joyY;
-
-    if (state.keys.a || state.keys.arrowleft) x -= 1;
-    if (state.keys.d || state.keys.arrowright) x += 1;
-    if (state.keys.w || state.keys.arrowup) y -= 1;
-    if (state.keys.s || state.keys.arrowdown) y += 1;
-
-    const length = Math.hypot(x, y);
-
-    if (length > 1) {
-      x /= length;
-      y /= length;
-    }
-
-    return { x, y };
-  }
-
-  /* ===================== METE JWÈ A AN MOUVMAN ===================== */
-
-  function updateMovement(deltaTime) {
-    if (
-      !state.active ||
-      state.paused ||
-      state.finished ||
-      lostContext
-    ) {
-      return;
-    }
-
-    const dt = clamp(deltaTime, 0, 0.05);
-    const input = getMovementInput();
-
-    const hasInput =
-      Math.abs(input.x) > 0.01 ||
-      Math.abs(input.y) > 0.01;
-
-    const character =
-      CHARACTERS[state.character] || CHARACTERS.MEME;
-
-    let speed = character.speed * MOVEMENT.walkSpeed;
-
-    if (state.sprint && state.energy > 0 && hasInput) {
-      speed *= MOVEMENT.sprintMultiplier;
-      state.energy = Math.max(0, state.energy - 24 * dt);
-    } else {
-      state.energy = Math.min(100, state.energy + 12 * dt);
-    }
-
-    // Mouvman an suiv direksyon kamera a.
-    const forwardX = -Math.sin(state.cameraAngle);
-    const forwardZ = -Math.cos(state.cameraAngle);
-
-    const rightX = Math.cos(state.cameraAngle);
-    const rightZ = -Math.sin(state.cameraAngle);
-
-    const moveX =
-      rightX * input.x +
-      forwardX * -input.y;
-
-    const moveZ =
-      rightZ * input.x +
-      forwardZ * -input.y;
-
-    if (hasInput) {
-      state.x += moveX * speed * dt;
-      state.z += moveZ * speed * dt;
-
-      state.facing = Math.atan2(moveX, moveZ);
-    }
-
-    // Kenbe pèsonaj la andedan limit mond lan.
-    state.x = clamp(state.x, -WORLD_LIMIT, WORLD_LIMIT);
-    state.z = clamp(state.z, -WORLD_LIMIT, WORLD_LIMIT);
-
-    // Fizik sote a.
-    if (state.jumping) {
-      state.jumpY += state.jumpVelocity * dt;
-      state.jumpVelocity -= MOVEMENT.gravity * dt;
-
-      if (state.jumpY <= 0) {
-        state.jumpY = 0;
-        state.jumpVelocity = 0;
-        state.jumping = false;
-      }
-    }
-
-    // Rejenere enèji piti piti lè jwè a pa kouri.
-    if (ui.hudEnergy) {
-      ui.hudEnergy.textContent =
-        `${Math.round(state.energy)}%`;
-    }
-
-    // Mete pozisyon HUD la ajou si eleman yo egziste.
-    if (ui.location) {
-      ui.location.textContent =
-        `X: ${state.x.toFixed(1)} | Z: ${state.z.toFixed(1)}`;
-    }
-  }
-
-  /* ===================== INISYALIZE KONTWÒL ===================== */
-
-  function setupMovementControls() {
-    if (movementControlsReady) return;
-
-    movementControlsReady = true;
-
-    createPitchControls();
-    bindJoystick();
-    bindJumpButton();
-    bindSprintButton();
-    bindCameraControl();
-    bindMovementKeyboard();
-
-    window.addEventListener("resize", resizeCanvas);
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        state.sprint = false;
-        resetJoystick();
-      }
-    });
-  }
-
-  /* ===================== FIN PATI 3 ===================== */
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /* =========================================================
-     PATI 4 — MISYON, KRISTAL, LÈNMI, AKSYON AK REKONPANZ
-     Kontinye nan menm IIFE a.
-  ========================================================= */
-
-  /* ===================== PARAMÈT MISYON ===================== */
-
-  const MISSION_RULES = {
-    crystalRange: 1.65,
-    enemyRange: 1.35,
-    enemySpeed: 1.15,
-    enemyDamage: 8,
-    enemyDamageDelay: 1.0,
-    actionCooldown: 0.35,
-    particleLifetime: 0.65
-  };
-
-  let missionSystemsReady = false;
-  let enemyDamageCooldown = 0;
-  let missionActionPointer = null;
-
-  /* ===================== NOTIFIKASYON ===================== */
-
-  function missionMessage(message) {
-    if (typeof showNotification === "function") {
-      showNotification(message);
-      return;
-    }
-
-    if (!ui.notifications) return;
-
-    ui.notifications.textContent = message;
-    ui.notifications.classList.add("show");
-
-    window.clearTimeout(state.notifyTimer);
-
-    state.notifyTimer = window.setTimeout(() => {
-      if (ui.notifications) {
-        ui.notifications.classList.remove("show");
-      }
-    }, 2000);
-  }
-
-  /* ===================== MIZAJOU HUD MISYON ===================== */
-
-  function updateMissionHUD() {
-    const mission = MISSIONS[state.mission] || MISSIONS[1];
-    const target = mission.target;
-
-    if (ui.hudMissionTitle) {
-      ui.hudMissionTitle.textContent =
-        `Misyon ${state.mission}: ${mission.title}`;
-    }
-
-    if (ui.hudObjective) {
-      ui.hudObjective.textContent = mission.description;
-    }
-
-    if (ui.objectiveCount) {
-      ui.objectiveCount.textContent =
-        `${Math.min(state.collected, target)} / ${target}`;
-    }
-
-    if (ui.objectiveProgress) {
-      const percentage = clamp(
-        (state.collected / target) * 100,
-        0,
-        100
-      );
-
-      if ("value" in ui.objectiveProgress) {
-        ui.objectiveProgress.value = percentage;
-      } else {
-        ui.objectiveProgress.style.width =
-          `${percentage}%`;
-      }
-
-      ui.objectiveProgress.setAttribute(
-        "aria-valuenow",
-        String(Math.round(percentage))
-      );
-    }
-
-    if (ui.hudScore) {
-      ui.hudScore.textContent = String(state.score);
-    }
-
-    if (ui.hudHealth) {
-      ui.hudHealth.textContent =
-        `${Math.round(state.health)}%`;
-    }
-
-    if (ui.hudEnergy) {
-      ui.hudEnergy.textContent =
-        `${Math.round(state.energy)}%`;
-    }
-
-    if (ui.hudLevel) {
-      ui.hudLevel.textContent =
-        `Nivo ${state.mission}`;
-    }
-
-    if (ui.hudCharacter) {
-      ui.hudCharacter.textContent = state.character;
-    }
-
-    if (ui.timer) {
-      const totalSeconds = Math.max(
-        0,
-        Math.floor(state.elapsed)
-      );
-
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = totalSeconds % 60;
-
-      ui.timer.textContent =
-        `${String(minutes).padStart(2, "0")}:` +
-        `${String(seconds).padStart(2, "0")}`;
-    }
-  }
-
-  /* ===================== PATIKIL KI PI PRE KRISTAL ===================== */
-
-  function spawnMissionParticles(x, y, z, color, amount = 8) {
-    for (let i = 0; i < amount; i++) {
-      const angle = rand(0, Math.PI * 2);
-      const speed = rand(0.6, 2.2);
-
-      state.particles.push({
-        x,
-        y,
-        z,
-        vx: Math.cos(angle) * speed,
-        vy: rand(0.7, 2.2),
-        vz: Math.sin(angle) * speed,
-        life: MISSION_RULES.particleLifetime,
-        maxLife: MISSION_RULES.particleLifetime,
-        color: color.slice()
-      });
-    }
-  }
-
-  function updateMissionParticles(deltaTime) {
-    const dt = clamp(deltaTime, 0, 0.05);
-
-    for (let i = state.particles.length - 1; i >= 0; i--) {
-      const particle = state.particles[i];
-
-      particle.life -= dt;
-      particle.x += particle.vx * dt;
-      particle.y += particle.vy * dt;
-      particle.z += particle.vz * dt;
-      particle.vy -= 4 * dt;
-
-      if (particle.life <= 0) {
-        state.particles.splice(i, 1);
-      }
-    }
-  }
-
-  function renderMissionParticles() {
-    if (!gl || lostContext || !meshes.crystal) return;
-
-    for (const particle of state.particles) {
-      const scale = Math.max(
-        0.04,
-        0.16 * (particle.life / particle.maxLife)
-      );
-
-      drawMesh(
-        meshes.crystal,
-        modelMatrix(
-          particle.x,
-          Math.max(0.08, particle.y),
-          particle.z,
-          scale,
-          scale,
-          scale
-        ),
-        particle.color,
-        0.35
-      );
-    }
-  }
-
-  /* ===================== KOLEKTE KRISTAL ===================== */
-
-  function collectMissionCrystal(crystal) {
-    if (!crystal || crystal.collected) return false;
-
-    const mission = MISSIONS[state.mission] || MISSIONS[1];
-
-    if (state.collected >= mission.target) {
-      return false;
-    }
-
-    crystal.collected = true;
-    state.collected += 1;
-    state.score += 10;
-
-    spawnMissionParticles(
-      crystal.x,
-      crystal.y,
-      crystal.z,
-      [0.15, 0.9, 1],
-      10
-    );
-
-    missionMessage(
-      `Kristal jwenn! ${state.collected}/${mission.target}`
-    );
-
-    updateMissionHUD();
-
-    if (state.collected >= mission.target) {
-      completeMissionSystems();
-    }
-
-    return true;
-  }
-
-  function findNearbyCrystal(maxDistance = MISSION_RULES.crystalRange) {
-    let nearest = null;
-    let nearestDistance = maxDistance;
-
-    for (const crystal of state.crystals) {
-      if (crystal.collected) continue;
-
-      const distance = Math.hypot(
-        state.x - crystal.x,
-        state.z - crystal.z
-      );
-
-      if (distance < nearestDistance) {
-        nearest = crystal;
-        nearestDistance = distance;
-      }
-    }
-
-    return nearest;
-  }
-
-  function collectNearbyMissionCrystal() {
-    const crystal = findNearbyCrystal();
-
-    if (!crystal) {
-      missionMessage("Pwoche pi pre yon kristal pou kolekte li.");
-      return false;
-    }
-
-    return collectMissionCrystal(crystal);
-  }
-
-  /* ===================== KREYE LÈNMI ===================== */
-
-  function createMissionEnemies() {
-    state.enemies = [];
-
-    const count = Math.min(
-      2 + state.mission,
-      8
-    );
-
-    for (let i = 0; i < count; i++) {
-      let x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-      let z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-
-      let attempts = 0;
-
-      while (
-        Math.hypot(x - state.x, z - state.z) < 10 &&
-        attempts < 25
-      ) {
-        x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-        z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
-        attempts++;
-      }
-
-      state.enemies.push({
-        x,
-        y: 0.75,
-        z,
-        health: 2 + Math.floor(state.mission / 3),
-        speed: MISSION_RULES.enemySpeed +
-          rand(0, 0.45),
-        phase: rand(0, Math.PI * 2),
-        alive: true,
-        attackCooldown: rand(0.2, 0.8)
-      });
-    }
-  }
-
-  /* ===================== MOUVMAN LÈNMI ===================== */
-
-  function updateMissionEnemies(deltaTime) {
-    const dt = clamp(deltaTime, 0, 0.05);
-
-    enemyDamageCooldown = Math.max(
-      0,
-      enemyDamageCooldown - dt
-    );
-
-    for (const enemy of state.enemies) {
-      if (!enemy.alive) continue;
-
-      const dx = state.x - enemy.x;
-      const dz = state.z - enemy.z;
-      const distance = Math.hypot(dx, dz);
-
-      enemy.attackCooldown = Math.max(
-        0,
-        enemy.attackCooldown - dt
-      );
-
-      if (distance > MISSION_RULES.enemyRange && distance > 0.001) {
-        enemy.x +=
-          (dx / distance) *
-          enemy.speed *
-          dt;
-
-        enemy.z +=
-          (dz / distance) *
-          enemy.speed *
-          dt;
-      } else if (
-        enemy.attackCooldown <= 0 &&
-        enemyDamageCooldown <= 0
-      ) {
-        state.health = Math.max(
-          0,
-          state.health - MISSION_RULES.enemyDamage
-        );
-
-        enemy.attackCooldown = 1.2;
-        enemyDamageCooldown =
-          MISSION_RULES.enemyDamageDelay;
-
-        missionMessage("Atansyon! Yon lènmi pwoche ou.");
-
-        updateMissionHUD();
-
-        if (state.health <= 0) {
-          failMissionSystems();
-          break;
-        }
-      }
-
-      enemy.x = clamp(
-        enemy.x,
-        -WORLD_LIMIT,
-        WORLD_LIMIT
-      );
-
-      enemy.z = clamp(
-        enemy.z,
-        -WORLD_LIMIT,
-        WORLD_LIMIT
-      );
-    }
-  }
-
-  function renderMissionEnemies(timeSeconds) {
-    if (!gl || lostContext || !meshes.cube) return;
-
-    for (const enemy of state.enemies) {
-      if (!enemy.alive) continue;
-
-      const bob = Math.sin(
-        timeSeconds * 3 + enemy.phase
-      ) * 0.08;
-
-      drawCube(
-        enemy.x,
-        0.75 + bob,
-        enemy.z,
-        0.8,
-        1.15,
-        0.7,
-        [0.82, 0.12, 0.19],
-        timeSeconds * 0.4,
-        0.08
-      );
-
-      drawCube(
-        enemy.x,
-        1.43 + bob,
-        enemy.z,
-        0.65,
-        0.45,
-        0.62,
-        [0.48, 0.08, 0.15],
-        timeSeconds * 0.4
-      );
-    }
-  }
-
-  /* ===================== AKSYON JWÈ A ===================== */
-
-  function performMissionAction() {
-    if (
-      !state.active ||
-      state.paused ||
-      state.finished ||
-      lostContext
-    ) {
-      return;
-    }
-
-    if (state.shotCooldown > 0) return;
-
-    state.shotCooldown = MISSION_RULES.actionCooldown;
-
-    // Si yon kristal toupre, aksyon an kolekte li.
-    const crystal = findNearbyCrystal();
-
-    if (crystal) {
-      collectMissionCrystal(crystal);
-      return;
-    }
-
-    // Sinon, aksyon an frape lènmi ki toupre yo.
-    let target = null;
-    let bestDistance = 3.2;
-
-    for (const enemy of state.enemies) {
-      if (!enemy.alive) continue;
-
-      const distance = Math.hypot(
-        state.x - enemy.x,
-        state.z - enemy.z
-      );
-
-      if (distance < bestDistance) {
-        target = enemy;
-        bestDistance = distance;
-      }
-    }
-
-    if (!target) {
-      missionMessage("Pa gen kristal oswa lènmi toupre ou.");
-      return;
-    }
-
-    target.health -= 1;
-
-    spawnMissionParticles(
-      target.x,
-      target.y,
-      target.z,
-      [1, 0.25, 0.18],
-      6
-    );
-
-    if (target.health <= 0) {
-      target.alive = false;
-      state.score += 25;
-      missionMessage("Ou depase yon lènmi! +25 pwen");
-    } else {
-      missionMessage("Ou frape lènmi an!");
-    }
-
-    updateMissionHUD();
-  }
-
-  function bindMissionAction() {
-    if (!ui.action) return;
-
-    ui.action.style.touchAction = "none";
-
-    ui.action.addEventListener("pointerdown", event => {
-      event.preventDefault();
-
-      if (missionActionPointer !== null) return;
-
-      missionActionPointer = event.pointerId;
-      performMissionAction();
-    });
-
-    const releaseAction = event => {
-      if (event.pointerId === missionActionPointer) {
-        missionActionPointer = null;
-      }
-    };
-
-    ui.action.addEventListener("pointerup", releaseAction);
-    ui.action.addEventListener("pointercancel", releaseAction);
-
-    window.addEventListener("keydown", event => {
-      if (
-        event.repeat ||
-        event.key.toLowerCase() !== "f"
-      ) {
-        return;
-      }
-
-      performMissionAction();
-    });
-  }
-
-  /* ===================== REZILTA MISYON ===================== */
-
-  function completeMissionSystems() {
-    if (state.finished) return;
-
-    const mission = MISSIONS[state.mission] || MISSIONS[1];
-
-    state.finished = true;
-    state.active = false;
-    state.paused = false;
-
-    state.score += mission.reward;
-
-    updateMissionHUD();
-
-    if (typeof finishMission === "function") {
-      finishMission(true);
-      return;
-    }
-
-    if (ui.result) {
-      ui.result.hidden = false;
-      ui.result.style.display = "flex";
-    }
-
-    if (ui.resultTitle) {
-      ui.resultTitle.textContent = "Misyon Reyisi!";
-    }
-
-    if (ui.resultDescription) {
-      ui.resultDescription.textContent =
-        `${mission.title} fini. Ou resevwa ${mission.reward} pwen kòm rekonpans.`;
-    }
-
-    if (ui.resultScore) {
-      ui.resultScore.textContent = String(state.score);
-    }
-
-    missionMessage("Felisitasyon! Ou fini misyon an.");
-  }
-
-  function failMissionSystems() {
-    if (state.finished) return;
-
-    state.finished = true;
-    state.active = false;
-    state.paused = false;
-
-    updateMissionHUD();
-
-    if (ui.result) {
-      ui.result.hidden = false;
-      ui.result.style.display = "flex";
-    }
-
-    if (ui.resultTitle) {
-      ui.resultTitle.textContent = "Misyon Echwe";
-    }
-
-    if (ui.resultDescription) {
-      ui.resultDescription.textContent =
-        "Sante ou fini. Ou ka rekòmanse misyon an.";
-    }
-
-    if (ui.resultScore) {
-      ui.resultScore.textContent = String(state.score);
-    }
-
-    missionMessage("Misyon fini. Eseye ankò!");
-  }
-
-  /* ===================== DEMARE YON MISYON ===================== */
-
-  function setupMissionSystems() {
-    if (missionSystemsReady) return;
-
-    missionSystemsReady = true;
-
-    bindMissionAction();
-    updateMissionHUD();
-  }
-
-  function resetMissionSystems() {
-    const mission = MISSIONS[state.mission] || MISSIONS[1];
-
-    state.collected = 0;
-    state.elapsed = 0;
-    state.health = 100;
-    state.energy = 100;
-    state.finished = false;
-    state.paused = false;
-    state.sprint = false;
-    state.shotCooldown = 0;
-
-    enemyDamageCooldown = 0;
-
-    state.x = 0;
-    state.z = 0;
-    state.jumpY = 0;
-    state.jumpVelocity = 0;
-    state.jumping = false;
-
-    state.cameraAngle = 0;
-    state.cameraPitch = 0.35;
-    state.cameraDistance = 8;
-    state.targetCameraDistance = 8;
-
-    state.particles = [];
-
-    createWorld();
-    createMissionEnemies();
-    updateMissionHUD();
-
-    if (ui.hudObjective) {
-      ui.hudObjective.textContent = mission.description;
-    }
-  }
-
-  /* ===================== MIZAJOU SISTÈM MISYON ===================== */
-
-  function updateMissionSystems(deltaTime) {
-    if (
-      !state.active ||
-      state.paused ||
-      state.finished ||
-      lostContext
-    ) {
-      return;
-    }
-
-    const dt = clamp(deltaTime, 0, 0.05);
-
-    state.elapsed += dt;
-
-    state.shotCooldown = Math.max(
-      0,
-      state.shotCooldown - dt
-    );
-
-    updateMissionParticles(dt);
-    updateMissionEnemies(dt);
-    updateMissionHUD();
-  }
-
-  /* ===================== FIN PATI 4 ===================== */
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ============================================================
-// PATI 5/6 — MENI, PARAMÈT, SOVGAD, HUD AK REZILTA MISYON
-// Kole pati sa a dirèkteman apre Pati 4.
-// Pa mete yon lòt IIFE epi pa ajoute })(); nan pati sa a.
-// ============================================================
-
-const SAVE_KEY = "fobasMission3D_save_v1";
-
-let menuControlsReady = false;
-let saveSystemReady = false;
-let notificationElement = null;
-let notificationHideTimer = null;
-
-// ------------------------------------------------------------
-// 1. ZOUTI POU KONTWOLE AFICHAY ELEMAN HTML YO
-// ------------------------------------------------------------
-
-function setElementVisible(element, visible, displayMode = "flex") {
+  /* ============================================================
+     BOUTON AKSYON HTML
+     ============================================================ */
+
+  function bindClick(element, callback) {
     if (!element) return;
 
-    element.hidden = !visible;
-    element.style.display = visible ? displayMode : "none";
-    element.setAttribute("aria-hidden", visible ? "false" : "true");
-}
+    element.addEventListener("click", (event) => {
+      event.preventDefault();
+      callback();
+    });
+  }
 
-function showScreen(screenName) {
-    const screens = [
-        { name: "menu", element: ui.menu },
-        { name: "game", element: ui.game },
-        { name: "missions", element: ui.missionMenu },
-        { name: "characters", element: ui.characterMenu },
-        { name: "settings", element: ui.settingsMenu },
-        { name: "pause", element: ui.pauseMenu },
-        { name: "result", element: ui.result }
-    ];
+  function setupButtons() {
+    bindClick(dom.btnEnter, enterGame);
 
-    screens.forEach((screen) => {
-        const visible = screen.name === screenName;
-        if (screen.element) {
-            setElementVisible(screen.element, visible);
-        }
+    bindClick(dom.btnPlay, () => {
+      if (!selectMission(state.missionIndex + 1)) {
+        selectMission(1);
+      }
+
+      startGame();
     });
 
-    if (ui.loading) {
-        setElementVisible(ui.loading, false);
-    }
-}
-
-function openMenu(menuName) {
-    if (state.active && menuName !== "game" && menuName !== "pause") {
-        state.active = false;
-    }
-
-    if (menuName === "missions") {
-        showScreen("missions");
-    } else if (menuName === "characters") {
-        showScreen("characters");
-        updateCharacterSelectionUI();
-    } else if (menuName === "settings") {
-        showScreen("settings");
-        syncSettingsControls();
-    } else if (menuName === "pause") {
-        showScreen("pause");
-    } else if (menuName === "game") {
-        showScreen("game");
-    } else {
-        showScreen("menu");
-    }
-}
-
-// ------------------------------------------------------------
-// 2. NOTIFIKASYON AK MESAJ ERÈ
-// ------------------------------------------------------------
-
-function showNotification(message, duration = 2600) {
-    const text = String(message || "");
-
-    if (ui.notifications) {
-        ui.notifications.textContent = text;
-        setElementVisible(ui.notifications, true, "block");
-
-        if (notificationHideTimer !== null) {
-            clearTimeout(notificationHideTimer);
-        }
-
-        notificationHideTimer = setTimeout(() => {
-            if (ui.notifications) {
-                setElementVisible(ui.notifications, false);
-            }
-            notificationHideTimer = null;
-        }, Math.max(500, Number(duration) || 2600));
-
-        return;
-    }
-
-    if (!notificationElement) {
-        notificationElement = document.createElement("div");
-        notificationElement.id = "runtime-notification";
-        notificationElement.setAttribute("role", "status");
-        notificationElement.style.position = "fixed";
-        notificationElement.style.left = "50%";
-        notificationElement.style.bottom = "22px";
-        notificationElement.style.transform = "translateX(-50%)";
-        notificationElement.style.zIndex = "9999";
-        notificationElement.style.maxWidth = "90%";
-        notificationElement.style.padding = "12px 18px";
-        notificationElement.style.borderRadius = "10px";
-        notificationElement.style.background = "rgba(10, 18, 30, 0.94)";
-        notificationElement.style.color = "#ffffff";
-        notificationElement.style.fontFamily = "sans-serif";
-        notificationElement.style.fontSize = "14px";
-        notificationElement.style.textAlign = "center";
-        notificationElement.style.pointerEvents = "none";
-        document.body.appendChild(notificationElement);
-    }
-
-    notificationElement.textContent = text;
-    notificationElement.style.display = "block";
-
-    if (notificationHideTimer !== null) {
-        clearTimeout(notificationHideTimer);
-    }
-
-    notificationHideTimer = setTimeout(() => {
-        if (notificationElement) {
-            notificationElement.style.display = "none";
-        }
-        notificationHideTimer = null;
-    }, Math.max(500, Number(duration) || 2600));
-}
-
-function showAppError(message) {
-    const errorText = String(message || "Yon erè rive pandan jwèt la t ap fonksyone.");
-
-    if (ui.errorMessage) {
-        ui.errorMessage.textContent = errorText;
-    }
-
-    if (ui.error) {
-        setElementVisible(ui.error, true);
-    } else {
-        showNotification(errorText, 5000);
-    }
-}
-
-function hideAppError() {
-    if (ui.error) {
-        setElementVisible(ui.error, false);
-    }
-}
-
-// ------------------------------------------------------------
-// 3. SOVGAD AK CHAJMAN PWOGRÈ JWE A
-// ------------------------------------------------------------
-
-function getSafeSavedData() {
-    return {
-        version: 1,
-        mission: Number(state.mission) || 1,
-        character: String(state.character || "FOBAS"),
-        selectedCharacter: String(
-            state.selectedCharacter || state.character || "FOBAS"
-        ),
-        score: Math.max(0, Number(state.score) || 0),
-        settings: {
-            quality: state.settings.quality || "high",
-            sensitivity: clamp(
-                Number(state.settings.sensitivity) || 5,
-                1,
-                10
-            ),
-            volume: clamp(
-                Number(state.settings.volume) || 0,
-                0,
-                100
-            ),
-            sound: state.settings.sound !== false
-        },
-        savedAt: Date.now()
-    };
-}
-
-function saveGameData() {
-    try {
-        const data = getSafeSavedData();
-        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-        saveSystemReady = true;
-
-        if (ui.saveStatus) {
-            ui.saveStatus.textContent = "Sovgad la reyisi.";
-        }
-
-        return true;
-    } catch (error) {
-        console.warn("Sovgad lokal la pa disponib:", error);
-
-        if (ui.saveStatus) {
-            ui.saveStatus.textContent =
-                "Sovgad pa disponib sou aparèy sa a.";
-        }
-
-        return false;
-    }
-}
-
-function loadGameData() {
-    try {
-        const rawData = localStorage.getItem(SAVE_KEY);
-
-        if (!rawData) {
-            saveSystemReady = true;
-            syncSettingsControls();
-            return false;
-        }
-
-        const data = JSON.parse(rawData);
-
-        if (!data || typeof data !== "object") {
-            throw new Error("Done sovgad yo pa nan bon fòma.");
-        }
-
-        const missionNumber = Number(data.mission);
-        const missionExists = MISSIONS.some(
-            (mission) => Number(mission.id) === missionNumber
-        );
-
-        if (missionExists) {
-            state.mission = missionNumber;
-        }
-
-        const savedCharacter = String(data.character || "");
-        const selectedCharacter = String(
-            data.selectedCharacter || savedCharacter
-        );
-
-        if (CHARACTERS[savedCharacter]) {
-            state.character = savedCharacter;
-        }
-
-        if (CHARACTERS[selectedCharacter]) {
-            state.selectedCharacter = selectedCharacter;
-        } else if (CHARACTERS[state.character]) {
-            state.selectedCharacter = state.character;
-        }
-
-        if (Number.isFinite(Number(data.score))) {
-            state.score = Math.max(0, Number(data.score));
-        }
-
-        if (data.settings && typeof data.settings === "object") {
-            const savedSettings = data.settings;
-
-            if (["low", "medium", "high"].includes(savedSettings.quality)) {
-                state.settings.quality = savedSettings.quality;
-            }
-
-            if (Number.isFinite(Number(savedSettings.sensitivity))) {
-                state.settings.sensitivity = clamp(
-                    Number(savedSettings.sensitivity),
-                    1,
-                    10
-                );
-            }
-
-            if (Number.isFinite(Number(savedSettings.volume))) {
-                state.settings.volume = clamp(
-                    Number(savedSettings.volume),
-                    0,
-                    100
-                );
-            }
-
-            if (typeof savedSettings.sound === "boolean") {
-                state.settings.sound = savedSettings.sound;
-            }
-        }
-
-        saveSystemReady = true;
-        syncSettingsControls();
-        updateCharacterSelectionUI();
-
-        return true;
-    } catch (error) {
-        console.warn("Pa t kapab chaje sovgad la:", error);
-        saveSystemReady = false;
-
-        if (ui.saveStatus) {
-            ui.saveStatus.textContent =
-                "Sovgad la pa t kapab chaje; jwèt la ap itilize paramèt nòmal yo.";
-        }
-
-        return false;
-    }
-}
-
-// ------------------------------------------------------------
-// 4. PARAMÈT JWÈT LA
-// ------------------------------------------------------------
-
-function syncSettingsControls() {
-    if (ui.quality) {
-        ui.quality.value = state.settings.quality || "high";
-    }
-
-    if (ui.sensitivity) {
-        ui.sensitivity.value = String(
-            clamp(Number(state.settings.sensitivity) || 5, 1, 10)
-        );
-    }
-
-    if (ui.volume) {
-        ui.volume.value = String(
-            clamp(Number(state.settings.volume) || 0, 0, 100)
-        );
-    }
-
-    if (ui.sound) {
-        ui.sound.checked = state.settings.sound !== false;
-    }
-}
-
-function readSettingsControls() {
-    if (ui.quality) {
-        const qualityValue = String(ui.quality.value || "high");
-
-        if (["low", "medium", "high"].includes(qualityValue)) {
-            state.settings.quality = qualityValue;
-        }
-    }
-
-    if (ui.sensitivity) {
-        state.settings.sensitivity = clamp(
-            Number(ui.sensitivity.value) || 5,
-            1,
-            10
-        );
-    }
-
-    if (ui.volume) {
-        state.settings.volume = clamp(
-            Number(ui.volume.value) || 0,
-            0,
-            100
-        );
-    }
-
-    if (ui.sound) {
-        state.settings.sound = Boolean(ui.sound.checked);
-    }
-}
-
-function applySettings() {
-    state.settings.sensitivity = clamp(
-        Number(state.settings.sensitivity) || 5,
-        1,
-        10
-    );
-
-    state.settings.volume = clamp(
-        Number(state.settings.volume) || 0,
-        0,
-        100
-    );
-
-    state.settings.sound = state.settings.sound !== false;
-
-    if (canvas) {
-        resizeCanvas();
-    }
-
-    if (ui.saveStatus) {
-        ui.saveStatus.textContent = "Paramèt yo aplike.";
-    }
-}
-
-// ------------------------------------------------------------
-// 5. CHWA PÈSONAJ
-// ------------------------------------------------------------
-
-function updateCharacterSelectionUI() {
-    const selectedId = String(
-        state.selectedCharacter || state.character || "FOBAS"
-    );
-
-    if (ui.selectedCharacter) {
-        const characterData = CHARACTERS[selectedId];
-
-        ui.selectedCharacter.textContent = characterData
-            ? String(characterData.name || selectedId)
-            : selectedId;
-    }
-
-    document.querySelectorAll("[data-character]").forEach((element) => {
-        const characterId = String(element.dataset.character || "");
-        const selected = characterId === selectedId;
-
-        element.classList.toggle("selected", selected);
-        element.setAttribute("aria-pressed", selected ? "true" : "false");
-    });
-}
-
-function selectCharacter(characterId) {
-    const id = String(characterId || "");
-
-    if (!CHARACTERS[id]) {
-        showNotification("Pèsonaj sa a pa disponib.");
-        return;
-    }
-
-    state.selectedCharacter = id;
-    updateCharacterSelectionUI();
-    saveGameData();
-}
-
-function confirmCharacterSelection() {
-    const id = String(
-        state.selectedCharacter || state.character || "FOBAS"
-    );
-
-    if (!CHARACTERS[id]) {
-        showNotification("Chwazi yon pèsonaj ki disponib anvan.");
-        return;
-    }
-
-    state.character = id;
-    saveGameData();
-    showNotification("Pèsonaj chwazi: " + id);
-    openMenu("menu");
-}
-
-// ------------------------------------------------------------
-// 6. CHWA MISYON
-// ------------------------------------------------------------
-
-function selectMission(missionId) {
-    const id = Number(missionId);
-    const mission = MISSIONS.find(
-        (item) => Number(item.id) === id
-    );
-
-    if (!mission) {
-        showNotification("Misyon sa a pa disponib.");
-        return;
-    }
-
-    state.mission = id;
-    saveGameData();
-    startGame();
-}
-
-// ------------------------------------------------------------
-// 7. HUD AK ENFÒMASYON JWÈ A
-// ------------------------------------------------------------
-
-function updateMainHUD() {
-    const characterId = String(state.character || "FOBAS");
-    const characterData = CHARACTERS[characterId] || {};
-    const mission = MISSIONS.find(
-        (item) => Number(item.id) === Number(state.mission)
-    );
-
-    if (ui.hudCharacter) {
-        ui.hudCharacter.textContent = String(
-            characterData.name || characterId
-        );
-    }
-
-    if (ui.hudLevel) {
-        ui.hudLevel.textContent = String(state.mission || 1);
-    }
-
-    if (ui.hudHealth) {
-        ui.hudHealth.textContent = String(
-            Math.round(clamp(Number(state.health) || 0, 0, 100))
-        );
-    }
-
-    if (ui.hudEnergy) {
-        ui.hudEnergy.textContent = String(
-            Math.round(clamp(Number(state.energy) || 0, 0, 100))
-        );
-    }
-
-    if (ui.hudScore) {
-        ui.hudScore.textContent = String(
-            Math.max(0, Math.round(Number(state.score) || 0))
-        );
-    }
-
-    if (ui.hudMissionTitle && mission) {
-        ui.hudMissionTitle.textContent = String(mission.title || "Misyon");
-    }
-
-    if (ui.hudObjective && mission) {
-        ui.hudObjective.textContent = String(
-            mission.description || "Kontinye misyon an."
-        );
-    }
-
-    if (ui.location) {
-        ui.location.textContent =
-            "X: " + Math.round(Number(state.x) || 0) +
-            " | Z: " + Math.round(Number(state.z) || 0);
-    }
-
-    if (ui.timer) {
-        const elapsed = Math.max(0, Number(state.elapsed) || 0);
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = Math.floor(elapsed % 60);
-
-        ui.timer.textContent =
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(seconds).padStart(2, "0");
-    }
-}
-
-// ------------------------------------------------------------
-// 8. KÒMANSE, REKÒMANSE AK KONTINYE MISYON
-// ------------------------------------------------------------
-
-function startGame() {
-    const chosenMission = MISSIONS.find(
-        (item) => Number(item.id) === Number(state.mission)
-    );
-
-    if (!chosenMission) {
-        state.mission = Number(MISSIONS[0].id) || 1;
-    }
-
-    if (!CHARACTERS[state.character]) {
-        state.character = CHARACTERS[state.selectedCharacter]
-            ? state.selectedCharacter
-            : "FOBAS";
-    }
-
-    state.selectedCharacter = state.character;
-    state.paused = false;
-    state.finished = false;
-    state.active = false;
-
-    if (typeof resetMissionSystems === "function") {
-        resetMissionSystems();
-    } else if (typeof createWorld === "function") {
-        createWorld();
-    }
-
-    if (typeof setupMovementControls === "function") {
-        setupMovementControls();
-    }
-
-    if (typeof setupMissionSystems === "function") {
-        setupMissionSystems();
-    }
-
-    state.active = true;
-    state.paused = false;
-    state.finished = false;
-
-    if (ui.result) {
-        setElementVisible(ui.result, false);
-    }
-
-    if (ui.pauseMenu) {
-        setElementVisible(ui.pauseMenu, false);
-    }
-
-    showScreen("game");
-    updateMainHUD();
-    updateMissionHUD();
-
-    saveGameData();
-
-    if (typeof startAnimation === "function") {
-        startAnimation();
-    }
-
-    showNotification("Misyon an kòmanse!");
-}
-
-function restartMission() {
-    startGame();
-}
-
-function continueGame() {
-    startGame();
-}
-
-// ------------------------------------------------------------
-// 9. POZ, REPRANN AK RETOUNEN NAN MENI
-// ------------------------------------------------------------
-
-function pauseGame() {
-    if (!state.active || state.finished) return;
-
-    state.paused = true;
-    state.active = false;
-
-    openMenu("pause");
-}
-
-function resumeGame() {
-    if (state.finished) return;
-
-    state.paused = false;
-    state.active = true;
-
-    showScreen("game");
-
-    if (typeof startAnimation === "function") {
-        startAnimation();
-    }
-}
-
-function returnToMenu() {
-    state.active = false;
-    state.paused = false;
-
-    saveGameData();
-
-    showScreen("menu");
-    updateCharacterSelectionUI();
-}
-
-// ------------------------------------------------------------
-// 10. REZILTA MISYON
-// ------------------------------------------------------------
-
-function finishMission(success = true) {
-    if (state.finished && ui.result && !ui.result.hidden) {
-        return;
-    }
-
-    state.finished = true;
-    state.active = false;
-    state.paused = false;
-
-    const mission = MISSIONS.find(
-        (item) => Number(item.id) === Number(state.mission)
-    );
-
-    if (success && mission) {
-        const reward = Math.max(0, Number(mission.reward) || 0);
-        state.score = Math.max(0, Number(state.score) || 0) + reward;
-    }
-
-    if (ui.resultTitle) {
-        ui.resultTitle.textContent = success
-            ? "MISYON REYISI!"
-            : "MISYON FINI";
-    }
-
-    if (ui.resultDescription) {
-        ui.resultDescription.textContent = success
-            ? "Bon travay! Ou fini misyon an."
-            : "Misyon sa a fini. Ou ka eseye ankò.";
-    }
-
-    if (ui.resultScore) {
-        ui.resultScore.textContent = String(
-            Math.max(0, Math.round(Number(state.score) || 0))
-        );
-    }
-
-    if (ui.nextMission) {
-        const hasNextMission = MISSIONS.some(
-            (item) => Number(item.id) === Number(state.mission) + 1
-        );
-
-        setElementVisible(ui.nextMission, success && hasNextMission, "inline-flex");
-    }
-
-    if (ui.result) {
-        setElementVisible(ui.result, true);
-    } else {
-        showNotification(
-            success ? "Misyon reyisi!" : "Misyon fini.",
-            4000
-        );
-    }
-
-    saveGameData();
-}
-
-function goToNextMission() {
-    const nextId = Number(state.mission) + 1;
-    const nextMission = MISSIONS.find(
-        (item) => Number(item.id) === nextId
-    );
-
-    if (!nextMission) {
-        showNotification("Ou fini tout misyon ki disponib yo!");
-        returnToMenu();
-        return;
-    }
-
-    state.mission = nextId;
-    startGame();
-}
-
-// ------------------------------------------------------------
-// 11. KONEKTE TOUT BOUTON AK MENI YO
-// ------------------------------------------------------------
-
-function bindMenuControls() {
-    if (menuControlsReady) return;
-    menuControlsReady = true;
-
-    if (ui.enter) {
-        ui.enter.addEventListener("click", () => {
-            openMenu("menu");
-        });
-    }
-
-    if (ui.play) {
-        ui.play.addEventListener("click", () => {
-            openMenu("missions");
-        });
-    }
-
-    if (ui.continue) {
-        ui.continue.addEventListener("click", () => {
-            continueGame();
-        });
-    }
-
-    if (ui.missions) {
-        ui.missions.addEventListener("click", () => {
-            openMenu("missions");
-        });
-    }
-
-    if (ui.characters) {
-        ui.characters.addEventListener("click", () => {
-            openMenu("characters");
-        });
-    }
-
-    if (ui.settings) {
-        ui.settings.addEventListener("click", () => {
-            openMenu("settings");
-        });
-    }
-
-    document.querySelectorAll("[data-select-mission]").forEach((element) => {
-        element.addEventListener("click", () => {
-            const missionId = element.dataset.selectMission;
-            selectMission(missionId);
-        });
+    bindClick(dom.btnMissions, () => {
+      showMainMenu("missions");
     });
 
-    document.querySelectorAll("[data-back-menu]").forEach((element) => {
-        element.addEventListener("click", () => {
-            openMenu("menu");
-        });
+    bindClick(dom.btnCharacters, () => {
+      showMainMenu("characters");
     });
 
-    document.querySelectorAll("[data-character]").forEach((element) => {
-        element.addEventListener("click", () => {
-            selectCharacter(element.dataset.character);
-        });
+    bindClick(dom.btnSettings, () => {
+      showMainMenu("settings");
     });
 
-    if (ui.confirmCharacter) {
-        ui.confirmCharacter.addEventListener("click", () => {
-            confirmCharacterSelection();
-        });
-    }
-
-    if (ui.saveSettings) {
-        ui.saveSettings.addEventListener("click", () => {
-            readSettingsControls();
-            applySettings();
-            saveGameData();
-            showNotification("Paramèt yo sove.");
-        });
-    }
-
-    if (ui.pause) {
-        ui.pause.addEventListener("click", () => {
-            if (state.paused) {
-                resumeGame();
-            } else {
-                pauseGame();
-            }
-        });
-    }
-
-    if (ui.resume) {
-        ui.resume.addEventListener("click", () => {
-            resumeGame();
-        });
-    }
-
-    if (ui.restart) {
-        ui.restart.addEventListener("click", () => {
-            restartMission();
-        });
-    }
-
-    if (ui.backMenu) {
-        ui.backMenu.addEventListener("click", () => {
-            returnToMenu();
-        });
-    }
-
-    if (ui.nextMission) {
-        ui.nextMission.addEventListener("click", () => {
-            goToNextMission();
-        });
-    }
-
-    if (ui.resultMenu) {
-        ui.resultMenu.addEventListener("click", () => {
-            returnToMenu();
-        });
-    }
-
-    if (ui.errorClose) {
-        ui.errorClose.addEventListener("click", () => {
-            hideAppError();
-        });
-    }
-
-    if (ui.quality) {
-        ui.quality.addEventListener("change", () => {
-            readSettingsControls();
-            applySettings();
-        });
-    }
-
-    if (ui.sensitivity) {
-        ui.sensitivity.addEventListener("input", () => {
-            readSettingsControls();
-        });
-    }
-
-    if (ui.volume) {
-        ui.volume.addEventListener("input", () => {
-            readSettingsControls();
-        });
-    }
-
-    if (ui.sound) {
-        ui.sound.addEventListener("change", () => {
-            readSettingsControls();
-        });
-    }
-
-    window.addEventListener("beforeunload", () => {
-        saveGameData();
+    bindClick(dom.btnContinue, async () => {
+      await loadGameSave();
+      selectMission(state.missionIndex + 1);
+      startGame();
     });
 
-    window.addEventListener("keydown", (event) => {
-        const key = String(event.key || "").toLowerCase();
-
-        if (key === "escape" || key === "p") {
-            if (state.active && !state.finished) {
-                pauseGame();
-            } else if (state.paused && !state.finished) {
-                resumeGame();
-            }
-        }
-    });
-}
-
-// ------------------------------------------------------------
-// 12. PREPARE SISTÈM MENI AK SOVGAD YO
-// Apèl fonksyon sa yo ap fèt nan Pati 6.
-// ------------------------------------------------------------
-
-function setupMenuSystems() {
-    loadGameData();
-    syncSettingsControls();
-    updateCharacterSelectionUI();
-    bindMenuControls();
-
-    if (ui.result) {
-        setElementVisible(ui.result, false);
-    }
-
-    if (ui.pauseMenu) {
-        setElementVisible(ui.pauseMenu, false);
-    }
-
-    if (ui.error) {
-        setElementVisible(ui.error, false);
-    }
-
-    updateMainHUD();
-}
-
-
-
-
-
-
-
-
-
-
-
-// ============================================================
-// PATI 6/6 — WEBGL, BOUK ANIMASYON, SON, ERÈ AK DEMARAJ
-// Dènye blòk appgametirfobas.js
-// Kole li dirèkteman apre Pati 5.
-// ============================================================
-
-// ------------------------------------------------------------
-// 1. SHADER WEBGL
-// ------------------------------------------------------------
-
-const FINAL_VERTEX_SHADER_SOURCE = `
-    attribute vec3 aPosition;
-
-    uniform mat4 uProjection;
-    uniform mat4 uView;
-    uniform mat4 uModel;
-
-    void main() {
-        gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
-    }
-`;
-
-const FINAL_FRAGMENT_SHADER_SOURCE = `
-    precision mediump float;
-
-    uniform vec4 uColor;
-
-    void main() {
-        gl_FragColor = uColor;
-    }
-`;
-
-// ------------------------------------------------------------
-// 2. KREYE YON PWOGRAM SHADER WEBGL
-// ------------------------------------------------------------
-
-function finalCompileShader(type, source) {
-    const shader = gl.createShader(type);
-
-    if (!shader) {
-        throw new Error("WebGL pa t kapab kreye shader la.");
-    }
-
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        const message = gl.getShaderInfoLog(shader) || "Erè konpilasyon shader.";
-        gl.deleteShader(shader);
-        throw new Error(message);
-    }
-
-    return shader;
-}
-
-function finalCreateProgram() {
-    const vertexShader = finalCompileShader(
-        gl.VERTEX_SHADER,
-        FINAL_VERTEX_SHADER_SOURCE
-    );
-
-    const fragmentShader = finalCompileShader(
-        gl.FRAGMENT_SHADER,
-        FINAL_FRAGMENT_SHADER_SOURCE
-    );
-
-    const newProgram = gl.createProgram();
-
-    if (!newProgram) {
-        gl.deleteShader(vertexShader);
-        gl.deleteShader(fragmentShader);
-        throw new Error("WebGL pa t kapab kreye pwogram grafik la.");
-    }
-
-    gl.attachShader(newProgram, vertexShader);
-    gl.attachShader(newProgram, fragmentShader);
-
-    gl.bindAttribLocation(newProgram, 0, "aPosition");
-    gl.linkProgram(newProgram);
-
-    gl.deleteShader(vertexShader);
-    gl.deleteShader(fragmentShader);
-
-    if (!gl.getProgramParameter(newProgram, gl.LINK_STATUS)) {
-        const message =
-            gl.getProgramInfoLog(newProgram) || "Erè lyen pwogram WebGL.";
-        gl.deleteProgram(newProgram);
-        throw new Error(message);
-    }
-
-    return newProgram;
-}
-
-// ------------------------------------------------------------
-// 3. CHÈCHE ADRES ATRIBI AK UNIFORM YO
-// ------------------------------------------------------------
-
-function finalSetupLocations() {
-    locations = locations || {};
-
-    const positionLocation = gl.getAttribLocation(program, "aPosition");
-    const projectionLocation = gl.getUniformLocation(program, "uProjection");
-    const viewLocation = gl.getUniformLocation(program, "uView");
-    const modelLocation = gl.getUniformLocation(program, "uModel");
-    const colorLocation = gl.getUniformLocation(program, "uColor");
-
-    // Non estanda yo.
-    locations.aPosition = positionLocation;
-    locations.uProjection = projectionLocation;
-    locations.uView = viewLocation;
-    locations.uModel = modelLocation;
-    locations.uColor = colorLocation;
-
-    // Alias pou fonksyon desen ki ka itilize non kout.
-    locations.position = positionLocation;
-    locations.projection = projectionLocation;
-    locations.view = viewLocation;
-    locations.model = modelLocation;
-    locations.color = colorLocation;
-}
-
-// ------------------------------------------------------------
-// 4. INISYALIZE WEBGL
-// ------------------------------------------------------------
-
-function initWebGL() {
-    if (!ui.canvas) {
-        throw new Error("Eleman canvas #game-canvas pa jwenn nan HTML la.");
-    }
-
-    canvas = ui.canvas;
-
-    const contextOptions = {
-        alpha: false,
-        antialias: true,
-        depth: true,
-        stencil: false,
-        powerPreference: "high-performance"
-    };
-
-    gl =
-        canvas.getContext("webgl", contextOptions) ||
-        canvas.getContext("experimental-webgl", contextOptions);
-
-    if (!gl) {
-        throw new Error(
-            "Navigatè sa a pa sipòte WebGL. Eseye yon navigatè ki pi resan."
+    document.querySelectorAll("[data-select-mission]").forEach((button) => {
+      bindClick(button, () => {
+        const number = Number(
+          button.getAttribute("data-select-mission")
         );
-    }
 
-    program = finalCreateProgram();
-
-    gl.useProgram(program);
-
-    finalSetupLocations();
-
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
-    gl.clearColor(0.48, 0.72, 0.91, 1.0);
-
-    if (typeof setupMeshes === "function") {
-        setupMeshes();
-    }
-
-    resizeCanvas();
-
-    lostContext = false;
-
-    return true;
-}
-
-// ------------------------------------------------------------
-// 5. AJISTE CANVAS LA AK GWOSÈ EKRAN AN
-// ------------------------------------------------------------
-
-function finalResizeCanvas() {
-    if (!canvas || !gl) return;
-
-    const pixelRatio = Math.min(
-        Math.max(window.devicePixelRatio || 1, 1),
-        state.settings.quality === "low" ? 1 : 1.75
-    );
-
-    const rect = canvas.getBoundingClientRect();
-
-    const displayWidth = Math.max(
-        1,
-        Math.floor((rect.width || window.innerWidth) * pixelRatio)
-    );
-
-    const displayHeight = Math.max(
-        1,
-        Math.floor((rect.height || window.innerHeight) * pixelRatio)
-    );
-
-    if (
-        canvas.width !== displayWidth ||
-        canvas.height !== displayHeight
-    ) {
-        canvas.width = displayWidth;
-        canvas.height = displayHeight;
-    }
-
-    canvasWidth = canvas.width;
-    canvasHeight = canvas.height;
-
-    gl.viewport(0, 0, canvasWidth, canvasHeight);
-}
-
-function installResizeHandler() {
-    window.addEventListener("resize", () => {
-        if (typeof resizeCanvas === "function") {
-            resizeCanvas();
-        } else {
-            finalResizeCanvas();
+        if (selectMission(number)) {
+          startGame();
         }
+      });
     });
-}
 
-// ------------------------------------------------------------
-// 6. BOUK ANIMASYON JWÈ A
-// ------------------------------------------------------------
+    document.querySelectorAll("[data-character]").forEach((button) => {
+      bindClick(button, () => {
+        selectCharacter(
+          button.getAttribute("data-character")
+        );
+      });
+    });
 
-let finalAnimationFrame = 0;
-let finalLoopLastTime = 0;
-let finalLoopStarted = false;
+    document.querySelectorAll("[data-back-menu]").forEach((button) => {
+      bindClick(button, () => showMainMenu());
+    });
 
-function startAnimation() {
-    if (finalLoopStarted) return;
+    bindClick(dom.btnConfirmCharacter, confirmCharacter);
+    bindClick(dom.btnSaveSettings, saveSettings);
 
-    finalLoopStarted = true;
-    animationStarted = true;
-    finalLoopLastTime = 0;
+    bindClick(dom.btnPause, pauseGame);
+    bindClick(dom.btnResume, resumeGame);
+    bindClick(dom.btnRestart, restartMission);
+    bindClick(dom.btnBackToMenu, backToMainMenu);
 
-    finalAnimationFrame = requestAnimationFrame(finalAnimationLoop);
-}
+    bindClick(dom.btnNextMission, nextMission);
+    bindClick(dom.btnResultMenu, backToMainMenu);
 
-function stopAnimation() {
-    finalLoopStarted = false;
-    animationStarted = false;
+    bindClick(dom.btnJump, jump);
+    bindClick(dom.btnRun, toggleRun);
+    bindClick(dom.btnAction, performAction);
+    bindClick(dom.btnCamera, toggleCamera);
+    bindClick(dom.btnPitch2, pitchCamera);
 
-    if (finalAnimationFrame) {
-        cancelAnimationFrame(finalAnimationFrame);
-        finalAnimationFrame = 0;
-    }
-}
+    bindClick(dom.btnErrorClose, hideError);
+  }
 
-function finalAnimationLoop(timestamp) {
-    if (!finalLoopStarted) return;
+  function updateMobileControls() {
+    if (!dom.mobileControls) return;
 
-    finalAnimationFrame = requestAnimationFrame(finalAnimationLoop);
+    const isTouchDevice =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0;
 
-    const currentTime = Number(timestamp) || 0;
+    dom.mobileControls.style.display =
+      isTouchDevice ? "" : "";
+  }
 
-    let deltaTime = finalLoopLastTime > 0
-        ? (currentTime - finalLoopLastTime) / 1000
-        : 1 / 60;
+  /* ============================================================
+     INISYALIZASYON
+     ============================================================ */
 
-    finalLoopLastTime = currentTime;
+  async function initialize() {
+    if (state.initialized) return;
 
-    // Evite gwo so nan mouvman apre yon telefòn retounen nan jwèt la.
-    deltaTime = clamp(deltaTime, 0, 0.05);
-
-    if (lostContext || !gl || !program) {
-        return;
-    }
+    setLoading(10, "Preparasyon motè grafik 3D...");
 
     try {
-        if (state.active && !state.paused && !state.finished) {
-            if (typeof updateMovement === "function") {
-                updateMovement(deltaTime);
-            }
+      initializeWebGL();
 
-            if (typeof updateMissionSystems === "function") {
-                updateMissionSystems(deltaTime);
-            }
+      setLoading(40, "Preparasyon mond jwèt la...");
 
-            if (Number(state.health) <= 0 && !state.finished) {
-                state.health = 0;
-                finishMission(false);
-            }
+      setupButtons();
+      setupJoystick();
+      setupCameraTouch();
+      setupMouseControls();
+
+      window.addEventListener("keydown", onKeyDown, {
+        passive: false
+      });
+
+      window.addEventListener("keyup", onKeyUp);
+
+      window.addEventListener("resize", () => {
+        resizeRenderer();
+        renderFrame();
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && state.running) {
+          pauseGame();
         }
+      });
 
-        if (typeof resizeCanvas === "function") {
-            resizeCanvas();
-        } else {
-            finalResizeCanvas();
-        }
+      setLoading(65, "Preparasyon sovgad...");
+      try {
+        state.db = await openDatabase();
+        await loadGameSave();
+      } catch (error) {
+        console.warn(
+          `${APP}: IndexedDB pa disponib nan anviwònman sa a.`,
+          error
+        );
 
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        updateSaveStatus(
+          "Sovgad IndexedDB pa disponib nan navigatè sa a."
+        );
+      }
 
-        if (typeof renderScene === "function") {
-            renderScene(currentTime / 1000);
-        }
+      applySettingsToControls();
 
-        if (typeof renderMissionEnemies === "function") {
-            renderMissionEnemies(currentTime / 1000);
-        }
+      selectMission(state.missionIndex + 1);
+      updateCharacterSelection();
+      updateHUD();
 
-        if (typeof renderMissionParticles === "function") {
-            renderMissionParticles();
-        }
+      setLoading(100, "Motè a pare!");
 
-        if (typeof updateMainHUD === "function") {
-            updateMainHUD();
-        }
+      state.initialized = true;
+
+      renderFrame();
+
+      if (dom.btnEnter) {
+        dom.btnEnter.disabled = false;
+      }
     } catch (error) {
-        console.error("Erè nan bouk animasyon an:", error);
-        showAppError(
-            "Yon erè rive pandan jwèt la t ap mache. Tcheke konsòl navigatè a pou plis detay."
-        );
-        state.active = false;
+      console.error(`${APP}:`, error);
+
+      if (dom.fallback) {
+        dom.fallback.hidden = false;
+        dom.fallback.textContent =
+          "Mond jwèt la pa t kapab chaje. Verifye sipò WebGL navigatè a.";
+      }
+
+      showError(
+        `Motè jwèt la pa t kapab demare: ${error.message}`
+      );
+
+      setLoading(100, "Erè pandan preparasyon motè a.");
     }
-}
+  }
 
-// ------------------------------------------------------------
-// 7. SIPÒ POU SON, SAN OBLIGASYON POU JWÈ A
-// ------------------------------------------------------------
+  /* ============================================================
+     API PUBLIK POU DEBAGAJ
+     ============================================================ */
 
-function playGameTone(frequency = 440, duration = 0.08, volume = 0.08) {
-    if (!state.settings.sound) return;
+  window.FOBAS_MISSION_3D = {
+    version: VERSION,
 
-    const audioVolume = clamp(
-        (Number(state.settings.volume) || 0) / 100,
-        0,
-        1
-    );
+    startGame,
+    pauseGame,
+    resumeGame,
+    restartMission,
+    backToMainMenu,
 
-    if (audioVolume <= 0) return;
+    selectMission,
+    selectCharacter,
+    confirmCharacter,
 
-    const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
+    shoot,
+    jump,
+    toggleRun,
+    toggleCamera,
+    pitchCamera,
+    activateBeaconIfNear,
 
-    if (!AudioContextClass) return;
+    saveGame,
+    loadGameSave,
+    updateHUD,
 
-    try {
-        if (!state.audio) {
-            state.audio = new AudioContextClass();
-        }
+    getState() {
+      return {
+        initialized: state.initialized,
+        running: state.running,
+        paused: state.paused,
+        completed: state.completed,
+        gameOver: state.gameOver,
 
-        const audioContext = state.audio;
+        mission: state.missionIndex + 1,
+        character: state.character,
 
-        if (audioContext.state === "suspended") {
-            audioContext.resume().catch(() => {});
-        }
+        score: state.score,
+        health: state.health,
+        energy: state.energy,
 
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(
-            clamp(Number(frequency) || 440, 80, 1500),
-            audioContext.currentTime
-        );
-
-        gainNode.gain.setValueAtTime(
-            clamp(Number(volume) || 0.08, 0, 0.15) * audioVolume,
-            audioContext.currentTime
-        );
-
-        gainNode.gain.exponentialRampToValueAtTime(
-            0.001,
-            audioContext.currentTime + Math.max(0.03, duration)
-        );
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.start();
-        oscillator.stop(
-            audioContext.currentTime + Math.max(0.03, duration)
-        );
-    } catch (error) {
-        console.warn("Son pa disponib:", error);
+        progress: state.progress,
+        enemiesEliminated: state.enemiesEliminated,
+        beaconsActivated: state.beaconsActivated
+      };
     }
-}
+  };
 
-// ------------------------------------------------------------
-// 8. JERE PÈT KONTÈKS WEBGL
-// ------------------------------------------------------------
+  /* ============================================================
+     LANSE MOTÈ A
+     ============================================================ */
 
-function installWebGLContextHandlers() {
-    if (!canvas) return;
-
-    canvas.addEventListener("webglcontextlost", (event) => {
-        event.preventDefault();
-
-        lostContext = true;
-        state.active = false;
-
-        showAppError(
-            "Grafik jwèt la te entèwonp. Eseye rechaje paj la pou rekòmanse."
-        );
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize, {
+      once: true
     });
-
-    canvas.addEventListener("webglcontextrestored", () => {
-        lostContext = false;
-
-        try {
-            initWebGL();
-            createWorld();
-            startAnimation();
-
-            showNotification("Grafik yo retabli.");
-        } catch (error) {
-            console.error("WebGL pa t kapab retabli:", error);
-            showAppError(
-                "Jwèt la pa t kapab retabli grafik yo. Rechaje paj la."
-            );
-        }
-    });
-}
-
-// ------------------------------------------------------------
-// 9. DEMARAJ JWÈT LA
-// ------------------------------------------------------------
-
-let finalGameInitialized = false;
-
-function initializeGame() {
-    if (finalGameInitialized) return;
-
-    finalGameInitialized = true;
-
-    try {
-        if (ui.progress) {
-            ui.progress.style.width = "10%";
-        }
-
-        if (ui.loadingStatus) {
-            ui.loadingStatus.textContent = "Preparasyon grafik yo...";
-        }
-
-        initWebGL();
-
-        if (ui.progress) {
-            ui.progress.style.width = "45%";
-        }
-
-        if (ui.loadingStatus) {
-            ui.loadingStatus.textContent = "Kreyasyon mond lan...";
-        }
-
-        createWorld();
-
-        if (ui.progress) {
-            ui.progress.style.width = "70%";
-        }
-
-        if (ui.loadingStatus) {
-            ui.loadingStatus.textContent = "Chajman meni ak paramèt yo...";
-        }
-
-        setupMenuSystems();
-        setupMovementControls();
-        setupMissionSystems();
-
-        installResizeHandler();
-        installWebGLContextHandlers();
-
-        if (ui.progress) {
-            ui.progress.style.width = "100%";
-        }
-
-        if (ui.loadingStatus) {
-            ui.loadingStatus.textContent = "Jwèt la pare!";
-        }
-
-        if (ui.fallback) {
-            setElementVisible(ui.fallback, false);
-        }
-
-        showScreen("menu");
-        updateMainHUD();
-        updateCharacterSelectionUI();
-
-        startAnimation();
-
-        if (ui.loading) {
-            setTimeout(() => {
-                setElementVisible(ui.loading, false);
-            }, 350);
-        }
-    } catch (error) {
-        finalGameInitialized = false;
-
-        console.error("Erè pandan demaraj jwèt la:", error);
-
-        if (ui.loadingStatus) {
-            ui.loadingStatus.textContent = "Jwèt la pa t kapab demare.";
-        }
-
-        if (ui.fallback) {
-            setElementVisible(ui.fallback, true);
-        }
-
-        showAppError(
-            error && error.message
-                ? error.message
-                : "Yon erè enkoni anpeche jwèt la demare."
-        );
-    }
-}
-
-// ------------------------------------------------------------
-// 10. EVITE DEMARAJ ANPLIS E KONEKTE PAJ LA
-// ------------------------------------------------------------
-
-function finalBootGame() {
-    if (document.readyState === "loading") {
-        document.addEventListener(
-            "DOMContentLoaded",
-            initializeGame,
-            { once: true }
-        );
-    } else {
-        initializeGame();
-    }
-}
-
-finalBootGame();
-
-// ============================================================
-// FIN FICHYE APPGAMETIRFOBAS.JS
-// Fèmen IIFE prensipal ki te kòmanse nan Pati 1.
-// ============================================================
+  } else {
+    initialize();
+  }
 })();
+
+
+
+
+
+
+
+
+
+
+
+
