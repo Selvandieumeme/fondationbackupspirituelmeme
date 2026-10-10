@@ -2016,3 +2016,670 @@
 
 
 
+
+
+
+
+
+
+
+  /* =========================================================
+     PATI 4 — MISYON, KRISTAL, LÈNMI, AKSYON AK REKONPANZ
+     Kontinye nan menm IIFE a.
+  ========================================================= */
+
+  /* ===================== PARAMÈT MISYON ===================== */
+
+  const MISSION_RULES = {
+    crystalRange: 1.65,
+    enemyRange: 1.35,
+    enemySpeed: 1.15,
+    enemyDamage: 8,
+    enemyDamageDelay: 1.0,
+    actionCooldown: 0.35,
+    particleLifetime: 0.65
+  };
+
+  let missionSystemsReady = false;
+  let enemyDamageCooldown = 0;
+  let missionActionPointer = null;
+
+  /* ===================== NOTIFIKASYON ===================== */
+
+  function missionMessage(message) {
+    if (typeof showNotification === "function") {
+      showNotification(message);
+      return;
+    }
+
+    if (!ui.notifications) return;
+
+    ui.notifications.textContent = message;
+    ui.notifications.classList.add("show");
+
+    window.clearTimeout(state.notifyTimer);
+
+    state.notifyTimer = window.setTimeout(() => {
+      if (ui.notifications) {
+        ui.notifications.classList.remove("show");
+      }
+    }, 2000);
+  }
+
+  /* ===================== MIZAJOU HUD MISYON ===================== */
+
+  function updateMissionHUD() {
+    const mission = MISSIONS[state.mission] || MISSIONS[1];
+    const target = mission.target;
+
+    if (ui.hudMissionTitle) {
+      ui.hudMissionTitle.textContent =
+        `Misyon ${state.mission}: ${mission.title}`;
+    }
+
+    if (ui.hudObjective) {
+      ui.hudObjective.textContent = mission.description;
+    }
+
+    if (ui.objectiveCount) {
+      ui.objectiveCount.textContent =
+        `${Math.min(state.collected, target)} / ${target}`;
+    }
+
+    if (ui.objectiveProgress) {
+      const percentage = clamp(
+        (state.collected / target) * 100,
+        0,
+        100
+      );
+
+      if ("value" in ui.objectiveProgress) {
+        ui.objectiveProgress.value = percentage;
+      } else {
+        ui.objectiveProgress.style.width =
+          `${percentage}%`;
+      }
+
+      ui.objectiveProgress.setAttribute(
+        "aria-valuenow",
+        String(Math.round(percentage))
+      );
+    }
+
+    if (ui.hudScore) {
+      ui.hudScore.textContent = String(state.score);
+    }
+
+    if (ui.hudHealth) {
+      ui.hudHealth.textContent =
+        `${Math.round(state.health)}%`;
+    }
+
+    if (ui.hudEnergy) {
+      ui.hudEnergy.textContent =
+        `${Math.round(state.energy)}%`;
+    }
+
+    if (ui.hudLevel) {
+      ui.hudLevel.textContent =
+        `Nivo ${state.mission}`;
+    }
+
+    if (ui.hudCharacter) {
+      ui.hudCharacter.textContent = state.character;
+    }
+
+    if (ui.timer) {
+      const totalSeconds = Math.max(
+        0,
+        Math.floor(state.elapsed)
+      );
+
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+
+      ui.timer.textContent =
+        `${String(minutes).padStart(2, "0")}:` +
+        `${String(seconds).padStart(2, "0")}`;
+    }
+  }
+
+  /* ===================== PATIKIL KI PI PRE KRISTAL ===================== */
+
+  function spawnMissionParticles(x, y, z, color, amount = 8) {
+    for (let i = 0; i < amount; i++) {
+      const angle = rand(0, Math.PI * 2);
+      const speed = rand(0.6, 2.2);
+
+      state.particles.push({
+        x,
+        y,
+        z,
+        vx: Math.cos(angle) * speed,
+        vy: rand(0.7, 2.2),
+        vz: Math.sin(angle) * speed,
+        life: MISSION_RULES.particleLifetime,
+        maxLife: MISSION_RULES.particleLifetime,
+        color: color.slice()
+      });
+    }
+  }
+
+  function updateMissionParticles(deltaTime) {
+    const dt = clamp(deltaTime, 0, 0.05);
+
+    for (let i = state.particles.length - 1; i >= 0; i--) {
+      const particle = state.particles[i];
+
+      particle.life -= dt;
+      particle.x += particle.vx * dt;
+      particle.y += particle.vy * dt;
+      particle.z += particle.vz * dt;
+      particle.vy -= 4 * dt;
+
+      if (particle.life <= 0) {
+        state.particles.splice(i, 1);
+      }
+    }
+  }
+
+  function renderMissionParticles() {
+    if (!gl || lostContext || !meshes.crystal) return;
+
+    for (const particle of state.particles) {
+      const scale = Math.max(
+        0.04,
+        0.16 * (particle.life / particle.maxLife)
+      );
+
+      drawMesh(
+        meshes.crystal,
+        modelMatrix(
+          particle.x,
+          Math.max(0.08, particle.y),
+          particle.z,
+          scale,
+          scale,
+          scale
+        ),
+        particle.color,
+        0.35
+      );
+    }
+  }
+
+  /* ===================== KOLEKTE KRISTAL ===================== */
+
+  function collectMissionCrystal(crystal) {
+    if (!crystal || crystal.collected) return false;
+
+    const mission = MISSIONS[state.mission] || MISSIONS[1];
+
+    if (state.collected >= mission.target) {
+      return false;
+    }
+
+    crystal.collected = true;
+    state.collected += 1;
+    state.score += 10;
+
+    spawnMissionParticles(
+      crystal.x,
+      crystal.y,
+      crystal.z,
+      [0.15, 0.9, 1],
+      10
+    );
+
+    missionMessage(
+      `Kristal jwenn! ${state.collected}/${mission.target}`
+    );
+
+    updateMissionHUD();
+
+    if (state.collected >= mission.target) {
+      completeMissionSystems();
+    }
+
+    return true;
+  }
+
+  function findNearbyCrystal(maxDistance = MISSION_RULES.crystalRange) {
+    let nearest = null;
+    let nearestDistance = maxDistance;
+
+    for (const crystal of state.crystals) {
+      if (crystal.collected) continue;
+
+      const distance = Math.hypot(
+        state.x - crystal.x,
+        state.z - crystal.z
+      );
+
+      if (distance < nearestDistance) {
+        nearest = crystal;
+        nearestDistance = distance;
+      }
+    }
+
+    return nearest;
+  }
+
+  function collectNearbyMissionCrystal() {
+    const crystal = findNearbyCrystal();
+
+    if (!crystal) {
+      missionMessage("Pwoche pi pre yon kristal pou kolekte li.");
+      return false;
+    }
+
+    return collectMissionCrystal(crystal);
+  }
+
+  /* ===================== KREYE LÈNMI ===================== */
+
+  function createMissionEnemies() {
+    state.enemies = [];
+
+    const count = Math.min(
+      2 + state.mission,
+      8
+    );
+
+    for (let i = 0; i < count; i++) {
+      let x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+      let z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+
+      let attempts = 0;
+
+      while (
+        Math.hypot(x - state.x, z - state.z) < 10 &&
+        attempts < 25
+      ) {
+        x = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+        z = rand(-WORLD_LIMIT + 5, WORLD_LIMIT - 5);
+        attempts++;
+      }
+
+      state.enemies.push({
+        x,
+        y: 0.75,
+        z,
+        health: 2 + Math.floor(state.mission / 3),
+        speed: MISSION_RULES.enemySpeed +
+          rand(0, 0.45),
+        phase: rand(0, Math.PI * 2),
+        alive: true,
+        attackCooldown: rand(0.2, 0.8)
+      });
+    }
+  }
+
+  /* ===================== MOUVMAN LÈNMI ===================== */
+
+  function updateMissionEnemies(deltaTime) {
+    const dt = clamp(deltaTime, 0, 0.05);
+
+    enemyDamageCooldown = Math.max(
+      0,
+      enemyDamageCooldown - dt
+    );
+
+    for (const enemy of state.enemies) {
+      if (!enemy.alive) continue;
+
+      const dx = state.x - enemy.x;
+      const dz = state.z - enemy.z;
+      const distance = Math.hypot(dx, dz);
+
+      enemy.attackCooldown = Math.max(
+        0,
+        enemy.attackCooldown - dt
+      );
+
+      if (distance > MISSION_RULES.enemyRange && distance > 0.001) {
+        enemy.x +=
+          (dx / distance) *
+          enemy.speed *
+          dt;
+
+        enemy.z +=
+          (dz / distance) *
+          enemy.speed *
+          dt;
+      } else if (
+        enemy.attackCooldown <= 0 &&
+        enemyDamageCooldown <= 0
+      ) {
+        state.health = Math.max(
+          0,
+          state.health - MISSION_RULES.enemyDamage
+        );
+
+        enemy.attackCooldown = 1.2;
+        enemyDamageCooldown =
+          MISSION_RULES.enemyDamageDelay;
+
+        missionMessage("Atansyon! Yon lènmi pwoche ou.");
+
+        updateMissionHUD();
+
+        if (state.health <= 0) {
+          failMissionSystems();
+          break;
+        }
+      }
+
+      enemy.x = clamp(
+        enemy.x,
+        -WORLD_LIMIT,
+        WORLD_LIMIT
+      );
+
+      enemy.z = clamp(
+        enemy.z,
+        -WORLD_LIMIT,
+        WORLD_LIMIT
+      );
+    }
+  }
+
+  function renderMissionEnemies(timeSeconds) {
+    if (!gl || lostContext || !meshes.cube) return;
+
+    for (const enemy of state.enemies) {
+      if (!enemy.alive) continue;
+
+      const bob = Math.sin(
+        timeSeconds * 3 + enemy.phase
+      ) * 0.08;
+
+      drawCube(
+        enemy.x,
+        0.75 + bob,
+        enemy.z,
+        0.8,
+        1.15,
+        0.7,
+        [0.82, 0.12, 0.19],
+        timeSeconds * 0.4,
+        0.08
+      );
+
+      drawCube(
+        enemy.x,
+        1.43 + bob,
+        enemy.z,
+        0.65,
+        0.45,
+        0.62,
+        [0.48, 0.08, 0.15],
+        timeSeconds * 0.4
+      );
+    }
+  }
+
+  /* ===================== AKSYON JWÈ A ===================== */
+
+  function performMissionAction() {
+    if (
+      !state.active ||
+      state.paused ||
+      state.finished ||
+      lostContext
+    ) {
+      return;
+    }
+
+    if (state.shotCooldown > 0) return;
+
+    state.shotCooldown = MISSION_RULES.actionCooldown;
+
+    // Si yon kristal toupre, aksyon an kolekte li.
+    const crystal = findNearbyCrystal();
+
+    if (crystal) {
+      collectMissionCrystal(crystal);
+      return;
+    }
+
+    // Sinon, aksyon an frape lènmi ki toupre yo.
+    let target = null;
+    let bestDistance = 3.2;
+
+    for (const enemy of state.enemies) {
+      if (!enemy.alive) continue;
+
+      const distance = Math.hypot(
+        state.x - enemy.x,
+        state.z - enemy.z
+      );
+
+      if (distance < bestDistance) {
+        target = enemy;
+        bestDistance = distance;
+      }
+    }
+
+    if (!target) {
+      missionMessage("Pa gen kristal oswa lènmi toupre ou.");
+      return;
+    }
+
+    target.health -= 1;
+
+    spawnMissionParticles(
+      target.x,
+      target.y,
+      target.z,
+      [1, 0.25, 0.18],
+      6
+    );
+
+    if (target.health <= 0) {
+      target.alive = false;
+      state.score += 25;
+      missionMessage("Ou depase yon lènmi! +25 pwen");
+    } else {
+      missionMessage("Ou frape lènmi an!");
+    }
+
+    updateMissionHUD();
+  }
+
+  function bindMissionAction() {
+    if (!ui.action) return;
+
+    ui.action.style.touchAction = "none";
+
+    ui.action.addEventListener("pointerdown", event => {
+      event.preventDefault();
+
+      if (missionActionPointer !== null) return;
+
+      missionActionPointer = event.pointerId;
+      performMissionAction();
+    });
+
+    const releaseAction = event => {
+      if (event.pointerId === missionActionPointer) {
+        missionActionPointer = null;
+      }
+    };
+
+    ui.action.addEventListener("pointerup", releaseAction);
+    ui.action.addEventListener("pointercancel", releaseAction);
+
+    window.addEventListener("keydown", event => {
+      if (
+        event.repeat ||
+        event.key.toLowerCase() !== "f"
+      ) {
+        return;
+      }
+
+      performMissionAction();
+    });
+  }
+
+  /* ===================== REZILTA MISYON ===================== */
+
+  function completeMissionSystems() {
+    if (state.finished) return;
+
+    const mission = MISSIONS[state.mission] || MISSIONS[1];
+
+    state.finished = true;
+    state.active = false;
+    state.paused = false;
+
+    state.score += mission.reward;
+
+    updateMissionHUD();
+
+    if (typeof finishMission === "function") {
+      finishMission(true);
+      return;
+    }
+
+    if (ui.result) {
+      ui.result.hidden = false;
+      ui.result.style.display = "flex";
+    }
+
+    if (ui.resultTitle) {
+      ui.resultTitle.textContent = "Misyon Reyisi!";
+    }
+
+    if (ui.resultDescription) {
+      ui.resultDescription.textContent =
+        `${mission.title} fini. Ou resevwa ${mission.reward} pwen kòm rekonpans.`;
+    }
+
+    if (ui.resultScore) {
+      ui.resultScore.textContent = String(state.score);
+    }
+
+    missionMessage("Felisitasyon! Ou fini misyon an.");
+  }
+
+  function failMissionSystems() {
+    if (state.finished) return;
+
+    state.finished = true;
+    state.active = false;
+    state.paused = false;
+
+    updateMissionHUD();
+
+    if (ui.result) {
+      ui.result.hidden = false;
+      ui.result.style.display = "flex";
+    }
+
+    if (ui.resultTitle) {
+      ui.resultTitle.textContent = "Misyon Echwe";
+    }
+
+    if (ui.resultDescription) {
+      ui.resultDescription.textContent =
+        "Sante ou fini. Ou ka rekòmanse misyon an.";
+    }
+
+    if (ui.resultScore) {
+      ui.resultScore.textContent = String(state.score);
+    }
+
+    missionMessage("Misyon fini. Eseye ankò!");
+  }
+
+  /* ===================== DEMARE YON MISYON ===================== */
+
+  function setupMissionSystems() {
+    if (missionSystemsReady) return;
+
+    missionSystemsReady = true;
+
+    bindMissionAction();
+    updateMissionHUD();
+  }
+
+  function resetMissionSystems() {
+    const mission = MISSIONS[state.mission] || MISSIONS[1];
+
+    state.collected = 0;
+    state.elapsed = 0;
+    state.health = 100;
+    state.energy = 100;
+    state.finished = false;
+    state.paused = false;
+    state.sprint = false;
+    state.shotCooldown = 0;
+
+    enemyDamageCooldown = 0;
+
+    state.x = 0;
+    state.z = 0;
+    state.jumpY = 0;
+    state.jumpVelocity = 0;
+    state.jumping = false;
+
+    state.cameraAngle = 0;
+    state.cameraPitch = 0.35;
+    state.cameraDistance = 8;
+    state.targetCameraDistance = 8;
+
+    state.particles = [];
+
+    createWorld();
+    createMissionEnemies();
+    updateMissionHUD();
+
+    if (ui.hudObjective) {
+      ui.hudObjective.textContent = mission.description;
+    }
+  }
+
+  /* ===================== MIZAJOU SISTÈM MISYON ===================== */
+
+  function updateMissionSystems(deltaTime) {
+    if (
+      !state.active ||
+      state.paused ||
+      state.finished ||
+      lostContext
+    ) {
+      return;
+    }
+
+    const dt = clamp(deltaTime, 0, 0.05);
+
+    state.elapsed += dt;
+
+    state.shotCooldown = Math.max(
+      0,
+      state.shotCooldown - dt
+    );
+
+    updateMissionParticles(dt);
+    updateMissionEnemies(dt);
+    updateMissionHUD();
+  }
+
+  /* ===================== FIN PATI 4 ===================== */
+
+  // Pa mete })(); isit la.
+  // Pati 5 dwe kontinye nan menm estrikti JavaScript la.
+
+
+
+
+
+
+
+
+
+
+
+
+
