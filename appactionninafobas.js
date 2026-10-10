@@ -2489,7 +2489,26 @@ if (now - state.lastShot < weapon.rate * ammoType.rate * (1 - cadenceBonus)) {
 
     if (hit) {
       const enemy = hit.enemy;
-      const damage = weapon.damage * (enemy.boss ? 1 : 1);
+
+
+
+
+const equipmentDamage = getNinaEquipmentEffect('damage');
+
+const bossMultiplier = enemy.boss && ammoType.id === 'anti-boss'
+  ? 1.5
+  : 1;
+
+const damage =
+  weapon.damage *
+  ammoType.damage *
+  (1 + equipmentDamage) *
+  bossMultiplier;
+
+
+
+
+
 
       enemy.health -= damage;
       enemy.hitFlash = 0.1;
