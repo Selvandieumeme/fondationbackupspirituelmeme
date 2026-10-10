@@ -1,0 +1,595 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#08140f">
+  <meta name="description"
+        content="NINA FOBAS 3D — Jeu d'action et de survie avec dix grandes missions, créatures féroces et environnement 3D.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>NINA — FOBAS 3D | Action Survival</title>
+
+  <link rel="stylesheet" href="appactionninafobas.css">
+</head>
+
+<body>
+  <main id="ninaGameApp" class="nina-game-app">
+
+    <!-- ==================================================
+         ÉCRAN DE CHARGEMENT
+    =================================================== -->
+    <section id="loadingScreen" class="loading-screen">
+      <div class="loading-emblem" aria-hidden="true">N</div>
+      <p class="brand-kicker">FOBAS GAME STUDIO</p>
+      <h1>NINA <span>3D</span></h1>
+      <p class="loading-message" id="loadingMessage">
+        Préparation du terrain...
+      </p>
+      <div class="loading-track">
+        <div id="loadingProgress" class="loading-progress"></div>
+      </div>
+      <p class="loading-small">INITIALISATION DU MOTEUR 3D</p>
+    </section>
+
+    <!-- ==================================================
+         MENU PRINCIPAL
+    =================================================== -->
+    <section id="mainMenu" class="main-menu screen-panel">
+      <div class="menu-background" aria-hidden="true"></div>
+
+      <header class="top-brand">
+        <div class="brand-symbol">N</div>
+        <div class="brand-text">
+          <strong>FOBAS <span>TACTICAL</span></strong>
+          <small>ADVANCED ACTION SYSTEM</small>
+        </div>
+        <button id="menuSettingsBtn" class="icon-button"
+                type="button" aria-label="Paramètres">
+          ⚙
+        </button>
+      </header>
+
+      <div class="hero-content">
+        <div class="game-edition">SPECIAL OPERATIONS · 3D</div>
+        <h1 class="hero-title">NINA<span>:</span><br>WILD FRONTIER</h1>
+        <p class="hero-description">
+          Une combattante. Dix missions. Un monde sauvage.
+          Survivre est votre seule option.
+        </p>
+
+        <div class="hero-tags">
+          <span>● ACTION</span>
+          <span>● SURVIE</span>
+          <span>● 3D</span>
+        </div>
+
+        <button id="startGameBtn" class="primary-button" type="button">
+          <span aria-hidden="true">▶</span>
+          <span>COMMENCER LA MISSION</span>
+        </button>
+
+        <button id="missionsMenuBtn" class="secondary-button" type="button">
+          ☰ &nbsp; SÉLECTION DES MISSIONS
+        </button>
+
+        <div class="menu-status">
+          <span class="status-dot"></span>
+          <span id="engineStatus">PRÉPARATION DU SYSTÈME</span>
+        </div>
+      </div>
+
+      <footer class="menu-footer">
+        <span>FOBAS GAME STUDIO</span>
+        <span>VERSION 1.0</span>
+      </footer>
+    </section>
+
+    <!-- ==================================================
+         SÉLECTION DES 10 MISSIONS
+    =================================================== -->
+    <section id="missionScreen" class="mission-screen screen-panel"
+             hidden>
+      <header class="panel-header">
+        <button id="missionsBackBtn" class="icon-button"
+                type="button" aria-label="Retour">←</button>
+        <div>
+          <p class="panel-kicker">CAMPAGNE PRINCIPALE</p>
+          <h2>MISSIONS <span>10</span></h2>
+        </div>
+        <div class="mission-total">
+          <strong id="missionsUnlockedCount">1/10</strong>
+          <small>DÉBLOQUÉES</small>
+        </div>
+      </header>
+
+      <div class="campaign-progress">
+        <div class="progress-label">
+          <span>PROGRESSION DE CAMPAGNE</span>
+          <strong id="campaignProgressText">0%</strong>
+        </div>
+        <div class="progress-track">
+          <div id="campaignProgressBar" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div id="missionGrid" class="mission-grid">
+
+        <button class="mission-card" type="button" data-mission="0">
+          <span class="mission-number">01</span>
+          <span class="mission-art mission-art-1">🌿</span>
+          <span class="mission-info">
+            <strong>JUNGLE HOSTILE</strong>
+            <small>Reconnaissance et survie</small>
+            <span class="mission-difficulty">DIFFICULTÉ : FACILE</span>
+          </span>
+          <span class="mission-lock">▶</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="1">
+          <span class="mission-number">02</span>
+          <span class="mission-art mission-art-2">🐺</span>
+          <span class="mission-info">
+            <strong>LA MEUTE SAUVAGE</strong>
+            <small>Éliminer les prédateurs</small>
+            <span class="mission-difficulty">DIFFICULTÉ : MODÉRÉE</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="2">
+          <span class="mission-number">03</span>
+          <span class="mission-art mission-art-3">🌋</span>
+          <span class="mission-info">
+            <strong>TERRE VOLCANIQUE</strong>
+            <small>Traverser la zone brûlante</small>
+            <span class="mission-difficulty">DIFFICULTÉ : MODÉRÉE</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="3">
+          <span class="mission-number">04</span>
+          <span class="mission-art mission-art-4">🐊</span>
+          <span class="mission-info">
+            <strong>EAUX MORTELLES</strong>
+            <small>Survivre aux créatures aquatiques</small>
+            <span class="mission-difficulty">DIFFICULTÉ : ÉLEVÉE</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="4">
+          <span class="mission-number">05</span>
+          <span class="mission-art mission-art-5">🌑</span>
+          <span class="mission-info">
+            <strong>NUIT DE TERREUR</strong>
+            <small>Opération nocturne</small>
+            <span class="mission-difficulty">DIFFICULTÉ : ÉLEVÉE</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="5">
+          <span class="mission-number">06</span>
+          <span class="mission-art mission-art-6">🦖</span>
+          <span class="mission-info">
+            <strong>LE COLOSSE</strong>
+            <small>Affronter une bête géante</small>
+            <span class="mission-difficulty">DIFFICULTÉ : EXPERT</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="6">
+          <span class="mission-number">07</span>
+          <span class="mission-art mission-art-7">🏚️</span>
+          <span class="mission-info">
+            <strong>AVANT-POSTE OUBLIÉ</strong>
+            <small>Explorer et sécuriser la zone</small>
+            <span class="mission-difficulty">DIFFICULTÉ : EXPERT</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="7">
+          <span class="mission-number">08</span>
+          <span class="mission-art mission-art-8">🐉</span>
+          <span class="mission-info">
+            <strong>LE PRÉDATEUR ALPHA</strong>
+            <small>Chasser le monstre dominant</small>
+            <span class="mission-difficulty">DIFFICULTÉ : EXTRÊME</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="8">
+          <span class="mission-number">09</span>
+          <span class="mission-art mission-art-9">⚔️</span>
+          <span class="mission-info">
+            <strong>DERNIÈRE FRONTIÈRE</strong>
+            <small>Défendre la zone finale</small>
+            <span class="mission-difficulty">DIFFICULTÉ : EXTRÊME</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+        <button class="mission-card locked" type="button"
+                data-mission="9">
+          <span class="mission-number">10</span>
+          <span class="mission-art mission-art-10">👑</span>
+          <span class="mission-info">
+            <strong>REINE DES BÊTES</strong>
+            <small>Combat final et survie totale</small>
+            <span class="mission-difficulty">DIFFICULTÉ : LÉGENDAIRE</span>
+          </span>
+          <span class="mission-lock">🔒</span>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- ==================================================
+         ÉCRAN PRINCIPAL DU JEU 3D
+    =================================================== -->
+    <section id="gameScreen" class="game-screen" hidden>
+
+      <!-- Three.js crée sa scène dans ce conteneur -->
+      <div id="gameWorld" class="game-world">
+        <canvas id="nina3DCanvas"
+                aria-label="Monde 3D interactif du jeu NINA"></canvas>
+
+        <div id="worldLoading" class="world-loading">
+          <div class="loading-spinner"></div>
+          <strong>CHARGEMENT DU MONDE 3D</strong>
+          <small id="worldLoadingMessage">Création du terrain...</small>
+        </div>
+
+        <div id="gameToast" class="game-toast" role="status"
+             aria-live="polite"></div>
+
+        <!-- HUD supérieur -->
+        <header class="game-hud-top">
+          <button id="gameMenuBtn" class="hud-icon-button"
+                  type="button" aria-label="Ouvrir le menu">☰</button>
+
+          <div class="hud-mission">
+            <small id="currentMissionLabel">MISSION 01</small>
+            <strong id="currentMissionName">JUNGLE HOSTILE</strong>
+            <div class="objective-line" id="missionObjective">
+              Explorez la zone et survivez.
+            </div>
+          </div>
+
+          <button id="pauseGameBtn" class="hud-icon-button"
+                  type="button" aria-label="Mettre en pause">Ⅱ</button>
+        </header>
+
+        <!-- Informations du personnage -->
+        <section class="player-status" aria-label="État de NINA">
+          <div class="player-identity">
+            <div class="player-avatar">N</div>
+            <div>
+              <strong>NINA</strong>
+              <small>UNITÉ SPÉCIALE</small>
+            </div>
+          </div>
+
+          <div class="status-meter">
+            <div class="meter-label">
+              <span>♥ SANTÉ</span>
+              <strong id="healthText">100</strong>
+            </div>
+            <div class="meter-track health-track">
+              <div id="healthBar" class="meter-fill health-fill"
+                   style="width:100%"></div>
+            </div>
+          </div>
+
+          <div class="status-meter armor-meter">
+            <div class="meter-label">
+              <span>⬟ ARMURE</span>
+              <strong id="armorText">100</strong>
+            </div>
+            <div class="meter-track">
+              <div id="armorBar" class="meter-fill armor-fill"
+                   style="width:100%"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Objectif et ennemis -->
+        <div class="objective-hud">
+          <span class="objective-icon">◆</span>
+          <div>
+            <small>OBJECTIF</small>
+            <strong id="objectiveProgress">0 / 5 CRÉATURES</strong>
+          </div>
+        </div>
+
+        <div id="bossHealthPanel" class="boss-health-panel" hidden>
+          <div class="boss-title">
+            <span>⚠ MENACE MAJEURE</span>
+            <strong id="bossName">PRÉDATEUR ALPHA</strong>
+          </div>
+          <div class="meter-track boss-track">
+            <div id="bossHealthBar" class="meter-fill boss-fill"
+                 style="width:100%"></div>
+          </div>
+        </div>
+
+        <!-- Viseur central -->
+        <div id="aimReticle" class="aim-reticle"
+             aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <i></i>
+        </div>
+
+        <!-- Message de dégâts -->
+        <div id="damageIndicator" class="damage-indicator"
+             aria-hidden="true">!</div>
+
+        <!-- Mini-carte -->
+        <div class="minimap" id="minimap">
+          <div class="minimap-header">
+            <span>RADAR</span>
+            <span class="radar-live">● LIVE</span>
+          </div>
+          <canvas id="minimapCanvas"
+                  width="180" height="180"
+                  aria-label="Mini-carte de la zone"></canvas>
+          <div class="minimap-footer" id="radarStatus">
+            SCAN ACTIF
+          </div>
+        </div>
+
+        <!-- Arme et munitions -->
+        <div class="weapon-hud">
+          <div class="weapon-icon" aria-hidden="true">⌁</div>
+          <div class="weapon-information">
+            <strong id="weaponName">TACTICAL RIFLE</strong>
+            <small id="weaponMode">MODE AUTOMATIQUE</small>
+          </div>
+          <div class="ammo-information">
+            <strong><span id="ammoCurrent">30</span><i>/</i><span
+              id="ammoReserve">120</span></strong>
+            <small>MUNITIONS</small>
+          </div>
+        </div>
+
+        <!-- Commandes tactiles -->
+        <div id="touchControls" class="touch-controls">
+
+          <div id="movementZone" class="movement-zone">
+            <div id="joystickBase" class="joystick-base"
+                 aria-label="Joystick de déplacement">
+              <div id="joystickThumb" class="joystick-thumb"></div>
+            </div>
+            <small class="control-caption">DÉPLACEMENT</small>
+          </div>
+
+          <div class="left-action-buttons">
+            <button id="runBtn" class="action-control"
+                    type="button" aria-label="Courir">
+              <span>➤</span><small>SPRINT</small>
+            </button>
+            <button id="jumpBtn" class="action-control"
+                    type="button" aria-label="Sauter">
+              <span>↟</span><small>SAUT</small>
+            </button>
+          </div>
+
+          <div class="right-action-buttons">
+            <button id="aimBtn" class="action-control"
+                    type="button" aria-label="Viser">
+              <span>⌖</span><small>VISER</small>
+            </button>
+            <button id="reloadBtn" class="action-control"
+                    type="button" aria-label="Recharger">
+              <span>↻</span><small>RECHARGE</small>
+            </button>
+            <button id="weaponSwitchBtn" class="action-control"
+                    type="button" aria-label="Changer d'arme">
+              <span>⚔</span><small>ARME</small>
+            </button>
+            <button id="fireBtn" class="fire-control"
+                    type="button" aria-label="Tirer">
+              <span class="fire-symbol">✹</span>
+              <strong>TIRER</strong>
+            </button>
+          </div>
+        </div>
+
+        <!-- Commandes ordinateur -->
+        <div class="keyboard-hints" id="keyboardHints">
+          <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+            DÉPLACER</span>
+          <span><kbd>ESPACE</kbd> SAUTER</span>
+          <span><kbd>SHIFT</kbd> COURIR</span>
+          <span><kbd>CLIC</kbd> TIRER</span>
+          <span><kbd>R</kbd> RECHARGER</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         MENU DE PAUSE
+    =================================================== -->
+    <section id="pauseScreen" class="overlay-screen" hidden>
+      <div class="dialog-panel">
+        <p class="panel-kicker">OPÉRATION SUSPENDUE</p>
+        <h2>PAUSE <span>TACTIQUE</span></h2>
+        <p>La mission est momentanément interrompue.</p>
+
+        <button id="resumeGameBtn" class="primary-button"
+                type="button">▶ REPRENDRE</button>
+        <button id="restartMissionBtn" class="secondary-button"
+                type="button">↻ RECOMMENCER LA MISSION</button>
+        <button id="pauseMissionsBtn" class="secondary-button"
+                type="button">☰ MISSIONS</button>
+        <button id="pauseMainMenuBtn" class="text-button"
+                type="button">RETOUR AU MENU PRINCIPAL</button>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         VICTOIRE
+    =================================================== -->
+    <section id="victoryScreen" class="overlay-screen victory-screen"
+             hidden>
+      <div class="dialog-panel result-panel">
+        <div class="result-emblem">★</div>
+        <p class="panel-kicker">OBJECTIF ACCOMPLI</p>
+        <h2>MISSION <span>RÉUSSIE</span></h2>
+        <p id="victoryMessage">
+          Zone sécurisée. Excellent travail, NINA.
+        </p>
+
+        <div class="result-stats">
+          <div><small>ÉLIMINATIONS</small><strong
+            id="victoryKills">0</strong></div>
+          <div><small>SCORE</small><strong
+            id="victoryScore">0</strong></div>
+          <div><small>TEMPS</small><strong
+            id="victoryTime">00:00</strong></div>
+        </div>
+
+        <button id="nextMissionBtn" class="primary-button"
+                type="button">▶ MISSION SUIVANTE</button>
+        <button id="victoryMissionsBtn" class="secondary-button"
+                type="button">CHOISIR UNE MISSION</button>
+        <button id="victoryMenuBtn" class="text-button"
+                type="button">MENU PRINCIPAL</button>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         ÉCHEC
+    =================================================== -->
+    <section id="gameOverScreen" class="overlay-screen gameover-screen"
+             hidden>
+      <div class="dialog-panel result-panel">
+        <div class="result-emblem danger-emblem">!</div>
+        <p class="panel-kicker">SIGNAL PERDU</p>
+        <h2>MISSION <span>ÉCHOUÉE</span></h2>
+        <p id="gameOverMessage">
+          NINA est tombée au combat. Préparez une nouvelle tentative.
+        </p>
+
+        <div class="result-stats">
+          <div><small>ÉLIMINATIONS</small><strong
+            id="failedKills">0</strong></div>
+          <div><small>SCORE</small><strong
+            id="failedScore">0</strong></div>
+          <div><small>TEMPS</small><strong
+            id="failedTime">00:00</strong></div>
+        </div>
+
+        <button id="retryMissionBtn" class="primary-button"
+                type="button">↻ RÉESSAYER</button>
+        <button id="gameOverMissionsBtn" class="secondary-button"
+                type="button">CHOISIR UNE MISSION</button>
+        <button id="gameOverMenuBtn" class="text-button"
+                type="button">MENU PRINCIPAL</button>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         PARAMÈTRES
+    =================================================== -->
+    <section id="settingsScreen" class="overlay-screen" hidden>
+      <div class="dialog-panel settings-panel">
+        <header class="panel-header">
+          <div>
+            <p class="panel-kicker">CONFIGURATION</p>
+            <h2>PARAMÈTRES</h2>
+          </div>
+          <button id="closeSettingsBtn" class="icon-button"
+                  type="button" aria-label="Fermer">✕</button>
+        </header>
+
+        <label class="setting-row" for="graphicsQuality">
+          <span>
+            <strong>Qualité graphique</strong>
+            <small>Adapter les performances du téléphone</small>
+          </span>
+          <select id="graphicsQuality">
+            <option value="low">ÉCONOMIQUE</option>
+            <option value="medium" selected>ÉQUILIBRÉE</option>
+            <option value="high">ÉLEVÉE</option>
+          </select>
+        </label>
+
+        <label class="setting-row" for="sensitivityRange">
+          <span>
+            <strong>Sensibilité caméra</strong>
+            <small>Vitesse de rotation de la caméra</small>
+          </span>
+          <input id="sensitivityRange" type="range"
+                 min="1" max="10" value="5">
+        </label>
+
+        <label class="setting-row" for="soundToggle">
+          <span>
+            <strong>Effets sonores</strong>
+            <small>Armes, créatures et environnement</small>
+          </span>
+          <input id="soundToggle" type="checkbox" checked>
+        </label>
+
+        <label class="setting-row" for="vibrationToggle">
+          <span>
+            <strong>Vibrations</strong>
+            <small>Retour tactile sur appareils compatibles</small>
+          </span>
+          <input id="vibrationToggle" type="checkbox" checked>
+        </label>
+
+        <label class="setting-row" for="showMinimapToggle">
+          <span>
+            <strong>Afficher le radar</strong>
+            <small>Position et menaces à proximité</small>
+          </span>
+          <input id="showMinimapToggle" type="checkbox" checked>
+        </label>
+
+        <button id="saveSettingsBtn" class="primary-button"
+                type="button">ENREGISTRER LES PARAMÈTRES</button>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         ACCESSIBILITÉ / ORIENTATION
+    =================================================== -->
+    <div id="orientationNotice" class="orientation-notice" hidden>
+      <span aria-hidden="true">↻</span>
+      <strong>MODE PAYSAGE RECOMMANDÉ</strong>
+      <small>Tournez votre téléphone pour une meilleure expérience.</small>
+    </div>
+
+    <!-- Notifications globales -->
+    <div id="ninaAnnouncement" class="sr-only"
+         role="status" aria-live="polite"></div>
+
+  </main>
+
+  <!--
+    IMPORTANT :
+    Le fichier JavaScript gère la scène Three.js, les contrôles,
+    les missions, les ennemis et les sauvegardes.
+  -->
+  <script type="module" src="appactionninafobas.js"></script>
+</body>
+</html>
