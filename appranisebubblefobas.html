@@ -1,0 +1,677 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+  <meta name="theme-color" content="#071426">
+  <meta name="color-scheme" content="dark">
+  <meta name="description"
+        content="FOBAS Bubble Shooter 3D — Jeu de bulles 3D avec Ranise Moise, combos, boules de feu et 30 missions.">
+  <meta name="application-name" content="FOBAS Bubble Shooter 3D">
+  <title>FOBAS Bubble Shooter 3D — Ranise Moise</title>
+
+  <link rel="stylesheet" href="appranisebubblefobas.css">
+
+  <!--
+    Fichiers du projet :
+    appranisebubblefobas.html
+    appranisebubblefobas.css
+    appranisebubblefobas.js
+
+    Le moteur Three.js, les animations, les règles du jeu,
+    les sons et IndexedDB seront gérés par le fichier JavaScript.
+  -->
+</head>
+
+<body>
+  <div id="bubbleApp" class="bubble-app">
+
+    <!-- EN-TÊTE DU JEU -->
+    <header class="game-header">
+      <button id="homeButton" class="icon-button"
+              type="button" aria-label="Retour au menu"
+              title="Menu principal">
+        <span aria-hidden="true">⌂</span>
+      </button>
+
+      <div class="brand-block">
+        <div class="brand-title">FOBAS <span>BUBBLE</span></div>
+        <div class="brand-subtitle">SHOOTER 3D · RANISE MOISE</div>
+      </div>
+
+      <button id="settingsButton" class="icon-button"
+              type="button" aria-label="Paramètres"
+              title="Paramètres">
+        <span aria-hidden="true">⚙</span>
+      </button>
+    </header>
+
+    <!-- INDICATEURS DE PARTIE -->
+    <section id="gameHud" class="game-hud" aria-label="Statistiques de la partie">
+      <div class="hud-card">
+        <span class="hud-label">MISSION</span>
+        <strong id="hudMission">01 / 30</strong>
+      </div>
+
+      <div class="hud-card hud-score">
+        <span class="hud-label">SCORE</span>
+        <strong id="scoreValue">0</strong>
+      </div>
+
+      <div class="hud-card">
+        <span class="hud-label">RECORD</span>
+        <strong id="bestScoreValue">0</strong>
+      </div>
+
+      <div class="hud-card">
+        <span class="hud-label">COMBO</span>
+        <strong id="comboValue">x0</strong>
+      </div>
+    </section>
+
+    <!-- OBJECTIF DE MISSION -->
+    <section id="missionObjective" class="mission-objective"
+             aria-live="polite">
+      <div class="objective-main">
+        <span class="objective-icon" aria-hidden="true">✦</span>
+        <div>
+          <strong id="missionTitle">Le premier défi</strong>
+          <p id="missionDescription">
+            Éclate les bulles de même couleur et découvre les combos.
+          </p>
+        </div>
+      </div>
+
+      <div class="objective-progress">
+        <div class="progress-track">
+          <div id="objectiveProgressBar" class="progress-fill"></div>
+        </div>
+        <span id="objectiveProgressText">0 %</span>
+      </div>
+    </section>
+
+    <!-- ZONE PRINCIPALE DU JEU 3D -->
+    <main id="gameMain" class="game-main">
+
+      <section id="gameViewport" class="game-viewport"
+               aria-label="Arène de jeu Bubble Shooter 3D">
+
+        <!-- Three.js créera la scène et son canvas dans ce conteneur. -->
+        <div id="threeContainer" class="three-container"></div>
+
+        <!-- Indication de chargement -->
+        <div id="loadingScreen" class="loading-screen"
+             role="status" aria-live="polite">
+          <div class="loading-orb" aria-hidden="true"></div>
+          <h2>FOBAS BUBBLE 3D</h2>
+          <p id="loadingMessage">Préparation de l'arène 3D...</p>
+          <div class="loading-track">
+            <div id="loadingProgress" class="loading-progress"></div>
+          </div>
+        </div>
+
+        <!-- GUIDE DU JEU : RANISE MOISE -->
+        <aside id="raniseAssistant" class="ranise-assistant"
+               aria-label="Guide Ranise Moise">
+          <div class="ranise-avatar" aria-hidden="true">
+            <span>RM</span>
+          </div>
+          <div class="ranise-message">
+            <strong>Ranise Moise</strong>
+            <p id="raniseMessage">
+              Bienvenue ! Vise les bulles de même couleur pour créer des combos.
+            </p>
+          </div>
+          <button id="closeRaniseButton" class="small-icon-button"
+                  type="button" aria-label="Masquer le guide">
+            ×
+          </button>
+        </aside>
+
+        <!-- MESSAGES DE COMBO ET D'EFFETS -->
+        <div id="gameAnnouncement" class="game-announcement"
+             aria-live="polite"></div>
+
+        <div id="comboAnnouncement" class="combo-announcement"
+             aria-live="polite"></div>
+
+        <!-- CIBLE ET AIDE DE VISÉE -->
+        <div id="aimHint" class="aim-hint">
+          Touchez la zone de jeu pour viser
+        </div>
+
+        <!-- COMMANDES FLOTTANTES DE L'ARÈNE -->
+        <div class="viewport-controls">
+          <button id="zoomOutButton" class="viewport-button"
+                  type="button" aria-label="Réduire le zoom"
+                  title="Zoom arrière">−</button>
+
+          <button id="zoomResetButton" class="viewport-button"
+                  type="button" aria-label="Réinitialiser le zoom"
+                  title="Réinitialiser le zoom">⌂</button>
+
+          <button id="zoomInButton" class="viewport-button"
+                  type="button" aria-label="Augmenter le zoom"
+                  title="Zoom avant">+</button>
+
+          <button id="fullscreenButton" class="viewport-button"
+                  type="button" aria-label="Plein écran"
+                  title="Plein écran">⛶</button>
+        </div>
+
+        <!-- ÉTAT DE PAUSE -->
+        <div id="pauseOverlay" class="overlay-panel" hidden>
+          <div class="dialog-card">
+            <span class="dialog-symbol" aria-hidden="true">Ⅱ</span>
+            <h2>Partie en pause</h2>
+            <p>Reprends ta mission quand tu es prêt.</p>
+
+            <button id="resumeButton" class="primary-button"
+                    type="button">▶ Continuer</button>
+
+            <button id="restartFromPauseButton" class="secondary-button"
+                    type="button">↻ Recommencer</button>
+
+            <button id="pauseHomeButton" class="secondary-button"
+                    type="button">⌂ Menu principal</button>
+          </div>
+        </div>
+
+        <!-- VICTOIRE -->
+        <div id="victoryOverlay" class="overlay-panel" hidden>
+          <div class="dialog-card victory-card">
+            <span class="dialog-symbol" aria-hidden="true">🏆</span>
+            <h2>Mission réussie !</h2>
+            <p id="victoryMessage">Bravo ! Tu as terminé cette mission.</p>
+
+            <div class="result-stars" id="victoryStars"
+                 aria-label="Étoiles obtenues">☆☆☆</div>
+
+            <div class="result-stat-grid">
+              <div>
+                <span>Score</span>
+                <strong id="victoryScore">0</strong>
+              </div>
+              <div>
+                <span>Meilleur combo</span>
+                <strong id="victoryCombo">x0</strong>
+              </div>
+            </div>
+
+            <button id="nextMissionButton" class="primary-button"
+                    type="button">Mission suivante →</button>
+
+            <button id="replayVictoryButton" class="secondary-button"
+                    type="button">↻ Rejouer</button>
+
+            <button id="victoryHomeButton" class="secondary-button"
+                    type="button">⌂ Menu principal</button>
+          </div>
+        </div>
+
+        <!-- DÉFAITE -->
+        <div id="defeatOverlay" class="overlay-panel" hidden>
+          <div class="dialog-card">
+            <span class="dialog-symbol" aria-hidden="true">✦</span>
+            <h2>Nouvelle tentative</h2>
+            <p id="defeatMessage">
+              Ne baisse pas les bras. Change de stratégie et réessaie.
+            </p>
+
+            <button id="retryButton" class="primary-button"
+                    type="button">↻ Réessayer</button>
+
+            <button id="defeatHomeButton" class="secondary-button"
+                    type="button">⌂ Menu principal</button>
+          </div>
+        </div>
+
+        <!-- DIALOGUE D'AIDE -->
+        <div id="tutorialOverlay" class="overlay-panel" hidden>
+          <div class="dialog-card tutorial-card">
+            <span class="dialog-symbol" aria-hidden="true">ⓘ</span>
+            <h2 id="tutorialTitle">Comment jouer ?</h2>
+            <p id="tutorialText">
+              Vise les bulles, tire et rassemble au moins trois bulles
+              de la même couleur pour les faire éclater.
+            </p>
+
+            <div class="tutorial-step-indicator">
+              <span id="tutorialStep">1 / 4</span>
+            </div>
+
+            <button id="tutorialNextButton" class="primary-button"
+                    type="button">Suivant →</button>
+
+            <button id="tutorialSkipButton" class="secondary-button"
+                    type="button">Passer le tutoriel</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- PANNEAU DE CONTRÔLE DU TIREUR -->
+      <section id="shooterPanel" class="shooter-panel"
+               aria-label="Commandes du tireur">
+
+        <div class="shooter-info">
+          <div class="next-bubble-block">
+            <span class="control-caption">PROCHAINE BULLE</span>
+            <div id="nextBubblePreview" class="bubble-preview"
+                 aria-label="Aperçu de la prochaine bulle">
+              <span id="nextBubbleColor" class="bubble-color-dot"></span>
+            </div>
+          </div>
+
+          <div class="shots-block">
+            <span class="control-caption">TIRS RESTANTS</span>
+            <strong id="shotsRemaining">∞</strong>
+          </div>
+
+          <div class="power-block">
+            <span class="control-caption">PUISSANCE</span>
+            <strong id="powerValue">100%</strong>
+            <div class="power-track">
+              <div id="powerBar" class="power-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOUTONS DES POUVOIRS SPÉCIAUX -->
+        <div id="powerUpToolbar" class="powerup-toolbar"
+             aria-label="Pouvoirs spéciaux">
+
+          <button id="fireballButton" class="powerup-button"
+                  type="button" aria-label="Boule de feu"
+                  title="Boule de feu">
+            <span class="powerup-icon" aria-hidden="true">🔥</span>
+            <span class="powerup-name">Feu</span>
+            <span id="fireballCount" class="powerup-count">3</span>
+          </button>
+
+          <button id="bombButton" class="powerup-button"
+                  type="button" aria-label="Boule explosive"
+                  title="Boule explosive">
+            <span class="powerup-icon" aria-hidden="true">💣</span>
+            <span class="powerup-name">Bombe</span>
+            <span id="bombCount" class="powerup-count">3</span>
+          </button>
+
+          <button id="rainbowButton" class="powerup-button"
+                  type="button" aria-label="Boule arc-en-ciel"
+                  title="Boule arc-en-ciel">
+            <span class="powerup-icon" aria-hidden="true">🌈</span>
+            <span class="powerup-name">Rainbow</span>
+            <span id="rainbowCount" class="powerup-count">2</span>
+          </button>
+
+          <button id="lightningButton" class="powerup-button"
+                  type="button" aria-label="Éclair"
+                  title="Éclair">
+            <span class="powerup-icon" aria-hidden="true">⚡</span>
+            <span class="powerup-name">Éclair</span>
+            <span id="lightningCount" class="powerup-count">2</span>
+          </button>
+
+          <button id="shieldButton" class="powerup-button"
+                  type="button" aria-label="Bouclier"
+                  title="Bouclier">
+            <span class="powerup-icon" aria-hidden="true">🛡️</span>
+            <span class="powerup-name">Bouclier</span>
+            <span id="shieldCount" class="powerup-count">1</span>
+          </button>
+        </div>
+
+        <!-- ACTIONS DU JOUEUR -->
+        <div class="primary-controls">
+          <button id="swapBubbleButton" class="secondary-button"
+                  type="button" aria-label="Changer de bulle"
+                  title="Changer de bulle">
+            <span aria-hidden="true">⇄</span>
+            <span>Changer</span>
+          </button>
+
+          <button id="shootButton" class="shoot-button"
+                  type="button" aria-label="Tirer une bulle">
+            <span aria-hidden="true">➤</span>
+            <span>TIRER</span>
+          </button>
+
+          <button id="pauseButton" class="secondary-button"
+                  type="button" aria-label="Mettre en pause"
+                  title="Pause">
+            <span aria-hidden="true">Ⅱ</span>
+            <span>Pause</span>
+          </button>
+        </div>
+
+        <p id="controlHint" class="control-hint">
+          Vise avec ton doigt, puis touche TIRER.
+          Rassemble au moins trois bulles de la même couleur.
+        </p>
+      </section>
+
+    </main>
+
+    <!-- ÉCRAN PRINCIPAL / MENU -->
+    <section id="mainMenuScreen" class="screen-panel">
+      <div class="menu-hero">
+        <div class="hero-emblem" aria-hidden="true">
+          <span>✦</span>
+        </div>
+
+        <p class="eyebrow">FOBAS GAMING STUDIO</p>
+        <h1>BUBBLE SHOOTER <span>3D</span></h1>
+        <p class="hero-description">
+          Entre dans un univers de bulles lumineuses, de combos
+          spectaculaires et de missions extraordinaires.
+        </p>
+
+        <div class="hero-guide">
+          <div class="hero-guide-avatar" aria-hidden="true">RM</div>
+          <div>
+            <strong>Ranise Moise</strong>
+            <p>Ton guide dans l'aventure</p>
+          </div>
+        </div>
+
+        <button id="playButton" class="primary-button hero-play-button"
+                type="button">▶ JOUER</button>
+
+        <button id="continueButton" class="secondary-button"
+                type="button">Continuer ma partie</button>
+
+        <button id="missionsMenuButton" class="secondary-button"
+                type="button">✦ Choisir une mission</button>
+
+        <button id="tutorialMenuButton" class="text-button"
+                type="button">ⓘ Apprendre à jouer</button>
+      </div>
+
+      <div class="menu-bottom-stats">
+        <div>
+          <strong id="menuCompletedMissions">0 / 30</strong>
+          <span>Missions terminées</span>
+        </div>
+        <div>
+          <strong id="menuTotalScore">0</strong>
+          <span>Score total</span>
+        </div>
+        <div>
+          <strong id="menuTotalStars">0 / 90</strong>
+          <span>Étoiles</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SÉLECTION DU MODE DE JEU -->
+    <section id="modeSelectScreen" class="screen-panel" hidden>
+      <div class="screen-heading">
+        <button id="modeBackButton" class="icon-button"
+                type="button" aria-label="Retour">←</button>
+        <div>
+          <p class="eyebrow">CHOISIS TON AVENTURE</p>
+          <h2>Mode de jeu</h2>
+        </div>
+      </div>
+
+      <button id="classicModeButton" class="mode-card" type="button">
+        <span class="mode-icon" aria-hidden="true">🔮</span>
+        <span class="mode-card-text">
+          <strong>Mode classique</strong>
+          <span>Éclate les bulles et réalise le meilleur score.</span>
+        </span>
+        <span class="mode-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button id="missionModeButton" class="mode-card" type="button">
+        <span class="mode-icon" aria-hidden="true">🏆</span>
+        <span class="mode-card-text">
+          <strong>Mode missions</strong>
+          <span>Termine les 30 missions et gagne des étoiles.</span>
+        </span>
+        <span class="mode-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <button id="relaxModeButton" class="mode-card" type="button">
+        <span class="mode-icon" aria-hidden="true">🌌</span>
+        <span class="mode-card-text">
+          <strong>Mode détente</strong>
+          <span>Joue tranquillement et entraîne ta précision.</span>
+        </span>
+        <span class="mode-arrow" aria-hidden="true">→</span>
+      </button>
+    </section>
+
+    <!-- SÉLECTION DES 30 MISSIONS -->
+    <section id="missionSelectScreen" class="screen-panel" hidden>
+      <div class="screen-heading">
+        <button id="missionsBackButton" class="icon-button"
+                type="button" aria-label="Retour">←</button>
+        <div>
+          <p class="eyebrow">TON PARCOURS</p>
+          <h2>Les 30 missions</h2>
+        </div>
+      </div>
+
+      <div class="mission-overview">
+        <div>
+          <strong id="missionCompletedCount">0</strong>
+          <span>Terminées</span>
+        </div>
+        <div>
+          <strong id="missionUnlockedCount">1</strong>
+          <span>Débloquées</span>
+        </div>
+        <div>
+          <strong id="missionStarsCount">0 / 90</strong>
+          <span>Étoiles</span>
+        </div>
+      </div>
+
+      <div class="difficulty-inline">
+        <label for="missionDifficulty">Difficulté</label>
+        <select id="missionDifficulty">
+          <option value="easy">Facile</option>
+          <option value="normal" selected>Normale</option>
+          <option value="hard">Difficile</option>
+          <option value="expert">Extrême</option>
+        </select>
+      </div>
+
+      <div class="level-category">
+        <h3>Débutant <span>01–10</span></h3>
+        <div id="beginnerMissionGrid" class="mission-grid"></div>
+      </div>
+
+      <div class="level-category">
+        <h3>Intermédiaire <span>11–20</span></h3>
+        <div id="intermediateMissionGrid" class="mission-grid"></div>
+      </div>
+
+      <div class="level-category">
+        <h3>Avancé <span>21–30</span></h3>
+        <div id="advancedMissionGrid" class="mission-grid"></div>
+      </div>
+
+      <p id="missionSelectionMessage" class="status-message"
+         aria-live="polite"></p>
+    </section>
+
+    <!-- RÉGLAGES -->
+    <section id="settingsScreen" class="screen-panel" hidden>
+      <div class="screen-heading">
+        <button id="settingsBackButton" class="icon-button"
+                type="button" aria-label="Retour">←</button>
+        <div>
+          <p class="eyebrow">PERSONNALISE TON EXPÉRIENCE</p>
+          <h2>Paramètres</h2>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>Audio</h3>
+
+        <div class="setting-row">
+          <label for="musicEnabled">Musique</label>
+          <input id="musicEnabled" type="checkbox" checked>
+        </div>
+
+        <div class="setting-row">
+          <label for="musicVolume">Volume de la musique</label>
+          <output id="musicVolumeOutput" for="musicVolume">45%</output>
+        </div>
+        <input id="musicVolume" class="range-input"
+               type="range" min="0" max="100" value="45">
+
+        <div class="setting-row">
+          <label for="sfxEnabled">Effets sonores</label>
+          <input id="sfxEnabled" type="checkbox" checked>
+        </div>
+
+        <div class="setting-row">
+          <label for="sfxVolume">Volume des effets</label>
+          <output id="sfxVolumeOutput" for="sfxVolume">75%</output>
+        </div>
+        <input id="sfxVolume" class="range-input"
+               type="range" min="0" max="100" value="75">
+      </div>
+
+      <div class="settings-group">
+        <h3>Graphismes</h3>
+
+        <div class="setting-row">
+          <label for="graphicsQuality">Qualité graphique</label>
+          <select id="graphicsQuality">
+            <option value="low">Économie d'énergie</option>
+            <option value="medium" selected>Équilibrée</option>
+            <option value="high">Élevée</option>
+            <option value="ultra">Ultra</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <label for="reducedEffects">Réduire les effets</label>
+          <input id="reducedEffects" type="checkbox">
+        </div>
+
+        <div class="setting-row">
+          <label for="showAimGuide">Guide de visée</label>
+          <input id="showAimGuide" type="checkbox" checked>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>Contrôles</h3>
+
+        <div class="setting-row">
+          <label for="touchZoomEnabled">Zoom tactile à deux doigts</label>
+          <input id="touchZoomEnabled" type="checkbox" checked>
+        </div>
+
+        <div class="setting-row">
+          <label for="vibrationEnabled">Vibrations</label>
+          <input id="vibrationEnabled" type="checkbox" checked>
+        </div>
+
+        <div class="setting-row">
+          <label for="leftHandedMode">Mode gaucher</label>
+          <input id="leftHandedMode" type="checkbox">
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button id="saveSettingsButton" class="primary-button"
+                type="button">Enregistrer les paramètres</button>
+
+        <button id="resetSettingsButton" class="secondary-button"
+                type="button">Réglages par défaut</button>
+      </div>
+    </section>
+
+    <!-- STATISTIQUES ET RÉCOMPENSES -->
+    <section id="statisticsScreen" class="screen-panel" hidden>
+      <div class="screen-heading">
+        <button id="statisticsBackButton" class="icon-button"
+                type="button" aria-label="Retour">←</button>
+        <div>
+          <p class="eyebrow">TES PERFORMANCES</p>
+          <h2>Statistiques</h2>
+        </div>
+      </div>
+
+      <div class="statistics-grid">
+        <div class="stat-card">
+          <span>Score total</span>
+          <strong id="statsTotalScore">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Meilleur score</span>
+          <strong id="statsBestScore">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Missions terminées</span>
+          <strong id="statsCompletedMissions">0 / 30</strong>
+        </div>
+        <div class="stat-card">
+          <span>Étoiles gagnées</span>
+          <strong id="statsStars">0 / 90</strong>
+        </div>
+        <div class="stat-card">
+          <span>Meilleur combo</span>
+          <strong id="statsBestCombo">x0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Bulles éclatées</span>
+          <strong id="statsBubblesPopped">0</strong>
+        </div>
+      </div>
+
+      <button id="exportProgressButton" class="secondary-button"
+              type="button">Exporter ma progression</button>
+
+      <button id="statisticsHomeButton" class="secondary-button"
+              type="button">⌂ Menu principal</button>
+    </section>
+
+    <!-- CONFIRMATION DES ACTIONS -->
+    <div id="confirmationOverlay" class="overlay-panel" hidden>
+      <div class="dialog-card">
+        <span class="dialog-symbol" aria-hidden="true">?</span>
+        <h2 id="confirmationTitle">Confirmation</h2>
+        <p id="confirmationMessage">
+          Veux-tu vraiment effectuer cette action ?
+        </p>
+
+        <div class="dialog-actions">
+          <button id="confirmActionButton" class="primary-button"
+                  type="button">Confirmer</button>
+          <button id="cancelActionButton" class="secondary-button"
+                  type="button">Annuler</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="toastRegion" class="toast-region"
+         aria-live="polite" aria-atomic="true"></div>
+
+    <!-- PIED DE PAGE -->
+    <footer class="game-footer">
+      <span>FOBAS GAMING STUDIO</span>
+      <span>Bubble Shooter 3D</span>
+      <button id="statisticsMenuButton" class="text-button"
+              type="button">Statistiques</button>
+    </footer>
+
+  </div>
+
+  <!--
+    Le moteur de jeu et les gestionnaires d'événements
+    seront chargés depuis le fichier JavaScript séparé.
+  -->
+  <script type="module" src="appranisebubblefobas.js"></script>
+</body>
+</html>
