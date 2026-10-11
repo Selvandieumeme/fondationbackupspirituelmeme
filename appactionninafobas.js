@@ -242,16 +242,18 @@
     }
   ];
 
+
+
   const weapons = [
     {
       name: 'TACTICAL RIFLE',
       mode: 'MODE AUTOMATIQUE',
       magazine: 30,
       reserve: 120,
-      damage: 28,
+      damage: 1000000,
       rate: 145,
       reload: 1400,
-      range: 65,
+      range: 150,
       spread: 0.018
     },
     {
@@ -259,25 +261,156 @@
       mode: 'MODE RAPIDE',
       magazine: 40,
       reserve: 160,
-      damage: 20,
+      damage: 1000000,
       rate: 95,
-      reload: 1650,
-      range: 55,
-      spread: 0.028
+      reload: 1300,
+      range: 150,
+      spread: 0.025
     },
     {
       name: 'HEAVY BLASTER',
       mode: 'MODE PUISSANT',
       magazine: 12,
       reserve: 48,
-      damage: 75,
-      rate: 480,
-      reload: 1900,
-      range: 80,
-      spread: 0.009
+      damage: 1000000,
+      rate: 300,
+      reload: 1700,
+      range: 180,
+      spread: 0.008
+    },
+    {
+      name: 'PLASMA DESTROYER',
+      mode: 'MODE PLASMA',
+      magazine: 20,
+      reserve: 100,
+      damage: 1000000,
+      rate: 180,
+      reload: 1500,
+      range: 200,
+      spread: 0.005
+    },
+    {
+      name: 'THUNDER RAILGUN',
+      mode: 'MODE PRECISION',
+      magazine: 10,
+      reserve: 50,
+      damage: 1000000,
+      rate: 400,
+      reload: 1800,
+      range: 300,
+      spread: 0
+    },
+    {
+      name: 'LASER ANNIHILATOR',
+      mode: 'MODE LASER',
+      magazine: 25,
+      reserve: 125,
+      damage: 1000000,
+      rate: 120,
+      reload: 1600,
+      range: 250,
+      spread: 0.002
+    },
+    {
+      name: 'TITAN CANNON',
+      mode: 'MODE EXPLOSIF',
+      magazine: 8,
+      reserve: 40,
+      damage: 1000000,
+      rate: 500,
+      reload: 2000,
+      range: 180,
+      spread: 0.004
+    },
+    {
+      name: 'CRYO EXECUTOR',
+      mode: 'MODE CRYOGÉNIQUE',
+      magazine: 18,
+      reserve: 90,
+      damage: 1000000,
+      rate: 160,
+      reload: 1500,
+      range: 180,
+      spread: 0.003
+    },
+    {
+      name: 'STORM BREAKER',
+      mode: 'MODE ÉLECTRIQUE',
+      magazine: 24,
+      reserve: 120,
+      damage: 1000000,
+      rate: 130,
+      reload: 1550,
+      range: 200,
+      spread: 0.003
+    },
+    {
+      name: 'BEAST HUNTER',
+      mode: 'MODE ANTI-BÊTE',
+      magazine: 15,
+      reserve: 75,
+      damage: 1000000,
+      rate: 250,
+      reload: 1650,
+      range: 280,
+      spread: 0
+    },
+    {
+      name: 'QUANTUM RIFLE',
+      mode: 'MODE QUANTIQUE',
+      magazine: 20,
+      reserve: 100,
+      damage: 1000000,
+      rate: 110,
+      reload: 1500,
+      range: 250,
+      spread: 0.001
+    },
+    {
+      name: 'EMP DEVASTATOR',
+      mode: 'MODE EMP',
+      magazine: 12,
+      reserve: 60,
+      damage: 1000000,
+      rate: 280,
+      reload: 1700,
+      range: 200,
+      spread: 0.002
+    },
+    {
+      name: 'OMEGA CANNON',
+      mode: 'MODE OMEGA',
+      magazine: 6,
+      reserve: 36,
+      damage: 1000000,
+      rate: 600,
+      reload: 2200,
+      range: 300,
+      spread: 0
+    },
+    {
+      name: 'INFERNO STRIKE',
+      mode: 'MODE INCENDIAIRE',
+      magazine: 16,
+      reserve: 80,
+      damage: 1000000,
+      rate: 200,
+      reload: 1600,
+      range: 200,
+      spread: 0.002
+    },
+    {
+      name: 'NINA GODSLAYER',
+      mode: 'MODE ULTIME',
+      magazine: 10,
+      reserve: 999,
+      damage: 1000000,
+      rate: 100,
+      reload: 1000,
+      range: 500,
+      spread: 0
     }
   ];
-
 
 
 
