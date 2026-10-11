@@ -1,9 +1,14 @@
+
+
+
+
 /* ============================================================
    FOBAS MOTO RACING 3D — ENGINE CORRIGÉ
    Fichier : appmotorracingfobas.js
-   Version : 5.0.0
+   Version : 5.1.0
    Three.js + IndexedDB + sauvegarde locale
    Auteur : MEME Selvandieu
+   Missions : 1 à 55
    ============================================================ */
 
 (() => {
@@ -12,13 +17,14 @@
   if (window.__FOBAS_MOTO_RACING_V5__) return;
   window.__FOBAS_MOTO_RACING_V5__ = true;
 
-  const VERSION = "5.0.0";
+  const VERSION = "5.1.0";
   const THREE_URL =
     "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js";
 
   const DB_NAME = "FOBAS_MOTO_RACING_DB";
   const STORE = "gameData";
   const SAVE_KEY = "mainSave";
+  const MAX_MISSIONS = 55;
 
   const $ = id => document.getElementById(id);
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -46,9 +52,7 @@
 
   const fmtTime = seconds => {
     seconds = Math.max(0, Math.floor(seconds || 0));
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
   };
 
   const DEPARTMENTS = [
@@ -73,6 +77,7 @@
     ["Italie", "Rome"]
   ];
 
+  /* Les 35 missions originales restent dans le même ordre. */
   const MISSION_NAMES = [
     "Premiers tours de roue",
     "Maîtrise de trajectoire",
@@ -108,7 +113,29 @@
     "Course de prestige",
     "L'ultime rivalité",
     "Le dernier obstacle",
-    "Couronne de légende"
+    "Couronne de légende",
+
+    /* 20 nouvelles missions : 36 à 55 */
+    "Route des géants",
+    "Les virages infernaux",
+    "L'asphalte sans fin",
+    "Tempête de vitesse",
+    "Le col des champions",
+    "Rivalité des titans",
+    "Circuit des falaises",
+    "L'épreuve des réflexes",
+    "La route impitoyable",
+    "Le défi des machines",
+    "Les courbes du danger",
+    "Grand prix de l'endurance",
+    "Le serpent d'asphalte",
+    "La montagne noire",
+    "Les pilotes d'élite",
+    "Le circuit des légendes",
+    "La traversée extrême",
+    "L'ultime course d'endurance",
+    "Le duel des maîtres",
+    "FOBAS — Couronne ultime"
   ];
 
   const DIFFICULTIES = [
@@ -155,16 +182,12 @@
   }));
 
   /*
-   * Kantite rival pa misyon:
-   * 1 = 7
-   * 2 = 12
-   * 3 = 19
-   * 4 = 26
-   * 5 = 33
-   * Apre sa, ajoute 7 rival chak nouvo misyon.
+   * Nombre de rivaux.
+   * La formule d'origine est conservée jusqu'à la mission 35.
+   * Les missions 36 à 55 continuent la progression.
    */
   function aiCountForMission(missionId) {
-    const id = clamp(Math.floor(Number(missionId) || 1), 1, 35);
+    const id = clamp(Math.floor(Number(missionId) || 1), 1, MAX_MISSIONS);
     if (id === 1) return 7;
     if (id === 2) return 12;
     if (id === 3) return 19;
@@ -173,8 +196,15 @@
 
   const MISSIONS = MISSION_NAMES.map((name, index) => {
     const id = index + 1;
-    const tier = Math.min(4, Math.floor(index / 7));
     const local = DEPARTMENTS[index % DEPARTMENTS.length];
+
+    let tier = Math.min(4, Math.floor(index / 7));
+    let difficulty = DIFFICULTIES[tier];
+    let laps = difficulty.laps;
+    let routeLength = 1800;
+    let curveIntensity = 0.25;
+    let reward = difficulty.reward + index * 15;
+    let xp = 40 + index * 8;
 
     const location = id <= 28
       ? {
@@ -187,7 +217,30 @@
           city: INTERNATIONAL[(id - 29) % INTERNATIONAL.length][1]
         };
 
-    const difficulty = DIFFICULTIES[tier];
+    /*
+     * Paramètres spécifiques aux nouvelles missions.
+     * Chaque niveau ajoute de la distance et de la difficulté.
+     */
+    if (id >= 36) {
+      const stage = id - 35;
+
+      tier = Math.min(4, Math.floor((stage - 1) / 4));
+      difficulty = {
+        name: stage <= 5 ? "Élite"
+          : stage <= 10 ? "Expert supérieur"
+          : stage <= 15 ? "Légende extrême"
+          : "FOBAS Ultime",
+        factor: 1.08 + stage * 0.018,
+        laps: Math.min(8, 3 + Math.floor((stage - 1) / 3)),
+        reward: 900 + stage * 180
+      };
+
+      laps = difficulty.laps;
+      routeLength = 2400 + stage * 180;
+      curveIntensity = Math.min(1.9, 0.55 + stage * 0.065);
+      reward = difficulty.reward + index * 30;
+      xp = 180 + stage * 35;
+    }
 
     return {
       id,
@@ -195,9 +248,11 @@
       tier,
       difficulty,
       location,
-      laps: difficulty.laps,
-      reward: difficulty.reward + index * 15,
-      xp: 40 + index * 8,
+      laps,
+      routeLength,
+      curveIntensity,
+      reward,
+      xp,
       aiCount: aiCountForMission(id)
     };
   });
@@ -279,6 +334,7 @@
   let toastTimer = 0;
   let saveTimer = 0;
   let lastCollisionTime = 0;
+  let roadCurvePhase = 0;
 
   let inputLeft = false;
   let inputRight = false;
@@ -435,7 +491,7 @@
     }
 
     result.ownedBikes = Array.isArray(result.ownedBikes)
-      ? [...new Set(result.ownedBikes.filter(id =>
+      ? [...new Set(result.ownedBikes.map(Number).filter(id =>
           Number.isInteger(id) && Boolean(BIKES[id])))]
       : [0];
 
@@ -450,7 +506,7 @@
     for (const key of ["completedMissions", "unlockedMissions"]) {
       result[key] = Array.isArray(result[key])
         ? [...new Set(result[key].map(Number).filter(id =>
-            Number.isInteger(id) && id >= 1 && id <= 35))]
+            Number.isInteger(id) && id >= 1 && id <= MAX_MISSIONS))]
         : [];
     }
 
@@ -513,9 +569,7 @@
 
   function scheduleSave() {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      saveProgress(false);
-    }, 350);
+    saveTimer = setTimeout(() => saveProgress(false), 350);
   }
 
   /* ============================ XP / PROFIL =================== */
@@ -526,9 +580,7 @@
 
   function xpAtLevel(level) {
     let total = 0;
-    for (let i = 1; i < level; i++) {
-      total += xpRequired(i);
-    }
+    for (let i = 1; i < level; i++) total += xpRequired(i);
     return total;
   }
 
@@ -537,7 +589,7 @@
     let level = 1;
     let remaining = state.xp;
 
-    while (level < 35 && remaining >= xpRequired(level)) {
+    while (level < 55 && remaining >= xpRequired(level)) {
       remaining -= xpRequired(level);
       level++;
     }
@@ -561,17 +613,10 @@
     return {
       ...bike,
       speed: bike.speed * (1 + upgradeLevel(id, "speed") * 0.045),
-      acceleration: bike.acceleration +
-        upgradeLevel(id, "acceleration") * 3,
-      handling: Math.min(
-        100, bike.handling + upgradeLevel(id, "handling") * 3
-      ),
-      braking: Math.min(
-        100, bike.braking + upgradeLevel(id, "braking") * 3
-      ),
-      nitro: Math.min(
-        100, bike.nitro + upgradeLevel(id, "nitro") * 3
-      )
+      acceleration: bike.acceleration + upgradeLevel(id, "acceleration") * 3,
+      handling: Math.min(100, bike.handling + upgradeLevel(id, "handling") * 3),
+      braking: Math.min(100, bike.braking + upgradeLevel(id, "braking") * 3),
+      nitro: Math.min(100, bike.nitro + upgradeLevel(id, "nitro") * 3)
     };
   }
 
@@ -584,7 +629,8 @@
   }
 
   function updateProfileUI() {
-    const rank = state.level >= 29 ? "Légende"
+    const rank = state.level >= 45 ? "FOBAS Ultime"
+      : state.level >= 29 ? "Légende"
       : state.level >= 22 ? "Champion"
       : state.level >= 15 ? "Expert"
       : state.level >= 8 ? "Intermédiaire"
@@ -596,13 +642,8 @@
     txt("profileLevelDisplay", state.level);
     txt("profileRankDisplay", rank);
 
-    if ($("playerNameInput")) {
-      $("playerNameInput").value = state.profile.name;
-    }
-
-    if ($("playerCountrySelect")) {
-      $("playerCountrySelect").value = state.profile.country;
-    }
+    if ($("playerNameInput")) $("playerNameInput").value = state.profile.name;
+    if ($("playerCountrySelect")) $("playerCountrySelect").value = state.profile.country;
   }
 
   function updateHomeUI() {
@@ -613,20 +654,12 @@
     txt("homeMissions", state.completedMissions.length);
 
     const bike = BIKES[state.selectedBike] || BIKES[0];
-
     txt("homeBikeName", bike.name);
-    txt(
-      "homeBikeDescription",
-      `Vitesse ${bike.speed} km/h · Maniabilité ${bike.handling}/100`
-    );
+    txt("homeBikeDescription", `Vitesse ${bike.speed} km/h · Maniabilité ${bike.handling}/100`);
 
     const art = $("homeBikeArt");
-
     if (art) {
-      art.style.setProperty(
-        "--bike-color",
-        `#${bike.color.toString(16).padStart(6, "0")}`
-      );
+      art.style.setProperty("--bike-color", `#${bike.color.toString(16).padStart(6, "0")}`);
       art.setAttribute("aria-label", bike.name);
     }
 
@@ -645,19 +678,14 @@
     txt("bestCareerPosition", state.bestPosition || "—");
     txt("careerPoints", state.championshipPoints);
 
-    if ($("xpProgress")) {
-      $("xpProgress").style.width = `${percent}%`;
-    }
-
-    if ($("xpBar")) {
-      $("xpBar").style.width = `${percent}%`;
-    }
+    if ($("xpProgress")) $("xpProgress").style.width = `${percent}%`;
+    if ($("xpBar")) $("xpBar").style.width = `${percent}%`;
 
     txt(
       "careerMessage",
-      state.completedMissions.length >= 35
-        ? "Toutes les missions sont terminées."
-        : `${35 - state.completedMissions.length} mission(s) restante(s).`
+      state.completedMissions.length >= MAX_MISSIONS
+        ? "Toutes les 55 missions sont terminées."
+        : `${MAX_MISSIONS - state.completedMissions.length} mission(s) restante(s).`
     );
 
     const list = $("raceList");
@@ -666,7 +694,6 @@
     list.innerHTML = MISSIONS.map(mission => {
       const done = state.completedMissions.includes(mission.id);
       const unlocked = state.unlockedMissions.includes(mission.id);
-      const rivals = mission.aiCount;
 
       return `
         <button type="button"
@@ -677,7 +704,7 @@
           <span class="mission-info">
             <strong>${html(mission.name)}</strong>
             <small>${html(mission.difficulty.name)} · ${html(mission.location.city)}</small>
-            <small>${rivals} moto IA · ${mission.laps} tour(s)</small>
+            <small>${mission.aiCount} moto IA · ${mission.laps} tour(s) · ${Math.round(mission.routeLength)} m/tour</small>
           </span>
           <span class="mission-status">${done ? "✓" : unlocked ? "▶" : "🔒"}</span>
         </button>`;
@@ -704,9 +731,7 @@
         wins: state.wins,
         isPlayer: true
       }
-    ].sort((a, b) =>
-      (Number(b.points) || 0) - (Number(a.points) || 0)
-    ).slice(0, 20);
+    ].sort((a, b) => (Number(b.points) || 0) - (Number(a.points) || 0)).slice(0, 20);
 
     list.innerHTML = rows.map((entry, index) => `
       <div class="leaderboard-row ${entry.isPlayer ? "current-player" : ""}">
@@ -729,13 +754,12 @@
       return;
     }
 
-    document.querySelectorAll(
-      "#motoApp main section, #motoApp > section"
-    ).forEach(section => {
-      if (section.id && section.id.endsWith("Screen")) {
-        section.hidden = section.id !== screenId;
-      }
-    });
+    document.querySelectorAll("#motoApp main section, #motoApp > section")
+      .forEach(section => {
+        if (section.id && section.id.endsWith("Screen")) {
+          section.hidden = section.id !== screenId;
+        }
+      });
 
     target.hidden = false;
     currentScreen = screenId;
@@ -756,18 +780,18 @@
 
   function bindNavigation() {
     document.querySelectorAll("[data-nav]").forEach(button => {
+      if (button.dataset.fobasNavBound === "1") return;
+      button.dataset.fobasNavBound = "1";
       button.addEventListener("click", () => navigate(button.dataset.nav));
     });
 
     document.querySelectorAll("[data-go]").forEach(button => {
+      if (button.dataset.fobasGoBound === "1") return;
+      button.dataset.fobasGoBound = "1";
       button.addEventListener("click", () => {
         const destination = button.dataset.go;
-
-        if (destination === "raceScreen") {
-          startRace(selectedMissionId);
-        } else {
-          navigate(destination);
-        }
+        if (destination === "raceScreen") startRace(selectedMissionId);
+        else navigate(destination);
       });
     });
 
@@ -784,45 +808,47 @@
     };
 
     Object.entries(mappings).forEach(([id, screen]) => {
-      $(id)?.addEventListener("click", () => navigate(screen));
+      const button = $(id);
+      if (!button || button.dataset.fobasNavBound === "1") return;
+      button.dataset.fobasNavBound = "1";
+      button.addEventListener("click", () => navigate(screen));
     });
 
-    $("homeRaceButton")?.addEventListener("click", () => {
-      startRace(selectedMissionId);
-    });
+    const bindOnce = (id, event, callback) => {
+      const element = $(id);
+      if (!element || element.dataset.fobasActionBound === "1") return;
+      element.dataset.fobasActionBound = "1";
+      element.addEventListener(event, callback);
+    };
 
-    $("challengeMasterButton")?.addEventListener("click", challengeMaster);
-    $("challengeMasterChampionshipButton")?.addEventListener(
-      "click", challengeMaster
-    );
+    bindOnce("homeRaceButton", "click", () => startRace(selectedMissionId));
+    bindOnce("challengeMasterButton", "click", challengeMaster);
+    bindOnce("challengeMasterChampionshipButton", "click", challengeMaster);
 
-    $("editProfileButton")?.addEventListener("click", () => {
+    bindOnce("editProfileButton", "click", () => {
       visible("profileEditForm", true);
       $("playerNameInput")?.focus();
     });
 
-    $("cancelProfileButton")?.addEventListener("click", () => {
+    bindOnce("cancelProfileButton", "click", () => {
       visible("profileEditForm", false);
       updateProfileUI();
     });
 
-    $("saveProfileButton")?.addEventListener("click", saveProfile);
-    $("refreshLeaderboardButton")?.addEventListener(
-      "click", updateChampionshipUI
-    );
-    $("saveProgressButton")?.addEventListener(
-      "click", () => saveProgress(true)
-    );
+    bindOnce("saveProfileButton", "click", saveProfile);
+    bindOnce("refreshLeaderboardButton", "click", updateChampionshipUI);
+    bindOnce("saveProgressButton", "click", () => saveProgress(true));
 
     document.querySelectorAll("button").forEach(button => {
       const label = (button.textContent || "").trim().toLowerCase();
-
       if (
         label.includes("défier meme") ||
         label.includes("defier meme") ||
         label.includes("défier le maître") ||
         label.includes("defier le maitre")
       ) {
+        if (button.dataset.fobasMasterBound === "1") return;
+        button.dataset.fobasMasterBound = "1";
         button.addEventListener("click", challengeMaster);
       }
     });
@@ -844,7 +870,6 @@
     updateProfileUI();
     updateHomeUI();
     scheduleSave();
-
     toast("Profil enregistré.");
   }
 
@@ -855,9 +880,7 @@
   }
 
   function upgradePrice(id, key) {
-    return Math.round(
-      (220 + id * 55) * (1 + upgradeLevel(id, key) * 0.85)
-    );
+    return Math.round((220 + id * 55) * (1 + upgradeLevel(id, key) * 0.85));
   }
 
   function buyOrSelectBike(id) {
@@ -879,7 +902,6 @@
 
     state.selectedBike = id;
     garageBikeId = id;
-
     updateGarageUI();
     updateHomeUI();
     updatePlayerBikePaint();
@@ -892,10 +914,7 @@
       `#${bike.color.toString(16).padStart(6, "0")}`;
 
     txt("garageBikeName", bike.name);
-    txt("bikeOwnedBadge", owned(garageBikeId)
-      ? "Possédée"
-      : `${bike.price} crédits`);
-
+    txt("bikeOwnedBadge", owned(garageBikeId) ? "Possédée" : `${bike.price} crédits`);
     txt("statSpeed", Math.round(bike.speed));
     txt("statAccel", Math.round(bike.acceleration));
     txt("statHandling", Math.round(bike.handling));
@@ -903,7 +922,6 @@
     txt("statNitro", Math.round(bike.nitro));
 
     const art = $("garageBikeArt");
-
     if (art) {
       art.style.setProperty("--bike-color", color);
       art.setAttribute("aria-label", bike.name);
@@ -920,23 +938,18 @@
 
     list.innerHTML = BIKES.map(bike => `
       <article class="bike-shop-card ${bike.id === garageBikeId ? "selected" : ""}">
-        <div class="bike-shop-color"
-          style="background:#${bike.color.toString(16).padStart(6, "0")}"></div>
+        <div class="bike-shop-color" style="background:#${bike.color.toString(16).padStart(6, "0")}"></div>
         <div class="bike-shop-info">
           <strong>${html(bike.name)}</strong>
           <small>${bike.speed} km/h · Maniabilité ${bike.handling}</small>
         </div>
         <button type="button" data-bike-action="${bike.id}">
-          ${bike.id === garageBikeId
-            ? "Sélectionnée"
-            : owned(bike.id) ? "Choisir" : `${bike.price} crédits`}
+          ${bike.id === garageBikeId ? "Sélectionnée" : owned(bike.id) ? "Choisir" : `${bike.price} crédits`}
         </button>
       </article>`).join("");
 
     list.querySelectorAll("[data-bike-action]").forEach(button => {
-      button.addEventListener("click", () => {
-        buyOrSelectBike(Number(button.dataset.bikeAction));
-      });
+      button.addEventListener("click", () => buyOrSelectBike(Number(button.dataset.bikeAction)));
     });
   }
 
@@ -958,21 +971,15 @@
 
       return `
         <div class="upgrade-row">
-          <div>
-            <strong>${label}</strong>
-            <small>Niveau ${level}/5</small>
-          </div>
-          <button type="button" data-upgrade="${key}"
-            ${level >= 5 || !owned(garageBikeId) ? "disabled" : ""}>
+          <div><strong>${label}</strong><small>Niveau ${level}/5</small></div>
+          <button type="button" data-upgrade="${key}" ${level >= 5 || !owned(garageBikeId) ? "disabled" : ""}>
             ${level >= 5 ? "MAX" : `Améliorer · ${price}`}
           </button>
         </div>`;
     }).join("");
 
     list.querySelectorAll("[data-upgrade]").forEach(button => {
-      button.addEventListener("click", () => {
-        purchaseUpgrade(garageBikeId, button.dataset.upgrade);
-      });
+      button.addEventListener("click", () => purchaseUpgrade(garageBikeId, button.dataset.upgrade));
     });
   }
 
@@ -993,7 +1000,6 @@
     updateHomeUI();
     updatePlayerBikePaint();
     scheduleSave();
-
     toast("Amélioration installée.");
   }
 
@@ -1006,26 +1012,18 @@
     container.innerHTML = PAINTS.map(([name, color]) => `
       <button type="button"
         class="paint-option ${current === color ? "selected" : ""}"
-        data-paint="${color}"
-        title="${html(name)}"
-        aria-label="${html(name)}"
+        data-paint="${color}" title="${html(name)}" aria-label="${html(name)}"
         style="background:${color};width:36px;height:36px;border-radius:50%;border:2px solid ${current === color ? "#fff" : "transparent"};cursor:pointer">
       </button>`).join("");
 
     container.querySelectorAll("[data-paint]").forEach(button => {
       button.addEventListener("click", () => {
-        if (!owned(garageBikeId)) {
-          toast("Achetez d'abord cette moto.");
-          return;
-        }
+        if (!owned(garageBikeId)) return toast("Achetez d'abord cette moto.");
 
         state.bikePaints[garageBikeId] = button.dataset.paint;
-
         updateGarageUI();
 
-        if (state.selectedBike === garageBikeId) {
-          updatePlayerBikePaint();
-        }
+        if (state.selectedBike === garageBikeId) updatePlayerBikePaint();
 
         scheduleSave();
         toast("Couleur appliquée.");
@@ -1034,52 +1032,29 @@
   }
 
   function applyPaint() {
-    if (!owned(garageBikeId)) {
-      return toast("Achetez d'abord cette moto.");
-    }
-
-    if (!state.bikePaints[garageBikeId]) {
-      return toast("Choisissez une couleur.");
-    }
+    if (!owned(garageBikeId)) return toast("Achetez d'abord cette moto.");
+    if (!state.bikePaints[garageBikeId]) return toast("Choisissez une couleur.");
 
     updatePlayerBikePaint();
     updateGarageUI();
     scheduleSave();
-
     toast("Peinture appliquée.");
   }
 
   /* ============================ PARAMÈTRES ===================== */
 
   function updateSettingsUI() {
-    if ($("settingTilt")) {
-      $("settingTilt").checked = Boolean(state.settings.tilt);
-    }
-
-    if ($("settingVibration")) {
-      $("settingVibration").checked = Boolean(state.settings.vibration);
-    }
-
-    if ($("settingReducedEffects")) {
-      $("settingReducedEffects").checked =
-        Boolean(state.settings.reducedEffects);
-    }
-
-    if ($("graphicsQuality")) {
-      $("graphicsQuality").value = state.settings.graphicsQuality;
-    }
-
+    if ($("settingTilt")) $("settingTilt").checked = Boolean(state.settings.tilt);
+    if ($("settingVibration")) $("settingVibration").checked = Boolean(state.settings.vibration);
+    if ($("settingReducedEffects")) $("settingReducedEffects").checked = Boolean(state.settings.reducedEffects);
+    if ($("graphicsQuality")) $("graphicsQuality").value = state.settings.graphicsQuality;
     txt("gameVersion", VERSION);
   }
 
   function bindSettings() {
     $("settingTilt")?.addEventListener("change", async event => {
       state.settings.tilt = event.target.checked;
-
-      if (state.settings.tilt) {
-        await requestTiltPermission();
-      }
-
+      if (state.settings.tilt) await requestTiltPermission();
       scheduleSave();
     });
 
@@ -1108,7 +1083,6 @@
         typeof DeviceOrientationEvent.requestPermission === "function"
       ) {
         const permission = await DeviceOrientationEvent.requestPermission();
-
         if (permission !== "granted") {
           state.settings.tilt = false;
           updateSettingsUI();
@@ -1116,7 +1090,6 @@
           return;
         }
       }
-
       toast("Contrôle par inclinaison activé.");
     } catch (error) {
       console.warn("[FOBAS] Gyroscope :", error);
@@ -1127,24 +1100,15 @@
   /* ============================ THREE.JS ======================= */
 
   function mat(color, roughness = 0.7, metalness = 0.1) {
-    return new three.MeshStandardMaterial({
-      color,
-      roughness,
-      metalness
-    });
+    return new three.MeshStandardMaterial({ color, roughness, metalness });
   }
 
   function box(parent, width, height, depth, material, x, y, z) {
-    const mesh = new three.Mesh(
-      new three.BoxGeometry(width, height, depth),
-      material
-    );
-
+    const mesh = new three.Mesh(new three.BoxGeometry(width, height, depth), material);
     mesh.position.set(x, y, z);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     parent.add(mesh);
-
     return mesh;
   }
 
@@ -1156,25 +1120,17 @@
       new three.TorusGeometry(radius, radius * 0.17, 10, 20),
       mat(0x111315, 0.98)
     );
-
     tire.rotation.y = Math.PI / 2;
     tire.castShadow = true;
     group.add(tire);
 
     const rim = new three.Mesh(
-      new three.CylinderGeometry(
-        radius * 0.62,
-        radius * 0.62,
-        0.08,
-        16
-      ),
+      new three.CylinderGeometry(radius * 0.62, radius * 0.62, 0.08, 16),
       mat(0xb9c3cd, 0.28, 0.8)
     );
-
     rim.rotation.z = Math.PI / 2;
     group.add(rim);
     parent.add(group);
-
     return group;
   }
 
@@ -1194,11 +1150,7 @@
     box(bike, 0.12, 0.15, 1.05, metal, 0, 0.72, -0.02);
     box(bike, 0.43, 0.4, 0.45, dark, 0, 0.65, 0.17);
 
-    const tank = new three.Mesh(
-      new three.SphereGeometry(0.35, 14, 10),
-      paint
-    );
-
+    const tank = new three.Mesh(new three.SphereGeometry(0.35, 14, 10), paint);
     tank.scale.set(0.85, 0.65, 1.25);
     tank.position.set(0, 1.05, -0.12);
     tank.castShadow = true;
@@ -1208,11 +1160,7 @@
     box(bike, 0.08, 0.74, 0.08, metal, 0, 0.83, -0.73);
     box(bike, 0.86, 0.06, 0.07, metal, 0, 1.32, -0.64);
 
-    const fairing = new three.Mesh(
-      new three.SphereGeometry(0.32, 12, 10),
-      paint
-    );
-
+    const fairing = new three.Mesh(new three.SphereGeometry(0.32, 12, 10), paint);
     fairing.scale.set(0.7, 0.85, 0.75);
     fairing.position.set(0, 0.91, -0.62);
     bike.add(fairing);
@@ -1225,18 +1173,13 @@
         emissiveIntensity: 0.8
       })
     );
-
     lamp.position.set(0, 1.04, -0.9);
     bike.add(lamp);
 
     const rider = new three.Group();
     const suit = mat(0x20252d, 0.8);
 
-    const torso = new three.Mesh(
-      new three.CapsuleGeometry(0.18, 0.43, 3, 6),
-      suit
-    );
-
+    const torso = new three.Mesh(new three.CapsuleGeometry(0.18, 0.43, 3, 6), suit);
     torso.rotation.x = -0.35;
     torso.position.set(0, 1.48, 0.16);
     rider.add(torso);
@@ -1245,14 +1188,12 @@
       new three.SphereGeometry(0.19, 12, 10),
       mat(0xf2f3f4, 0.25, 0.15)
     );
-
     helmet.position.set(0, 1.82, -0.12);
     rider.add(helmet);
     bike.add(rider);
 
     bike.userData.wheels = wheels;
     bike.userData.paintMaterial = paint;
-
     return bike;
   }
 
@@ -1277,22 +1218,18 @@
     for (let i = 0; i < 36; i++) {
       const segment = new three.Group();
       segment.position.z = -i * 7;
+      segment.userData.segmentIndex = i;
 
       const road = new three.Mesh(
         new three.BoxGeometry(8.8, 0.12, 7.1),
         roadMaterial
       );
-
       road.position.y = -0.045;
       road.receiveShadow = true;
       segment.add(road);
 
       for (const side of [-1, 1]) {
-        box(
-          segment, 0.26, 0.16, 7.1,
-          edgeMaterial, side * 4.35, 0.02, 0
-        );
-
+        box(segment, 0.26, 0.16, 7.1, edgeMaterial, side * 4.35, 0.02, 0);
         box(
           segment, 0.15, 0.17, 1.4,
           i % 2 ? redMaterial : lineMaterial,
@@ -1301,7 +1238,6 @@
       }
 
       box(segment, 0.12, 0.025, 2.4, lineMaterial, 0, 0.025, 0);
-
       world.add(segment);
       roadSegments.push(segment);
     }
@@ -1314,7 +1250,6 @@
       new three.CylinderGeometry(0.12, 0.18, 1.5, 8),
       mat(0x6c4a30)
     );
-
     trunk.position.y = 0.75;
     tree.add(trunk);
 
@@ -1322,10 +1257,8 @@
       new three.ConeGeometry(rand(0.75, 1.15), rand(1.8, 2.7), 8),
       mat(pick([0x267447, 0x317d49, 0x448b48, 0x236b45]))
     );
-
     leaves.position.y = 2;
     tree.add(leaves);
-
     return tree;
   }
 
@@ -1336,7 +1269,6 @@
       new three.PlaneGeometry(500, 600),
       mat(0x527c42, 1)
     );
-
     ground.rotation.x = -Math.PI / 2;
     ground.position.set(0, -0.14, -150);
     world.add(ground);
@@ -1344,10 +1276,8 @@
     for (let i = 0; i < 54; i++) {
       const side = i % 2 === 0 ? -1 : 1;
       const tree = createTree();
-
       tree.position.set(side * rand(6, 18), -0.1, -rand(15, 235));
       tree.userData.initialX = tree.position.x;
-
       world.add(tree);
       scenery.push(tree);
     }
@@ -1355,10 +1285,7 @@
 
   async function initThree() {
     const canvas = $("raceCanvas");
-
-    if (!canvas) {
-      throw new Error("Élément #raceCanvas absent du HTML.");
-    }
+    if (!canvas) throw new Error("Élément #raceCanvas absent du HTML.");
 
     three = await import(THREE_URL);
 
@@ -1379,12 +1306,9 @@
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.4));
     renderer.shadowMap.enabled =
-      !state.settings.reducedEffects &&
-      state.settings.graphicsQuality === "high";
+      !state.settings.reducedEffects && state.settings.graphicsQuality === "high";
 
-    if ("outputColorSpace" in renderer) {
-      renderer.outputColorSpace = three.SRGBColorSpace;
-    }
+    if ("outputColorSpace" in renderer) renderer.outputColorSpace = three.SRGBColorSpace;
 
     world = new three.Group();
     scene.add(world);
@@ -1415,8 +1339,7 @@
     if (!renderer) return;
 
     renderer.shadowMap.enabled =
-      !state.settings.reducedEffects &&
-      state.settings.graphicsQuality === "high";
+      !state.settings.reducedEffects && state.settings.graphicsQuality === "high";
 
     const ratio = state.settings.graphicsQuality === "low" ? 1
       : state.settings.graphicsQuality === "medium" ? 1.2
@@ -1431,12 +1354,8 @@
 
     const canvas = $("raceCanvas");
     const parent = canvas?.parentElement;
-
     const width = Math.max(1, parent?.clientWidth || window.innerWidth);
-    const height = Math.max(
-      1,
-      parent?.clientHeight || Math.min(window.innerHeight * 0.55, 600)
-    );
+    const height = Math.max(1, parent?.clientHeight || Math.min(window.innerHeight * 0.55, 600));
 
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
@@ -1446,11 +1365,12 @@
   function resetRaceWorld() {
     roadSegments.forEach((segment, index) => {
       segment.position.z = -index * 7;
+      segment.position.x = 0;
+      segment.rotation.y = 0;
     });
 
     scenery.forEach(object => {
       object.position.z = -rand(20, 250);
-
       if (object.userData.initialX !== undefined) {
         object.position.x = object.userData.initialX;
       }
@@ -1463,6 +1383,7 @@
     }
 
     cameraZoom = 1;
+    roadCurvePhase = 0;
   }
 
   /* ============================ COURSES ======================== */
@@ -1470,23 +1391,28 @@
   function buildRaceData(missionId, masterChallenge = false) {
     const mission = missionById(missionId);
     const player = currentBike();
+    const progress = (mission.id - 1) / (MAX_MISSIONS - 1);
 
-    const aiCount = mission.aiCount;
-    const progress = (mission.id - 1) / 34;
+    const ai = Array.from({ length: mission.aiCount }, (_, index) => {
+      /*
+       * Missions 1–35 gardent un comportement proche de l'original.
+       * À partir de 36, les rivaux deviennent plus rapides et réactifs.
+       */
+      let skill;
+      if (mission.id <= 35) {
+        skill = 0.82 + progress * 0.15 + rand(-0.035, 0.035);
+      } else {
+        const stage = mission.id - 35;
+        skill = 0.98 + stage * 0.009 + rand(-0.025, 0.025);
+      }
 
-    /*
-     * IA yo vin pi rapid selon misyon an.
-     * Vitès sib la depann de moto jwè a tou, pou jwèt la
-     * rete konpetitif san li pa vin enposib pou genyen.
-     */
-    const ai = Array.from({ length: aiCount }, (_, index) => {
-      const skill = 0.82 + progress * 0.15 + rand(-0.035, 0.035);
-      const speedRatio = clamp(skill, 0.74, 0.99);
-      const targetSpeed = Math.max(
-        48,
-        player.speed * speedRatio + rand(-8, 8)
-      );
+      skill = clamp(skill, 0.74, 1.18);
 
+      const speedRatio = mission.id <= 35
+        ? clamp(skill, 0.74, 0.99)
+        : clamp(skill, 0.98, 1.16);
+
+      const targetSpeed = Math.max(48, player.speed * speedRatio + rand(-5, 7));
       const lanePattern = [-3.0, -1.8, -0.6, 0.6, 1.8, 3.0];
 
       return {
@@ -1502,17 +1428,17 @@
         finished: false,
         finishTime: Infinity,
         phase: rand(0, Math.PI * 2),
-        skill: clamp(skill, 0.74, 0.99)
+        skill
       };
     });
 
     if (masterChallenge && ai[0]) {
       ai[0].name = "MEME Selvandieu";
       ai[0].targetSpeed = Math.min(
-        player.speed * 0.99,
-        Math.max(80, player.speed * (0.91 + progress * 0.08))
+        player.speed * 1.12,
+        Math.max(80, player.speed * (0.91 + progress * 0.18))
       );
-      ai[0].skill = 0.96 + progress * 0.03;
+      ai[0].skill = Math.min(1.2, 0.96 + progress * 0.20);
     }
 
     return {
@@ -1522,23 +1448,18 @@
       started: false,
       elapsed: 0,
       distance: 0,
-      totalDistance: 1800 * mission.laps,
+      totalDistance: mission.routeLength * mission.laps,
       laps: mission.laps,
       ai,
-      aiCount
+      aiCount: mission.aiCount
     };
   }
 
   function challengeMaster() {
-    selectedMissionId = 35;
-    startRace(35, true);
+    selectedMissionId = MAX_MISSIONS;
+    startRace(MAX_MISSIONS, true);
   }
 
-  /*
-   * Gen tout rival yo nan done kous la, men rann sèlman rival
-   * ki pi pre yo an 3D pou telefòn Android pa bloke lè gen
-   * plizyè santèn rival nan nivo ki pi wo yo.
-   */
   function createAIRiders() {
     if (!world || !three || !currentRace) return;
 
@@ -1565,7 +1486,6 @@
 
       rider.userData.index = index;
       world.add(rider);
-
       aiRiders.push(rider);
       aiRiderIndexes.push(index);
     }
@@ -1581,12 +1501,9 @@
       if (!window.confirm("Abandonner la course actuelle ?")) return;
     }
 
-    const id = clamp(Math.floor(Number(missionId) || 1), 1, 35);
+    const id = clamp(Math.floor(Number(missionId) || 1), 1, MAX_MISSIONS);
 
-    if (
-      !state.unlockedMissions.includes(id) &&
-      !masterChallenge
-    ) {
+    if (!state.unlockedMissions.includes(id) && !masterChallenge) {
       toast("Mission verrouillée. Terminez la mission précédente.");
       return;
     }
@@ -1610,7 +1527,6 @@
     inputGas = false;
     inputBrake = false;
     inputNitro = false;
-
     lastCollisionTime = 0;
 
     resetRaceWorld();
@@ -1623,7 +1539,6 @@
 
     txt("countdownDisplay", "3");
     txt("pauseButton", "Ⅱ");
-
     txt("raceMissionName", currentRace.mission.name);
     txt(
       "raceLocationName",
@@ -1636,10 +1551,11 @@
     txt("speedDisplay", "0 km/h");
     txt("nitroDisplay", "100%");
 
+    const routeMeters = Math.round(currentRace.totalDistance);
     toast(
       currentRace.masterChallenge
-        ? `Défi lancé : affrontez MEME Selvandieu ! ${currentRace.aiCount} rival(s) IA.`
-        : `Mission ${id}/35 : ${currentRace.aiCount} moto IA. Préparez-vous !`
+        ? `Défi final : affrontez MEME Selvandieu ! ${currentRace.aiCount} rivaux.`
+        : `Mission ${id}/${MAX_MISSIONS} · ${currentRace.aiCount} IA · ${routeMeters.toLocaleString("fr-FR")} m.`
     );
   }
 
@@ -1647,13 +1563,9 @@
     if (!currentRace) return 1;
 
     let position = 1;
-
     for (const ai of currentRace.ai) {
-      if (ai.distance > currentRace.distance + 0.01) {
-        position++;
-      }
+      if (ai.distance > currentRace.distance + 0.01) position++;
     }
-
     return clamp(position, 1, currentRace.ai.length + 1);
   }
 
@@ -1661,39 +1573,15 @@
     const base = mission.reward;
     const xp = mission.xp;
 
-    if (position === 1) {
-      return { credits: base, xp, points: 100 };
-    }
-
-    if (position === 2) {
-      return {
-        credits: Math.round(base * 0.75),
-        xp: Math.round(xp * 0.8),
-        points: 75
-      };
-    }
-
-    if (position === 3) {
-      return {
-        credits: Math.round(base * 0.55),
-        xp: Math.round(xp * 0.65),
-        points: 50
-      };
-    }
+    if (position === 1) return { credits: base, xp, points: 100 };
+    if (position === 2) return { credits: Math.round(base * 0.75), xp: Math.round(xp * 0.8), points: 75 };
+    if (position === 3) return { credits: Math.round(base * 0.55), xp: Math.round(xp * 0.65), points: 50 };
 
     if (position <= Math.ceil((mission.aiCount + 1) * 0.25)) {
-      return {
-        credits: Math.round(base * 0.3),
-        xp: Math.round(xp * 0.4),
-        points: 25
-      };
+      return { credits: Math.round(base * 0.3), xp: Math.round(xp * 0.4), points: 25 };
     }
 
-    return {
-      credits: Math.round(base * 0.1),
-      xp: 5,
-      points: 5
-    };
+    return { credits: Math.round(base * 0.1), xp: 5, points: 5 };
   }
 
   function positionLabel(position) {
@@ -1745,33 +1633,17 @@
 
     const style = document.createElement("style");
     style.id = "fobasResultsStyle";
-
     style.textContent = `
       #resultOverlay[hidden] { display:none !important; }
       .fobas-results-card {
-        width:min(100%,430px);
-        max-height:92vh;
-        overflow:auto;
-        padding:24px 20px;
-        text-align:center;
-        color:#fff;
-        background:linear-gradient(145deg,#183b32,#111b22);
-        border:1px solid #52796c;
-        border-radius:22px;
-        box-shadow:0 20px 70px #0009;
+        width:min(100%,430px);max-height:92vh;overflow:auto;padding:24px 20px;
+        text-align:center;color:#fff;background:linear-gradient(145deg,#183b32,#111b22);
+        border:1px solid #52796c;border-radius:22px;box-shadow:0 20px 70px #0009;
         font-family:Arial,sans-serif;
       }
       .fobas-results-card button {
-        display:block;
-        width:100%;
-        min-height:48px;
-        margin-top:10px;
-        border:0;
-        border-radius:12px;
-        padding:12px;
-        font-weight:800;
-        cursor:pointer;
-        touch-action:manipulation;
+        display:block;width:100%;min-height:48px;margin-top:10px;border:0;
+        border-radius:12px;padding:12px;font-weight:800;cursor:pointer;
       }
       #fobasNextMissionButton {background:#39d98a;color:#062015;}
       #fobasReplayButton {background:#274552;color:#fff;}
@@ -1780,17 +1652,22 @@
       #resultTitle {font-size:27px;margin:8px 0;}
     `;
 
-    document.head.appendChild(style);
+    if (!$("fobasResultsStyle")) document.head.appendChild(style);
     document.body.appendChild(overlay);
-
     bindResultsButtons();
   }
 
   function bindResultsButtons() {
-    $("fobasNextMissionButton")?.addEventListener("click", nextMission);
-    $("fobasReplayButton")?.addEventListener("click", restartRace);
+    const bindOnce = (id, callback) => {
+      const button = $(id);
+      if (!button || button.dataset.fobasResultBound === "1") return;
+      button.dataset.fobasResultBound = "1";
+      button.addEventListener("click", callback);
+    };
 
-    $("fobasCareerButton")?.addEventListener("click", () => {
+    bindOnce("fobasNextMissionButton", nextMission);
+    bindOnce("fobasReplayButton", restartRace);
+    bindOnce("fobasCareerButton", () => {
       visible("resultOverlay", false);
       currentRace = null;
       navigate("careerScreen");
@@ -1813,10 +1690,6 @@
     visible("countdownDisplay", false);
     visible("pauseOverlay", false);
 
-    /*
-     * Pozisyon an konte tout IA ki te devan jwè a nan moman
-     * jwè a travèse liy final la. Sa mache ak nenpòt kantite rival.
-     */
     let position = 1;
 
     if (forcedPosition !== null) {
@@ -1845,17 +1718,13 @@
     if (position === 1) state.wins++;
     if (position <= 3) state.podiums++;
 
-    /*
-     * Fini kous la valide misyon an, menm si jwè a pa premye.
-     * Sa pèmèt jwè a kontinye aprann epi déverrouiller rès jwèt la.
-     */
     if (!state.completedMissions.includes(mission.id)) {
       state.completedMissions.push(mission.id);
     }
 
     const nextId = mission.id + 1;
 
-    if (nextId <= 35 && !state.unlockedMissions.includes(nextId)) {
+    if (nextId <= MAX_MISSIONS && !state.unlockedMissions.includes(nextId)) {
       state.unlockedMissions.push(nextId);
     }
 
@@ -1870,14 +1739,12 @@
       "resultEyebrow",
       currentRace.masterChallenge
         ? "DÉFI DE MEME SELVANDIEU"
-        : `MISSION ${mission.id}/35`
+        : `MISSION ${mission.id}/${MAX_MISSIONS}`
     );
 
     txt(
       "resultTitle",
-      position === 1 ? "VICTOIRE !"
-        : position <= 3 ? "PODIUM !"
-        : "COURSE TERMINÉE"
+      position === 1 ? "VICTOIRE !" : position <= 3 ? "PODIUM !" : "COURSE TERMINÉE"
     );
 
     txt(
@@ -1895,39 +1762,30 @@
         : "Continuez à vous entraîner et améliorez votre moto."
     );
 
-    txt(
-      "resultPodium",
-      position === 1 ? "🥇"
-        : position === 2 ? "🥈"
-        : position === 3 ? "🥉"
-        : "🏁"
-    );
-
+    txt("resultPodium", position === 1 ? "🥇" : position === 2 ? "🥈" : position === 3 ? "🥉" : "🏁");
     txt("resultElapsedTime", fmtTime(elapsed));
 
     txt(
       "resultNextMission",
-      nextId <= 35
+      nextId <= MAX_MISSIONS
         ? `Mission ${nextId} débloquée.`
-        : "Vous avez terminé les 35 missions !"
+        : `Vous avez terminé les ${MAX_MISSIONS} missions !`
     );
 
     ensureResultsOverlay();
     visible("resultOverlay", true);
 
     const nextButton = $("fobasNextMissionButton");
-
     if (nextButton) {
-      nextButton.textContent = nextId <= 35
+      nextButton.textContent = nextId <= MAX_MISSIONS
         ? `PROCHAINE MISSION ${nextId} ➜`
-        : "REJOUER LA MISSION 35";
+        : `REJOUER LA MISSION ${MAX_MISSIONS}`;
     }
 
     updateHomeUI();
     updateCareerUI();
     updateChampionshipUI();
     updateGarageUI();
-
     scheduleSave();
   }
 
@@ -1939,11 +1797,10 @@
     }
 
     const nextId = currentRace.missionId + 1;
-
     visible("resultOverlay", false);
 
-    if (nextId > 35) {
-      toast("Félicitations ! Vous avez terminé les 35 missions.");
+    if (nextId > MAX_MISSIONS) {
+      toast(`Félicitations ! Vous avez terminé les ${MAX_MISSIONS} missions.`);
       currentRace = null;
       navigate("championshipScreen");
       return;
@@ -1951,7 +1808,6 @@
 
     currentRace = null;
     selectedMissionId = nextId;
-
     startRace(nextId);
   }
 
@@ -1963,7 +1819,6 @@
 
     const id = currentRace.missionId;
     const master = currentRace.masterChallenge;
-
     visible("resultOverlay", false);
     startRace(id, master);
   }
@@ -1973,13 +1828,11 @@
     currentRace = null;
     raceFinished = false;
     currentSpeed = 0;
-
     releaseAllControls();
 
     visible("pauseOverlay", false);
     visible("resultOverlay", false);
     visible("countdownDisplay", false);
-
     navigate("homeScreen");
   }
 
@@ -1987,24 +1840,27 @@
     if (!currentRace || raceFinished) return;
 
     paused = !paused;
-
     visible("pauseOverlay", paused);
     txt("pauseButton", paused ? "▶" : "Ⅱ");
 
-    if (!paused) {
-      lastFrameTime = performance.now();
-    } else {
-      releaseAllControls();
-    }
+    if (!paused) lastFrameTime = performance.now();
+    else releaseAllControls();
   }
 
   function bindRaceButtons() {
-    $("pauseButton")?.addEventListener("click", pauseRace);
-    $("resumeButton")?.addEventListener("click", pauseRace);
-    $("restartButton")?.addEventListener("click", restartRace);
-    $("quitRaceButton")?.addEventListener("click", quitRace);
-    $("continueButton")?.addEventListener("click", nextMission);
-    $("applyPaintButton")?.addEventListener("click", applyPaint);
+    const bindOnce = (id, callback) => {
+      const button = $(id);
+      if (!button || button.dataset.fobasRaceBound === "1") return;
+      button.dataset.fobasRaceBound = "1";
+      button.addEventListener("click", callback);
+    };
+
+    bindOnce("pauseButton", pauseRace);
+    bindOnce("resumeButton", pauseRace);
+    bindOnce("restartButton", restartRace);
+    bindOnce("quitRaceButton", quitRace);
+    bindOnce("continueButton", nextMission);
+    bindOnce("applyPaintButton", applyPaint);
   }
 
   /* ============================ COMMANDES ===================== */
@@ -2031,7 +1887,6 @@
 
   function bindHoldButton(id, name) {
     const button = $(id);
-
     if (!button || button.dataset.fobasBound === "1") return;
 
     button.dataset.fobasBound = "1";
@@ -2039,7 +1894,6 @@
 
     const press = event => {
       if (event.cancelable) event.preventDefault();
-
       if (paused || raceFinished || !currentRace) return;
 
       setControl(name, true);
@@ -2052,7 +1906,6 @@
 
     const release = event => {
       if (event?.cancelable) event.preventDefault();
-
       setControl(name, false);
       button.classList.remove("pressed");
     };
@@ -2071,24 +1924,21 @@
     bindHoldButton("brakeButton", "brake");
     bindHoldButton("nitroButton", "nitro");
 
-    $("tiltButton")?.addEventListener("click", async () => {
-      state.settings.tilt = !state.settings.tilt;
-      updateSettingsUI();
-
-      if (state.settings.tilt) {
-        await requestTiltPermission();
-      }
-
-      scheduleSave();
-    });
+    const tiltButton = $("tiltButton");
+    if (tiltButton && tiltButton.dataset.fobasTiltBound !== "1") {
+      tiltButton.dataset.fobasTiltBound = "1";
+      tiltButton.addEventListener("click", async () => {
+        state.settings.tilt = !state.settings.tilt;
+        updateSettingsUI();
+        if (state.settings.tilt) await requestTiltPermission();
+        scheduleSave();
+      });
+    }
 
     window.addEventListener("keydown", event => {
       const key = event.key.toLowerCase();
 
-      if (
-        ["arrowleft", "arrowright", "arrowup", "arrowdown", " "]
-          .includes(key)
-      ) {
+      if (["arrowleft", "arrowright", "arrowup", "arrowdown", " "].includes(key)) {
         event.preventDefault();
       }
 
@@ -2098,14 +1948,11 @@
       if (key === "arrowdown" || key === "s") setControl("brake", true);
       if (key === " " || key === "shift") setControl("nitro", true);
 
-      if (key === "escape" && currentRace && !raceFinished) {
-        pauseRace();
-      }
+      if (key === "escape" && currentRace && !raceFinished) pauseRace();
     }, { passive: false });
 
     window.addEventListener("keyup", event => {
       const key = event.key.toLowerCase();
-
       if (key === "arrowleft" || key === "a") setControl("left", false);
       if (key === "arrowright" || key === "d") setControl("right", false);
       if (key === "arrowup" || key === "w") setControl("gas", false);
@@ -2117,18 +1964,12 @@
 
     document.addEventListener("visibilitychange", () => {
       releaseAllControls();
-
-      if (document.hidden && currentRace && !raceFinished && !paused) {
-        pauseRace();
-      }
+      if (document.hidden && currentRace && !raceFinished && !paused) pauseRace();
     });
 
     window.addEventListener("deviceorientation", event => {
       if (!state.settings.tilt || currentScreen !== "raceScreen") return;
-
-      if (typeof event.gamma === "number") {
-        tiltValue = clamp(event.gamma / 24, -1, 1);
-      }
+      if (typeof event.gamma === "number") tiltValue = clamp(event.gamma / 24, -1, 1);
     }, { passive: true });
 
     bindPinchZoom();
@@ -2136,32 +1977,25 @@
 
   function bindPinchZoom() {
     const surface = $("canvasWrap") || $("raceCanvas");
-    if (!surface) return;
+    if (!surface || surface.dataset.fobasPinchBound === "1") return;
+    surface.dataset.fobasPinchBound = "1";
 
     let initialDistance = 0;
     let initialZoom = 1;
 
     surface.addEventListener("touchstart", event => {
       if (event.touches.length !== 2) return;
-
       const dx = event.touches[0].clientX - event.touches[1].clientX;
       const dy = event.touches[0].clientY - event.touches[1].clientY;
-
       initialDistance = Math.hypot(dx, dy);
       initialZoom = cameraZoom;
     }, { passive: true });
 
     surface.addEventListener("touchmove", event => {
       if (event.touches.length !== 2 || !initialDistance) return;
-
       const dx = event.touches[0].clientX - event.touches[1].clientX;
       const dy = event.touches[0].clientY - event.touches[1].clientY;
-
-      cameraZoom = clamp(
-        initialZoom * Math.hypot(dx, dy) / initialDistance,
-        0.75,
-        1.65
-      );
+      cameraZoom = clamp(initialZoom * Math.hypot(dx, dy) / initialDistance, 0.75, 1.65);
     }, { passive: true });
 
     surface.addEventListener("touchend", () => {
@@ -2184,15 +2018,11 @@
         if (countdown <= 0) {
           currentRace.started = true;
           txt("countdownDisplay", "GO !");
-
-          setTimeout(() => {
-            visible("countdownDisplay", false);
-          }, 650);
+          setTimeout(() => visible("countdownDisplay", false), 650);
         } else {
           txt("countdownDisplay", countdown);
         }
       }
-
       return;
     }
 
@@ -2203,24 +2033,17 @@
     const maxSpeed = bike.speed;
 
     steering = (inputRight ? 1 : 0) - (inputLeft ? 1 : 0);
-
-    if (!inputLeft && !inputRight && state.settings.tilt) {
-      steering = tiltValue;
-    }
+    if (!inputLeft && !inputRight && state.settings.tilt) steering = tiltValue;
 
     if (inputGas) {
-      currentSpeed +=
-        (0.28 + bike.acceleration * 0.006) * delta * 60 * 8.5;
-
+      currentSpeed += (0.28 + bike.acceleration * 0.006) * delta * 60 * 8.5;
       throttle = Math.min(1, throttle + delta * 2.5);
     } else {
       currentSpeed -= delta * 3.2;
       throttle = Math.max(0, throttle - delta * 1.8);
     }
 
-    if (inputBrake) {
-      currentSpeed -= (bike.braking * 0.12 + 9) * delta;
-    }
+    if (inputBrake) currentSpeed -= (bike.braking * 0.12 + 9) * delta;
 
     if (inputNitro && nitroEnergy > 0 && currentSpeed > 10) {
       currentSpeed += 28 * delta;
@@ -2230,41 +2053,52 @@
     }
 
     const nitroActive = inputNitro && nitroEnergy > 0;
+    currentSpeed = clamp(currentSpeed, 0, nitroActive ? maxSpeed * 1.2 : maxSpeed);
 
-    currentSpeed = clamp(
-      currentSpeed,
-      0,
-      nitroActive ? maxSpeed * 1.2 : maxSpeed
-    );
-
+    const missionCurve = currentRace.mission.curveIntensity || 0.25;
     playerLane = clamp(
       playerLane + steering * delta * (2.8 + bike.handling * 0.025),
       -3.45,
       3.45
     );
 
+    /*
+     * Sou nouvo misyon yo, koub yo pi sere.
+     * Lè jwè a pa byen vire sou wout la, moto a pèdi vitès.
+     */
+    const curveNeed = Math.abs(Math.sin(
+      currentRace.distance / Math.max(500, currentRace.mission.routeLength) * Math.PI * 2
+    )) * missionCurve;
+
+    const curvePenalty = currentRace.missionId >= 36
+      ? Math.max(0, curveNeed - Math.abs(steering) * (0.25 + bike.handling / 160))
+      : 0;
+
     if (Math.abs(playerLane) > 3.15) {
       currentSpeed = Math.max(0, currentSpeed - delta * 10);
     }
 
+    if (curvePenalty > 0) {
+      currentSpeed = Math.max(0, currentSpeed - curvePenalty * delta * 8);
+    }
+
     currentRace.distance += currentSpeed / 3.6 * delta;
 
-    /*
-     * Chak rival gen pwòp distans li ak lè li travèse liy final la.
-     * Vitès yo vin pi konpetitif sou misyon ki pi wo yo.
-     */
     currentRace.ai.forEach(ai => {
       if (ai.finished) return;
 
       const accelerationRate = 0.65 + ai.skill * 0.65;
+      ai.speed = lerp(ai.speed, ai.targetSpeed, Math.min(1, delta * accelerationRate));
 
-      ai.speed = lerp(
-        ai.speed,
-        ai.targetSpeed,
-        Math.min(1, delta * accelerationRate)
-      );
+      /*
+       * IA yo ajiste vitès yo sou misyon elit yo.
+       * Ti varyasyon sa a anpeche tout rival yo kouri egzakteman menm jan.
+       */
+      const paceVariation = currentRace.missionId >= 36
+        ? 1 + Math.sin(raceClock * 0.7 + ai.phase) * 0.012
+        : 1;
 
-      ai.distance += ai.speed / 3.6 * delta;
+      ai.distance += ai.speed * paceVariation / 3.6 * delta;
 
       if (ai.distance >= currentRace.totalDistance) {
         ai.distance = currentRace.totalDistance;
@@ -2300,29 +2134,27 @@
     if (!currentRace) return;
 
     const position = getPlayerPosition();
-
     const lap = Math.min(
       currentRace.laps,
-      Math.floor(currentRace.distance / 1800) + 1
+      Math.floor(currentRace.distance / currentRace.mission.routeLength) + 1
     );
 
-    txt(
-      "positionDisplay",
-      `${position}/${currentRace.aiCount + 1}`
-    );
-
+    txt("positionDisplay", `${position}/${currentRace.aiCount + 1}`);
     txt("timeDisplay", fmtTime(raceClock));
     txt("lapDisplay", `${lap}/${currentRace.laps}`);
     txt("speedDisplay", `${Math.round(currentSpeed)} km/h`);
     txt("nitroDisplay", `${Math.round(nitroEnergy)}%`);
 
-    if ($("nitroProgress")) {
-      $("nitroProgress").style.width = `${nitroEnergy}%`;
-    }
+    if ($("nitroProgress")) $("nitroProgress").style.width = `${nitroEnergy}%`;
+    if ($("nitroBar")) $("nitroBar").style.width = `${nitroEnergy}%`;
+  }
 
-    if ($("nitroBar")) {
-      $("nitroBar").style.width = `${nitroEnergy}%`;
-    }
+  function curveOffsetForZ(z, mission) {
+    if (!mission || mission.id < 36) return 0;
+
+    const intensity = mission.curveIntensity || 0.5;
+    const phase = roadCurvePhase + Math.abs(z) * 0.018;
+    return Math.sin(phase) * intensity * 1.45;
   }
 
   function animateThree(delta) {
@@ -2348,6 +2180,7 @@
 
     if (currentRace && currentRace.started && !paused && !raceFinished) {
       const movement = currentSpeed * delta * 0.16;
+      roadCurvePhase += delta * (0.4 + currentSpeed / 160);
 
       roadSegments.forEach(segment => {
         segment.position.z += movement;
@@ -2355,36 +2188,48 @@
         if (segment.position.z > 12) {
           segment.position.z -= roadSegments.length * 7;
         }
+
+        const curve = curveOffsetForZ(segment.position.z, currentRace.mission);
+        segment.position.x = curve;
+        segment.rotation.y = currentRace.missionId >= 36
+          ? Math.cos(roadCurvePhase + Math.abs(segment.position.z) * 0.018) *
+            currentRace.mission.curveIntensity * 0.055
+          : 0;
       });
 
       scenery.forEach(object => {
         object.position.z += movement;
 
-        if (object.position.z > 14) {
-          object.position.z = -rand(190, 280);
+        if (object.position.z > 14) object.position.z = -rand(190, 280);
+
+        if (currentRace.missionId >= 36) {
+          const side = object.userData.initialX < 0 ? -1 : 1;
+          object.position.x = side * (6 + Math.abs(curveOffsetForZ(object.position.z, currentRace.mission)));
         }
       });
 
       aiRiders.forEach((rider, riderIndex) => {
         const dataIndex = aiRiderIndexes[riderIndex];
         const data = currentRace.ai[dataIndex];
-
         if (!data) return;
 
         const difference = data.distance - currentRace.distance;
-
         rider.position.z = clamp(2 - difference * 0.075, -65, 10);
+
+        const curve = currentRace.missionId >= 36
+          ? curveOffsetForZ(rider.position.z, currentRace.mission)
+          : 0;
 
         rider.position.x = lerp(
           rider.position.x,
-          data.lane + Math.sin(data.phase += delta) * 0.12,
+          data.lane + curve + Math.sin(data.phase += delta) * 0.12,
           Math.min(1, delta * 1.4)
         );
       });
 
       camera.position.x = lerp(
         camera.position.x,
-        playerLane * 0.55,
+        playerLane * 0.55 + curveOffsetForZ(-5, currentRace.mission) * 0.3,
         Math.min(1, delta * 2)
       );
 
@@ -2404,12 +2249,7 @@
   function gameLoop(timestamp) {
     if (!lastFrameTime) lastFrameTime = timestamp;
 
-    const delta = clamp(
-      (timestamp - lastFrameTime) / 1000,
-      0,
-      0.05
-    );
-
+    const delta = clamp((timestamp - lastFrameTime) / 1000, 0, 0.05);
     lastFrameTime = timestamp;
 
     try {
@@ -2427,7 +2267,6 @@
 
   async function init() {
     txt("gameVersion", VERSION);
-
     await loadProgress();
 
     bindNavigation();
@@ -2452,15 +2291,11 @@
     } catch (error) {
       console.error("[FOBAS] Initialisation Three.js impossible :", error);
       gameReady = false;
-      toast(
-        "Three.js n'a pas démarré. Vérifiez Internet et WebGL.",
-        5000
-      );
+      toast("Three.js n'a pas démarré. Vérifiez Internet et WebGL.", 5000);
     }
 
     document.addEventListener("click", event => {
       const button = event.target.closest("[data-mission-id]");
-
       if (!button || button.disabled) return;
 
       selectedMissionId = Number(button.dataset.missionId);
@@ -2471,7 +2306,6 @@
 
     window.addEventListener("beforeunload", () => {
       releaseAllControls();
-
       if (db) db.close();
     });
 
@@ -2485,10 +2319,7 @@
     init().catch(error => {
       console.error("[FOBAS] Erreur d'initialisation :", error);
       visible("loadingOverlay", false);
-      toast(
-        "Erreur d'initialisation. Vérifiez les éléments HTML.",
-        5000
-      );
+      toast("Erreur d'initialisation. Vérifiez les éléments HTML.", 5000);
     });
   }
 
@@ -2513,6 +2344,9 @@
         name: mission.name,
         aiCount: mission.aiCount,
         laps: mission.laps,
+        routeLength: mission.routeLength,
+        totalDistance: mission.routeLength * mission.laps,
+        curveIntensity: mission.curveIntensity,
         difficulty: mission.difficulty.name,
         unlocked: state.unlockedMissions.includes(mission.id),
         completed: state.completedMissions.includes(mission.id)
@@ -2521,26 +2355,8 @@
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      startSafely,
-      { once: true }
-    );
+    document.addEventListener("DOMContentLoaded", startSafely, { once: true });
   } else {
     startSafely();
   }
 })();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
