@@ -1,7 +1,3 @@
-
-
-
-
 /* ============================================================
    FOBAS MOTO RACING 3D — ENGINE CORRIGÉ
    Fichier : appmotorracingfobas.js
