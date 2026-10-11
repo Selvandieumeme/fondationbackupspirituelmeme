@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <meta name="theme-color" content="#071b16">
+  <meta name="description"
+        content="FOBAS MOTO RACING 3D — Jeu de course moto avec 35 missions, 20 motos, championnat, circuits dynamiques et environnements 3D.">
+  <meta name="application-name" content="FOBAS MOTO RACING 3D">
+  <meta name="color-scheme" content="dark">
+
+  <title>FOBAS MOTO RACING 3D</title>
+
+  <!-- Les trois fichiers restent à la racine du dépôt GitHub. -->
+  <link rel="stylesheet" href="./appmotorracingfobas.css">
+  <script src="./appmotorracingfobas.js" defer></script>
+</head>
+
+<body>
+  <div id="motoApp" class="app-shell">
+
+    <!-- =====================================================
+         EN-TÊTE PRINCIPAL
+         ===================================================== -->
+    <header class="topbar">
+      <button id="homeButton"
+              class="brand"
+              type="button"
+              aria-label="Retour à l'accueil">
+        <span class="brand-mark" aria-hidden="true">F</span>
+        <span class="brand-copy">
+          <strong>FOBAS</strong>
+          <small>MOTO RACING 3D</small>
+        </span>
+      </button>
+
+      <div class="topbar-actions">
+        <button id="profileButton"
+                class="profile-button"
+                type="button"
+                aria-label="Modifier le profil du pilote">
+          <span aria-hidden="true">👤</span>
+          <span id="headerPlayerName">PILOTE</span>
+        </button>
+
+        <div class="wallet" aria-label="Solde de crédits">
+          <span aria-hidden="true">◆</span>
+          <strong id="creditDisplay">500</strong>
+          <small>CR</small>
+        </div>
+      </div>
+    </header>
+
+    <!-- =====================================================
+         CONTENU PRINCIPAL
+         ===================================================== -->
+    <main id="mainContent">
+
+      <!-- ===================================================
+           ACCUEIL
+           =================================================== -->
+      <section id="homeScreen"
+               class="screen active"
+               aria-labelledby="homeTitle">
+
+        <div class="hero">
+          <div class="hero-overlay">
+            <span class="eyebrow">EXPÉRIENCE DE COURSE 3D</span>
+
+            <h1 id="homeTitle">DOMINE<br>LA PISTE.</h1>
+
+            <p>
+              Accélère. Dépasse tes rivaux. Défie le champion.
+              Écris ton histoire dans le monde de la moto.
+            </p>
+
+            <div class="hero-stats">
+              <div>
+                <strong id="homeLevel">1</strong>
+                <small>NIVEAU</small>
+              </div>
+              <div>
+                <strong id="homeWins">0</strong>
+                <small>VICTOIRES</small>
+              </div>
+              <div>
+                <strong id="homeRaces">0</strong>
+                <small>COURSES</small>
+              </div>
+              <div>
+                <strong id="homeMissions">0/35</strong>
+                <small>MISSIONS</small>
+              </div>
+            </div>
+
+            <button id="careerButton"
+                    class="primary-btn"
+                    type="button">
+              <span aria-hidden="true">▶</span>
+              COMMENCER LA CARRIÈRE
+            </button>
+          </div>
+        </div>
+
+        <!-- PROFIL DU JOUEUR -->
+        <article class="panel player-profile-panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">IDENTITÉ DU PILOTE</span>
+              <h2>Ton profil de course</h2>
+            </div>
+
+            <button id="editProfileButton"
+                    class="text-btn"
+                    type="button">
+              MODIFIER
+            </button>
+          </div>
+
+          <div class="player-profile-content">
+            <div class="player-avatar" aria-hidden="true">🏁</div>
+
+            <div class="player-profile-info">
+              <strong id="profileNameDisplay">Pilote FOBAS</strong>
+              <span id="profileRankDisplay">Débutant</span>
+              <small id="profileCountryDisplay">Haïti</small>
+            </div>
+
+            <div class="profile-level">
+              <small>NIVEAU</small>
+              <strong id="profileLevelDisplay">1</strong>
+            </div>
+          </div>
+
+          <div class="profile-edit-form" id="profileEditForm" hidden>
+            <label for="playerNameInput">Nom du pilote</label>
+
+            <input id="playerNameInput"
+                   name="playerName"
+                   type="text"
+                   maxlength="24"
+                   autocomplete="nickname"
+                   placeholder="Entre ton nom de pilote">
+
+            <label for="playerCountrySelect">Pays de représentation</label>
+
+            <select id="playerCountrySelect" name="playerCountry">
+              <option value="HT">Haïti</option>
+              <option value="DO">République dominicaine</option>
+              <option value="JM">Jamaïque</option>
+              <option value="US">États-Unis</option>
+              <option value="FR">France</option>
+              <option value="IT">Italie</option>
+              <option value="JP">Japon</option>
+            </select>
+
+            <div class="profile-form-actions">
+              <button id="saveProfileButton"
+                      class="primary-btn compact"
+                      type="button">
+                ENREGISTRER
+              </button>
+
+              <button id="cancelProfileButton"
+                      class="secondary-btn compact"
+                      type="button">
+                ANNULER
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- MOTO SÉLECTIONNÉE -->
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">TON GARAGE</span>
+            <h2>Prêt à rouler ?</h2>
+          </div>
+
+          <button id="openGarageButton"
+                  class="text-btn"
+                  type="button">
+            GARAGE ↗
+          </button>
+        </div>
+
+        <article class="bike-preview panel">
+          <div class="bike-illustration" id="homeBikeArt">
+            <span class="bike-number" aria-hidden="true">01</span>
+
+            <svg viewBox="0 0 320 150"
+                 role="img"
+                 aria-label="Illustration de moto sportive"
+                 xmlns="http://www.w3.org/2000/svg">
+
+              <ellipse cx="160" cy="127" rx="118" ry="9"
+                       fill="#000" opacity=".35"/>
+
+              <g stroke="#101817" stroke-width="7" fill="#17231f">
+                <circle cx="83" cy="108" r="30"/>
+                <circle cx="243" cy="108" r="30"/>
+              </g>
+
+              <g stroke="#a9b7ae" stroke-width="2" fill="none">
+                <circle cx="83" cy="108" r="20"/>
+                <circle cx="243" cy="108" r="20"/>
+                <path d="M83 88V128M63 108H103M243 88V128M223 108H263"/>
+              </g>
+
+              <path d="M83 108L124 76L169 106L243 108L198 72L156 74L124 76"
+                    stroke="#e5ece7" stroke-width="5" fill="none"/>
+
+              <path d="M122 76L139 53L185 53L205 75L172 87L135 87Z"
+                    fill="var(--bike-color,#19e68c)"/>
+
+              <path d="M137 52L151 40L181 41L190 54Z"
+                    fill="#111d19"/>
+
+              <path d="M151 40L171 38L181 42L158 45Z"
+                    fill="#9bfff0"/>
+
+              <path d="M184 54L211 59L231 85L201 79L190 68Z"
+                    fill="var(--bike-color,#19e68c)"/>
+
+              <path d="M213 59L232 58L245 66L230 69Z"
+                    fill="#121b17"/>
+
+              <path d="M124 76L108 66L94 66L111 76Z"
+                    fill="#9bfff0"/>
+
+              <path d="M135 87L126 99L160 99L172 87Z"
+                    fill="#33463d"/>
+
+              <path d="M181 45L191 30L211 30"
+                    stroke="#b6c6bd" stroke-width="4" fill="none"/>
+            </svg>
+          </div>
+
+          <div class="bike-details">
+            <div>
+              <span class="eyebrow">MOTO SÉLECTIONNÉE</span>
+              <h3 id="homeBikeName">Street Racer 125</h3>
+              <p id="homeBikeDescription">
+                Agile, équilibrée et idéale pour débuter.
+              </p>
+            </div>
+
+            <button id="homeRaceButton"
+                    class="primary-btn compact"
+                    type="button">
+              LANCER UNE COURSE
+            </button>
+          </div>
+        </article>
+
+        <!-- NAVIGATION RAPIDE -->
+        <div class="quick-grid">
+          <button class="quick-card"
+                  id="quickCareerButton"
+                  type="button">
+            <span class="quick-icon" aria-hidden="true">🏁</span>
+            <strong>Carrière</strong>
+            <small>35 missions à réussir</small>
+          </button>
+
+          <button class="quick-card"
+                  id="quickGarageButton"
+                  type="button">
+            <span class="quick-icon" aria-hidden="true">🏍️</span>
+            <strong>Garage</strong>
+            <small>20 motos à débloquer</small>
+          </button>
+
+          <button class="quick-card"
+                  id="quickChampionshipButton"
+                  type="button">
+            <span class="quick-icon" aria-hidden="true">🏆</span>
+            <strong>Championnat</strong>
+            <small>Affronte les meilleurs</small>
+          </button>
+        </div>
+
+        <!-- DÉFI DU CHAMPION -->
+        <article class="panel master-rival-panel">
+          <span class="eyebrow">RIVAL SPÉCIAL</span>
+
+          <div class="master-rival-content">
+            <div class="master-rival-avatar" aria-hidden="true">👑</div>
+
+            <div>
+              <h2>MEME Selvandieu</h2>
+              <p>
+                Le pilote maître. Bats-le dans une compétition
+                pour tenter de devenir le champion.
+              </p>
+              <span class="master-rival-badge">MASTER AI</span>
+            </div>
+          </div>
+
+          <button id="challengeMasterButton"
+                  class="secondary-btn"
+                  type="button">
+            DÉFIER LE CHAMPION
+          </button>
+        </article>
+      </section>
+
+      <!-- ===================================================
+           CARRIÈRE — 35 MISSIONS
+           =================================================== -->
+      <section id="careerScreen"
+               class="screen"
+               aria-labelledby="careerTitle"
+               hidden>
+
+        <div class="page-heading">
+          <button class="back-btn"
+                  type="button"
+                  data-go="homeScreen"
+                  aria-label="Retour à l'accueil">←</button>
+
+          <div>
+            <span class="eyebrow">MODE SOLO</span>
+            <h1 id="careerTitle">Carrière</h1>
+          </div>
+        </div>
+
+        <div class="panel career-progress">
+          <div class="progress-top">
+            <div>
+              <small>NIVEAU PILOTE</small>
+              <h2 id="careerLevel">Niveau 1</h2>
+            </div>
+
+            <div class="right">
+              <strong id="xpDisplay">0 XP</strong>
+              <small id="xpNextDisplay">XP pour le niveau suivant</small>
+            </div>
+          </div>
+
+          <div class="progress-track"
+               id="xpProgress"
+               role="progressbar"
+               aria-label="Progression de l'expérience"
+               aria-valuemin="0"
+               aria-valuemax="100"
+               aria-valuenow="0">
+            <span id="xpBar"></span>
+          </div>
+
+          <p id="careerMessage">
+            La piste t'attend. Lance ta première course !
+          </p>
+        </div>
+
+        <div class="career-summary panel">
+          <div>
+            <small>MISSIONS TERMINÉES</small>
+            <strong id="completedMissionCount">0/35</strong>
+          </div>
+
+          <div>
+            <small>MEILLEUR RÉSULTAT</small>
+            <strong id="bestCareerPosition">—</strong>
+          </div>
+
+          <div>
+            <small>POINTS CARRIÈRE</small>
+            <strong id="careerPoints">0</strong>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">PROGRESSION</span>
+            <h2>35 missions de course</h2>
+          </div>
+        </div>
+
+        <!-- Le JavaScript génère les 35 missions dans cette zone. -->
+        <div id="raceList" class="race-list"></div>
+      </section>
+
+      <!-- ===================================================
+           GARAGE — 20 MOTOS
+           =================================================== -->
+      <section id="garageScreen"
+               class="screen"
+               aria-labelledby="garageTitle"
+               hidden>
+
+        <div class="page-heading">
+          <button class="back-btn"
+                  type="button"
+                  data-go="homeScreen"
+                  aria-label="Retour à l'accueil">←</button>
+
+          <div>
+            <span class="eyebrow">PERSONNALISATION</span>
+            <h1 id="garageTitle">Mon garage</h1>
+          </div>
+        </div>
+
+        <div class="garage-showcase panel">
+          <div id="garageBikeArt"
+               class="bike-illustration large">
+            <span class="bike-number" aria-hidden="true">01</span>
+
+            <svg viewBox="0 0 320 150"
+                 role="img"
+                 aria-label="Moto actuellement sélectionnée"
+                 xmlns="http://www.w3.org/2000/svg">
+
+              <ellipse cx="160" cy="127" rx="118" ry="9"
+                       fill="#000" opacity=".35"/>
+
+              <g stroke="#101817" stroke-width="7" fill="#17231f">
+                <circle cx="83" cy="108" r="30"/>
+                <circle cx="243" cy="108" r="30"/>
+              </g>
+
+              <g stroke="#a9b7ae" stroke-width="2" fill="none">
+                <circle cx="83" cy="108" r="20"/>
+                <circle cx="243" cy="108" r="20"/>
+                <path d="M83 88V128M63 108H103M243 88V128M223 108H263"/>
+              </g>
+
+              <path d="M83 108L124 76L169 106L243 108L198 72L156 74L124 76"
+                    stroke="#e5ece7" stroke-width="5" fill="none"/>
+
+              <path d="M122 76L139 53L185 53L205 75L172 87L135 87Z"
+                    fill="var(--bike-color,#19e68c)"/>
+
+              <path d="M137 52L151 40L181 41L190 54Z"
+                    fill="#111d19"/>
+
+              <path d="M151 40L171 38L181 42L158 45Z"
+                    fill="#9bfff0"/>
+
+              <path d="M184 54L211 59L231 85L201 79L190 68Z"
+                    fill="var(--bike-color,#19e68c)"/>
+
+              <path d="M213 59L232 58L245 66L230 69Z"
+                    fill="#121b17"/>
+
+              <path d="M124 76L108 66L94 66L111 76Z"
+                    fill="#9bfff0"/>
+
+              <path d="M135 87L126 99L160 99L172 87Z"
+                    fill="#33463d"/>
+
+              <path d="M181 45L191 30L211 30"
+                    stroke="#b6c6bd" stroke-width="4" fill="none"/>
+            </svg>
+          </div>
+
+          <div class="garage-title">
+            <div>
+              <span class="eyebrow">MOTO ACTIVE</span>
+              <h2 id="garageBikeName">Street Racer 125</h2>
+            </div>
+
+            <span id="bikeOwnedBadge" class="status-badge">
+              POSSÉDÉE
+            </span>
+          </div>
+
+          <div class="bike-rating">
+            <div>
+              <small>VITESSE</small>
+              <strong id="statSpeed">45</strong>
+              <span>/100</span>
+            </div>
+
+            <div>
+              <small>ACCÉLÉRATION</small>
+              <strong id="statAccel">45</strong>
+              <span>/100</span>
+            </div>
+
+            <div>
+              <small>MANIABILITÉ</small>
+              <strong id="statHandling">70</strong>
+              <span>/100</span>
+            </div>
+
+            <div>
+              <small>FREINAGE</small>
+              <strong id="statBraking">50</strong>
+              <span>/100</span>
+            </div>
+
+            <div>
+              <small>NITRO</small>
+              <strong id="statNitro">40</strong>
+              <span>/100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">COLLECTION</span>
+            <h2>20 motos à découvrir</h2>
+          </div>
+        </div>
+
+        <!-- Les 20 cartes seront générées par le JavaScript. -->
+        <div id="bikeShopList" class="bike-shop-list"></div>
+
+        <!-- AMÉLIORATIONS -->
+        <div class="panel upgrade-panel">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">PERFORMANCE</span>
+              <h2>Améliorations</h2>
+            </div>
+          </div>
+
+          <p>
+            Améliore les performances de la moto active avec
+            les crédits que tu as gagnés en course.
+          </p>
+
+          <div id="upgradeList"></div>
+        </div>
+
+        <!-- PERSONNALISATION -->
+        <div class="panel paint-panel">
+          <div>
+            <span class="eyebrow">STYLE</span>
+            <h2>Couleur de la moto</h2>
+          </div>
+
+          <div id="paintOptions" class="paint-options"></div>
+
+          <button id="applyPaintButton"
+                  class="secondary-btn"
+                  type="button">
+            APPLIQUER LA COULEUR
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================================================
+           CHAMPIONNAT
+           =================================================== -->
+      <section id="championshipScreen"
+               class="screen"
+               aria-labelledby="championshipTitle"
+               hidden>
+
+        <div class="page-heading">
+          <button class="back-btn"
+                  type="button"
+                  data-go="homeScreen"
+                  aria-label="Retour à l'accueil">←</button>
+
+          <div>
+            <span class="eyebrow">COMPÉTITION</span>
+            <h1 id="championshipTitle">Championnat</h1>
+          </div>
+        </div>
+
+        <div class="champion-hero">
+          <span class="trophy-icon" aria-hidden="true">🏆</span>
+          <span class="eyebrow">SAISON 01</span>
+          <h2>Rising Riders</h2>
+
+          <p>
+            Remporte des points, monte sur le podium et tente
+            de battre le pilote maître.
+          </p>
+
+          <div class="champion-stats">
+            <div>
+              <small>POINTS</small>
+              <strong id="championPoints">0</strong>
+            </div>
+
+            <div>
+              <small>VICTOIRES</small>
+              <strong id="championWins">0</strong>
+            </div>
+
+            <div>
+              <small>COURSES</small>
+              <strong id="championRaces">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- RÈGLES DE RÉCOMPENSES -->
+        <div class="panel podium-rewards">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">RÉCOMPENSES</span>
+              <h2>Le podium</h2>
+            </div>
+          </div>
+
+          <div class="podium-reward-grid">
+            <div class="podium-reward first">
+              <span aria-hidden="true">🥇</span>
+              <strong>1er</strong>
+              <small>Champion</small>
+              <span id="firstPlaceReward">Récompense maximale</span>
+            </div>
+
+            <div class="podium-reward second">
+              <span aria-hidden="true">🥈</span>
+              <strong>2e</strong>
+              <small>Finaliste</small>
+              <span id="secondPlaceReward">Récompense intermédiaire</span>
+            </div>
+
+            <div class="podium-reward third">
+              <span aria-hidden="true">🥉</span>
+              <strong>3e</strong>
+              <small>Podium</small>
+              <span id="thirdPlaceReward">Récompense de podium</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIVAL MAÎTRE -->
+        <div class="panel master-rival-panel">
+          <span class="eyebrow">RIVAL À BATTRE</span>
+
+          <div class="master-rival-content">
+            <div class="master-rival-avatar" aria-hidden="true">👑</div>
+
+            <div>
+              <h2>MEME Selvandieu</h2>
+              <p>
+                Rival maître piloté par l'intelligence artificielle.
+                Sa difficulté doit être gérée par la logique de course.
+              </p>
+              <span class="master-rival-badge">MASTER AI</span>
+            </div>
+          </div>
+
+          <button id="challengeMasterChampionshipButton"
+                  class="primary-btn"
+                  type="button">
+            LANCER LE DÉFI DU CHAMPION
+          </button>
+        </div>
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">CLASSEMENT</span>
+            <h2>Meilleurs pilotes</h2>
+          </div>
+
+          <button id="refreshLeaderboardButton"
+                  class="text-btn"
+                  type="button">
+            ACTUALISER
+          </button>
+        </div>
+
+        <div id="leaderboard" class="leaderboard"></div>
+
+        <p class="note">
+          Le classement local est enregistré sur cet appareil.
+          Un classement mondial fiable nécessite un serveur,
+          une API sécurisée et une vérification des résultats.
+        </p>
+      </section>
+
+      <!-- ===================================================
+           COURSE 3D
+           =================================================== -->
+      <section id="raceScreen"
+               class="screen race-screen"
+               aria-label="Écran de course"
+               hidden>
+
+        <!-- HUD -->
+        <div class="race-hud">
+          <button id="pauseButton"
+                  class="hud-button"
+                  type="button"
+                  aria-label="Mettre la course en pause">Ⅱ</button>
+
+          <div class="hud-position">
+            <strong id="positionDisplay">1</strong>
+            <span>/ 4</span>
+            <small>POSITION</small>
+          </div>
+
+          <div class="hud-lap">
+            <strong id="lapDisplay">1/3</strong>
+            <small>TOUR</small>
+          </div>
+
+          <div class="hud-time">
+            <strong id="timeDisplay">00:00.0</strong>
+            <small>TEMPS</small>
+          </div>
+        </div>
+
+        <!-- INFOS MISSION -->
+        <div class="race-mission-info">
+          <div>
+            <small>MISSION</small>
+            <strong id="raceMissionName">Mission 01</strong>
+          </div>
+
+          <div>
+            <small>LOCALISATION</small>
+            <strong id="raceLocationName">Haïti</strong>
+          </div>
+
+          <div>
+            <small>DIFFICULTÉ</small>
+            <strong id="raceDifficultyName">Débutant</strong>
+          </div>
+        </div>
+
+        <!-- ZONE 3D : THREE.JS -->
+        <div class="canvas-wrap" id="canvasWrap">
+
+          <!-- Le moteur JS pourra remplacer ce canvas par le renderer WebGL. -->
+          <canvas id="raceCanvas"
+                  aria-label="Circuit de course de motos en 3D"
+                  role="img"></canvas>
+
+          <div class="race-toast"
+               id="raceToast"
+               role="status"
+               aria-live="polite"></div>
+
+          <div class="countdown"
+               id="countdownDisplay"
+               aria-live="assertive"></div>
+
+          <!-- PAUSE -->
+          <div class="race-pause-overlay hidden"
+               id="pauseOverlay"
+               aria-label="Course en pause"
+               hidden>
+
+            <div class="pause-card">
+              <span class="eyebrow">COURSE EN PAUSE</span>
+              <h2>Reprends ton souffle.</h2>
+
+              <button id="resumeButton"
+                      class="primary-btn"
+                      type="button">
+                REPRENDRE
+              </button>
+
+              <button id="restartButton"
+                      class="secondary-btn"
+                      type="button">
+                RECOMMENCER
+              </button>
+
+              <button id="quitRaceButton"
+                      class="text-btn"
+                      type="button">
+                QUITTER LA COURSE
+              </button>
+            </div>
+          </div>
+
+          <!-- RÉSULTATS -->
+          <div class="race-result-overlay hidden"
+               id="resultOverlay"
+               aria-label="Résultat de la course"
+               aria-live="polite"
+               hidden>
+
+            <div class="result-card">
+              <span class="eyebrow" id="resultEyebrow">RÉSULTAT</span>
+
+              <h2 id="resultTitle">Course terminée !</h2>
+
+              <p id="resultSubtitle"></p>
+
+              <div class="result-position">
+                <small>POSITION FINALE</small>
+                <strong id="resultPosition">—</strong>
+              </div>
+
+              <div class="result-rewards">
+                <div>
+                  <small>CRÉDITS GAGNÉS</small>
+                  <strong id="resultCredits">+0 CR</strong>
+                </div>
+
+                <div>
+                  <small>EXPÉRIENCE</small>
+                  <strong id="resultXP">+0 XP</strong>
+                </div>
+
+                <div>
+                  <small>POINTS CHAMPIONNAT</small>
+                  <strong id="resultChampionshipPoints">+0</strong>
+                </div>
+              </div>
+
+              <div id="resultPodium" class="result-podium" hidden>
+                <span aria-hidden="true">🏆</span>
+                <strong>Résultat de podium</strong>
+                <p id="resultPodiumMessage"></p>
+              </div>
+
+              <button id="continueButton"
+                      class="primary-btn"
+                      type="button">
+                CONTINUER
+              </button>
+            </div>
+          </div>
+
+          <!-- INDICATION GESTES TACTILES -->
+          <div id="gestureHint"
+               class="gesture-hint"
+               aria-live="polite">
+            Glisse pour regarder · Deux doigts pour zoomer
+          </div>
+        </div>
+
+        <!-- COMPTEUR DE VITESSE ET NITRO -->
+        <div class="race-bottom">
+          <div class="speed-panel">
+            <div class="speedometer">
+              <strong id="speedDisplay">0</strong>
+              <small>KM/H</small>
+            </div>
+
+            <div class="nitro-wrap">
+              <div class="nitro-label">
+                <span>NITRO</span>
+                <strong id="nitroDisplay">100%</strong>
+              </div>
+
+              <div class="nitro-track"
+                   id="nitroProgress"
+                   role="progressbar"
+                   aria-label="Réserve de nitro"
+                   aria-valuemin="0"
+                   aria-valuemax="100"
+                   aria-valuenow="100">
+                <span id="nitroBar"></span>
+              </div>
+
+              <button id="nitroButton"
+                      class="nitro-button"
+                      type="button"
+                      aria-label="Activer le nitro">
+                ⚡ NITRO
+              </button>
+            </div>
+          </div>
+
+          <!-- COMMANDES -->
+          <div class="race-controls">
+
+            <div class="steering-controls">
+              <button id="leftButton"
+                      class="control-button steer"
+                      type="button"
+                      aria-label="Tourner à gauche">◀</button>
+
+              <button id="rightButton"
+                      class="control-button steer"
+                      type="button"
+                      aria-label="Tourner à droite">▶</button>
+
+              <button id="tiltButton"
+                      class="control-button tilt-control"
+                      type="button"
+                      aria-pressed="false"
+                      aria-label="Activer le contrôle par inclinaison">
+                ↔ TILT
+              </button>
+            </div>
+
+            <div class="pedal-controls">
+              <button id="brakeButton"
+                      class="control-button brake"
+                      type="button"
+                      aria-label="Freiner">
+                FREIN
+              </button>
+
+              <button id="gasButton"
+                      class="control-button gas"
+                      type="button"
+                      aria-label="Accélérer">
+                ACCÉLÉRER
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p class="race-help">
+          Utilise les commandes tactiles ou le clavier.
+          Le contrôle par inclinaison dépend des capacités
+          du navigateur et de l'appareil.
+        </p>
+      </section>
+    </main>
+
+    <!-- =====================================================
+         NAVIGATION PRINCIPALE
+         ===================================================== -->
+    <nav id="bottomNav"
+         class="bottom-nav"
+         aria-label="Navigation principale">
+
+      <button data-nav="homeScreen"
+              class="nav-item active"
+              type="button"
+              aria-current="page">
+        <span aria-hidden="true">⌂</span>
+        <small>Accueil</small>
+      </button>
+
+      <button data-nav="careerScreen"
+              class="nav-item"
+              type="button">
+        <span aria-hidden="true">🏁</span>
+        <small>Carrière</small>
+      </button>
+
+      <button data-nav="garageScreen"
+              class="nav-item"
+              type="button">
+        <span aria-hidden="true">🏍</span>
+        <small>Garage</small>
+      </button>
+
+      <button data-nav="championshipScreen"
+              class="nav-item"
+              type="button">
+        <span aria-hidden="true">🏆</span>
+        <small>Championnat</small>
+      </button>
+    </nav>
+
+    <!-- =====================================================
+         MESSAGES GLOBAUX
+         ===================================================== -->
+    <div id="appToast"
+         class="app-toast"
+         role="status"
+         aria-live="polite"></div>
+
+    <!-- CHARGEMENT -->
+    <div id="loadingOverlay"
+         class="loading-overlay hidden"
+         role="status"
+         aria-live="polite"
+         aria-label="Chargement de FOBAS Racing"
+         hidden>
+      <div class="loader" aria-hidden="true"></div>
+      <p>Chargement de FOBAS Racing…</p>
+    </div>
+
+    <!-- =====================================================
+         PARAMÈTRES ET INFORMATIONS
+         ===================================================== -->
+    <section id="settingsScreen"
+             class="screen settings-screen"
+             aria-labelledby="settingsTitle"
+             hidden>
+
+      <div class="page-heading">
+        <button class="back-btn"
+                type="button"
+                data-go="homeScreen"
+                aria-label="Retour à l'accueil">←</button>
+
+        <div>
+          <span class="eyebrow">CONFIGURATION</span>
+          <h1 id="settingsTitle">Paramètres</h1>
+        </div>
+      </div>
+
+      <div class="panel settings-panel">
+        <h2>Commandes</h2>
+
+        <label class="setting-row" for="settingTilt">
+          <span>
+            <strong>Contrôle par inclinaison</strong>
+            <small>Incline ton appareil pour diriger la moto.</small>
+          </span>
+          <input id="settingTilt" type="checkbox">
+        </label>
+
+        <label class="setting-row" for="settingVibration">
+          <span>
+            <strong>Vibrations</strong>
+            <small>Retour tactile si le navigateur le permet.</small>
+          </span>
+          <input id="settingVibration" type="checkbox" checked>
+        </label>
+
+        <label class="setting-row" for="settingReducedEffects">
+          <span>
+            <strong>Réduire les effets visuels</strong>
+            <small>Utile pour les appareils moins puissants.</small>
+          </span>
+          <input id="settingReducedEffects" type="checkbox">
+        </label>
+      </div>
+
+      <div class="panel settings-panel">
+        <h2>Graphismes</h2>
+
+        <label for="graphicsQuality">Qualité graphique</label>
+
+        <select id="graphicsQuality">
+          <option value="auto">Automatique</option>
+          <option value="low">Économie de performance</option>
+          <option value="medium">Équilibrée</option>
+          <option value="high">Élevée</option>
+        </select>
+
+        <p class="note">
+          Les performances réelles dépendent du GPU, du navigateur
+          et des capacités WebGL de l'appareil.
+        </p>
+      </div>
+
+      <div class="panel settings-panel">
+        <h2>Sauvegarde</h2>
+
+        <p>
+          La progression locale peut être enregistrée dans IndexedDB
+          lorsque le JavaScript du jeu initialise correctement
+          la base de données.
+        </p>
+
+        <button id="saveProgressButton"
+                class="secondary-btn"
+                type="button">
+          ENREGISTRER LA PROGRESSION
+        </button>
+      </div>
+
+      <div class="panel settings-panel">
+        <h2>FOBAS MOTO RACING 3D</h2>
+        <p>Course moto · Carrière · Garage · Championnat</p>
+        <p>Version du jeu : <span id="gameVersion">1.0.0</span></p>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
