@@ -158,7 +158,7 @@
 
     function categoryLabel(category) {
         const labels = {
-            "soin-visage": "Soins du visage",
+            "pour-homme": "pour-homme",
             maquillage: "Maquillage",
             cheveux: "Soins capillaires",
             corps: "Soins du corps",
