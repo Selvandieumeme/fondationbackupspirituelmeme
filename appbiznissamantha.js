@@ -301,7 +301,7 @@
     ===================================================== */
 
     const DEFAULT_PRODUCTS = [
-        ["COS-001", "Crème hydratante visage", "soin-visage", 250, 400],
+        ["COS-001", "Boxers", "pour-homme", 125, 166.65],
         ["COS-002", "Sérum vitamine C", "soin-visage", 350, 550],
         ["COS-003", "Nettoyant visage", "soin-visage", 180, 300],
         ["COS-004", "Tonique visage", "soin-visage", 200, 350],
