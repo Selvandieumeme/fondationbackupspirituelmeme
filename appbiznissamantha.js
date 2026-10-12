@@ -708,7 +708,7 @@
         setValue("editProductId", product?.id || "");
         setValue("productCode", product?.code || nextProductCode());
         setValue("productName", product?.name || "");
-        setValue("productCategory", product?.category || "soin-visage");
+        setValue("productCategory", product?.category || "pour-homme");
         setValue("productPurchasePrice", product?.purchasePrice ?? "");
         setValue("productSellingPrice", product?.sellingPrice ?? "");
         setValue("productInitialStock", product?.stock ?? 0);
