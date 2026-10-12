@@ -1,0 +1,2287 @@
+/* ============================================================
+   FOBAS — SUR L'AMOUR EN ACTION
+   Fichier : appamourfobas.css
+   Version : 1.0.0
+   Auteur : MEME Selvandieu
+   Design : Romantic Cinematic 3D / Android First
+   Compatible avec : appamourfobas.html
+   ============================================================ */
+
+/* ============================================================
+   1. VARIABLES GLOBALES
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  --love-bg: #100b19;
+  --love-bg-deep: #090711;
+  --love-panel: rgba(26, 18, 37, 0.96);
+  --love-panel-light: rgba(48, 31, 55, 0.92);
+
+  --love-primary: #e84d88;
+  --love-primary-light: #ff83b1;
+  --love-primary-dark: #a92d61;
+
+  --love-secondary: #bd92ff;
+  --love-gold: #f5d59a;
+  --love-white: #fff9fc;
+
+  --love-text: #f8edf5;
+  --love-muted: #b7a6bc;
+  --love-border: rgba(255, 255, 255, 0.12);
+
+  --love-success: #79e5bd;
+  --love-warning: #ffcb7d;
+  --love-danger: #ff7585;
+
+  --love-radius-sm: 10px;
+  --love-radius-md: 17px;
+  --love-radius-lg: 25px;
+  --love-radius-xl: 32px;
+
+  --love-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.36);
+
+  --love-glow:
+    0 0 28px rgba(232, 77, 136, 0.22);
+
+  --love-transition: 180ms ease;
+
+  --love-safe-top: env(safe-area-inset-top, 0px);
+  --love-safe-right: env(safe-area-inset-right, 0px);
+  --love-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --love-safe-left: env(safe-area-inset-left, 0px);
+
+  --love-font:
+    Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ============================================================
+   2. RÉINITIALISATION
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  width: 100%;
+  min-width: 280px;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--love-bg);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  min-width: 280px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(
+      ellipse at top,
+      rgba(91, 37, 85, 0.2),
+      transparent 48%
+    ),
+    var(--love-bg);
+  color: var(--love-text);
+  font-family: var(--love-font);
+  font-size: 14px;
+  line-height: 1.5;
+  overscroll-behavior-y: contain;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+canvas:focus-visible {
+  outline: 3px solid var(--love-primary-light);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+button,
+input,
+select {
+  touch-action: manipulation;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.975);
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+p {
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+
+p {
+  margin-top: 0;
+}
+
+::selection {
+  color: white;
+  background: var(--love-primary-dark);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   3. RACINE DE L'APPLICATION
+   ============================================================ */
+
+#loveGameApp,
+.love-game-app {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: clip;
+  background: var(--love-bg);
+}
+
+.screen {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+button,
+.panel-card,
+.menu-hero,
+.objective-panel,
+.dialogue-panel {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ============================================================
+   4. ÉCRAN DE CHARGEMENT
+   ============================================================ */
+
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    calc(28px + var(--love-safe-top))
+    calc(24px + var(--love-safe-right))
+    calc(28px + var(--love-safe-bottom))
+    calc(24px + var(--love-safe-left));
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(232, 77, 136, 0.22),
+      transparent 36%
+    ),
+    radial-gradient(
+      ellipse at bottom,
+      rgba(102, 51, 125, 0.23),
+      transparent 55%
+    ),
+    linear-gradient(
+      145deg,
+      #160d22,
+      #090711 75%
+    );
+}
+
+.loading-content {
+  width: min(100%, 460px);
+  text-align: center;
+  animation: love-fade-up 650ms ease both;
+}
+
+.loading-symbol {
+  display: grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  margin: 0 auto 25px;
+  border: 1px solid rgba(255, 131, 177, 0.55);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 131, 177, 0.24),
+      rgba(232, 77, 136, 0.04)
+    );
+  box-shadow:
+    0 0 0 12px rgba(232, 77, 136, 0.045),
+    0 0 48px rgba(232, 77, 136, 0.25);
+  color: var(--love-primary-light);
+  font-size: 54px;
+  animation: love-heart-pulse 2.2s ease-in-out infinite;
+}
+
+.brand-kicker {
+  margin: 0 0 10px;
+  color: var(--love-gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  line-height: 1.5;
+}
+
+.loading-content h1 {
+  margin-bottom: 15px;
+  color: var(--love-white);
+  font-size: clamp(23px, 6vw, 38px);
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  line-height: 1.15;
+  text-shadow: 0 5px 32px rgba(232, 77, 136, 0.2);
+}
+
+.loading-message {
+  min-height: 24px;
+  margin-bottom: 22px;
+  color: var(--love-muted);
+  font-size: 13px;
+}
+
+.loading-track,
+.overall-progress-track,
+.objective-progress-track {
+  position: relative;
+  overflow: hidden;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.loading-track {
+  margin: 0 0 12px;
+}
+
+.loading-progress,
+.overall-progress-bar,
+.objective-progress-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    var(--love-primary-dark),
+    var(--love-primary-light),
+    var(--love-gold)
+  );
+  box-shadow: 0 0 18px rgba(232, 77, 136, 0.3);
+  transition: width 250ms ease;
+}
+
+#loadingPercent {
+  margin: 0;
+  color: var(--love-primary-light);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   5. MENU PRINCIPAL
+   ============================================================ */
+
+.main-menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 30px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding:
+    calc(24px + var(--love-safe-top))
+    calc(25px + var(--love-safe-right))
+    calc(20px + var(--love-safe-bottom))
+    calc(25px + var(--love-safe-left));
+
+  background:
+    radial-gradient(
+      ellipse at 82% 24%,
+      rgba(232, 77, 136, 0.15),
+      transparent 40%
+    ),
+    radial-gradient(
+      ellipse at 15% 82%,
+      rgba(132, 80, 190, 0.14),
+      transparent 38%
+    ),
+    linear-gradient(
+      160deg,
+      #1b1027 0%,
+      #100b19 55%,
+      #090711 100%
+    );
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.brand-heart {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 131, 177, 0.42);
+  border-radius: 15px;
+  background: rgba(232, 77, 136, 0.13);
+  color: var(--love-primary-light);
+  font-size: 25px;
+  box-shadow: var(--love-glow);
+}
+
+.brand-lockup .brand-kicker {
+  margin-bottom: 3px;
+  font-size: 8px;
+  letter-spacing: 0.19em;
+}
+
+.brand-lockup h1 {
+  margin: 0;
+  color: var(--love-white);
+  font-size: clamp(13px, 3vw, 20px);
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  line-height: 1.3;
+}
+
+.icon-button,
+.game-icon-button,
+.dialogue-close-button {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--love-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--love-white);
+  font-size: 21px;
+  transition:
+    background var(--love-transition),
+    border-color var(--love-transition),
+    transform var(--love-transition);
+}
+
+.icon-button:hover,
+.game-icon-button:hover,
+.dialogue-close-button:hover {
+  border-color: rgba(255, 131, 177, 0.55);
+  background: rgba(232, 77, 136, 0.17);
+}
+
+.menu-hero {
+  width: min(100%, 760px);
+  margin: auto;
+  padding: 30px 0;
+  animation: love-fade-up 700ms ease both;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 17px;
+  color: var(--love-primary-light);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.17em;
+  line-height: 1.8;
+}
+
+.menu-hero h2 {
+  max-width: 740px;
+  margin-bottom: 19px;
+  color: var(--love-white);
+  font-size: clamp(33px, 8vw, 70px);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.menu-hero > p:last-child {
+  max-width: 540px;
+  margin-bottom: 0;
+  color: var(--love-muted);
+  font-size: clamp(14px, 3vw, 17px);
+  line-height: 1.9;
+}
+
+.menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(100%, 440px);
+  margin: 0 auto;
+}
+
+.primary-button,
+.secondary-button,
+.text-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 51px;
+  padding: 13px 19px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.5;
+  transition:
+    transform var(--love-transition),
+    background var(--love-transition),
+    border-color var(--love-transition),
+    box-shadow var(--love-transition);
+}
+
+.primary-button {
+  border-color: rgba(255, 205, 224, 0.2);
+  background: linear-gradient(
+    115deg,
+    #a92d61,
+    #e84d88 60%,
+    #f477a7
+  );
+  color: #fff;
+  box-shadow: 0 9px 27px rgba(232, 77, 136, 0.2);
+}
+
+.primary-button:hover:not(:disabled) {
+  box-shadow: 0 12px 35px rgba(232, 77, 136, 0.34);
+  filter: brightness(1.08);
+}
+
+.secondary-button {
+  border-color: var(--love-border);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--love-text);
+}
+
+.secondary-button:hover:not(:disabled) {
+  border-color: rgba(255, 131, 177, 0.42);
+  background: rgba(232, 77, 136, 0.1);
+}
+
+.text-button {
+  min-height: 43px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--love-muted);
+}
+
+.text-button:hover:not(:disabled) {
+  color: var(--love-primary-light);
+}
+
+.menu-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  color: var(--love-muted);
+  font-size: 10px;
+}
+
+/* ============================================================
+   6. ÉCRAN DE JEU 3D
+   ============================================================ */
+
+.game-screen {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 360px;
+  overflow: hidden;
+  background: #10121b;
+}
+
+.game-world {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      ellipse at 50% 30%,
+      #49405a,
+      #171421 55%,
+      #0b0b12
+    );
+}
+
+#loveGameCanvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.world-loading-overlay {
+  position: absolute;
+  z-index: 12;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 25px;
+  background: rgba(10, 8, 17, 0.83);
+  color: var(--love-white);
+  text-align: center;
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+}
+
+.world-loading-overlay p {
+  margin: 0;
+  color: var(--love-muted);
+  font-size: 13px;
+}
+
+.loading-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(255, 255, 255, 0.14);
+  border-top-color: var(--love-primary-light);
+  border-radius: 50%;
+  animation: love-spin 800ms linear infinite;
+}
+
+/* ============================================================
+   7. BARRE SUPÉRIEURE EN JEU
+   ============================================================ */
+
+.game-top-bar {
+  position: absolute;
+  z-index: 15;
+  top: calc(12px + var(--love-safe-top));
+  left: calc(12px + var(--love-safe-left));
+  right: calc(12px + var(--love-safe-right));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 19px;
+  background: rgba(17, 12, 25, 0.78);
+  box-shadow: var(--love-shadow);
+  backdrop-filter: blur(17px);
+  -webkit-backdrop-filter: blur(17px);
+}
+
+.game-icon-button {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  font-size: 18px;
+}
+
+.mission-summary {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mission-number {
+  color: var(--love-gold);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.mission-title {
+  overflow: hidden;
+  color: var(--love-white);
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   8. PANNEAU D'OBJECTIF
+   ============================================================ */
+
+.objective-panel {
+  position: absolute;
+  z-index: 10;
+  top: calc(87px + var(--love-safe-top));
+  left: calc(13px + var(--love-safe-left));
+  width: min(290px, calc(100% - 26px));
+  padding: 14px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 17px;
+  background: rgba(17, 12, 25, 0.76);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.17);
+  backdrop-filter: blur(13px);
+  -webkit-backdrop-filter: blur(13px);
+}
+
+.panel-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--love-gold);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+}
+
+.objective-panel > p {
+  margin-bottom: 11px;
+  color: var(--love-white);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.objective-progress-track {
+  height: 4px;
+  margin-bottom: 6px;
+}
+
+.objective-progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--love-primary-dark),
+    var(--love-primary-light)
+  );
+}
+
+#objectiveProgressText {
+  display: block;
+  color: var(--love-muted);
+  font-size: 10px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   9. INVITATION À INTERAGIR
+   ============================================================ */
+
+.interaction-prompt {
+  position: absolute;
+  z-index: 16;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+  padding: 13px 20px;
+  border: 1px solid rgba(255, 131, 177, 0.55);
+  border-radius: 999px;
+  background: rgba(20, 12, 25, 0.9);
+  color: var(--love-white);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 0 35px rgba(232, 77, 136, 0.24);
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.interaction-prompt:hover {
+  background: rgba(75, 25, 56, 0.94);
+}
+
+#interactionIcon {
+  color: var(--love-primary-light);
+  font-size: 19px;
+}
+
+/* ============================================================
+   10. CONTRÔLES TACTILES
+   ============================================================ */
+
+.touch-controls {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.movement-control,
+.action-controls,
+.camera-control-hint {
+  pointer-events: auto;
+}
+
+.movement-control {
+  position: absolute;
+  bottom: calc(22px + var(--love-safe-bottom));
+  left: calc(18px + var(--love-safe-left));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  touch-action: none;
+}
+
+.joystick-base {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(108px, 29vw, 142px);
+  height: clamp(108px, 29vw, 142px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.085),
+      rgba(15, 11, 23, 0.58)
+    );
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.2),
+    0 8px 25px rgba(0, 0, 0, 0.17);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  touch-action: none;
+}
+
+.joystick-base::before,
+.joystick-base::after {
+  position: absolute;
+  display: block;
+  content: "";
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.joystick-base::before {
+  width: 66%;
+  height: 66%;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.joystick-base::after {
+  width: 35%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.joystick-thumb {
+  position: absolute;
+  z-index: 2;
+  width: 42%;
+  height: 42%;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 50%;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 131, 177, 0.93),
+    rgba(169, 45, 97, 0.88)
+  );
+  box-shadow:
+    0 5px 18px rgba(0, 0, 0, 0.3),
+    0 0 22px rgba(232, 77, 136, 0.19);
+  transform: translate(0, 0);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.control-caption {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-shadow: 0 2px 5px #000;
+}
+
+.action-controls {
+  position: absolute;
+  right: calc(16px + var(--love-safe-right));
+  bottom: calc(29px + var(--love-safe-bottom));
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: clamp(8px, 2.6vw, 15px);
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: clamp(53px, 15vw, 68px);
+  height: clamp(60px, 16vw, 75px);
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 19px;
+  background: rgba(17, 12, 25, 0.78);
+  color: var(--love-white);
+  box-shadow: 0 8px 23px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  touch-action: manipulation;
+  transition:
+    transform var(--love-transition),
+    background var(--love-transition),
+    border-color var(--love-transition);
+}
+
+.action-button > span {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.action-button small {
+  color: var(--love-muted);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.action-button:hover:not(:disabled) {
+  border-color: rgba(255, 131, 177, 0.55);
+  background: rgba(65, 28, 54, 0.88);
+}
+
+.action-button-main {
+  width: clamp(62px, 17vw, 79px);
+  height: clamp(70px, 18vw, 86px);
+  border-color: rgba(255, 160, 195, 0.65);
+  background: linear-gradient(
+    145deg,
+    rgba(232, 77, 136, 0.95),
+    rgba(132, 32, 78, 0.93)
+  );
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.23),
+    0 0 23px rgba(232, 77, 136, 0.16);
+}
+
+.action-button-main small {
+  color: white;
+}
+
+.camera-control-hint {
+  position: absolute;
+  right: 15px;
+  bottom: calc(119px + var(--love-safe-bottom));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 185px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(10, 8, 17, 0.48);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 9px;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+.camera-control-hint > span:first-child {
+  color: var(--love-primary-light);
+  font-size: 17px;
+}
+
+/* ============================================================
+   11. DIALOGUES DES PERSONNAGES
+   ============================================================ */
+
+.dialogue-panel {
+  position: absolute;
+  z-index: 35;
+  right: calc(14px + var(--love-safe-right));
+  bottom: calc(16px + var(--love-safe-bottom));
+  left: calc(14px + var(--love-safe-left));
+  width: min(720px, calc(100% - 28px));
+  max-height: min(65dvh, 520px);
+  margin: 0 auto;
+  padding: 19px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 23px;
+  background: rgba(19, 12, 28, 0.96);
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.45),
+    0 0 35px rgba(232, 77, 136, 0.09);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  animation: love-fade-up 220ms ease both;
+}
+
+.dialogue-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--love-border);
+}
+
+.speaker-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 45px;
+  width: 45px;
+  height: 45px;
+  border: 1px solid rgba(255, 131, 177, 0.38);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(255, 131, 177, 0.36),
+      rgba(232, 77, 136, 0.08)
+    );
+  color: var(--love-primary-light);
+  font-size: 22px;
+}
+
+.speaker-information {
+  flex: 1;
+  min-width: 0;
+}
+
+.speaker-information .panel-label {
+  margin-bottom: 3px;
+}
+
+.speaker-information h2 {
+  margin: 0;
+  color: var(--love-white);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.dialogue-close-button {
+  width: 37px;
+  height: 37px;
+  border-radius: 11px;
+  font-size: 24px;
+}
+
+#dialogueText {
+  margin: 16px 0;
+  color: var(--love-text);
+  font-size: 14px;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+
+.dialogue-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 12px 0;
+}
+
+.dialogue-choice {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid var(--love-border);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--love-text);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+  transition:
+    border-color var(--love-transition),
+    background var(--love-transition);
+}
+
+.dialogue-choice:hover {
+  border-color: rgba(255, 131, 177, 0.5);
+  background: rgba(232, 77, 136, 0.12);
+}
+
+.dialogue-choice::before {
+  flex-shrink: 0;
+  content: "♡";
+  color: var(--love-primary-light);
+  font-size: 17px;
+}
+
+.dialogue-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--love-border);
+}
+
+#dialogueVoiceStatus {
+  color: var(--love-muted);
+  font-size: 10px;
+}
+
+.dialogue-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.small-button {
+  width: auto;
+  min-width: 100px;
+  min-height: 39px;
+  padding: 9px 12px;
+  border-radius: 11px;
+  font-size: 11px;
+}
+
+/* ============================================================
+   12. NOTIFICATIONS ET SAUVEGARDE
+   ============================================================ */
+
+.game-notification {
+  position: absolute;
+  z-index: 45;
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - 36px);
+  padding: 13px 19px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  background: rgba(20, 12, 28, 0.95);
+  color: var(--love-white);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: var(--love-shadow);
+  transform: translate(-50%, -50%);
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.saving-indicator {
+  position: absolute;
+  z-index: 46;
+  top: calc(76px + var(--love-safe-top));
+  right: calc(14px + var(--love-safe-right));
+  padding: 7px 10px;
+  border: 1px solid rgba(121, 229, 189, 0.2);
+  border-radius: 10px;
+  background: rgba(9, 30, 25, 0.92);
+  color: var(--love-success);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* ============================================================
+   13. ÉCRANS DE PANNEAUX
+   ============================================================ */
+
+.overlay-screen {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    calc(18px + var(--love-safe-top))
+    calc(15px + var(--love-safe-right))
+    calc(18px + var(--love-safe-bottom))
+    calc(15px + var(--love-safe-left));
+  overflow-y: auto;
+  background: rgba(6, 5, 12, 0.79);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: love-fade-in 180ms ease both;
+}
+
+.panel-card {
+  position: relative;
+  width: min(100%, 510px);
+  max-height: calc(
+    100dvh - var(--love-safe-top) - var(--love-safe-bottom) - 36px
+  );
+  padding: 27px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 27px;
+  background:
+    radial-gradient(
+      ellipse at top right,
+      rgba(232, 77, 136, 0.09),
+      transparent 48%
+    ),
+    var(--love-panel);
+  box-shadow: var(--love-shadow);
+  animation: love-panel-enter 250ms ease both;
+}
+
+.panel-card > .icon-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.panel-card h2 {
+  margin-bottom: 10px;
+  color: var(--love-white);
+  font-size: clamp(23px, 6vw, 32px);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+
+.panel-card > p {
+  color: var(--love-muted);
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+/* ============================================================
+   14. ÉCRAN DES MISSIONS
+   ============================================================ */
+
+.missions-card {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 750px);
+  max-height: calc(
+    100dvh - var(--love-safe-top) - var(--love-safe-bottom) - 36px
+  );
+  padding: 23px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.panel-header > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel-header .brand-kicker {
+  margin-bottom: 7px;
+}
+
+.panel-header h2 {
+  margin-bottom: 7px;
+}
+
+.panel-header p:last-child {
+  margin-bottom: 0;
+  color: var(--love-muted);
+  font-size: 11px;
+}
+
+.overall-progress-track {
+  flex: 0 0 6px;
+  margin-bottom: 16px;
+}
+
+.missions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 0;
+  padding: 2px 3px 4px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mission-chapter-heading {
+  margin: 17px 0 4px;
+  padding: 11px 12px;
+  border-left: 3px solid var(--love-primary);
+  border-radius: 0 10px 10px 0;
+  background: rgba(232, 77, 136, 0.08);
+  color: var(--love-gold);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.mission-chapter-heading:first-child {
+  margin-top: 0;
+}
+
+.mission-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 70px;
+  padding: 12px;
+  border: 1px solid var(--love-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  text-align: left;
+  transition:
+    border-color var(--love-transition),
+    background var(--love-transition);
+}
+
+.mission-card:hover:not(:disabled) {
+  border-color: rgba(255, 131, 177, 0.43);
+  background: rgba(232, 77, 136, 0.075);
+}
+
+.mission-card.is-current {
+  border-color: rgba(255, 131, 177, 0.6);
+  background: rgba(232, 77, 136, 0.12);
+}
+
+.mission-card.is-completed {
+  border-color: rgba(121, 229, 189, 0.25);
+}
+
+.mission-card.is-locked {
+  opacity: 0.55;
+}
+
+.mission-card-number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 39px;
+  width: 39px;
+  height: 39px;
+  border: 1px solid var(--love-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--love-primary-light);
+  font-size: 12px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.is-completed .mission-card-number {
+  border-color: rgba(121, 229, 189, 0.24);
+  background: rgba(121, 229, 189, 0.1);
+  color: var(--love-success);
+}
+
+.mission-card-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mission-card-info strong {
+  color: var(--love-white);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.mission-card-info small {
+  color: var(--love-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.mission-card-status {
+  flex-shrink: 0;
+  color: var(--love-muted);
+  font-size: 16px;
+}
+
+/* ============================================================
+   15. MENU PAUSE
+   ============================================================ */
+
+.pause-card {
+  text-align: center;
+}
+
+.pause-symbol {
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 20px;
+  border: 1px solid rgba(255, 131, 177, 0.35);
+  border-radius: 22px;
+  background: rgba(232, 77, 136, 0.1);
+  color: var(--love-primary-light);
+  font-size: 32px;
+}
+
+.pause-card > p:not(.brand-kicker) {
+  margin-bottom: 23px;
+}
+
+.pause-card > button {
+  margin-top: 10px;
+}
+
+/* ============================================================
+   16. PARAMÈTRES
+   ============================================================ */
+
+.settings-card {
+  width: min(100%, 550px);
+}
+
+.settings-card > .panel-header {
+  padding-right: 35px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 72px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.setting-row > span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.setting-row strong {
+  color: var(--love-white);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.setting-row small {
+  color: var(--love-muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.setting-row input[type="checkbox"] {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 25px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition:
+    background var(--love-transition),
+    border-color var(--love-transition);
+}
+
+.setting-row input[type="checkbox"]::before {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: white;
+  content: "";
+  transition: transform var(--love-transition);
+}
+
+.setting-row input[type="checkbox"]:checked {
+  border-color: var(--love-primary);
+  background: var(--love-primary-dark);
+}
+
+.setting-row input[type="checkbox"]:checked::before {
+  transform: translateX(19px);
+}
+
+.setting-row select {
+  max-width: 135px;
+  min-height: 39px;
+  padding: 8px 10px;
+  border: 1px solid var(--love-border);
+  border-radius: 11px;
+  background: #21172d;
+  color: var(--love-text);
+  font-size: 11px;
+}
+
+.setting-row input[type="range"] {
+  width: min(130px, 38%);
+  accent-color: var(--love-primary);
+  cursor: pointer;
+}
+
+#saveSettingsButton {
+  margin-top: 22px;
+}
+
+/* ============================================================
+   17. À PROPOS
+   ============================================================ */
+
+.credits-card {
+  text-align: center;
+}
+
+.credits-card > .icon-button {
+  z-index: 2;
+}
+
+.credits-heart,
+.ending-symbol {
+  display: grid;
+  place-items: center;
+  width: 83px;
+  height: 83px;
+  margin: 7px auto 24px;
+  border: 1px solid rgba(255, 131, 177, 0.4);
+  border-radius: 50%;
+  background: rgba(232, 77, 136, 0.12);
+  color: var(--love-primary-light);
+  font-size: 40px;
+  box-shadow: var(--love-glow);
+}
+
+.credits-card .brand-kicker {
+  margin-bottom: 12px;
+}
+
+.credits-card h2 {
+  padding: 0 10px;
+}
+
+.credits-version {
+  margin-top: 22px;
+  color: var(--love-gold) !important;
+  font-size: 10px !important;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   18. FIN DE MISSION
+   ============================================================ */
+
+.completion-card {
+  text-align: center;
+}
+
+.completion-symbol {
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 22px;
+  border: 1px solid rgba(245, 213, 154, 0.48);
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      rgba(245, 213, 154, 0.16),
+      rgba(232, 77, 136, 0.1)
+    );
+  color: var(--love-gold);
+  font-size: 39px;
+  box-shadow: 0 0 30px rgba(245, 213, 154, 0.12);
+  animation: love-heart-pulse 1.8s ease-in-out infinite;
+}
+
+.completion-card .brand-kicker {
+  margin-bottom: 11px;
+}
+
+.completion-reward {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 22px 0;
+  padding: 15px;
+  border: 1px solid var(--love-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--love-muted);
+  font-size: 12px;
+}
+
+.completion-reward strong {
+  color: var(--love-gold);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.completion-card > button {
+  margin-top: 10px;
+}
+
+/* ============================================================
+   19. FIN DE L'AVENTURE
+   ============================================================ */
+
+.ending-card {
+  text-align: center;
+}
+
+.ending-symbol {
+  width: 94px;
+  height: 94px;
+  margin-bottom: 25px;
+  font-size: 48px;
+  animation: love-heart-pulse 2s ease-in-out infinite;
+}
+
+.ending-card .brand-kicker {
+  margin-bottom: 12px;
+}
+
+.ending-card > p {
+  margin-bottom: 25px;
+}
+
+.ending-card > button {
+  margin-top: 10px;
+}
+
+/* ============================================================
+   20. CONFIRMATION
+   ============================================================ */
+
+.confirmation-card {
+  width: min(100%, 420px);
+}
+
+.confirmation-card h2 {
+  padding-right: 5px;
+  font-size: 24px;
+}
+
+.confirmation-card > p {
+  margin-bottom: 22px;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.confirmation-actions > button {
+  flex: 1;
+  min-width: 0;
+  padding-right: 9px;
+  padding-left: 9px;
+}
+
+/* ============================================================
+   21. ERREURS
+   ============================================================ */
+
+.error-card {
+  text-align: center;
+}
+
+.error-symbol {
+  display: grid;
+  place-items: center;
+  width: 67px;
+  height: 67px;
+  margin: 0 auto 20px;
+  border: 1px solid rgba(255, 117, 133, 0.35);
+  border-radius: 50%;
+  background: rgba(255, 117, 133, 0.1);
+  color: var(--love-danger);
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.error-card h2 {
+  font-size: 24px;
+}
+
+.error-card > button {
+  margin-top: 10px;
+}
+
+/* ============================================================
+   22. SCROLLBARS
+   ============================================================ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(232, 77, 136, 0.55)
+    rgba(255, 255, 255, 0.04);
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: 99px;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(232, 77, 136, 0.5);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--love-primary-light);
+}
+
+/* ============================================================
+   23. ANIMATIONS
+   ============================================================ */
+
+@keyframes love-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes love-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes love-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(9px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes love-heart-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.055);
+  }
+}
+
+@keyframes love-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes love-notification-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Classes utilisables par JavaScript */
+
+.is-visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+.is-speaking {
+  border-color: var(--love-primary-light) !important;
+  box-shadow: 0 0 22px rgba(232, 77, 136, 0.25);
+}
+
+.is-selected {
+  border-color: var(--love-primary-light) !important;
+  background: rgba(232, 77, 136, 0.16) !important;
+}
+
+.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.game-notification.is-visible {
+  animation: love-notification-in 220ms ease both;
+}
+
+/* ============================================================
+   24. TABLETTES ET ÉCRANS INTERMÉDIAIRES
+   ============================================================ */
+
+@media (min-width: 600px) {
+  .main-menu {
+    padding-right: max(35px, calc((100vw - 1000px) / 2));
+    padding-left: max(35px, calc((100vw - 1000px) / 2));
+  }
+
+  .menu-hero {
+    padding-top: 42px;
+    padding-bottom: 42px;
+  }
+
+  .menu-actions {
+    margin-left: 0;
+  }
+
+  .menu-footer {
+    margin-top: 10px;
+  }
+
+  .objective-panel {
+    width: 300px;
+  }
+
+  .dialogue-panel {
+    bottom: calc(24px + var(--love-safe-bottom));
+    padding: 23px;
+  }
+
+  .dialogue-controls {
+    gap: 10px;
+  }
+
+  .missions-card {
+    padding: 29px;
+  }
+
+  .mission-card {
+    min-height: 76px;
+    padding: 14px;
+  }
+
+  .mission-card-info strong {
+    font-size: 13px;
+  }
+}
+
+/* ============================================================
+   25. GRANDS ÉCRANS
+   ============================================================ */
+
+@media (min-width: 1000px) {
+  .main-menu {
+    padding-top: 35px;
+    padding-bottom: 25px;
+  }
+
+  .menu-hero {
+    margin-left: max(0px, calc((100vw - 1160px) / 2));
+  }
+
+  .menu-actions {
+    margin-left: max(0px, calc((100vw - 1160px) / 2));
+  }
+
+  .game-top-bar {
+    top: 22px;
+    left: 24px;
+    right: 24px;
+    max-width: 650px;
+  }
+
+  .objective-panel {
+    top: 102px;
+    left: 24px;
+  }
+
+  .movement-control {
+    bottom: 28px;
+    left: 30px;
+  }
+
+  .action-controls {
+    right: 30px;
+    bottom: 34px;
+  }
+
+  .camera-control-hint {
+    right: 30px;
+    bottom: 135px;
+  }
+
+  .dialogue-panel {
+    right: 24px;
+    bottom: 24px;
+    left: auto;
+    width: min(600px, calc(100% - 48px));
+  }
+}
+
+/* ============================================================
+   26. PETITS ÉCRANS ANDROID
+   ============================================================ */
+
+@media (max-width: 380px) {
+  .main-menu {
+    gap: 20px;
+    padding-right: 17px;
+    padding-left: 17px;
+  }
+
+  .brand-lockup {
+    gap: 9px;
+  }
+
+  .brand-heart {
+    flex-basis: 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 21px;
+  }
+
+  .brand-lockup h1 {
+    font-size: 12px;
+  }
+
+  .brand-lockup .brand-kicker {
+    font-size: 7px;
+  }
+
+  .menu-hero h2 {
+    font-size: clamp(30px, 9vw, 39px);
+  }
+
+  .menu-hero > p:last-child {
+    font-size: 13px;
+  }
+
+  .menu-footer {
+    font-size: 9px;
+  }
+
+  .game-top-bar {
+    gap: 8px;
+    padding: 7px 8px;
+  }
+
+  .game-icon-button {
+    width: 37px;
+    height: 37px;
+  }
+
+  .mission-title {
+    font-size: 11px;
+  }
+
+  .objective-panel {
+    top: calc(82px + var(--love-safe-top));
+    padding: 11px 12px;
+  }
+
+  .movement-control {
+    bottom: calc(17px + var(--love-safe-bottom));
+    left: calc(10px + var(--love-safe-left));
+  }
+
+  .joystick-base {
+    width: 103px;
+    height: 103px;
+  }
+
+  .action-controls {
+    right: calc(9px + var(--love-safe-right));
+    bottom: calc(25px + var(--love-safe-bottom));
+    gap: 6px;
+  }
+
+  .action-button {
+    width: 48px;
+    height: 58px;
+    border-radius: 15px;
+  }
+
+  .action-button-main {
+    width: 57px;
+    height: 68px;
+  }
+
+  .action-button > span {
+    font-size: 19px;
+  }
+
+  .action-button small {
+    font-size: 8px;
+  }
+
+  .camera-control-hint {
+    right: 8px;
+    bottom: calc(103px + var(--love-safe-bottom));
+    max-width: 156px;
+    font-size: 8px;
+  }
+
+  .dialogue-panel {
+    right: 8px;
+    bottom: calc(8px + var(--love-safe-bottom));
+    left: 8px;
+    width: calc(100% - 16px);
+    padding: 14px;
+    border-radius: 19px;
+  }
+
+  #dialogueText {
+    font-size: 13px;
+  }
+
+  .dialogue-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dialogue-controls {
+    width: 100%;
+  }
+
+  .dialogue-controls > button {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .panel-card {
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .missions-card {
+    padding: 16px;
+  }
+
+  .mission-card {
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .mission-card-number {
+    flex-basis: 33px;
+    width: 33px;
+    height: 33px;
+  }
+
+  .mission-card-info strong {
+    font-size: 11px;
+  }
+
+  .mission-card-info small {
+    font-size: 9px;
+  }
+}
+
+/* ============================================================
+   27. ÉCRANS COURTS / MODE PAYSAGE
+   ============================================================ */
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .main-menu {
+    gap: 12px;
+    padding-top: calc(10px + var(--love-safe-top));
+    padding-bottom: calc(10px + var(--love-safe-bottom));
+  }
+
+  .menu-hero {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .menu-hero h2 {
+    margin-bottom: 8px;
+    font-size: clamp(24px, 5vh, 37px);
+  }
+
+  .menu-hero > p:last-child {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .menu-actions {
+    gap: 6px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    min-height: 40px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .text-button {
+    min-height: 34px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .menu-footer {
+    padding-top: 8px;
+  }
+
+  .game-top-bar {
+    top: calc(6px + var(--love-safe-top));
+    min-height: 46px;
+    padding: 5px 8px;
+  }
+
+  .game-icon-button {
+    width: 35px;
+    height: 35px;
+  }
+
+  .objective-panel {
+    top: calc(60px + var(--love-safe-top));
+    max-width: 230px;
+    padding: 9px 11px;
+  }
+
+  .objective-panel > p {
+    margin-bottom: 6px;
+    font-size: 10px;
+  }
+
+  .movement-control {
+    bottom: calc(8px + var(--love-safe-bottom));
+  }
+
+  .joystick-base {
+    width: 85px;
+    height: 85px;
+  }
+
+  .control-caption {
+    font-size: 7px;
+  }
+
+  .action-controls {
+    bottom: calc(12px + var(--love-safe-bottom));
+  }
+
+  .action-button {
+    width: 51px;
+    height: 53px;
+  }
+
+  .action-button-main {
+    width: 57px;
+    height: 61px;
+  }
+
+  .camera-control-hint {
+    bottom: calc(84px + var(--love-safe-bottom));
+  }
+
+  .dialogue-panel {
+    top: auto;
+    right: 12px;
+    bottom: calc(8px + var(--love-safe-bottom));
+    left: auto;
+    width: min(440px, 57%);
+    max-height: 76dvh;
+    padding: 12px;
+  }
+
+  .dialogue-heading {
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+
+  .speaker-avatar {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+  }
+
+  #dialogueText {
+    margin: 8px 0;
+    font-size: 11px;
+    line-height: 1.55;
+  }
+
+  .dialogue-footer {
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  .dialogue-controls {
+    gap: 5px;
+  }
+
+  .small-button {
+    min-width: 0;
+    min-height: 32px;
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .panel-card {
+    padding: 17px;
+  }
+}
+
+/* ============================================================
+   28. ACCESSIBILITÉ : MOUVEMENT RÉDUIT
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   29. CONTRASTE ÉLEVÉ
+   ============================================================ */
+
+@media (prefers-contrast: more) {
+  :root {
+    --love-muted: #e2d3e4;
+    --love-border: rgba(255, 255, 255, 0.35);
+  }
+
+  .primary-button,
+  .secondary-button,
+  .action-button,
+  .icon-button {
+    border-width: 2px;
+  }
+
+  .mission-title,
+  .mission-number,
+  .panel-label {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ============================================================
+   30. FIN DU FICHIER CSS
+   ============================================================ */
