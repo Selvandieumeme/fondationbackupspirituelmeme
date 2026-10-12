@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#130d20">
+  <meta name="description"
+        content="FOBAS — Sur l'Amour en Action : une aventure romantique immersive en 3D.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>FOBAS — Sur l'Amour en Action</title>
+
+  <link rel="stylesheet" href="appamourfobas.css">
+
+  <!-- Babylon.js : moteur graphique 3D -->
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+</head>
+
+<body>
+  <div id="loveGameApp" class="love-game-app">
+
+    <!-- =====================================================
+         ÉCRAN DE CHARGEMENT
+    ====================================================== -->
+    <section id="loadingScreen" class="screen loading-screen"
+             aria-label="Chargement du jeu">
+      <div class="loading-content">
+        <div class="loading-symbol" aria-hidden="true">♡</div>
+        <p class="brand-kicker">FOBAS INTERACTIVE</p>
+        <h1>SUR L'AMOUR EN ACTION</h1>
+        <p class="loading-message" id="loadingMessage">
+          Préparation de votre histoire...
+        </p>
+        <div class="loading-track">
+          <div id="loadingProgress" class="loading-progress"></div>
+        </div>
+        <p id="loadingPercent">0 %</p>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         MENU PRINCIPAL
+    ====================================================== -->
+    <section id="mainMenu" class="screen main-menu hidden"
+             aria-label="Menu principal">
+      <header class="menu-header">
+        <div class="brand-lockup">
+          <span class="brand-heart" aria-hidden="true">♥</span>
+          <div>
+            <p class="brand-kicker">FOBAS INTERACTIVE</p>
+            <h1>SUR L'AMOUR EN ACTION</h1>
+          </div>
+        </div>
+        <button id="settingsButton" class="icon-button"
+                type="button" aria-label="Paramètres"
+                title="Paramètres">⚙</button>
+      </header>
+
+      <div class="menu-hero">
+        <p class="eyebrow">UNE HISTOIRE. DES CHOIX. DES ÉMOTIONS.</p>
+        <h2>Et si l'amour devenait une aventure ?</h2>
+        <p>
+          Explorez des lieux magnifiques, rencontrez des personnages,
+          partagez des moments uniques et écrivez votre propre histoire.
+        </p>
+      </div>
+
+      <div class="menu-actions">
+        <button id="newGameButton" class="primary-button" type="button">
+          <span aria-hidden="true">▶</span>
+          Nouvelle aventure
+        </button>
+
+        <button id="continueGameButton" class="secondary-button"
+                type="button" disabled>
+          <span aria-hidden="true">↗</span>
+          Continuer l'aventure
+        </button>
+
+        <button id="missionsMenuButton" class="secondary-button"
+                type="button">
+          <span aria-hidden="true">☷</span>
+          Les 35 missions
+        </button>
+
+        <button id="creditsButton" class="text-button" type="button">
+          À propos du jeu
+        </button>
+      </div>
+
+      <footer class="menu-footer">
+        <span>Une aventure romantique en 3D</span>
+        <span id="saveStatus">Sauvegarde locale prête</span>
+      </footer>
+    </section>
+
+    <!-- =====================================================
+         ÉCRAN PRINCIPAL DU JEU
+    ====================================================== -->
+    <main id="gameScreen" class="game-screen hidden">
+
+      <!-- Zone 3D -->
+      <section id="gameWorld" class="game-world"
+               aria-label="Monde 3D du jeu">
+        <canvas id="loveGameCanvas"
+                aria-label="Vue 3D du jeu"
+                tabindex="0"></canvas>
+
+        <div id="worldLoadingOverlay" class="world-loading-overlay">
+          <div class="loading-spinner" aria-hidden="true"></div>
+          <p id="worldLoadingText">Préparation du monde 3D...</p>
+        </div>
+
+        <!-- Barre supérieure -->
+        <header id="gameTopBar" class="game-top-bar">
+          <button id="pauseButton" class="game-icon-button"
+                  type="button" aria-label="Mettre en pause"
+                  title="Pause">Ⅱ</button>
+
+          <div class="mission-summary">
+            <span class="mission-number" id="missionNumber">MISSION 01 / 35</span>
+            <span class="mission-title" id="missionTitle">
+              Un regard inattendu
+            </span>
+          </div>
+
+          <button id="openMissionsButton" class="game-icon-button"
+                  type="button" aria-label="Liste des missions"
+                  title="Missions">☷</button>
+        </header>
+
+        <!-- Objectif de mission -->
+        <section id="objectivePanel" class="objective-panel"
+                 aria-label="Objectif actuel">
+          <span class="panel-label">OBJECTIF</span>
+          <p id="objectiveText">Découvrez votre environnement.</p>
+          <div class="objective-progress-track">
+            <div id="objectiveProgressBar" class="objective-progress-bar"></div>
+          </div>
+          <span id="objectiveProgressText">0 / 1</span>
+        </section>
+
+        <!-- Indicateur d'interaction -->
+        <button id="interactionPrompt" class="interaction-prompt hidden"
+                type="button">
+          <span id="interactionIcon" aria-hidden="true">♡</span>
+          <span id="interactionText">Interagir</span>
+        </button>
+
+        <!-- Dialogue des personnages -->
+        <section id="dialoguePanel" class="dialogue-panel hidden"
+                 aria-label="Dialogue du personnage"
+                 aria-live="polite">
+          <div class="dialogue-heading">
+            <div id="speakerAvatar" class="speaker-avatar"
+                 aria-hidden="true">♡</div>
+            <div class="speaker-information">
+              <span class="panel-label">PERSONNAGE</span>
+              <h2 id="speakerName">Camille</h2>
+            </div>
+            <button id="closeDialogueButton" class="dialogue-close-button"
+                    type="button" aria-label="Fermer le dialogue">×</button>
+          </div>
+
+          <p id="dialogueText">
+            Bonjour ! Je suis heureuse de vous rencontrer.
+          </p>
+
+          <div id="dialogueChoices" class="dialogue-choices"></div>
+
+          <div class="dialogue-footer">
+            <span id="dialogueVoiceStatus">Dialogue en français</span>
+            <div class="dialogue-controls">
+              <button id="repeatDialogueButton" class="small-button"
+                      type="button">↻ Réécouter</button>
+              <button id="nextDialogueButton" class="primary-button small-button"
+                      type="button">Continuer →</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contrôles tactiles -->
+        <div id="touchControls" class="touch-controls">
+
+          <div id="movementControl" class="movement-control"
+               aria-label="Contrôle du déplacement">
+            <div id="joystickBase" class="joystick-base">
+              <div id="joystickThumb" class="joystick-thumb"></div>
+            </div>
+            <span class="control-caption">DÉPLACEMENT</span>
+          </div>
+
+          <div id="cameraControlHint" class="camera-control-hint">
+            <span aria-hidden="true">⇱</span>
+            <span>Glisser : caméra · Pincer : zoom</span>
+          </div>
+
+          <div class="action-controls">
+            <button id="runButton" class="action-button"
+                    type="button" aria-label="Courir">
+              <span aria-hidden="true">➤</span>
+              <small>Courir</small>
+            </button>
+
+            <button id="jumpButton" class="action-button"
+                    type="button" aria-label="Sauter">
+              <span aria-hidden="true">↟</span>
+              <small>Sauter</small>
+            </button>
+
+            <button id="talkButton" class="action-button action-button-main"
+                    type="button" aria-label="Parler ou interagir">
+              <span aria-hidden="true">♡</span>
+              <small>Interagir</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Notification -->
+        <div id="gameNotification" class="game-notification hidden"
+             role="status" aria-live="polite"></div>
+
+        <!-- Indicateur de sauvegarde -->
+        <div id="savingIndicator" class="saving-indicator hidden"
+             role="status">Sauvegarde...</div>
+      </section>
+    </main>
+
+    <!-- =====================================================
+         MENU DES MISSIONS
+    ====================================================== -->
+    <section id="missionsScreen" class="screen overlay-screen hidden"
+             aria-label="Liste des missions">
+      <div class="panel-card missions-card">
+        <header class="panel-header">
+          <div>
+            <p class="brand-kicker">VOTRE HISTOIRE</p>
+            <h2>Les 35 missions</h2>
+            <p id="missionsSummary">0 mission terminée</p>
+          </div>
+          <button id="closeMissionsButton" class="icon-button"
+                  type="button" aria-label="Fermer">×</button>
+        </header>
+
+        <div class="overall-progress-track">
+          <div id="overallProgressBar" class="overall-progress-bar"></div>
+        </div>
+
+        <div id="missionsList" class="missions-list">
+          <!-- Les missions seront générées par JavaScript. -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         MENU PAUSE
+    ====================================================== -->
+    <section id="pauseScreen" class="screen overlay-screen hidden"
+             aria-label="Jeu en pause">
+      <div class="panel-card pause-card">
+        <div class="pause-symbol" aria-hidden="true">Ⅱ</div>
+        <p class="brand-kicker">PRENEZ VOTRE TEMPS</p>
+        <h2>Pause</h2>
+        <p>Votre histoire vous attend.</p>
+
+        <button id="resumeButton" class="primary-button" type="button">
+          Reprendre l'aventure
+        </button>
+        <button id="pauseMissionsButton" class="secondary-button"
+                type="button">
+          Consulter les missions
+        </button>
+        <button id="saveGameButton" class="secondary-button"
+                type="button">
+          Sauvegarder la progression
+        </button>
+        <button id="returnToMenuButton" class="text-button"
+                type="button">
+          Retour au menu principal
+        </button>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         PARAMÈTRES
+    ====================================================== -->
+    <section id="settingsScreen" class="screen overlay-screen hidden"
+             aria-label="Paramètres du jeu">
+      <div class="panel-card settings-card">
+        <header class="panel-header">
+          <div>
+            <p class="brand-kicker">PERSONNALISATION</p>
+            <h2>Paramètres</h2>
+          </div>
+          <button id="closeSettingsButton" class="icon-button"
+                  type="button" aria-label="Fermer">×</button>
+        </header>
+
+        <label class="setting-row" for="voiceEnabled">
+          <span>
+            <strong>Voix des personnages</strong>
+            <small>Activer les dialogues vocaux</small>
+          </span>
+          <input id="voiceEnabled" type="checkbox" checked>
+        </label>
+
+        <label class="setting-row" for="musicEnabled">
+          <span>
+            <strong>Musique et ambiance</strong>
+            <small>Autoriser les sons du jeu</small>
+          </span>
+          <input id="musicEnabled" type="checkbox" checked>
+        </label>
+
+        <label class="setting-row" for="subtitlesEnabled">
+          <span>
+            <strong>Sous-titres</strong>
+            <small>Afficher les dialogues en français</small>
+          </span>
+          <input id="subtitlesEnabled" type="checkbox" checked>
+        </label>
+
+        <label class="setting-row" for="qualitySelect">
+          <span>
+            <strong>Qualité graphique</strong>
+            <small>Adapter les performances à votre appareil</small>
+          </span>
+          <select id="qualitySelect">
+            <option value="low">Économique</option>
+            <option value="medium" selected>Équilibrée</option>
+            <option value="high">Élevée</option>
+          </select>
+        </label>
+
+        <label class="setting-row" for="sensitivityRange">
+          <span>
+            <strong>Sensibilité de la caméra</strong>
+            <small>Réglage du mouvement tactile</small>
+          </span>
+          <input id="sensitivityRange" type="range"
+                 min="0.5" max="2" step="0.1" value="1">
+        </label>
+
+        <button id="saveSettingsButton" class="primary-button"
+                type="button">Enregistrer les paramètres</button>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         À PROPOS
+    ====================================================== -->
+    <section id="creditsScreen" class="screen overlay-screen hidden"
+             aria-label="À propos du jeu">
+      <div class="panel-card credits-card">
+        <button id="closeCreditsButton" class="icon-button"
+                type="button" aria-label="Fermer">×</button>
+        <div class="credits-heart" aria-hidden="true">♥</div>
+        <p class="brand-kicker">FOBAS INTERACTIVE</p>
+        <h2>Sur l'Amour en Action</h2>
+        <p>
+          Une aventure interactive consacrée aux rencontres, aux émotions,
+          aux choix personnels et aux moments qui rapprochent les personnages.
+        </p>
+        <p class="credits-version">Version 1.0.0</p>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         FIN DE MISSION
+    ====================================================== -->
+    <section id="missionCompleteScreen"
+             class="screen overlay-screen hidden"
+             aria-label="Mission terminée">
+      <div class="panel-card completion-card">
+        <div class="completion-symbol" aria-hidden="true">♥</div>
+        <p class="brand-kicker">UN MOMENT INOUBLIABLE</p>
+        <h2 id="completionTitle">Mission accomplie !</h2>
+        <p id="completionMessage">
+          Vous avez franchi une nouvelle étape de votre histoire.
+        </p>
+        <div class="completion-reward">
+          <span>Progression</span>
+          <strong id="completionProgress">1 / 35</strong>
+        </div>
+        <button id="nextMissionButton" class="primary-button"
+                type="button">Mission suivante →</button>
+        <button id="completionMenuButton" class="secondary-button"
+                type="button">Menu principal</button>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         FIN DE L'AVENTURE
+    ====================================================== -->
+    <section id="endingScreen" class="screen overlay-screen hidden"
+             aria-label="Fin de l'aventure">
+      <div class="panel-card ending-card">
+        <div class="ending-symbol" aria-hidden="true">♡</div>
+        <p class="brand-kicker">FOBAS INTERACTIVE</p>
+        <h2>Votre histoire continue...</h2>
+        <p>
+          Vous avez parcouru les 35 missions. Les souvenirs, les décisions
+          et les moments partagés font désormais partie de votre aventure.
+        </p>
+        <button id="restartGameButton" class="primary-button"
+                type="button">Recommencer l'aventure</button>
+        <button id="endingMenuButton" class="secondary-button"
+                type="button">Retour au menu</button>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         BOÎTE DE CONFIRMATION
+    ====================================================== -->
+    <section id="confirmationScreen"
+             class="screen overlay-screen hidden"
+             role="dialog" aria-modal="true"
+             aria-labelledby="confirmationTitle">
+      <div class="panel-card confirmation-card">
+        <h2 id="confirmationTitle">Confirmation</h2>
+        <p id="confirmationMessage">Voulez-vous continuer ?</p>
+        <div class="confirmation-actions">
+          <button id="cancelConfirmationButton"
+                  class="secondary-button" type="button">
+            Annuler
+          </button>
+          <button id="acceptConfirmationButton"
+                  class="primary-button" type="button">
+            Confirmer
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         ERREUR / COMPATIBILITÉ
+    ====================================================== -->
+    <section id="errorScreen" class="screen overlay-screen hidden"
+             role="alert" aria-label="Erreur du jeu">
+      <div class="panel-card error-card">
+        <div class="error-symbol" aria-hidden="true">!</div>
+        <h2 id="errorTitle">Impossible de démarrer le jeu</h2>
+        <p id="errorMessage">
+          Vérifiez votre navigateur et réessayez.
+        </p>
+        <button id="retryButton" class="primary-button" type="button">
+          Réessayer
+        </button>
+        <button id="errorMenuButton" class="secondary-button"
+                type="button">Retour au menu</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- JavaScript principal : chargé après le HTML -->
+  <script src="appamourfobas.js" defer></script>
+</body>
+</html>
