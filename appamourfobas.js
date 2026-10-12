@@ -1,89 +1,90 @@
 
 /* ============================================================
    FOBAS INTERACTIVE — SUR L'AMOUR EN ACTION
-   Moteur principal JavaScript
-   Babylon.js • Android Touch • Missions dynamiques
-   IndexedDB • Dialogues français • Sauvegarde locale
-   Version 1.0.0
+   JavaScript complet — Babylon.js — Android + ordinateur
+   35 missions évolutives, personnages IA, dialogues, choix,
+   collecte, exploration, sauvegarde IndexedDB et contrôles 3D.
 ============================================================ */
-(function () {
+(() => {
   "use strict";
 
-  /* ==========================================================
-     1. CONFIGURATION ET SÉCURITÉ DE BASE
-  ========================================================== */
+  /* ----------------------------------------------------------
+     1. CONFIGURATION ET ÉLÉMENTS HTML
+  ---------------------------------------------------------- */
 
-  const VERSION = "1.0.0";
+  const VERSION = "2.0.0";
   const DB_NAME = "FOBAS_AMOUR_ACTION_DB";
   const DB_VERSION = 1;
-  const SAVE_KEY = "love-adventure-save";
-  const SETTINGS_KEY = "love-adventure-settings";
-  const PROFILE_KEY = "love-adventure-profile";
+  const SAVE_KEY = "main-save";
 
   const $ = (id) => document.getElementById(id);
 
-  const ui = {};
-  const requiredIds = [
-    "loadingScreen", "loadingMessage", "loadingProgress",
-    "loadingPercent", "mainMenu", "gameScreen", "loveGameCanvas",
-    "worldLoadingOverlay", "worldLoadingText", "missionNumber",
-    "missionTitle", "objectiveText", "objectiveProgressBar",
-    "objectiveProgressText", "interactionPrompt", "interactionText",
-    "interactionIcon", "dialoguePanel", "speakerAvatar",
-    "speakerName", "dialogueText", "dialogueChoices",
-    "dialogueVoiceStatus", "closeDialogueButton",
-    "repeatDialogueButton", "nextDialogueButton", "movementControl",
-    "joystickBase", "joystickThumb", "runButton", "jumpButton",
-    "talkButton", "gameNotification", "savingIndicator",
-    "missionsScreen", "missionsList", "missionsSummary",
-    "overallProgressBar", "pauseScreen", "settingsScreen",
-    "creditsScreen", "missionCompleteScreen", "endingScreen",
-    "confirmationScreen", "confirmationTitle",
-    "confirmationMessage", "acceptConfirmationButton",
-    "cancelConfirmationButton", "errorScreen", "errorTitle",
-    "errorMessage", "saveStatus", "continueGameButton"
-  ];
-
-  requiredIds.forEach((id) => {
-    ui[id] = $(id);
-  });
-
-  const missing = requiredIds.filter((id) => !ui[id]);
-
-  if (missing.length) {
-    console.error(
-      "[FOBAS AMOUR] Éléments HTML manquants :",
-      missing.join(", ")
-    );
-  }
-
-  const app = $("loveGameApp") || document.body;
   const canvas = $("loveGameCanvas");
 
-  if (!canvas || !window.BABYLON) {
-    showFatalError(
-      "Moteur 3D indisponible",
-      "Babylon.js ou le canvas 3D est introuvable. Vérifiez la connexion Internet, les scripts HTML et réessayez."
-    );
-    return;
-  }
+  const REQUIRED_IDS = [
+    "loadingScreen", "mainMenu", "gameScreen",
+    "missionsScreen", "pauseScreen", "settingsScreen",
+    "creditsScreen", "missionCompleteScreen", "endingScreen",
+    "confirmationScreen", "errorScreen",
+    "loadingMessage", "loadingProgress", "loadingPercent",
+    "gameNotification", "dialoguePanel", "dialogueText",
+    "dialogueChoices", "speakerName", "speakerAvatar",
+    "missionNumber", "missionTitle", "objectiveText",
+    "objectiveProgressBar", "objectiveProgressText",
+    "interactionPrompt", "interactionText",
+    "missionsList", "missionsSummary",
+    "overallProgressBar", "continueGameButton",
+    "saveStatus", "worldLoadingOverlay", "worldLoadingText",
+    "completionTitle", "completionMessage", "completionProgress",
+    "confirmationTitle", "confirmationMessage",
+    "errorTitle", "errorMessage"
+  ];
 
-  const BABYLON = window.BABYLON;
+  const missingIds = REQUIRED_IDS.filter((id) => !$(id));
+
+  let initialized = false;
+  let initializing = false;
+  let engine = null;
+  let scene = null;
+  let camera = null;
+  let player = null;
+  let db = null;
+  let audioContext = null;
+  let musicTimer = null;
+  let musicStep = 0;
+  let voiceUtterance = null;
+  let notificationTimer = null;
+  let jumpTimer = null;
+  let autosaveTimer = null;
+  let frameTimer = null;
+  let lastFrame = 0;
+  let frameDelta = 0;
+  let jumpVelocity = 0;
+  let isJumping = false;
+  let dialogueTransition = false;
+  let activePointers = new Map();
+  let confirmationAction = null;
+  let currentInteraction = null;
+  let worldGeneration = 0;
+
+  const keys = new Set();
 
   const state = {
-    screen: "loading",
-    previousScreen: "menu",
+    screen: "loadingScreen",
+    previousScreen: "mainMenu",
+    paused: true,
     running: false,
-    paused: false,
     gameStarted: false,
     missionIndex: 0,
     completedMissions: [],
     completedSteps: [],
     choices: {},
     flags: {},
+    inventory: [],
+    relationship: 0,
     profile: {
-      name: "Voyageur",
-      createdAt: Date.now()
+      name: "Alex",
+      avatar: "♡"
     },
     settings: {
       voice: true,
@@ -92,71 +93,52 @@
       quality: "medium",
       sensitivity: 1
     },
-    currentDialogue: null,
-    confirmationAction: null,
-    saving: false,
-    saveTimer: null,
-    lastNotification: "",
-    lastNotificationAt: 0,
-    frameTime: 0,
-    jumpVelocity: 0,
-    verticalVelocity: 0,
-    isJumping: false,
-    isRunning: false,
     joystick: {
-      x: 0,
-      y: 0,
       active: false,
-      pointerId: null
+      pointerId: null,
+      x: 0,
+      y: 0
     },
-    camera: {
+    cameraControl: {
       dragging: false,
       pointerId: null,
       lastX: 0,
       lastY: 0,
       pinchDistance: 0
     },
-    missionRuntime: null,
-    activeTarget: null,
-    db: null,
-    engine: null,
-    scene: null,
-    camera3D: null,
-    player: null,
-    playerParts: [],
     npcs: [],
     collectibles: [],
     landmarks: [],
     decorations: [],
-    ambientSound: null,
-    animationFrame: 0,
-    lastAutosave: 0,
-    lastPlayerPosition: null
+    activeTarget: null,
+    missionRuntime: null,
+    currentDialogue: null,
+    isRunning: false,
+    isInteracting: false,
+    audioUnlocked: false
   };
 
-  let initialized = false;
-  let voiceUtterance = null;
-  let audioContext = null;
-  let musicTimer = null;
-  let musicStep = 0;
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
 
-  const clamp = (v, min, max) =>
-    Math.max(min, Math.min(max, v));
+  function random(min, max) {
+    return min + Math.random() * (max - min);
+  }
 
-  const distanceXZ = (a, b) => {
+  function pick(items) {
+    return items[Math.floor(Math.random() * items.length)];
+  }
+
+  function distanceXZ(a, b) {
     const dx = a.x - b.x;
     const dz = a.z - b.z;
     return Math.sqrt(dx * dx + dz * dz);
-  };
+  }
 
-  const escapeHTML = (value) =>
-    String(value).replace(/[&<>"']/g, (character) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[character]);
+  function setText(element, value) {
+    if (element) element.textContent = String(value ?? "");
+  }
 
   function setVisible(element, visible) {
     if (!element) return;
@@ -164,1003 +146,31 @@
     element.setAttribute("aria-hidden", visible ? "false" : "true");
   }
 
-  function setText(element, value) {
-    if (element) element.textContent = String(value);
-  }
-
-  function safeNumber(value, fallback) {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : fallback;
-  }
-
-  function randomRange(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
-  function showFatalError(title, message) {
-    const screen = $("errorScreen");
-    if (screen) {
-      screen.querySelectorAll(".screen").forEach((node) => {
-        node.classList.add("hidden");
-      });
-
-      setText($("errorTitle"), title);
-      setText($("errorMessage"), message);
-      screen.classList.remove("hidden");
-    } else {
-      console.error("[FOBAS AMOUR]", title, message);
+  function safeDispose(object) {
+    try {
+      if (object && typeof object.dispose === "function") {
+        object.dispose(false, true);
+      }
+    } catch (error) {
+      console.warn("[FOBAS] Nettoyage objet :", error);
     }
   }
 
-  window.addEventListener("error", (event) => {
-    console.error("[FOBAS AMOUR] JavaScript :", event.message);
-  });
-
-  window.addEventListener("unhandledrejection", (event) => {
-    console.error("[FOBAS AMOUR] Promise :", event.reason);
-  });
-
-  /* ==========================================================
-     2. LES 35 MISSIONS INITIALES
-     Chaque mission possède son histoire, ses personnages,
-     son lieu et son type d'activité.
-  ========================================================== */
-
-  const missionData = [
-    {
-      title: "Un regard inattendu",
-      place: "Le jardin des premières rencontres",
-      story: "Un regard échangé peut devenir le commencement d'une grande histoire. Explorez le jardin, rencontrez Camille et découvrez ce qui vous rapproche.",
-      mode: "meeting",
-      goal: "Rencontrer les personnes du jardin"
-    },
-    {
-      title: "Le langage des fleurs",
-      place: "Le jardin des roses",
-      story: "Camille vous invite à découvrir le langage des fleurs. Écoutez ses amis, cherchez les fleurs lumineuses et choisissez un bouquet qui exprime vos sentiments.",
-      mode: "flowers",
-      goal: "Découvrir les fleurs et leur signification"
-    },
-    {
-      title: "Une promesse au soleil couchant",
-      place: "La plage dorée",
-      story: "Au bord de l'eau, les paroles prennent un sens différent. Retrouvez vos compagnons, découvrez leurs souvenirs et formulez une promesse sincère.",
-      mode: "sunset",
-      goal: "Partager un moment au coucher du soleil"
-    },
-    {
-      title: "Un geste qui compte",
-      place: "La place des rencontres",
-      story: "Un petit geste peut illuminer une journée. Des habitants ont besoin de votre aide. Écoutez-les, retrouvez les objets utiles et offrez votre soutien.",
-      mode: "kindness",
-      goal: "Accomplir des gestes de gentillesse"
-    },
-    {
-      title: "Les secrets du vieux pont",
-      place: "Le pont des souvenirs",
-      story: "Un vieux pont cache plusieurs messages. Explorez ses alentours, parlez aux témoins et reconstituez le souvenir oublié.",
-      mode: "mystery",
-      goal: "Résoudre le mystère du pont"
-    },
-    {
-      title: "Une promenade à deux",
-      place: "Le sentier des lanternes",
-      story: "Une promenade tranquille vous rapproche de Camille. Découvrez le sentier, rencontrez de nouveaux amis et apprenez à écouter sans juger.",
-      mode: "walk",
-      goal: "Explorer le sentier et ses rencontres"
-    },
-    {
-      title: "La musique de nos cœurs",
-      place: "Le kiosque musical",
-      story: "Les musiciens préparent une soirée spéciale. Retrouvez les artistes, découvrez leurs histoires et participez à la préparation du concert.",
-      mode: "music",
-      goal: "Préparer le concert romantique"
-    },
-    {
-      title: "Le café des confidences",
-      place: "Le café des amoureux",
-      story: "Autour d'une tasse chaude, chacun a une histoire à raconter. Respectez les confidences, posez les bonnes questions et découvrez ce que signifie la confiance.",
-      mode: "cafe",
-      goal: "Écouter les confidences des amis"
-    },
-    {
-      title: "La lettre mystérieuse",
-      place: "La bibliothèque ancienne",
-      story: "Une lettre sans signature arrive à la bibliothèque. Cherchez les indices, consultez les témoins et découvrez son destinataire.",
-      mode: "letter",
-      goal: "Retrouver l'origine de la lettre"
-    },
-    {
-      title: "Le bal des lumières",
-      place: "La salle des lumières",
-      story: "Le grand bal approche. Aidez les organisateurs, découvrez les préférences des invités et préparez une soirée où chacun se sent accueilli.",
-      mode: "ball",
-      goal: "Préparer le bal et accueillir les invités"
-    },
-    {
-      title: "Le jardin des souvenirs",
-      place: "Le jardin des souvenirs",
-      story: "Chaque fleur rappelle un moment important. Rencontrez les jardiniers, restaurez les parterres et écoutez les histoires qu'ils souhaitent partager.",
-      mode: "garden",
-      goal: "Restaurer le jardin des souvenirs"
-    },
-    {
-      title: "La fête des amis",
-      place: "La grande place",
-      story: "Une fête rassemble des personnes très différentes. Coordonnez les préparatifs, aidez les invités et apprenez à faire une place à chacun.",
-      mode: "festival",
-      goal: "Réussir la préparation de la fête"
-    },
-    {
-      title: "Un cadeau inattendu",
-      place: "L'atelier des artisans",
-      story: "Vous souhaitez préparer un cadeau significatif. Écoutez les artisans, réunissez les éléments nécessaires et personnalisez votre création.",
-      mode: "gift",
-      goal: "Créer un cadeau personnalisé"
-    },
-    {
-      title: "La vérité dans les yeux",
-      place: "Le belvédère",
-      story: "Un malentendu menace une belle amitié. Recueillez les témoignages, confrontez les faits avec calme et choisissez une réponse honnête.",
-      mode: "truth",
-      goal: "Clarifier le malentendu"
-    },
-    {
-      title: "Le voyage des papillons",
-      place: "La vallée fleurie",
-      story: "Des papillons colorés traversent la vallée. Explorez leur habitat, découvrez les personnes qui le protègent et participez à une mission de préservation.",
-      mode: "nature",
-      goal: "Découvrir et protéger la vallée"
-    },
-    {
-      title: "Le pont de la réconciliation",
-      place: "Le pont des retrouvailles",
-      story: "Deux amis ne se parlent plus depuis longtemps. Écoutez les deux versions de leur histoire, identifiez les blessures et aidez-les à renouer le dialogue.",
-      mode: "reconcile",
-      goal: "Favoriser une réconciliation sincère"
-    },
-    {
-      title: "La maison aux fenêtres bleues",
-      place: "Le quartier des maisons bleues",
-      story: "Une famille prépare une rencontre importante. Découvrez ses traditions, rencontrez les voisins et contribuez à rendre l'accueil chaleureux.",
-      mode: "family",
-      goal: "Préparer une rencontre familiale"
-    },
-    {
-      title: "Le défi de la confiance",
-      place: "Le parcours de confiance",
-      story: "La confiance se construit par des actions cohérentes. Suivez un parcours, écoutez les engagements de vos amis et montrez que vos paroles correspondent à vos actes.",
-      mode: "trust",
-      goal: "Réussir les étapes de confiance"
-    },
-    {
-      title: "Le marché des mille couleurs",
-      place: "Le marché fleuri",
-      story: "Un marché animé réunit artisans, musiciens et visiteurs. Découvrez leurs besoins, réalisez des échanges amicaux et préparez une surprise collective.",
-      mode: "market",
-      goal: "Participer aux activités du marché"
-    },
-    {
-      title: "Les étoiles de minuit",
-      place: "L'observatoire romantique",
-      story: "Le ciel est magnifique ce soir. Rejoignez les observateurs, apprenez leurs histoires et découvrez ce que chacun espère pour l'avenir.",
-      mode: "stars",
-      goal: "Observer le ciel avec vos compagnons"
-    },
-    {
-      title: "Une journée de solidarité",
-      place: "Le centre communautaire",
-      story: "Le quartier organise une journée d'entraide. Répartissez les tâches, rencontrez les bénévoles et apportez une aide concrète aux habitants.",
-      mode: "solidarity",
-      goal: "Compléter les activités de solidarité"
-    },
-    {
-      title: "Le secret de la vieille horloge",
-      place: "La tour de l'horloge",
-      story: "Une horloge ancienne s'est arrêtée au moment d'un événement mémorable. Examinez les indices, écoutez les anciens et reconstituez son histoire.",
-      mode: "clock",
-      goal: "Découvrir l'histoire de l'horloge"
-    },
-    {
-      title: "Le retour du voyageur",
-      place: "La gare des retrouvailles",
-      story: "Un ami revient après une longue absence. Préparez son accueil, retrouvez ses proches et partagez des souvenirs qui lui sont chers.",
-      mode: "return",
-      goal: "Organiser des retrouvailles mémorables"
-    },
-    {
-      title: "La cuisine des émotions",
-      place: "La cuisine du village",
-      story: "Une préparation collective rassemble les amis. Découvrez les préférences de chacun, réunissez les ingrédients et réalisez un repas de partage.",
-      mode: "cooking",
-      goal: "Préparer le repas collectif"
-    },
-    {
-      title: "Le théâtre des sentiments",
-      place: "Le théâtre du parc",
-      story: "Une troupe prépare une pièce sur les relations humaines. Aidez les acteurs, découvrez les scènes et participez à la représentation.",
-      mode: "theatre",
-      goal: "Préparer la représentation"
-    },
-    {
-      title: "La rivière des confidences",
-      place: "La rivière paisible",
-      story: "Au bord de la rivière, les amis parlent de leurs espoirs et de leurs inquiétudes. Prenez le temps de les écouter et d'offrir des paroles réconfortantes.",
-      mode: "river",
-      goal: "Partager des moments de confiance"
-    },
-    {
-      title: "Le festival des talents",
-      place: "L'esplanade des talents",
-      story: "Chacun possède un talent particulier. Découvrez les artistes, aidez-les à se préparer et contribuez à un spectacle collectif.",
-      mode: "talents",
-      goal: "Réunir les talents du groupe"
-    },
-    {
-      title: "La maison des promesses",
-      place: "La maison des promesses",
-      story: "Une rencontre invite chacun à réfléchir à ses engagements. Discutez des attentes, reconnaissez les limites de chacun et formulez des promesses réalistes.",
-      mode: "promises",
-      goal: "Construire des engagements sincères"
-    },
-    {
-      title: "Le grand voyage du cœur",
-      place: "La route des horizons",
-      story: "Votre groupe entreprend une aventure collective. Explorez les étapes, retrouvez les compagnons dispersés et résolvez ensemble les défis du voyage.",
-      mode: "journey",
-      goal: "Réunir les compagnons du voyage"
-    },
-    {
-      title: "Les retrouvailles au clair de lune",
-      place: "La terrasse de lune",
-      story: "Une soirée réunit toutes les personnes importantes de votre parcours. Retrouvez vos amis, revisitez les souvenirs et découvrez comment vos choix ont transformé leurs relations.",
-      mode: "reunion",
-      goal: "Retrouver les personnes importantes"
-    },
-    {
-      title: "Le livre de nos histoires",
-      place: "La bibliothèque du cœur",
-      story: "Un livre rassemble les moments les plus précieux de votre aventure. Retrouvez les témoins, revisitez les souvenirs et choisissez les histoires à conserver.",
-      mode: "book",
-      goal: "Composer le livre des souvenirs"
-    },
-    {
-      title: "Le jardin de demain",
-      place: "Le jardin de l'avenir",
-      story: "Votre groupe imagine un lieu où chacun pourra se sentir accepté. Consultez les habitants, recueillez leurs idées et préparez un projet commun.",
-      mode: "future",
-      goal: "Concevoir un projet collectif"
-    },
-    {
-      title: "Le choix du cœur",
-      place: "La place des décisions",
-      story: "Plusieurs possibilités s'offrent à vous. Écoutez les personnes concernées, réfléchissez aux conséquences de chaque choix et décidez avec honnêteté.",
-      mode: "choice",
-      goal: "Prendre des décisions réfléchies"
-    },
-    {
-      title: "La grande célébration",
-      place: "Le jardin des célébrations",
-      story: "Les amis se retrouvent pour célébrer le chemin parcouru. Préparez les lieux, remerciez les personnes qui vous ont aidé et partagez vos souvenirs préférés.",
-      mode: "celebration",
-      goal: "Préparer la grande célébration"
-    },
-    {
-      title: "L'amour en action",
-      place: "Le jardin de l'amour en action",
-      story: "Votre aventure arrive à son grand chapitre final. Retrouvez les compagnons de votre histoire, accomplissez les dernières actions de solidarité et découvrez le message qui relie toutes vos rencontres : l'amour se révèle dans les actes.",
-      mode: "finale",
-      goal: "Achever les dernières actions et célébrer votre aventure"
-    }
-  ];
-
-  const characterNames = [
-    "Camille", "Alexandre", "Sofia", "Gabriel", "Élise",
-    "Nathan", "Amélie", "Raphaël", "Chloé", "Thomas",
-    "Juliette", "Louis", "Manon", "Antoine", "Léa",
-    "Mathis", "Clara", "Noah", "Inès", "Samuel",
-    "Zoé", "David", "Mélanie", "Daniel", "Sarah",
-    "Lucas", "Anaïs", "Hugo", "Eva", "Benjamin",
-    "Nina", "Maxime", "Alicia", "Jules", "Maya"
-  ];
-
-  const characterColors = [
-    "#e9a0b9", "#78b9d7", "#d7a1ef", "#e5bd79",
-    "#8bc5a0", "#ec947d", "#8d9de4", "#e3a4d4",
-    "#b9cf82", "#d5a08d", "#7fcae3", "#c8a5f0"
-  ];
-
-  const characterPersonalities = [
-    "sincère et attentionné",
-    "optimiste et curieux",
-    "calme et réfléchi",
-    "créatif et chaleureux",
-    "courageux et généreux",
-    "rêveur et sensible",
-    "drôle et spontané",
-    "sage et bienveillant"
-  ];
-
-  const dialogueBank = [
-    "Je suis heureux que tu sois venu. J'avais envie de partager ce moment avec quelqu'un qui sait écouter.",
-    "Parfois, les plus belles histoires commencent par une simple conversation. Qu'en penses-tu ?",
-    "Pour moi, aimer ne signifie pas tout savoir sur une personne. Cela signifie vouloir continuer à la découvrir.",
-    "J'ai appris qu'une promesse n'a de valeur que lorsqu'on fait des efforts pour la tenir.",
-    "Les souvenirs deviennent plus précieux lorsque nous prenons le temps de les partager.",
-    "Tu sais, nous n'avons pas besoin d'être parfaits pour faire du bien autour de nous.",
-    "J'apprécie les personnes qui expriment leurs sentiments avec respect, même lorsqu'elles sont hésitantes.",
-    "Une bonne relation laisse de la place à la confiance, à la liberté et au dialogue.",
-    "Quand quelque chose nous blesse, il vaut mieux en parler calmement que laisser le silence tout compliquer.",
-    "Merci d'être présent. Ton attention me rappelle que les petits gestes comptent vraiment.",
-    "J'aimerais savoir ce que tu considères comme le plus important dans une relation durable.",
-    "On peut ne pas être d'accord et continuer à se respecter. C'est une belle force.",
-    "Je crois que le courage consiste aussi à reconnaître ses erreurs et à demander pardon.",
-    "Les moments ordinaires peuvent devenir extraordinaires quand on les partage avec sincérité.",
-    "Je suis curieux de connaître ton avis. Prends ton temps, je t'écoute.",
-    "Il y a plusieurs façons de montrer son affection : écouter, aider, respecter et encourager.",
-    "Une rencontre peut changer notre regard sur les autres, même sans grands discours.",
-    "Je voudrais que chacun puisse se sentir accueilli ici, sans pression et sans jugement.",
-    "Quand on fait équipe, chacun apporte quelque chose d'unique.",
-    "La confiance se construit petit à petit, grâce à des paroles claires et à des actes cohérents."
-  ];
-
-  const modeActions = {
-    meeting: ["talk", "choice", "visit"],
-    flowers: ["collect", "talk", "deliver"],
-    sunset: ["visit", "talk", "choice"],
-    kindness: ["help", "collect", "talk"],
-    mystery: ["collect", "talk", "inspect"],
-    walk: ["visit", "talk", "visit"],
-    music: ["talk", "collect", "perform"],
-    cafe: ["talk", "choice", "talk"],
-    letter: ["collect", "inspect", "deliver"],
-    ball: ["help", "talk", "perform"],
-    garden: ["collect", "help", "visit"],
-    festival: ["help", "talk", "perform"],
-    gift: ["collect", "talk", "deliver"],
-    truth: ["talk", "inspect", "choice"],
-    nature: ["visit", "collect", "help"],
-    reconcile: ["talk", "talk", "choice"],
-    family: ["talk", "help", "talk"],
-    trust: ["visit", "choice", "talk"],
-    market: ["talk", "collect", "deliver"],
-    stars: ["visit", "talk", "choice"],
-    solidarity: ["help", "collect", "help"],
-    clock: ["inspect", "collect", "talk"],
-    return: ["visit", "talk", "choice"],
-    cooking: ["collect", "help", "deliver"],
-    theatre: ["talk", "perform", "perform"],
-    river: ["visit", "talk", "choice"],
-    talents: ["talk", "perform", "perform"],
-    promises: ["talk", "choice", "talk"],
-    journey: ["visit", "help", "visit"],
-    reunion: ["talk", "talk", "choice"],
-    book: ["collect", "inspect", "talk"],
-    future: ["talk", "help", "choice"],
-    choice: ["talk", "choice", "choice"],
-    celebration: ["help", "talk", "perform"],
-    finale: ["talk", "help", "choice", "visit"]
-  };
-
-  /* ==========================================================
-     3. CRÉATION DU PLAN DE CHAQUE MISSION
-     Le nombre d'étapes et de personnages augmente.
-  ========================================================== */
-
-  function buildMissionPlan(index) {
-    const mission = missionData[index];
-    if (!mission) return null;
-
-    const number = index + 1;
-    const characterCount = Math.min(
-      2 + Math.floor((number - 1) / 3),
-      10
-    );
-
-    const stageCount = Math.min(
-      3 + Math.floor((number - 1) / 5),
-      10
-    );
-
-    const actions = modeActions[mission.mode] || [
-      "talk", "collect", "choice"
-    ];
-
-    const stages = [];
-
-    for (let i = 0; i < stageCount; i++) {
-      const action = actions[i % actions.length];
-      const characterIndex = i % characterCount;
-
-      const actionText = {
-        talk: "Rencontrer et écouter un personnage",
-        collect: "Trouver un objet spécial",
-        visit: "Explorer le lieu indiqué",
-        choice: "Prendre une décision",
-        help: "Aider un personnage",
-        inspect: "Examiner un indice",
-        deliver: "Remettre un objet à un personnage",
-        perform: "Participer à une activité"
-      };
-
-      stages.push({
-        id: `m${number}-step${i + 1}`,
-        action,
-        characterIndex,
-        label: actionText[action] || "Poursuivre l'aventure",
-        done: false
-      });
-    }
-
-    return {
-      id: `mission-${number}`,
-      number,
-      title: mission.title,
-      place: mission.place,
-      story: mission.story,
-      goal: mission.goal,
-      mode: mission.mode,
-      characterCount,
-      stages
-    };
-  }
-
-  function getCurrentMission() {
-    return buildMissionPlan(state.missionIndex);
-  }
-
-  function getTotalMissionCount() {
-    return missionData.length;
-  }
-
-  function registerMission(definition) {
-    if (!definition || typeof definition !== "object") {
-      throw new Error("La définition de la mission est invalide.");
-    }
-
-    if (!definition.title || !definition.story || !definition.mode) {
-      throw new Error(
-        "Une mission doit posséder un titre, une histoire et un mode."
-      );
-    }
-
-    missionData.push({
-      title: String(definition.title),
-      place: String(definition.place || "Un nouveau lieu"),
-      story: String(definition.story),
-      goal: String(definition.goal || "Découvrir cette aventure"),
-      mode: String(definition.mode)
-    });
-
-    refreshMissionList();
-    updateMissionHeader();
-
-    return missionData.length;
-  }
-
-  window.FOBASLoveGame = {
-    version: VERSION,
-    getMissions: () => missionData.map((mission, index) => ({
-      ...mission,
-      number: index + 1
-    })),
-    addMission: registerMission,
-    save: saveGame,
-    load: loadGame,
-    getProfile: () => ({ ...state.profile }),
-    getProgress: () => ({
-      currentMission: state.missionIndex + 1,
-      totalMissions: getTotalMissionCount(),
-      completed: state.completedMissions.slice()
-    })
-  };
-
-  /* ==========================================================
-     4. NAVIGATION ENTRE LES ÉCRANS
-  ========================================================== */
-
-  const screenIds = [
-    "loadingScreen",
-    "mainMenu",
-    "gameScreen",
-    "missionsScreen",
-    "pauseScreen",
-    "settingsScreen",
-    "creditsScreen",
-    "missionCompleteScreen",
-    "endingScreen",
-    "confirmationScreen",
-    "errorScreen"
-  ];
-
-  function showScreen(id) {
-    screenIds.forEach((screenId) => {
-      const element = $(screenId);
-      if (element) {
-        setVisible(element, screenId === id);
-      }
-    });
-
-    state.screen = id;
-  }
-
-  function hideAllOverlays() {
-    [
-      "missionsScreen", "pauseScreen", "settingsScreen",
-      "creditsScreen", "missionCompleteScreen",
-      "endingScreen", "confirmationScreen", "errorScreen"
-    ].forEach((id) => setVisible($(id), false));
-  }
-
-  function showGame() {
-    showScreen("gameScreen");
-    setVisible($("worldLoadingOverlay"), false);
-    setVisible($("touchControls"), true);
-    state.paused = false;
-    state.running = true;
-
-    if (state.scene) {
-      state.scene.paused = false;
-    }
-  }
-
-  function showMenu() {
-    stopVoice();
-    closeDialogue(false);
-    state.running = false;
-    state.paused = true;
-    stopMusic();
-    showScreen("mainMenu");
-    updateContinueButton();
-  }
-
-  function showPause() {
-    if (!state.gameStarted || state.screen !== "gameScreen") return;
-
-    state.paused = true;
-    state.running = false;
-    stopVoice();
-    showScreen("pauseScreen");
-    saveGame();
-  }
-
-  function resumeGame() {
-    if (!state.gameStarted) {
-      startNewGame();
-      return;
-    }
-
-    state.paused = false;
-    state.running = true;
-    showGame();
-    startMusicIfEnabled();
-  }
-
-  /* ==========================================================
-     5. INDEXEDDB — SAUVEGARDE LOCALE
-  ========================================================== */
-
-  function openDatabase() {
-    return new Promise((resolve, reject) => {
-      if (!("indexedDB" in window)) {
-        reject(new Error("IndexedDB n'est pas disponible."));
-        return;
-      }
-
-      let request;
-
-      try {
-        request = indexedDB.open(DB_NAME, DB_VERSION);
-      } catch (error) {
-        reject(error);
-        return;
-      }
-
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result;
-
-        if (!db.objectStoreNames.contains("saves")) {
-          db.createObjectStore("saves", { keyPath: "id" });
-        }
-
-        if (!db.objectStoreNames.contains("settings")) {
-          db.createObjectStore("settings", { keyPath: "id" });
-        }
-
-        if (!db.objectStoreNames.contains("profiles")) {
-          db.createObjectStore("profiles", { keyPath: "id" });
-        }
-      };
-
-      request.onsuccess = () => {
-        state.db = request.result;
-
-        state.db.onversionchange = () => {
-          state.db.close();
-          state.db = null;
-        };
-
-        resolve(state.db);
-      };
-
-      request.onerror = () => reject(
-        request.error || new Error("Ouverture IndexedDB impossible.")
-      );
-
-      request.onblocked = () => {
-        console.warn("[FOBAS AMOUR] Ouverture IndexedDB bloquée.");
-      };
-    });
-  }
-
-  function dbPut(storeName, record) {
-    return new Promise((resolve, reject) => {
-      if (!state.db) {
-        reject(new Error("Base de données indisponible."));
-        return;
-      }
-
-      let transaction;
-
-      try {
-        transaction = state.db.transaction(storeName, "readwrite");
-        transaction.objectStore(storeName).put(record);
-      } catch (error) {
-        reject(error);
-        return;
-      }
-
-      transaction.oncomplete = () => resolve(true);
-      transaction.onerror = () => reject(
-        transaction.error || new Error("Écriture impossible.")
-      );
-      transaction.onabort = () => reject(
-        transaction.error || new Error("Écriture annulée.")
-      );
-    });
-  }
-
-  function dbGet(storeName, id) {
-    return new Promise((resolve, reject) => {
-      if (!state.db) {
-        reject(new Error("Base de données indisponible."));
-        return;
-      }
-
-      let transaction;
-      let request;
-
-      try {
-        transaction = state.db.transaction(storeName, "readonly");
-        request = transaction.objectStore(storeName).get(id);
-      } catch (error) {
-        reject(error);
-        return;
-      }
-
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(
-        request.error || new Error("Lecture impossible.")
-      );
-    });
-  }
-
-  function snapshotGame() {
-    return {
-      id: SAVE_KEY,
-      version: VERSION,
-      savedAt: Date.now(),
-      gameStarted: state.gameStarted,
-      missionIndex: state.missionIndex,
-      completedMissions: state.completedMissions.slice(),
-      completedSteps: state.completedSteps.slice(),
-      choices: { ...state.choices },
-      flags: { ...state.flags },
-      profile: { ...state.profile },
-      runtime: state.missionRuntime ? {
-        missionIndex: state.missionRuntime.missionIndex,
-        stageIndex: state.missionRuntime.stageIndex,
-        stageProgress: state.missionRuntime.stageProgress,
-        visited: state.missionRuntime.visited.slice(),
-        collected: state.missionRuntime.collected.slice(),
-        talked: state.missionRuntime.talked.slice(),
-        storySeen: state.missionRuntime.storySeen
-      } : null
-    };
-  }
-
-  async function saveGame() {
-    if (!state.db) {
-      try {
-        await openDatabase();
-      } catch (error) {
-        updateSaveStatus("Sauvegarde indisponible");
-        notify("La sauvegarde locale n'est pas disponible dans ce navigateur.");
-        return false;
-      }
-    }
-
-    if (state.saving) return false;
-
-    state.saving = true;
-    setVisible($("savingIndicator"), true);
+  function meshIsDisposed(mesh) {
+    if (!mesh) return true;
 
     try {
-      const data = snapshotGame();
-
-      await Promise.all([
-        dbPut("saves", data),
-        dbPut("profiles", {
-          id: PROFILE_KEY,
-          profile: { ...state.profile },
-          updatedAt: Date.now()
-        }),
-        dbPut("settings", {
-          id: SETTINGS_KEY,
-          settings: { ...state.settings },
-          updatedAt: Date.now()
-        })
-      ]);
-
-      state.lastAutosave = Date.now();
-      updateSaveStatus("Progression sauvegardée");
-      return true;
-    } catch (error) {
-      console.error("[FOBAS AMOUR] Sauvegarde :", error);
-      updateSaveStatus("Échec de la sauvegarde");
-      notify("Impossible de sauvegarder. Vérifiez l'espace disponible.");
-      return false;
-    } finally {
-      state.saving = false;
-      setVisible($("savingIndicator"), false);
-    }
-  }
-
-  async function loadGame() {
-    try {
-      if (!state.db) await openDatabase();
-
-      const [record, profileRecord, settingsRecord] = await Promise.all([
-        dbGet("saves", SAVE_KEY),
-        dbGet("profiles", PROFILE_KEY),
-        dbGet("settings", SETTINGS_KEY)
-      ]);
-
-      if (profileRecord && profileRecord.profile) {
-        state.profile = {
-          ...state.profile,
-          ...profileRecord.profile
-        };
-      }
-
-      if (settingsRecord && settingsRecord.settings) {
-        state.settings = {
-          ...state.settings,
-          ...settingsRecord.settings
-        };
-      }
-
-      applySettingsToUI();
-
-      if (!record) {
-        updateContinueButton();
-        return false;
-      }
-
-      state.gameStarted = Boolean(record.gameStarted);
-      state.missionIndex = clamp(
-        safeNumber(record.missionIndex, 0),
-        0,
-        Math.max(0, getTotalMissionCount() - 1)
-      );
-
-      state.completedMissions = Array.isArray(record.completedMissions)
-        ? record.completedMissions.filter(Number.isInteger)
-        : [];
-
-      state.completedSteps = Array.isArray(record.completedSteps)
-        ? record.completedSteps
-        : [];
-
-      state.choices = record.choices || {};
-      state.flags = record.flags || {};
-
-      if (record.profile) {
-        state.profile = { ...state.profile, ...record.profile };
-      }
-
-      if (state.gameStarted) {
-        buildMissionWorld(state.missionIndex);
-
-        if (record.runtime &&
-            record.runtime.missionIndex === state.missionIndex) {
-          restoreRuntime(record.runtime);
-        }
-      }
-
-      updateContinueButton();
-      updateSaveStatus("Progression récupérée");
-      return true;
-    } catch (error) {
-      console.error("[FOBAS AMOUR] Chargement :", error);
-      updateSaveStatus("Sauvegarde non accessible");
+      return typeof mesh.isDisposed === "function"
+        ? mesh.isDisposed()
+        : mesh.isDisposed === true;
+    } catch (_) {
       return false;
     }
   }
 
-  function restoreRuntime(runtime) {
-    if (!state.missionRuntime || !runtime) return;
-
-    const current = state.missionRuntime;
-
-    current.stageIndex = clamp(
-      safeNumber(runtime.stageIndex, 0),
-      0,
-      Math.max(0, current.plan.stages.length - 1)
-    );
-
-    current.stageProgress = safeNumber(runtime.stageProgress, 0);
-    current.visited = Array.isArray(runtime.visited)
-      ? runtime.visited : [];
-    current.collected = Array.isArray(runtime.collected)
-      ? runtime.collected : [];
-    current.talked = Array.isArray(runtime.talked)
-      ? runtime.talked : [];
-    current.storySeen = Boolean(runtime.storySeen);
-
-    current.collected.forEach((id) => {
-      const object = state.collectibles.find((item) => item.id === id);
-      if (object) object.setEnabled(false);
-    });
-
-    updateObjective();
-  }
-
-  function updateSaveStatus(message) {
-    setText($("saveStatus"), message);
-  }
-
-  function updateContinueButton() {
-    const button = $("continueGameButton");
-    if (!button) return;
-
-    const available = state.gameStarted ||
-      state.completedMissions.length > 0;
-
-    button.disabled = !available;
-    button.setAttribute("aria-disabled", available ? "false" : "true");
-  }
-
-  function scheduleAutosave() {
-    if (state.saveTimer) clearTimeout(state.saveTimer);
-
-    state.saveTimer = setTimeout(() => {
-      if (state.gameStarted) saveGame();
-    }, 900);
-  }
-
-  /* ==========================================================
-     6. PROFIL DU JOUEUR
-  ========================================================== */
-
-  function editProfile() {
-    const current = state.profile.name || "Voyageur";
-    const proposed = window.prompt(
-      "Quel nom souhaitez-vous utiliser dans l'aventure ?",
-      current
-    );
-
-    if (proposed === null) return;
-
-    const name = proposed.trim().slice(0, 32);
-
-    if (!name) {
-      notify("Veuillez saisir un nom valide.");
-      return;
-    }
-
-    state.profile.name = name;
-    notify(`Bienvenue, ${name} !`);
-    saveGame();
-  }
-
-  /* ==========================================================
-     7. PARAMÈTRES
-  ========================================================== */
-
-  function applySettingsToUI() {
-    const bindings = [
-      ["voiceEnabled", "voice"],
-      ["musicEnabled", "music"],
-      ["subtitlesEnabled", "subtitles"]
-    ];
-
-    bindings.forEach(([id, key]) => {
-      const element = $(id);
-      if (element) element.checked = Boolean(state.settings[key]);
-    });
-
-    if ($("qualitySelect")) {
-      $("qualitySelect").value = state.settings.quality;
-    }
-
-    if ($("sensitivityRange")) {
-      $("sensitivityRange").value = state.settings.sensitivity;
-    }
-
-    applyGraphicsQuality();
-  }
-
-  function readSettingsFromUI() {
-    state.settings.voice = Boolean($("voiceEnabled")?.checked);
-    state.settings.music = Boolean($("musicEnabled")?.checked);
-    state.settings.subtitles = Boolean($("subtitlesEnabled")?.checked);
-
-    state.settings.quality =
-      $("qualitySelect")?.value || "medium";
-
-    state.settings.sensitivity = clamp(
-      safeNumber($("sensitivityRange")?.value, 1),
-      0.5,
-      2
-    );
-
-    applyGraphicsQuality();
-
-    if (!state.settings.music) stopMusic();
-    else startMusicIfEnabled();
-
-    if (!state.settings.voice) stopVoice();
-
-    saveGame();
-  }
-
-  function applyGraphicsQuality() {
-    if (!state.engine) return;
-
-    const quality = state.settings.quality;
-
-    if (quality === "low") {
-      state.engine.setHardwareScalingLevel(1.5);
-      state.engine.setSize(
-        Math.max(320, Math.floor(window.innerWidth / 1.5)),
-        Math.max(240, Math.floor(window.innerHeight / 1.5))
-      );
-    } else if (quality === "high") {
-      state.engine.setHardwareScalingLevel(1);
-    } else {
-      state.engine.setHardwareScalingLevel(
-        window.devicePixelRatio > 1.5 ? 1.25 : 1
-      );
-    }
-
-    if (state.scene && state.scene.activeCamera) {
-      state.scene.activeCamera.maxZ =
-        quality === "high" ? 600 : 350;
-    }
-  }
-
-  /* ==========================================================
-     8. NOTIFICATIONS
-  ========================================================== */
-
-  let notificationTimer = null;
-
-  function notify(message, duration = 2800) {
+  function notify(message, duration = 2600) {
     const element = $("gameNotification");
     if (!element) return;
-
-    const now = Date.now();
-
-    if (
-      state.lastNotification === message &&
-      now - state.lastNotificationAt < 500
-    ) {
-      return;
-    }
-
-    state.lastNotification = message;
-    state.lastNotificationAt = now;
 
     setText(element, message);
     setVisible(element, true);
@@ -1172,906 +182,1718 @@
     }, duration);
   }
 
-  /* ==========================================================
-     9. MOTEUR 3D BABYLON.JS
-  ========================================================== */
+  function showFatalError(title, message) {
+    setText($("errorTitle"), title);
+    setText($("errorMessage"), message);
 
-  function createMaterial(name, color, options = {}) {
-    const material = new BABYLON.StandardMaterial(name, state.scene);
+    setVisible($("loadingScreen"), false);
+    setVisible($("mainMenu"), false);
+    setVisible($("gameScreen"), false);
+    setVisible($("errorScreen"), true);
+
+    state.screen = "errorScreen";
+  }
+
+  /* ----------------------------------------------------------
+     2. LES 35 MISSIONS
+  ---------------------------------------------------------- */
+
+  const missionData = [
+    {
+      title: "Un regard inattendu",
+      place: "Jardin des Premiers Sourires",
+      story: "Dans un jardin lumineux, une rencontre inattendue ouvre la porte à une aventure pleine de possibilités.",
+      goal: "rencontrer Camille et apprendre à la connaître",
+      mode: "talk"
+    },
+    {
+      title: "Une promenade au jardin",
+      place: "Allée des Roses",
+      story: "Camille vous propose une promenade. Plusieurs visiteurs ont des histoires intéressantes à raconter.",
+      goal: "parcourir le jardin et découvrir ses secrets",
+      mode: "visit"
+    },
+    {
+      title: "Le souvenir perdu",
+      place: "Place des Souvenirs",
+      story: "Un petit objet précieux a disparu. Aidez les habitants à le retrouver avant le coucher du soleil.",
+      goal: "retrouver le souvenir perdu",
+      mode: "collect"
+    },
+    {
+      title: "Une conversation sincère",
+      place: "Café des Rencontres",
+      story: "Une discussion profonde vous apprend que l'écoute peut rapprocher des personnes très différentes.",
+      goal: "écouter les confidences des personnages",
+      mode: "talk"
+    },
+    {
+      title: "Le choix du cœur",
+      place: "Pont des Décisions",
+      story: "Une situation délicate demande de choisir entre plusieurs façons d'aider un ami.",
+      goal: "prendre une décision réfléchie",
+      mode: "choice"
+    },
+    {
+      title: "Une main tendue",
+      place: "Village des Amis",
+      story: "Une personne traverse une journée difficile. Votre présence peut transformer sa situation.",
+      goal: "aider un habitant dans le besoin",
+      mode: "help"
+    },
+    {
+      title: "La lettre mystérieuse",
+      place: "Bibliothèque des Émotions",
+      story: "Une lettre ancienne contient des indices sur une histoire oubliée.",
+      goal: "retrouver et examiner une lettre",
+      mode: "inspect"
+    },
+    {
+      title: "Le cadeau oublié",
+      place: "Marché des Couleurs",
+      story: "Un cadeau destiné à une amie attend d'être remis à la bonne personne.",
+      goal: "retrouver un cadeau et le livrer",
+      mode: "deliver"
+    },
+    {
+      title: "La fête des sourires",
+      place: "Place des Fêtes",
+      story: "Les habitants organisent une fête. Chacun peut participer à sa manière.",
+      goal: "participer à une activité collective",
+      mode: "perform"
+    },
+    {
+      title: "Les mots qui réparent",
+      place: "Maison de l'Amitié",
+      story: "Deux amis se sont mal compris. Une conversation calme peut les aider à se réconcilier.",
+      goal: "écouter les deux personnes et proposer une solution",
+      mode: "choice"
+    },
+    {
+      title: "Le chemin du lac",
+      place: "Lac des Reflets",
+      story: "Un chemin tranquille conduit vers un lac où plusieurs personnages attendent votre visite.",
+      goal: "explorer le lac et rencontrer ses visiteurs",
+      mode: "visit"
+    },
+    {
+      title: "Un secret partagé",
+      place: "Pavillon des Confidences",
+      story: "Un ami vous confie un problème personnel et attend une réponse respectueuse.",
+      goal: "écouter un ami et choisir une réponse adaptée",
+      mode: "choice"
+    },
+    {
+      title: "La clé du pavillon",
+      place: "Pavillon des Lumières",
+      story: "Une clé manque pour ouvrir le pavillon. Les indices sont dispersés dans les environs.",
+      goal: "trouver la clé et découvrir le pavillon",
+      mode: "collect"
+    },
+    {
+      title: "Le message oublié",
+      place: "Jardin des Messages",
+      story: "Un message incomplet doit être retrouvé et remis à son destinataire.",
+      goal: "retrouver un message et le remettre",
+      mode: "deliver"
+    },
+    {
+      title: "Le défi de confiance",
+      place: "Parcours de la Confiance",
+      story: "Plusieurs épreuves simples invitent les participants à coopérer et à se faire confiance.",
+      goal: "accomplir les étapes du parcours",
+      mode: "perform"
+    },
+    {
+      title: "La rencontre au marché",
+      place: "Grand Marché",
+      story: "Des commerçants et des visiteurs vous racontent leurs projets et leurs difficultés.",
+      goal: "rencontrer plusieurs personnages et les écouter",
+      mode: "talk"
+    },
+    {
+      title: "Le carnet des promesses",
+      place: "Maison des Souvenirs",
+      story: "Un carnet oublié rappelle l'importance de tenir ses engagements.",
+      goal: "examiner le carnet et découvrir ses indices",
+      mode: "inspect"
+    },
+    {
+      title: "Une surprise préparée",
+      place: "Terrasse Fleurie",
+      story: "Des amis préparent une surprise. Votre aide est nécessaire pour rassembler les éléments.",
+      goal: "rassembler les objets nécessaires à la surprise",
+      mode: "collect"
+    },
+    {
+      title: "Le pont de la réconciliation",
+      place: "Pont des Amis",
+      story: "Deux personnes attendent un geste qui permettra de recommencer leur relation sur de meilleures bases.",
+      goal: "faciliter une réconciliation",
+      mode: "help"
+    },
+    {
+      title: "La soirée des confidences",
+      place: "Terrasse des Étoiles",
+      story: "Sous le ciel du soir, plusieurs amis partagent leurs espoirs, leurs peurs et leurs projets.",
+      goal: "participer aux conversations de la soirée",
+      mode: "talk"
+    },
+    {
+      title: "Le village solidaire",
+      place: "Village de l'Espoir",
+      story: "Une initiative collective cherche à soutenir les personnes les plus isolées du village.",
+      goal: "visiter les lieux et participer à l'entraide",
+      mode: "help"
+    },
+    {
+      title: "Les indices du phare",
+      place: "Phare de l'Espoir",
+      story: "Des indices conduisent au phare. Votre curiosité permet de découvrir une histoire importante.",
+      goal: "explorer le phare et examiner les indices",
+      mode: "inspect"
+    },
+    {
+      title: "Le cadeau de gratitude",
+      place: "Jardin de la Gratitude",
+      story: "Un cadeau symbolique doit être remis à une personne qui a beaucoup aidé la communauté.",
+      goal: "préparer et remettre un cadeau",
+      mode: "deliver"
+    },
+    {
+      title: "La grande promenade",
+      place: "Promenade des Horizons",
+      story: "Une longue promenade permet de rencontrer des habitants et de découvrir de nouveaux paysages.",
+      goal: "explorer les différentes zones de la promenade",
+      mode: "visit"
+    },
+    {
+      title: "Le festival des rencontres",
+      place: "Esplanade du Festival",
+      story: "Le festival rassemble des personnages aux talents et aux expériences variés.",
+      goal: "participer au festival et rencontrer ses participants",
+      mode: "perform"
+    },
+    {
+      title: "Les voix du quartier",
+      place: "Quartier des Artisans",
+      story: "Les habitants souhaitent améliorer leur quartier et cherchent des idées pour travailler ensemble.",
+      goal: "écouter les habitants et choisir une proposition",
+      mode: "choice"
+    },
+    {
+      title: "Le jardin à reconstruire",
+      place: "Jardin Communautaire",
+      story: "Une tempête a abîmé le jardin. Les voisins se réunissent pour lui redonner vie.",
+      goal: "collecter les éléments et aider les voisins",
+      mode: "help"
+    },
+    {
+      title: "La vérité derrière la lettre",
+      place: "Archives du Village",
+      story: "De nouveaux documents éclairent la lettre mystérieuse découverte plus tôt.",
+      goal: "examiner les archives et comprendre l'histoire",
+      mode: "inspect"
+    },
+    {
+      title: "Une promesse difficile",
+      place: "Belvédère du Courage",
+      story: "Une promesse exige du courage, de la patience et une discussion honnête.",
+      goal: "rencontrer les personnes concernées et décider de la suite",
+      mode: "choice"
+    },
+    {
+      title: "La nuit des lanternes",
+      place: "Sentier des Lanternes",
+      story: "Une procession de lanternes illumine le sentier. Plusieurs objets ont été égarés pendant les préparatifs.",
+      goal: "retrouver les objets manquants et aider les participants",
+      mode: "collect"
+    },
+    {
+      title: "Les chemins de la confiance",
+      place: "Carrefour des Destins",
+      story: "Les choix précédents influencent les relations. Les personnages se souviennent de vos actions.",
+      goal: "rencontrer vos alliés et renforcer les liens",
+      mode: "talk"
+    },
+    {
+      title: "Le grand geste",
+      place: "Place de la Solidarité",
+      story: "Une situation collective demande de coordonner plusieurs personnes et de partager les responsabilités.",
+      goal: "aider plusieurs habitants et terminer les tâches",
+      mode: "help"
+    },
+    {
+      title: "Le dernier message",
+      place: "Tour des Souvenirs",
+      story: "Un dernier message relie plusieurs événements de votre aventure.",
+      goal: "retrouver le message et le remettre à son destinataire",
+      mode: "deliver"
+    },
+    {
+      title: "Le choix qui nous unit",
+      place: "Jardin de l'Union",
+      story: "Plusieurs possibilités s'offrent à vous. Votre choix doit tenir compte des sentiments et des besoins de chacun.",
+      goal: "écouter les personnages et prendre une décision",
+      mode: "choice"
+    },
+    {
+      title: "L'amour en action",
+      place: "Place de l'Avenir",
+      story: "Votre aventure rassemble les rencontres, les gestes généreux et les décisions qui ont changé votre parcours.",
+      goal: "retrouver vos alliés et célébrer les liens construits",
+      mode: "perform"
+    }
+  ];
+
+  const NPC_NAMES = [
+    "Camille", "Maya", "Lucas", "Sofia", "Noah",
+    "Emma", "Gabriel", "Lina", "Nathan", "Amélie",
+    "Ethan", "Chloé", "Samuel", "Jade", "Daniel",
+    "Sarah", "David", "Élise", "Adam", "Nina",
+    "Thomas", "Inès", "Raphaël", "Zoé", "Julien",
+    "Arielle", "Michaël", "Élodie", "Antoine", "Mélissa"
+  ];
+
+  const PERSONALITIES = [
+    "bienveillant", "curieux", "réservé", "optimiste",
+    "réfléchi", "drôle", "courageux", "créatif",
+    "calme", "solidaire", "rêveur", "franc"
+  ];
+
+  const COLORS = [
+    "#ef86a7", "#71a6ef", "#f2b66b", "#81cfa4",
+    "#bd91ec", "#f17f70", "#70c9d4", "#d7b66f",
+    "#e8a2d0", "#9db6ee", "#d5a08a", "#90c1a5"
+  ];
+
+  const DIALOGUE_BANK = [
+    "Je crois que les relations deviennent plus fortes lorsque nous prenons le temps de nous écouter vraiment.",
+    "Il n'est pas nécessaire d'avoir toutes les réponses. Parfois, être présent est déjà une grande aide.",
+    "J'ai appris qu'un petit geste sincère peut illuminer une journée entière.",
+    "Les différences ne nous empêchent pas de nous comprendre. Elles peuvent même nous apprendre beaucoup.",
+    "Quand une difficulté arrive, j'essaie de chercher une solution qui respecte chacun.",
+    "La confiance se construit progressivement, grâce à la vérité et aux actions.",
+    "Je préfère une conversation honnête à une promesse que je ne pourrais pas tenir.",
+    "Nous ne pouvons pas changer le passé, mais nous pouvons choisir la manière de continuer.",
+    "J'aimerais que les personnes se sentent libres de parler sans craindre d'être jugées.",
+    "L'amitié n'est pas seulement une question de mots. Elle se voit aussi dans nos gestes.",
+    "Quand plusieurs personnes travaillent ensemble, elles peuvent accomplir davantage.",
+    "Prendre le temps de comprendre les émotions des autres peut éviter beaucoup de malentendus.",
+    "Je crois qu'un désaccord n'est pas forcément la fin d'une relation.",
+    "Une décision juste tient compte des besoins des personnes concernées.",
+    "Le courage ne signifie pas ne jamais avoir peur. Il signifie avancer malgré les difficultés.",
+    "Chaque personne possède une histoire qui mérite d'être entendue.",
+    "Il faut parfois demander pardon, mais il faut aussi apprendre à changer ses habitudes.",
+    "La gratitude prend tout son sens lorsqu'elle se transforme en action.",
+    "Une parole douce peut encourager quelqu'un qui traverse une période difficile.",
+    "J'espère que nous pourrons construire quelque chose de positif ensemble."
+  ];
+
+  /* ----------------------------------------------------------
+     3. GÉNÉRATION DES OBJECTIFS
+  ---------------------------------------------------------- */
+
+  function buildMissionPlan(index) {
+    const mission = missionData[index];
+    const difficulty = Math.floor(index / 5) + 1;
+    const stages = [];
+
+    const stageCount = Math.min(6, 2 + Math.floor(index / 6));
+
+    const actionPool = {
+      talk: ["talk", "visit", "choice", "talk", "help", "perform"],
+      visit: ["visit", "talk", "visit", "inspect", "talk", "visit"],
+      collect: ["collect", "visit", "collect", "talk", "collect", "deliver"],
+      choice: ["talk", "choice", "visit", "talk", "choice", "help"],
+      help: ["talk", "collect", "help", "visit", "talk", "help"],
+      inspect: ["visit", "inspect", "collect", "talk", "inspect", "choice"],
+      deliver: ["collect", "talk", "deliver", "visit", "deliver", "talk"],
+      perform: ["visit", "talk", "perform", "collect", "talk", "perform"]
+    };
+
+    const actions = actionPool[mission.mode] || ["talk", "visit"];
+
+    for (let i = 0; i < stageCount; i++) {
+      const action = actions[i % actions.length];
+
+      stages.push({
+        id: `m${index + 1}-stage${i + 1}`,
+        action,
+        label: stageLabel(action, i),
+        done: false,
+        targetId: null
+      });
+    }
+
+    return {
+      number: index + 1,
+      title: mission.title,
+      place: mission.place,
+      story: mission.story,
+      goal: mission.goal,
+      difficulty,
+      stages,
+      createdAt: Date.now()
+    };
+  }
+
+  function stageLabel(action, index) {
+    const labels = {
+      talk: ["Rencontrer un personnage", "Écouter un ami", "Partager vos idées"],
+      collect: ["Trouver un objet précieux", "Récupérer un souvenir", "Rassembler les objets"],
+      visit: ["Explorer la zone", "Découvrir un lieu", "Rejoindre le point indiqué"],
+      choice: ["Écouter les avis", "Choisir une réponse", "Prendre une décision"],
+      help: ["Comprendre le problème", "Apporter votre aide", "Terminer la tâche"],
+      inspect: ["Chercher un indice", "Examiner un objet", "Comprendre les indices"],
+      deliver: ["Récupérer un objet", "Trouver le destinataire", "Remettre le cadeau"],
+      perform: ["Rejoindre les participants", "Participer à l'activité", "Célébrer ensemble"]
+    };
+
+    const list = labels[action] || ["Continuer l'aventure"];
+    return list[index % list.length];
+  }
+
+  function getCurrentMission() {
+    return missionData[state.missionIndex] || null;
+  }
+
+  function getTotalMissionCount() {
+    return missionData.length;
+  }
+
+  function currentStage() {
+    if (!state.missionRuntime) return null;
+
+    return state.missionRuntime.plan.stages[
+      state.missionRuntime.stageIndex
+    ] || null;
+  }
+
+  /* ----------------------------------------------------------
+     4. NAVIGATION ET INTERFACES
+  ---------------------------------------------------------- */
+
+  function showScreen(id) {
+    const allScreens = [
+      "loadingScreen", "mainMenu", "gameScreen",
+      "missionsScreen", "pauseScreen", "settingsScreen",
+      "creditsScreen", "missionCompleteScreen", "endingScreen",
+      "confirmationScreen", "errorScreen"
+    ];
+
+    allScreens.forEach((screenId) => {
+      setVisible($(screenId), screenId === id);
+    });
+
+    state.screen = id;
+
+    if (id !== "gameScreen") {
+      setVisible($("interactionPrompt"), false);
+    }
+
+    if (id === "gameScreen") {
+      setVisible($("worldLoadingOverlay"), false);
+    }
+  }
+
+  function showMenu() {
+    state.paused = true;
+    state.running = false;
+    state.screen = "mainMenu";
+    setVisible($("mainMenu"), true);
+    showScreen("mainMenu");
+    updateContinueButton();
+    stopVoice();
+  }
+
+  function showGame() {
+    state.paused = false;
+    state.running = true;
+    showScreen("gameScreen");
+    updateMissionHeader();
+    updateObjective();
+    updateInteractionTarget();
+
+    if (scene) {
+      scene.activeCamera = camera;
+    }
+  }
+
+  function showPause() {
+    if (!state.gameStarted || state.screen !== "gameScreen") return;
+
+    state.paused = true;
+    state.running = false;
+    state.joystick.active = false;
+    state.joystick.x = 0;
+    state.joystick.y = 0;
+
+    stopVoice();
+    showScreen("pauseScreen");
+    scheduleAutosave();
+  }
+
+  function resumeGame() {
+    if (!state.gameStarted) {
+      showMenu();
+      return;
+    }
+
+    showGame();
+    startMusicIfEnabled();
+  }
+
+  function hideAllOverlays() {
+    [
+      "missionsScreen", "pauseScreen", "settingsScreen",
+      "creditsScreen", "missionCompleteScreen",
+      "endingScreen", "confirmationScreen"
+    ].forEach((id) => setVisible($(id), false));
+  }
+
+  function updateContinueButton() {
+    const button = $("continueGameButton");
+    if (!button) return;
+
+    button.disabled = !state.gameStarted &&
+      state.completedMissions.length === 0;
+  }
+
+  /* ----------------------------------------------------------
+     5. INDEXEDDB — SAUVEGARDE LOCALE
+  ---------------------------------------------------------- */
+
+  function openDatabase() {
+    return new Promise((resolve, reject) => {
+      if (!("indexedDB" in window)) {
+        reject(new Error("IndexedDB indisponible"));
+        return;
+      }
+
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = () => {
+        const database = request.result;
+
+        if (!database.objectStoreNames.contains("saves")) {
+          database.createObjectStore("saves", { keyPath: "id" });
+        }
+      };
+
+      request.onsuccess = () => {
+        db = request.result;
+        resolve(db);
+      };
+
+      request.onerror = () => reject(
+        request.error || new Error("Ouverture de la base impossible")
+      );
+    });
+  }
+
+  function createSaveData() {
+    return {
+      id: SAVE_KEY,
+      version: VERSION,
+      savedAt: new Date().toISOString(),
+      missionIndex: state.missionIndex,
+      completedMissions: [...state.completedMissions],
+      completedSteps: [...state.completedSteps],
+      choices: { ...state.choices },
+      flags: { ...state.flags },
+      inventory: [...state.inventory],
+      relationship: state.relationship,
+      profile: { ...state.profile },
+      settings: { ...state.settings },
+      gameStarted: state.gameStarted,
+      missionRuntime: state.missionRuntime
+        ? JSON.parse(JSON.stringify(state.missionRuntime))
+        : null
+    };
+  }
+
+  function saveGame() {
+    const indicator = $("savingIndicator");
+    setVisible(indicator, true);
+
+    if (!db) {
+      try {
+        const data = createSaveData();
+        window.localStorage.setItem(
+          "FOBAS_AMOUR_FALLBACK",
+          JSON.stringify(data)
+        );
+
+        setText($("saveStatus"), "Progression sauvegardée");
+        notify("Progression sauvegardée sur cet appareil.");
+      } catch (error) {
+        console.error("[FOBAS] Sauvegarde locale :", error);
+        setText($("saveStatus"), "Sauvegarde indisponible");
+      }
+
+      setTimeout(() => setVisible(indicator, false), 700);
+      updateContinueButton();
+      return Promise.resolve(false);
+    }
+
+    return new Promise((resolve) => {
+      try {
+        const transaction = db.transaction(["saves"], "readwrite");
+        transaction.objectStore("saves").put(createSaveData());
+
+        transaction.oncomplete = () => {
+          setText($("saveStatus"), "Progression sauvegardée");
+          setVisible(indicator, false);
+          updateContinueButton();
+          resolve(true);
+        };
+
+        transaction.onerror = () => {
+          setText($("saveStatus"), "Erreur de sauvegarde");
+          setVisible(indicator, false);
+          resolve(false);
+        };
+      } catch (error) {
+        console.error("[FOBAS] Sauvegarde :", error);
+        setVisible(indicator, false);
+        resolve(false);
+      }
+    });
+  }
+
+  function loadGame() {
+    return new Promise((resolve) => {
+      function applySave(data) {
+        if (!data) {
+          resolve(false);
+          return;
+        }
+
+        state.missionIndex = clamp(
+          Number(data.missionIndex) || 0,
+          0,
+          missionData.length - 1
+        );
+
+        state.completedMissions = Array.isArray(data.completedMissions)
+          ? data.completedMissions.filter(
+              (n) => Number.isInteger(n) && n >= 0 && n < missionData.length
+            )
+          : [];
+
+        state.completedSteps = Array.isArray(data.completedSteps)
+          ? data.completedSteps
+          : [];
+
+        state.choices = data.choices || {};
+        state.flags = data.flags || {};
+        state.inventory = Array.isArray(data.inventory)
+          ? data.inventory
+          : [];
+
+        state.relationship = Number(data.relationship) || 0;
+        state.profile = { ...state.profile, ...(data.profile || {}) };
+        state.settings = { ...state.settings, ...(data.settings || {}) };
+        state.gameStarted = Boolean(data.gameStarted);
+
+        if (
+          data.missionRuntime &&
+          data.missionRuntime.plan &&
+          Array.isArray(data.missionRuntime.plan.stages)
+        ) {
+          state.missionRuntime = data.missionRuntime;
+        } else {
+          state.missionRuntime = null;
+        }
+
+        applySettingsToUI();
+        updateContinueButton();
+        refreshMissionList();
+        resolve(true);
+      }
+
+      if (!db) {
+        try {
+          const fallback = window.localStorage.getItem(
+            "FOBAS_AMOUR_FALLBACK"
+          );
+
+          applySave(fallback ? JSON.parse(fallback) : null);
+        } catch (_) {
+          resolve(false);
+        }
+        return;
+      }
+
+      try {
+        const transaction = db.transaction(["saves"], "readonly");
+        const request = transaction.objectStore("saves").get(SAVE_KEY);
+
+        request.onsuccess = () => applySave(request.result || null);
+        request.onerror = () => resolve(false);
+      } catch (_) {
+        resolve(false);
+      }
+    });
+  }
+
+  function scheduleAutosave() {
+    if (autosaveTimer) clearTimeout(autosaveTimer);
+
+    autosaveTimer = setTimeout(() => {
+      saveGame();
+    }, 800);
+  }
+
+  /* ----------------------------------------------------------
+     6. PARAMÈTRES
+  ---------------------------------------------------------- */
+
+  function applySettingsToUI() {
+    if ($("voiceEnabled")) {
+      $("voiceEnabled").checked = state.settings.voice;
+    }
+
+    if ($("musicEnabled")) {
+      $("musicEnabled").checked = state.settings.music;
+    }
+
+    if ($("subtitlesEnabled")) {
+      $("subtitlesEnabled").checked = state.settings.subtitles;
+    }
+
+    if ($("qualitySelect")) {
+      $("qualitySelect").value = state.settings.quality;
+    }
+
+    if ($("sensitivityRange")) {
+      $("sensitivityRange").value = state.settings.sensitivity;
+    }
+  }
+
+  function readSettingsFromUI() {
+    state.settings.voice = Boolean($("voiceEnabled")?.checked);
+    state.settings.music = Boolean($("musicEnabled")?.checked);
+    state.settings.subtitles = Boolean($("subtitlesEnabled")?.checked);
+
+    state.settings.quality = $("qualitySelect")?.value || "medium";
+    state.settings.sensitivity = clamp(
+      Number($("sensitivityRange")?.value || 1),
+      0.5,
+      2
+    );
+
+    if (engine) {
+      const ratio = state.settings.quality === "high"
+        ? 1
+        : state.settings.quality === "low"
+          ? 1.6
+          : 1.25;
+
+      engine.setHardwareScalingLevel(ratio);
+      engine.resize();
+    }
+
+    if (!state.settings.voice) stopVoice();
+
+    if (state.settings.music) {
+      startMusicIfEnabled();
+    } else {
+      stopMusic();
+    }
+
+    notify("Paramètres enregistrés.");
+    scheduleAutosave();
+  }
+
+  /* ----------------------------------------------------------
+     7. MATÉRIAUX ET OBJETS BABYLON.JS
+  ---------------------------------------------------------- */
+
+  function createMaterial(name, color, emissive = null) {
+    const material = new BABYLON.StandardMaterial(name, scene);
 
     material.diffuseColor = BABYLON.Color3.FromHexString(color);
-    material.specularColor = new BABYLON.Color3(0.25, 0.25, 0.25);
 
-    if (options.emissive) {
-      material.emissiveColor = BABYLON.Color3.FromHexString(
-        options.emissive
-      );
+    if (emissive) {
+      material.emissiveColor = BABYLON.Color3.FromHexString(emissive);
     }
 
-    if (options.alpha !== undefined) {
-      material.alpha = options.alpha;
-    }
-
+    material.specularColor = new BABYLON.Color3(0.18, 0.18, 0.18);
     return material;
   }
 
-  function createBox(name, position, scaling, material) {
-    const mesh = BABYLON.MeshBuilder.CreateBox(name, {
-      width: scaling.x,
-      height: scaling.y,
-      depth: scaling.z
-    }, state.scene);
-
-    mesh.position.copyFrom(position);
-    mesh.material = material;
-    mesh.checkCollisions = false;
-
+  function rememberDecoration(mesh) {
+    if (mesh) state.decorations.push(mesh);
     return mesh;
   }
 
-  function createSphere(name, position, diameter, material) {
-    const mesh = BABYLON.MeshBuilder.CreateSphere(name, {
-      diameter,
-      segments: 12
-    }, state.scene);
+  function createBox(name, position, size, material, parent = null) {
+    const mesh = BABYLON.MeshBuilder.CreateBox(
+      name,
+      { width: size.x, height: size.y, depth: size.z },
+      scene
+    );
 
     mesh.position.copyFrom(position);
-    mesh.material = material;
 
-    return mesh;
+    if (material) mesh.material = material;
+    if (parent) mesh.parent = parent;
+
+    return rememberDecoration(mesh);
   }
 
-  function createCylinder(name, position, height, diameter, material) {
-    const mesh = BABYLON.MeshBuilder.CreateCylinder(name, {
-      height,
-      diameter,
-      tessellation: 12
-    }, state.scene);
+  function createSphere(name, position, diameter, material, parent = null) {
+    const mesh = BABYLON.MeshBuilder.CreateSphere(
+      name,
+      { diameter, segments: 12 },
+      scene
+    );
 
     mesh.position.copyFrom(position);
-    mesh.material = material;
 
-    return mesh;
+    if (material) mesh.material = material;
+    if (parent) mesh.parent = parent;
+
+    return rememberDecoration(mesh);
   }
 
-  function createWorldEnvironment(mission) {
-    state.scene.clearColor = new BABYLON.Color4(0.55, 0.72, 0.90, 1);
-
-    const groundMaterial = createMaterial(
-      "groundMaterial",
-      "#7ab783"
+  function createCylinder(name, position, height, diameter, material, parent = null) {
+    const mesh = BABYLON.MeshBuilder.CreateCylinder(
+      name,
+      { height, diameter, tessellation: 10 },
+      scene
     );
 
-    const ground = BABYLON.MeshBuilder.CreateGround("ground", {
-      width: 260,
-      height: 260,
-      subdivisions: 2
-    }, state.scene);
+    mesh.position.copyFrom(position);
 
-    ground.material = groundMaterial;
-    ground.position.y = -0.08;
-    ground.isPickable = false;
+    if (material) mesh.material = material;
+    if (parent) mesh.parent = parent;
 
-    const skyMaterial = createMaterial("skyMaterial", "#9ccbf5", {
-      emissive: "#274a73"
-    });
+    return rememberDecoration(mesh);
+  }
 
-    const sky = BABYLON.MeshBuilder.CreateSphere("skyDome", {
-      diameter: 500,
-      segments: 16,
-      sideOrientation: BABYLON.Mesh.BACKSIDE
-    }, state.scene);
+  function createWorldEnvironment(index) {
+    const mission = missionData[index];
 
-    sky.material = skyMaterial;
-    sky.isPickable = false;
-    sky.infiniteDistance = true;
-
-    const sunMaterial = createMaterial("sunMaterial", "#fff0b5", {
-      emissive: "#ffd779"
-    });
-
-    const sun = createSphere(
-      "sun",
-      new BABYLON.Vector3(38, 55, 55),
-      13,
-      sunMaterial
-    );
-
-    sun.isPickable = false;
-
-    const pathMaterial = createMaterial("pathMaterial", "#d8c5a1");
-
-    const path = createBox(
-      "gardenPath",
-      new BABYLON.Vector3(0, 0.005, 0),
-      new BABYLON.Vector3(12, 0.035, 100),
-      pathMaterial
-    );
-
-    path.isPickable = false;
-
-    const waterMaterial = createMaterial("waterMaterial", "#65b8d7", {
-      alpha: 0.84
-    });
-
-    const water = BABYLON.MeshBuilder.CreateGround("water", {
-      width: 42,
-      height: 24,
-      subdivisions: 2
-    }, state.scene);
-
-    water.material = waterMaterial;
-    water.position.set(-45, 0.025, 15);
-    water.isPickable = false;
-
-    const flowerColors = [
-      "#ef8fb5", "#e6b7ef", "#fff1b1", "#f49b87"
+    const groundMat = createMaterial("groundMat", "#7ebc86");
+    const pathMat = createMaterial("pathMat", "#d6c09a");
+    const treeMat = createMaterial("treeMat", "#3d8654");
+    const trunkMat = createMaterial("trunkMat", "#79553b");
+    const flowerMats = [
+      createMaterial("flowerPink", "#f18db7"),
+      createMaterial("flowerYellow", "#f7d66c"),
+      createMaterial("flowerBlue", "#a1c8ff")
     ];
+    const waterMat = createMaterial("waterMat", "#64c9d6", "#155c6b");
+    const benchMat = createMaterial("benchMat", "#8a5c3a");
+    const stoneMat = createMaterial("stoneMat", "#e4dfd5");
+    const lampMat = createMaterial("lampMat", "#fff0ad", "#ffda70");
 
-    for (let i = 0; i < 90; i++) {
-      const x = randomRange(-95, 95);
-      const z = randomRange(-95, 95);
+    const ground = BABYLON.MeshBuilder.CreateGround(
+      "worldGround",
+      { width: 100, height: 100, subdivisions: 2 },
+      scene
+    );
 
-      if (Math.abs(x) < 9) continue;
+    ground.material = groundMat;
+    ground.isPickable = false;
+    rememberDecoration(ground);
 
-      const stem = createCylinder(
-        `flowerStem${i}`,
-        new BABYLON.Vector3(x, 0.45, z),
-        0.9,
-        0.08,
-        createMaterial(`stemMat${i}`, "#42814e")
-      );
+    const path = BABYLON.MeshBuilder.CreateGround(
+      "mainPath",
+      { width: 7, height: 58 },
+      scene
+    );
 
-      const blossom = createSphere(
-        `flowerBlossom${i}`,
-        new BABYLON.Vector3(x, 0.95, z),
-        0.38,
-        createMaterial(
-          `flowerMat${i}`,
-          flowerColors[i % flowerColors.length]
-        )
-      );
+    path.position.y = 0.025;
+    path.material = pathMat;
+    rememberDecoration(path);
 
-      stem.isPickable = false;
-      blossom.isPickable = false;
-      state.decorations.push(stem, blossom);
-    }
+    const skyMat = new BABYLON.StandardMaterial("skyMat", scene);
+    skyMat.diffuseColor = BABYLON.Color3.FromHexString("#8fc9ee");
+    skyMat.backFaceCulling = false;
+    skyMat.disableLighting = true;
 
-    for (let i = 0; i < 36; i++) {
-      const x = randomRange(-100, 100);
-      const z = randomRange(-100, 100);
+    const sky = BABYLON.MeshBuilder.CreateSphere(
+      "skyDome",
+      { diameter: 240, segments: 12 },
+      scene
+    );
 
-      if (Math.abs(x) < 13) continue;
+    sky.material = skyMat;
+    sky.infiniteDistance = true;
+    sky.isPickable = false;
+    rememberDecoration(sky);
 
-      const trunk = createCylinder(
+    const sunMat = createMaterial("sunMat", "#fff2c3", "#ffe9a1");
+
+    createSphere(
+      "sun",
+      new BABYLON.Vector3(-24, 22, 28),
+      6,
+      sunMat
+    );
+
+    const water = BABYLON.MeshBuilder.CreateGround(
+      "water",
+      { width: 20, height: 13 },
+      scene
+    );
+
+    water.position.set(24, 0.035, -19);
+    water.material = waterMat;
+    rememberDecoration(water);
+
+    for (let i = 0; i < 30; i++) {
+      const side = Math.random() < 0.5 ? -1 : 1;
+      const x = side * random(8, 35);
+      const z = random(-32, 32);
+
+      createCylinder(
         `treeTrunk${i}`,
-        new BABYLON.Vector3(x, 2, z),
-        4,
-        0.7,
-        createMaterial(`treeTrunkMaterial${i}`, "#8a5b40")
+        new BABYLON.Vector3(x, 1.1, z),
+        2.2,
+        0.55,
+        trunkMat
       );
 
-      const leaves = createSphere(
+      createSphere(
         `treeLeaves${i}`,
-        new BABYLON.Vector3(x, 4.7, z),
-        randomRange(4, 6),
-        createMaterial(`treeLeavesMaterial${i}`, "#3d8b57")
+        new BABYLON.Vector3(x, 3.1, z),
+        random(3.1, 4.6),
+        treeMat
       );
 
-      trunk.isPickable = false;
-      leaves.isPickable = false;
-
-      state.decorations.push(trunk, leaves);
+      if (i < 20) {
+        for (let f = 0; f < 3; f++) {
+          createSphere(
+            `flower${i}-${f}`,
+            new BABYLON.Vector3(
+              x + random(-2.5, 2.5),
+              0.3,
+              z + random(-2.5, 2.5)
+            ),
+            0.32,
+            pick(flowerMats)
+          );
+        }
+      }
     }
 
-    const lampMaterial = createMaterial(
-      "lampMaterial",
-      "#f5dca0",
-      { emissive: "#c99a45" }
-    );
+    for (let i = 0; i < 9; i++) {
+      const z = -26 + i * 6;
 
-    for (let i = -4; i <= 4; i++) {
-      const z = i * 11;
-
-      const pole = createCylinder(
+      createCylinder(
         `lampPole${i}`,
-        new BABYLON.Vector3(8, 2.2, z),
-        4.4,
-        0.16,
-        createMaterial(`lampPoleMat${i}`, "#54465a")
+        new BABYLON.Vector3(i % 2 ? 5.2 : -5.2, 1.7, z),
+        3.4,
+        0.18,
+        stoneMat
       );
 
-      const lamp = createSphere(
+      createSphere(
         `lampLight${i}`,
-        new BABYLON.Vector3(8, 4.5, z),
-        0.75,
-        lampMaterial
+        new BABYLON.Vector3(i % 2 ? 5.2 : -5.2, 3.5, z),
+        0.65,
+        lampMat
       );
-
-      pole.isPickable = false;
-      lamp.isPickable = false;
-
-      state.decorations.push(pole, lamp);
     }
 
-    const sign = createBox(
-      "locationSign",
-      new BABYLON.Vector3(0, 2.2, -12),
-      new BABYLON.Vector3(7, 3.5, 0.5),
-      createMaterial("signMaterial", "#805c80")
+    for (let i = 0; i < 6; i++) {
+      const x = -15 + i * 6;
+
+      createBox(
+        `benchSeat${i}`,
+        new BABYLON.Vector3(x, 0.65, 12),
+        new BABYLON.Vector3(2.3, 0.22, 0.8),
+        benchMat
+      );
+
+      createBox(
+        `benchBack${i}`,
+        new BABYLON.Vector3(x, 1.1, 12.35),
+        new BABYLON.Vector3(2.3, 0.8, 0.2),
+        benchMat
+      );
+    }
+
+    const landmarkMat = createMaterial("landmarkMat", "#efb6d3", "#b66d95");
+
+    const landmark = BABYLON.MeshBuilder.CreateTorus(
+      "missionLandmark",
+      { diameter: 3.2, thickness: 0.28, tessellation: 24 },
+      scene
     );
 
-    sign.isPickable = false;
+    landmark.position.set(0, 0.4, -17);
+    landmark.rotation.x = Math.PI / 2;
+    landmark.material = landmarkMat;
+    rememberDecoration(landmark);
 
-    createLandmark(
+    const titlePlane = BABYLON.MeshBuilder.CreatePlane(
+      "missionTitlePlane",
+      { width: 12, height: 2.2 },
+      scene
+    );
+
+    titlePlane.position.set(0, 5.3, -24);
+    titlePlane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+
+    const titleTexture = new BABYLON.DynamicTexture(
+      "missionTitleTexture",
+      { width: 1024, height: 180 },
+      scene,
+      true
+    );
+
+    titleTexture.hasAlpha = true;
+    titleTexture.drawText(
       mission.place,
-      new BABYLON.Vector3(0, 0, -12)
+      null,
+      115,
+      "bold 52px Arial",
+      "#ffffff",
+      "transparent",
+      true
     );
+
+    const titleMaterial = new BABYLON.StandardMaterial(
+      "missionTitleMaterial",
+      scene
+    );
+
+    titleMaterial.diffuseTexture = titleTexture;
+    titleMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+    titleMaterial.opacityTexture = titleTexture;
+    titleMaterial.backFaceCulling = false;
+    titlePlane.material = titleMaterial;
+    rememberDecoration(titlePlane);
+
+    const platform = BABYLON.MeshBuilder.CreateCylinder(
+      "centralPlatform",
+      { height: 0.25, diameter: 8, tessellation: 32 },
+      scene
+    );
+
+    platform.position.set(0, 0.14, -17);
+    platform.material = stoneMat;
+    rememberDecoration(platform);
   }
+
+  /* ----------------------------------------------------------
+     8. PERSONNAGE PRINCIPAL
+  ---------------------------------------------------------- */
 
   function createPlayer() {
-    const root = new BABYLON.TransformNode("playerRoot", state.scene);
-    root.position.set(0, 0, 4);
+    const root = new BABYLON.TransformNode("playerRoot", scene);
 
-    const skin = createMaterial("playerSkin", "#dca77f");
-    const clothes = createMaterial("playerClothes", "#8c7ed5");
-    const pants = createMaterial("playerPants", "#384b75");
-    const shoes = createMaterial("playerShoes", "#392f39");
-    const hair = createMaterial("playerHair", "#382b30");
+    const skin = createMaterial("playerSkin", "#e9b48f");
+    const clothes = createMaterial("playerClothes", "#5c7fe0");
+    const pants = createMaterial("playerPants", "#34425e");
+    const shoes = createMaterial("playerShoes", "#f5f3ed");
+    const hair = createMaterial("playerHair", "#392c2a");
 
-    const body = BABYLON.MeshBuilder.CreateCapsule(
-      "playerBody",
-      { height: 1.35, radius: 0.36, tessellation: 10 },
-      state.scene
-    );
+    const body = BABYLON.MeshBuilder.CreateCapsule
+      ? BABYLON.MeshBuilder.CreateCapsule(
+          "playerBody",
+          { height: 1.6, radius: 0.42, tessellation: 10 },
+          scene
+        )
+      : BABYLON.MeshBuilder.CreateCylinder(
+          "playerBody",
+          { height: 1.5, diameter: 0.8, tessellation: 12 },
+          scene
+        );
 
-    body.parent = root;
-    body.position.y = 1.25;
+    body.position.y = 1.5;
     body.material = clothes;
+    body.parent = root;
 
-    const head = createSphere(
+    createSphere(
       "playerHead",
-      new BABYLON.Vector3(0, 2.25, 0),
-      0.72,
-      skin
+      new BABYLON.Vector3(0, 2.65, 0),
+      0.85,
+      skin,
+      root
     );
 
-    head.parent = root;
-
-    const hairCap = createSphere(
+    createSphere(
       "playerHair",
-      new BABYLON.Vector3(0, 2.51, 0),
-      0.73,
-      hair
-    );
-
-    hairCap.parent = root;
-    hairCap.scaling.y = 0.65;
+      new BABYLON.Vector3(0, 2.94, -0.04),
+      0.82,
+      hair,
+      root
+    ).scaling.y = 0.55;
 
     const leftLeg = createCylinder(
       "playerLeftLeg",
-      new BABYLON.Vector3(-0.17, 0.47, 0),
+      new BABYLON.Vector3(-0.22, 0.65, 0),
       0.9,
-      0.22,
-      pants
+      0.24,
+      pants,
+      root
     );
 
     const rightLeg = createCylinder(
       "playerRightLeg",
-      new BABYLON.Vector3(0.17, 0.47, 0),
+      new BABYLON.Vector3(0.22, 0.65, 0),
       0.9,
-      0.22,
-      pants
+      0.24,
+      pants,
+      root
     );
 
-    leftLeg.parent = root;
-    rightLeg.parent = root;
-
-    const leftShoe = createBox(
+    createBox(
       "playerLeftShoe",
-      new BABYLON.Vector3(-0.17, 0.08, 0.1),
-      new BABYLON.Vector3(0.3, 0.16, 0.5),
-      shoes
+      new BABYLON.Vector3(-0.22, 0.18, 0.12),
+      new BABYLON.Vector3(0.36, 0.22, 0.56),
+      shoes,
+      root
     );
 
-    const rightShoe = createBox(
+    createBox(
       "playerRightShoe",
-      new BABYLON.Vector3(0.17, 0.08, 0.1),
-      new BABYLON.Vector3(0.3, 0.16, 0.5),
-      shoes
+      new BABYLON.Vector3(0.22, 0.18, 0.12),
+      new BABYLON.Vector3(0.36, 0.22, 0.56),
+      shoes,
+      root
     );
-
-    leftShoe.parent = root;
-    rightShoe.parent = root;
 
     const leftArm = createCylinder(
       "playerLeftArm",
-      new BABYLON.Vector3(-0.45, 1.3, 0),
-      0.95,
-      0.18,
-      skin
+      new BABYLON.Vector3(-0.55, 1.6, 0),
+      0.9,
+      0.22,
+      skin,
+      root
     );
+
+    leftArm.rotation.z = -0.25;
 
     const rightArm = createCylinder(
       "playerRightArm",
-      new BABYLON.Vector3(0.45, 1.3, 0),
-      0.95,
-      0.18,
-      skin
+      new BABYLON.Vector3(0.55, 1.6, 0),
+      0.9,
+      0.22,
+      skin,
+      root
     );
 
-    leftArm.parent = root;
-    rightArm.parent = root;
+    rightArm.rotation.z = 0.25;
 
-    state.playerParts = [
-      body, head, hairCap, leftLeg, rightLeg,
-      leftShoe, rightShoe, leftArm, rightArm
+    root.position.set(0, 0, 8);
+
+    player = {
+      root,
+      position: root.position,
+      leftLeg,
+      rightLeg,
+      leftArm,
+      rightArm,
+      speed: 5,
+      walkTime: 0,
+      baseY: 0
+    };
+
+    if (camera) {
+      camera.target = new BABYLON.Vector3(0, 1.4, 8);
+    }
+
+    return player;
+  }
+
+  /* ----------------------------------------------------------
+     9. PERSONNAGES IA ET LEURS COMPORTEMENTS
+  ---------------------------------------------------------- */
+
+  function createCharacter(name, index, x, z) {
+    const root = new BABYLON.TransformNode(
+      `npcRoot-${index}-${name}`,
+      scene
+    );
+
+    const skinColors = [
+      "#edc19d", "#a96f4e", "#d59b75", "#f0d0b0"
     ];
 
-    state.player = root;
-    state.lastPlayerPosition = root.position.clone();
-
-    return root;
-  }
-
-  function createCharacter(name, index, position) {
-    const root = new BABYLON.TransformNode(
-      `npcRoot_${index}_${name}`,
-      state.scene
-    );
-
-    root.position.copyFrom(position);
-
-    const outfit = createMaterial(
-      `npcOutfit_${index}`,
-      characterColors[index % characterColors.length]
-    );
-
-    const skinColors = ["#e8b995", "#b97d5a", "#f0c9a8", "#8e6048"];
     const skin = createMaterial(
-      `npcSkin_${index}`,
-      skinColors[index % skinColors.length]
+      `npcSkin-${index}`,
+      pick(skinColors)
     );
 
-    const hairColors = ["#392b2d", "#654333", "#2b2831", "#b28b55"];
+    const clothes = createMaterial(
+      `npcClothes-${index}`,
+      COLORS[index % COLORS.length]
+    );
+
     const hair = createMaterial(
-      `npcHair_${index}`,
-      hairColors[index % hairColors.length]
+      `npcHair-${index}`,
+      pick(["#3b2a24", "#241e22", "#604633", "#a36b43"])
     );
 
-    const pants = createMaterial(
-      `npcPants_${index}`,
-      index % 2 ? "#415b79" : "#655777"
-    );
+    const body = BABYLON.MeshBuilder.CreateCapsule
+      ? BABYLON.MeshBuilder.CreateCapsule(
+          `npcBody-${index}`,
+          { height: 1.45, radius: 0.38, tessellation: 10 },
+          scene
+        )
+      : BABYLON.MeshBuilder.CreateCylinder(
+          `npcBody-${index}`,
+          { height: 1.4, diameter: 0.76, tessellation: 12 },
+          scene
+        );
 
-    const body = BABYLON.MeshBuilder.CreateCapsule(
-      `npcBody_${index}`,
-      { height: 1.3, radius: 0.34, tessellation: 10 },
-      state.scene
-    );
-
+    body.position.y = 1.42;
+    body.material = clothes;
     body.parent = root;
-    body.position.y = 1.2;
-    body.material = outfit;
 
-    const head = createSphere(
-      `npcHead_${index}`,
-      new BABYLON.Vector3(0, 2.2, 0),
-      0.67,
-      skin
+    createSphere(
+      `npcHead-${index}`,
+      new BABYLON.Vector3(0, 2.55, 0),
+      0.78,
+      skin,
+      root
     );
 
-    head.parent = root;
+    createSphere(
+      `npcHair-${index}`,
+      new BABYLON.Vector3(0, 2.82, -0.03),
+      0.77,
+      hair,
+      root
+    ).scaling.y = 0.48;
 
-    const hairCap = createSphere(
-      `npcHair_${index}`,
-      new BABYLON.Vector3(0, 2.45, 0),
-      0.69,
-      hair
-    );
+    const legMat = createMaterial(`npcLegMat-${index}`, "#3e4b62");
 
-    hairCap.parent = root;
-    hairCap.scaling.y = 0.6;
-
-    const leftLeg = createCylinder(
-      `npcLeftLeg_${index}`,
-      new BABYLON.Vector3(-0.16, 0.43, 0),
+    createCylinder(
+      `npcLegL-${index}`,
+      new BABYLON.Vector3(-0.2, 0.6, 0),
       0.85,
+      0.22,
+      legMat,
+      root
+    );
+
+    createCylinder(
+      `npcLegR-${index}`,
+      new BABYLON.Vector3(0.2, 0.6, 0),
+      0.85,
+      0.22,
+      legMat,
+      root
+    );
+
+    createCylinder(
+      `npcArmL-${index}`,
+      new BABYLON.Vector3(-0.49, 1.55, 0),
+      0.82,
       0.2,
-      pants
+      skin,
+      root
     );
 
-    const rightLeg = createCylinder(
-      `npcRightLeg_${index}`,
-      new BABYLON.Vector3(0.16, 0.43, 0),
-      0.85,
+    createCylinder(
+      `npcArmR-${index}`,
+      new BABYLON.Vector3(0.49, 1.55, 0),
+      0.82,
       0.2,
-      pants
+      skin,
+      root
     );
 
-    leftLeg.parent = root;
-    rightLeg.parent = root;
+    root.position.set(x, 0, z);
 
-    const leftArm = createCylinder(
-      `npcLeftArm_${index}`,
-      new BABYLON.Vector3(-0.43, 1.27, 0),
-      0.85,
-      0.17,
-      skin
-    );
-
-    const rightArm = createCylinder(
-      `npcRightArm_${index}`,
-      new BABYLON.Vector3(0.43, 1.27, 0),
-      0.85,
-      0.17,
-      skin
-    );
-
-    leftArm.parent = root;
-    rightArm.parent = root;
-
-    const character = {
-      id: `character-${index}`,
+    return {
+      id: `npc-${index}-${name}`,
       name,
-      index,
       root,
-      body,
-      head,
-      outfit,
-      personality: characterPersonalities[
-        index % characterPersonalities.length
-      ],
-      dialogueIndex: index,
-      visited: false,
-      available: true,
-      greeting: `Bonjour ${state.profile.name}. Je m'appelle ${name}. Je suis ${characterPersonalities[index % characterPersonalities.length]}.`,
-      meshes: [body, head, hairCap, leftLeg, rightLeg, leftArm, rightArm]
+      personality: PERSONALITIES[index % PERSONALITIES.length],
+      dialogueIndex: index % DIALOGUE_BANK.length,
+      greeting: `Bonjour ${state.profile.name} ! Je suis ${name}. Je suis ravi de te rencontrer ici. Comment se passe ton aventure ?`,
+      aiState: "idle",
+      homeX: x,
+      homeZ: z,
+      targetX: x,
+      targetZ: z,
+      walkTimer: random(1, 4),
+      phase: random(0, Math.PI * 2),
+      colorIndex: index % COLORS.length,
+      interactionCount: 0
     };
-
-    character.meshes.forEach((mesh) => {
-      mesh.metadata = {
-        kind: "npc",
-        characterId: character.id
-      };
-    });
-
-    state.npcs.push(character);
-    return character;
   }
 
-  function createLandmark(name, position) {
-    const markerMaterial = createMaterial(
-      `landmarkMaterial_${state.landmarks.length}`,
-      "#e7ca82",
-      { emissive: "#8d6a31" }
-    );
+  function createMissionCharacters(index) {
+    const baseCount = 4 + Math.floor(index / 2);
+    const count = Math.min(14, baseCount);
 
-    const marker = BABYLON.MeshBuilder.CreateTorus(
-      `landmark_${state.landmarks.length}`,
-      {
-        diameter: 3.5,
-        thickness: 0.16,
-        tessellation: 24
-      },
-      state.scene
-    );
+    const selectedNames = [];
 
-    marker.position.set(position.x, 0.18, position.z);
-    marker.rotation.x = Math.PI / 2;
-    marker.material = markerMaterial;
+    for (let i = 0; i < count; i++) {
+      let name = NPC_NAMES[(index * 3 + i) % NPC_NAMES.length];
 
-    marker.metadata = {
-      kind: "landmark",
-      label: name
-    };
+      if (selectedNames.includes(name)) {
+        name = `${name} ${i + 1}`;
+      }
 
-    state.landmarks.push({
-      id: `landmark-${state.landmarks.length}`,
-      name,
-      mesh: marker,
-      position: position.clone(),
-      visited: false
-    });
+      selectedNames.push(name);
 
-    return marker;
+      const angle = (i / count) * Math.PI * 2;
+      const radius = 6 + (i % 3) * 2;
+
+      const x = Math.cos(angle) * radius;
+      const z = 1 + Math.sin(angle) * radius;
+
+      state.npcs.push(createCharacter(name, i, x, z));
+    }
+
+    if (state.npcs.length > 0) {
+      state.npcs[0].root.position.set(2.5, 0, 5);
+      state.npcs[0].homeX = 2.5;
+      state.npcs[0].homeZ = 5;
+    }
   }
 
-  function createCollectible(index, position) {
-    const material = createMaterial(
-      `heartMaterial_${index}`,
-      "#ff72ae",
-      { emissive: "#b72563" }
+  function updateNPCs(delta) {
+    state.npcs.forEach((npc) => {
+      if (!npc.root || !npc.root.position) return;
+
+      npc.phase += delta;
+
+      if (npc.aiState === "talking" && player) {
+        const dx = player.position.x - npc.root.position.x;
+        const dz = player.position.z - npc.root.position.z;
+
+        npc.root.rotation.y = Math.atan2(dx, dz);
+        return;
+      }
+
+      npc.walkTimer -= delta;
+
+      if (npc.walkTimer <= 0) {
+        npc.walkTimer = random(2, 5);
+
+        if (Math.random() < 0.55) {
+          npc.targetX = clamp(npc.homeX + random(-4, 4), -35, 35);
+          npc.targetZ = clamp(npc.homeZ + random(-4, 4), -35, 35);
+          npc.aiState = "walking";
+        } else {
+          npc.targetX = npc.homeX;
+          npc.targetZ = npc.homeZ;
+          npc.aiState = "idle";
+        }
+      }
+
+      if (npc.aiState === "walking") {
+        const dx = npc.targetX - npc.root.position.x;
+        const dz = npc.targetZ - npc.root.position.z;
+        const distance = Math.sqrt(dx * dx + dz * dz);
+
+        if (distance > 0.12) {
+          const speed = 1.15 * delta;
+
+          npc.root.position.x += (dx / distance) * speed;
+          npc.root.position.z += (dz / distance) * speed;
+          npc.root.rotation.y = Math.atan2(dx, dz);
+        } else {
+          npc.aiState = "idle";
+        }
+      }
+
+      npc.root.position.y = Math.abs(Math.sin(npc.phase * 2)) * 0.035;
+    });
+  }
+
+  /* ----------------------------------------------------------
+     10. OBJETS À COLLECTER ET POINTS D'EXPLORATION
+  ---------------------------------------------------------- */
+
+  function createCollectible(index, x, z) {
+    const mat = createMaterial(
+      `collectibleMat-${index}`,
+      pick(["#ffdb78", "#f4a9d0", "#a7e4ef", "#d8b4ff"]),
+      "#80602e"
     );
 
     const mesh = BABYLON.MeshBuilder.CreatePolyhedron(
-      `collectibleHeart_${index}`,
-      { type: 1, size: 0.8 },
-      state.scene
+      `collectible-${index}`,
+      { type: 1, size: 0.75 },
+      scene
     );
 
-    mesh.position.copyFrom(position);
-    mesh.position.y = 0.9;
-    mesh.material = material;
+    mesh.position.set(x, 1.15, z);
+    mesh.material = mat;
+    rememberDecoration(mesh);
 
-    mesh.metadata = {
-      kind: "collectible",
-      collectibleId: `collectible-${index}`
-    };
-
-    state.collectibles.push({
-      id: `collectible-${index}`,
+    return {
+      id: `item-${state.missionIndex}-${index}`,
+      name: pick([
+        "Souvenir lumineux",
+        "Petite lettre",
+        "Fleur précieuse",
+        "Cadeau mystérieux",
+        "Fragment de mémoire",
+        "Objet de gratitude"
+      ]),
       mesh,
-      name: "Souvenir du cœur",
-      collected: false
-    });
+      collected: false,
+      baseY: 1.15,
+      phase: random(0, Math.PI * 2)
+    };
+  }
 
-    return mesh;
+  function createMissionCollectibles(index) {
+    const count = Math.min(7, 2 + Math.floor(index / 5));
+
+    for (let i = 0; i < count; i++) {
+      const x = random(-19, 19);
+      const z = random(-24, 24);
+
+      state.collectibles.push(createCollectible(i, x, z));
+    }
+  }
+
+  function createLandmarks(index) {
+    const places = [
+      { name: "Jardin central", x: 0, z: -17 },
+      { name: "Allée des fleurs", x: -12, z: -8 },
+      { name: "Belvédère", x: 12, z: -12 },
+      { name: "Bord du lac", x: 22, z: -17 },
+      { name: "Place de rencontre", x: 0, z: 23 }
+    ];
+
+    places.forEach((place, i) => {
+      state.landmarks.push({
+        id: `landmark-${index}-${i}`,
+        name: place.name,
+        position: new BABYLON.Vector3(place.x, 0, place.z),
+        visited: false
+      });
+    });
   }
 
   function disposeMissionObjects() {
-    state.npcs.forEach((npc) => {
-      if (npc.root) npc.root.dispose(false, true);
-    });
+    state.decorations.forEach(safeDispose);
+    state.decorations = [];
 
-    state.collectibles.forEach((item) => {
-      if (item.mesh) item.mesh.dispose();
-    });
-
-    state.landmarks.forEach((item) => {
-      if (item.mesh) item.mesh.dispose();
-    });
-
-    state.decorations.forEach((item) => {
-      if (item && !item.isDisposed()) item.dispose();
-    });
-
+    state.npcs.forEach((npc) => safeDispose(npc.root));
     state.npcs = [];
+
     state.collectibles = [];
     state.landmarks = [];
-    state.decorations = [];
-    state.missionRuntime = null;
+
+    player = null;
+    currentInteraction = null;
   }
 
   function buildMissionWorld(index) {
-    if (!state.scene) return;
+    if (!scene) {
+      throw new Error("La scène 3D n'est pas prête.");
+    }
+
+    worldGeneration++;
+    const generation = worldGeneration;
+
+    setVisible($("worldLoadingOverlay"), true);
+    setText($("worldLoadingText"), "Préparation du nouvel environnement...");
 
     disposeMissionObjects();
 
-    const plan = buildMissionPlan(index);
-    if (!plan) return;
+    state.missionIndex = clamp(index, 0, missionData.length - 1);
 
-    state.scene.clearColor = new BABYLON.Color4(0.55, 0.72, 0.90, 1);
-
-    createWorldEnvironment(plan);
-
-    if (!state.player || state.player.isDisposed()) {
-      createPlayer();
-    } else {
-      state.player.position.set(0, 0, 4);
-      state.player.rotation.y = 0;
-    }
-
-    for (let i = 0; i < plan.characterCount; i++) {
-      const angle = (Math.PI * 2 * i) / plan.characterCount;
-      const radius = 12 + (i % 3) * 4;
-
-      const position = new BABYLON.Vector3(
-        Math.cos(angle) * radius,
-        0,
-        Math.sin(angle) * radius - 5
-      );
-
-      const name = characterNames[
-        (index * 3 + i) % characterNames.length
-      ];
-
-      createCharacter(name, i, position);
-    }
-
-    const collectibleCount = Math.min(
-      3 + Math.floor((index + 1) / 3),
-      12
-    );
-
-    for (let i = 0; i < collectibleCount; i++) {
-      const position = new BABYLON.Vector3(
-        randomRange(-32, 32),
-        0.8,
-        randomRange(-32, 32)
-      );
-
-      createCollectible(i, position);
-    }
-
-    for (let i = 0; i < 4; i++) {
-      createLandmark(
-        `${plan.place} — zone ${i + 1}`,
-        new BABYLON.Vector3(
-          (i - 1.5) * 18,
-          0,
-          i % 2 ? -26 : 28
-        )
-      );
-    }
+    const plan = buildMissionPlan(state.missionIndex);
 
     state.missionRuntime = {
-      missionIndex: index,
       plan,
       stageIndex: 0,
-      stageProgress: 0,
-      visited: [],
       collected: [],
       talked: [],
-      storySeen: false
+      visited: [],
+      storySeen: false,
+      generation
     };
 
-    state.activeTarget = null;
+    createWorldEnvironment(state.missionIndex);
+    createPlayer();
+    createMissionCharacters(state.missionIndex);
+    createMissionCollectibles(state.missionIndex);
+    createLandmarks(state.missionIndex);
+
+    if (camera && player) {
+      camera.target = new BABYLON.Vector3(
+        player.position.x,
+        1.4,
+        player.position.z
+      );
+    }
 
     updateMissionHeader();
     updateObjective();
     refreshMissionList();
+
+    setTimeout(() => {
+      if (generation === worldGeneration) {
+        setVisible($("worldLoadingOverlay"), false);
+      }
+    }, 350);
   }
 
-  /* ==========================================================
-     10. INITIALISATION DE BABYLON
-  ========================================================== */
+  /* ----------------------------------------------------------
+     11. MOTEUR 3D BABYLON.JS
+  ---------------------------------------------------------- */
 
-  function initializeEngine() {
-    return new Promise((resolve, reject) => {
+  async function initializeEngine() {
+    if (!canvas) {
+      throw new Error("Le canvas loveGameCanvas est absent du HTML.");
+    }
+
+    if (!window.BABYLON || !BABYLON.Engine) {
+      throw new Error(
+        "Babylon.js n'est pas accessible dans window.BABYLON. Vérifiez son chargement dans le HTML."
+      );
+    }
+
+    if (engine && !engine.isDisposed) {
       try {
-        state.engine = new BABYLON.Engine(
-          canvas,
-          true,
-          {
-            preserveDrawingBuffer: false,
-            stencil: true,
-            adaptToDeviceRatio: true,
-            antialias: state.settings.quality !== "low"
-          }
-        );
+        engine.dispose();
+      } catch (_) {}
+    }
 
-        state.scene = new BABYLON.Scene(state.engine);
-        state.scene.collisionsEnabled = false;
-
-        const hemispheric = new BABYLON.HemisphericLight(
-          "ambientLight",
-          new BABYLON.Vector3(0, 1, 0),
-          state.scene
-        );
-
-        hemispheric.intensity = 0.95;
-
-        const directional = new BABYLON.DirectionalLight(
-          "sunLight",
-          new BABYLON.Vector3(-0.5, -1, 0.35),
-          state.scene
-        );
-
-        directional.intensity = 0.8;
-
-        state.camera3D = new BABYLON.ArcRotateCamera(
-          "loveCamera",
-          -Math.PI / 2,
-          1.12,
-          20,
-          new BABYLON.Vector3(0, 1.2, 0),
-          state.scene
-        );
-
-        state.camera3D.lowerRadiusLimit = 6;
-        state.camera3D.upperRadiusLimit = 48;
-        state.camera3D.lowerBetaLimit = 0.3;
-        state.camera3D.upperBetaLimit = 1.45;
-        state.camera3D.wheelPrecision = 30;
-        state.camera3D.panningSensibility = 0;
-        state.camera3D.attachControl(canvas, false);
-
-        state.scene.activeCamera = state.camera3D;
-
-        state.engine.runRenderLoop(() => {
-          if (!state.scene || state.scene.isDisposed) return;
-
-          const dt = Math.min(
-            state.engine.getDeltaTime() / 1000,
-            0.05
-          );
-
-          if (state.running && !state.paused) {
-            updatePlayer(dt);
-            updateCharacters(dt);
-            updateCollectibles(dt);
-            updateCamera();
-            checkAutomaticObjectives();
-            updateInteractionTarget();
-          }
-
-          state.scene.render();
-          state.animationFrame++;
-        });
-
-        window.addEventListener("resize", () => {
-          if (state.engine) state.engine.resize();
-        });
-
-        applyGraphicsQuality();
-        resolve(true);
-      } catch (error) {
-        reject(error);
+    engine = new BABYLON.Engine(
+      canvas,
+      true,
+      {
+        preserveDrawingBuffer: false,
+        stencil: true,
+        antialias: true,
+        adaptToDeviceRatio: true
       }
+    );
+
+    scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(0.52, 0.76, 0.91, 1);
+
+    scene.collisionsEnabled = false;
+    scene.skipPointerMovePicking = true;
+
+    const hemi = new BABYLON.HemisphericLight(
+      "hemiLight",
+      new BABYLON.Vector3(0, 1, 0),
+      scene
+    );
+
+    hemi.intensity = 0.85;
+
+    const sun = new BABYLON.DirectionalLight(
+      "sunLight",
+      new BABYLON.Vector3(-0.4, -1, 0.3),
+      scene
+    );
+
+    sun.position = new BABYLON.Vector3(-20, 35, -10);
+    sun.intensity = 0.8;
+
+    camera = new BABYLON.ArcRotateCamera(
+      "gameCamera",
+      -Math.PI / 2,
+      1.08,
+      15,
+      new BABYLON.Vector3(0, 1.4, 8),
+      scene
+    );
+
+    camera.lowerRadiusLimit = 6;
+    camera.upperRadiusLimit = 48;
+    camera.lowerBetaLimit = 0.3;
+    camera.upperBetaLimit = 1.45;
+    camera.wheelPrecision = 35;
+    camera.panningSensibility = 0;
+    camera.inertia = 0.7;
+
+    camera.attachControl(canvas, false);
+    camera.inputs.clear();
+
+    engine.setHardwareScalingLevel(
+      state.settings.quality === "high"
+        ? 1
+        : state.settings.quality === "low"
+          ? 1.6
+          : 1.25
+    );
+
+    engine.runRenderLoop(() => {
+      if (!scene || scene.isDisposed) return;
+
+      const now = performance.now();
+
+      frameDelta = lastFrame
+        ? Math.min((now - lastFrame) / 1000, 0.05)
+        : 0.016;
+
+      lastFrame = now;
+
+      if (!state.paused && state.screen === "gameScreen") {
+        updateKeyboardMovement();
+        updatePlayer(frameDelta);
+        updateNPCs(frameDelta);
+        updateCollectibles(frameDelta);
+        checkAutomaticObjectives();
+      }
+
+      if (player && camera && !camera.isDisposed) {
+        camera.target.x +=
+          (player.position.x - camera.target.x) * 0.08;
+
+        camera.target.y +=
+          (1.5 - camera.target.y) * 0.08;
+
+        camera.target.z +=
+          (player.position.z - camera.target.z) * 0.08;
+      }
+
+      scene.render();
+    });
+
+    window.addEventListener("resize", () => {
+      if (engine) engine.resize();
     });
   }
 
-  /* ==========================================================
-     11. DÉPLACEMENT DU JOUEUR
-  ========================================================== */
+  /* ----------------------------------------------------------
+     12. DÉPLACEMENT DU JOUEUR
+  ---------------------------------------------------------- */
 
-  function updatePlayer(dt) {
-    if (!state.player || !state.joystick.active) {
-      if (state.player && !state.isJumping) {
-        animatePlayerIdle(dt);
-      }
+  function updateKeyboardMovement() {
+    if (state.joystick.pointerId !== null) return;
+
+    let x = 0;
+    let y = 0;
+
+    if (keys.has("ArrowLeft") || keys.has("KeyA")) x -= 1;
+    if (keys.has("ArrowRight") || keys.has("KeyD")) x += 1;
+    if (keys.has("ArrowUp") || keys.has("KeyW")) y += 1;
+    if (keys.has("ArrowDown") || keys.has("KeyS")) y -= 1;
+
+    const magnitude = Math.sqrt(x * x + y * y);
+
+    if (magnitude > 0) {
+      state.joystick.x = x / magnitude;
+      state.joystick.y = y / magnitude;
+      state.joystick.active = true;
+    } else {
+      state.joystick.x = 0;
+      state.joystick.y = 0;
+      state.joystick.active = false;
+    }
+  }
+
+  function updatePlayer(delta) {
+    if (!player || !state.joystick.active) {
+      animatePlayerIdle(delta);
+      updateInteractionTarget();
       return;
     }
 
-    const inputX = state.joystick.x;
-    const inputY = state.joystick.y;
+    const x = state.joystick.x;
+    const y = state.joystick.y;
 
-    const cameraAlpha = state.camera3D.alpha;
+    const direction = camera
+      ? camera.alpha
+      : -Math.PI / 2;
 
-    const forward = new BABYLON.Vector3(
-      Math.sin(cameraAlpha),
-      0,
-      Math.cos(cameraAlpha)
+    const forwardX = -Math.sin(direction);
+    const forwardZ = -Math.cos(direction);
+    const rightX = Math.cos(direction);
+    const rightZ = -Math.sin(direction);
+
+    let moveX = rightX * x + forwardX * y;
+    let moveZ = rightZ * x + forwardZ * y;
+
+    const magnitude = Math.sqrt(moveX * moveX + moveZ * moveZ);
+
+    if (magnitude > 1) {
+      moveX /= magnitude;
+      moveZ /= magnitude;
+    }
+
+    const speed = player.speed * (state.isRunning ? 1.8 : 1);
+
+    player.position.x = clamp(
+      player.position.x + moveX * speed * delta,
+      -43,
+      43
     );
 
-    const right = new BABYLON.Vector3(
-      forward.z,
-      0,
-      -forward.x
+    player.position.z = clamp(
+      player.position.z + moveZ * speed * delta,
+      -43,
+      43
     );
 
-    const movement = forward.scale(-inputY).add(
-      right.scale(inputX)
-    );
+    if (magnitude > 0.02) {
+      player.root.rotation.y = Math.atan2(moveX, moveZ);
+      animatePlayerWalk(delta);
+    }
 
-    if (movement.lengthSquared() < 0.002) return;
+    if (isJumping) {
+      jumpVelocity -= 15 * delta;
+      player.root.position.y += jumpVelocity * delta;
 
-    movement.normalize();
-
-    const speed = state.isRunning ? 11 : 5.5;
-    const movementSpeed = speed * dt;
-
-    state.player.position.addInPlace(
-      movement.scale(movementSpeed)
-    );
-
-    state.player.position.x = clamp(
-      state.player.position.x, -115, 115
-    );
-
-    state.player.position.z = clamp(
-      state.player.position.z, -115, 115
-    );
-
-    state.player.rotation.y = Math.atan2(
-      movement.x,
-      movement.z
-    );
-
-    animatePlayerWalk(dt);
-  }
-
-  function animatePlayerWalk(dt) {
-    if (!state.playerParts.length) return;
-
-    const t = performance.now() / 150;
-    const swing = Math.sin(t) * 0.35;
-
-    state.playerParts[3].rotation.x = swing;
-    state.playerParts[4].rotation.x = -swing;
-    state.playerParts[7].rotation.x = -swing;
-    state.playerParts[8].rotation.x = swing;
-  }
-
-  function animatePlayerIdle(dt) {
-    if (!state.playerParts.length) return;
-
-    const t = performance.now() / 900;
-    state.playerParts[1].position.y =
-      2.25 + Math.sin(t) * 0.025;
-  }
-
-  function updateCharacters(dt) {
-    const time = performance.now() / 1000;
-
-    state.npcs.forEach((npc, index) => {
-      if (!npc.root || npc.root.isDisposed()) return;
-
-      npc.root.position.y = Math.sin(
-        time * 1.5 + index
-      ) * 0.035;
-
-      if (
-        state.player &&
-        distanceXZ(state.player.position, npc.root.position) < 4
-      ) {
-        const dx = state.player.position.x - npc.root.position.x;
-        const dz = state.player.position.z - npc.root.position.z;
-
-        if (Math.abs(dx) + Math.abs(dz) > 0.1) {
-          npc.root.rotation.y = Math.atan2(dx, dz);
-        }
+      if (player.root.position.y <= 0) {
+        player.root.position.y = 0;
+        jumpVelocity = 0;
+        isJumping = false;
       }
-    });
+    }
+
+    updateInteractionTarget();
   }
 
-  function updateCollectibles(dt) {
-    const time = performance.now() / 1000;
+  function animatePlayerWalk(delta) {
+    if (!player) return;
 
-    state.collectibles.forEach((item, index) => {
-      if (!item.mesh || item.mesh.isDisposed()) return;
+    player.walkTime += delta * (state.isRunning ? 13 : 8);
 
-      if (item.collected) return;
+    const swing = Math.sin(player.walkTime) * 0.48;
 
-      item.mesh.rotation.y += dt * 0.8;
-      item.mesh.position.y =
-        0.9 + Math.sin(time * 2 + index) * 0.18;
-    });
-
-    state.landmarks.forEach((item, index) => {
-      if (!item.mesh || item.mesh.isDisposed()) return;
-
-      item.mesh.rotation.z =
-        Math.sin(time * 1.5 + index) * 0.05;
-
-      item.mesh.rotation.y += dt * 0.15;
-    });
+    player.leftLeg.rotation.x = swing;
+    player.rightLeg.rotation.x = -swing;
+    player.leftArm.rotation.x = -swing * 0.75;
+    player.rightArm.rotation.x = swing * 0.75;
   }
 
-  function updateCamera() {
-    if (!state.player || !state.camera3D) return;
+  function animatePlayerIdle(delta) {
+    if (!player) return;
 
-    state.camera3D.target.x +=
-      (state.player.position.x - state.camera3D.target.x) * 0.12;
+    player.walkTime += delta * 1.8;
 
-    state.camera3D.target.y +=
-      (state.player.position.y + 1.4 - state.camera3D.target.y) * 0.12;
-
-    state.camera3D.target.z +=
-      (state.player.position.z - state.camera3D.target.z) * 0.12;
+    player.leftLeg.rotation.x *= 0.85;
+    player.rightLeg.rotation.x *= 0.85;
+    player.leftArm.rotation.x *= 0.85;
+    player.rightArm.rotation.x *= 0.85;
   }
 
   function jumpPlayer() {
-    if (!state.player || state.isJumping || state.paused) return;
+    if (!player || state.paused || isJumping) return;
 
-    state.isJumping = true;
-    state.verticalVelocity = 7;
-
-    const initialY = state.player.position.y;
-
-    const timer = setInterval(() => {
-      if (!state.player || state.paused) {
-        clearInterval(timer);
-        return;
-      }
-
-      state.verticalVelocity -= 0.45;
-      state.player.position.y += state.verticalVelocity * 0.045;
-
-      if (state.player.position.y <= initialY) {
-        state.player.position.y = initialY;
-        state.verticalVelocity = 0;
-        state.isJumping = false;
-        clearInterval(timer);
-      }
-    }, 45);
+    isJumping = true;
+    jumpVelocity = 6.5;
   }
 
-  /* ==========================================================
-     12. CONTRÔLES TACTILES ANDROID
-     Joystick + caméra + zoom à deux doigts
-  ========================================================== */
+  function updateCollectibles(delta) {
+    state.collectibles.forEach((item) => {
+      if (item.collected || meshIsDisposed(item.mesh)) return;
+
+      item.phase += delta * 1.8;
+      item.mesh.position.y = item.baseY + Math.sin(item.phase) * 0.22;
+      item.mesh.rotation.y += delta * 0.8;
+    });
+  }
+
+  /* ----------------------------------------------------------
+     13. JOYSTICK TACTILE
+  ---------------------------------------------------------- */
 
   function setupJoystick() {
     const base = $("joystickBase");
@@ -2089,19 +1911,18 @@
       let dx = event.clientX - centerX;
       let dy = event.clientY - centerY;
 
-      const maxRadius = rect.width * 0.32;
+      const maxRadius = Math.max(1, rect.width * 0.32);
       const length = Math.sqrt(dx * dx + dy * dy);
 
       if (length > maxRadius) {
-        dx = (dx / length) * maxRadius;
-        dy = (dy / length) * maxRadius;
+        dx = dx / length * maxRadius;
+        dy = dy / length * maxRadius;
       }
 
       state.joystick.x = clamp(dx / maxRadius, -1, 1);
-      state.joystick.y = clamp(dy / maxRadius, -1, 1);
+      state.joystick.y = clamp(-dy / maxRadius, -1, 1);
 
-      thumb.style.transform =
-        `translate(${dx}px, ${dy}px)`;
+      thumb.style.transform = `translate(${dx}px, ${dy}px)`;
     }
 
     control.addEventListener("pointerdown", (event) => {
@@ -2127,7 +1948,7 @@
       updateJoystick(event);
     });
 
-    const stopJoystick = (event) => {
+    function stopJoystick(event) {
       if (
         event &&
         state.joystick.pointerId !== null &&
@@ -2142,20 +1963,25 @@
       state.joystick.y = 0;
 
       thumb.style.transform = "translate(0px, 0px)";
-    };
+    }
 
     control.addEventListener("pointerup", stopJoystick);
     control.addEventListener("pointercancel", stopJoystick);
     control.addEventListener("lostpointercapture", stopJoystick);
   }
 
+  /* ----------------------------------------------------------
+     14. CAMÉRA, GLISSEMENT ET ZOOM À DEUX DOIGTS
+  ---------------------------------------------------------- */
+
   function setupCameraGestures() {
-    const pointers = new Map();
+    if (!canvas) return;
 
     canvas.style.touchAction = "none";
 
-    function getPinchDistance() {
-      const points = Array.from(pointers.values());
+    function pinchDistance() {
+      const points = [...activePointers.values()];
+
       if (points.length < 2) return 0;
 
       const dx = points[0].x - points[1].x;
@@ -2167,96 +1993,87 @@
     canvas.addEventListener("pointerdown", (event) => {
       if (state.screen !== "gameScreen" || state.paused) return;
 
-      pointers.set(event.pointerId, {
+      activePointers.set(event.pointerId, {
         x: event.clientX,
         y: event.clientY
       });
 
-      if (pointers.size === 1) {
-        state.camera.dragging = true;
-        state.camera.pointerId = event.pointerId;
-        state.camera.lastX = event.clientX;
-        state.camera.lastY = event.clientY;
+      if (activePointers.size === 1) {
+        state.cameraControl.dragging = true;
+        state.cameraControl.pointerId = event.pointerId;
+        state.cameraControl.lastX = event.clientX;
+        state.cameraControl.lastY = event.clientY;
+      } else if (activePointers.size >= 2) {
+        state.cameraControl.pinchDistance = pinchDistance();
+        state.cameraControl.dragging = false;
       }
-
-      if (pointers.size >= 2) {
-        state.camera.pinchDistance = getPinchDistance();
-        state.camera.dragging = false;
-      }
-
-      try {
-        canvas.setPointerCapture(event.pointerId);
-      } catch (_) {}
     });
 
     canvas.addEventListener("pointermove", (event) => {
-      if (!pointers.has(event.pointerId)) return;
+      if (!activePointers.has(event.pointerId)) return;
 
-      pointers.set(event.pointerId, {
+      activePointers.set(event.pointerId, {
         x: event.clientX,
         y: event.clientY
       });
 
-      if (pointers.size >= 2) {
-        const nextDistance = getPinchDistance();
+      if (activePointers.size >= 2) {
+        const nextDistance = pinchDistance();
 
-        if (state.camera.pinchDistance > 0 && state.camera3D) {
-          const delta = nextDistance - state.camera.pinchDistance;
-          const sensitivity = state.settings.sensitivity;
+        if (state.cameraControl.pinchDistance > 0 && camera) {
+          const delta = nextDistance - state.cameraControl.pinchDistance;
 
-          state.camera3D.radius = clamp(
-            state.camera3D.radius -
-              delta * 0.035 * sensitivity,
+          camera.radius = clamp(
+            camera.radius - delta * 0.035 * state.settings.sensitivity,
             6,
             48
           );
         }
 
-        state.camera.pinchDistance = nextDistance;
+        state.cameraControl.pinchDistance = nextDistance;
         return;
       }
 
       if (
-        !state.camera.dragging ||
-        event.pointerId !== state.camera.pointerId ||
-        !state.camera3D
+        !state.cameraControl.dragging ||
+        event.pointerId !== state.cameraControl.pointerId ||
+        !camera
       ) {
         return;
       }
 
-      const dx = event.clientX - state.camera.lastX;
-      const dy = event.clientY - state.camera.lastY;
+      const dx = event.clientX - state.cameraControl.lastX;
+      const dy = event.clientY - state.cameraControl.lastY;
 
-      const sensitivity = state.settings.sensitivity;
+      camera.alpha -= dx * 0.005 * state.settings.sensitivity;
 
-      state.camera3D.alpha -= dx * 0.005 * sensitivity;
-      state.camera3D.beta = clamp(
-        state.camera3D.beta + dy * 0.004 * sensitivity,
+      camera.beta = clamp(
+        camera.beta + dy * 0.004 * state.settings.sensitivity,
         0.3,
         1.45
       );
 
-      state.camera.lastX = event.clientX;
-      state.camera.lastY = event.clientY;
+      state.cameraControl.lastX = event.clientX;
+      state.cameraControl.lastY = event.clientY;
     });
 
     function finishPointer(event) {
-      pointers.delete(event.pointerId);
+      activePointers.delete(event.pointerId);
 
-      if (pointers.size < 2) {
-        state.camera.pinchDistance = 0;
+      if (activePointers.size < 2) {
+        state.cameraControl.pinchDistance = 0;
       }
 
-      if (pointers.size === 0) {
-        state.camera.dragging = false;
-        state.camera.pointerId = null;
-      } else if (pointers.size === 1) {
-        const remaining = Array.from(pointers.entries())[0];
+      if (activePointers.size === 0) {
+        state.cameraControl.dragging = false;
+        state.cameraControl.pointerId = null;
+      } else if (activePointers.size === 1) {
+        const remaining = [...activePointers.entries()][0];
 
-        state.camera.pointerId = remaining[0];
-        state.camera.lastX = remaining[1].x;
-        state.camera.lastY = remaining[1].y;
-        state.camera.dragging = true;
+        state.cameraControl.pointerId = remaining[0];
+        state.cameraControl.lastX = remaining[1].x;
+        state.cameraControl.lastY = remaining[1].y;
+        state.cameraControl.dragging = true;
       }
     }
 
@@ -2265,29 +2082,21 @@
     canvas.addEventListener("lostpointercapture", finishPointer);
 
     canvas.addEventListener("wheel", (event) => {
-      if (!state.camera3D) return;
+      if (!camera || state.screen !== "gameScreen") return;
 
       event.preventDefault();
 
-      state.camera3D.radius = clamp(
-        state.camera3D.radius + event.deltaY * 0.025,
+      camera.radius = clamp(
+        camera.radius + event.deltaY * 0.025,
         6,
         48
       );
     }, { passive: false });
   }
 
-  /* ==========================================================
-     13. OBJECTIFS ET PROGRESSION DES MISSIONS
-  ========================================================== */
-
-  function currentStage() {
-    if (!state.missionRuntime) return null;
-
-    return state.missionRuntime.plan.stages[
-      state.missionRuntime.stageIndex
-    ] || null;
-  }
+  /* ----------------------------------------------------------
+     15. OBJECTIFS ET PROGRESSION
+  ---------------------------------------------------------- */
 
   function updateMissionHeader() {
     const mission = getCurrentMission();
@@ -2295,17 +2104,15 @@
 
     setText(
       $("missionNumber"),
-      `MISSION ${String(mission.number).padStart(2, "0")} / ${getTotalMissionCount()}`
+      `MISSION ${String(missionData.indexOf(mission) + 1).padStart(2, "0")} / ${missionData.length}`
     );
 
     setText($("missionTitle"), mission.title);
 
-    if ($("missionsScreen")) {
-      const title = $("missionsScreen").querySelector(".panel-header h2");
+    const listTitle = $("missionsScreen")?.querySelector(".panel-header h2");
 
-      if (title) {
-        title.textContent = `Les ${getTotalMissionCount()} missions`;
-      }
+    if (listTitle) {
+      listTitle.textContent = `Les ${missionData.length} missions`;
     }
   }
 
@@ -2315,9 +2122,8 @@
     const runtime = state.missionRuntime;
     const plan = runtime.plan;
     const stage = currentStage();
-
-    const completed = runtime.stageIndex;
     const total = plan.stages.length;
+    const completed = runtime.stageIndex;
 
     if (!stage) {
       setText($("objectiveText"), "Mission accomplie !");
@@ -2331,13 +2137,13 @@
     }
 
     const objectiveText = {
-      talk: "Approchez-vous du personnage et engagez la conversation.",
-      collect: "Explorez les alentours et récupérez le souvenir lumineux.",
-      visit: "Rejoignez la zone indiquée pour découvrir le lieu.",
-      choice: "Rencontrez le personnage et faites un choix.",
+      talk: "Approchez-vous d'un personnage et engagez une conversation.",
+      collect: "Explorez les alentours et récupérez un objet lumineux.",
+      visit: "Rejoignez la zone indiquée pour découvrir ce lieu.",
+      choice: "Rencontrez les personnages et faites un choix réfléchi.",
       help: "Approchez-vous de la personne qui a besoin de votre aide.",
       inspect: "Cherchez un indice et examinez-le.",
-      deliver: "Trouvez l'objet et remettez-le à la bonne personne.",
+      deliver: "Trouvez un objet et remettez-le à la bonne personne.",
       perform: "Rejoignez les participants et prenez part à l'activité."
     };
 
@@ -2346,14 +2152,11 @@
       `${stage.label} — ${objectiveText[stage.action] || plan.goal}`
     );
 
-    setText(
-      $("objectiveProgressText"),
-      `${completed} / ${total}`
-    );
+    setText($("objectiveProgressText"), `${completed} / ${total}`);
 
     if ($("objectiveProgressBar")) {
       $("objectiveProgressBar").style.width =
-        `${(completed / total) * 100}%`;
+        `${completed / Math.max(1, total) * 100}%`;
     }
 
     updateInteractionTarget();
@@ -2367,11 +2170,9 @@
 
     missionData.forEach((mission, index) => {
       const completed = state.completedMissions.includes(index);
-      const current = state.gameStarted &&
-        index === state.missionIndex;
+      const current = index === state.missionIndex;
 
       const card = document.createElement("button");
-
       card.type = "button";
       card.className = "mission-list-item";
       card.style.width = "100%";
@@ -2402,84 +2203,72 @@
         ? "✓ Mission terminée"
         : current
           ? "● Mission actuelle"
-          : "🔒 À découvrir";
+          : index > state.missionIndex
+            ? "🔒 À découvrir"
+            : "Disponible";
 
       card.append(heading, description, status);
 
       card.addEventListener("click", () => {
-        if (completed) {
-          notify("Cette mission est déjà terminée.");
-          return;
-        }
-
-        if (!state.gameStarted) {
-          notify("Commencez une aventure avant de sélectionner une mission.");
-          return;
-        }
-
         if (index > state.missionIndex) {
           notify("Terminez les missions précédentes pour débloquer celle-ci.");
+          return;
+        }
+
+        if (completed) {
+          notify("Cette mission est déjà terminée.");
           return;
         }
 
         if (index < state.missionIndex) {
           showConfirmation(
             "Rejouer une mission ?",
-            "Revenir à cette mission remplacera la mission actuellement chargée. Votre progression terminée restera enregistrée.",
+            "La mission actuelle sera remplacée. Votre progression terminée restera conservée.",
             () => {
               state.missionIndex = index;
+              state.gameStarted = true;
+              state.paused = false;
               buildMissionWorld(index);
               showGame();
-              closeMissions();
               saveGame();
             }
           );
           return;
         }
 
-        showGame();
         closeMissions();
       });
 
       list.appendChild(card);
     });
 
-    const total = getTotalMissionCount();
     const done = state.completedMissions.length;
 
     setText(
       $("missionsSummary"),
-      `${done} mission${done > 1 ? "s" : ""} terminée${done > 1 ? "s" : ""} sur ${total}`
+      `${done} mission${done !== 1 ? "s" : ""} terminée${done !== 1 ? "s" : ""} sur ${missionData.length}`
     );
 
     if ($("overallProgressBar")) {
       $("overallProgressBar").style.width =
-        `${(done / Math.max(1, total)) * 100}%`;
+        `${done / missionData.length * 100}%`;
     }
   }
 
   function checkAutomaticObjectives() {
-    if (!state.player || !state.missionRuntime || state.paused) return;
+    if (!player || !state.missionRuntime || state.paused) return;
 
     const stage = currentStage();
-    if (!stage) return;
+    if (!stage || stage.action !== "visit") return;
 
-    if (stage.action === "visit") {
-      const landmark = state.landmarks.find((item) =>
-        distanceXZ(state.player.position, item.position) < 3
-      );
+    const landmark = state.landmarks.find((item) =>
+      distanceXZ(player.position, item.position) < 3 &&
+      !item.visited
+    );
 
-      if (landmark && !landmark.visited) {
-        landmark.visited = true;
-
-        if (!state.missionRuntime.visited.includes(landmark.id)) {
-          state.missionRuntime.visited.push(landmark.id);
-        }
-
-        completeStage(
-          `Vous avez découvert : ${landmark.name}.`
-        );
-      }
+    if (landmark) {
+      landmark.visited = true;
+      completeStage(`Vous avez découvert : ${landmark.name}.`);
     }
   }
 
@@ -2494,7 +2283,7 @@
     stage.done = true;
     runtime.stageIndex++;
 
-    if (message) notify(message, 2300);
+    if (message) notify(message, 2400);
 
     updateObjective();
     refreshMissionList();
@@ -2507,7 +2296,7 @@
 
       notify(
         `Étape terminée ! Prochaine activité : ${next.label}`,
-        3000
+        2800
       );
     }
   }
@@ -2534,52 +2323,55 @@
 
     setText(
       $("completionProgress"),
-      `${state.completedMissions.length} / ${getTotalMissionCount()}`
+      `${state.completedMissions.length} / ${missionData.length}`
     );
+
+    state.paused = true;
+    state.running = false;
+
+    stopVoice();
+    stopMusic();
 
     refreshMissionList();
     saveGame();
 
-    state.running = false;
-    state.paused = true;
-    stopVoice();
-
-    if (state.missionIndex >= getTotalMissionCount() - 1) {
+    if (index >= missionData.length - 1) {
       showScreen("endingScreen");
-      notify("Félicitations ! Vous avez terminé toute l'aventure.");
+      notify("Félicitations ! Vous avez terminé les 35 missions.", 4500);
     } else {
       showScreen("missionCompleteScreen");
     }
   }
 
   function goToNextMission() {
-    if (state.missionIndex >= getTotalMissionCount() - 1) {
+    if (state.missionIndex >= missionData.length - 1) {
       showScreen("endingScreen");
       return;
     }
 
     state.missionIndex++;
-    buildMissionWorld(state.missionIndex);
     state.gameStarted = true;
+    state.paused = false;
 
+    buildMissionWorld(state.missionIndex);
     showGame();
     showMissionIntroduction();
+    startMusicIfEnabled();
     saveGame();
   }
 
-  /* ==========================================================
-     14. PERSONNAGES ET INTERACTIONS
-  ========================================================== */
+  /* ----------------------------------------------------------
+     16. CIBLES ET INTERACTIONS
+  ---------------------------------------------------------- */
 
   function findNearestTarget() {
-    if (!state.player) return null;
+    if (!player) return null;
 
-    const playerPosition = state.player.position;
     let nearest = null;
     let nearestDistance = 5;
 
     state.npcs.forEach((npc) => {
-      const d = distanceXZ(playerPosition, npc.root.position);
+      const d = distanceXZ(player.position, npc.root.position);
 
       if (d < nearestDistance) {
         nearestDistance = d;
@@ -2595,9 +2387,9 @@
     });
 
     state.collectibles.forEach((item) => {
-      if (item.collected || item.mesh.isDisposed()) return;
+      if (item.collected || meshIsDisposed(item.mesh)) return;
 
-      const d = distanceXZ(playerPosition, item.mesh.position);
+      const d = distanceXZ(player.position, item.mesh.position);
 
       if (d < nearestDistance) {
         nearestDistance = d;
@@ -2613,7 +2405,7 @@
     });
 
     state.landmarks.forEach((item) => {
-      const d = distanceXZ(playerPosition, item.position);
+      const d = distanceXZ(player.position, item.position);
 
       if (d < nearestDistance) {
         nearestDistance = d;
@@ -2632,7 +2424,7 @@
   }
 
   function updateInteractionTarget() {
-    if (!state.player || state.paused || state.screen !== "gameScreen") {
+    if (!player || state.paused || state.screen !== "gameScreen") {
       setVisible($("interactionPrompt"), false);
       return;
     }
@@ -2656,8 +2448,11 @@
 
     setText(
       $("interactionIcon"),
-      target.kind === "npc" ? "♡" :
-      target.kind === "collectible" ? "✦" : "◎"
+      target.kind === "npc"
+        ? "♡"
+        : target.kind === "collectible"
+          ? "✦"
+          : "◎"
     );
 
     setVisible($("interactionPrompt"), true);
@@ -2671,36 +2466,27 @@
     const target = findNearestTarget();
 
     if (!target) {
-      notify("Approchez-vous d'un personnage, d'un objet ou d'une zone d'exploration.");
+      notify("Approchez-vous d'un personnage, d'un objet ou d'une zone.");
       return;
     }
 
     const stage = currentStage();
-
     if (!stage) return;
 
     if (target.kind === "npc") {
       interactWithCharacter(target.object, stage);
-      return;
-    }
-
-    if (target.kind === "collectible") {
+    } else if (target.kind === "collectible") {
       collectItem(target.object, stage);
-      return;
-    }
-
-    if (target.kind === "landmark") {
+    } else {
       interactWithLandmark(target.object, stage);
     }
   }
 
   function interactWithCharacter(character, stage) {
-    const runtime = state.missionRuntime;
-
-    if (!runtime) return;
+    if (!character || !stage) return;
 
     if (stage.action === "collect" || stage.action === "inspect") {
-      notify("Pour cette étape, cherchez l'objet lumineux indiqué.");
+      notify("Pour cette étape, cherchez un objet ou un indice.");
       return;
     }
 
@@ -2709,19 +2495,23 @@
       return;
     }
 
-    if (stage.action === "deliver") {
-      const collected = runtime.collected.length > 0;
-
-      if (!collected) {
-        notify("Vous devez d'abord récupérer un objet.");
-        return;
-      }
+    if (
+      stage.action === "deliver" &&
+      state.missionRuntime.collected.length === 0
+    ) {
+      notify("Vous devez d'abord récupérer un objet.");
+      return;
     }
+
+    character.interactionCount++;
+    character.aiState = "talking";
 
     openDialogue(character, stage);
   }
 
   function interactWithLandmark(landmark, stage) {
+    if (!landmark || !stage) return;
+
     if (stage.action === "visit") {
       if (!landmark.visited) {
         landmark.visited = true;
@@ -2731,9 +2521,8 @@
     }
 
     if (stage.action === "inspect") {
-      notify(`Vous examinez ${landmark.name}. Un nouvel indice apparaît dans votre carnet.`);
       state.flags[`inspected-${landmark.id}`] = true;
-      completeStage("Indice découvert !");
+      completeStage(`Vous avez examiné ${landmark.name}. Un indice est découvert !`);
       return;
     }
 
@@ -2743,10 +2532,10 @@
   function collectItem(item, stage) {
     const runtime = state.missionRuntime;
 
-    if (!runtime || item.collected) return;
+    if (!runtime || !item || item.collected) return;
 
     if (!["collect", "deliver", "help", "inspect"].includes(stage.action)) {
-      notify("Ce souvenir est intéressant, mais votre objectif actuel est différent.");
+      notify("Cet objet est intéressant, mais votre objectif actuel est différent.");
       return;
     }
 
@@ -2757,52 +2546,58 @@
       runtime.collected.push(item.id);
     }
 
+    if (!state.inventory.includes(item.name)) {
+      state.inventory.push(item.name);
+    }
+
     if (stage.action === "deliver") {
-      notify("Objet récupéré. Approchez-vous d'un personnage pour le remettre.");
+      notify("Objet récupéré. Approchez-vous du destinataire.");
       scheduleAutosave();
       return;
     }
 
-    if (stage.action === "inspect") {
-      notify("Vous avez découvert un nouvel indice.");
-    }
-
-    completeStage("Vous avez récupéré un objet précieux.");
+    completeStage(`Vous avez récupéré : ${item.name}.`);
   }
 
-  /* ==========================================================
-     15. DIALOGUES FRANÇAIS, CHOIX ET RÉÉCOUTE
-  ========================================================== */
+  /* ----------------------------------------------------------
+     17. DIALOGUES, CHOIX ET CONSÉQUENCES
+  ---------------------------------------------------------- */
 
   function openDialogue(character, stage) {
     if (!character || !stage) return;
 
     stopVoice();
+    dialogueTransition = false;
 
     const mission = getCurrentMission();
+    const relationshipLine = state.relationship >= 5
+      ? "Je remarque que nos conversations nous ont rapprochés. J'apprécie la confiance que nous construisons."
+      : "Je pense que nous pouvons mieux nous comprendre si nous prenons le temps de nous écouter.";
 
-    const dialogue = {
+    const lines = [
+      character.greeting,
+      DIALOGUE_BANK[
+        (state.missionIndex * 3 + character.dialogueIndex) %
+        DIALOGUE_BANK.length
+      ],
+      `${state.profile.name}, dans cette mission, nous devons ${mission.goal.toLowerCase()}. Je crois que nous pouvons y arriver en travaillant ensemble.`,
+      relationshipLine,
+      `Personnellement, je suis plutôt ${character.personality}. J'essaie de comprendre les autres avant de prendre une décision.`,
+      "J'aimerais connaître ton point de vue. Que ferais-tu à ma place ?",
+      "Merci de prendre le temps de discuter avec moi. Les paroles ont de la valeur lorsqu'elles sont suivies d'actions."
+    ];
+
+    state.currentDialogue = {
       character,
       stage,
       line: 0,
-      lines: [
-        character.greeting,
-        dialogueBank[
-          (mission.number * 3 + character.dialogueIndex) %
-          dialogueBank.length
-        ],
-        `${state.profile.name}, dans cette mission, nous devons ${mission.goal.toLowerCase()}. Je pense que nous pouvons y arriver en nous écoutant et en travaillant ensemble.`,
-        "Avant de continuer, j'aimerais connaître ton point de vue. Chaque personne peut apporter une idée différente."
-      ]
+      lines,
+      chosen: false,
+      choiceText: ""
     };
 
-    state.currentDialogue = dialogue;
-
     setText($("speakerName"), character.name);
-    setText($("speakerAvatar"), character.name.slice(0, 1));
-    setVisible($("dialoguePanel"), true);
-
-    renderDialogueLine();
+    setText($("speakerAvatar"), character.name.slice(0, 1) || "♡");
 
     const choices = $("dialogueChoices");
     if (choices) choices.replaceChildren();
@@ -2810,7 +2605,7 @@
     const choiceTexts = [
       "Je t'écoute avec attention.",
       "Je préfère agir et apporter mon aide.",
-      "Je souhaite comprendre avant de décider."
+      "Je veux comprendre avant de décider."
     ];
 
     choiceTexts.forEach((text, index) => {
@@ -2827,9 +2622,8 @@
       if (choices) choices.appendChild(button);
     });
 
-    if (!state.settings.voice) {
-      setText($("dialogueVoiceStatus"), "Voix désactivée");
-    }
+    setVisible($("dialoguePanel"), true);
+    renderDialogueLine();
   }
 
   function renderDialogueLine() {
@@ -2840,10 +2634,9 @@
 
     setText($("dialogueText"), line);
 
-    if (!state.settings.subtitles) {
-      $("dialogueText").style.visibility = "hidden";
-    } else {
-      $("dialogueText").style.visibility = "visible";
+    if ($("dialogueText")) {
+      $("dialogueText").style.visibility =
+        state.settings.subtitles ? "visible" : "hidden";
     }
 
     setText(
@@ -2858,7 +2651,7 @@
 
   function nextDialogueLine() {
     const dialogue = state.currentDialogue;
-    if (!dialogue) return;
+    if (!dialogue || dialogueTransition) return;
 
     if (dialogue.line < dialogue.lines.length - 1) {
       dialogue.line++;
@@ -2870,10 +2663,10 @@
 
   function chooseDialogueOption(index, text) {
     const dialogue = state.currentDialogue;
-    if (!dialogue) return;
+    if (!dialogue || dialogue.chosen) return;
 
     const mission = getCurrentMission();
-    const key = `${mission.number}-${dialogue.character.id}`;
+    const key = `${state.missionIndex + 1}-${dialogue.character.id}`;
 
     state.choices[key] = {
       index,
@@ -2881,37 +2674,45 @@
       timestamp: Date.now()
     };
 
-    notify(`${dialogue.character.name} apprécie votre réponse.`);
-
-    dialogue.line = Math.min(
-      dialogue.lines.length - 1,
-      dialogue.line + 1
-    );
-
-    renderDialogueLine();
-
-    const choices = $("dialogueChoices");
-    if (choices) choices.replaceChildren();
-
-    const response = document.createElement("p");
-    response.textContent = [
-      "Merci de m'avoir écouté. Continuons ensemble.",
-      "Je suis heureux de voir que tu souhaites agir concrètement.",
-      "Prendre le temps de réfléchir peut nous aider à mieux nous comprendre."
-    ][index];
-
-    if (choices) choices.appendChild(response);
-
+    state.relationship += index === 0 ? 2 : index === 1 ? 3 : 1;
     dialogue.chosen = true;
     dialogue.choiceText = text;
 
+    const responses = [
+      "Merci de m'avoir écouté. Je me sens compris et respecté.",
+      "Je suis heureux de voir que tu souhaites agir concrètement.",
+      "Prendre le temps de réfléchir peut nous aider à mieux nous comprendre."
+    ];
+
+    const choices = $("dialogueChoices");
+    if (choices) {
+      choices.replaceChildren();
+
+      const response = document.createElement("p");
+      response.textContent = responses[index];
+      choices.appendChild(response);
+    }
+
+    dialogue.lines.push(
+      `${dialogue.character.name} : ${responses[index]} Continuons notre aventure autour de « ${mission.title} ».`
+    );
+
+    dialogue.lines.push(
+      "Je garderai en mémoire cette conversation. Ce sont souvent les petits gestes qui construisent les relations durables."
+    );
+
+    notify("Votre choix a été enregistré. Votre relation évolue.");
     scheduleAutosave();
   }
 
   function closeDialogue(completed) {
     const dialogue = state.currentDialogue;
+    if (!dialogue) {
+      setVisible($("dialoguePanel"), false);
+      return;
+    }
 
-    if (completed && dialogue) {
+    if (completed) {
       const runtime = state.missionRuntime;
       const stage = dialogue.stage;
 
@@ -2922,15 +2723,19 @@
           runtime.talked.push(characterId);
         }
 
+        const character = dialogue.character;
+        character.aiState = "idle";
+
         if (stage.action === "deliver") {
           if (runtime.collected.length > 0) {
             const itemId = runtime.collected.shift();
+
             runtime.collected = runtime.collected.filter(
               (id) => id !== itemId
             );
 
             completeStage(
-              `Vous avez remis un objet à ${dialogue.character.name}.`
+              `Vous avez remis un objet à ${character.name}.`
             );
           } else {
             notify("Vous n'avez aucun objet à remettre.");
@@ -2939,33 +2744,73 @@
           ["talk", "choice", "help", "perform"].includes(stage.action)
         ) {
           if (stage.action === "help") {
-            notify(`Vous avez apporté votre aide à ${dialogue.character.name}.`);
+            notify(`Vous avez aidé ${character.name}.`);
           }
 
           if (stage.action === "perform") {
-            notify(`Vous avez participé à l'activité avec ${dialogue.character.name}.`);
+            notify(`Vous avez participé à l'activité avec ${character.name}.`);
           }
 
           completeStage(
-            `Conversation terminée avec ${dialogue.character.name}.`
+            `Conversation terminée avec ${character.name}.`
           );
         } else {
           notify("Conversation terminée. Poursuivez votre objectif.");
         }
       }
+    } else if (dialogue.character && dialogue.character.root) {
+      dialogue.character.aiState = "idle";
     }
 
     state.currentDialogue = null;
-    stopVoice();
+    dialogueTransition = false;
 
+    stopVoice();
     setVisible($("dialoguePanel"), false);
 
     const choices = $("dialogueChoices");
     if (choices) choices.replaceChildren();
+
+    scheduleAutosave();
   }
+
+  function showMissionIntroduction() {
+    const mission = getCurrentMission();
+    if (!mission || !state.missionRuntime) return;
+
+    state.missionRuntime.storySeen = true;
+
+    const lines = [
+      `Mission ${state.missionIndex + 1} : ${mission.title}. ${mission.story}`,
+      `Votre objectif : ${mission.goal}.`,
+      `Votre aventure se déroule à ${mission.place}. Explorez les lieux, rencontrez les personnages et utilisez le bouton Interagir pour avancer.`,
+      `Conseil : observez les objets lumineux, approchez-vous des personnages et prenez le temps d'écouter leurs histoires.`
+    ];
+
+    state.currentDialogue = {
+      character: {
+        id: "narrator",
+        name: "Narrateur"
+      },
+      stage: null,
+      line: 0,
+      lines
+    };
+
+    setText($("speakerName"), "Narrateur");
+    setText($("speakerAvatar"), "♡");
+    setVisible($("dialoguePanel"), true);
+
+    renderDialogueLine();
+  }
+
+  /* ----------------------------------------------------------
+     18. SYNTHÈSE VOCALE FRANÇAISE
+  ---------------------------------------------------------- */
 
   function speakFrench(text) {
     if (!state.settings.voice) return;
+
     if (!("speechSynthesis" in window)) {
       setText($("dialogueVoiceStatus"), "Voix française indisponible");
       return;
@@ -2976,8 +2821,8 @@
     try {
       voiceUtterance = new SpeechSynthesisUtterance(text);
       voiceUtterance.lang = "fr-FR";
-      voiceUtterance.rate = 0.92;
-      voiceUtterance.pitch = 1.04;
+      voiceUtterance.rate = 0.93;
+      voiceUtterance.pitch = 1.03;
       voiceUtterance.volume = 0.95;
 
       const voices = window.speechSynthesis.getVoices();
@@ -2991,18 +2836,9 @@
         setText($("dialogueVoiceStatus"), "Lecture vocale interrompue");
       };
 
-      voiceUtterance.onend = () => {
-        setText(
-          $("dialogueVoiceStatus"),
-          state.settings.voice
-            ? "Dialogue en français"
-            : "Voix désactivée"
-        );
-      };
-
       window.speechSynthesis.speak(voiceUtterance);
     } catch (error) {
-      console.warn("[FOBAS AMOUR] Synthèse vocale :", error);
+      console.warn("[FOBAS] Synthèse vocale :", error);
     }
   }
 
@@ -3016,6 +2852,7 @@
 
   function repeatDialogue() {
     const dialogue = state.currentDialogue;
+
     if (!dialogue) {
       notify("Aucun dialogue à réécouter.");
       return;
@@ -3024,42 +2861,9 @@
     speakFrench(dialogue.lines[dialogue.line] || "");
   }
 
-  function showMissionIntroduction() {
-    const mission = getCurrentMission();
-    if (!mission) return;
-
-    state.missionRuntime.storySeen = true;
-
-    setText($("speakerName"), "Narrateur");
-    setText($("speakerAvatar"), "♡");
-    setText(
-      $("dialogueText"),
-      `Mission ${mission.number} : ${mission.title}. ${mission.story}`
-    );
-
-    setVisible($("dialoguePanel"), true);
-
-    state.currentDialogue = {
-      character: {
-        id: "narrator",
-        name: "Narrateur"
-      },
-      stage: null,
-      line: 0,
-      lines: [
-        `Mission ${mission.number} : ${mission.title}. ${mission.story}`,
-        `Votre objectif : ${mission.goal}.`,
-        `Votre aventure se déroule à ${mission.place}. Explorez les lieux, rencontrez les personnages et utilisez le bouton Interagir pour avancer.`
-      ]
-    };
-
-    renderDialogueLine();
-  }
-
-  /* ==========================================================
-     16. MUSIQUE ET AMBIANCE GÉNÉRÉES
-     Synthèse sonore locale — aucune piste externe requise.
-  ========================================================== */
+  /* ----------------------------------------------------------
+     19. MUSIQUE GÉNÉRÉE LOCALEMENT
+  ---------------------------------------------------------- */
 
   function ensureAudioContext() {
     const AudioContextClass =
@@ -3067,9 +2871,7 @@
 
     if (!AudioContextClass) return null;
 
-    if (!audioContext) {
-      audioContext = new AudioContextClass();
-    }
+    if (!audioContext) audioContext = new AudioContextClass();
 
     if (audioContext.state === "suspended") {
       audioContext.resume().catch(() => {});
@@ -3078,9 +2880,11 @@
     return audioContext;
   }
 
-  function playTone(frequency, duration, volume = 0.035, type = "sine") {
+  function playTone(frequency, duration, volume = 0.02, type = "sine") {
+    if (!state.settings.music) return;
+
     const context = ensureAudioContext();
-    if (!context || !state.settings.music) return;
+    if (!context) return;
 
     const oscillator = context.createOscillator();
     const gain = context.createGain();
@@ -3088,16 +2892,11 @@
     oscillator.type = type;
     oscillator.frequency.value = frequency;
 
-    gain.gain.setValueAtTime(
-      0.0001,
-      context.currentTime
-    );
-
+    gain.gain.setValueAtTime(0.0001, context.currentTime);
     gain.gain.exponentialRampToValueAtTime(
       volume,
       context.currentTime + 0.08
     );
-
     gain.gain.exponentialRampToValueAtTime(
       0.0001,
       context.currentTime + duration
@@ -3113,8 +2912,7 @@
   function startMusicIfEnabled() {
     if (!state.settings.music || musicTimer) return;
 
-    const context = ensureAudioContext();
-    if (!context) return;
+    if (!ensureAudioContext()) return;
 
     const melody = [
       261.63, 329.63, 392.00, 329.63,
@@ -3134,10 +2932,10 @@
 
       const frequency = melody[musicStep % melody.length];
 
-      playTone(frequency, 1.2, 0.018, "sine");
+      playTone(frequency, 0.75, 0.012, "sine");
 
       if (musicStep % 4 === 0) {
-        playTone(frequency / 2, 1.5, 0.008, "triangle");
+        playTone(frequency / 2, 0.9, 0.006, "triangle");
       }
 
       musicStep++;
@@ -3151,37 +2949,43 @@
     }
   }
 
-  /* ==========================================================
-     17. MENUS, CONFIRMATIONS ET BOUTONS
-  ========================================================== */
+  /* ----------------------------------------------------------
+     20. CONFIRMATIONS ET MENUS
+  ---------------------------------------------------------- */
 
   function showConfirmation(title, message, action) {
-    state.confirmationAction = action;
+    confirmationAction = action;
 
     setText($("confirmationTitle"), title);
     setText($("confirmationMessage"), message);
 
     state.previousScreen = state.screen;
-
     setVisible($("confirmationScreen"), true);
   }
 
   function cancelConfirmation() {
     setVisible($("confirmationScreen"), false);
-    state.confirmationAction = null;
+    confirmationAction = null;
   }
 
   function acceptConfirmation() {
-    const action = state.confirmationAction;
+    const action = confirmationAction;
 
+    confirmationAction = null;
     setVisible($("confirmationScreen"), false);
-    state.confirmationAction = null;
 
     if (typeof action === "function") {
       try {
-        action();
+        const result = action();
+
+        if (result && typeof result.catch === "function") {
+          result.catch((error) => {
+            console.error("[FOBAS] Confirmation :", error);
+            notify("Cette action n'a pas pu être effectuée.");
+          });
+        }
       } catch (error) {
-        console.error("[FOBAS AMOUR] Confirmation :", error);
+        console.error("[FOBAS] Confirmation :", error);
         notify("Cette action n'a pas pu être effectuée.");
       }
     }
@@ -3200,6 +3004,8 @@
       showGame();
     } else if (state.screen === "mainMenu") {
       showScreen("mainMenu");
+    } else if (state.paused) {
+      showScreen("pauseScreen");
     }
   }
 
@@ -3232,7 +3038,10 @@
         state.completedSteps = [];
         state.choices = {};
         state.flags = {};
+        state.inventory = [];
+        state.relationship = 0;
         state.gameStarted = true;
+        state.paused = false;
 
         stopVoice();
         buildMissionWorld(0);
@@ -3247,9 +3056,9 @@
   }
 
   async function continueGame() {
-    const loaded = await loadGame();
+    await loadGame();
 
-    if (!loaded && !state.gameStarted) {
+    if (!state.gameStarted && state.completedMissions.length === 0) {
       notify("Aucune progression sauvegardée. Commencez une nouvelle aventure.");
       return;
     }
@@ -3259,8 +3068,11 @@
     }
 
     state.gameStarted = true;
+    state.paused = false;
+
     showGame();
     startMusicIfEnabled();
+
     notify("Bon retour dans votre aventure !");
   }
 
@@ -3272,8 +3084,10 @@
         await saveGame();
         stopVoice();
         stopMusic();
+
         state.paused = true;
         state.running = false;
+
         showMenu();
       }
     );
@@ -3289,7 +3103,10 @@
         state.completedSteps = [];
         state.choices = {};
         state.flags = {};
+        state.inventory = [];
+        state.relationship = 0;
         state.gameStarted = true;
+        state.paused = false;
 
         buildMissionWorld(0);
         showGame();
@@ -3299,11 +3116,15 @@
     );
   }
 
+  /* ----------------------------------------------------------
+     21. CONNEXION DES BOUTONS HTML
+  ---------------------------------------------------------- */
+
   function bindClick(id, callback) {
     const element = $(id);
 
     if (!element) {
-      console.warn(`[FOBAS AMOUR] Bouton introuvable : ${id}`);
+      console.warn(`[FOBAS] Élément HTML introuvable : ${id}`);
       return;
     }
 
@@ -3311,9 +3132,16 @@
       event.preventDefault();
 
       try {
-        callback(event);
+        const result = callback(event);
+
+        if (result && typeof result.catch === "function") {
+          result.catch((error) => {
+            console.error(`[FOBAS] Action ${id} :`, error);
+            notify("Une erreur est survenue pendant cette action.");
+          });
+        }
       } catch (error) {
-        console.error(`[FOBAS AMOUR] Action ${id} :`, error);
+        console.error(`[FOBAS] Action ${id} :`, error);
         notify("Une erreur est survenue pendant cette action.");
       }
     });
@@ -3322,18 +3150,14 @@
   function bindAllButtons() {
     bindClick("newGameButton", startNewGame);
     bindClick("continueGameButton", continueGame);
-
-    bindClick("missionsMenuButton", () => {
-      openMissions();
-    });
-
+    bindClick("missionsMenuButton", openMissions);
     bindClick("settingsButton", openSettings);
     bindClick("creditsButton", openCredits);
 
     bindClick("pauseButton", showPause);
     bindClick("resumeButton", resumeGame);
-    bindClick("pauseMissionsButton", () => openMissions());
-    bindClick("openMissionsButton", () => openMissions());
+    bindClick("pauseMissionsButton", openMissions);
+    bindClick("openMissionsButton", openMissions);
 
     bindClick("closeMissionsButton", closeMissions);
     bindClick("closeSettingsButton", closeSettings);
@@ -3360,6 +3184,7 @@
       state.isRunning = !state.isRunning;
 
       const button = $("runButton");
+
       if (button) {
         button.classList.toggle("active", state.isRunning);
 
@@ -3370,9 +3195,7 @@
       }
 
       notify(
-        state.isRunning
-          ? "Course activée"
-          : "Course désactivée",
+        state.isRunning ? "Course activée" : "Course désactivée",
         1200
       );
     });
@@ -3382,33 +3205,40 @@
     bindClick("repeatDialogueButton", repeatDialogue);
 
     bindClick("retryButton", async () => {
-      showScreen("loadingScreen");
+      setVisible($("errorScreen"), false);
+      initializing = false;
+      initialized = false;
       await initializeApplication();
     });
 
     bindClick("errorMenuButton", showMenu);
 
-    bindClick("missionCompleteScreen", () => {});
-
-    bindClick("missionCompleteScreen", () => {});
-
-    if ($("loveGameCanvas")) {
-      canvas.addEventListener("dblclick", interact);
+    if (canvas) {
+      canvas.addEventListener("dblclick", () => {
+        if (state.screen === "gameScreen") interact();
+      });
     }
   }
 
-  /* ==========================================================
-     18. CLAVIER POUR LES TESTS SUR ORDINATEUR
-  ========================================================== */
-
-  const keys = new Set();
+  /* ----------------------------------------------------------
+     22. CLAVIER ORDINATEUR
+  ---------------------------------------------------------- */
 
   window.addEventListener("keydown", (event) => {
-    if ([
+    const movementCodes = [
       "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
       "Space", "KeyW", "KeyA", "KeyS", "KeyD"
-    ].includes(event.code)) {
+    ];
+
+    if (movementCodes.includes(event.code)) {
       keys.add(event.code);
+
+      if (
+        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"]
+          .includes(event.code)
+      ) {
+        event.preventDefault();
+      }
     }
 
     if (event.code === "Escape") {
@@ -3422,48 +3252,42 @@
     }
 
     if (event.code === "KeyE") interact();
-    if (event.code === "Space") jumpPlayer();
+    if (event.code === "Space" && state.screen === "gameScreen") jumpPlayer();
   });
 
   window.addEventListener("keyup", (event) => {
     keys.delete(event.code);
   });
 
-  function updateKeyboardMovement() {
-    if (!state.player || state.paused || !state.running) return;
+  window.addEventListener("blur", () => {
+    keys.clear();
 
-    let x = 0;
-    let y = 0;
+    state.joystick.active = false;
+    state.joystick.pointerId = null;
+    state.joystick.x = 0;
+    state.joystick.y = 0;
+  });
 
-    if (keys.has("ArrowLeft") || keys.has("KeyA")) x -= 1;
-    if (keys.has("ArrowRight") || keys.has("KeyD")) x += 1;
-    if (keys.has("ArrowUp") || keys.has("KeyW")) y += 1;
-    if (keys.has("ArrowDown") || keys.has("KeyS")) y -= 1;
-
-    if (x !== 0 || y !== 0) {
-      state.joystick.x = x;
-      state.joystick.y = y;
-      state.joystick.active = true;
-    } else if (!state.joystick.pointerId && state.joystick.active) {
-      state.joystick.active = false;
-      state.joystick.x = 0;
-      state.joystick.y = 0;
-    }
-  }
-
-  /* ==========================================================
-     19. BOUCLE D'ENTRETIEN ET INITIALISATION
-  ========================================================== */
+  /* ----------------------------------------------------------
+     23. INITIALISATION GÉNÉRALE
+  ---------------------------------------------------------- */
 
   async function initializeApplication() {
-    if (initialized) {
-      showMenu();
-      return;
-    }
+    if (initialized || initializing) return;
 
-    initialized = true;
+    initializing = true;
 
     try {
+      if (missingIds.length > 0) {
+        console.warn(
+          "[FOBAS] Certains éléments HTML optionnels sont absents :",
+          missingIds
+        );
+      }
+
+      setVisible($("loadingScreen"), true);
+      setVisible($("errorScreen"), false);
+
       setText($("loadingMessage"), "Initialisation des systèmes...");
       setText($("loadingPercent"), "10 %");
 
@@ -3473,15 +3297,6 @@
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      try {
-        await openDatabase();
-      } catch (error) {
-        console.warn(
-          "[FOBAS AMOUR] IndexedDB indisponible. Le jeu peut continuer sans sauvegarde persistante.",
-          error
-        );
-      }
-
       setText($("loadingMessage"), "Préparation du moteur 3D...");
       setText($("loadingPercent"), "30 %");
 
@@ -3489,14 +3304,19 @@
         $("loadingProgress").style.width = "30%";
       }
 
+      try {
+        await openDatabase();
+      } catch (error) {
+        console.warn(
+          "[FOBAS] IndexedDB indisponible. Utilisation de la sauvegarde locale de secours.",
+          error
+        );
+      }
+
       await initializeEngine();
 
       setText($("loadingMessage"), "Préparation de votre histoire...");
-      setText($("loadingPercent"), "70 %");
-
-      if ($("loadingProgress")) {
-        $("loadingProgress").style.width = "70%";
-      }
+      setText($("loadingPercent"), "65 %");
 
       bindAllButtons();
       setupJoystick();
@@ -3505,7 +3325,7 @@
       await loadGame();
 
       if (!state.missionRuntime) {
-        buildMissionWorld(0);
+        buildMissionWorld(state.missionIndex);
       }
 
       setText($("loadingMessage"), "Votre aventure est prête !");
@@ -3515,38 +3335,92 @@
         $("loadingProgress").style.width = "100%";
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 250));
+
+      state.paused = true;
+      state.running = false;
 
       showMenu();
       updateContinueButton();
 
-      setInterval(updateKeyboardMovement, 16);
+      initialized = true;
+      initializing = false;
 
-      window.addEventListener("beforeunload", () => {
-        if (state.gameStarted) {
-          try {
-            saveGame();
-          } catch (_) {}
-        }
+      if (!window.__FOBAS_AMOUR_UNLOAD_BOUND__) {
+        window.__FOBAS_AMOUR_UNLOAD_BOUND__ = true;
 
-        stopVoice();
-        stopMusic();
-      });
+        window.addEventListener("beforeunload", () => {
+          if (state.gameStarted) {
+            try {
+              saveGame();
+            } catch (_) {}
+          }
+
+          stopVoice();
+          stopMusic();
+
+          if (jumpTimer) clearInterval(jumpTimer);
+          if (autosaveTimer) clearTimeout(autosaveTimer);
+          if (notificationTimer) clearTimeout(notificationTimer);
+          if (frameTimer) clearInterval(frameTimer);
+        });
+      }
+
+      console.info(
+        `[FOBAS INTERACTIVE] Version ${VERSION} initialisée avec ${missionData.length} missions.`
+      );
+
     } catch (error) {
       initialized = false;
+      initializing = false;
 
-      console.error("[FOBAS AMOUR] Initialisation :", error);
+      console.error("[FOBAS] Erreur d'initialisation :", error);
 
       showFatalError(
         "Impossible de démarrer le jeu",
-        `${error.message || "Erreur inconnue"}. Vérifiez que Babylon.js est chargé, que le navigateur prend en charge WebGL et que les trois fichiers du jeu sont correctement reliés.`
+        `${error.message || "Erreur inconnue"}. Vérifiez le chargement de Babylon.js, la prise en charge WebGL et les chemins des fichiers HTML, CSS et JavaScript.`
       );
     }
   }
 
-  /* ==========================================================
-     20. DÉMARRAGE
-  ========================================================== */
+  /* ----------------------------------------------------------
+     24. API PUBLIQUE DE DÉBOGAGE
+  ---------------------------------------------------------- */
+
+  window.FOBASLoveGame = {
+    version: VERSION,
+
+    getState() {
+      return {
+        screen: state.screen,
+        missionIndex: state.missionIndex,
+        completedMissions: [...state.completedMissions],
+        gameStarted: state.gameStarted,
+        paused: state.paused,
+        relationship: state.relationship,
+        missionCount: missionData.length,
+        npcCount: state.npcs.length,
+        inventory: [...state.inventory]
+      };
+    },
+
+    save: saveGame,
+    load: loadGame,
+
+    nextMission() {
+      if (state.missionIndex < missionData.length - 1) {
+        goToNextMission();
+      }
+    },
+
+    interact,
+    pause: showPause,
+    resume: resumeGame
+  };
+
+  /* ----------------------------------------------------------
+     25. DÉMARRAGE
+  ---------------------------------------------------------- */
 
   if (document.readyState === "loading") {
     document.addEventListener(
@@ -3559,5 +3433,18 @@
   }
 
 })();
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
