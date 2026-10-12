@@ -1,5 +1,3 @@
-
-
 /* ============================================================
    FOBAS INTERACTIVE — SUR L'AMOUR EN ACTION
    Fichier : appamourfobas.js
