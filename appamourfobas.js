@@ -1,67 +1,51 @@
+
 /* ============================================================
    FOBAS INTERACTIVE — SUR L'AMOUR EN ACTION
    Fichier : appamourfobas.js
-   Version : 2.0.0
-   Moteur  : Babylon.js
-   Stockage : IndexedDB + solution de secours
-   Interface : compatible avec appamourfobas.html
+   Version : 3.0.0
+   Moteur : Babylon.js
+   Compatible avec appamourfobas.html
    Auteur : MEME Selvandieu
-
-   FONCTIONNALITÉS
-   - Monde 3D généré avec Babylon.js
-   - 35 missions configurables et extensibles
-   - Personnages 3D stylisés et sélectionnables
-   - Déplacement tactile, caméra et zoom
-   - Interactions, dialogues, choix et objectifs
-   - Progression automatique entre les étapes
-   - Sauvegarde locale avec IndexedDB
-   - Paramètres, pause, reprise et notifications
-   - Synthèse vocale française si disponible
-   - Interface adaptée aux appareils mobiles
-============================================================ */
+   ============================================================ */
 
 (() => {
   "use strict";
 
   /* ==========================================================
-     1. CONFIGURATION GÉNÉRALE
+     1. CONFIGURATION
   ========================================================== */
 
-  const CONFIG = Object.freeze({
-    appName: "FOBAS — Sur l'Amour en Action",
-    version: "2.0.0",
-    databaseName: "FOBAS_SUR_AMOUR_DB",
-    databaseVersion: 1,
-    saveStore: "gameSaves",
-    settingsStore: "gameSettings",
-    saveKey: "main-save",
-    settingsKey: "main-settings",
-    autoSaveDelay: 900,
+  const CONFIG = {
+    version: "3.0.0",
+    missionCount: 35,
+    storageKey: "FOBAS_LOVE_GAME_V3",
+    settingsKey: "FOBAS_LOVE_SETTINGS_V3",
+    saveDelay: 450,
     interactionDistance: 4.2,
-    worldLimit: 95,
-    movementSpeed: 5.4,
-    runningSpeed: 9.2,
-    jumpHeight: 1.4,
-    gravity: 15,
-    touchSensitivity: 1,
-    defaultQuality: "medium",
-    missionCount: 35
-  });
+    playerSpeed: 5.0,
+    runMultiplier: 1.8,
+    jumpForce: 7.5,
+    gravity: 18,
+    cameraSensitivity: 0.003,
+    cameraMinRadius: 4,
+    cameraMaxRadius: 15,
+    worldLimit: 85,
+    autosaveInterval: 20000
+  };
 
   const $ = (id) => document.getElementById(id);
 
   const DOM = {
-    app: $("loveGameApp"),
     loadingScreen: $("loadingScreen"),
     loadingMessage: $("loadingMessage"),
     loadingProgress: $("loadingProgress"),
     loadingPercent: $("loadingPercent"),
 
     mainMenu: $("mainMenu"),
+    settingsButton: $("settingsButton"),
     newGameButton: $("newGameButton"),
     continueGameButton: $("continueGameButton"),
     missionsMenuButton: $("missionsMenuButton"),
-    settingsButton: $("settingsButton"),
     creditsButton: $("creditsButton"),
     saveStatus: $("saveStatus"),
 
@@ -70,7 +54,7 @@
     canvas: $("loveGameCanvas"),
     worldLoadingOverlay: $("worldLoadingOverlay"),
     worldLoadingText: $("worldLoadingText"),
-
+    gameTopBar: $("gameTopBar"),
     pauseButton: $("pauseButton"),
     missionNumber: $("missionNumber"),
     missionTitle: $("missionTitle"),
@@ -108,10 +92,10 @@
     savingIndicator: $("savingIndicator"),
 
     missionsScreen: $("missionsScreen"),
+    closeMissionsButton: $("closeMissionsButton"),
     missionsSummary: $("missionsSummary"),
     overallProgressBar: $("overallProgressBar"),
     missionsList: $("missionsList"),
-    closeMissionsButton: $("closeMissionsButton"),
 
     pauseScreen: $("pauseScreen"),
     resumeButton: $("resumeButton"),
@@ -156,7 +140,7 @@
   };
 
   /* ==========================================================
-     2. OUTILS GÉNÉRAUX
+     2. UTILITAIRES
   ========================================================== */
 
   const Utils = {
@@ -164,1145 +148,679 @@
       return Math.max(min, Math.min(max, value));
     },
 
-    random(min, max) {
-      return min + Math.random() * (max - min);
-    },
-
-    distance2D(a, b) {
+    distanceXZ(a, b) {
       const dx = a.x - b.x;
       const dz = a.z - b.z;
       return Math.sqrt(dx * dx + dz * dz);
     },
 
-    escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[char]);
+    random(min, max) {
+      return min + Math.random() * (max - min);
+    },
+
+    setVisible(element, visible) {
+      if (!element) return;
+      element.classList.toggle("hidden", !visible);
+      element.setAttribute("aria-hidden", visible ? "false" : "true");
     },
 
     setText(element, value) {
       if (element) element.textContent = String(value ?? "");
     },
 
-    setWidth(element, percent) {
-      if (element) {
-        element.style.width = `${Utils.clamp(percent, 0, 100)}%`;
-      }
-    },
-
-    show(element) {
+    setProgress(element, percent) {
       if (!element) return;
-      element.classList.remove("hidden");
-      element.setAttribute("aria-hidden", "false");
-    },
-
-    hide(element) {
-      if (!element) return;
-      element.classList.add("hidden");
-      element.setAttribute("aria-hidden", "true");
+      element.style.width = `${Utils.clamp(percent, 0, 100)}%`;
     },
 
     button(element, callback) {
       if (!element) return;
       element.addEventListener("click", (event) => {
         event.preventDefault();
-        callback(event);
+        try {
+          callback(event);
+        } catch (error) {
+          console.error("Erreur bouton FOBAS :", error);
+          UI.notify("Une erreur est survenue. Réessayez.");
+        }
       });
     },
 
-    color3(hex) {
-      return BABYLON.Color3.FromHexString(hex);
+    safeJSON(value, fallback = null) {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return fallback;
+      }
     },
 
-    vector(x, y, z) {
-      return new BABYLON.Vector3(x, y, z);
-    },
-
-    safeNumber(value, fallback = 0) {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : fallback;
+    async wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
   };
 
   /* ==========================================================
-     3. PERSONNAGES DISPONIBLES
-  ========================================================== */
-
-  const CHARACTERS = [
-    {
-      id: "alex",
-      name: "Alex",
-      description: "Charismatique, calme et attentionné",
-      gender: "masculin",
-      skin: "#C68662",
-      hair: "#25202B",
-      outfit: "#315A94",
-      pants: "#252F42",
-      accent: "#E8B86D",
-      avatar: "👨",
-      voicePitch: 0.88
-    },
-    {
-      id: "camille",
-      name: "Camille",
-      description: "Souriante, sensible et courageuse",
-      gender: "féminin",
-      skin: "#E0AF91",
-      hair: "#4B2925",
-      outfit: "#D96D91",
-      pants: "#693A60",
-      accent: "#F5D2A7",
-      avatar: "👩",
-      voicePitch: 1.2
-    },
-    {
-      id: "noah",
-      name: "Noah",
-      description: "Spontané, généreux et curieux",
-      gender: "masculin",
-      skin: "#8C5A3C",
-      hair: "#171719",
-      outfit: "#397D73",
-      pants: "#273A39",
-      accent: "#E7C16E",
-      avatar: "🧑",
-      voicePitch: 0.95
-    },
-    {
-      id: "lea",
-      name: "Léa",
-      description: "Créative, indépendante et chaleureuse",
-      gender: "féminin",
-      skin: "#F0C7A5",
-      hair: "#8C5131",
-      outfit: "#8C6AD7",
-      pants: "#40375B",
-      accent: "#EBCB78",
-      avatar: "👩‍🦰",
-      voicePitch: 1.25
-    },
-    {
-      id: "mika",
-      name: "Mika",
-      description: "Optimiste, drôle et plein d'énergie",
-      gender: "masculin",
-      skin: "#B77952",
-      hair: "#211C1B",
-      outfit: "#D38B48",
-      pants: "#334052",
-      accent: "#E6D6A4",
-      avatar: "🧑🏽",
-      voicePitch: 1.02
-    },
-    {
-      id: "sarah",
-      name: "Sarah",
-      description: "Élégante, douce et déterminée",
-      gender: "féminin",
-      skin: "#A86D4D",
-      hair: "#22191B",
-      outfit: "#9F4F75",
-      pants: "#37283C",
-      accent: "#F1CE83",
-      avatar: "👩🏽",
-      voicePitch: 1.16
-    }
-  ];
-
-  /* ==========================================================
-     4. MISSIONS — STRUCTURE MODIFIABLE
-
-     Pour ajouter une mission :
-     1. Ajouter un objet dans MISSION_DATA.
-     2. Définir son titre, son décor et ses étapes.
-     3. Chaque étape possède une action et un objectif.
-
-     Actions reconnues :
-     move, visit, talk, interact, collect, help,
-     sit, dance, sing, photo, listen, give, choice,
-     promise, explore, wait, hug, observe, arrive.
+     3. LES 35 MISSIONS
   ========================================================== */
 
   const MISSION_DATA = [
     {
-      id: 1,
       title: "Un regard inattendu",
-      location: "Le jardin des rencontres",
-      landscape: "garden",
-      description: "Découvrez le jardin et faites une rencontre inattendue.",
-      reward: "Une première rencontre inoubliable",
-      steps: [
-        { type: "move", text: "Avancez jusqu'à l'allée fleurie.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Approchez Camille et engagez la conversation.", npc: "camille" },
-        { type: "choice", text: "Choisissez comment vous présenter.", npc: "camille", choices: ["Avec un sourire sincère", "Avec une plaisanterie", "Avec une question sur le jardin"] },
-        { type: "visit", text: "Rejoignez le belvédère pour admirer le jardin.", target: { x: 8, z: 13 } }
-      ]
+      objective: "Rencontrez Camille près du jardin.",
+      person: "Camille",
+      place: "Le jardin romantique",
+      dialogue: "Bonjour ! Quel plaisir de vous rencontrer ici.",
+      action: "Faire connaissance"
     },
     {
-      id: 2,
-      title: "Une promenade à deux",
-      location: "Le parc romantique",
-      landscape: "park",
-      description: "Apprenez à mieux connaître votre nouvelle rencontre.",
-      reward: "Un souvenir partagé",
-      steps: [
-        { type: "talk", text: "Retrouvez Camille près du grand arbre.", npc: "camille" },
-        { type: "move", text: "Promenez-vous jusqu'au petit pont.", target: { x: 7, z: 10 } },
-        { type: "choice", text: "Choisissez un sujet de conversation.", npc: "camille", choices: ["Les rêves d'avenir", "Les voyages", "Les souvenirs d'enfance"] },
-        { type: "visit", text: "Terminez la promenade au bord de l'eau.", target: { x: -8, z: 12 } }
-      ]
+      title: "Un sourire sincère",
+      objective: "Retrouvez Lucas et échangez quelques mots.",
+      person: "Lucas",
+      place: "L'allée des fleurs",
+      dialogue: "Votre sourire vient d'embellir ma journée.",
+      action: "Échanger un sourire"
     },
     {
-      id: 3,
-      title: "Le café des confidences",
-      location: "Une terrasse ensoleillée",
-      landscape: "cafe",
-      description: "Partagez un moment chaleureux autour d'un café.",
-      reward: "Une conversation sincère",
-      steps: [
-        { type: "visit", text: "Entrez dans la zone de la terrasse.", target: { x: 0, z: 7 } },
-        { type: "talk", text: "Saluez la personne qui vous attend.", npc: "lea" },
-        { type: "interact", text: "Commandez deux boissons au comptoir.", target: { x: 4, z: 3 }, actionLabel: "Commander" },
-        { type: "choice", text: "Choisissez une boisson à partager.", npc: "lea", choices: ["Un chocolat chaud", "Un café au lait", "Un jus de fruits"] }
-      ]
+      title: "Le premier bonjour",
+      objective: "Approchez-vous de Sofia pour la saluer.",
+      person: "Sofia",
+      place: "La place centrale",
+      dialogue: "Bonjour ! Je suis ravie que vous soyez venu.",
+      action: "Saluer Sofia"
     },
     {
-      id: 4,
-      title: "Une lettre mystérieuse",
-      location: "La maison aux volets bleus",
-      landscape: "house",
-      description: "Découvrez le message laissé devant la maison.",
-      reward: "Le secret de la lettre",
-      steps: [
-        { type: "move", text: "Approchez de la maison aux volets bleus.", target: { x: 0, z: 9 } },
-        { type: "collect", text: "Récupérez la lettre près de la porte.", target: { x: 2, z: 7 }, actionLabel: "Prendre la lettre" },
-        { type: "talk", text: "Montrez la lettre à Alex.", npc: "alex" },
-        { type: "choice", text: "Décidez de la suite.", npc: "alex", choices: ["Lire la lettre ensemble", "Chercher son auteur", "Garder le message pour plus tard"] }
-      ]
+      title: "Une rencontre imprévue",
+      objective: "Allez rencontrer Gabriel.",
+      person: "Gabriel",
+      place: "Le pavillon",
+      dialogue: "Je ne m'attendais pas à faire une aussi belle rencontre.",
+      action: "Faire connaissance"
     },
     {
-      id: 5,
-      title: "Le marché des couleurs",
-      location: "Le marché du centre-ville",
-      landscape: "market",
-      description: "Explorez les étals et préparez une petite surprise.",
-      reward: "Un cadeau attentionné",
-      steps: [
-        { type: "visit", text: "Rejoignez l'entrée du marché.", target: { x: 0, z: 9 } },
-        { type: "collect", text: "Choisissez un bouquet de fleurs.", target: { x: -5, z: 5 }, actionLabel: "Prendre les fleurs" },
-        { type: "talk", text: "Retrouvez Sarah près des étals.", npc: "sarah" },
-        { type: "give", text: "Offrez le bouquet à Sarah.", npc: "sarah", actionLabel: "Offrir le bouquet" }
-      ]
+      title: "Le jardin secret",
+      objective: "Retrouvez Camille dans le jardin.",
+      person: "Camille",
+      place: "Le jardin secret",
+      dialogue: "Cet endroit est magnifique, n'est-ce pas ?",
+      action: "Découvrir le jardin"
     },
     {
-      id: 6,
-      title: "Le chemin vers la plage",
-      location: "La route côtière",
-      landscape: "coast",
-      description: "Suivez le sentier qui mène à la mer.",
-      reward: "Un paysage magnifique",
-      steps: [
-        { type: "move", text: "Suivez le sentier côtier.", target: { x: 0, z: 10 } },
-        { type: "visit", text: "Rejoignez le bord de mer.", target: { x: 8, z: 15 } },
-        { type: "talk", text: "Retrouvez Noah face aux vagues.", npc: "noah" },
-        { type: "observe", text: "Approchez-vous du point de vue sur la mer.", target: { x: -7, z: 17 }, actionLabel: "Admirer le paysage" }
-      ]
+      title: "Une conversation agréable",
+      objective: "Discutez avec Lucas.",
+      person: "Lucas",
+      place: "Le banc des rencontres",
+      dialogue: "J'aime les conversations qui nous permettent de mieux nous connaître.",
+      action: "Discuter"
     },
     {
-      id: 7,
-      title: "Le coucher du soleil",
-      location: "La plage dorée",
-      landscape: "beach",
-      description: "Admirez les dernières couleurs du jour.",
-      reward: "Un moment de tranquillité",
-      steps: [
-        { type: "move", text: "Marchez vers le sable doré.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Rejoignez Léa sur la plage.", npc: "lea" },
-        { type: "observe", text: "Installez-vous au point de vue.", target: { x: 7, z: 13 }, actionLabel: "Admirer le coucher du soleil" },
-        { type: "choice", text: "Partagez ce que vous ressentez.", npc: "lea", choices: ["C'est un moment paisible", "J'aimerais revenir ici", "Ce paysage est magnifique"] }
-      ]
+      title: "Le langage des fleurs",
+      objective: "Retrouvez Sofia près des fleurs.",
+      person: "Sofia",
+      place: "Le parterre fleuri",
+      dialogue: "Chaque fleur raconte une histoire différente.",
+      action: "Parler des fleurs"
     },
     {
-      id: 8,
-      title: "La promesse du phare",
-      location: "Le vieux phare",
-      landscape: "lighthouse",
-      description: "Rejoignez le phare et découvrez son histoire.",
-      reward: "Une promesse sincère",
-      steps: [
-        { type: "visit", text: "Approchez du pied du phare.", target: { x: 0, z: 9 } },
-        { type: "talk", text: "Parlez au gardien du phare.", npc: "noah" },
-        { type: "move", text: "Rejoignez le point de vue en hauteur.", target: { x: 7, z: 13 } },
-        { type: "promise", text: "Faites une promesse pour l'avenir.", npc: "noah", actionLabel: "Faire une promesse" }
-      ]
+      title: "Une promesse d'amitié",
+      objective: "Rencontrez Gabriel et parlez d'amitié.",
+      person: "Gabriel",
+      place: "La fontaine",
+      dialogue: "Une belle amitié commence souvent par un simple geste.",
+      action: "Partager une pensée"
     },
     {
-      id: 9,
-      title: "Un repas fait avec le cœur",
-      location: "La cuisine familiale",
-      landscape: "house",
-      description: "Préparez un repas simple avec une personne chère.",
-      reward: "Un repas partagé",
-      steps: [
-        { type: "visit", text: "Rejoignez la cuisine.", target: { x: 0, z: 6 } },
-        { type: "interact", text: "Préparez les ingrédients sur la table.", target: { x: 4, z: 4 }, actionLabel: "Préparer les ingrédients" },
-        { type: "talk", text: "Demandez un coup de main à Camille.", npc: "camille" },
-        { type: "interact", text: "Terminez la préparation du repas.", target: { x: -3, z: 4 }, actionLabel: "Terminer le repas" }
-      ]
+      title: "Un moment de confiance",
+      objective: "Retrouvez Camille.",
+      person: "Camille",
+      place: "Le sentier paisible",
+      dialogue: "La confiance se construit avec le temps et la sincérité.",
+      action: "Parler de confiance"
     },
     {
-      id: 10,
-      title: "Le dîner aux chandelles",
-      location: "La salle à manger",
-      landscape: "restaurant",
-      description: "Organisez un dîner dans une ambiance chaleureuse.",
-      reward: "Un dîner réussi",
-      steps: [
-        { type: "visit", text: "Rejoignez la table préparée.", target: { x: 0, z: 7 } },
-        { type: "interact", text: "Allumez les bougies.", target: { x: 0, z: 5 }, actionLabel: "Allumer les bougies" },
-        { type: "talk", text: "Accueillez votre invitée.", npc: "camille" },
-        { type: "choice", text: "Choisissez un sujet de discussion.", npc: "camille", choices: ["Les projets communs", "La musique", "Les plus beaux voyages"] }
-      ]
+      title: "Le plaisir de partager",
+      objective: "Allez parler à Lucas.",
+      person: "Lucas",
+      place: "La terrasse",
+      dialogue: "Les meilleurs moments sont ceux que nous partageons.",
+      action: "Partager un moment"
     },
     {
-      id: 11,
-      title: "Le bal des lumières",
-      location: "La place illuminée",
-      landscape: "festival",
-      description: "Découvrez la fête et partagez une danse.",
-      reward: "Une danse mémorable",
-      steps: [
-        { type: "visit", text: "Entrez sur la place du festival.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Retrouvez Mika près des lumières.", npc: "mika" },
-        { type: "dance", text: "Partagez une danse au centre de la place.", target: { x: 0, z: 3 }, actionLabel: "Danser ensemble" },
-        { type: "observe", text: "Admirez les décorations du festival.", target: { x: 7, z: 10 }, actionLabel: "Admirer les lumières" }
-      ]
+      title: "Une surprise délicate",
+      objective: "Retrouvez Sofia.",
+      person: "Sofia",
+      place: "Le kiosque",
+      dialogue: "Les petites attentions peuvent rendre une journée spéciale.",
+      action: "Préparer une surprise"
     },
     {
-      id: 12,
-      title: "Une mélodie pour deux",
-      location: "Le kiosque musical",
-      landscape: "park",
-      description: "Retrouvez une mélodie qui vous rappelle un souvenir.",
-      reward: "Une mélodie partagée",
-      steps: [
-        { type: "visit", text: "Rejoignez le kiosque musical.", target: { x: 0, z: 7 } },
-        { type: "talk", text: "Parlez de musique avec Léa.", npc: "lea" },
-        { type: "sing", text: "Lancez une petite chanson.", npc: "lea", actionLabel: "Chanter" },
-        { type: "choice", text: "Choisissez la prochaine mélodie.", npc: "lea", choices: ["Une chanson douce", "Une chanson joyeuse", "Une chanson nostalgique"] }
-      ]
+      title: "L'écoute du cœur",
+      objective: "Discutez avec Gabriel.",
+      person: "Gabriel",
+      place: "Le jardin calme",
+      dialogue: "Écouter sincèrement est une belle manière de montrer son affection.",
+      action: "Écouter"
     },
     {
-      id: 13,
-      title: "Le voyage imprévu",
-      location: "La gare des voyageurs",
-      landscape: "station",
-      description: "Préparez un voyage improvisé.",
-      reward: "Un billet pour l'aventure",
-      steps: [
-        { type: "visit", text: "Rejoignez le hall de la gare.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Retrouvez Alex devant les départs.", npc: "alex" },
-        { type: "interact", text: "Consultez le panneau des destinations.", target: { x: 5, z: 6 }, actionLabel: "Consulter les destinations" },
-        { type: "choice", text: "Choisissez votre destination.", npc: "alex", choices: ["Une ville au bord de mer", "Un village de montagne", "Une capitale animée"] }
-      ]
+      title: "Des souvenirs heureux",
+      objective: "Retrouvez Camille.",
+      person: "Camille",
+      place: "L'allée des souvenirs",
+      dialogue: "Les bons souvenirs nous accompagnent longtemps.",
+      action: "Évoquer un souvenir"
     },
     {
-      id: 14,
-      title: "Le village des souvenirs",
-      location: "Le vieux village",
-      landscape: "village",
-      description: "Explorez les ruelles d'un village plein de charme.",
-      reward: "Une histoire retrouvée",
-      steps: [
-        { type: "explore", text: "Explorez la ruelle principale.", target: { x: 0, z: 9 } },
-        { type: "visit", text: "Rejoignez la vieille fontaine.", target: { x: 8, z: 7 } },
-        { type: "talk", text: "Écoutez l'histoire de Sarah.", npc: "sarah" },
-        { type: "observe", text: "Contemplez les maisons anciennes.", target: { x: -7, z: 11 }, actionLabel: "Observer les maisons" }
-      ]
+      title: "Une promenade ensemble",
+      objective: "Rejoignez Lucas pour une promenade.",
+      person: "Lucas",
+      place: "Le chemin du parc",
+      dialogue: "Marcher ensemble permet parfois de mieux se comprendre.",
+      action: "Faire une promenade"
     },
     {
-      id: 15,
-      title: "La photographie parfaite",
-      location: "Le jardin des roses",
-      landscape: "garden",
-      description: "Créez un souvenir photographique.",
-      reward: "Un souvenir à conserver",
-      steps: [
-        { type: "visit", text: "Rejoignez le jardin des roses.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Demandez à Noah de poser avec vous.", npc: "noah" },
-        { type: "photo", text: "Prenez une photo souvenir.", target: { x: 4, z: 11 }, actionLabel: "Prendre la photo" },
-        { type: "choice", text: "Choisissez le titre de la photo.", npc: "noah", choices: ["Un jour heureux", "Deux sourires", "Un souvenir précieux"] }
-      ]
+      title: "Le courage de parler",
+      objective: "Allez rencontrer Sofia.",
+      person: "Sofia",
+      place: "La roseraie",
+      dialogue: "Il faut parfois du courage pour exprimer ce que l'on ressent.",
+      action: "Exprimer ses sentiments"
     },
     {
-      id: 16,
-      title: "Une journée solidaire",
-      location: "La place communautaire",
-      landscape: "village",
-      description: "Aidez les habitants et découvrez la force de l'entraide.",
-      reward: "La gratitude des habitants",
-      steps: [
-        { type: "visit", text: "Rejoignez la place communautaire.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Écoutez la demande de Sarah.", npc: "sarah" },
-        { type: "help", text: "Aidez à préparer les provisions.", target: { x: -5, z: 5 }, actionLabel: "Préparer les provisions" },
-        { type: "give", text: "Remettez les provisions à Sarah.", npc: "sarah", actionLabel: "Remettre les provisions" }
-      ]
+      title: "La beauté de la sincérité",
+      objective: "Discutez avec Gabriel.",
+      person: "Gabriel",
+      place: "La place fleurie",
+      dialogue: "La sincérité donne de la valeur aux paroles.",
+      action: "Parler avec sincérité"
     },
     {
-      id: 17,
-      title: "La surprise d'anniversaire",
-      location: "La maison décorée",
-      landscape: "house",
-      description: "Préparez une surprise pour une personne importante.",
-      reward: "Un anniversaire réussi",
-      steps: [
-        { type: "collect", text: "Récupérez les décorations.", target: { x: -4, z: 5 }, actionLabel: "Prendre les décorations" },
-        { type: "interact", text: "Décorez la pièce principale.", target: { x: 0, z: 7 }, actionLabel: "Décorer la pièce" },
-        { type: "talk", text: "Invitez Léa à découvrir la surprise.", npc: "lea" },
-        { type: "choice", text: "Choisissez vos mots pour l'occasion.", npc: "lea", choices: ["Tu comptes beaucoup pour moi", "Je te souhaite beaucoup de bonheur", "Que cette journée soit inoubliable"] }
-      ]
+      title: "Un geste attentionné",
+      objective: "Retrouvez Camille.",
+      person: "Camille",
+      place: "Le petit pont",
+      dialogue: "Un geste attentionné peut illuminer une journée.",
+      action: "Faire attention à l'autre"
     },
     {
-      id: 18,
-      title: "Le sentier de la montagne",
-      location: "Les hauteurs verdoyantes",
-      landscape: "mountain",
-      description: "Parcourez un sentier et profitez de la vue.",
-      reward: "La beauté des hauteurs",
-      steps: [
-        { type: "move", text: "Suivez le sentier de montagne.", target: { x: 0, z: 10 } },
-        { type: "help", text: "Aidez Mika à franchir le passage.", npc: "mika", actionLabel: "Aider Mika" },
-        { type: "visit", text: "Atteignez le belvédère.", target: { x: 8, z: 15 } },
-        { type: "observe", text: "Admirez la vallée.", target: { x: -6, z: 17 }, actionLabel: "Admirer la vallée" }
-      ]
+      title: "Le respect des différences",
+      objective: "Allez parler à Lucas.",
+      person: "Lucas",
+      place: "Le jardin ouvert",
+      dialogue: "Nous sommes différents, et c'est aussi ce qui rend les rencontres enrichissantes.",
+      action: "Parler du respect"
     },
     {
-      id: 19,
-      title: "La nuit sous les étoiles",
-      location: "Le campement paisible",
-      landscape: "camp",
-      description: "Installez-vous dans un lieu calme sous le ciel nocturne.",
-      reward: "Une soirée étoilée",
-      steps: [
-        { type: "visit", text: "Rejoignez le campement.", target: { x: 0, z: 7 } },
-        { type: "interact", text: "Installez les couvertures.", target: { x: -3, z: 5 }, actionLabel: "Installer les couvertures" },
-        { type: "talk", text: "Parlez avec Alex autour du campement.", npc: "alex" },
-        { type: "observe", text: "Levez les yeux vers les étoiles.", target: { x: 6, z: 9 }, actionLabel: "Observer les étoiles" }
-      ]
+      title: "L'art de comprendre",
+      objective: "Retrouvez Sofia.",
+      person: "Sofia",
+      place: "Le pavillon fleuri",
+      dialogue: "Comprendre quelqu'un commence par prendre le temps de l'écouter.",
+      action: "Mieux se comprendre"
     },
     {
-      id: 20,
-      title: "Les mots du cœur",
-      location: "Le balcon fleuri",
-      landscape: "balcony",
-      description: "Exprimez vos sentiments avec sincérité et respect.",
-      reward: "Des mots sincères",
-      steps: [
-        { type: "visit", text: "Rejoignez le balcon fleuri.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Retrouvez Camille.", npc: "camille" },
-        { type: "choice", text: "Choisissez comment exprimer vos sentiments.", npc: "camille", choices: ["Je suis heureux de te connaître", "J'apprécie chaque moment partagé", "J'aimerais continuer à te découvrir"] },
-        { type: "promise", text: "Promettez de rester honnête et attentionné.", npc: "camille", actionLabel: "Faire une promesse" }
-      ]
+      title: "Une parole encourageante",
+      objective: "Discutez avec Gabriel.",
+      person: "Gabriel",
+      place: "Le jardin des rêves",
+      dialogue: "Quelques paroles encourageantes peuvent donner beaucoup de force.",
+      action: "Encourager"
     },
     {
-      id: 21,
-      title: "Le jardin à reconstruire",
-      location: "Le jardin communautaire",
-      landscape: "garden",
-      description: "Rendez au jardin sa beauté grâce au travail collectif.",
-      reward: "Un jardin renouvelé",
-      steps: [
-        { type: "visit", text: "Inspectez le jardin.", target: { x: 0, z: 8 } },
-        { type: "collect", text: "Récupérez les outils de jardinage.", target: { x: -4, z: 5 }, actionLabel: "Prendre les outils" },
-        { type: "help", text: "Plantez les fleurs avec Sarah.", npc: "sarah", actionLabel: "Planter les fleurs" },
-        { type: "observe", text: "Admirez le jardin rénové.", target: { x: 6, z: 11 }, actionLabel: "Admirer le jardin" }
-      ]
+      title: "La force du pardon",
+      objective: "Retrouvez Camille.",
+      person: "Camille",
+      place: "Le sentier du lac",
+      dialogue: "Le pardon peut ouvrir la voie à une nouvelle compréhension.",
+      action: "Parler du pardon"
     },
     {
-      id: 22,
-      title: "Une journée de pluie",
-      location: "Le salon chaleureux",
-      landscape: "house",
-      description: "Transformez une journée pluvieuse en un moment agréable.",
-      reward: "Un souvenir chaleureux",
-      steps: [
-        { type: "visit", text: "Entrez dans le salon.", target: { x: 0, z: 7 } },
-        { type: "interact", text: "Préparez une boisson chaude.", target: { x: 4, z: 4 }, actionLabel: "Préparer une boisson" },
-        { type: "talk", text: "Rejoignez Léa pour discuter.", npc: "lea" },
-        { type: "choice", text: "Choisissez une activité.", npc: "lea", choices: ["Jouer à un jeu de société", "Écouter de la musique", "Raconter des histoires"] }
-      ]
+      title: "Une confiance renouvelée",
+      objective: "Allez rencontrer Lucas.",
+      person: "Lucas",
+      place: "La clairière",
+      dialogue: "La confiance se nourrit de respect et de cohérence.",
+      action: "Renforcer la confiance"
     },
     {
-      id: 23,
-      title: "La fête du village",
-      location: "La grande place",
-      landscape: "festival",
-      description: "Participez aux préparatifs et à la fête.",
-      reward: "La joie de la communauté",
-      steps: [
-        { type: "visit", text: "Rejoignez la grande place.", target: { x: 0, z: 8 } },
-        { type: "help", text: "Aidez Mika à préparer les décorations.", npc: "mika", actionLabel: "Préparer les décorations" },
-        { type: "dance", text: "Participez à la danse collective.", target: { x: 3, z: 4 }, actionLabel: "Participer à la danse" },
-        { type: "talk", text: "Remerciez les participants.", npc: "mika" }
-      ]
+      title: "Un rêve partagé",
+      objective: "Retrouvez Sofia.",
+      person: "Sofia",
+      place: "Le belvédère",
+      dialogue: "Parler de nos rêves nous aide à imaginer l'avenir.",
+      action: "Partager un rêve"
     },
     {
-      id: 24,
-      title: "Le cadeau inattendu",
-      location: "La boutique artisanale",
-      landscape: "market",
-      description: "Choisissez un cadeau qui exprime votre attention.",
-      reward: "Un cadeau plein de sens",
-      steps: [
-        { type: "visit", text: "Entrez dans la boutique artisanale.", target: { x: 0, z: 7 } },
-        { type: "collect", text: "Choisissez un objet artisanal.", target: { x: 4, z: 4 }, actionLabel: "Choisir le cadeau" },
-        { type: "talk", text: "Retrouvez Sarah à la sortie.", npc: "sarah" },
-        { type: "give", text: "Offrez le cadeau choisi.", npc: "sarah", actionLabel: "Offrir le cadeau" }
-      ]
+      title: "Le bonheur des petites choses",
+      objective: "Discutez avec Gabriel.",
+      person: "Gabriel",
+      place: "Le jardin lumineux",
+      dialogue: "Le bonheur se cache parfois dans les choses les plus simples.",
+      action: "Parler du bonheur"
     },
     {
-      id: 25,
-      title: "Une lettre d'excuses",
-      location: "Le jardin tranquille",
-      landscape: "garden",
-      description: "Apprenez à reconnaître une erreur et à dialoguer.",
-      reward: "Un pas vers la réconciliation",
-      steps: [
-        { type: "move", text: "Rejoignez le banc du jardin.", target: { x: -3, z: 7 } },
-        { type: "talk", text: "Retrouvez Noah pour discuter.", npc: "noah" },
-        { type: "choice", text: "Choisissez une réponse respectueuse.", npc: "noah", choices: ["Reconnaître son erreur", "Écouter d'abord", "Proposer une solution"] },
-        { type: "promise", text: "Engagez-vous à mieux communiquer.", npc: "noah", actionLabel: "Confirmer son engagement" }
-      ]
+      title: "Le temps de la réflexion",
+      objective: "Retrouvez Camille.",
+      person: "Camille",
+      place: "Le banc tranquille",
+      dialogue: "Prendre le temps de réfléchir aide à choisir avec sagesse.",
+      action: "Réfléchir ensemble"
     },
     {
-      id: 26,
-      title: "La route des découvertes",
-      location: "La campagne verdoyante",
-      landscape: "countryside",
-      description: "Explorez plusieurs points de vue dans la campagne.",
-      reward: "Un nouvel horizon",
-      steps: [
-        { type: "visit", text: "Rejoignez le vieux chemin.", target: { x: 0, z: 9 } },
-        { type: "explore", text: "Découvrez le petit pont.", target: { x: 8, z: 12 } },
-        { type: "talk", text: "Retrouvez Alex près de la rivière.", npc: "alex" },
-        { type: "visit", text: "Terminez au belvédère.", target: { x: -7, z: 15 } }
-      ]
+      title: "Un choix important",
+      objective: "Allez parler à Lucas.",
+      person: "Lucas",
+      place: "Le carrefour du parc",
+      dialogue: "Chaque choix mérite attention et responsabilité.",
+      action: "Discuter d'un choix"
     },
     {
-      id: 27,
-      title: "Le spectacle de talents",
-      location: "La scène du festival",
-      landscape: "festival",
-      description: "Encouragez vos amis et participez au spectacle.",
-      reward: "Une ovation chaleureuse",
-      steps: [
-        { type: "visit", text: "Rejoignez la scène.", target: { x: 0, z: 7 } },
-        { type: "talk", text: "Encouragez Mika avant son passage.", npc: "mika" },
-        { type: "sing", text: "Participez à un refrain.", npc: "mika", actionLabel: "Chanter avec Mika" },
-        { type: "choice", text: "Choisissez votre message de soutien.", npc: "mika", choices: ["Bravo pour ton courage", "Tu as donné le meilleur de toi-même", "Quel beau spectacle !"] }
-      ]
+      title: "La valeur de l'engagement",
+      objective: "Retrouvez Sofia.",
+      person: "Sofia",
+      place: "Le jardin des promesses",
+      dialogue: "L'engagement prend tout son sens lorsqu'il est libre et sincère.",
+      action: "Parler d'engagement"
     },
     {
-      id: 28,
-      title: "Le voyage en bateau",
-      location: "Le petit port",
-      landscape: "harbor",
-      description: "Découvrez le port et préparez une petite excursion.",
-      reward: "Un voyage paisible",
-      steps: [
-        { type: "visit", text: "Rejoignez le quai.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Parlez avec Léa du voyage.", npc: "lea" },
-        { type: "interact", text: "Préparez le départ.", target: { x: 5, z: 5 }, actionLabel: "Préparer le départ" },
-        { type: "observe", text: "Contemplez la mer depuis le quai.", target: { x: -6, z: 12 }, actionLabel: "Observer la mer" }
-      ]
+      title: "Construire ensemble",
+      objective: "Discutez avec Gabriel.",
+      person: "Gabriel",
+      place: "La grande terrasse",
+      dialogue: "Construire quelque chose ensemble demande du dialogue et du respect.",
+      action: "Imaginer un projet"
     },
     {
-      id: 29,
-      title: "Les lumières de la ville",
-      location: "Le quartier animé",
-      landscape: "city",
-      description: "Explorez la ville et ses rues illuminées.",
-      reward: "Une soirée en ville",
-      steps: [
-        { type: "explore", text: "Explorez la rue principale.", target: { x: 0, z: 9 } },
-        { type: "visit", text: "Rejoignez la place illuminée.", target: { x: 8, z: 8 } },
-        { type: "talk", text: "Retrouvez Sarah sur la place.", npc: "sarah" },
-        { type: "photo", text: "Prenez une photo des lumières.", target: { x: -6, z: 11 }, actionLabel: "Photographier la ville" }
-      ]
+      title: "Un cœur reconnaissant",
+      objective: "Retrouvez Camille.",
+      person: "Camille",
+      place: "La roseraie centrale",
+      dialogue: "Exprimer sa gratitude fait du bien à celui qui la reçoit comme à celui qui la donne.",
+      action: "Exprimer sa gratitude"
     },
     {
-      id: 30,
-      title: "Le projet commun",
-      location: "L'atelier créatif",
-      landscape: "workshop",
-      description: "Construisez un petit projet en équipe.",
-      reward: "Une réussite collective",
-      steps: [
-        { type: "visit", text: "Entrez dans l'atelier.", target: { x: 0, z: 7 } },
-        { type: "talk", text: "Discutez du projet avec Noah.", npc: "noah" },
-        { type: "interact", text: "Assemblez les éléments du projet.", target: { x: 4, z: 4 }, actionLabel: "Assembler le projet" },
-        { type: "help", text: "Terminez le projet ensemble.", npc: "noah", actionLabel: "Terminer le projet" }
-      ]
+      title: "La force de la solidarité",
+      objective: "Allez rencontrer Lucas.",
+      person: "Lucas",
+      place: "La place de l'amitié",
+      dialogue: "S'entraider rend les moments difficiles plus faciles à traverser.",
+      action: "Parler de solidarité"
     },
     {
-      id: 31,
-      title: "Une décision importante",
-      location: "Le belvédère",
-      landscape: "mountain",
-      description: "Discutez des décisions qui peuvent changer l'avenir.",
-      reward: "Une décision réfléchie",
-      steps: [
-        { type: "visit", text: "Rejoignez le belvédère.", target: { x: 0, z: 9 } },
-        { type: "talk", text: "Retrouvez Camille.", npc: "camille" },
-        { type: "choice", text: "Choisissez une priorité pour l'avenir.", npc: "camille", choices: ["Construire un projet commun", "Prendre le temps de réfléchir", "Explorer de nouvelles possibilités"] },
-        { type: "promise", text: "Confirmez votre décision.", npc: "camille", actionLabel: "Confirmer la décision" }
-      ]
+      title: "Le courage d'avancer",
+      objective: "Retrouvez Sofia.",
+      person: "Sofia",
+      place: "Le chemin de l'espoir",
+      dialogue: "Chaque nouvelle étape offre une occasion d'apprendre.",
+      action: "Parler d'espoir"
     },
     {
-      id: 32,
-      title: "La grande réconciliation",
-      location: "Le jardin des retrouvailles",
-      landscape: "garden",
-      description: "Rétablissez le dialogue et apprenez à vous écouter.",
-      reward: "Une relation apaisée",
-      steps: [
-        { type: "visit", text: "Rejoignez le jardin des retrouvailles.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Écoutez les explications de Noah.", npc: "noah" },
-        { type: "choice", text: "Choisissez une réponse constructive.", npc: "noah", choices: ["Écouter sans interrompre", "Expliquer calmement son point de vue", "Chercher un compromis"] },
-        { type: "promise", text: "Confirmez votre volonté d'avancer.", npc: "noah", actionLabel: "Sceller la réconciliation" }
-      ]
+      title: "Une vision commune",
+      objective: "Discutez avec Gabriel.",
+      person: "Gabriel",
+      place: "Le jardin de l'avenir",
+      dialogue: "Une vision commune se construit en partageant ses idées.",
+      action: "Imaginer l'avenir"
     },
     {
-      id: 33,
-      title: "Le rêve partagé",
-      location: "La terrasse panoramique",
-      landscape: "balcony",
-      description: "Imaginez ensemble un avenir riche en possibilités.",
-      reward: "Un rêve commun",
-      steps: [
-        { type: "visit", text: "Rejoignez la terrasse panoramique.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Parlez de vos rêves avec Léa.", npc: "lea" },
-        { type: "choice", text: "Choisissez un rêve à poursuivre.", npc: "lea", choices: ["Voyager ensemble", "Créer un projet utile", "Découvrir de nouveaux horizons"] },
-        { type: "promise", text: "Définissez la première étape du projet.", npc: "lea", actionLabel: "Définir la première étape" }
-      ]
+      title: "Le sens de l'amour",
+      objective: "Retrouvez Camille pour une dernière conversation.",
+      person: "Camille",
+      place: "Le jardin du cœur",
+      dialogue: "L'amour véritable se nourrit de respect, de liberté, d'écoute et de bienveillance.",
+      action: "Parler de l'amour"
     },
     {
-      id: 34,
-      title: "La célébration des souvenirs",
-      location: "Le jardin des souvenirs",
-      landscape: "festival",
-      description: "Revivez les étapes importantes de votre aventure.",
-      reward: "Des souvenirs précieux",
-      steps: [
-        { type: "visit", text: "Rejoignez le jardin de célébration.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Retrouvez vos amis.", npc: "mika" },
-        { type: "photo", text: "Prenez une photo de groupe.", target: { x: 5, z: 10 }, actionLabel: "Photographier le groupe" },
-        { type: "dance", text: "Partagez la danse de célébration.", target: { x: 0, z: 3 }, actionLabel: "Célébrer ensemble" }
-      ]
-    },
-    {
-      id: 35,
       title: "Sur l'Amour en Action",
-      location: "Le grand jardin de l'avenir",
-      landscape: "grandfinale",
-      description: "Terminez votre aventure en célébrant les liens, les choix et les souvenirs.",
-      reward: "Le chapitre final de votre aventure",
-      steps: [
-        { type: "visit", text: "Rejoignez le jardin de l'avenir.", target: { x: 0, z: 8 } },
-        { type: "talk", text: "Retrouvez Camille pour le dernier dialogue.", npc: "camille" },
-        { type: "choice", text: "Choisissez le message qui résume votre aventure.", npc: "camille", choices: ["L'amour se construit par les actes", "Le respect rend les liens plus forts", "Chaque jour offre une nouvelle possibilité"] },
-        { type: "observe", text: "Rejoignez le belvédère et contemplez votre chemin.", target: { x: 8, z: 15 }, actionLabel: "Contempler l'avenir" }
-      ]
+      objective: "Retrouvez tous les beaux souvenirs de votre aventure avec Lucas.",
+      person: "Lucas",
+      place: "La grande place des souvenirs",
+      dialogue: "Merci d'avoir parcouru cette aventure. Que la bienveillance et le respect continuent de guider vos choix.",
+      action: "Achever l'aventure"
     }
   ];
 
   /* ==========================================================
-     5. ÉTAT DU JEU
+     4. ÉTAT DU JEU
   ========================================================== */
 
   const State = {
-    engine: null,
-    scene: null,
-    camera: null,
-    player: null,
-    playerVisual: null,
-    playerCharacterId: "alex",
-    npcs: [],
-    worldObjects: [],
-    currentTarget: null,
-    activeMissionIndex: 0,
-    activeStepIndex: 0,
-    completedMissions: [],
-    currentChoices: [],
-    lastDialogue: "",
-    dialogueOpen: false,
+    active: false,
     paused: false,
-    gameStarted: false,
-    gameReady: false,
-    ending: false,
-    isRunning: false,
-    isJumping: false,
-    verticalVelocity: 0,
-    movement: { x: 0, z: 0 },
-    joystickPointerId: null,
-    joystickOrigin: { x: 0, y: 0 },
-    cameraPointerId: null,
-    cameraPointerLast: { x: 0, y: 0 },
-    activePointers: new Map(),
-    pinchDistance: 0,
-    autoSaveTimer: null,
-    notificationTimer: null,
-    saving: false,
+    started: false,
+    completed: false,
+    missionIndex: 0,
+    completedMissions: [],
+    playerPosition: { x: 0, z: 0 },
+    nearbyNPC: null,
+    dialogueOpen: false,
+    dialogueStep: 0,
+    lastInteractionTime: 0,
+    worldReady: false,
+    engineReady: false,
+    gameTime: 0,
+    lastSave: 0,
+    confirmationAction: null,
+    saveTimer: null,
+    frameCount: 0,
+    error: null
+  };
+
+  /* ==========================================================
+     5. STOCKAGE INDEXEDDB AVEC SOLUTION DE REPLI
+  ========================================================== */
+
+  const Storage = {
     db: null,
-    dbAvailable: false,
-    memoryStore: new Map(),
-    settings: {
+    supported: typeof indexedDB !== "undefined",
+
+    async open() {
+      if (!this.supported) return null;
+      if (this.db) return this.db;
+
+      return new Promise((resolve) => {
+        try {
+          const request = indexedDB.open("FOBAS_LOVE_DATABASE", 1);
+
+          request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains("saves")) {
+              db.createObjectStore("saves");
+            }
+          };
+
+          request.onsuccess = () => {
+            this.db = request.result;
+            resolve(this.db);
+          };
+
+          request.onerror = () => resolve(null);
+          request.onblocked = () => resolve(null);
+        } catch {
+          resolve(null);
+        }
+      });
+    },
+
+    async save(key, data) {
+      const serialized = JSON.stringify(data);
+      let db = await this.open();
+
+      if (db) {
+        const success = await new Promise(resolve => {
+          try {
+            const transaction = db.transaction("saves", "readwrite");
+            transaction.objectStore("saves").put(serialized, key);
+            transaction.oncomplete = () => resolve(true);
+            transaction.onerror = () => resolve(false);
+            transaction.onabort = () => resolve(false);
+          } catch {
+            resolve(false);
+          }
+        });
+
+        if (success) return true;
+      }
+
+      try {
+        localStorage.setItem(key, serialized);
+        return true;
+      } catch (error) {
+        console.warn("Sauvegarde locale indisponible :", error);
+        return false;
+      }
+    },
+
+    async load(key) {
+      const db = await this.open();
+
+      if (db) {
+        const result = await new Promise(resolve => {
+          try {
+            const request = db.transaction("saves", "readonly")
+              .objectStore("saves").get(key);
+
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => resolve(null);
+          } catch {
+            resolve(null);
+          }
+        });
+
+        if (result) {
+          return Utils.safeJSON(result, null);
+        }
+      }
+
+      try {
+        return Utils.safeJSON(localStorage.getItem(key), null);
+      } catch {
+        return null;
+      }
+    },
+
+    async hasSave() {
+      const data = await this.load(CONFIG.storageKey);
+      return Boolean(data && data.started);
+    },
+
+    async remove(key) {
+      const db = await this.open();
+
+      if (db) {
+        await new Promise(resolve => {
+          try {
+            const transaction = db.transaction("saves", "readwrite");
+            transaction.objectStore("saves").delete(key);
+            transaction.oncomplete = resolve;
+            transaction.onerror = resolve;
+          } catch {
+            resolve();
+          }
+        });
+      }
+
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // Stockage navigateur indisponible.
+      }
+    }
+  };
+
+  /* ==========================================================
+     6. PARAMÈTRES
+  ========================================================== */
+
+  const Settings = {
+    values: {
       voice: true,
       music: true,
       subtitles: true,
       quality: "medium",
       sensitivity: 1
     },
-    lastFrameTime: 0,
-    animationTime: 0,
-    playerAction: "idle",
-    confirmationCallback: null,
-    sceneGeneration: 0
-  };
 
-  /* ==========================================================
-     6. SAUVEGARDE INDEXEDDB
-  ========================================================== */
+    async load() {
+      let data = await Storage.load(CONFIG.settingsKey);
 
-  const Storage = {
-    async open() {
-      if (!("indexedDB" in window)) {
-        State.dbAvailable = false;
-        return false;
-      }
-
-      return new Promise((resolve) => {
-        let request;
-
+      if (!data) {
         try {
-          request = indexedDB.open(
-            CONFIG.databaseName,
-            CONFIG.databaseVersion
+          data = Utils.safeJSON(
+            localStorage.getItem(CONFIG.settingsKey),
+            null
           );
-        } catch (error) {
-          console.warn("IndexedDB indisponible :", error);
-          resolve(false);
-          return;
+        } catch {
+          data = null;
         }
-
-        request.onupgradeneeded = () => {
-          const db = request.result;
-
-          if (!db.objectStoreNames.contains(CONFIG.saveStore)) {
-            db.createObjectStore(CONFIG.saveStore, { keyPath: "id" });
-          }
-
-          if (!db.objectStoreNames.contains(CONFIG.settingsStore)) {
-            db.createObjectStore(CONFIG.settingsStore, { keyPath: "id" });
-          }
-        };
-
-        request.onsuccess = () => {
-          State.db = request.result;
-          State.dbAvailable = true;
-
-          State.db.onversionchange = () => {
-            State.db.close();
-            State.db = null;
-          };
-
-          resolve(true);
-        };
-
-        request.onerror = () => {
-          console.warn("Impossible d'ouvrir IndexedDB.");
-          State.dbAvailable = false;
-          resolve(false);
-        };
-
-        request.onblocked = () => {
-          console.warn("Ouverture IndexedDB bloquée.");
-          resolve(false);
-        };
-      });
-    },
-
-    async get(storeName, key) {
-      if (State.dbAvailable && State.db) {
-        return new Promise((resolve) => {
-          try {
-            const transaction = State.db.transaction(storeName, "readonly");
-            const request = transaction.objectStore(storeName).get(key);
-
-            request.onsuccess = () => resolve(request.result?.value ?? null);
-            request.onerror = () => resolve(
-              State.memoryStore.get(`${storeName}:${key}`) ?? null
-            );
-          } catch (error) {
-            console.warn("Lecture impossible :", error);
-            resolve(State.memoryStore.get(`${storeName}:${key}`) ?? null);
-          }
-        });
       }
 
-      return State.memoryStore.get(`${storeName}:${key}`) ?? null;
-    },
-
-    async put(storeName, key, value) {
-      State.memoryStore.set(`${storeName}:${key}`, value);
-
-      if (State.dbAvailable && State.db) {
-        return new Promise((resolve) => {
-          try {
-            const transaction = State.db.transaction(storeName, "readwrite");
-            transaction.objectStore(storeName).put({
-              id: key,
-              value
-            });
-
-            transaction.oncomplete = () => resolve(true);
-            transaction.onerror = () => resolve(false);
-            transaction.onabort = () => resolve(false);
-          } catch (error) {
-            console.warn("Écriture impossible :", error);
-            resolve(false);
-          }
-        });
+      if (data && typeof data === "object") {
+        this.values = { ...this.values, ...data };
       }
 
-      return false;
+      this.applyToForm();
+      return this.values;
     },
 
-    async loadSave() {
-      return this.get(CONFIG.saveStore, CONFIG.saveKey);
-    },
-
-    async saveGame() {
-      const data = {
-        version: CONFIG.version,
-        savedAt: new Date().toISOString(),
-        activeMissionIndex: State.activeMissionIndex,
-        activeStepIndex: State.activeStepIndex,
-        completedMissions: [...State.completedMissions],
-        playerCharacterId: State.playerCharacterId,
-        gameStarted: State.gameStarted,
-        playerPosition: State.player
-          ? {
-              x: State.player.position.x,
-              y: State.player.position.y,
-              z: State.player.position.z
-            }
-          : null
-      };
-
-      const result = await this.put(
-        CONFIG.saveStore,
-        CONFIG.saveKey,
-        data
-      );
-
-      try {
-        localStorage.setItem(
-          "fobas-love-save-fallback",
-          JSON.stringify(data)
-        );
-      } catch (_) {
-        // Le stockage local du navigateur peut être indisponible.
+    applyToForm() {
+      if (DOM.voiceEnabled) DOM.voiceEnabled.checked = this.values.voice;
+      if (DOM.musicEnabled) DOM.musicEnabled.checked = this.values.music;
+      if (DOM.subtitlesEnabled) {
+        DOM.subtitlesEnabled.checked = this.values.subtitles;
       }
-
-      return result;
+      if (DOM.qualitySelect) {
+        DOM.qualitySelect.value = this.values.quality;
+      }
+      if (DOM.sensitivityRange) {
+        DOM.sensitivityRange.value = this.values.sensitivity;
+      }
     },
 
-    async loadSettings() {
-      const settings = await this.get(
-        CONFIG.settingsStore,
-        CONFIG.settingsKey
-      );
-
-      if (settings) return settings;
-
-      try {
-        const fallback = localStorage.getItem("fobas-love-settings");
-        if (fallback) return JSON.parse(fallback);
-      } catch (_) {}
-
-      return null;
+    readForm() {
+      this.values.voice = DOM.voiceEnabled
+        ? DOM.voiceEnabled.checked : true;
+      this.values.music = DOM.musicEnabled
+        ? DOM.musicEnabled.checked : true;
+      this.values.subtitles = DOM.subtitlesEnabled
+        ? DOM.subtitlesEnabled.checked : true;
+      this.values.quality = DOM.qualitySelect
+        ? DOM.qualitySelect.value : "medium";
+      this.values.sensitivity = DOM.sensitivityRange
+        ? Number(DOM.sensitivityRange.value) || 1 : 1;
     },
 
-    async saveSettings(settings) {
-      const result = await this.put(
-        CONFIG.settingsStore,
+    async save() {
+      this.readForm();
+      const success = await Storage.save(
         CONFIG.settingsKey,
-        settings
+        this.values
       );
 
-      try {
-        localStorage.setItem(
-          "fobas-love-settings",
-          JSON.stringify(settings)
-        );
-      } catch (_) {}
-
-      return result;
-    },
-
-    async restoreFallbackSave() {
-      try {
-        const raw = localStorage.getItem("fobas-love-save-fallback");
-        return raw ? JSON.parse(raw) : null;
-      } catch (_) {
-        return null;
+      if (Game.engine) {
+        Game.applyQuality();
       }
+
+      UI.notify(
+        success
+          ? "Paramètres enregistrés."
+          : "Paramètres appliqués, mais la sauvegarde est indisponible."
+      );
+
+      return success;
     }
   };
 
   /* ==========================================================
-     7. AUDIO ET VOIX
-  ========================================================== */
-
-  const AudioSystem = {
-    context: null,
-    masterGain: null,
-
-    initialize() {
-      const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
-
-      if (!AudioContextClass) return;
-
-      try {
-        this.context = new AudioContextClass();
-        this.masterGain = this.context.createGain();
-        this.masterGain.gain.value = State.settings.music ? 0.12 : 0;
-        this.masterGain.connect(this.context.destination);
-      } catch (error) {
-        console.warn("Audio indisponible :", error);
-      }
-    },
-
-    resume() {
-      if (this.context?.state === "suspended") {
-        this.context.resume().catch(() => {});
-      }
-    },
-
-    setMusicEnabled(enabled) {
-      if (this.masterGain) {
-        this.masterGain.gain.setTargetAtTime(
-          enabled ? 0.12 : 0,
-          this.context.currentTime,
-          0.1
-        );
-      }
-    },
-
-    tone(frequency = 660, duration = 0.12, type = "sine") {
-      if (!State.settings.music || !this.context || !this.masterGain) {
-        return;
-      }
-
-      try {
-        const oscillator = this.context.createOscillator();
-        const gain = this.context.createGain();
-        const now = this.context.currentTime;
-
-        oscillator.type = type;
-        oscillator.frequency.value = frequency;
-
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-        oscillator.connect(gain);
-        gain.connect(this.masterGain);
-
-        oscillator.start(now);
-        oscillator.stop(now + duration + 0.03);
-      } catch (_) {}
-    },
-
-    success() {
-      this.tone(523, 0.11);
-      setTimeout(() => this.tone(659, 0.11), 90);
-      setTimeout(() => this.tone(784, 0.18), 180);
-    },
-
-    click() {
-      this.tone(540, 0.055);
-    },
-
-    speak(text, characterId = State.playerCharacterId) {
-      if (!State.settings.voice || !("speechSynthesis" in window)) {
-        Utils.setText(DOM.dialogueVoiceStatus, "Dialogue en français");
-        return;
-      }
-
-      try {
-        window.speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(String(text));
-        const character = CHARACTERS.find((c) => c.id === characterId);
-
-        utterance.lang = "fr-FR";
-        utterance.rate = 0.94;
-        utterance.pitch = character?.voicePitch ?? 1;
-        utterance.volume = 1;
-
-        const voices = window.speechSynthesis.getVoices();
-        const frenchVoice = voices.find((voice) =>
-          voice.lang?.toLowerCase().startsWith("fr")
-        );
-
-        if (frenchVoice) utterance.voice = frenchVoice;
-
-        utterance.onstart = () => {
-          Utils.setText(DOM.dialogueVoiceStatus, "Lecture vocale...");
-          CharacterSystem.setExpression(characterId, "talking");
-        };
-
-        utterance.onend = () => {
-          Utils.setText(DOM.dialogueVoiceStatus, "Dialogue en français");
-          CharacterSystem.setExpression(characterId, "neutral");
-        };
-
-        utterance.onerror = () => {
-          Utils.setText(DOM.dialogueVoiceStatus, "Texte affiché");
-          CharacterSystem.setExpression(characterId, "neutral");
-        };
-
-        window.speechSynthesis.speak(utterance);
-      } catch (error) {
-        console.warn("Voix indisponible :", error);
-      }
-    },
-
-    stopSpeech() {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-    }
-  };
-
-  /* ==========================================================
-     8. INTERFACE — NOTIFICATIONS ET ÉCRANS
+     7. INTERFACE UTILISATEUR
   ========================================================== */
 
   const UI = {
-    activeOverlay: null,
+    notificationTimer: null,
 
-    showOnlyScreen(screen) {
+    showScreen(name) {
       const screens = [
-        DOM.loadingScreen,
-        DOM.mainMenu,
-        DOM.gameScreen,
-        DOM.missionsScreen,
-        DOM.pauseScreen,
-        DOM.settingsScreen,
-        DOM.creditsScreen,
-        DOM.missionCompleteScreen,
-        DOM.endingScreen,
-        DOM.confirmationScreen,
-        DOM.errorScreen
+        "mainMenu",
+        "gameScreen",
+        "missionsScreen",
+        "pauseScreen",
+        "settingsScreen",
+        "creditsScreen",
+        "missionCompleteScreen",
+        "endingScreen",
+        "confirmationScreen",
+        "errorScreen"
       ];
 
-      screens.forEach((element) => Utils.hide(element));
-
-      if (screen) Utils.show(screen);
-
-      this.activeOverlay = screen || null;
+      for (const key of screens) {
+        if (DOM[key]) {
+          Utils.setVisible(DOM[key], key === name);
+        }
+      }
     },
 
-    notification(message, duration = 2800) {
+    showGame() {
+      this.showScreen("gameScreen");
+      State.active = true;
+      State.paused = false;
+      Game.resume();
+    },
+
+    showMenu() {
+      State.active = false;
+      State.paused = false;
+      State.dialogueOpen = false;
+
+      Dialogue.close();
+      Game.stopMovement();
+      this.showScreen("mainMenu");
+
+      if (Game.engine) {
+        Game.engine.stopRenderLoop();
+      }
+
+      this.updateContinueButton();
+    },
+
+    notify(message, duration = 2800) {
       if (!DOM.gameNotification) return;
 
-      clearTimeout(State.notificationTimer);
       Utils.setText(DOM.gameNotification, message);
-      Utils.show(DOM.gameNotification);
+      Utils.setVisible(DOM.gameNotification, true);
 
-      State.notificationTimer = setTimeout(() => {
-        Utils.hide(DOM.gameNotification);
+      clearTimeout(this.notificationTimer);
+      this.notificationTimer = setTimeout(() => {
+        Utils.setVisible(DOM.gameNotification, false);
       }, duration);
     },
 
-    setLoading(percent, message) {
-      const value = Utils.clamp(percent, 0, 100);
-
-      Utils.setWidth(DOM.loadingProgress, value);
-      Utils.setText(DOM.loadingPercent, `${Math.round(value)} %`);
-
-      if (message) Utils.setText(DOM.loadingMessage, message);
+    loading(message, percent) {
+      Utils.setText(DOM.loadingMessage, message);
+      Utils.setText(DOM.loadingPercent, `${Math.round(percent)} %`);
+      Utils.setProgress(DOM.loadingProgress, percent);
     },
 
     worldLoading(visible, message = "Préparation du monde 3D...") {
-      if (DOM.worldLoadingText) {
-        Utils.setText(DOM.worldLoadingText, message);
-      }
-
-      if (visible) Utils.show(DOM.worldLoadingOverlay);
-      else Utils.hide(DOM.worldLoadingOverlay);
+      Utils.setVisible(DOM.worldLoadingOverlay, visible);
+      Utils.setText(DOM.worldLoadingText, message);
     },
 
     saving(visible) {
-      if (visible) Utils.show(DOM.savingIndicator);
-      else Utils.hide(DOM.savingIndicator);
-
-      if (DOM.saveStatus) {
-        Utils.setText(
-          DOM.saveStatus,
-          visible ? "Sauvegarde en cours..." : "Sauvegarde locale prête"
-        );
-      }
+      Utils.setVisible(DOM.savingIndicator, visible);
+      Utils.setText(
+        DOM.saveStatus,
+        visible ? "Sauvegarde en cours..." : "Sauvegarde locale prête"
+      );
     },
 
-    updateMissionHeader() {
-      const mission = MISSION_DATA[State.activeMissionIndex];
+    async updateContinueButton() {
+      const available = await Storage.hasSave();
 
+      if (DOM.continueGameButton) {
+        DOM.continueGameButton.disabled = !available;
+        DOM.continueGameButton.setAttribute(
+          "aria-disabled",
+          available ? "false" : "true"
+        );
+      }
+
+      return available;
+    },
+
+    updateMissionUI() {
+      const mission = MISSION_DATA[State.missionIndex];
       if (!mission) return;
 
       Utils.setText(
         DOM.missionNumber,
-        `MISSION ${String(mission.id).padStart(2, "0")} / ${MISSION_DATA.length}`
+        `MISSION ${String(State.missionIndex + 1).padStart(2, "0")} / 35`
       );
-
       Utils.setText(DOM.missionTitle, mission.title);
-      this.updateObjective();
-    },
+      Utils.setText(DOM.objectiveText, mission.objective);
 
-    updateObjective() {
-      const mission = MISSION_DATA[State.activeMissionIndex];
+      const count = State.completedMissions.length;
+      Utils.setText(DOM.objectiveProgressText, `${count} / 35`);
+      Utils.setProgress(DOM.objectiveProgressBar, count / 35 * 100);
 
-      if (!mission) return;
-
-      const steps = mission.steps || [];
-      const step = steps[State.activeStepIndex];
-
-      if (!step) {
-        Utils.setText(DOM.objectiveText, "Mission terminée !");
-        Utils.setWidth(DOM.objectiveProgressBar, 100);
-        Utils.setText(DOM.objectiveProgressText, `${steps.length} / ${steps.length}`);
-        return;
-      }
-
-      Utils.setText(DOM.objectiveText, step.text);
-
-      const percent = steps.length
-        ? (State.activeStepIndex / steps.length) * 100
-        : 0;
-
-      Utils.setWidth(DOM.objectiveProgressBar, percent);
-      Utils.setText(
-        DOM.objectiveProgressText,
-        `${State.activeStepIndex} / ${steps.length}`
-      );
+      this.updateMissionsList();
     },
 
     updateMissionsList() {
@@ -1311,636 +829,498 @@
       DOM.missionsList.replaceChildren();
 
       MISSION_DATA.forEach((mission, index) => {
-        const completed = State.completedMissions.includes(mission.id);
-        const current = index === State.activeMissionIndex;
-        const locked = index > State.activeMissionIndex && !completed;
+        const completed = State.completedMissions.includes(index);
+        const current = index === State.missionIndex && !State.completed;
+        const locked = index > State.missionIndex && !completed;
 
-        const item = document.createElement("article");
+        const item = document.createElement("button");
+        item.type = "button";
         item.className = "mission-list-item";
-        item.dataset.missionId = String(mission.id);
-
-        if (completed) item.classList.add("mission-completed");
-        if (current) item.classList.add("mission-current");
-        if (locked) item.classList.add("mission-locked");
+        item.classList.toggle("completed", completed);
+        item.classList.toggle("current", current);
+        item.classList.toggle("locked", locked);
+        item.setAttribute(
+          "aria-label",
+          `Mission ${index + 1} : ${mission.title}`
+        );
 
         const number = document.createElement("span");
         number.className = "mission-list-number";
-        number.textContent = completed ? "✓" : String(mission.id).padStart(2, "0");
+        number.textContent = completed ? "✓" : String(index + 1);
 
-        const content = document.createElement("div");
-        content.className = "mission-list-content";
+        const details = document.createElement("span");
+        details.className = "mission-list-details";
 
         const title = document.createElement("strong");
         title.textContent = mission.title;
 
-        const description = document.createElement("p");
-        description.textContent = mission.description;
+        const description = document.createElement("small");
+        description.textContent = completed
+          ? "Mission terminée"
+          : locked
+            ? "À débloquer"
+            : mission.objective;
 
-        const location = document.createElement("small");
-        location.textContent = mission.location;
+        details.append(title, description);
+        item.append(number, details);
 
-        content.append(title, description, location);
+        item.addEventListener("click", () => {
+          if (completed || locked) {
+            UI.notify(
+              completed
+                ? "Cette mission est déjà terminée."
+                : "Terminez les missions précédentes pour continuer."
+            );
+            return;
+          }
 
-        const status = document.createElement("span");
-        status.className = "mission-list-status";
-        status.textContent = completed
-          ? "Terminée"
-          : current
-            ? "En cours"
-            : locked
-              ? "Verrouillée"
-              : "Disponible";
-
-        item.append(number, content, status);
-
-        if (!locked) {
-          item.tabIndex = 0;
-          item.setAttribute("role", "button");
-
-          const activate = () => {
-            this.closeMissions();
-
-            if (!completed) {
-              Game.startMission(index);
-            } else {
-              this.notification("Cette mission est déjà terminée.");
-            }
-          };
-
-          item.addEventListener("click", activate);
-          item.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              activate();
-            }
-          });
-        }
+          UI.showScreen("gameScreen");
+          State.active = true;
+          State.paused = false;
+          Game.resume();
+        });
 
         DOM.missionsList.appendChild(item);
       });
 
       const completedCount = State.completedMissions.length;
-      const total = MISSION_DATA.length;
-      const percent = total ? completedCount / total * 100 : 0;
-
       Utils.setText(
         DOM.missionsSummary,
-        `${completedCount} mission${completedCount > 1 ? "s" : ""} terminée${completedCount > 1 ? "s" : ""}`
+        `${completedCount} mission${completedCount > 1 ? "s" : ""} terminée${completedCount > 1 ? "s" : ""} sur 35`
       );
 
-      Utils.setWidth(DOM.overallProgressBar, percent);
-    },
-
-    openMissions() {
-      if (State.dialogueOpen) Dialogue.close();
-
-      State.paused = true;
-      AudioSystem.stopSpeech();
-      this.updateMissionsList();
-      Utils.show(DOM.missionsScreen);
-    },
-
-    closeMissions() {
-      Utils.hide(DOM.missionsScreen);
-
-      if (State.gameStarted && !State.ending) {
-        State.paused = false;
-      }
-    },
-
-    openPause() {
-      if (!State.gameStarted || State.ending) return;
-
-      State.paused = true;
-      Dialogue.close();
-      AudioSystem.stopSpeech();
-      Utils.show(DOM.pauseScreen);
-    },
-
-    closePause() {
-      Utils.hide(DOM.pauseScreen);
-      State.paused = false;
-    },
-
-    openSettings() {
-      this.populateSettings();
-      Utils.show(DOM.settingsScreen);
-    },
-
-    closeSettings() {
-      Utils.hide(DOM.settingsScreen);
-    },
-
-    populateSettings() {
-      if (DOM.voiceEnabled) DOM.voiceEnabled.checked = State.settings.voice;
-      if (DOM.musicEnabled) DOM.musicEnabled.checked = State.settings.music;
-      if (DOM.subtitlesEnabled) DOM.subtitlesEnabled.checked = State.settings.subtitles;
-      if (DOM.qualitySelect) DOM.qualitySelect.value = State.settings.quality;
-      if (DOM.sensitivityRange) DOM.sensitivityRange.value = String(State.settings.sensitivity);
-    },
-
-    async saveSettingsFromForm() {
-      State.settings.voice = Boolean(DOM.voiceEnabled?.checked);
-      State.settings.music = Boolean(DOM.musicEnabled?.checked);
-      State.settings.subtitles = Boolean(DOM.subtitlesEnabled?.checked);
-
-      State.settings.quality = DOM.qualitySelect?.value || "medium";
-      State.settings.sensitivity = Utils.clamp(
-        Utils.safeNumber(DOM.sensitivityRange?.value, 1),
-        0.5,
-        2
+      Utils.setProgress(
+        DOM.overallProgressBar,
+        completedCount / CONFIG.missionCount * 100
       );
-
-      AudioSystem.setMusicEnabled(State.settings.music);
-      Game.applyGraphicsQuality();
-
-      await Storage.saveSettings(State.settings);
-
-      this.closeSettings();
-      this.notification("Paramètres enregistrés.");
     },
 
-    showMissionComplete(mission) {
-      State.paused = true;
-
-      Utils.setText(
-        DOM.completionTitle,
-        `Mission ${mission.id} accomplie !`
-      );
-
-      Utils.setText(
-        DOM.completionMessage,
-        `${mission.description} ${mission.reward ? "Récompense : " + mission.reward + "." : ""}`
-      );
-
-      Utils.setText(
-        DOM.completionProgress,
-        `${State.completedMissions.length} / ${MISSION_DATA.length}`
-      );
-
-      Utils.setText(
-        DOM.nextMissionButton,
-        State.activeMissionIndex >= MISSION_DATA.length - 1
-          ? "Terminer l'aventure →"
-          : "Mission suivante →"
-      );
-
-      Utils.show(DOM.missionCompleteScreen);
-      AudioSystem.success();
-    },
-
-    showEnding() {
-      State.ending = true;
-      State.paused = true;
-      State.gameStarted = false;
-
-      Utils.hide(DOM.gameScreen);
-      Utils.hide(DOM.missionCompleteScreen);
-      Utils.show(DOM.endingScreen);
-
-      AudioSystem.success();
-      Storage.saveGame();
+    showConfirmation(title, message, action) {
+      State.confirmationAction = action;
+      Utils.setText(DOM.confirmationTitle, title);
+      Utils.setText(DOM.confirmationMessage, message);
+      this.showScreen("confirmationScreen");
     },
 
     showError(title, message) {
+      State.error = { title, message };
       Utils.setText(DOM.errorTitle, title);
       Utils.setText(DOM.errorMessage, message);
-      this.showOnlyScreen(DOM.errorScreen);
-    },
-
-    confirm(title, message, callback) {
-      Utils.setText(DOM.confirmationTitle, title);
-      Utils.setText(DOM.confirmationMessage, message);
-      State.confirmationCallback = callback;
-      Utils.show(DOM.confirmationScreen);
-    },
-
-    closeConfirmation(accepted) {
-      const callback = State.confirmationCallback;
-      State.confirmationCallback = null;
-
-      Utils.hide(DOM.confirmationScreen);
-
-      if (accepted && typeof callback === "function") {
-        callback();
-      }
+      this.showScreen("errorScreen");
     }
   };
 
   /* ==========================================================
-     9. PERSONNAGES 3D
-
-     Les personnages sont construits avec des meshes Babylon.js.
-     Ils sont stylisés : ce ne sont pas des modèles humains
-     photoréalistes importés.
+     8. AUDIO ET DIALOGUES VOCAUX
   ========================================================== */
 
-  const CharacterSystem = {
-    buildCharacter(character, scene, name, isPlayer = false) {
-      const root = new BABYLON.TransformNode(
-        `character-${name}-${Date.now()}-${Math.random()}`,
-        scene
-      );
-
-      const material = (matName, hex, roughness = 0.75) => {
-        const mat = new BABYLON.StandardMaterial(matName, scene);
-        mat.diffuseColor = Utils.color3(hex);
-        mat.specularColor = new BABYLON.Color3(0.22, 0.22, 0.22);
-        mat.roughness = roughness;
-        return mat;
-      };
-
-      const skinMat = material(`${name}-skin`, character.skin);
-      const hairMat = material(`${name}-hair`, character.hair);
-      const outfitMat = material(`${name}-outfit`, character.outfit);
-      const pantsMat = material(`${name}-pants`, character.pants);
-      const accentMat = material(`${name}-accent`, character.accent);
-      const shoeMat = material(`${name}-shoes`, "#29232B");
-      const eyeMat = material(`${name}-eyes`, "#211A20");
-      const whiteMat = material(`${name}-eye-white`, "#FFF8EE");
-      const mouthMat = material(`${name}-mouth`, "#713D43");
-
-      const parts = [];
-      const limbs = {};
-
-      const sphere = (partName, diameter, mat, x, y, z, scale = null) => {
-        const mesh = BABYLON.MeshBuilder.CreateSphere(
-          `${name}-${partName}`,
-          { diameter, segments: 16 },
-          scene
-        );
-
-        mesh.material = mat;
-        mesh.position.set(x, y, z);
-        mesh.parent = root;
-
-        if (scale) mesh.scaling.set(scale.x, scale.y, scale.z);
-
-        parts.push(mesh);
-        return mesh;
-      };
-
-      const box = (partName, width, height, depth, mat, x, y, z) => {
-        const mesh = BABYLON.MeshBuilder.CreateBox(
-          `${name}-${partName}`,
-          { width, height, depth },
-          scene
-        );
-
-        mesh.material = mat;
-        mesh.position.set(x, y, z);
-        mesh.parent = root;
-
-        parts.push(mesh);
-        return mesh;
-      };
-
-      const cylinder = (partName, diameterTop, diameterBottom, height, mat, x, y, z) => {
-        const mesh = BABYLON.MeshBuilder.CreateCylinder(
-          `${name}-${partName}`,
-          {
-            diameterTop,
-            diameterBottom,
-            height,
-            tessellation: 16
-          },
-          scene
-        );
-
-        mesh.material = mat;
-        mesh.position.set(x, y, z);
-        mesh.parent = root;
-
-        parts.push(mesh);
-        return mesh;
-      };
-
-      // Jambes
-      limbs.leftLeg = box(
-        "left-leg", 0.19, 0.66, 0.23, pantsMat,
-        -0.16, 0.47, 0
-      );
-
-      limbs.rightLeg = box(
-        "right-leg", 0.19, 0.66, 0.23, pantsMat,
-        0.16, 0.47, 0
-      );
-
-      // Chaussures
-      limbs.leftFoot = box(
-        "left-foot", 0.22, 0.14, 0.34, shoeMat,
-        -0.16, 0.12, 0.035
-      );
-
-      limbs.rightFoot = box(
-        "right-foot", 0.22, 0.14, 0.34, shoeMat,
-        0.16, 0.12, 0.035
-      );
-
-      // Corps
-      const torso = BABYLON.MeshBuilder.CreateCylinder(
-        `${name}-torso`,
-        {
-          height: 0.79,
-          diameterTop: 0.55,
-          diameterBottom: 0.39,
-          tessellation: 18
-        },
-        scene
-      );
-
-      torso.position.y = 1.23;
-      torso.material = outfitMat;
-      torso.parent = root;
-      parts.push(torso);
-
-      // Col
-      cylinder("neck", 0.16, 0.16, 0.18, skinMat, 0, 1.68, 0);
-
-      // Tête
-      const head = sphere(
-        "head", 0.61, skinMat, 0, 2.02, 0,
-        { x: 0.82, y: 1, z: 0.78 }
-      );
-
-      // Cheveux
-      const hair = sphere(
-        "hair-cap", 0.65, hairMat, 0, 2.19, -0.025,
-        { x: 0.88, y: 0.58, z: 0.83 }
-      );
-
-      // Mèche frontale
-      sphere(
-        "hair-front", 0.27, hairMat, 0, 2.2, 0.225,
-        { x: 1.7, y: 0.45, z: 0.45 }
-      );
-
-      // Yeux
-      sphere(
-        "left-eye-white", 0.105, whiteMat, -0.12, 2.05, 0.232,
-        { x: 1, y: 0.8, z: 0.6 }
-      );
-
-      sphere(
-        "right-eye-white", 0.105, whiteMat, 0.12, 2.05, 0.232,
-        { x: 1, y: 0.8, z: 0.6 }
-      );
-
-      sphere(
-        "left-eye", 0.055, eyeMat, -0.12, 2.045, 0.273
-      );
-
-      sphere(
-        "right-eye", 0.055, eyeMat, 0.12, 2.045, 0.273
-      );
-
-      // Nez et bouche
-      sphere(
-        "nose", 0.075, skinMat, 0, 1.97, 0.28,
-        { x: 0.8, y: 1, z: 0.65 }
-      );
-
-      const mouth = box(
-        "mouth", 0.13, 0.025, 0.025,
-        mouthMat, 0, 1.89, 0.258
-      );
-
-      // Bras
-      limbs.leftArm = cylinder(
-        "left-arm", 0.17, 0.15, 0.68,
-        skinMat, -0.39, 1.28, 0
-      );
-
-      limbs.rightArm = cylinder(
-        "right-arm", 0.17, 0.15, 0.68,
-        skinMat, 0.39, 1.28, 0
-      );
-
-      limbs.leftArm.rotation.z = -0.1;
-      limbs.rightArm.rotation.z = 0.1;
-
-      // Mains
-      sphere("left-hand", 0.17, skinMat, -0.4, 0.9, 0);
-      sphere("right-hand", 0.17, skinMat, 0.4, 0.9, 0);
-
-      // Accessoire décoratif
-      if (character.gender === "féminin") {
-        sphere(
-          "hair-side-left", 0.2, hairMat, -0.25, 1.99, -0.015,
-          { x: 0.8, y: 1.3, z: 0.8 }
-        );
-
-        sphere(
-          "hair-side-right", 0.2, hairMat, 0.25, 1.99, -0.015,
-          { x: 0.8, y: 1.3, z: 0.8 }
-        );
-      } else {
-        // Col et petit détail vestimentaire
-        const collar = box(
-          "collar", 0.23, 0.12, 0.07,
-          accentMat, 0, 1.57, 0.24
-        );
-        collar.rotation.x = -0.2;
+  const AudioSystem = {
+    speak(text) {
+      if (!Settings.values.voice) return;
+      if (!("speechSynthesis" in window)) {
+        Utils.setText(DOM.dialogueVoiceStatus, "Dialogue affiché à l'écran");
+        return;
       }
 
-      root.position.y = 0;
-      root.rotation.y = Math.PI;
+      try {
+        window.speechSynthesis.cancel();
 
-      return {
-        id: character.id,
-        character,
-        root,
-        parts,
-        limbs,
-        head,
-        hair,
-        mouth,
-        isPlayer,
-        expression: "neutral",
-        animationTime: Math.random() * 5,
-        baseY: 0
-      };
-    },
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "fr-FR";
+        utterance.rate = 0.95;
+        utterance.pitch = 1.05;
 
-    setExpression(characterId, expression) {
-      const visual = State.npcs.find(
-        (npc) => npc.id === characterId
-      )?.visual;
+        utterance.onstart = () => {
+          Utils.setText(DOM.dialogueVoiceStatus, "Lecture du dialogue...");
+        };
 
-      if (!visual) return;
+        utterance.onend = () => {
+          Utils.setText(DOM.dialogueVoiceStatus, "Dialogue en français");
+        };
 
-      visual.expression = expression;
+        utterance.onerror = () => {
+          Utils.setText(DOM.dialogueVoiceStatus, "Dialogue affiché à l'écran");
+        };
 
-      if (visual.mouth && !visual.mouth.isDisposed()) {
-        visual.mouth.scaling.y = expression === "talking" ? 2.5 : 1;
+        window.speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.warn("Voix indisponible :", error);
       }
     },
 
-    getCharacter(characterId) {
-      return CHARACTERS.find((character) => character.id === characterId)
-        || CHARACTERS[0];
+    stop() {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     },
 
-    getNPC(characterId) {
-      return State.npcs.find((npc) => npc.id === characterId) || null;
-    },
+    async unlock() {
+      // Les navigateurs mobiles autorisent l'audio après une action utilisateur.
+      return true;
+    }
+  };
 
-    choosePlayer(characterId) {
-      const character = this.getCharacter(characterId);
+  /* ==========================================================
+     9. CONTRÔLES DU JOUEUR
+  ========================================================== */
 
-      State.playerCharacterId = character.id;
+  const Controls = {
+    keys: Object.create(null),
+    joystick: { x: 0, y: 0 },
+    running: false,
+    jumpRequested: false,
+    joystickPointer: null,
+    cameraPointers: new Map(),
+    cameraDragging: false,
+    lastCameraX: 0,
+    lastCameraY: 0,
+    pinchDistance: 0,
+    jumpVelocity: 0,
+    grounded: true,
 
-      if (State.scene && State.player) {
-        const oldPosition = State.player.position.clone();
-        const oldRotation = State.player.rotation.y;
+    bind() {
+      window.addEventListener("keydown", event => {
+        const key = event.key.toLowerCase();
 
-        if (State.playerVisual?.root) {
-          State.playerVisual.root.dispose(false, true);
+        if (
+          ["arrowup", "arrowdown", "arrowleft", "arrowright", " "]
+            .includes(key)
+        ) {
+          event.preventDefault();
         }
 
-        State.playerVisual = this.buildCharacter(
-          character,
-          State.scene,
-          "player",
-          true
-        );
+        this.keys[key] = true;
 
-        State.playerVisual.root.position.copyFrom(oldPosition);
-        State.playerVisual.root.rotation.y = oldRotation;
-        State.player = State.playerVisual.root;
-      }
-
-      this.updateCharacterButton();
-      Storage.saveGame();
-    },
-
-    updateCharacterButton() {
-      let button = $("characterSelectButton");
-
-      if (!button && DOM.gameTopBar) {
-        button = document.createElement("button");
-        button.id = "characterSelectButton";
-        button.type = "button";
-        button.className = "game-icon-button";
-        button.title = "Changer de personnage";
-        button.setAttribute("aria-label", "Changer de personnage");
-        button.textContent = "♙";
-
-        DOM.gameTopBar.insertBefore(
-          button,
-          DOM.gameTopBar.lastElementChild
-        );
-
-        button.addEventListener("click", () => {
-          this.openSelector();
-        });
-      }
-
-      if (button) {
-        const character = this.getCharacter(State.playerCharacterId);
-        button.title = `Personnage : ${character.name}`;
-      }
-    },
-
-    openSelector() {
-      let panel = $("characterSelectorPanel");
-
-      if (!panel) {
-        panel = document.createElement("section");
-        panel.id = "characterSelectorPanel";
-        panel.className = "character-selector-panel";
-        panel.setAttribute("role", "dialog");
-        panel.setAttribute("aria-label", "Choisir un personnage");
-
-        const heading = document.createElement("h2");
-        heading.textContent = "Choisissez votre personnage";
-
-        const description = document.createElement("p");
-        description.textContent =
-          "Votre choix modifie l'apparence du personnage principal.";
-
-        const grid = document.createElement("div");
-        grid.className = "character-selector-grid";
-        grid.id = "characterSelectorGrid";
-
-        const close = document.createElement("button");
-        close.type = "button";
-        close.className = "secondary-button";
-        close.textContent = "Fermer";
-        close.addEventListener("click", () => {
-          Utils.hide(panel);
-          State.paused = false;
-        });
-
-        panel.append(heading, description, grid, close);
-        DOM.gameWorld.appendChild(panel);
-      }
-
-      const grid = $("characterSelectorGrid");
-      grid.replaceChildren();
-
-      CHARACTERS.forEach((character) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "character-choice-card";
-
-        if (character.id === State.playerCharacterId) {
-          button.classList.add("selected");
+        if (key === " " || key === "shift") {
+          if (key === " ") this.jumpRequested = true;
+          if (key === "shift") this.running = true;
         }
 
-        const avatar = document.createElement("span");
-        avatar.className = "character-choice-avatar";
-        avatar.textContent = character.avatar;
+        if (key === "e" || key === "enter") {
+          if (State.active && !State.paused) {
+            this.interact();
+          }
+        }
 
-        const name = document.createElement("strong");
-        name.textContent = character.name;
-
-        const description = document.createElement("small");
-        description.textContent = character.description;
-
-        button.append(avatar, name, description);
-
-        button.addEventListener("click", () => {
-          this.choosePlayer(character.id);
-          Utils.hide(panel);
-          State.paused = false;
-          UI.notification(`${character.name} est maintenant votre personnage.`);
-        });
-
-        grid.appendChild(button);
+        if (key === "escape") {
+          if (State.dialogueOpen) {
+            Dialogue.close();
+          } else if (State.active && !State.paused) {
+            Game.pause();
+          } else if (State.paused) {
+            Game.resume();
+          }
+        }
       });
 
-      State.paused = true;
-      Utils.show(panel);
+      window.addEventListener("keyup", event => {
+        const key = event.key.toLowerCase();
+        this.keys[key] = false;
+        if (key === "shift") this.running = false;
+      });
+
+      window.addEventListener("blur", () => {
+        this.keys = Object.create(null);
+        this.joystick.x = 0;
+        this.joystick.y = 0;
+        this.running = false;
+      });
+
+      this.bindJoystick();
+      this.bindCamera();
     },
 
-    animate(visual, delta, moving, running) {
-      if (!visual) return;
+    bindJoystick() {
+      const base = DOM.joystickBase;
+      const thumb = DOM.joystickThumb;
 
-      visual.animationTime += delta;
+      if (!base || !thumb) return;
 
-      const t = visual.animationTime;
-      const limbs = visual.limbs;
+      const move = (event) => {
+        if (this.joystickPointer !== event.pointerId) return;
+
+        const rect = base.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const maxRadius = Math.max(20, rect.width * 0.31);
+
+        let dx = event.clientX - cx;
+        let dy = event.clientY - cy;
+
+        const distance = Math.hypot(dx, dy);
+        if (distance > maxRadius) {
+          dx = dx / distance * maxRadius;
+          dy = dy / distance * maxRadius;
+        }
+
+        this.joystick.x = Utils.clamp(dx / maxRadius, -1, 1);
+        this.joystick.y = Utils.clamp(dy / maxRadius, -1, 1);
+
+        thumb.style.transform = `translate(${dx}px, ${dy}px)`;
+      };
+
+      const finish = (event) => {
+        if (this.joystickPointer !== event.pointerId) return;
+
+        this.joystickPointer = null;
+        this.joystick.x = 0;
+        this.joystick.y = 0;
+        thumb.style.transform = "translate(0, 0)";
+      };
+
+      base.addEventListener("pointerdown", event => {
+        event.preventDefault();
+        this.joystickPointer = event.pointerId;
+
+        try {
+          base.setPointerCapture(event.pointerId);
+        } catch {
+          // Capture tactile non prise en charge.
+        }
+
+        move(event);
+      });
+
+      base.addEventListener("pointermove", move);
+      base.addEventListener("pointerup", finish);
+      base.addEventListener("pointercancel", finish);
+      base.addEventListener("lostpointercapture", finish);
+    },
+
+    bindCamera() {
+      const canvas = DOM.canvas;
+      if (!canvas) return;
+
+      canvas.style.touchAction = "none";
+
+      canvas.addEventListener("pointerdown", event => {
+        this.cameraPointers.set(event.pointerId, {
+          x: event.clientX,
+          y: event.clientY
+        });
+
+        if (this.cameraPointers.size === 1) {
+          this.cameraDragging = true;
+          this.lastCameraX = event.clientX;
+          this.lastCameraY = event.clientY;
+        }
+
+        if (this.cameraPointers.size === 2) {
+          const points = [...this.cameraPointers.values()];
+          this.pinchDistance = Math.hypot(
+            points[0].x - points[1].x,
+            points[0].y - points[1].y
+          );
+        }
+      });
+
+      canvas.addEventListener("pointermove", event => {
+        if (!this.cameraPointers.has(event.pointerId)) return;
+
+        this.cameraPointers.set(event.pointerId, {
+          x: event.clientX,
+          y: event.clientY
+        });
+
+        if (this.cameraPointers.size >= 2) {
+          const points = [...this.cameraPointers.values()].slice(0, 2);
+          const distance = Math.hypot(
+            points[0].x - points[1].x,
+            points[0].y - points[1].y
+          );
+
+          if (this.pinchDistance > 0 && Game.camera) {
+            const delta = this.pinchDistance - distance;
+            Game.camera.radius = Utils.clamp(
+              Game.camera.radius + delta * 0.025,
+              CONFIG.cameraMinRadius,
+              CONFIG.cameraMaxRadius
+            );
+          }
+
+          this.pinchDistance = distance;
+          return;
+        }
+
+        if (!this.cameraDragging || !Game.camera) return;
+
+        const dx = event.clientX - this.lastCameraX;
+        const dy = event.clientY - this.lastCameraY;
+
+        const sensitivity =
+          CONFIG.cameraSensitivity * Settings.values.sensitivity;
+
+        Game.camera.alpha -= dx * sensitivity;
+        Game.camera.beta = Utils.clamp(
+          Game.camera.beta + dy * sensitivity,
+          0.45,
+          1.35
+        );
+
+        this.lastCameraX = event.clientX;
+        this.lastCameraY = event.clientY;
+      });
+
+      const endCamera = event => {
+        this.cameraPointers.delete(event.pointerId);
+
+        if (this.cameraPointers.size === 0) {
+          this.cameraDragging = false;
+          this.pinchDistance = 0;
+        } else if (this.cameraPointers.size === 1) {
+          const remaining = [...this.cameraPointers.values()][0];
+          this.lastCameraX = remaining.x;
+          this.lastCameraY = remaining.y;
+          this.pinchDistance = 0;
+        }
+      };
+
+      canvas.addEventListener("pointerup", endCamera);
+      canvas.addEventListener("pointercancel", endCamera);
+      canvas.addEventListener("wheel", event => {
+        if (!Game.camera) return;
+
+        event.preventDefault();
+        Game.camera.radius = Utils.clamp(
+          Game.camera.radius + event.deltaY * 0.01,
+          CONFIG.cameraMinRadius,
+          CONFIG.cameraMaxRadius
+        );
+      }, { passive: false });
+    },
+
+    stop() {
+      this.keys = Object.create(null);
+      this.joystick.x = 0;
+      this.joystick.y = 0;
+      this.running = false;
+      this.jumpRequested = false;
+
+      if (DOM.joystickThumb) {
+        DOM.joystickThumb.style.transform = "translate(0, 0)";
+      }
+    },
+
+    interact() {
+      if (State.dialogueOpen) {
+        Dialogue.next();
+        return;
+      }
+
+      if (!State.active || State.paused) return;
+
+      const npc = NPCSystem.findNearest();
+
+      if (npc && npc.distance <= CONFIG.interactionDistance) {
+        Dialogue.open(npc);
+        return;
+      }
+
+      UI.notify("Approchez-vous d'un personnage pour interagir.");
+    },
+
+    update(delta) {
+      if (!State.active || State.paused || !Game.player) return;
+      if (State.dialogueOpen) return;
+
+      const forwardInput =
+        (this.keys.w || this.keys.arrowup ? 1 : 0) -
+        (this.keys.s || this.keys.arrowdown ? 1 : 0) -
+        this.joystick.y;
+
+      const sideInput =
+        (this.keys.d || this.keys.arrowright ? 1 : 0) -
+        (this.keys.a || this.keys.arrowleft ? 1 : 0) +
+        this.joystick.x;
+
+      let forward = Utils.clamp(forwardInput, -1, 1);
+      let side = Utils.clamp(sideInput, -1, 1);
+
+      const magnitude = Math.hypot(forward, side);
+
+      if (magnitude > 1) {
+        forward /= magnitude;
+        side /= magnitude;
+      }
+
+      const cameraAlpha = Game.camera ? Game.camera.alpha : 0;
+      const forwardX = -Math.sin(cameraAlpha);
+      const forwardZ = -Math.cos(cameraAlpha);
+      const rightX = Math.cos(cameraAlpha);
+      const rightZ = -Math.sin(cameraAlpha);
+
+      const directionX = forwardX * forward + rightX * side;
+      const directionZ = forwardZ * forward + rightZ * side;
+
+      const moving = Math.hypot(directionX, directionZ) > 0.03;
+      const speed = CONFIG.playerSpeed *
+        ((this.running || this.keys.shift) ? CONFIG.runMultiplier : 1);
 
       if (moving) {
-        const speed = running ? 13 : 8;
-        const swing = Math.sin(t * speed) * 0.48;
+        Game.player.position.x += directionX * speed * delta;
+        Game.player.position.z += directionZ * speed * delta;
 
-        limbs.leftLeg.rotation.x = swing;
-        limbs.rightLeg.rotation.x = -swing;
-        limbs.leftArm.rotation.x = -swing * 0.75;
-        limbs.rightArm.rotation.x = swing * 0.75;
+        Game.player.position.x = Utils.clamp(
+          Game.player.position.x,
+          -CONFIG.worldLimit,
+          CONFIG.worldLimit
+        );
 
-        visual.root.position.y =
-          visual.baseY + Math.abs(Math.sin(t * speed * 2)) * 0.035;
+        Game.player.position.z = Utils.clamp(
+          Game.player.position.z,
+          -CONFIG.worldLimit,
+          CONFIG.worldLimit
+        );
+
+        Game.player.rotation.y = Math.atan2(directionX, directionZ);
+      }
+
+      if (this.jumpRequested && this.grounded) {
+        this.jumpVelocity = CONFIG.jumpForce;
+        this.grounded = false;
+      }
+
+      this.jumpRequested = false;
+
+      if (!this.grounded) {
+        this.jumpVelocity -= CONFIG.gravity * delta;
+        Game.player.position.y += this.jumpVelocity * delta;
+
+        if (Game.player.position.y <= 0) {
+          Game.player.position.y = 0;
+          this.jumpVelocity = 0;
+          this.grounded = true;
+        }
+      }
+
+      State.playerPosition.x = Game.player.position.x;
+      State.playerPosition.z = Game.player.position.z;
+
+      NPCSystem.update(delta);
+      this.updateInteractionPrompt();
+    },
+
+    updateInteractionPrompt() {
+      if (!State.active || State.paused || State.dialogueOpen) {
+        Utils.setVisible(DOM.interactionPrompt, false);
+        return;
+      }
+
+      const nearest = NPCSystem.findNearest();
+
+      if (nearest && nearest.distance <= CONFIG.interactionDistance) {
+        Utils.setVisible(DOM.interactionPrompt, true);
+        Utils.setText(DOM.interactionIcon, "♡");
+        Utils.setText(DOM.interactionText, `Parler à ${nearest.name}`);
+
+        if (DOM.interactionPrompt) {
+          DOM.interactionPrompt.setAttribute(
+            "aria-label",
+            `Parler à ${nearest.name}`
+          );
+        }
       } else {
-        limbs.leftLeg.rotation.x *= 0.82;
-        limbs.rightLeg.rotation.x *= 0.82;
-        limbs.leftArm.rotation.x *= 0.82;
-        limbs.rightArm.rotation.x *= 0.82;
-
-        visual.root.position.y =
-          visual.baseY + Math.sin(t * 1.7) * 0.012;
+        Utils.setVisible(DOM.interactionPrompt, false);
       }
     }
   };
@@ -1950,1925 +1330,1511 @@
   ========================================================== */
 
   const World = {
-    sceneMaterials: [],
-    ground: null,
+    scene: null,
+    materials: {},
+    worldMeshes: [],
+    landmarks: [],
 
-    createMaterial(name, hex, roughness = 0.85) {
-      const material = new BABYLON.StandardMaterial(name, State.scene);
-      material.diffuseColor = Utils.color3(hex);
-      material.specularColor = new BABYLON.Color3(0.12, 0.12, 0.12);
-      material.roughness = roughness;
-      this.sceneMaterials.push(material);
+    material(name, color, emissive = null) {
+      const key = `${name}_${color}_${emissive || ""}`;
+      if (this.materials[key]) return this.materials[key];
+
+      const material = new BABYLON.StandardMaterial(
+        `mat_${key}`,
+        this.scene
+      );
+
+      material.diffuseColor = BABYLON.Color3.FromHexString(color);
+      material.specularColor = new BABYLON.Color3(0.22, 0.22, 0.22);
+
+      if (emissive) {
+        material.emissiveColor = BABYLON.Color3.FromHexString(emissive);
+      }
+
+      this.materials[key] = material;
       return material;
     },
 
-    makeBox(name, x, y, z, width, height, depth, material, options = {}) {
+    track(mesh) {
+      if (mesh) this.worldMeshes.push(mesh);
+      return mesh;
+    },
+
+    makeBox(name, position, scaling, color, options = {}) {
       const mesh = BABYLON.MeshBuilder.CreateBox(
         name,
-        { width, height, depth },
-        State.scene
+        { width: 1, height: 1, depth: 1 },
+        this.scene
       );
 
-      mesh.position.set(x, y, z);
-      mesh.material = material;
+      mesh.position.copyFrom(position);
+      mesh.scaling.copyFrom(scaling);
+      mesh.material = this.material(name, color, options.emissive);
+      mesh.isPickable = false;
 
-      if (options.rotationY) mesh.rotation.y = options.rotationY;
-      if (options.rotationX) mesh.rotation.x = options.rotationX;
-      if (options.scaling) mesh.scaling.copyFrom(options.scaling);
-
-      mesh.isPickable = options.pickable !== false;
-      State.worldObjects.push(mesh);
-
-      return mesh;
+      return this.track(mesh);
     },
 
-    makeSphere(name, x, y, z, diameter, material, scaling = null) {
+    makeSphere(name, position, scaling, color) {
       const mesh = BABYLON.MeshBuilder.CreateSphere(
         name,
-        { diameter, segments: 12 },
-        State.scene
+        { diameter: 1, segments: 12 },
+        this.scene
       );
 
-      mesh.position.set(x, y, z);
-      mesh.material = material;
+      mesh.position.copyFrom(position);
+      mesh.scaling.copyFrom(scaling);
+      mesh.material = this.material(name, color);
+      mesh.isPickable = false;
 
-      if (scaling) mesh.scaling.copyFrom(scaling);
-
-      State.worldObjects.push(mesh);
-      return mesh;
+      return this.track(mesh);
     },
 
-    makeCylinder(name, x, y, z, diameter, height, material) {
-      const mesh = BABYLON.MeshBuilder.CreateCylinder(
-        name,
-        { diameter, height, tessellation: 16 },
-        State.scene
+    createEnvironment() {
+      this.scene = Game.scene;
+      this.worldMeshes = [];
+      this.landmarks = [];
+
+      const ground = BABYLON.MeshBuilder.CreateGround(
+        "love_world_ground",
+        { width: 180, height: 180, subdivisions: 2 },
+        this.scene
       );
 
-      mesh.position.set(x, y, z);
-      mesh.material = material;
+      ground.material = this.material("grass", "#478B58");
+      ground.isPickable = false;
+      this.track(ground);
 
-      State.worldObjects.push(mesh);
-      return mesh;
+      const path = BABYLON.MeshBuilder.CreateGround(
+        "central_path",
+        { width: 8, height: 120 },
+        this.scene
+      );
+
+      path.position.y = 0.015;
+      path.material = this.material("path", "#D8BE9B");
+      path.isPickable = false;
+      this.track(path);
+
+      const crossPath = BABYLON.MeshBuilder.CreateGround(
+        "cross_path",
+        { width: 120, height: 6 },
+        this.scene
+      );
+
+      crossPath.position.y = 0.02;
+      crossPath.material = this.material("cross_path", "#D8BE9B");
+      crossPath.isPickable = false;
+      this.track(crossPath);
+
+      this.createFlowers();
+      this.createTrees();
+      this.createBenches();
+      this.createFountain();
+      this.createPavilion();
+      this.createLandmarks();
+      this.createLightingDecorations();
+
+      const sky = BABYLON.MeshBuilder.CreateSphere(
+        "love_sky",
+        { diameter: 400, segments: 16 },
+        this.scene
+      );
+
+      const skyMaterial = new BABYLON.StandardMaterial(
+        "love_sky_material",
+        this.scene
+      );
+
+      skyMaterial.backFaceCulling = false;
+      skyMaterial.disableLighting = true;
+      skyMaterial.emissiveColor = BABYLON.Color3.FromHexString("#9CC5EF");
+      skyMaterial.diffuseColor = BABYLON.Color3.FromHexString("#9CC5EF");
+      skyMaterial.specularColor = BABYLON.Color3.Black();
+
+      sky.material = skyMaterial;
+      sky.isPickable = false;
+      sky.infiniteDistance = true;
+      this.track(sky);
     },
 
-    makeTree(x, z, scale = 1) {
-      const trunk = this.createMaterial("tree-trunk-" + Math.random(), "#76513A");
-      const leaves = this.createMaterial("tree-leaves-" + Math.random(), "#3D8055");
+    createTrees() {
+      for (let i = 0; i < 52; i++) {
+        const x = Utils.random(-75, 75);
+        const z = Utils.random(-75, 75);
 
-      this.makeCylinder(
-        "tree-trunk", x, 1.1 * scale, z,
-        0.35 * scale, 2.2 * scale, trunk
-      );
+        if (Math.abs(x) < 8 || Math.abs(z) < 6) continue;
 
-      this.makeSphere(
-        "tree-crown", x, 2.5 * scale, z,
-        2.1 * scale, leaves,
-        new BABYLON.Vector3(1, 1.1, 1)
-      );
-    },
+        const trunkHeight = Utils.random(2.0, 3.8);
 
-    makePalm(x, z, scale = 1) {
-      const trunkMat = this.createMaterial("palm-trunk-" + Math.random(), "#99724B");
-      const leafMat = this.createMaterial("palm-leaves-" + Math.random(), "#37875D");
-
-      this.makeCylinder(
-        "palm-trunk", x, 2.2 * scale, z,
-        0.32 * scale, 4.4 * scale, trunkMat
-      );
-
-      for (let i = 0; i < 6; i++) {
-        const angle = i / 6 * Math.PI * 2;
-
-        const leaf = this.makeBox(
-          "palm-leaf",
-          x + Math.cos(angle) * 1.2 * scale,
-          4.1 * scale,
-          z + Math.sin(angle) * 1.2 * scale,
-          2.6 * scale,
-          0.13 * scale,
-          0.45 * scale,
-          leafMat
+        const trunk = BABYLON.MeshBuilder.CreateCylinder(
+          `tree_trunk_${i}`,
+          {
+            height: trunkHeight,
+            diameterTop: 0.22,
+            diameterBottom: 0.5,
+            tessellation: 7
+          },
+          this.scene
         );
 
-        leaf.rotation.y = -angle;
-        leaf.rotation.z = Math.sin(angle) * 0.25;
+        trunk.position.set(x, trunkHeight / 2, z);
+        trunk.material = this.material("tree_trunk", "#795239");
+        trunk.isPickable = false;
+        this.track(trunk);
+
+        const crown = BABYLON.MeshBuilder.CreateSphere(
+          `tree_crown_${i}`,
+          { diameter: Utils.random(2.5, 4.5), segments: 7 },
+          this.scene
+        );
+
+        crown.position.set(x, trunkHeight + 0.7, z);
+        crown.scaling.y = 1.15;
+        crown.material = this.material(
+          "tree_crown",
+          i % 2 ? "#28784A" : "#398D54"
+        );
+        crown.isPickable = false;
+        this.track(crown);
       }
     },
 
-    makeFlower(x, z, petalColor = "#EFA7CB") {
-      const stem = this.createMaterial("flower-stem-" + Math.random(), "#34744A");
-      const petals = this.createMaterial("flower-petals-" + Math.random(), petalColor);
-      const center = this.createMaterial("flower-center-" + Math.random(), "#F5D578");
+    createFlowers() {
+      const colors = ["#F3A6C8", "#FFF0D6", "#E5A0F0", "#F4D35E"];
 
-      this.makeCylinder("flower-stem", x, 0.25, z, 0.045, 0.5, stem);
-      this.makeSphere("flower-head", x, 0.55, z, 0.22, petals);
-      this.makeSphere("flower-center", x, 0.56, z, 0.09, center);
+      for (let i = 0; i < 85; i++) {
+        const x = Utils.random(-48, 48);
+        const z = Utils.random(-48, 48);
+
+        if (Math.abs(x) < 6 || Math.abs(z) < 5) continue;
+
+        const stem = BABYLON.MeshBuilder.CreateCylinder(
+          `flower_stem_${i}`,
+          { height: 0.5, diameter: 0.045, tessellation: 5 },
+          this.scene
+        );
+
+        stem.position.set(x, 0.25, z);
+        stem.material = this.material("flower_stem", "#34734A");
+        stem.isPickable = false;
+        this.track(stem);
+
+        const flower = BABYLON.MeshBuilder.CreateSphere(
+          `flower_head_${i}`,
+          { diameter: 0.22, segments: 6 },
+          this.scene
+        );
+
+        flower.position.set(x, 0.55, z);
+        flower.material = this.material(
+          "flower_head",
+          colors[i % colors.length]
+        );
+        flower.isPickable = false;
+        this.track(flower);
+      }
     },
 
-    makeBench(x, z) {
-      const wood = this.createMaterial("bench-wood-" + Math.random(), "#A7754B");
-      const dark = this.createMaterial("bench-support-" + Math.random(), "#46382D");
+    createBenches() {
+      const positions = [
+        [-12, 2], [12, 2], [-18, -15], [18, -15],
+        [-15, 24], [15, 24], [-28, 10], [28, 10]
+      ];
 
-      this.makeBox("bench-seat", x, 0.55, z, 2.1, 0.17, 0.65, wood);
-      this.makeBox("bench-back", x, 0.92, z - 0.27, 2.1, 0.68, 0.13, wood);
-      this.makeBox("bench-leg-a", x - 0.75, 0.28, z, 0.14, 0.55, 0.14, dark);
-      this.makeBox("bench-leg-b", x + 0.75, 0.28, z, 0.14, 0.55, 0.14, dark);
+      positions.forEach((p, index) => {
+        const x = p[0];
+        const z = p[1];
+
+        this.makeBox(
+          `bench_seat_${index}`,
+          new BABYLON.Vector3(x, 0.65, z),
+          new BABYLON.Vector3(2.2, 0.18, 0.65),
+          "#986443"
+        );
+
+        for (const side of [-0.75, 0.75]) {
+          this.makeBox(
+            `bench_leg_${index}_${side}`,
+            new BABYLON.Vector3(x + side, 0.32, z),
+            new BABYLON.Vector3(0.15, 0.65, 0.18),
+            "#5B4337"
+          );
+        }
+
+        this.makeBox(
+          `bench_back_${index}`,
+          new BABYLON.Vector3(x, 1.05, z - 0.25),
+          new BABYLON.Vector3(2.2, 0.65, 0.13),
+          "#986443"
+        );
+      });
     },
 
-    makeBuilding(x, z, color = "#F2D7B6") {
-      const wall = this.createMaterial("house-wall-" + Math.random(), color);
-      const roof = this.createMaterial("house-roof-" + Math.random(), "#774B54");
-      const door = this.createMaterial("house-door-" + Math.random(), "#513B36");
-      const windowMat = this.createMaterial("house-window-" + Math.random(), "#A8DDE9");
+    createFountain() {
+      const base = BABYLON.MeshBuilder.CreateCylinder(
+        "fountain_base",
+        { height: 0.45, diameter: 5, tessellation: 32 },
+        this.scene
+      );
 
-      this.makeBox("house-wall", x, 2, z, 7, 4, 5, wall);
-      this.makeBox("house-roof", x, 4.35, z, 8, 0.55, 6, roof);
+      base.position.set(0, 0.22, 13);
+      base.material = this.material("fountain_stone", "#D8D4D0");
+      base.isPickable = false;
+      this.track(base);
 
-      this.makeBox("house-door", x, 1.1, z - 2.56, 1.25, 2.2, 0.15, door);
-      this.makeBox("house-window-left", x - 2.1, 2.4, z - 2.56, 1.1, 1, 0.12, windowMat);
-      this.makeBox("house-window-right", x + 2.1, 2.4, z - 2.56, 1.1, 1, 0.12, windowMat);
+      const water = BABYLON.MeshBuilder.CreateCylinder(
+        "fountain_water",
+        { height: 0.07, diameter: 4.2, tessellation: 32 },
+        this.scene
+      );
+
+      water.position.set(0, 0.48, 13);
+      water.material = this.material(
+        "fountain_water",
+        "#68C7EA",
+        "#2A7597"
+      );
+      water.isPickable = false;
+      this.track(water);
+
+      const column = BABYLON.MeshBuilder.CreateCylinder(
+        "fountain_column",
+        { height: 1.7, diameter: 0.55, tessellation: 16 },
+        this.scene
+      );
+
+      column.position.set(0, 1.25, 13);
+      column.material = this.material("fountain_column", "#EDE5DA");
+      column.isPickable = false;
+      this.track(column);
+
+      const upper = BABYLON.MeshBuilder.CreateCylinder(
+        "fountain_upper",
+        { height: 0.18, diameter: 1.9, tessellation: 24 },
+        this.scene
+      );
+
+      upper.position.set(0, 2.0, 13);
+      upper.material = this.material("fountain_upper", "#F2E6D6");
+      upper.isPickable = false;
+      this.track(upper);
     },
 
-    makeLamp(x, z) {
-      const pole = this.createMaterial("lamp-pole-" + Math.random(), "#4B4853");
-      const bulb = this.createMaterial("lamp-bulb-" + Math.random(), "#FFE6A2");
+    createPavilion() {
+      this.makeBox(
+        "pavilion_floor",
+        new BABYLON.Vector3(-22, 0.12, -20),
+        new BABYLON.Vector3(10, 0.24, 8),
+        "#D8C7AD"
+      );
 
-      this.makeCylinder("lamp-pole", x, 1.8, z, 0.13, 3.6, pole);
-      this.makeBox("lamp-head", x, 3.6, z, 0.9, 0.15, 0.45, pole);
-      this.makeSphere("lamp-light", x, 3.45, z, 0.28, bulb);
-    },
+      for (const x of [-26, -22, -18]) {
+        for (const z of [-23, -17]) {
+          const column = BABYLON.MeshBuilder.CreateCylinder(
+            `pavilion_column_${x}_${z}`,
+            { height: 4, diameter: 0.32, tessellation: 10 },
+            this.scene
+          );
 
-    makeWater() {
-      const water = this.createMaterial("water-material", "#328DAA", 0.35);
-      water.alpha = 0.83;
+          column.position.set(x, 2.1, z);
+          column.material = this.material("pavilion_column", "#FFF0E5");
+          column.isPickable = false;
+          this.track(column);
+        }
+      }
 
       this.makeBox(
-        "water-surface",
-        0, -0.12, 19,
-        45, 0.12, 18,
-        water,
-        { pickable: false }
+        "pavilion_roof",
+        new BABYLON.Vector3(-22, 4.2, -20),
+        new BABYLON.Vector3(11, 0.45, 9),
+        "#C77791"
       );
+    },
+
+    createLandmarks() {
+      const locations = [
+        { name: "Le jardin romantique", x: -10, z: -8 },
+        { name: "L'allée des fleurs", x: 8, z: -12 },
+        { name: "La place centrale", x: 0, z: 0 },
+        { name: "Le pavillon", x: -22, z: -20 },
+        { name: "Le jardin secret", x: 18, z: 22 },
+        { name: "Le banc des rencontres", x: -12, z: 2 },
+        { name: "Le parterre fleuri", x: 20, z: -8 },
+        { name: "La fontaine", x: 0, z: 13 },
+        { name: "Le sentier paisible", x: -25, z: 15 },
+        { name: "La terrasse", x: 26, z: -20 },
+        { name: "Le kiosque", x: 25, z: 17 },
+        { name: "Le jardin calme", x: -30, z: -8 },
+        { name: "L'allée des souvenirs", x: -35, z: 25 },
+        { name: "Le chemin du parc", x: 35, z: 25 },
+        { name: "La roseraie", x: 34, z: -10 },
+        { name: "La place fleurie", x: -38, z: -20 },
+        { name: "Le petit pont", x: 0, z: 34 },
+        { name: "Le jardin ouvert", x: -5, z: -35 },
+        { name: "Le pavillon fleuri", x: 42, z: 8 },
+        { name: "Le jardin des rêves", x: -42, z: 5 },
+        { name: "Le sentier du lac", x: 0, z: 48 },
+        { name: "La clairière", x: -48, z: -25 },
+        { name: "Le belvédère", x: 48, z: -35 },
+        { name: "Le jardin lumineux", x: 10, z: 43 },
+        { name: "Le banc tranquille", x: -20, z: 42 },
+        { name: "Le carrefour du parc", x: 0, z: -10 },
+        { name: "Le jardin des promesses", x: 40, z: 40 },
+        { name: "La grande terrasse", x: -42, z: 38 },
+        { name: "La roseraie centrale", x: 0, z: 25 },
+        { name: "La place de l'amitié", x: 30, z: 0 },
+        { name: "Le chemin de l'espoir", x: -30, z: -38 },
+        { name: "Le jardin de l'avenir", x: 20, z: -45 },
+        { name: "Le jardin du cœur", x: -15, z: -45 },
+        { name: "La grande place des souvenirs", x: 0, z: 0 }
+      ];
+
+      this.landmarks = locations;
+
+      locations.forEach((place, index) => {
+        const marker = BABYLON.MeshBuilder.CreateCylinder(
+          `landmark_${index}`,
+          { height: 0.05, diameter: 1.7, tessellation: 24 },
+          this.scene
+        );
+
+        marker.position.set(place.x, 0.04, place.z);
+        marker.material = this.material(
+          `landmark_material_${index}`,
+          index % 2 ? "#F0A4C7" : "#EBD28A",
+          "#8A526D"
+        );
+        marker.isPickable = false;
+        this.track(marker);
+      });
+    },
+
+    createLightingDecorations() {
+      for (let i = 0; i < 14; i++) {
+        const angle = i / 14 * Math.PI * 2;
+        const x = Math.cos(angle) * 36;
+        const z = Math.sin(angle) * 36;
+
+        const pole = BABYLON.MeshBuilder.CreateCylinder(
+          `light_pole_${i}`,
+          { height: 3.2, diameter: 0.12, tessellation: 8 },
+          this.scene
+        );
+
+        pole.position.set(x, 1.6, z);
+        pole.material = this.material("light_pole", "#65546D");
+        pole.isPickable = false;
+        this.track(pole);
+
+        const lamp = BABYLON.MeshBuilder.CreateSphere(
+          `light_lamp_${i}`,
+          { diameter: 0.35, segments: 8 },
+          this.scene
+        );
+
+        lamp.position.set(x, 3.25, z);
+        lamp.material = this.material(
+          "light_lamp",
+          "#FFE8B0",
+          "#F4CE73"
+        );
+        lamp.isPickable = false;
+        this.track(lamp);
+      }
     },
 
     clearWorldObjects() {
-      State.worldObjects.forEach((mesh) => {
-        if (mesh && !mesh.isDisposed()) mesh.dispose(false, false);
+      this.worldMeshes.forEach(mesh => {
+        if (mesh && !mesh.isDisposed()) mesh.dispose();
       });
 
-      State.worldObjects = [];
+      this.worldMeshes = [];
+      this.landmarks = [];
 
-      this.sceneMaterials.forEach((material) => {
+      Object.values(this.materials).forEach(material => {
         if (material && !material.isDisposed()) material.dispose();
       });
 
-      this.sceneMaterials = [];
-    },
-
-    createEnvironment(landscape) {
-      this.clearWorldObjects();
-
-      const scene = State.scene;
-
-      const skyColors = {
-        garden: ["#A9D9EF", "#E6F4FA"],
-        park: ["#A6D5EF", "#EAF4F9"],
-        cafe: ["#A8D5E8", "#F6E7DA"],
-        house: ["#9BC6E5", "#E8E9F0"],
-        restaurant: ["#1D2849", "#584267"],
-        market: ["#A5D8EB", "#F4E1C8"],
-        coast: ["#7EC7EA", "#D6F0F6"],
-        beach: ["#F2A77D", "#F9D9AD"],
-        lighthouse: ["#84BCE0", "#E4EAF3"],
-        festival: ["#27264E", "#81537E"],
-        station: ["#A7CBE4", "#DDE5EF"],
-        village: ["#A8D6E7", "#F2E9D3"],
-        mountain: ["#91B9D9", "#DCE9F3"],
-        camp: ["#111A3B", "#433D6E"],
-        balcony: ["#E9A58C", "#F5D8C7"],
-        countryside: ["#9ACDE4", "#E7F1DA"],
-        harbor: ["#82BCE1", "#DAEDF7"],
-        city: ["#1B2346", "#5D4776"],
-        workshop: ["#A8CBE2", "#EEE3D7"],
-        grandfinale: ["#E9A8C4", "#F6DFD5"]
-      };
-
-      const colors = skyColors[landscape] || skyColors.garden;
-
-      scene.clearColor = BABYLON.Color4.FromHexString(
-        colors[0] + "FF"
-      );
-
-      const groundColors = {
-        beach: "#E7C88B",
-        coast: "#D9C68B",
-        harbor: "#B6C5A4",
-        mountain: "#718B68",
-        countryside: "#7BA96A",
-        camp: "#4C6B54",
-        city: "#777985",
-        station: "#A2A1A5",
-        house: "#BBAA8B",
-        restaurant: "#655C72",
-        workshop: "#A89B8D",
-        market: "#C4AD82"
-      };
-
-      const groundColor = groundColors[landscape] || "#668C66";
-
-      const groundMat = this.createMaterial("ground-material", groundColor);
-      this.ground = BABYLON.MeshBuilder.CreateGround(
-        "love-world-ground",
-        { width: 150, height: 150, subdivisions: 2 },
-        scene
-      );
-
-      this.ground.material = groundMat;
-      this.ground.isPickable = false;
-
-      const roadMat = this.createMaterial("path-material", "#D8C4A5");
-      const path = this.makeBox(
-        "central-path", 0, 0.012, 5,
-        5, 0.025, 38, roadMat,
-        { pickable: false }
-      );
-
-      path.isPickable = false;
-
-      if (["beach", "coast", "harbor", "lighthouse"].includes(landscape)) {
-        this.makeWater();
-
-        const sandMat = this.createMaterial("sand-material", "#E8D2A1");
-        this.makeBox(
-          "beach-sand", 0, 0.015, 12,
-          48, 0.025, 17, sandMat,
-          { pickable: false }
-        );
-
-        for (let i = 0; i < 7; i++) {
-          this.makePalm(-17 + i * 5.5, 3 + (i % 2) * 4, 0.75 + Math.random() * 0.3);
-        }
-      }
-
-      if (["garden", "park", "countryside", "village", "grandfinale"].includes(landscape)) {
-        for (let i = 0; i < 20; i++) {
-          const x = Utils.random(-23, 23);
-          const z = Utils.random(-15, 24);
-
-          if (Math.abs(x) < 5 && z < 13) continue;
-
-          this.makeTree(x, z, Utils.random(0.65, 1.1));
-        }
-
-        for (let i = 0; i < 55; i++) {
-          this.makeFlower(
-            Utils.random(-16, 16),
-            Utils.random(-8, 18),
-            ["#EFA7CB", "#F6DB85", "#E9EEF4", "#B9A0EA"][i % 4]
-          );
-        }
-
-        this.makeBench(-5, 4);
-        this.makeBench(7, 10);
-      }
-
-      if (["house", "cafe", "restaurant", "workshop"].includes(landscape)) {
-        this.makeBuilding(0, 16, "#F0D8BB");
-        this.makeBench(-5, 6);
-      }
-
-      if (landscape === "market") {
-        const stallColors = ["#D76F73", "#D7B85D", "#5F9D94", "#A17BC2"];
-
-        for (let i = 0; i < 4; i++) {
-          const x = -9 + i * 6;
-
-          const stallMat = this.createMaterial(
-            "market-stall-" + i,
-            stallColors[i]
-          );
-
-          this.makeBox("market-table", x, 1, 8, 3.4, 0.25, 1.7, stallMat);
-          this.makeBox("market-awning", x, 2.4, 8, 3.8, 0.2, 2.1, stallMat);
-          this.makeBox("market-post-a", x - 1.5, 1.7, 7.3, 0.1, 1.4, 0.1, stallMat);
-          this.makeBox("market-post-b", x + 1.5, 1.7, 7.3, 0.1, 1.4, 0.1, stallMat);
-        }
-      }
-
-      if (landscape === "lighthouse") {
-        const tower = this.createMaterial("lighthouse-wall", "#EAE7DF");
-        const red = this.createMaterial("lighthouse-red", "#BD5E66");
-
-        this.makeCylinder("lighthouse-tower", 0, 5, 17, 4, 10, tower);
-        this.makeCylinder("lighthouse-cap", 0, 10.2, 17, 3.1, 0.7, red);
-        this.makeSphere("lighthouse-light", 0, 10.8, 17, 0.7, this.createMaterial("light", "#FFF3B2"));
-      }
-
-      if (landscape === "mountain") {
-        const mountainColors = ["#718B7A", "#829B8B", "#8FA69A"];
-
-        for (let i = 0; i < 7; i++) {
-          const mat = this.createMaterial(
-            "mountain-" + i,
-            mountainColors[i % mountainColors.length]
-          );
-
-          const mountain = BABYLON.MeshBuilder.CreateCylinder(
-            "distant-mountain-" + i,
-            {
-              diameterTop: 0,
-              diameterBottom: Utils.random(12, 20),
-              height: Utils.random(12, 24),
-              tessellation: 4
-            },
-            scene
-          );
-
-          mountain.position.set(-35 + i * 12, 6, 35 + Math.random() * 8);
-          mountain.material = mat;
-          State.worldObjects.push(mountain);
-        }
-      }
-
-      if (["city", "festival", "station", "grandfinale"].includes(landscape)) {
-        for (let i = 0; i < 8; i++) {
-          const x = -23 + i * 6.5;
-          const h = Utils.random(5, 13);
-          const buildingMat = this.createMaterial(
-            "distant-building-" + i,
-            ["#69677F", "#8A748A", "#5B7188", "#B08D85"][i % 4]
-          );
-
-          this.makeBox(
-            "distant-building",
-            x, h / 2, 33,
-            Utils.random(4, 6), h, 3,
-            buildingMat,
-            { pickable: false }
-          );
-        }
-
-        for (let i = 0; i < 7; i++) {
-          this.makeLamp(-12 + i * 4, 4);
-        }
-      }
-
-      if (landscape === "camp") {
-        const tentMat = this.createMaterial("tent-fabric", "#C77E65");
-        const tent = BABYLON.MeshBuilder.CreateCylinder(
-          "camp-tent",
-          {
-            diameterTop: 0,
-            diameterBottom: 5,
-            height: 3.3,
-            tessellation: 4
-          },
-          scene
-        );
-
-        tent.position.set(-7, 1.65, 8);
-        tent.rotation.y = Math.PI / 4;
-        tent.material = tentMat;
-        State.worldObjects.push(tent);
-
-        const fireMat = this.createMaterial("campfire-glow", "#F5A447");
-        this.makeSphere("campfire", 4, 0.5, 8, 1.1, fireMat);
-      }
-
-      if (landscape === "balcony") {
-        const stone = this.createMaterial("balcony-stone", "#D8B8AC");
-        const rail = this.createMaterial("balcony-rail", "#EEE1D9");
-
-        this.makeBox("balcony-floor", 0, 0.15, 11, 18, 0.3, 8, stone);
-        this.makeBox("balcony-front-rail", 0, 0.8, 7, 18, 0.85, 0.18, rail);
-        this.makeBox("balcony-left-rail", -9, 0.8, 11, 0.18, 0.85, 8, rail);
-        this.makeBox("balcony-right-rail", 9, 0.8, 11, 0.18, 0.85, 8, rail);
-      }
-
-      if (landscape === "grandfinale") {
-        const gold = this.createMaterial("finale-gold", "#E8C47A");
-
-        for (let i = 0; i < 3; i++) {
-          this.makeCylinder(
-            "finale-pedestal",
-            -6 + i * 6,
-            0.45,
-            7,
-            1.5,
-            0.9,
-            gold
-          );
-        }
-      }
-
-      // Repères visuels au loin
-      const horizonMat = this.createMaterial("horizon", colors[1]);
-      const horizon = this.makeBox(
-        "horizon-backdrop", 0, 8, 48,
-        120, 18, 0.8,
-        horizonMat,
-        { pickable: false }
-      );
-
-      horizon.isPickable = false;
-
-      this.addTargetMarker();
-    },
-
-    addTargetMarker() {
-      const mat = this.createMaterial("target-marker-material", "#F6D18B");
-
-      const marker = BABYLON.MeshBuilder.CreateTorus(
-        "target-marker",
-        { diameter: 1.5, thickness: 0.1, tessellation: 32 },
-        State.scene
-      );
-
-      marker.position.set(0, 0.08, 8);
-      marker.rotation.x = Math.PI / 2;
-      marker.material = mat;
-      marker.isPickable = false;
-
-      State.worldObjects.push(marker);
-      State.targetMarker = marker;
-    },
-
-    updateTargetMarker(position) {
-      if (!State.targetMarker || State.targetMarker.isDisposed()) return;
-
-      State.targetMarker.position.x = position.x;
-      State.targetMarker.position.z = position.z;
+      this.materials = {};
     }
   };
 
   /* ==========================================================
-     11. PERSONNAGES NON JOUEURS
+     11. PERSONNAGES NON-JOUEURS
   ========================================================== */
 
   const NPCSystem = {
-    spawnNPCs() {
-      State.npcs.forEach((npc) => {
-        if (npc.visual?.root && !npc.visual.root.isDisposed()) {
-          npc.visual.root.dispose(false, true);
-        }
-      });
+    list: [],
+    activeNPC: null,
 
-      State.npcs = [];
+    definitions: [
+      { name: "Camille", color: "#D95E93", hair: "#55342C", x: -10, z: -8 },
+      { name: "Lucas", color: "#4F8FCB", hair: "#4A3429", x: 8, z: -12 },
+      { name: "Sofia", color: "#B47BE0", hair: "#352A2D", x: 0, z: 0 },
+      { name: "Gabriel", color: "#55A77D", hair: "#4D3327", x: -22, z: -20 }
+    ],
 
-      const roster = CHARACTERS.filter(
-        (character) => character.id !== State.playerCharacterId
+    createNPC(definition, index) {
+      const root = new BABYLON.TransformNode(
+        `npc_${definition.name}_${index}`,
+        Game.scene
       );
 
-      const positions = [
-        { x: 3, z: 8 },
-        { x: -5, z: 10 },
-        { x: 8, z: 5 },
-        { x: -9, z: 4 },
-        { x: 5, z: 14 }
-      ];
+      root.position.set(definition.x, 0, definition.z);
 
-      roster.forEach((character, index) => {
-        const visual = CharacterSystem.buildCharacter(
-          character,
-          State.scene,
-          `npc-${character.id}`,
-          false
+      const body = BABYLON.MeshBuilder.CreateCylinder(
+        `npc_body_${index}`,
+        {
+          height: 1.35,
+          diameterTop: 0.55,
+          diameterBottom: 0.72,
+          tessellation: 12
+        },
+        Game.scene
+      );
+
+      body.parent = root;
+      body.position.y = 0.88;
+      body.material = World.material(
+        `npc_body_mat_${index}`,
+        definition.color
+      );
+      body.isPickable = false;
+
+      const head = BABYLON.MeshBuilder.CreateSphere(
+        `npc_head_${index}`,
+        { diameter: 0.72, segments: 12 },
+        Game.scene
+      );
+
+      head.parent = root;
+      head.position.y = 1.8;
+      head.material = World.material(
+        `npc_head_mat_${index}`,
+        "#F0C6A5"
+      );
+      head.isPickable = false;
+
+      const hair = BABYLON.MeshBuilder.CreateSphere(
+        `npc_hair_${index}`,
+        { diameter: 0.76, segments: 10 }
+      , Game.scene);
+
+      hair.parent = root;
+      hair.position.y = 2.0;
+      hair.scaling.y = 0.6;
+      hair.material = World.material(
+        `npc_hair_mat_${index}`,
+        definition.hair
+      );
+      hair.isPickable = false;
+
+      const eyeMaterial = World.material(
+        `npc_eye_mat_${index}`,
+        "#30252B"
+      );
+
+      for (const eyeX of [-0.13, 0.13]) {
+        const eye = BABYLON.MeshBuilder.CreateSphere(
+          `npc_eye_${index}_${eyeX}`,
+          { diameter: 0.065, segments: 6 },
+          Game.scene
         );
 
-        const position = positions[index % positions.length];
-
-        visual.root.position.set(position.x, 0, position.z);
-        visual.root.rotation.y = Math.atan2(
-          -position.x,
-          -position.z
-        );
-
-        State.npcs.push({
-          id: character.id,
-          name: character.name,
-          character,
-          visual,
-          position: { x: position.x, z: position.z },
-          basePosition: { x: position.x, z: position.z },
-          active: true,
-          movementPhase: Math.random() * Math.PI * 2
-        });
-      });
-    },
-
-    placeNPCForStep(step) {
-      if (!step?.npc) return;
-
-      const npc = CharacterSystem.getNPC(step.npc);
-
-      if (!npc || !npc.visual?.root) return;
-
-      if (step.target) {
-        npc.visual.root.position.x = step.target.x + 1.3;
-        npc.visual.root.position.z = step.target.z + 0.5;
+        eye.parent = root;
+        eye.position.set(eyeX, 1.83, -0.335);
+        eye.material = eyeMaterial;
+        eye.isPickable = false;
       }
 
-      npc.visual.root.rotation.y = Math.atan2(
-        State.player.position.x - npc.visual.root.position.x,
-        State.player.position.z - npc.visual.root.position.z
+      const marker = BABYLON.MeshBuilder.CreateTorus(
+        `npc_marker_${index}`,
+        { diameter: 1.05, thickness: 0.075, tessellation: 24 },
+        Game.scene
       );
+
+      marker.parent = root;
+      marker.position.y = 0.08;
+      marker.rotation.x = Math.PI / 2;
+      marker.material = World.material(
+        `npc_marker_mat_${index}`,
+        "#F4C2D7",
+        "#C75A90"
+      );
+      marker.isPickable = false;
+
+      return {
+        name: definition.name,
+        root,
+        marker,
+        homeX: definition.x,
+        homeZ: definition.z,
+        distance: Infinity,
+        phase: Math.random() * Math.PI * 2,
+        index
+      };
     },
 
-    nearestNPC(maxDistance = CONFIG.interactionDistance) {
-      if (!State.player) return null;
+    create() {
+      this.clear();
 
-      let nearest = null;
-      let nearestDistance = maxDistance;
+      this.list = this.definitions.map((definition, index) => {
+        return this.createNPC(definition, index);
+      });
+    },
 
-      State.npcs.forEach((npc) => {
-        if (!npc.active || !npc.visual?.root) return;
-
-        const distance = Utils.distance2D(
-          State.player.position,
-          npc.visual.root.position
-        );
-
-        if (distance < nearestDistance) {
-          nearest = npc;
-          nearestDistance = distance;
+    clear() {
+      this.list.forEach(npc => {
+        if (npc.root && !npc.root.isDisposed()) {
+          npc.root.getChildMeshes().forEach(mesh => mesh.dispose());
+          npc.root.dispose();
         }
       });
 
-      return nearest
-        ? { npc: nearest, distance: nearestDistance }
-        : null;
+      this.list = [];
+      this.activeNPC = null;
     },
 
     update(delta) {
-      State.npcs.forEach((npc) => {
-        if (!npc.visual?.root) return;
+      if (!Game.player) return;
 
-        const t = performance.now() * 0.001 + npc.movementPhase;
+      for (const npc of this.list) {
+        const dx = Game.player.position.x - npc.root.position.x;
+        const dz = Game.player.position.z - npc.root.position.z;
 
-        if (npc.id !== State.currentTarget?.npc?.id) {
-          npc.visual.root.position.y = Math.sin(t * 1.2) * 0.015;
+        npc.distance = Math.hypot(dx, dz);
+
+        npc.phase += delta * 1.2;
+        npc.marker.position.y = 0.08 + Math.sin(npc.phase) * 0.04;
+
+        if (npc.distance < 10 && npc.distance > 0.1) {
+          npc.root.rotation.y = Math.atan2(dx, dz);
         }
+      }
+    },
 
-        CharacterSystem.animate(npc.visual, delta, false, false);
-      });
+    findNearest() {
+      if (!Game.player || !this.list.length) return null;
+
+      let nearest = null;
+      let distance = Infinity;
+
+      for (const npc of this.list) {
+        const current = Utils.distanceXZ(
+          Game.player.position,
+          npc.root.position
+        );
+
+        if (current < distance) {
+          distance = current;
+          nearest = npc;
+        }
+      }
+
+      if (!nearest) return null;
+
+      return {
+        ...nearest,
+        distance,
+        root: nearest.root
+      };
+    },
+
+    getByName(name) {
+      return this.list.find(npc => npc.name === name) || null;
+    },
+
+    moveToMissionTarget(missionIndex) {
+      const mission = MISSION_DATA[missionIndex];
+      if (!mission) return;
+
+      const npc = this.getByName(mission.person);
+      if (!npc) return;
+
+      this.activeNPC = npc;
+      npc.marker.material = World.material(
+        "npc_active_marker",
+        "#FFD36D",
+        "#E6A83D"
+      );
     }
   };
 
   /* ==========================================================
-     12. CAMÉRA ET MOUVEMENTS
+     12. PERSONNAGE JOUEUR
   ========================================================== */
 
-  const Controls = {
-    setupCamera() {
-      const camera = new BABYLON.ArcRotateCamera(
-        "love-camera",
-        -Math.PI / 2,
-        1.12,
-        12,
-        new BABYLON.Vector3(0, 1.2, 0),
-        State.scene
+  const CharacterSystem = {
+    create() {
+      const root = new BABYLON.TransformNode("love_player", Game.scene);
+      root.position.set(0, 0, -5);
+
+      const body = BABYLON.MeshBuilder.CreateCapsule(
+        "player_body",
+        { height: 1.7, radius: 0.42, tessellation: 12 },
+        Game.scene
       );
 
-      camera.lowerRadiusLimit = 4.5;
-      camera.upperRadiusLimit = 25;
-      camera.lowerBetaLimit = 0.38;
-      camera.upperBetaLimit = 1.47;
-      camera.wheelPrecision = 35;
-      camera.panningSensibility = 0;
-      camera.inertia = 0.82;
-      camera.attachControl(DOM.canvas, true);
-
-      // Le contrôle de la caméra est géré explicitement
-      // pour assurer le support du glissement et du pincement.
-      camera.detachControl();
-
-      camera.inputs.clear();
-      camera.fov = 0.8;
-      camera.minZ = 0.1;
-      camera.maxZ = 400;
-
-      State.camera = camera;
-    },
-
-    updateCamera() {
-      if (!State.camera || !State.player) return;
-
-      const target = State.player.position.clone();
-      target.y += 1.05;
-
-      State.camera.setTarget(target);
-
-      const desiredAlpha = State.player.rotation.y + Math.PI;
-      State.camera.alpha +=
-        (desiredAlpha - State.camera.alpha) * 0.025;
-    },
-
-    setupTouchControls() {
-      const canvas = DOM.canvas;
-
-      if (canvas) {
-        canvas.style.touchAction = "none";
-
-        canvas.addEventListener("pointerdown", (event) => {
-          State.activePointers.set(event.pointerId, {
-            x: event.clientX,
-            y: event.clientY
-          });
-
-          if (State.activePointers.size === 1) {
-            State.cameraPointerId = event.pointerId;
-            State.cameraPointerLast = {
-              x: event.clientX,
-              y: event.clientY
-            };
-          }
-
-          if (State.activePointers.size === 2) {
-            const points = [...State.activePointers.values()];
-            State.pinchDistance = Math.hypot(
-              points[1].x - points[0].x,
-              points[1].y - points[0].y
-            );
-          }
-
-          try {
-            canvas.setPointerCapture(event.pointerId);
-          } catch (_) {}
-        });
-
-        canvas.addEventListener("pointermove", (event) => {
-          if (!State.activePointers.has(event.pointerId)) return;
-
-          State.activePointers.set(event.pointerId, {
-            x: event.clientX,
-            y: event.clientY
-          });
-
-          if (State.activePointers.size >= 2) {
-            const points = [...State.activePointers.values()];
-            const distance = Math.hypot(
-              points[1].x - points[0].x,
-              points[1].y - points[0].y
-            );
-
-            if (State.pinchDistance > 0 && State.camera) {
-              const delta = State.pinchDistance - distance;
-
-              State.camera.radius = Utils.clamp(
-                State.camera.radius + delta * 0.035,
-                4.5,
-                25
-              );
-            }
-
-            State.pinchDistance = distance;
-            return;
-          }
-
-          if (
-            event.pointerId === State.cameraPointerId &&
-            !State.paused &&
-            !State.dialogueOpen
-          ) {
-            const dx = event.clientX - State.cameraPointerLast.x;
-            const dy = event.clientY - State.cameraPointerLast.y;
-
-            State.camera.alpha -=
-              dx * 0.004 * State.settings.sensitivity;
-
-            State.camera.beta = Utils.clamp(
-              State.camera.beta +
-                dy * 0.003 * State.settings.sensitivity,
-              0.38,
-              1.47
-            );
-
-            State.cameraPointerLast = {
-              x: event.clientX,
-              y: event.clientY
-            };
-          }
-        });
-
-        const releasePointer = (event) => {
-          State.activePointers.delete(event.pointerId);
-
-          if (State.cameraPointerId === event.pointerId) {
-            State.cameraPointerId = null;
-          }
-
-          if (State.activePointers.size < 2) {
-            State.pinchDistance = 0;
-          }
-        };
-
-        canvas.addEventListener("pointerup", releasePointer);
-        canvas.addEventListener("pointercancel", releasePointer);
-        canvas.addEventListener("lostpointercapture", releasePointer);
-
-        canvas.addEventListener("wheel", (event) => {
-          if (!State.camera) return;
-
-          State.camera.radius = Utils.clamp(
-            State.camera.radius + Math.sign(event.deltaY) * 0.7,
-            4.5,
-            25
-          );
-        }, { passive: true });
-      }
-
-      if (DOM.joystickBase) {
-        DOM.joystickBase.style.touchAction = "none";
-
-        DOM.joystickBase.addEventListener("pointerdown", (event) => {
-          if (State.paused || State.dialogueOpen) return;
-
-          event.preventDefault();
-
-          State.joystickPointerId = event.pointerId;
-          State.joystickOrigin = {
-            x: event.clientX,
-            y: event.clientY
-          };
-
-          try {
-            DOM.joystickBase.setPointerCapture(event.pointerId);
-          } catch (_) {}
-
-          this.updateJoystick(event);
-        });
-
-        DOM.joystickBase.addEventListener("pointermove", (event) => {
-          if (event.pointerId !== State.joystickPointerId) return;
-
-          event.preventDefault();
-          this.updateJoystick(event);
-        });
-
-        const releaseJoystick = (event) => {
-          if (event.pointerId !== State.joystickPointerId) return;
-
-          State.joystickPointerId = null;
-          State.movement.x = 0;
-          State.movement.z = 0;
-
-          if (DOM.joystickThumb) {
-            DOM.joystickThumb.style.transform = "translate(0px, 0px)";
-          }
-        };
-
-        DOM.joystickBase.addEventListener("pointerup", releaseJoystick);
-        DOM.joystickBase.addEventListener("pointercancel", releaseJoystick);
-        DOM.joystickBase.addEventListener("lostpointercapture", releaseJoystick);
-      }
-
-      // Clavier pour les ordinateurs et les appareils avec clavier.
-      window.addEventListener("keydown", (event) => {
-        if (event.repeat || State.paused || State.dialogueOpen) return;
-
-        const key = event.key.toLowerCase();
-
-        if (["w", "arrowup", "z"].includes(key)) State.movement.z = 1;
-        if (["s", "arrowdown"].includes(key)) State.movement.z = -1;
-        if (["a", "arrowleft", "q"].includes(key)) State.movement.x = -1;
-        if (["d", "arrowright"].includes(key)) State.movement.x = 1;
-
-        if (key === "shift") State.isRunning = true;
-        if (key === " " && State.gameStarted) Game.jump();
-        if (key === "e" && State.gameStarted) Game.interact();
-        if (key === "escape") Game.handleEscape();
-      });
-
-      window.addEventListener("keyup", (event) => {
-        const key = event.key.toLowerCase();
-
-        if (["w", "arrowup", "z", "s", "arrowdown"].includes(key)) {
-          State.movement.z = 0;
-        }
-
-        if (["a", "arrowleft", "q", "d", "arrowright"].includes(key)) {
-          State.movement.x = 0;
-        }
-
-        if (key === "shift") State.isRunning = false;
-      });
-
-      window.addEventListener("blur", () => {
-        State.movement.x = 0;
-        State.movement.z = 0;
-        State.isRunning = false;
-      });
-    },
-
-    updateJoystick(event) {
-      const rect = DOM.joystickBase.getBoundingClientRect();
-
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      const maxRadius = Math.min(rect.width, rect.height) * 0.32;
-
-      let dx = event.clientX - centerX;
-      let dy = event.clientY - centerY;
-
-      const length = Math.hypot(dx, dy);
-
-      if (length > maxRadius) {
-        dx = dx / length * maxRadius;
-        dy = dy / length * maxRadius;
-      }
-
-      State.movement.x = Utils.clamp(dx / maxRadius, -1, 1);
-      State.movement.z = Utils.clamp(-dy / maxRadius, -1, 1);
-
-      if (DOM.joystickThumb) {
-        DOM.joystickThumb.style.transform =
-          `translate(${dx}px, ${dy}px)`;
-      }
-    },
-
-    updatePlayer(delta) {
-      if (!State.player || State.paused || !State.gameStarted) return;
-
-      const x = State.movement.x;
-      const z = State.movement.z;
-
-      const magnitude = Math.hypot(x, z);
-
-      if (magnitude > 0.08) {
-        const direction = new BABYLON.Vector3(x, 0, z).normalize();
-
-        const speed = State.isRunning
-          ? CONFIG.runningSpeed
-          : CONFIG.movementSpeed;
-
-        const forward = new BABYLON.Vector3(
-          Math.sin(State.camera.alpha),
-          0,
-          Math.cos(State.camera.alpha)
+      body.parent = root;
+      body.position.y = 0.9;
+      body.material = World.material("player_body_material", "#7D5AB6");
+      body.isPickable = false;
+
+      const head = BABYLON.MeshBuilder.CreateSphere(
+        "player_head",
+        { diameter: 0.68, segments: 12 },
+        Game.scene
+      );
+
+      head.parent = root;
+      head.position.y = 1.95;
+      head.material = World.material("player_head_material", "#E9BFA0");
+      head.isPickable = false;
+
+      const hair = BABYLON.MeshBuilder.CreateSphere(
+        "player_hair",
+        { diameter: 0.72, segments: 10 },
+        Game.scene
+      );
+
+      hair.parent = root;
+      hair.position.y = 2.14;
+      hair.scaling.y = 0.55;
+      hair.material = World.material("player_hair_material", "#3E2C29");
+      hair.isPickable = false;
+
+      const footMaterial = World.material("player_foot_material", "#302C38");
+
+      for (const x of [-0.18, 0.18]) {
+        const foot = BABYLON.MeshBuilder.CreateBox(
+          `player_foot_${x}`,
+          { width: 0.22, height: 0.18, depth: 0.4 },
+          Game.scene
         );
 
-        const right = new BABYLON.Vector3(
-          Math.cos(State.camera.alpha),
-          0,
-          -Math.sin(State.camera.alpha)
-        );
-
-        const movement = right.scale(direction.x)
-          .add(forward.scale(direction.z));
-
-        if (movement.lengthSquared() > 0.001) {
-          movement.normalize();
-
-          State.player.position.addInPlace(
-            movement.scale(speed * delta)
-          );
-
-          const desiredRotation = Math.atan2(
-            movement.x,
-            movement.z
-          );
-
-          let rotationDelta = desiredRotation - State.player.rotation.y;
-
-          while (rotationDelta > Math.PI) rotationDelta -= Math.PI * 2;
-          while (rotationDelta < -Math.PI) rotationDelta += Math.PI * 2;
-
-          State.player.rotation.y += rotationDelta * Math.min(1, delta * 9);
-        }
+        foot.parent = root;
+        foot.position.set(x, 0.13, 0.03);
+        foot.material = footMaterial;
+        foot.isPickable = false;
       }
 
-      // Gravité et saut
-      if (State.isJumping) {
-        State.verticalVelocity -= CONFIG.gravity * delta;
-        State.player.position.y += State.verticalVelocity * delta;
-
-        if (State.player.position.y <= 0) {
-          State.player.position.y = 0;
-          State.verticalVelocity = 0;
-          State.isJumping = false;
-        }
-      }
-
-      State.player.position.x = Utils.clamp(
-        State.player.position.x,
-        -CONFIG.worldLimit,
-        CONFIG.worldLimit
-      );
-
-      State.player.position.z = Utils.clamp(
-        State.player.position.z,
-        -CONFIG.worldLimit,
-        CONFIG.worldLimit
-      );
-
-      CharacterSystem.animate(
-        State.playerVisual,
-        delta,
-        magnitude > 0.08,
-        State.isRunning
-      );
-
-      this.updateCamera();
+      return root;
     },
 
-    updateCamera() {
-      if (State.camera && State.player) {
-        const target = State.player.position.clone();
-        target.y += 1.15;
-        State.camera.setTarget(target);
-      }
+    animate() {
+      // Les animations de déplacement sont gérées par le moteur.
+      // Cette méthode est conservée pour assurer la compatibilité.
     }
   };
 
   /* ==========================================================
-     13. DIALOGUES ET CHOIX
+     13. DIALOGUES
   ========================================================== */
 
   const Dialogue = {
-    open(characterId, customText = null, choices = null, onChoice = null) {
-      const character = CharacterSystem.getCharacter(characterId);
+    npc: null,
+    mission: null,
+    choices: [],
+    step: 0,
+
+    open(npc) {
+      if (!npc || !State.active || State.paused) return;
+
+      const mission = MISSION_DATA[State.missionIndex];
+      if (!mission) return;
+
+      if (npc.name !== mission.person) {
+        UI.notify(`Pour cette mission, recherchez ${mission.person}.`);
+        return;
+      }
+
+      this.npc = npc;
+      this.mission = mission;
+      this.step = 0;
 
       State.dialogueOpen = true;
-      State.paused = true;
-      State.currentChoices = choices || [];
-      State.lastDialogue = customText || this.defaultDialogue(characterId);
-      State.dialogueOnChoice = onChoice || null;
-      State.dialogueCharacterId = characterId;
+      Game.stopMovement();
 
-      Utils.setText(DOM.speakerName, character.name);
-      Utils.setText(DOM.speakerAvatar, character.avatar);
-      Utils.setText(DOM.dialogueText, State.lastDialogue);
-
-      if (DOM.dialogueText) {
-        DOM.dialogueText.style.display =
-          State.settings.subtitles ? "" : "none";
-      }
+      Utils.setText(DOM.speakerName, npc.name);
+      Utils.setText(DOM.speakerAvatar, "♡");
+      Utils.setText(DOM.dialogueVoiceStatus, "Dialogue en français");
+      Utils.setText(DOM.dialogueText, mission.dialogue);
 
       if (DOM.dialogueChoices) {
         DOM.dialogueChoices.replaceChildren();
-      }
 
-      if (choices?.length) {
+        const choices = [
+          "Je suis heureux de vous rencontrer.",
+          "J'aimerais mieux vous connaître.",
+          "Merci pour ce beau moment."
+        ];
+
         choices.forEach((choice, index) => {
           const button = document.createElement("button");
           button.type = "button";
-          button.className = "secondary-button dialogue-choice-button";
+          button.className = "dialogue-choice-button";
           button.textContent = choice;
 
           button.addEventListener("click", () => {
-            AudioSystem.click();
-            State.lastChoice = choice;
-
-            if (typeof State.dialogueOnChoice === "function") {
-              State.dialogueOnChoice(choice, index);
-            }
-
-            this.close();
-            Game.advanceStep("choice");
+            this.choose(index, choice);
           });
 
           DOM.dialogueChoices.appendChild(button);
         });
-
-        Utils.hide(DOM.nextDialogueButton);
-      } else {
-        Utils.show(DOM.nextDialogueButton);
       }
 
-      Utils.show(DOM.dialoguePanel);
-      AudioSystem.speak(State.lastDialogue, characterId);
+      Utils.setVisible(DOM.dialoguePanel, true);
+      Utils.setVisible(DOM.interactionPrompt, false);
+
+      AudioSystem.speak(mission.dialogue);
     },
 
-    defaultDialogue(characterId) {
-      const lines = {
-        alex: "Je suis heureux de te retrouver. Prenons le temps de discuter et de profiter de ce moment.",
-        camille: "Bonjour ! Je suis heureuse de te rencontrer. Cet endroit est magnifique, tu ne trouves pas ?",
-        noah: "Salut ! La journée s'annonce belle. Qu'aimerais-tu découvrir aujourd'hui ?",
-        lea: "Quel plaisir de partager cette promenade. Raconte-moi ce qui te fait sourire.",
-        mika: "Hé, te voilà ! J'ai une idée pour rendre cette journée encore plus intéressante.",
-        sarah: "Bonjour ! Je crois que les plus beaux souvenirs commencent par une conversation sincère."
-      };
-
-      return lines[characterId] || "Bonjour ! Heureux de partager ce moment avec toi.";
-    },
-
-    continue() {
+    choose(index, choice) {
       if (!State.dialogueOpen) return;
 
-      this.close();
+      const replies = [
+        "C'est gentil. J'apprécie les rencontres où chacun peut être lui-même.",
+        "Avec plaisir. Prenons le temps d'échanger et de nous écouter.",
+        "Merci à vous aussi. Le respect et la bienveillance rendent ce moment précieux."
+      ];
 
-      const step = Game.currentStep();
+      this.step = index + 1;
 
-      if (step && step.type === "talk") {
-        Game.advanceStep("talk");
-      } else if (step && step.type === "choice") {
-        UI.notification("Choisissez une réponse pour continuer.");
+      Utils.setText(DOM.dialogueText, replies[index] || replies[0]);
+
+      if (DOM.dialogueChoices) {
+        DOM.dialogueChoices.replaceChildren();
+
+        const selected = document.createElement("p");
+        selected.className = "dialogue-selected-choice";
+        selected.textContent = `Vous : « ${choice} »`;
+        DOM.dialogueChoices.appendChild(selected);
+      }
+
+      AudioSystem.speak(replies[index] || replies[0]);
+
+      if (DOM.nextDialogueButton) {
+        DOM.nextDialogueButton.textContent =
+          this.step >= 1 ? "Terminer la conversation ✓" : "Continuer →";
       }
     },
 
-    close() {
-      Utils.hide(DOM.dialoguePanel);
-      State.dialogueOpen = false;
-      State.paused = false;
-      State.dialogueOnChoice = null;
-      AudioSystem.stopSpeech();
+    next() {
+      if (!State.dialogueOpen) return;
+
+      if (this.step === 0) {
+        this.choose(0, "Je suis heureux de vous rencontrer.");
+        return;
+      }
+
+      const missionIndex = State.missionIndex;
+      this.close();
+
+      Game.completeMission(missionIndex);
     },
 
     repeat() {
-      if (!State.lastDialogue) return;
-
+      if (!this.mission) return;
       AudioSystem.speak(
-        State.lastDialogue,
-        State.dialogueCharacterId || State.playerCharacterId
+        DOM.dialogueText ? DOM.dialogueText.textContent : this.mission.dialogue
       );
+    },
+
+    close() {
+      State.dialogueOpen = false;
+      AudioSystem.stop();
+      Utils.setVisible(DOM.dialoguePanel, false);
+
+      if (DOM.nextDialogueButton) {
+        DOM.nextDialogueButton.textContent = "Continuer →";
+      }
+
+      this.npc = null;
+      this.mission = null;
+      this.step = 0;
     }
   };
 
   /* ==========================================================
-     14. SYSTÈME DE MISSIONS
+     14. MOTEUR PRINCIPAL
   ========================================================== */
 
   const Game = {
-    currentMission() {
-      return MISSION_DATA[State.activeMissionIndex] || null;
-    },
-
-    currentStep() {
-      const mission = this.currentMission();
-      return mission?.steps?.[State.activeStepIndex] || null;
-    },
-
-    async startNewGame() {
-      const hasSave = await Storage.loadSave();
-
-      if (hasSave && hasSave.gameStarted) {
-        UI.confirm(
-          "Nouvelle aventure",
-          "Commencer une nouvelle aventure effacera la progression actuelle. Continuer ?",
-          async () => {
-            this.resetProgress();
-            await this.ensureWorld();
-            this.beginMission(0);
-          }
-        );
-        return;
-      }
-
-      this.resetProgress();
-      await this.ensureWorld();
-      this.beginMission(0);
-    },
-
-    resetProgress() {
-      State.activeMissionIndex = 0;
-      State.activeStepIndex = 0;
-      State.completedMissions = [];
-      State.gameStarted = false;
-      State.ending = false;
-      State.paused = false;
-    },
-
-    async continueGame() {
-      let save = await Storage.loadSave();
-
-      if (!save) {
-        save = await Storage.restoreFallbackSave();
-      }
-
-      if (!save) {
-        UI.notification("Aucune sauvegarde trouvée. Commencez une nouvelle aventure.");
-        return;
-      }
-
-      State.activeMissionIndex = Utils.clamp(
-        Utils.safeNumber(save.activeMissionIndex, 0),
-        0,
-        MISSION_DATA.length - 1
-      );
-
-      State.activeStepIndex = Math.max(
-        0,
-        Utils.safeNumber(save.activeStepIndex, 0)
-      );
-
-      State.completedMissions = Array.isArray(save.completedMissions)
-        ? save.completedMissions.filter((id) =>
-            MISSION_DATA.some((mission) => mission.id === id)
-          )
-        : [];
-
-      State.playerCharacterId = CharacterSystem.getCharacter(
-        save.playerCharacterId
-      ).id;
-
-      State.gameStarted = true;
-      State.ending = false;
-
-      await this.ensureWorld();
-
-      if (save.playerPosition && State.player) {
-        State.player.position.set(
-          Utils.safeNumber(save.playerPosition.x, 0),
-          0,
-          Utils.safeNumber(save.playerPosition.z, 0)
-        );
-      }
-
-      this.beginMission(State.activeMissionIndex, true);
-      UI.notification("Votre aventure a été restaurée.");
-    },
+    engine: null,
+    scene: null,
+    camera: null,
+    player: null,
+    light: null,
+    resizeHandler: null,
+    initialized: false,
+    initializing: false,
+    lastFrameTime: 0,
+    autosaveTimer: null,
 
     async ensureWorld() {
-      if (State.gameReady && State.scene && !State.scene.isDisposed) {
+      if (this.scene && !this.scene.isDisposed()) {
         return true;
       }
 
-      if (!window.BABYLON) {
-        UI.showError(
-          "Babylon.js indisponible",
-          "Le moteur 3D n'a pas pu être chargé. Vérifiez votre connexion Internet puis réessayez."
+      if (typeof BABYLON === "undefined") {
+        throw new Error(
+          "Babylon.js n'est pas chargé. Vérifiez votre connexion Internet et les scripts Babylon.js dans le HTML."
         );
-        return false;
       }
 
-      UI.worldLoading(true, "Création du monde 3D...");
+      if (!DOM.canvas) {
+        throw new Error("Le canvas #loveGameCanvas est introuvable.");
+      }
+
+      UI.worldLoading(true, "Création du moteur 3D...");
 
       try {
-        if (!State.engine) {
-          State.engine = new BABYLON.Engine(
-            DOM.canvas,
-            true,
-            {
-              preserveDrawingBuffer: false,
-              stencil: true,
-              antialias: true,
-              adaptToDeviceRatio: true,
-              powerPreference: "high-performance"
-            }
-          );
-
-          State.engine.setHardwareScalingLevel(
-            State.settings.quality === "high"
-              ? 0.8
-              : State.settings.quality === "low"
-                ? 1.6
-                : 1
-          );
-        }
-
-        if (State.scene && !State.scene.isDisposed()) {
-          State.scene.dispose();
-        }
-
-        State.scene = new BABYLON.Scene(State.engine);
-        State.scene.collisionsEnabled = false;
-        State.scene.skipPointerMovePicking = true;
-
-        State.scene.ambientColor = new BABYLON.Color3(0.32, 0.32, 0.32);
-        State.scene.imageProcessingConfiguration.contrast = 1.12;
-        State.scene.imageProcessingConfiguration.exposure = 1.08;
-
-        const hemispheric = new BABYLON.HemisphericLight(
-          "love-sky-light",
-          new BABYLON.Vector3(0, 1, 0),
-          State.scene
+        this.engine = new BABYLON.Engine(
+          DOM.canvas,
+          true,
+          {
+            preserveDrawingBuffer: false,
+            stencil: true,
+            antialias: true,
+            adaptToDeviceRatio: true
+          }
         );
 
-        hemispheric.intensity = 0.9;
-        hemispheric.diffuse = new BABYLON.Color3(1, 0.91, 0.82);
-        hemispheric.groundColor = new BABYLON.Color3(0.34, 0.39, 0.34);
+        this.scene = new BABYLON.Scene(this.engine);
+        this.scene.clearColor = new BABYLON.Color4(0.58, 0.75, 0.92, 1);
+        this.scene.collisionsEnabled = false;
+        this.scene.skipPointerMovePicking = true;
+
+        this.light = new BABYLON.HemisphericLight(
+          "love_ambient_light",
+          new BABYLON.Vector3(0, 1, 0),
+          this.scene
+        );
+
+        this.light.intensity = 0.95;
+        this.light.groundColor = new BABYLON.Color3(0.3, 0.34, 0.28);
 
         const sunlight = new BABYLON.DirectionalLight(
-          "love-sunlight",
-          new BABYLON.Vector3(-0.5, -1, 0.4),
-          State.scene
+          "love_sunlight",
+          new BABYLON.Vector3(-0.4, -1, 0.3),
+          this.scene
         );
 
-        sunlight.position = new BABYLON.Vector3(20, 35, -10);
-        sunlight.intensity = 1.1;
+        sunlight.position = new BABYLON.Vector3(20, 35, -20);
+        sunlight.intensity = 0.7;
 
-        Controls.setupCamera();
-
-        const playerCharacter = CharacterSystem.getCharacter(
-          State.playerCharacterId
+        this.camera = new BABYLON.ArcRotateCamera(
+          "love_camera",
+          -Math.PI / 2,
+          1.05,
+          10,
+          new BABYLON.Vector3(0, 1.2, 0),
+          this.scene
         );
 
-        State.playerVisual = CharacterSystem.buildCharacter(
-          playerCharacter,
-          State.scene,
-          "player",
-          true
-        );
+        this.camera.lowerRadiusLimit = CONFIG.cameraMinRadius;
+        this.camera.upperRadiusLimit = CONFIG.cameraMaxRadius;
+        this.camera.lowerBetaLimit = 0.45;
+        this.camera.upperBetaLimit = 1.35;
+        this.camera.wheelPrecision = 25;
+        this.camera.panningSensibility = 0;
+        this.camera.attachControl(DOM.canvas, false);
 
-        State.player = State.playerVisual.root;
-        State.player.position.set(0, 0, 0);
+        UI.worldLoading(true, "Création du jardin romantique...");
+        World.createEnvironment();
 
-        World.createEnvironment(this.currentMission()?.landscape || "garden");
-        NPCSystem.spawnNPCs();
+        UI.worldLoading(true, "Création du personnage...");
+        this.player = CharacterSystem.create();
 
-        State.scene.onBeforeRenderObservable.add(() => {
-          // Réserve le point d'entrée pour les effets visuels futurs.
-        });
+        this.camera.lockedTarget = this.player;
+        this.camera.target = new BABYLON.Vector3(0, 1.1, -5);
 
-        State.engine.runRenderLoop(() => {
-          if (!State.scene || State.scene.isDisposed()) return;
+        UI.worldLoading(true, "Préparation des personnages...");
+        NPCSystem.create();
+
+        this.applyQuality();
+
+        this.engine.runRenderLoop(() => {
+          if (!this.scene || this.scene.isDisposed()) return;
 
           const now = performance.now();
           const delta = Math.min(
-            (now - (State.lastFrameTime || now)) / 1000,
+            (now - (this.lastFrameTime || now)) / 1000,
             0.05
           );
 
-          State.lastFrameTime = now;
+          this.lastFrameTime = now;
 
-          if (State.gameStarted && !State.paused) {
-            Controls.updatePlayer(delta);
-            NPCSystem.update(delta);
-            this.updateInteractionPrompt();
-            this.updateMissionProximity();
+          if (State.active && !State.paused) {
+            State.gameTime += delta;
+            Controls.update(delta);
           }
 
-          State.scene.render();
+          try {
+            this.scene.render();
+          } catch (error) {
+            console.error("Erreur rendu 3D :", error);
+          }
         });
 
-        window.addEventListener("resize", () => {
-          State.engine?.resize();
-        });
+        if (this.resizeHandler) {
+          window.removeEventListener("resize", this.resizeHandler);
+        }
 
-        State.gameReady = true;
+        this.resizeHandler = () => {
+          if (this.engine) this.engine.resize();
+        };
+
+        window.addEventListener("resize", this.resizeHandler);
+
+        this.initialized = true;
+        this.initializing = false;
+        State.worldReady = true;
+        State.engineReady = true;
+
         UI.worldLoading(false);
-
         return true;
       } catch (error) {
-        console.error("Erreur de création du monde 3D :", error);
+        this.initializing = false;
+        State.worldReady = false;
+        State.engineReady = false;
+
+        console.error("Impossible de créer le monde FOBAS :", error);
 
         UI.worldLoading(false);
 
+        if (this.engine) {
+          try {
+            this.engine.stopRenderLoop();
+            this.engine.dispose();
+          } catch {
+            // Nettoyage.
+          }
+        }
+
+        this.engine = null;
+        this.scene = null;
+        this.camera = null;
+        this.player = null;
+
+        throw error;
+      }
+    },
+
+    applyQuality() {
+      if (!this.engine || !this.scene) return;
+
+      const quality = Settings.values.quality;
+
+      if (quality === "low") {
+        this.engine.setHardwareScalingLevel(1.4);
+        this.scene.shadowsEnabled = false;
+      } else if (quality === "high") {
+        this.engine.setHardwareScalingLevel(0.75);
+        this.scene.shadowsEnabled = true;
+      } else {
+        this.engine.setHardwareScalingLevel(1);
+        this.scene.shadowsEnabled = false;
+      }
+
+      this.engine.resize();
+    },
+
+    async startNewGame() {
+      if (this.initializing) return;
+      this.initializing = true;
+
+      try {
+        UI.showScreen("gameScreen");
+        UI.worldLoading(true, "Préparation de votre aventure...");
+
+        await AudioSystem.unlock();
+        await this.ensureWorld();
+
+        State.missionIndex = 0;
+        State.completedMissions = [];
+        State.started = true;
+        State.completed = false;
+        State.active = true;
+        State.paused = false;
+        State.dialogueOpen = false;
+        State.gameTime = 0;
+
+        this.resetPlayer();
+        this.beginMission(0);
+
+        UI.worldLoading(false);
+        UI.showGame();
+        UI.notify("Votre aventure commence. Approchez-vous de Camille.");
+
+        await this.saveGame();
+      } catch (error) {
+        console.error(error);
         UI.showError(
-          "Erreur du monde 3D",
-          "Le monde n'a pas pu être créé. Vérifiez que Babylon.js est chargé et que votre appareil dispose de suffisamment de mémoire."
+          "Impossible de démarrer le jeu",
+          error && error.message
+            ? error.message
+            : "Le monde 3D n'a pas pu être créé. Vérifiez que Babylon.js est chargé et réessayez."
         );
-
-        return false;
+      } finally {
+        this.initializing = false;
       }
     },
 
-    applyGraphicsQuality() {
-      if (!State.engine) return;
+    async continueGame() {
+      if (this.initializing) return;
+      this.initializing = true;
 
-      const levels = {
-        low: 1.6,
-        medium: 1,
-        high: 0.8
-      };
+      try {
+        UI.showScreen("gameScreen");
+        UI.worldLoading(true, "Récupération de votre progression...");
 
-      State.engine.setHardwareScalingLevel(
-        levels[State.settings.quality] || 1
-      );
-    },
+        await this.ensureWorld();
 
-    beginMission(index, restoring = false) {
-      if (index < 0 || index >= MISSION_DATA.length) {
-        UI.showEnding();
-        return;
-      }
+        const save = await Storage.load(CONFIG.storageKey);
 
-      State.activeMissionIndex = index;
-      State.activeStepIndex = Utils.clamp(
-        State.activeStepIndex,
-        0,
-        Math.max(0, MISSION_DATA[index].steps.length - 1)
-      );
-
-      State.gameStarted = true;
-      State.paused = false;
-      State.ending = false;
-
-      UI.hide(DOM.mainMenu);
-      UI.hide(DOM.missionsScreen);
-      UI.hide(DOM.pauseScreen);
-      UI.hide(DOM.missionCompleteScreen);
-      UI.hide(DOM.endingScreen);
-      UI.show(DOM.gameScreen);
-
-      const mission = this.currentMission();
-
-      if (State.scene && mission) {
-        State.scene.clearColor = BABYLON.Color4.FromHexString(
-          "#9BCFE8FF"
-        );
-
-        World.createEnvironment(mission.landscape);
-        NPCSystem.spawnNPCs();
-
-        if (!restoring) {
-          State.player.position.set(0, 0, 0);
-          State.player.rotation.y = Math.PI;
-        }
-      }
-
-      UI.updateMissionHeader();
-      UI.updateMissionsList();
-      CharacterSystem.updateCharacterButton();
-
-      const step = this.currentStep();
-
-      if (step?.npc) NPCSystem.placeNPCForStep(step);
-
-      if (step?.target) {
-        World.updateTargetMarker(step.target);
-      } else {
-        World.updateTargetMarker({ x: 0, z: 8 });
-      }
-
-      UI.notification(
-        `Mission ${mission.id} : ${mission.title}`,
-        3500
-      );
-
-      Storage.saveGame();
-    },
-
-    updateInteractionPrompt() {
-      const step = this.currentStep();
-
-      if (!step || !State.player || State.dialogueOpen) {
-        Utils.hide(DOM.interactionPrompt);
-        State.currentTarget = null;
-        return;
-      }
-
-      const npc = step.npc ? CharacterSystem.getNPC(step.npc) : null;
-      let target = null;
-      let distance = Infinity;
-
-      if (npc?.visual?.root) {
-        target = {
-          kind: "npc",
-          npc,
-          position: npc.visual.root.position
-        };
-
-        distance = Utils.distance2D(
-          State.player.position,
-          npc.visual.root.position
-        );
-      } else if (step.target) {
-        target = {
-          kind: "point",
-          position: step.target
-        };
-
-        distance = Utils.distance2D(
-          State.player.position,
-          step.target
-        );
-      } else if (step.type === "talk") {
-        const nearest = NPCSystem.nearestNPC();
-
-        if (nearest) {
-          target = {
-            kind: "npc",
-            npc: nearest.npc,
-            position: nearest.npc.visual.root.position
-          };
-
-          distance = nearest.distance;
-        }
-      }
-
-      if (!target) {
-        Utils.hide(DOM.interactionPrompt);
-        State.currentTarget = null;
-        return;
-      }
-
-      State.currentTarget = {
-        ...target,
-        distance,
-        step
-      };
-
-      const closeEnough = distance <= CONFIG.interactionDistance;
-
-      if (closeEnough) {
-        Utils.show(DOM.interactionPrompt);
-
-        const action = step.actionLabel || this.actionLabel(step.type);
-
-        Utils.setText(DOM.interactionText, action);
-        Utils.setText(
-          DOM.interactionIcon,
-          step.type === "talk" ? "♡" : "✦"
-        );
-      } else {
-        Utils.hide(DOM.interactionPrompt);
-      }
-    },
-
-    actionLabel(type) {
-      const labels = {
-        move: "Atteindre le lieu",
-        visit: "Visiter le lieu",
-        talk: "Parler",
-        interact: "Interagir",
-        collect: "Récupérer",
-        help: "Aider",
-        sit: "S'asseoir",
-        dance: "Danser",
-        sing: "Chanter",
-        photo: "Prendre une photo",
-        listen: "Écouter",
-        give: "Offrir",
-        choice: "Choisir une réponse",
-        promise: "Faire une promesse",
-        explore: "Explorer",
-        wait: "Continuer",
-        hug: "Partager un geste amical",
-        observe: "Observer",
-        arrive: "Arriver"
-      };
-
-      return labels[type] || "Interagir";
-    },
-
-    updateMissionProximity() {
-      const step = this.currentStep();
-
-      if (!step || !step.target) return;
-
-      if (!["move", "visit", "explore", "arrive"].includes(step.type)) {
-        return;
-      }
-
-      const distance = Utils.distance2D(
-        State.player.position,
-        step.target
-      );
-
-      if (distance <= 1.7) {
-        this.advanceStep(step.type);
-      }
-    },
-
-    interact() {
-      if (!State.gameStarted || State.paused) return;
-
-      if (State.dialogueOpen) {
-        Dialogue.continue();
-        return;
-      }
-
-      const step = this.currentStep();
-
-      if (!step) return;
-
-      const target = State.currentTarget;
-
-      if (target && target.distance <= CONFIG.interactionDistance) {
-        this.performStepAction(step, target);
-        return;
-      }
-
-      if (step.npc) {
-        const npc = CharacterSystem.getNPC(step.npc);
-
-        if (npc?.visual?.root) {
-          const dx = npc.visual.root.position.x - State.player.position.x;
-          const dz = npc.visual.root.position.z - State.player.position.z;
-          const length = Math.hypot(dx, dz) || 1;
-
-          State.movement.x = dx / length;
-          State.movement.z = dz / length;
-
-          UI.notification("Approchez-vous du personnage pour interagir.");
+        if (!save || !save.started) {
+          UI.notify("Aucune sauvegarde disponible. Commencez une nouvelle aventure.");
+          UI.showScreen("mainMenu");
           return;
         }
-      }
 
-      if (step.target) {
-        UI.notification("Approchez-vous du repère lumineux pour continuer.");
-      } else {
-        this.performStepAction(step, null);
-      }
-    },
-
-    performStepAction(step, target) {
-      AudioSystem.click();
-
-      switch (step.type) {
-        case "talk": {
-          const npcId = step.npc || target?.npc?.id;
-
-          if (!npcId) {
-            UI.notification("Aucun personnage à proximité.");
-            return;
-          }
-
-          Dialogue.open(
-            npcId,
-            this.dialogueForStep(npcId, step),
-            null
-          );
-          break;
-        }
-
-        case "choice": {
-          const npcId = step.npc || State.playerCharacterId;
-
-          Dialogue.open(
-            npcId,
-            this.dialogueForStep(npcId, step),
-            step.choices || [
-              "Écouter avec attention",
-              "Répondre avec sincérité",
-              "Prendre le temps de réfléchir"
-            ]
-          );
-          break;
-        }
-
-        case "give":
-        case "help":
-        case "promise":
-        case "hug":
-        case "sing":
-        case "dance":
-        case "sit":
-        case "collect":
-        case "interact":
-        case "photo":
-        case "observe":
-        case "listen":
-        case "wait":
-        case "explore":
-        case "move":
-        case "visit":
-        case "arrive": {
-          const npcId = step.npc;
-
-          if (npcId) {
-            const npc = CharacterSystem.getNPC(npcId);
-
-            if (npc?.visual?.root) {
-              npc.visual.root.rotation.y = Math.atan2(
-                State.player.position.x - npc.visual.root.position.x,
-                State.player.position.z - npc.visual.root.position.z
-              );
-            }
-          }
-
-          if (step.type === "photo") {
-            this.takePhotoMoment();
-          }
-
-          if (step.type === "dance" || step.type === "sing") {
-            CharacterSystem.animate(State.playerVisual, 0.5, true, false);
-            AudioSystem.success();
-          }
-
-          UI.notification(
-            this.actionCompletionMessage(step.type),
-            1700
-          );
-
-          this.advanceStep(step.type);
-          break;
-        }
-
-        default:
-          this.advanceStep(step.type);
-          break;
-      }
-    },
-
-    dialogueForStep(characterId, step) {
-      const character = CharacterSystem.getCharacter(characterId);
-
-      if (step.type === "choice") {
-        return `${character.name} vous écoute avec attention. Que souhaitez-vous répondre ?`;
-      }
-
-      if (step.type === "talk") {
-        return `${character.name} vous sourit. « Je suis heureux de partager ce moment avec toi. Qu'aimerais-tu me raconter ? »`;
-      }
-
-      return `${character.name} est prêt à vous écouter.`;
-    },
-
-    actionCompletionMessage(type) {
-      const messages = {
-        give: "Votre cadeau a été offert.",
-        help: "Votre aide a été apportée.",
-        promise: "Votre engagement a été confirmé.",
-        hug: "Un geste amical a été partagé.",
-        sing: "Votre chanson a accompagné ce moment.",
-        dance: "La danse a été partagée.",
-        sit: "Vous avez pris un moment de repos.",
-        collect: "Objet récupéré.",
-        interact: "Interaction réussie.",
-        photo: "Souvenir photographique enregistré.",
-        observe: "Vous avez admiré le paysage.",
-        listen: "Vous avez écouté attentivement.",
-        wait: "Cette étape est terminée.",
-        explore: "Lieu exploré.",
-        move: "Destination atteinte.",
-        visit: "Visite terminée.",
-        arrive: "Vous êtes arrivé à destination."
-      };
-
-      return messages[type] || "Objectif accompli.";
-    },
-
-    takePhotoMoment() {
-      // Capture d'écran via Babylon.js si le navigateur le permet.
-      try {
-        const canvas = DOM.canvas;
-
-        if (!canvas) return;
-
-        const dataURL = canvas.toDataURL("image/png");
-
-        const photos = JSON.parse(
-          localStorage.getItem("fobas-love-photos") || "[]"
+        State.missionIndex = Utils.clamp(
+          Number(save.missionIndex) || 0,
+          0,
+          CONFIG.missionCount - 1
         );
 
-        photos.push({
-          date: new Date().toISOString(),
-          image: dataURL
-        });
+        State.completedMissions = Array.isArray(save.completedMissions)
+          ? save.completedMissions.filter(
+              index => Number.isInteger(index) &&
+                index >= 0 &&
+                index < CONFIG.missionCount
+            )
+          : [];
 
-        localStorage.setItem(
-          "fobas-love-photos",
-          JSON.stringify(photos.slice(-10))
-        );
+        State.started = true;
+        State.completed = Boolean(save.completed);
+        State.active = true;
+        State.paused = false;
+        State.gameTime = Number(save.gameTime) || 0;
+
+        this.resetPlayer();
+
+        if (save.playerPosition && this.player) {
+          this.player.position.x = Utils.clamp(
+            Number(save.playerPosition.x) || 0,
+            -CONFIG.worldLimit,
+            CONFIG.worldLimit
+          );
+
+          this.player.position.z = Utils.clamp(
+            Number(save.playerPosition.z) || 0,
+            -CONFIG.worldLimit,
+            CONFIG.worldLimit
+          );
+        }
+
+        State.playerPosition.x = this.player.position.x;
+        State.playerPosition.z = this.player.position.z;
+
+        if (State.completedMissions.includes(State.missionIndex)) {
+          const next = State.completedMissions.findIndex(
+            index => index !== State.missionIndex
+          );
+
+          if (next >= 0) {
+            State.missionIndex = next;
+          } else {
+            State.missionIndex = Math.min(
+              State.completedMissions.length,
+              CONFIG.missionCount - 1
+            );
+          }
+        }
+
+        State.completed = State.completedMissions.length >= CONFIG.missionCount;
+
+        if (State.completed) {
+          UI.worldLoading(false);
+          UI.showScreen("endingScreen");
+          return;
+        }
+
+        this.beginMission(State.missionIndex);
+
+        UI.worldLoading(false);
+        UI.showGame();
+        UI.notify("Progression récupérée avec succès.");
       } catch (error) {
-        console.warn("La capture de souvenir n'a pas pu être enregistrée :", error);
+        console.error("Erreur chargement :", error);
+        UI.showError(
+          "Impossible de continuer",
+          error && error.message
+            ? error.message
+            : "La sauvegarde ou le monde 3D n'a pas pu être chargé."
+        );
+      } finally {
+        this.initializing = false;
       }
     },
 
-    advanceStep(actionType = "interaction") {
-      const mission = this.currentMission();
+    resetPlayer() {
+      if (!this.player) return;
 
-      if (!mission) return;
+      this.player.position.set(0, 0, -5);
+      this.player.rotation.y = 0;
 
-      if (State.dialogueOpen) {
-        Dialogue.close();
+      State.playerPosition = { x: 0, z: -5 };
+
+      if (this.camera) {
+        this.camera.alpha = -Math.PI / 2;
+        this.camera.beta = 1.05;
+        this.camera.radius = 10;
+        this.camera.target = new BABYLON.Vector3(0, 1.1, -5);
       }
-
-      State.activeStepIndex += 1;
-
-      if (State.activeStepIndex >= mission.steps.length) {
-        this.completeMission();
-        return;
-      }
-
-      const step = this.currentStep();
-
-      UI.updateObjective();
-
-      if (step?.npc) NPCSystem.placeNPCForStep(step);
-
-      if (step?.target) {
-        World.updateTargetMarker(step.target);
-      }
-
-      Storage.saveGame();
-
-      UI.notification(
-        `Nouvel objectif : ${step.text}`,
-        2800
-      );
-
-      AudioSystem.tone(720, 0.08);
     },
 
-    completeMission() {
-      const mission = this.currentMission();
-
-      if (!mission) return;
-
-      if (!State.completedMissions.includes(mission.id)) {
-        State.completedMissions.push(mission.id);
+    beginMission(index) {
+      if (!Number.isInteger(index) || index < 0 ||
+          index >= CONFIG.missionCount) {
+        UI.notify("Cette mission n'existe pas.");
+        return false;
       }
 
-      State.activeStepIndex = mission.steps.length;
+      State.missionIndex = index;
+      State.completed = false;
+      State.dialogueOpen = false;
+      Dialogue.close();
 
-      UI.updateObjective();
+      NPCSystem.moveToMissionTarget(index);
+      UI.updateMissionUI();
       UI.updateMissionsList();
 
-      Storage.saveGame();
-      UI.showMissionComplete(mission);
+      this.saveGame();
+      return true;
     },
 
-    nextMission() {
-      Utils.hide(DOM.missionCompleteScreen);
+    async completeMission(index) {
+      if (index !== State.missionIndex) return;
+      if (State.completedMissions.includes(index)) return;
 
-      if (State.activeMissionIndex >= MISSION_DATA.length - 1) {
-        UI.showEnding();
+      State.completedMissions.push(index);
+      State.completedMissions.sort((a, b) => a - b);
+
+      await this.saveGame();
+
+      if (State.completedMissions.length >= CONFIG.missionCount) {
+        State.completed = true;
+        State.active = false;
+        UI.showScreen("endingScreen");
+        UI.notify("Félicitations ! Vous avez terminé les 35 missions.", 5000);
         return;
       }
 
-      State.activeMissionIndex += 1;
-      State.activeStepIndex = 0;
+      Utils.setText(
+        DOM.completionTitle,
+        "Mission accomplie !"
+      );
 
-      this.beginMission(State.activeMissionIndex);
+      Utils.setText(
+        DOM.completionMessage,
+        `Vous avez terminé « ${MISSION_DATA[index].title} ». Une nouvelle étape de votre histoire vous attend.`
+      );
+
+      Utils.setText(
+        DOM.completionProgress,
+        `${State.completedMissions.length} / ${CONFIG.missionCount}`
+      );
+
+      UI.showScreen("missionCompleteScreen");
+      State.active = false;
+      State.paused = false;
+
+      UI.updateMissionsList();
+    },
+
+    async nextMission() {
+      const nextIndex = State.missionIndex + 1;
+
+      if (nextIndex >= CONFIG.missionCount) {
+        UI.showScreen("endingScreen");
+        return;
+      }
+
+      State.active = true;
+      State.paused = false;
+
+      this.beginMission(nextIndex);
+      UI.showGame();
+
+      UI.notify(
+        `Mission ${nextIndex + 1} : ${MISSION_DATA[nextIndex].title}`
+      );
+
+      await this.saveGame();
     },
 
     startMission(index) {
-      if (index < 0 || index >= MISSION_DATA.length) return;
-
-      if (index > State.activeMissionIndex) {
-        UI.notification("Terminez d'abord les missions précédentes.");
-        return;
+      if (!Number.isInteger(index) ||
+          index < 0 ||
+          index >= CONFIG.missionCount) {
+        UI.notify("Mission invalide.");
+        return false;
       }
 
-      State.activeMissionIndex = index;
-      State.activeStepIndex = 0;
+      if (State.completedMissions.includes(index)) {
+        UI.notify("Cette mission est déjà terminée.");
+        return false;
+      }
 
-      if (!State.gameReady) {
-        this.ensureWorld().then((ready) => {
-          if (ready) this.beginMission(index);
+      if (index !== State.missionIndex) {
+        UI.notify("Terminez d'abord la mission actuelle.");
+        return false;
+      }
+
+      return this.beginMission(index);
+    },
+
+    pause() {
+      if (!State.started || !State.active || State.paused) return;
+
+      State.paused = true;
+      State.active = false;
+
+      Controls.stop();
+      AudioSystem.stop();
+
+      UI.showScreen("pauseScreen");
+    },
+
+    resume() {
+      if (!this.scene || this.scene.isDisposed()) return;
+
+      State.paused = false;
+      State.active = true;
+
+      UI.showScreen("gameScreen");
+
+      if (this.engine) {
+        this.engine.runRenderLoop(() => {
+          if (!this.scene || this.scene.isDisposed()) return;
+
+          const now = performance.now();
+          const delta = Math.min(
+            (now - (this.lastFrameTime || now)) / 1000,
+            0.05
+          );
+
+          this.lastFrameTime = now;
+
+          if (State.active && !State.paused) {
+            State.gameTime += delta;
+            Controls.update(delta);
+          }
+
+          this.scene.render();
         });
-      } else {
-        this.beginMission(index);
       }
     },
 
-    jump() {
-      if (!State.gameStarted || State.paused || State.isJumping) return;
-
-      State.isJumping = true;
-      State.verticalVelocity = Math.sqrt(
-        2 * CONFIG.gravity * CONFIG.jumpHeight
-      );
-
-      AudioSystem.tone(380, 0.08);
+    stopMovement() {
+      Controls.stop();
     },
 
-    async save() {
+    async saveGame() {
+      if (!State.started) return false;
+
       UI.saving(true);
 
-      const success = await Storage.saveGame();
+      const data = {
+        version: CONFIG.version,
+        started: State.started,
+        completed: State.completed,
+        missionIndex: State.missionIndex,
+        completedMissions: State.completedMissions,
+        playerPosition: this.player
+          ? {
+              x: this.player.position.x,
+              z: this.player.position.z
+            }
+          : State.playerPosition,
+        gameTime: State.gameTime,
+        savedAt: new Date().toISOString()
+      };
 
-      setTimeout(() => UI.saving(false), 550);
+      const success = await Storage.save(CONFIG.storageKey, data);
 
-      UI.notification(
-        success ? "Progression sauvegardée." : "Sauvegarde de secours effectuée."
-      );
-    },
+      State.lastSave = Date.now();
+      UI.saving(false);
+      UI.updateContinueButton();
 
-    returnToMenu() {
-      UI.confirm(
-        "Retour au menu",
-        "Votre progression sera sauvegardée avant le retour au menu. Continuer ?",
-        async () => {
-          await Storage.saveGame();
-
-          State.paused = true;
-          State.gameStarted = false;
-
-          Dialogue.close();
-          AudioSystem.stopSpeech();
-
-          Utils.hide(DOM.pauseScreen);
-          Utils.hide(DOM.gameScreen);
-          Utils.hide(DOM.missionsScreen);
-          Utils.hide(DOM.missionCompleteScreen);
-
-          Utils.show(DOM.mainMenu);
-
-          const save = await Storage.loadSave();
-
-          if (DOM.continueGameButton) {
-            DOM.continueGameButton.disabled = !save;
-          }
-        }
-      );
-    },
-
-    handleEscape() {
-      if (State.dialogueOpen) {
-        Dialogue.close();
-        return;
-      }
-
-      if (DOM.missionsScreen && !DOM.missionsScreen.classList.contains("hidden")) {
-        UI.closeMissions();
-        return;
-      }
-
-      if (DOM.settingsScreen && !DOM.settingsScreen.classList.contains("hidden")) {
-        UI.closeSettings();
-        return;
-      }
-
-      if (DOM.pauseScreen && !DOM.pauseScreen.classList.contains("hidden")) {
-        UI.closePause();
-        return;
-      }
-
-      if (State.gameStarted && !State.paused) {
-        UI.openPause();
-      }
-    },
-
-    async retry() {
-      Utils.hide(DOM.errorScreen);
-      State.gameReady = false;
-
-      const ready = await this.ensureWorld();
-
-      if (ready) {
-        this.beginMission(State.activeMissionIndex);
-      } else {
-        UI.showError(
-          "Impossible de démarrer le jeu",
-          "Le moteur 3D n'est toujours pas disponible. Vérifiez la connexion et rechargez la page."
+      if (!success) {
+        UI.notify(
+          "Le navigateur a refusé la sauvegarde. Vérifiez l'espace disponible."
         );
       }
+
+      return success;
+    },
+
+    async returnToMenu() {
+      if (State.started) {
+        await this.saveGame();
+      }
+
+      Controls.stop();
+      Dialogue.close();
+      State.active = false;
+      State.paused = false;
+
+      UI.showMenu();
+    },
+
+    restart() {
+      UI.showConfirmation(
+        "Recommencer l'aventure ?",
+        "Votre progression actuelle sera effacée. Voulez-vous vraiment recommencer ?",
+        async () => {
+          await Storage.remove(CONFIG.storageKey);
+          await this.startNewGame();
+        }
+      );
     }
   };
 
   /* ==========================================================
-     15. BOUTONS — CONNEXION DE TOUTES LES ACTIONS
+     15. BOUTONS ET NAVIGATION
   ========================================================== */
 
   function bindButtons() {
     Utils.button(DOM.newGameButton, () => {
-      AudioSystem.resume();
-      AudioSystem.initialize();
-      Game.startNewGame();
+      UI.showConfirmation(
+        "Nouvelle aventure",
+        "Commencer une nouvelle aventure ? Une progression existante sera remplacée.",
+        async () => {
+          await Storage.remove(CONFIG.storageKey);
+          await Game.startNewGame();
+        }
+      );
     });
 
     Utils.button(DOM.continueGameButton, () => {
-      AudioSystem.resume();
-      AudioSystem.initialize();
       Game.continueGame();
     });
 
     Utils.button(DOM.missionsMenuButton, async () => {
-      AudioSystem.resume();
       UI.updateMissionsList();
-      Utils.hide(DOM.mainMenu);
-      Utils.show(DOM.missionsScreen);
+      UI.showScreen("missionsScreen");
     });
 
     Utils.button(DOM.settingsButton, () => {
-      UI.openSettings();
+      Settings.applyToForm();
+      UI.showScreen("settingsScreen");
     });
 
     Utils.button(DOM.creditsButton, () => {
-      Utils.hide(DOM.mainMenu);
-      Utils.show(DOM.creditsScreen);
+      UI.showScreen("creditsScreen");
+    });
+
+    Utils.button(DOM.closeCreditsButton, () => {
+      UI.showScreen("mainMenu");
     });
 
     Utils.button(DOM.pauseButton, () => {
-      UI.openPause();
+      Game.pause();
+    });
+
+    Utils.button(DOM.resumeButton, () => {
+      Game.resume();
     });
 
     Utils.button(DOM.openMissionsButton, () => {
-      UI.openMissions();
+      UI.updateMissionsList();
+      State.active = false;
+      State.paused = true;
+      UI.showScreen("missionsScreen");
+    });
+
+    Utils.button(DOM.closeMissionsButton, () => {
+      if (State.started && !State.completed) {
+        Game.resume();
+      } else {
+        UI.showScreen("mainMenu");
+      }
+    });
+
+    Utils.button(DOM.pauseMissionsButton, () => {
+      UI.updateMissionsList();
+      UI.showScreen("missionsScreen");
+    });
+
+    Utils.button(DOM.saveGameButton, async () => {
+      const saved = await Game.saveGame();
+      UI.notify(
+        saved
+          ? "Progression sauvegardée."
+          : "Impossible de sauvegarder la progression."
+      );
+    });
+
+    Utils.button(DOM.returnToMenuButton, () => {
+      UI.showConfirmation(
+        "Retour au menu",
+        "Votre progression sera sauvegardée avant le retour au menu.",
+        async () => Game.returnToMenu()
+      );
+    });
+
+    Utils.button(DOM.saveSettingsButton, () => {
+      Settings.save();
+    });
+
+    Utils.button(DOM.closeSettingsButton, () => {
+      if (State.started && !State.completed) {
+        Game.resume();
+      } else {
+        UI.showScreen("mainMenu");
+      }
     });
 
     Utils.button(DOM.interactionPrompt, () => {
-      Game.interact();
+      Controls.interact();
     });
 
     Utils.button(DOM.talkButton, () => {
-      Game.interact();
+      Controls.interact();
     });
 
     Utils.button(DOM.runButton, () => {
-      State.isRunning = !State.isRunning;
-
-      DOM.runButton.classList.toggle("active", State.isRunning);
-
-      UI.notification(
-        State.isRunning ? "Course activée." : "Course désactivée.",
-        1100
+      Controls.running = !Controls.running;
+      DOM.runButton.classList.toggle("active", Controls.running);
+      UI.notify(
+        Controls.running
+          ? "Course activée."
+          : "Course désactivée."
       );
     });
 
     if (DOM.runButton) {
       DOM.runButton.addEventListener("pointerdown", () => {
-        State.isRunning = true;
+        Controls.running = true;
       });
 
-      const stopRunning = () => {
-        State.isRunning = false;
-        DOM.runButton.classList.remove("active");
+      const stopRun = () => {
+        Controls.running = false;
       };
 
-      DOM.runButton.addEventListener("pointerup", stopRunning);
-      DOM.runButton.addEventListener("pointercancel", stopRunning);
-      DOM.runButton.addEventListener("pointerleave", stopRunning);
+      DOM.runButton.addEventListener("pointerup", stopRun);
+      DOM.runButton.addEventListener("pointercancel", stopRun);
+      DOM.runButton.addEventListener("pointerleave", stopRun);
     }
 
     Utils.button(DOM.jumpButton, () => {
-      Game.jump();
+      if (State.active && !State.paused) {
+        Controls.jumpRequested = true;
+      }
     });
 
     Utils.button(DOM.closeDialogueButton, () => {
@@ -3880,41 +2846,7 @@
     });
 
     Utils.button(DOM.nextDialogueButton, () => {
-      Dialogue.continue();
-    });
-
-    Utils.button(DOM.closeMissionsButton, () => {
-      UI.closeMissions();
-    });
-
-    Utils.button(DOM.resumeButton, () => {
-      UI.closePause();
-    });
-
-    Utils.button(DOM.pauseMissionsButton, () => {
-      Utils.hide(DOM.pauseScreen);
-      UI.openMissions();
-    });
-
-    Utils.button(DOM.saveGameButton, () => {
-      Game.save();
-    });
-
-    Utils.button(DOM.returnToMenuButton, () => {
-      Game.returnToMenu();
-    });
-
-    Utils.button(DOM.closeSettingsButton, () => {
-      UI.closeSettings();
-    });
-
-    Utils.button(DOM.saveSettingsButton, () => {
-      UI.saveSettingsFromForm();
-    });
-
-    Utils.button(DOM.closeCreditsButton, () => {
-      Utils.hide(DOM.creditsScreen);
-      Utils.show(DOM.mainMenu);
+      Dialogue.next();
     });
 
     Utils.button(DOM.nextMissionButton, () => {
@@ -3922,331 +2854,232 @@
     });
 
     Utils.button(DOM.completionMenuButton, () => {
-      Utils.hide(DOM.missionCompleteScreen);
-      Utils.hide(DOM.gameScreen);
-      Utils.show(DOM.mainMenu);
-
-      State.paused = true;
-      State.gameStarted = false;
+      Game.returnToMenu();
     });
 
     Utils.button(DOM.restartGameButton, () => {
-      State.ending = false;
-      Game.resetProgress();
-      Utils.hide(DOM.endingScreen);
-
-      Game.ensureWorld().then((ready) => {
-        if (ready) Game.beginMission(0);
-      });
+      Game.restart();
     });
 
     Utils.button(DOM.endingMenuButton, () => {
-      State.ending = false;
-      State.paused = true;
-      Utils.hide(DOM.endingScreen);
-      Utils.show(DOM.mainMenu);
+      Game.returnToMenu();
     });
 
     Utils.button(DOM.cancelConfirmationButton, () => {
-      UI.closeConfirmation(false);
+      State.confirmationAction = null;
+
+      if (State.started && !State.completed) {
+        Game.resume();
+      } else {
+        UI.showScreen("mainMenu");
+      }
     });
 
-    Utils.button(DOM.acceptConfirmationButton, () => {
-      UI.closeConfirmation(true);
+    Utils.button(DOM.acceptConfirmationButton, async () => {
+      const action = State.confirmationAction;
+      State.confirmationAction = null;
+
+      if (typeof action === "function") {
+        await action();
+      } else {
+        UI.showScreen("mainMenu");
+      }
     });
 
     Utils.button(DOM.retryButton, () => {
-      Game.retry();
+      Game.startNewGame();
     });
 
     Utils.button(DOM.errorMenuButton, () => {
-      Utils.hide(DOM.errorScreen);
-      Utils.show(DOM.mainMenu);
+      UI.showMenu();
     });
 
-    // Fermer les fenêtres avec Escape et éviter les interactions
-    // accidentelles avec les boutons.
-    window.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        if (DOM.confirmationScreen &&
-            !DOM.confirmationScreen.classList.contains("hidden")) {
-          UI.closeConfirmation(false);
-        }
-      }
-    });
-  }
-
-  /* ==========================================================
-     16. INITIALISATION
-  ========================================================== */
-
-  async function initialize() {
-    UI.setLoading(5, "Initialisation de FOBAS Interactive...");
-
-    if (!DOM.canvas) {
-      console.error("Canvas loveGameCanvas introuvable.");
-      return;
-    }
-
-    bindButtons();
-    Controls.setupTouchControls();
-    CharacterSystem.updateCharacterButton();
-
-    UI.setLoading(20, "Préparation de la sauvegarde locale...");
-
-    await Storage.open();
-
-    UI.setLoading(38, "Chargement des paramètres...");
-
-    const savedSettings = await Storage.loadSettings();
-
-    if (savedSettings && typeof savedSettings === "object") {
-      State.settings = {
-        ...State.settings,
-        ...savedSettings
-      };
-    }
-
-    AudioSystem.initialize();
-    AudioSystem.setMusicEnabled(State.settings.music);
-
-    UI.populateSettings();
-
-    UI.setLoading(55, "Vérification de la progression...");
-
-    let savedGame = await Storage.loadSave();
-
-    if (!savedGame) {
-      savedGame = await Storage.restoreFallbackSave();
-    }
-
-    if (DOM.continueGameButton) {
-      DOM.continueGameButton.disabled = !savedGame;
-    }
-
-    UI.setLoading(72, "Préparation de l'interface...");
-
-    UI.updateMissionsList();
-
-    UI.setLoading(88, "Prêt à commencer votre aventure...");
-
-    await new Promise((resolve) => setTimeout(resolve, 250));
-
-    UI.setLoading(100, "Votre aventure est prête.");
-
-    setTimeout(() => {
-      Utils.hide(DOM.loadingScreen);
-      Utils.show(DOM.mainMenu);
-    }, 300);
-
-    // En cas de retour de l'application en premier plan,
-    // redimensionner le moteur pour l'écran mobile.
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) {
-        State.engine?.resize();
-      } else {
-        State.movement.x = 0;
-        State.movement.z = 0;
-        State.isRunning = false;
+      if (document.hidden && State.active && !State.paused) {
+        Game.pause();
+        Game.saveGame();
       }
     });
 
-    console.info(
-      `${CONFIG.appName} — Version ${CONFIG.version} initialisée.`
-    );
+    window.addEventListener("beforeunload", () => {
+      if (!State.started) return;
+
+      try {
+        const data = {
+          version: CONFIG.version,
+          started: State.started,
+          completed: State.completed,
+          missionIndex: State.missionIndex,
+          completedMissions: State.completedMissions,
+          playerPosition: Game.player
+            ? {
+                x: Game.player.position.x,
+                z: Game.player.position.z
+              }
+            : State.playerPosition,
+          gameTime: State.gameTime
+        };
+
+        localStorage.setItem(CONFIG.storageKey, JSON.stringify(data));
+      } catch {
+        // Le stockage peut être bloqué par le navigateur.
+      }
+    });
   }
 
   /* ==========================================================
-     17. VALIDATION DE LA CONFIGURATION
+     16. VÉRIFICATION DES MISSIONS
   ========================================================== */
 
   function validateMissions() {
-    const ids = new Set();
+    if (MISSION_DATA.length !== CONFIG.missionCount) {
+      console.error(
+        `Nombre de missions incorrect : ${MISSION_DATA.length}`
+      );
+      return false;
+    }
 
-    MISSION_DATA.forEach((mission, index) => {
-      if (!mission.id || !mission.title || !Array.isArray(mission.steps)) {
-        throw new Error(`Mission invalide à l'index ${index}.`);
+    for (const mission of MISSION_DATA) {
+      if (
+        !mission.title ||
+        !mission.objective ||
+        !mission.person ||
+        !mission.dialogue
+      ) {
+        console.error("Mission incomplète :", mission);
+        return false;
       }
+    }
 
-      if (ids.has(mission.id)) {
-        throw new Error(`Identifiant de mission en double : ${mission.id}`);
-      }
-
-      ids.add(mission.id);
-
-      if (mission.steps.length === 0) {
-        console.warn(`La mission "${mission.title}" ne possède aucune étape.`);
-      }
-
-      mission.steps.forEach((step, stepIndex) => {
-        if (!step.type || !step.text) {
-          console.warn(
-            `Étape incomplète dans "${mission.title}", position ${stepIndex}.`
-          );
-        }
-      });
-    });
+    return true;
   }
 
   /* ==========================================================
-     18. API PUBLIQUE — AJOUT DE MISSIONS
+     17. INITIALISATION
+  ========================================================== */
 
-     Exemple depuis la console ou un module complémentaire :
+  async function initialize() {
+    try {
+      UI.loading("Chargement de l'interface...", 10);
 
-     FOBASLove.addMission({
-       id: 36,
-       title: "Une nouvelle aventure",
-       location: "Le parc",
-       landscape: "park",
-       description: "Une nouvelle histoire commence.",
-       reward: "Un souvenir",
-       steps: [
-         {
-           type: "move",
-           text: "Rejoignez le point de rencontre.",
-           target: { x: 0, z: 8 }
-         },
-         {
-           type: "talk",
-           text: "Parlez à Camille.",
-           npc: "camille"
-         }
-       ]
-     });
+      if (!validateMissions()) {
+        throw new Error("Les données des missions sont incomplètes.");
+      }
 
-     Pour commencer une mission ajoutée :
-     FOBASLove.startMission(35);
+      Controls.bind();
+      bindButtons();
+
+      UI.loading("Chargement des paramètres...", 35);
+      await Settings.load();
+
+      UI.loading("Vérification de la sauvegarde...", 60);
+      await UI.updateContinueButton();
+
+      UI.loading("Préparation de l'aventure...", 85);
+      await Utils.wait(150);
+
+      UI.loading("Prêt à jouer !", 100);
+      await Utils.wait(250);
+
+      Utils.setVisible(DOM.loadingScreen, false);
+      UI.showScreen("mainMenu");
+
+      State.started = await Storage.hasSave();
+      await UI.updateContinueButton();
+
+      if (DOM.canvas) {
+        DOM.canvas.addEventListener("contextmenu", event => {
+          event.preventDefault();
+        });
+      }
+
+      Game.autosaveTimer = setInterval(() => {
+        if (State.started && State.active && !State.paused) {
+          Game.saveGame();
+        }
+      }, CONFIG.autosaveInterval);
+
+      console.info(
+        `FOBAS Sur l'Amour en Action v${CONFIG.version} initialisé.`
+      );
+    } catch (error) {
+      console.error("Erreur d'initialisation FOBAS :", error);
+
+      Utils.setVisible(DOM.loadingScreen, false);
+
+      UI.showError(
+        "Erreur d'initialisation",
+        error && error.message
+          ? error.message
+          : "Le jeu n'a pas pu être initialisé."
+      );
+    }
+  }
+
+  /* ==========================================================
+     18. API PUBLIQUE
   ========================================================== */
 
   const PublicAPI = {
     version: CONFIG.version,
 
-    get missions() {
-      return MISSION_DATA;
+    start() {
+      return Game.startNewGame();
     },
 
-    get characters() {
-      return CHARACTERS;
+    continue() {
+      return Game.continueGame();
     },
 
-    get progress() {
-      return {
-        activeMissionIndex: State.activeMissionIndex,
-        activeMissionId: this.missions[State.activeMissionIndex]?.id ?? null,
-        activeStepIndex: State.activeStepIndex,
-        completedMissions: [...State.completedMissions],
-        totalMissions: MISSION_DATA.length
-      };
+    pause() {
+      return Game.pause();
     },
 
-    addMission(mission) {
-      if (!mission || typeof mission !== "object") {
-        throw new TypeError("La mission doit être un objet.");
-      }
-
-      if (!mission.title || !Array.isArray(mission.steps) || !mission.steps.length) {
-        throw new Error("Une mission doit avoir un titre et au moins une étape.");
-      }
-
-      const newId = mission.id ?? (
-        Math.max(0, ...MISSION_DATA.map((item) => item.id)) + 1
-      );
-
-      if (MISSION_DATA.some((item) => item.id === newId)) {
-        throw new Error(`L'identifiant ${newId} existe déjà.`);
-      }
-
-      const allowedTypes = new Set([
-        "move", "visit", "talk", "interact", "collect", "help",
-        "sit", "dance", "sing", "photo", "listen", "give",
-        "choice", "promise", "explore", "wait", "hug", "observe", "arrive"
-      ]);
-
-      const steps = mission.steps.map((step) => {
-        if (!step.type || !allowedTypes.has(step.type)) {
-          throw new Error(`Type d'action non reconnu : ${step.type}`);
-        }
-
-        if (!step.text) {
-          throw new Error("Chaque étape doit contenir un texte.");
-        }
-
-        return { ...step };
-      });
-
-      const newMission = {
-        id: newId,
-        title: String(mission.title),
-        location: String(mission.location || "Nouveau lieu"),
-        landscape: String(mission.landscape || "garden"),
-        description: String(mission.description || ""),
-        reward: String(mission.reward || ""),
-        steps
-      };
-
-      MISSION_DATA.push(newMission);
-
-      UI.updateMissionsList();
-      Storage.saveGame();
-
-      UI.notification(`Mission « ${newMission.title} » ajoutée.`);
-
-      return newMission;
-    },
-
-    startMission(index) {
-      Game.startMission(index);
+    resume() {
+      return Game.resume();
     },
 
     save() {
-      return Storage.saveGame();
+      return Game.saveGame();
     },
 
-    chooseCharacter(id) {
-      CharacterSystem.choosePlayer(id);
+    nextMission() {
+      return Game.nextMission();
     },
 
-    notify(message) {
-      UI.notification(message);
+    interact() {
+      return Controls.interact();
+    },
+
+    getState() {
+      return {
+        version: CONFIG.version,
+        started: State.started,
+        active: State.active,
+        paused: State.paused,
+        missionIndex: State.missionIndex,
+        missionsTotal: CONFIG.missionCount,
+        completedMissions: [...State.completedMissions],
+        worldReady: State.worldReady
+      };
     }
   };
 
   window.FOBASLove = PublicAPI;
 
   /* ==========================================================
-     19. DÉMARRAGE SÉCURISÉ
+     19. DÉMARRAGE
   ========================================================== */
 
-  try {
-    validateMissions();
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => {
-        initialize().catch((error) => {
-          console.error("Erreur d'initialisation :", error);
-
-          UI.showError(
-            "Erreur d'initialisation",
-            "Le jeu n'a pas pu démarrer correctement. Rechargez la page et réessayez."
-          );
-        });
-      }, { once: true });
-    } else {
-      initialize().catch((error) => {
-        console.error("Erreur d'initialisation :", error);
-
-        UI.showError(
-          "Erreur d'initialisation",
-          "Le jeu n'a pas pu démarrer correctement. Rechargez la page et réessayez."
-        );
-      });
-    }
-  } catch (error) {
-    console.error("Configuration des missions invalide :", error);
-
-    UI.showError(
-      "Erreur de configuration",
-      error.message || "La liste des missions contient une erreur."
-    );
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialize, {
+      once: true
+    });
+  } else {
+    initialize();
   }
+
 })();
+
+
+
