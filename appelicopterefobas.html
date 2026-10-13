@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"
+    >
+
+    <meta
+        name="description"
+        content="FOBAS ELITE STRIKE 3D — Jeu tactique 3D avec Babylon.js, hélicoptères, missions, armes et coopération entre experts."
+    >
+
+    <meta name="theme-color" content="#07130f">
+    <meta name="color-scheme" content="dark">
+
+    <title>FOBAS ELITE STRIKE 3D</title>
+
+    <!-- Babylon.js : résolution des modules pour le navigateur -->
+    <script type="importmap">
+    {
+        "imports": {
+            "@babylonjs/core": "https://esm.sh/@babylonjs/core@9.30.0",
+            "@babylonjs/core/": "https://esm.sh/@babylonjs/core@9.30.0/",
+            "@babylonjs/loaders": "https://esm.sh/@babylonjs/loaders@9.30.0",
+            "@babylonjs/loaders/": "https://esm.sh/@babylonjs/loaders@9.30.0/"
+        }
+    }
+    </script>
+
+    <!-- Feuille de style du jeu -->
+    <link rel="stylesheet" href="./appelicopterefobas.css">
+
+    <!-- Chargement du moteur du jeu -->
+    <script type="module" src="./appelicopterefobas.js"></script>
+</head>
+
+<body>
+    <main id="helicopterGameApp" class="game-app">
+
+        <!-- ==================================================
+             ÉCRAN DE CHARGEMENT
+        =================================================== -->
+        <section
+            id="loadingScreen"
+            class="loading-screen"
+            aria-label="Chargement du jeu"
+        >
+            <div class="loading-content">
+                <div class="loading-emblem" aria-hidden="true">
+                    <span>FS</span>
+                </div>
+
+                <p class="loading-eyebrow">FOBAS TACTICAL SYSTEMS</p>
+
+                <h1>ELITE STRIKE <span>3D</span></h1>
+
+                <p id="loadingMessage">
+                    Initialisation du moteur graphique Babylon.js…
+                </p>
+
+                <div class="loading-progress-track">
+                    <div
+                        id="loadingProgressBar"
+                        class="loading-progress-bar"
+                        style="width: 5%"
+                    ></div>
+                </div>
+
+                <p id="loadingProgressText">Préparation du terrain… 5 %</p>
+
+                <p class="loading-small">
+                    Préparation du système tactique
+                </p>
+            </div>
+        </section>
+
+
+        <!-- ==================================================
+             ÉCRAN D'ACCUEIL
+        =================================================== -->
+        <section
+            id="mainMenu"
+            class="main-menu hidden"
+            aria-label="Menu principal"
+        >
+            <div class="menu-background"></div>
+
+            <header class="menu-header">
+                <div class="brand-block">
+                    <div class="brand-symbol">FS</div>
+
+                    <div>
+                        <p class="brand-kicker">FOBAS INTERACTIVE</p>
+                        <h1>ELITE STRIKE <span>3D</span></h1>
+                    </div>
+                </div>
+
+                <div class="menu-status">
+                    <span class="status-dot"></span>
+                    SYSTÈME PRÊT
+                </div>
+            </header>
+
+            <div class="menu-hero">
+                <p class="section-eyebrow">OPÉRATION TACTIQUE</p>
+
+                <h2>
+                    LE CHAMP DE BATAILLE<br>
+                    <span>VOUS ATTEND</span>
+                </h2>
+
+                <p>
+                    Prenez le commandement, coordonnez votre équipe,
+                    récupérez les équipements disponibles et accomplissez
+                    vos missions.
+                </p>
+
+                <div class="menu-actions">
+                    <button
+                        id="startGameButton"
+                        class="btn btn-primary btn-large"
+                        type="button"
+                    >
+                        <span aria-hidden="true">▶</span>
+                        NOUVELLE MISSION
+                    </button>
+
+                    <button
+                        id="continueGameButton"
+                        class="btn btn-secondary btn-large"
+                        type="button"
+                    >
+                        CONTINUER
+                    </button>
+                </div>
+            </div>
+
+            <div class="menu-bottom-grid">
+                <article class="menu-feature">
+                    <span class="feature-icon" aria-hidden="true">◈</span>
+                    <div>
+                        <h3>ENVIRONNEMENT 3D</h3>
+                        <p>Terrain, unités et véhicules</p>
+                    </div>
+                </article>
+
+                <article class="menu-feature">
+                    <span class="feature-icon" aria-hidden="true">⌘</span>
+                    <div>
+                        <h3>ÉQUIPE TACTIQUE</h3>
+                        <p>Selvandieu, Ranise et Kerlande</p>
+                    </div>
+                </article>
+
+                <article class="menu-feature">
+                    <span class="feature-icon" aria-hidden="true">✚</span>
+                    <div>
+                        <h3>MISSIONS ÉVOLUTIVES</h3>
+                        <p>Objectifs et progression</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+
+        <!-- ==================================================
+             INTERFACE PRINCIPALE DU JEU
+        =================================================== -->
+        <section
+            id="gameScreen"
+            class="game-screen hidden"
+            aria-label="Champ de bataille"
+        >
+
+            <!-- Zone 3D Babylon.js -->
+            <div id="gameWorld" class="game-world">
+                <canvas
+                    id="gameCanvas"
+                    class="game-canvas"
+                    aria-label="Vue 3D interactive du champ de bataille"
+                ></canvas>
+
+                <div
+                    id="worldLoadingNotice"
+                    class="world-loading-notice"
+                    role="status"
+                >
+                    <span class="mini-spinner"></span>
+                    Préparation du monde 3D…
+                </div>
+            </div>
+
+
+            <!-- ==================================================
+                 BARRE SUPÉRIEURE
+            =================================================== -->
+            <header class="game-topbar">
+
+                <button
+                    id="backToMenuButton"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Retour au menu"
+                    title="Retour au menu"
+                >
+                    ☰
+                </button>
+
+                <div class="game-brand">
+                    <strong>ELITE STRIKE <span>3D</span></strong>
+                    <small id="missionHeaderLabel">OPÉRATION 001</small>
+                </div>
+
+                <div class="topbar-status">
+                    <span class="status-dot"></span>
+                    <span id="connectionStatus">EN LIGNE</span>
+                </div>
+
+                <button
+                    id="saveGameButton"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Sauvegarder la partie"
+                    title="Sauvegarder"
+                >
+                    💾
+                </button>
+
+                <button
+                    id="pauseGameButton"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Mettre en pause"
+                    title="Pause"
+                >
+                    Ⅱ
+                </button>
+            </header>
+
+
+            <!-- ==================================================
+                 PANNEAU MISSION
+            =================================================== -->
+            <aside id="missionPanel" class="mission-panel">
+
+                <div class="panel-heading">
+                    <span class="panel-kicker">MISSION ACTIVE</span>
+
+                    <button
+                        id="toggleMissionPanelButton"
+                        class="small-icon-button"
+                        type="button"
+                        aria-label="Réduire le panneau mission"
+                    >
+                        −
+                    </button>
+                </div>
+
+                <h2 id="missionTitle">OPÉRATION : PREMIER CONTACT</h2>
+
+                <p id="missionDescription">
+                    Prenez connaissance du terrain et coordonnez vos
+                    coéquipiers.
+                </p>
+
+                <div class="mission-progress-heading">
+                    <span>PROGRESSION</span>
+                    <strong id="missionProgressText">0 %</strong>
+                </div>
+
+                <div class="progress-track">
+                    <div
+                        id="missionProgressBar"
+                        class="progress-bar"
+                        style="width: 0%"
+                    ></div>
+                </div>
+
+                <ul id="missionObjectives" class="mission-objectives">
+                    <li class="objective-item">
+                        <span class="objective-marker"></span>
+                        <span>Initialiser le terrain</span>
+                    </li>
+                </ul>
+
+                <div class="mission-footer">
+                    <span>POINTS</span>
+                    <strong id="playerScore">0</strong>
+                </div>
+            </aside>
+
+
+            <!-- ==================================================
+                 HUD JOUEUR
+            =================================================== -->
+            <section id="playerHud" class="player-hud">
+
+                <div class="hud-player-card">
+                    <div class="player-avatar">S</div>
+
+                    <div class="player-information">
+                        <strong>SELVANDIEU</strong>
+                        <small>JOUEUR PRINCIPAL</small>
+                    </div>
+
+                    <span id="playerStateBadge" class="state-badge">
+                        AU SOL
+                    </span>
+                </div>
+
+                <div class="hud-vitals">
+
+                    <div class="vital-row">
+                        <span>♥</span>
+
+                        <div class="vital-track">
+                            <div
+                                id="playerHealthBar"
+                                class="vital-fill health-fill"
+                                style="width: 100%"
+                            ></div>
+                        </div>
+
+                        <strong id="playerHealthText">100</strong>
+                    </div>
+
+                    <div class="vital-row">
+                        <span>⬡</span>
+
+                        <div class="vital-track">
+                            <div
+                                id="playerArmorBar"
+                                class="vital-fill armor-fill"
+                                style="width: 100%"
+                            ></div>
+                        </div>
+
+                        <strong id="playerArmorText">100</strong>
+                    </div>
+                </div>
+
+                <div class="hud-ammunition">
+                    <span id="currentWeaponName">ARME PRINCIPALE</span>
+
+                    <div>
+                        <strong id="currentAmmo">30</strong>
+                        <span>/</span>
+                        <span id="reserveAmmo">120</span>
+                    </div>
+
+                    <small>MUNITIONS</small>
+                </div>
+            </section>
+
+
+            <!-- ==================================================
+                 MINICARTE ET COORDONNÉES
+            =================================================== -->
+            <aside id="minimapPanel" class="minimap-panel">
+
+                <div class="panel-heading">
+                    <span>CARTE TACTIQUE</span>
+
+                    <button
+                        id="toggleMapButton"
+                        class="small-icon-button"
+                        type="button"
+                        aria-label="Afficher ou masquer la carte"
+                    >
+                        −
+                    </button>
+                </div>
+
+                <canvas
+                    id="minimapCanvas"
+                    width="220"
+                    height="220"
+                    aria-label="Carte tactique du terrain"
+                ></canvas>
+
+                <div class="map-legend">
+                    <span><i class="legend-player"></i> Vous</span>
+                    <span><i class="legend-ally"></i> Alliés</span>
+                    <span><i class="legend-enemy"></i> Ennemis</span>
+                    <span><i class="legend-helicopter"></i> Hélicoptères</span>
+                </div>
+
+                <div class="coordinates-row">
+                    <span>POSITION</span>
+                    <strong id="playerCoordinates">X: 0 | Z: 0</strong>
+                </div>
+
+                <button
+                    id="centerCameraButton"
+                    class="btn btn-secondary btn-full"
+                    type="button"
+                >
+                    RECENTRER LA CAMÉRA
+                </button>
+            </aside>
+
+
+            <!-- ==================================================
+                 NOTIFICATIONS TACTIQUES
+            =================================================== -->
+            <section
+                id="notificationStack"
+                class="notification-stack"
+                aria-live="polite"
+                aria-atomic="false"
+            ></section>
+
+            <div
+                id="targetIndicator"
+                class="target-indicator hidden"
+                aria-live="polite"
+            >
+                <span class="target-reticle">⌖</span>
+
+                <div>
+                    <strong id="targetName">CIBLE</strong>
+                    <small id="targetDistance">DISTANCE : —</small>
+                </div>
+            </div>
+
+
+            <!-- ==================================================
+                 INDICATEUR D'HÉLICOPTÈRE
+            =================================================== -->
+            <aside id="helicopterHud" class="helicopter-hud hidden">
+
+                <div class="helicopter-hud-header">
+                    <span>MODE PILOTAGE</span>
+                    <strong id="helicopterStatus">AU SOL</strong>
+                </div>
+
+                <div class="helicopter-stat-grid">
+                    <div>
+                        <small>VITESSE</small>
+                        <strong><span id="helicopterSpeed">0</span> km/h</strong>
+                    </div>
+
+                    <div>
+                        <small>ALTITUDE</small>
+                        <strong><span id="helicopterAltitude">0</span> m</strong>
+                    </div>
+
+                    <div>
+                        <small>ÉTAT</small>
+                        <strong id="helicopterHealth">100 %</strong>
+                    </div>
+
+                    <div>
+                        <small>CARBURANT</small>
+                        <strong id="helicopterFuel">100 %</strong>
+                    </div>
+                </div>
+
+                <div class="helicopter-controls-hint">
+                    Utilisez les commandes de pilotage pour manœuvrer.
+                </div>
+
+            </aside>
+
+
+            <!-- ==================================================
+                 CONTRÔLES DE CAMÉRA
+            =================================================== -->
+            <section id="cameraControls" class="camera-controls">
+
+                <button
+                    id="zoomInButton"
+                    class="control-button zoom-button"
+                    type="button"
+                    aria-label="Zoom avant"
+                    title="Zoom +"
+                >
+                    +
+                </button>
+
+                <button
+                    id="zoomOutButton"
+                    class="control-button zoom-button"
+                    type="button"
+                    aria-label="Zoom arrière"
+                    title="Zoom −"
+                >
+                    −
+                </button>
+
+                <button
+                    id="resetCameraButton"
+                    class="control-button"
+                    type="button"
+                    aria-label="Réinitialiser la caméra"
+                    title="Réinitialiser la caméra"
+                >
+                    ◎
+                </button>
+
+            </section>
+
+
+            <!-- ==================================================
+                 JOYSTICK DE DÉPLACEMENT
+            =================================================== -->
+            <section
+                id="movementControl"
+                class="movement-control"
+                aria-label="Joystick de déplacement"
+            >
+                <div id="movementJoystick" class="movement-joystick">
+
+                    <div class="joystick-ring">
+                        <span class="joystick-direction direction-up">▲</span>
+                        <span class="joystick-direction direction-down">▼</span>
+                        <span class="joystick-direction direction-left">◀</span>
+                        <span class="joystick-direction direction-right">▶</span>
+
+                        <button
+                            id="joystickKnob"
+                            class="joystick-knob"
+                            type="button"
+                            aria-label="Contrôle de déplacement"
+                        >
+                            ●
+                        </button>
+                    </div>
+
+                </div>
+
+                <span class="control-caption">DÉPLACEMENT</span>
+            </section>
+
+
+            <!-- ==================================================
+                 ACTIONS RAPIDES DU JOUEUR
+            =================================================== -->
+            <section id="playerActionControls" class="player-action-controls">
+
+                <button
+                    id="interactButton"
+                    class="action-button"
+                    type="button"
+                >
+                    <span class="action-icon">⌕</span>
+                    <span>INTERAGIR</span>
+                </button>
+
+                <button
+                    id="shootButton"
+                    class="action-button action-button-danger"
+                    type="button"
+                >
+                    <span class="action-icon">⊕</span>
+                    <span>TIRER</span>
+                </button>
+
+                <button
+                    id="aimButton"
+                    class="action-button"
+                    type="button"
+                >
+                    <span class="action-icon">⌖</span>
+                    <span>VISER</span>
+                </button>
+
+                <button
+                    id="reloadButton"
+                    class="action-button"
+                    type="button"
+                >
+                    <span class="action-icon">↻</span>
+                    <span>RECHARGER</span>
+                </button>
+
+                <button
+                    id="jumpButton"
+                    class="action-button"
+                    type="button"
+                >
+                    <span class="action-icon">↟</span>
+                    <span>SAUTER</span>
+                </button>
+
+                <button
+                    id="crouchButton"
+                    class="action-button"
+                    type="button"
+                >
+                    <span class="action-icon">↓</span>
+                    <span>S'ACCROUPIR</span>
+                </button>
+
+                <button
+                    id="sprintButton"
+                    class="action-button"
+                    type="button"
+                >
+                    <span class="action-icon">»</span>
+                    <span>SPRINT</span>
+                </button>
+
+                <button
+                    id="meleeButton"
+                    class="action-button"
+                    type="button"
+                >
+                    <span class="action-icon">✦</span>
+                    <span>COMBAT RAPPROCHÉ</span>
+                </button>
+
+            </section>
+
+
+            <!-- ==================================================
+                 BIBLIOTHÈQUE D'ARMES
+            =================================================== -->
+            <button
+                id="openWeaponLibraryButton"
+                class="floating-panel-button weapon-library-button"
+                type="button"
+            >
+                <span class="floating-button-icon">⌁</span>
+                <span>ARSENAL</span>
+            </button>
+
+            <section
+                id="weaponLibraryPanel"
+                class="drawer-panel hidden"
+                aria-label="Bibliothèque d'armes"
+            >
+
+                <header class="drawer-header">
+                    <div>
+                        <small>ÉQUIPEMENT TACTIQUE</small>
+                        <h2>ARSENAL</h2>
+                    </div>
+
+                    <button
+                        id="closeWeaponLibraryButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fermer l'arsenal"
+                    >
+                        ✕
+                    </button>
+                </header>
+
+                <div class="drawer-resource-row">
+                    <span>POINTS DISPONIBLES</span>
+                    <strong id="weaponPurchasePoints">0</strong>
+                </div>
+
+                <div
+                    id="weaponLibraryList"
+                    class="weapon-library-list"
+                >
+                    <!-- Cartes générées dynamiquement par JavaScript -->
+                </div>
+
+                <div class="drawer-footer">
+                    <button
+                        id="confirmWeaponButton"
+                        class="btn btn-primary btn-full"
+                        type="button"
+                    >
+                        ÉQUIPER L'ARME SÉLECTIONNÉE
+                    </button>
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 BIBLIOTHÈQUE D'ÉQUIPEMENTS MILITAIRES
+            =================================================== -->
+            <button
+                id="openEquipmentButton"
+                class="floating-panel-button equipment-button"
+                type="button"
+            >
+                <span class="floating-button-icon">⬡</span>
+                <span>ÉQUIPEMENT</span>
+            </button>
+
+            <section
+                id="equipmentPanel"
+                class="drawer-panel hidden"
+                aria-label="Équipements militaires"
+            >
+
+                <header class="drawer-header">
+                    <div>
+                        <small>PRÉPARATION DU COMBATTANT</small>
+                        <h2>ÉQUIPEMENTS</h2>
+                    </div>
+
+                    <button
+                        id="closeEquipmentButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fermer les équipements"
+                    >
+                        ✕
+                    </button>
+                </header>
+
+                <div class="drawer-resource-row">
+                    <span>POINTS DISPONIBLES</span>
+                    <strong id="equipmentPurchasePoints">0</strong>
+                </div>
+
+                <div
+                    id="equipmentLibraryList"
+                    class="equipment-library-list"
+                >
+                    <!-- Équipements générés dynamiquement -->
+                </div>
+
+                <button
+                    id="confirmEquipmentButton"
+                    class="btn btn-primary btn-full"
+                    type="button"
+                >
+                    APPLIQUER L'ÉQUIPEMENT
+                </button>
+
+            </section>
+
+
+            <!-- ==================================================
+                 BIBLIOTHÈQUE DES HÉLICOPTÈRES
+            =================================================== -->
+            <button
+                id="openHelicopterLibraryButton"
+                class="floating-panel-button helicopter-library-button"
+                type="button"
+            >
+                <span class="floating-button-icon">✈</span>
+                <span>HÉLICOPTÈRES</span>
+            </button>
+
+            <section
+                id="helicopterLibraryPanel"
+                class="drawer-panel hidden"
+                aria-label="Bibliothèque des hélicoptères"
+            >
+
+                <header class="drawer-header">
+                    <div>
+                        <small>TRANSPORT ET SOUTIEN AÉRIEN</small>
+                        <h2>FLOTTE AÉRIENNE</h2>
+                    </div>
+
+                    <button
+                        id="closeHelicopterLibraryButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fermer les hélicoptères"
+                    >
+                        ✕
+                    </button>
+                </header>
+
+                <div class="helicopter-current-status">
+                    <span>VÉHICULE ACTUEL</span>
+                    <strong id="currentHelicopterName">
+                        AUCUN HÉLICOPTÈRE
+                    </strong>
+                </div>
+
+                <div
+                    id="helicopterLibraryList"
+                    class="helicopter-library-list"
+                >
+                    <!-- Véhicules générés dynamiquement -->
+                </div>
+
+                <div class="drawer-footer">
+                    <button
+                        id="selectHelicopterButton"
+                        class="btn btn-primary btn-full"
+                        type="button"
+                    >
+                        SÉLECTIONNER L'HÉLICOPTÈRE
+                    </button>
+
+                    <button
+                        id="boardHelicopterButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        MONTER DANS L'HÉLICOPTÈRE PROCHE
+                    </button>
+
+                    <button
+                        id="exitHelicopterButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        DESCENDRE DE L'HÉLICOPTÈRE
+                    </button>
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 COMMANDES DE PILOTAGE
+            =================================================== -->
+            <section
+                id="helicopterFlightControls"
+                class="helicopter-flight-controls hidden"
+                aria-label="Commandes de pilotage de l'hélicoptère"
+            >
+
+                <header class="flight-controls-header">
+                    <strong>COMMANDES DE VOL</strong>
+
+                    <button
+                        id="closeFlightControlsButton"
+                        class="small-icon-button"
+                        type="button"
+                        aria-label="Fermer le panneau de pilotage"
+                    >
+                        −
+                    </button>
+                </header>
+
+                <div class="flight-control-grid">
+
+                    <button
+                        id="helicopterTakeoffButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>⬆</span>
+                        <small>DÉCOLLER</small>
+                    </button>
+
+                    <button
+                        id="helicopterLandButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>⬇</span>
+                        <small>ATTERRIR</small>
+                    </button>
+
+                    <button
+                        id="helicopterAccelerateButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>»</span>
+                        <small>ACCÉLÉRER</small>
+                    </button>
+
+                    <button
+                        id="helicopterBrakeButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>■</span>
+                        <small>FREINER</small>
+                    </button>
+
+                    <button
+                        id="helicopterAscendButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>↟</span>
+                        <small>MONTER</small>
+                    </button>
+
+                    <button
+                        id="helicopterDescendButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>↡</span>
+                        <small>DESCENDRE</small>
+                    </button>
+
+                    <button
+                        id="helicopterTurnLeftButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>↶</span>
+                        <small>TOURNER GAUCHE</small>
+                    </button>
+
+                    <button
+                        id="helicopterTurnRightButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>↷</span>
+                        <small>TOURNER DROITE</small>
+                    </button>
+
+                    <button
+                        id="helicopterHoverButton"
+                        class="flight-button"
+                        type="button"
+                    >
+                        <span>◎</span>
+                        <small>STABILISER</small>
+                    </button>
+
+                    <button
+                        id="helicopterExitButton"
+                        class="flight-button flight-button-danger"
+                        type="button"
+                    >
+                        <span>⇩</span>
+                        <small>QUITTER</small>
+                    </button>
+
+                </div>
+
+                <p class="flight-controls-note">
+                    Les commandes sont activées selon l'état réel
+                    du véhicule et les conditions de la mission.
+                </p>
+
+            </section>
+
+
+            <!-- ==================================================
+                 COMMUNICATION ENTRE LES TROIS EXPERTS
+            =================================================== -->
+            <button
+                id="openCommunicationButton"
+                class="floating-panel-button communication-button"
+                type="button"
+            >
+                <span class="floating-button-icon">▤</span>
+                <span>COMMUNICATION</span>
+                <span id="unreadMessagesBadge" class="unread-badge hidden">
+                    0
+                </span>
+            </button>
+
+            <section
+                id="communicationPanel"
+                class="communication-panel hidden"
+                aria-label="Communication tactique entre les experts"
+            >
+
+                <header class="communication-header">
+                    <div>
+                        <small>CANAL TACTIQUE</small>
+                        <h2>ÉQUIPE EXPERTE</h2>
+                    </div>
+
+                    <button
+                        id="closeCommunicationButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fermer la communication"
+                    >
+                        ✕
+                    </button>
+                </header>
+
+                <div class="expert-roster">
+
+                    <button
+                        id="selectSelvandieuButton"
+                        class="expert-card expert-card-active"
+                        type="button"
+                        data-expert-id="selvandieu"
+                    >
+                        <span class="expert-avatar">S</span>
+
+                        <span class="expert-card-info">
+                            <strong>SELVANDIEU</strong>
+                            <small>JOUEUR PRINCIPAL</small>
+                        </span>
+
+                        <span class="expert-online-dot"></span>
+                    </button>
+
+                    <button
+                        id="selectRaniseButton"
+                        class="expert-card"
+                        type="button"
+                        data-expert-id="ranise"
+                    >
+                        <span class="expert-avatar">R</span>
+
+                        <span class="expert-card-info">
+                            <strong>RANISE</strong>
+                            <small>EXPERT ALLIÉ · IA</small>
+                        </span>
+
+                        <span id="raniseOnlineStatus" class="expert-online-dot"></span>
+                    </button>
+
+                    <button
+                        id="selectKerlandeButton"
+                        class="expert-card"
+                        type="button"
+                        data-expert-id="kerlande"
+                    >
+                        <span class="expert-avatar">K</span>
+
+                        <span class="expert-card-info">
+                            <strong>KERLANDE</strong>
+                            <small>EXPERT ALLIÉ · IA</small>
+                        </span>
+
+                        <span id="kerlandeOnlineStatus" class="expert-online-dot"></span>
+                    </button>
+
+                </div>
+
+
+                <!-- Choix de l'expéditeur et du destinataire -->
+                <div class="communication-routing">
+
+                    <label for="messageSenderSelect">EXPÉDITEUR</label>
+
+                    <select id="messageSenderSelect">
+                        <option value="selvandieu">Selvandieu</option>
+                        <option value="ranise">Ranise</option>
+                        <option value="kerlande">Kerlande</option>
+                    </select>
+
+                    <label for="messageRecipientSelect">DESTINATAIRE</label>
+
+                    <select id="messageRecipientSelect">
+                        <option value="ranise">Ranise</option>
+                        <option value="kerlande">Kerlande</option>
+                        <option value="all">Toute l'équipe</option>
+                    </select>
+
+                </div>
+
+
+                <!-- Les messages sont insérés dynamiquement -->
+                <div
+                    id="communicationMessages"
+                    class="communication-messages"
+                    role="log"
+                    aria-live="polite"
+                    aria-relevant="additions"
+                >
+                    <article class="chat-system-message">
+                        <strong>SYSTÈME</strong>
+                        <p>
+                            Canal tactique initialisé. Sélectionnez un expert
+                            et choisissez une interaction.
+                        </p>
+                    </article>
+                </div>
+
+
+                <!-- Recherche des interactions -->
+                <div class="interaction-search-area">
+                    <label for="interactionSearchInput">
+                        RECHERCHER UNE INTERACTION
+                    </label>
+
+                    <input
+                        id="interactionSearchInput"
+                        type="search"
+                        placeholder="Ex. : Où es-tu, Ranise ?"
+                        autocomplete="off"
+                    >
+                </div>
+
+
+                <!-- Catégories des 50 interactions et des extensions -->
+                <div class="interaction-category-tabs">
+
+                    <button
+                        class="interaction-category-tab active"
+                        type="button"
+                        data-interaction-category="position"
+                    >
+                        POSITION
+                    </button>
+
+                    <button
+                        class="interaction-category-tab"
+                        type="button"
+                        data-interaction-category="threat"
+                    >
+                        MENACES
+                    </button>
+
+                    <button
+                        class="interaction-category-tab"
+                        type="button"
+                        data-interaction-category="team"
+                    >
+                        ÉQUIPE
+                    </button>
+
+                    <button
+                        class="interaction-category-tab"
+                        type="button"
+                        data-interaction-category="helicopter"
+                    >
+                        HÉLICOPTÈRES
+                    </button>
+
+                    <button
+                        class="interaction-category-tab"
+                        type="button"
+                        data-interaction-category="mission"
+                    >
+                        MISSION
+                    </button>
+
+                    <button
+                        class="interaction-category-tab"
+                        type="button"
+                        data-interaction-category="all"
+                    >
+                        TOUTES
+                    </button>
+
+                </div>
+
+
+                <!--
+                    Les boutons d'interaction seront générés par JavaScript.
+                    Chaque bouton devra utiliser un identifiant unique et
+                    une commande reconnue par le moteur tactique.
+                -->
+                <div
+                    id="interactionButtons"
+                    class="interaction-buttons"
+                    aria-label="Boutons d'interaction tactique"
+                >
+                    <p class="interaction-loading">
+                        Chargement des interactions tactiques…
+                    </p>
+                </div>
+
+
+                <!-- Message personnalisé -->
+                <form id="customMessageForm" class="custom-message-form">
+
+                    <label for="customMessageInput">
+                        MESSAGE PERSONNALISÉ
+                    </label>
+
+                    <div class="custom-message-row">
+
+                        <input
+                            id="customMessageInput"
+                            type="text"
+                            maxlength="300"
+                            placeholder="Écrire un message à l'équipe…"
+                            autocomplete="off"
+                        >
+
+                        <button
+                            id="sendCustomMessageButton"
+                            class="btn btn-primary"
+                            type="submit"
+                        >
+                            ENVOYER
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+            <!-- ==================================================
+                 JOURNAL TACTIQUE
+            =================================================== -->
+            <button
+                id="openTacticalLogButton"
+                class="floating-panel-button tactical-log-button"
+                type="button"
+            >
+                <span class="floating-button-icon">≡</span>
+                <span>JOURNAL</span>
+            </button>
+
+            <section
+                id="tacticalLogPanel"
+                class="drawer-panel hidden"
+                aria-label="Journal tactique"
+            >
+
+                <header class="drawer-header">
+                    <div>
+                        <small>HISTORIQUE DES ÉVÉNEMENTS</small>
+                        <h2>JOURNAL TACTIQUE</h2>
+                    </div>
+
+                    <button
+                        id="closeTacticalLogButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fermer le journal"
+                    >
+                        ✕
+                    </button>
+                </header>
+
+                <div
+                    id="tacticalLogEntries"
+                    class="tactical-log-entries"
+                    aria-live="polite"
+                >
+                    <p class="empty-state">
+                        Aucun événement enregistré.
+                    </p>
+                </div>
+
+                <button
+                    id="clearTacticalLogButton"
+                    class="btn btn-secondary btn-full"
+                    type="button"
+                >
+                    EFFACER LE JOURNAL
+                </button>
+
+            </section>
+
+
+            <!-- ==================================================
+                 PARAMÈTRES DU JEU
+            =================================================== -->
+            <button
+                id="openSettingsButton"
+                class="floating-panel-button settings-button"
+                type="button"
+            >
+                <span class="floating-button-icon">⚙</span>
+                <span>PARAMÈTRES</span>
+            </button>
+
+            <section
+                id="settingsPanel"
+                class="drawer-panel hidden"
+                aria-label="Paramètres du jeu"
+            >
+
+                <header class="drawer-header">
+                    <div>
+                        <small>CONFIGURATION</small>
+                        <h2>PARAMÈTRES</h2>
+                    </div>
+
+                    <button
+                        id="closeSettingsButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fermer les paramètres"
+                    >
+                        ✕
+                    </button>
+                </header>
+
+                <div class="settings-list">
+
+                    <label class="setting-row" for="soundEnabled">
+                        <span>
+                            <strong>Effets sonores</strong>
+                            <small>Activer les sons du jeu</small>
+                        </span>
+
+                        <input
+                            id="soundEnabled"
+                            type="checkbox"
+                            checked
+                        >
+                    </label>
+
+                    <label class="setting-row" for="musicEnabled">
+                        <span>
+                            <strong>Musique</strong>
+                            <small>Activer la musique d'ambiance</small>
+                        </span>
+
+                        <input
+                            id="musicEnabled"
+                            type="checkbox"
+                        >
+                    </label>
+
+                    <label class="setting-row" for="showCoordinates">
+                        <span>
+                            <strong>Coordonnées</strong>
+                            <small>Afficher la position du joueur</small>
+                        </span>
+
+                        <input
+                            id="showCoordinates"
+                            type="checkbox"
+                            checked
+                        >
+                    </label>
+
+                    <label class="setting-row" for="showMinimap">
+                        <span>
+                            <strong>Carte tactique</strong>
+                            <small>Afficher la carte</small>
+                        </span>
+
+                        <input
+                            id="showMinimap"
+                            type="checkbox"
+                            checked
+                        >
+                    </label>
+
+                    <label class="setting-row" for="autoSaveEnabled">
+                        <span>
+                            <strong>Sauvegarde automatique</strong>
+                            <small>Enregistrer la progression</small>
+                        </span>
+
+                        <input
+                            id="autoSaveEnabled"
+                            type="checkbox"
+                            checked
+                        >
+                    </label>
+
+                    <label class="setting-row" for="graphicsQuality">
+                        <span>
+                            <strong>Qualité graphique</strong>
+                            <small>Adapter les performances à l'appareil</small>
+                        </span>
+
+                        <select id="graphicsQuality">
+                            <option value="low">Économique</option>
+                            <option value="medium" selected>Équilibrée</option>
+                            <option value="high">Élevée</option>
+                        </select>
+                    </label>
+
+                    <label class="setting-row" for="cameraSensitivity">
+                        <span>
+                            <strong>Sensibilité caméra</strong>
+                            <small>Contrôle de la vue</small>
+                        </span>
+
+                        <input
+                            id="cameraSensitivity"
+                            type="range"
+                            min="1"
+                            max="10"
+                            value="5"
+                        >
+                    </label>
+
+                </div>
+
+                <button
+                    id="applySettingsButton"
+                    class="btn btn-primary btn-full"
+                    type="button"
+                >
+                    APPLIQUER LES PARAMÈTRES
+                </button>
+
+                <button
+                    id="fullscreenButton"
+                    class="btn btn-secondary btn-full"
+                    type="button"
+                >
+                    MODE PLEIN ÉCRAN
+                </button>
+
+            </section>
+
+
+            <!-- ==================================================
+                 SAUVEGARDE, RÉINITIALISATION ET DONNÉES
+            =================================================== -->
+            <section
+                id="saveManagementPanel"
+                class="drawer-panel hidden"
+                aria-label="Gestion des sauvegardes"
+            >
+
+                <header class="drawer-header">
+                    <div>
+                        <small>DONNÉES DU JOUEUR</small>
+                        <h2>SAUVEGARDE</h2>
+                    </div>
+
+                    <button
+                        id="closeSaveManagementButton"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fermer la gestion des sauvegardes"
+                    >
+                        ✕
+                    </button>
+                </header>
+
+                <div class="save-status-card">
+                    <span>DERNIÈRE SAUVEGARDE</span>
+                    <strong id="lastSaveTime">AUCUNE</strong>
+                    <small id="saveStorageStatus">
+                        Préparation du stockage local…
+                    </small>
+                </div>
+
+                <button
+                    id="saveNowButton"
+                    class="btn btn-primary btn-full"
+                    type="button"
+                >
+                    SAUVEGARDER MAINTENANT
+                </button>
+
+                <button
+                    id="loadSavedGameButton"
+                    class="btn btn-secondary btn-full"
+                    type="button"
+                >
+                    CHARGER LA SAUVEGARDE
+                </button>
+
+                <button
+                    id="resetGameButton"
+                    class="btn btn-danger btn-full"
+                    type="button"
+                >
+                    RÉINITIALISER LA PARTIE
+                </button>
+
+                <p class="panel-warning">
+                    La réinitialisation peut supprimer la progression
+                    enregistrée. Une confirmation sera demandée.
+                </p>
+
+            </section>
+
+
+            <!-- ==================================================
+                 SYNCHRONISATION DYNAMIQUE
+            =================================================== -->
+            <aside id="syncStatusPanel" class="sync-status-panel">
+
+                <span id="syncStatusIndicator" class="sync-status-indicator"></span>
+
+                <div>
+                    <strong>CONTENU DYNAMIQUE</strong>
+                    <small id="syncStatusText">
+                        Initialisation du système…
+                    </small>
+                </div>
+
+                <button
+                    id="syncNowButton"
+                    class="small-icon-button"
+                    type="button"
+                    aria-label="Actualiser les interactions et les missions"
+                    title="Actualiser maintenant"
+                >
+                    ↻
+                </button>
+
+            </aside>
+
+
+            <!-- ==================================================
+                 CONTRÔLES TACTILES : PINCH ZOOM
+            =================================================== -->
+            <div
+                id="touchControlHint"
+                class="touch-control-hint"
+                aria-live="polite"
+            >
+                Glissez pour regarder autour de vous.
+                Pincez avec deux doigts pour zoomer.
+            </div>
+
+
+            <!-- ==================================================
+                 PAUSE
+            =================================================== -->
+            <section
+                id="pauseOverlay"
+                class="modal-overlay hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="pauseTitle"
+            >
+
+                <div class="modal-card">
+                    <p class="section-eyebrow">OPÉRATION SUSPENDUE</p>
+
+                    <h2 id="pauseTitle">PAUSE</h2>
+
+                    <p>
+                        La mission est suspendue. Reprenez lorsque vous
+                        êtes prêt.
+                    </p>
+
+                    <button
+                        id="resumeGameButton"
+                        class="btn btn-primary btn-full"
+                        type="button"
+                    >
+                        REPRENDRE LA MISSION
+                    </button>
+
+                    <button
+                        id="pauseSaveButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        SAUVEGARDER
+                    </button>
+
+                    <button
+                        id="pauseSettingsButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        PARAMÈTRES
+                    </button>
+
+                    <button
+                        id="pauseReturnMenuButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        RETOUR AU MENU
+                    </button>
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 CONFIRMATION GÉNÉRIQUE
+            =================================================== -->
+            <section
+                id="confirmationDialog"
+                class="modal-overlay hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="confirmationTitle"
+            >
+
+                <div class="modal-card">
+                    <p class="section-eyebrow">CONFIRMATION</p>
+
+                    <h2 id="confirmationTitle">CONFIRMER L'ACTION</h2>
+
+                    <p id="confirmationMessage">
+                        Voulez-vous continuer ?
+                    </p>
+
+                    <div class="modal-button-row">
+                        <button
+                            id="confirmActionButton"
+                            class="btn btn-danger"
+                            type="button"
+                        >
+                            CONFIRMER
+                        </button>
+
+                        <button
+                            id="cancelActionButton"
+                            class="btn btn-secondary"
+                            type="button"
+                        >
+                            ANNULER
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 FIN DE MISSION
+            =================================================== -->
+            <section
+                id="missionResultOverlay"
+                class="modal-overlay hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="missionResultTitle"
+            >
+
+                <div class="modal-card mission-result-card">
+
+                    <p id="missionResultEyebrow" class="section-eyebrow">
+                        RAPPORT D'OPÉRATION
+                    </p>
+
+                    <h2 id="missionResultTitle">MISSION TERMINÉE</h2>
+
+                    <p id="missionResultDescription">
+                        Le rapport de mission sera affiché ici.
+                    </p>
+
+                    <div class="mission-result-stats">
+
+                        <div>
+                            <small>POINTS GAGNÉS</small>
+                            <strong id="missionResultPoints">0</strong>
+                        </div>
+
+                        <div>
+                            <small>OBJECTIFS</small>
+                            <strong id="missionResultObjectives">0/0</strong>
+                        </div>
+
+                        <div>
+                            <small>TEMPS ÉCOULÉ</small>
+                            <strong id="missionResultTime">00:00</strong>
+                        </div>
+
+                    </div>
+
+                    <button
+                        id="nextMissionButton"
+                        class="btn btn-primary btn-full"
+                        type="button"
+                    >
+                        MISSION SUIVANTE
+                    </button>
+
+                    <button
+                        id="retryMissionButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        RECOMMENCER
+                    </button>
+
+                    <button
+                        id="resultReturnMenuButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        RETOUR AU MENU
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 NOTIFICATION GLOBALE
+            =================================================== -->
+            <div
+                id="globalToast"
+                class="global-toast hidden"
+                role="status"
+                aria-live="polite"
+            >
+                <span id="globalToastIcon">ℹ</span>
+                <span id="globalToastMessage">Information</span>
+            </div>
+
+
+            <!-- ==================================================
+                 ERREUR DU MOTEUR 3D
+            =================================================== -->
+            <section
+                id="gameErrorScreen"
+                class="game-error-screen hidden"
+                role="alert"
+            >
+
+                <div class="error-card">
+                    <h2>IMPOSSIBLE DE CHARGER LE JEU</h2>
+
+                    <p id="gameErrorMessage">
+                        Une erreur technique empêche le démarrage du moteur 3D.
+                    </p>
+
+                    <button
+                        id="retryGameInitializationButton"
+                        class="btn btn-primary btn-full"
+                        type="button"
+                    >
+                        RÉESSAYER
+                    </button>
+
+                    <button
+                        id="errorReturnMenuButton"
+                        class="btn btn-secondary btn-full"
+                        type="button"
+                    >
+                        RETOUR AU MENU
+                    </button>
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+    <!--
+        IMPORTANT :
+        Ce fichier HTML fournit la structure et les identifiants des
+        interfaces. Les commandes, le moteur Babylon.js, les interactions
+        entre experts, IndexedDB, les missions, les armes et les véhicules
+        doivent être implémentés et reliés dans appeli copterefobas.js.
+    -->
+
+</body>
+</html>
