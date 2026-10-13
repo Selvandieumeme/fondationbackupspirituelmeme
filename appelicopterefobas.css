@@ -1,0 +1,4315 @@
+/* =========================================================
+   FOBAS ELITE STRIKE 3D
+   Fichier : appelicopterefobas.css
+   Version : 1.0.0
+   Interface tactique professionnelle
+   Compatible avec : appelipcopterefobas.html
+   Optimisation : Android, tablette et ordinateur
+========================================================= */
+
+/* =========================================================
+   1. VARIABLES GLOBALES
+========================================================= */
+
+:root {
+    color-scheme: dark;
+
+    --color-bg: #06100d;
+    --color-bg-soft: #0a1712;
+    --color-panel: rgba(8, 21, 16, 0.94);
+    --color-panel-strong: rgba(5, 14, 11, 0.98);
+
+    --color-primary: #c9ff67;
+    --color-primary-dark: #8cbf38;
+    --color-primary-glow: rgba(201, 255, 103, 0.23);
+
+    --color-secondary: #45d9c1;
+    --color-secondary-glow: rgba(69, 217, 193, 0.17);
+
+    --color-danger: #ff5b62;
+    --color-warning: #ffcb68;
+    --color-info: #73c8ff;
+
+    --color-text: #f0f5ef;
+    --color-text-soft: #a8b9ad;
+    --color-text-muted: #71847a;
+
+    --color-border: rgba(203, 230, 208, 0.14);
+    --color-border-strong: rgba(201, 255, 103, 0.38);
+
+    --color-player: #c9ff67;
+    --color-ally: #45d9c1;
+    --color-enemy: #ff5b62;
+    --color-helicopter: #ffcb68;
+
+    --radius-small: 7px;
+    --radius-medium: 12px;
+    --radius-large: 18px;
+    --radius-pill: 999px;
+
+    --shadow-panel:
+        0 14px 40px rgba(0, 0, 0, 0.35);
+
+    --shadow-glow:
+        0 0 22px rgba(201, 255, 103, 0.12);
+
+    --topbar-height: 58px;
+
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+
+    --font-main:
+        Inter,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    --transition-fast: 160ms ease;
+    --transition-medium: 240ms ease;
+}
+
+
+/* =========================================================
+   2. RÉINITIALISATION
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+
+    background: var(--color-bg);
+
+    scroll-behavior: smooth;
+
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+
+    color: var(--color-text);
+    background: var(--color-bg);
+
+    font-family: var(--font-main);
+    font-size: 14px;
+    line-height: 1.45;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+}
+
+input,
+select,
+textarea {
+    color: var(--color-text);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+img,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#helicopterGameApp {
+    position: relative;
+    isolation: isolate;
+
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    overflow: hidden;
+
+    background: var(--color-bg);
+}
+
+
+/* =========================================================
+   3. ÉCRAN DE CHARGEMENT
+========================================================= */
+
+.loading-screen {
+    position: fixed;
+    z-index: 10000;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        calc(24px + var(--safe-top))
+        calc(20px + var(--safe-right))
+        calc(24px + var(--safe-bottom))
+        calc(20px + var(--safe-left));
+
+    overflow: auto;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 40%,
+            rgba(38, 88, 56, 0.34),
+            transparent 55%
+        ),
+        linear-gradient(
+            145deg,
+            #07150e,
+            #020704 72%
+        );
+
+    transition:
+        opacity 350ms ease,
+        visibility 350ms ease;
+}
+
+.loading-content {
+    width: min(100%, 440px);
+    text-align: center;
+}
+
+.loading-emblem {
+    position: relative;
+
+    display: grid;
+    place-items: center;
+
+    width: 86px;
+    height: 86px;
+
+    margin: 0 auto 25px;
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: 23px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(201, 255, 103, 0.15),
+            rgba(69, 217, 193, 0.05)
+        );
+
+    box-shadow:
+        0 0 45px rgba(201, 255, 103, 0.12),
+        inset 0 0 20px rgba(201, 255, 103, 0.05);
+
+    transform: rotate(-5deg);
+}
+
+.loading-emblem::before {
+    position: absolute;
+    inset: -7px;
+
+    content: "";
+
+    border: 1px solid rgba(201, 255, 103, 0.12);
+    border-radius: 28px;
+}
+
+.loading-emblem span {
+    color: var(--color-primary);
+
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -3px;
+
+    transform: rotate(5deg);
+}
+
+.loading-eyebrow,
+.section-eyebrow,
+.brand-kicker,
+.panel-kicker {
+    color: var(--color-primary);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+}
+
+.loading-content h1 {
+    margin: 9px 0 14px;
+
+    font-size: clamp(28px, 7vw, 43px);
+    font-weight: 950;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+}
+
+.loading-content h1 span,
+.game-brand strong span,
+.brand-block h1 span {
+    color: var(--color-primary);
+}
+
+#loadingMessage {
+    color: var(--color-text-soft);
+    font-size: 13px;
+}
+
+.loading-progress-track,
+.progress-track {
+    height: 5px;
+
+    overflow: hidden;
+
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.loading-progress-track {
+    margin-top: 28px;
+}
+
+.loading-progress-bar,
+.progress-bar {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--color-secondary),
+            var(--color-primary)
+        );
+
+    box-shadow: 0 0 15px var(--color-primary-glow);
+
+    transition: width 300ms ease;
+}
+
+#loadingProgressText {
+    margin: 11px 0;
+
+    color: var(--color-primary);
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.loading-small {
+    margin-top: 32px;
+
+    color: var(--color-text-muted);
+
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.mini-spinner {
+    display: inline-block;
+
+    width: 16px;
+    height: 16px;
+
+    border: 2px solid rgba(201, 255, 103, 0.18);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+
+    animation: spinner-rotation 800ms linear infinite;
+}
+
+@keyframes spinner-rotation {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   4. MENU PRINCIPAL
+========================================================= */
+
+.main-menu {
+    position: relative;
+    isolation: isolate;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    padding:
+        calc(22px + var(--safe-top))
+        calc(24px + var(--safe-right))
+        calc(25px + var(--safe-bottom))
+        calc(24px + var(--safe-left));
+
+    overflow: hidden;
+
+    background: #06110c;
+}
+
+.menu-background {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            ellipse at 75% 45%,
+            rgba(55, 111, 63, 0.3),
+            transparent 42%
+        ),
+        radial-gradient(
+            ellipse at 12% 85%,
+            rgba(33, 114, 93, 0.15),
+            transparent 40%
+        ),
+        linear-gradient(
+            120deg,
+            rgba(5, 16, 10, 0.96),
+            rgba(6, 18, 12, 0.75)
+        );
+}
+
+.menu-background::after {
+    position: absolute;
+    inset: 0;
+
+    content: "";
+
+    opacity: 0.2;
+
+    background-image:
+        linear-gradient(
+            rgba(201, 255, 103, 0.09) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(201, 255, 103, 0.09) 1px,
+            transparent 1px
+        );
+
+    background-size: 42px 42px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black,
+            transparent 85%
+        );
+}
+
+.menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.brand-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-symbol {
+    display: grid;
+    place-items: center;
+
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: 13px;
+
+    color: var(--color-primary);
+    background: rgba(201, 255, 103, 0.08);
+
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.brand-kicker {
+    margin: 0 0 4px;
+    font-size: 9px;
+}
+
+.brand-block h1 {
+    margin: 0;
+
+    font-size: clamp(15px, 3vw, 21px);
+    font-weight: 900;
+    letter-spacing: -0.6px;
+}
+
+.menu-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--color-text-soft);
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.status-dot,
+.expert-online-dot {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: var(--color-primary);
+
+    box-shadow: 0 0 10px rgba(201, 255, 103, 0.5);
+}
+
+.menu-hero {
+    width: min(100%, 700px);
+    margin: auto 0;
+    padding: 65px 0;
+}
+
+.menu-hero .section-eyebrow {
+    margin-bottom: 18px;
+}
+
+.menu-hero h2 {
+    margin: 0;
+
+    font-size: clamp(38px, 8vw, 78px);
+    font-weight: 950;
+    line-height: 0.98;
+    letter-spacing: -3px;
+}
+
+.menu-hero h2 span {
+    color: var(--color-primary);
+}
+
+.menu-hero > p:not(.section-eyebrow) {
+    max-width: 520px;
+
+    margin: 22px 0 28px;
+
+    color: var(--color-text-soft);
+
+    font-size: clamp(13px, 2vw, 16px);
+    line-height: 1.8;
+}
+
+.menu-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.menu-bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.menu-feature {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    min-width: 0;
+
+    padding: 18px;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+
+    background: rgba(10, 24, 16, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.feature-icon {
+    display: grid;
+    place-items: center;
+
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+
+    border-radius: 10px;
+
+    color: var(--color-primary);
+    background: rgba(201, 255, 103, 0.09);
+
+    font-size: 21px;
+}
+
+.menu-feature h3 {
+    margin: 0 0 5px;
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+}
+
+.menu-feature p {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   5. BOUTONS GÉNÉRAUX
+========================================================= */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-height: 42px;
+
+    padding: 11px 16px;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+
+    background: rgba(255, 255, 255, 0.04);
+
+    color: var(--color-text);
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-align: center;
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.btn:hover {
+    border-color: var(--color-border-strong);
+    background: rgba(201, 255, 103, 0.08);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-primary {
+    border-color: var(--color-primary);
+
+    color: #11190b;
+    background: var(--color-primary);
+
+    box-shadow: 0 5px 18px rgba(201, 255, 103, 0.1);
+}
+
+.btn-primary:hover {
+    color: #11190b;
+    background: #d9ff93;
+    box-shadow: 0 5px 25px rgba(201, 255, 103, 0.2);
+}
+
+.btn-secondary {
+    border-color: rgba(201, 255, 103, 0.22);
+    color: var(--color-text);
+
+    background: rgba(201, 255, 103, 0.04);
+}
+
+.btn-danger {
+    border-color: var(--color-danger);
+
+    color: white;
+    background: rgba(255, 91, 98, 0.16);
+}
+
+.btn-danger:hover {
+    background: rgba(255, 91, 98, 0.28);
+}
+
+.btn-large {
+    min-height: 51px;
+    padding: 15px 22px;
+}
+
+.btn-full {
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+}
+
+
+/* =========================================================
+   6. ÉCRAN PRINCIPAL ET MONDE 3D
+========================================================= */
+
+.game-screen {
+    position: fixed;
+    z-index: 1;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+
+    overflow: hidden;
+
+    background: #17251a;
+}
+
+.game-world {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #34563a 0%,
+            #1c3928 55%,
+            #0c1e13 100%
+        );
+}
+
+.game-canvas {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    outline: none;
+
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.world-loading-notice {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 50%;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    max-width: calc(100% - 30px);
+
+    padding: 12px 16px;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+
+    color: var(--color-text-soft);
+    background: rgba(5, 14, 9, 0.85);
+
+    font-size: 12px;
+
+    transform: translate(-50%, -50%);
+    backdrop-filter: blur(10px);
+}
+
+
+/* =========================================================
+   7. BARRE SUPÉRIEURE
+========================================================= */
+
+.game-topbar {
+    position: absolute;
+    z-index: 50;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    min-height: var(--topbar-height);
+
+    padding:
+        calc(8px + var(--safe-top))
+        calc(12px + var(--safe-right))
+        8px
+        calc(12px + var(--safe-left));
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(4, 13, 8, 0.95),
+            rgba(4, 13, 8, 0.72)
+        );
+
+    backdrop-filter: blur(12px);
+}
+
+.icon-button,
+.small-icon-button {
+    display: inline-grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+
+    color: var(--color-text);
+
+    background: rgba(255, 255, 255, 0.04);
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.icon-button {
+    width: 37px;
+    height: 37px;
+
+    font-size: 17px;
+}
+
+.small-icon-button {
+    width: 27px;
+    height: 27px;
+
+    font-size: 17px;
+}
+
+.icon-button:hover,
+.small-icon-button:hover {
+    border-color: var(--color-border-strong);
+    background: rgba(201, 255, 103, 0.1);
+}
+
+.game-brand {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+
+    min-width: 0;
+}
+
+.game-brand strong {
+    overflow: hidden;
+
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.game-brand small {
+    overflow: hidden;
+
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: var(--color-text-soft);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+}
+
+.topbar-status .status-dot {
+    width: 6px;
+    height: 6px;
+}
+
+
+/* =========================================================
+   8. PANNEAUX COMMUNS
+========================================================= */
+
+.mission-panel,
+.minimap-panel,
+.helicopter-hud,
+.drawer-panel,
+.communication-panel,
+.sync-status-panel,
+.save-status-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+
+    color: var(--color-text);
+
+    background: var(--color-panel);
+
+    box-shadow: var(--shadow-panel);
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.panel-heading > span,
+.coordinates-row > span {
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+.mission-panel {
+    position: absolute;
+    z-index: 20;
+
+    top: calc(var(--topbar-height) + 12px + var(--safe-top));
+    left: calc(12px + var(--safe-left));
+
+    width: min(300px, calc(100vw - 24px));
+
+    padding: 15px;
+}
+
+.mission-panel h2 {
+    margin: 13px 0 8px;
+
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1.5;
+}
+
+.mission-panel > p {
+    margin: 0 0 15px;
+
+    color: var(--color-text-soft);
+
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.mission-progress-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 7px;
+
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.mission-progress-heading strong {
+    color: var(--color-primary);
+}
+
+.mission-objectives {
+    display: grid;
+    gap: 9px;
+
+    margin: 15px 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.objective-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+
+    color: var(--color-text-soft);
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.objective-marker {
+    position: relative;
+
+    width: 9px;
+    height: 9px;
+    flex-shrink: 0;
+
+    margin-top: 3px;
+
+    border: 1px solid var(--color-primary);
+    border-radius: 50%;
+}
+
+.objective-item.completed .objective-marker {
+    background: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.objective-item.completed {
+    color: var(--color-primary);
+}
+
+.mission-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-top: 11px;
+
+    border-top: 1px solid var(--color-border);
+}
+
+.mission-footer span {
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.mission-footer strong {
+    color: var(--color-primary);
+
+    font-size: 19px;
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   9. HUD DU JOUEUR
+========================================================= */
+
+.player-hud {
+    position: absolute;
+    z-index: 25;
+
+    top: calc(var(--topbar-height) + 12px + var(--safe-top));
+    left: 50%;
+
+    display: flex;
+    align-items: center;
+    gap: 17px;
+
+    max-width: min(570px, calc(100vw - 25px));
+
+    padding: 11px 15px;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+
+    background: rgba(5, 15, 9, 0.84);
+
+    transform: translateX(-50%);
+
+    backdrop-filter: blur(12px);
+}
+
+.hud-player-card {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    min-width: 130px;
+}
+
+.player-avatar {
+    display: grid;
+    place-items: center;
+
+    width: 37px;
+    height: 37px;
+    flex-shrink: 0;
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: 10px;
+
+    color: var(--color-primary);
+    background: rgba(201, 255, 103, 0.1);
+
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.player-information {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.player-information strong {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+}
+
+.player-information small {
+    color: var(--color-text-muted);
+
+    font-size: 8px;
+    font-weight: 700;
+}
+
+.state-badge {
+    display: inline-block;
+
+    padding: 4px 6px;
+
+    border: 1px solid rgba(201, 255, 103, 0.2);
+    border-radius: 4px;
+
+    color: var(--color-primary);
+    background: rgba(201, 255, 103, 0.07);
+
+    font-size: 8px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.hud-vitals {
+    display: grid;
+    gap: 7px;
+
+    min-width: 100px;
+}
+
+.vital-row {
+    display: grid;
+    grid-template-columns: 12px minmax(35px, 1fr) 24px;
+    align-items: center;
+    gap: 6px;
+}
+
+.vital-row > span {
+    color: var(--color-text-soft);
+    font-size: 12px;
+}
+
+.vital-row strong {
+    font-size: 9px;
+    text-align: right;
+}
+
+.vital-track {
+    height: 5px;
+    overflow: hidden;
+
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.vital-fill {
+    height: 100%;
+    border-radius: inherit;
+
+    transition: width 200ms ease;
+}
+
+.health-fill {
+    background: #73e49b;
+}
+
+.armor-fill {
+    background: #66c8ff;
+}
+
+.hud-ammunition {
+    min-width: 74px;
+
+    text-align: right;
+}
+
+.hud-ammunition > span:first-child {
+    display: block;
+
+    max-width: 120px;
+    overflow: hidden;
+
+    color: var(--color-text-soft);
+
+    font-size: 8px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.hud-ammunition > div {
+    margin: 2px 0;
+
+    white-space: nowrap;
+}
+
+.hud-ammunition > div strong {
+    color: var(--color-primary);
+
+    font-size: 22px;
+    font-weight: 950;
+}
+
+.hud-ammunition > div span {
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+.hud-ammunition > small {
+    color: var(--color-text-muted);
+
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   10. MINICARTE
+========================================================= */
+
+.minimap-panel {
+    position: absolute;
+    z-index: 20;
+
+    top: calc(var(--topbar-height) + 12px + var(--safe-top));
+    right: calc(12px + var(--safe-right));
+
+    width: 220px;
+
+    padding: 12px;
+}
+
+.minimap-panel > canvas {
+    width: 100%;
+    height: auto;
+
+    margin: 10px 0;
+
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    background: rgba(16, 42, 26, 0.85);
+}
+
+.map-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+
+    margin-bottom: 12px;
+}
+
+.map-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: var(--color-text-soft);
+
+    font-size: 9px;
+}
+
+.map-legend i {
+    width: 7px;
+    height: 7px;
+    flex-shrink: 0;
+
+    border-radius: 50%;
+}
+
+.legend-player {
+    background: var(--color-player);
+}
+
+.legend-ally {
+    background: var(--color-ally);
+}
+
+.legend-enemy {
+    background: var(--color-enemy);
+}
+
+.legend-helicopter {
+    background: var(--color-helicopter);
+}
+
+.coordinates-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    margin-bottom: 10px;
+    padding-top: 9px;
+
+    border-top: 1px solid var(--color-border);
+}
+
+.coordinates-row strong {
+    color: var(--color-primary);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   11. BOUTONS DE CAMÉRA
+========================================================= */
+
+.camera-controls {
+    position: absolute;
+    z-index: 35;
+
+    top: 46%;
+    right: calc(12px + var(--safe-right));
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-button {
+    display: grid;
+    place-items: center;
+
+    width: 43px;
+    height: 43px;
+
+    border: 1px solid rgba(201, 255, 103, 0.3);
+    border-radius: 12px;
+
+    color: var(--color-primary);
+    background: rgba(5, 15, 9, 0.84);
+
+    font-size: 20px;
+    font-weight: 800;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    backdrop-filter: blur(10px);
+
+    transition:
+        transform var(--transition-fast),
+        background var(--transition-fast);
+}
+
+.control-button:hover {
+    background: rgba(201, 255, 103, 0.13);
+}
+
+.control-button:active {
+    transform: scale(0.92);
+}
+
+.zoom-button {
+    font-size: 24px;
+}
+
+
+/* =========================================================
+   12. JOYSTICK
+========================================================= */
+
+.movement-control {
+    position: absolute;
+    z-index: 40;
+
+    left: calc(20px + var(--safe-left));
+    bottom: calc(25px + var(--safe-bottom));
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    width: 140px;
+
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.movement-joystick {
+    width: 128px;
+    height: 128px;
+
+    touch-action: none;
+}
+
+.joystick-ring {
+    position: relative;
+
+    display: grid;
+    place-items: center;
+
+    width: 100%;
+    height: 100%;
+
+    border: 1px solid rgba(201, 255, 103, 0.3);
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(201, 255, 103, 0.07),
+            rgba(3, 12, 7, 0.75)
+        );
+
+    box-shadow:
+        inset 0 0 25px rgba(201, 255, 103, 0.05),
+        0 8px 24px rgba(0, 0, 0, 0.25);
+
+    backdrop-filter: blur(8px);
+}
+
+.joystick-ring::before {
+    position: absolute;
+    inset: 15px;
+
+    content: "";
+
+    border: 1px solid rgba(201, 255, 103, 0.13);
+    border-radius: 50%;
+}
+
+.joystick-direction {
+    position: absolute;
+
+    color: rgba(201, 255, 103, 0.6);
+
+    font-size: 10px;
+    pointer-events: none;
+}
+
+.direction-up {
+    top: 9px;
+}
+
+.direction-down {
+    bottom: 9px;
+}
+
+.direction-left {
+    left: 10px;
+}
+
+.direction-right {
+    right: 10px;
+}
+
+.joystick-knob {
+    position: absolute;
+    z-index: 2;
+
+    display: grid;
+    place-items: center;
+
+    width: 49px;
+    height: 49px;
+
+    border: 2px solid rgba(201, 255, 103, 0.7);
+    border-radius: 50%;
+
+    color: #15220c;
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #edffc9,
+            var(--color-primary) 70%
+        );
+
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(201, 255, 103, 0.13);
+
+    font-size: 15px;
+
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.joystick-knob:active {
+    background: #dfff9e;
+}
+
+.control-caption {
+    color: var(--color-text-soft);
+
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+
+    text-shadow: 0 2px 8px black;
+}
+
+
+/* =========================================================
+   13. ACTIONS DU JOUEUR
+========================================================= */
+
+.player-action-controls {
+    position: absolute;
+    z-index: 40;
+
+    right: calc(18px + var(--safe-right));
+    bottom: calc(24px + var(--safe-bottom));
+
+    display: grid;
+    grid-template-columns: repeat(3, 68px);
+    gap: 8px;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    min-width: 0;
+    min-height: 62px;
+
+    padding: 6px 4px;
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 11px;
+
+    color: var(--color-text);
+    background: rgba(5, 15, 9, 0.84);
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    backdrop-filter: blur(8px);
+
+    transition:
+        background var(--transition-fast),
+        transform var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.action-button:hover {
+    border-color: var(--color-border-strong);
+    background: rgba(201, 255, 103, 0.1);
+}
+
+.action-button:active {
+    transform: scale(0.94);
+}
+
+.action-icon {
+    color: var(--color-primary);
+
+    font-size: 21px;
+    line-height: 1;
+}
+
+.action-button > span:last-child {
+    font-size: 8px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.action-button-danger {
+    border-color: rgba(255, 91, 98, 0.5);
+    background: rgba(76, 14, 18, 0.83);
+}
+
+.action-button-danger .action-icon {
+    color: var(--color-danger);
+}
+
+.action-button-danger:hover {
+    background: rgba(110, 20, 25, 0.9);
+}
+
+
+/* =========================================================
+   14. BOUTONS FLOTTANTS
+========================================================= */
+
+.floating-panel-button {
+    position: absolute;
+    z-index: 45;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    min-height: 38px;
+
+    padding: 8px 12px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+
+    color: var(--color-text);
+
+    background: rgba(5, 15, 9, 0.88);
+
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.45px;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2);
+
+    backdrop-filter: blur(10px);
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.floating-panel-button:hover {
+    border-color: var(--color-border-strong);
+    background: rgba(15, 35, 19, 0.96);
+}
+
+.floating-panel-button:active {
+    transform: scale(0.96);
+}
+
+.floating-button-icon {
+    color: var(--color-primary);
+    font-size: 17px;
+}
+
+.weapon-library-button {
+    top: calc(50% + 5px);
+    left: calc(12px + var(--safe-left));
+}
+
+.equipment-button {
+    top: calc(50% + 52px);
+    left: calc(12px + var(--safe-left));
+}
+
+.helicopter-library-button {
+    top: calc(50% + 99px);
+    left: calc(12px + var(--safe-left));
+}
+
+.communication-button {
+    left: 50%;
+    bottom: calc(12px + var(--safe-bottom));
+
+    transform: translateX(-50%);
+}
+
+.communication-button:active {
+    transform: translateX(-50%) scale(0.96);
+}
+
+.tactical-log-button {
+    top: calc(var(--topbar-height) + 13px + var(--safe-top));
+    right: calc(12px + var(--safe-right));
+}
+
+.settings-button {
+    top: calc(var(--topbar-height) + 57px + var(--safe-top));
+    right: calc(12px + var(--safe-right));
+}
+
+.unread-badge {
+    display: inline-grid;
+    place-items: center;
+
+    min-width: 17px;
+    height: 17px;
+
+    padding: 0 4px;
+
+    border-radius: var(--radius-pill);
+
+    color: #111;
+    background: var(--color-primary);
+
+    font-size: 9px;
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   15. PANNEAUX LATÉRAUX
+========================================================= */
+
+.drawer-panel {
+    position: absolute;
+    z-index: 110;
+
+    top: calc(var(--topbar-height) + 10px + var(--safe-top));
+    right: calc(12px + var(--safe-right));
+    bottom: calc(12px + var(--safe-bottom));
+
+    display: flex;
+    flex-direction: column;
+
+    width: min(390px, calc(100vw - 24px));
+
+    padding: 17px;
+
+    overflow: hidden;
+}
+
+.drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding-bottom: 15px;
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.drawer-header > div {
+    min-width: 0;
+}
+
+.drawer-header small {
+    color: var(--color-primary);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
+.drawer-header h2 {
+    margin: 5px 0 0;
+
+    font-size: 18px;
+    font-weight: 950;
+    letter-spacing: -0.3px;
+}
+
+.drawer-resource-row,
+.helicopter-current-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    margin: 13px 0;
+    padding: 11px;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.drawer-resource-row span,
+.helicopter-current-status span {
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+}
+
+.drawer-resource-row strong {
+    color: var(--color-primary);
+    font-size: 16px;
+}
+
+.helicopter-current-status strong {
+    color: var(--color-primary);
+
+    font-size: 10px;
+    text-align: right;
+}
+
+.weapon-library-list,
+.equipment-library-list,
+.helicopter-library-list {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+
+    min-height: 0;
+    flex: 1;
+
+    padding: 2px 3px 12px 0;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201, 255, 103, 0.4) transparent;
+}
+
+.weapon-library-list::-webkit-scrollbar,
+.equipment-library-list::-webkit-scrollbar,
+.helicopter-library-list::-webkit-scrollbar,
+.communication-messages::-webkit-scrollbar,
+.interaction-buttons::-webkit-scrollbar,
+.tactical-log-entries::-webkit-scrollbar {
+    width: 5px;
+}
+
+.weapon-library-list::-webkit-scrollbar-thumb,
+.equipment-library-list::-webkit-scrollbar-thumb,
+.helicopter-library-list::-webkit-scrollbar-thumb,
+.communication-messages::-webkit-scrollbar-thumb,
+.interaction-buttons::-webkit-scrollbar-thumb,
+.tactical-log-entries::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: rgba(201, 255, 103, 0.25);
+}
+
+.drawer-footer {
+    padding-top: 12px;
+
+    border-top: 1px solid var(--color-border);
+}
+
+
+/* =========================================================
+   16. CARTES D'ARMES, D'ÉQUIPEMENTS ET D'HÉLICOPTÈRES
+========================================================= */
+
+.weapon-card,
+.equipment-card,
+.helicopter-card {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    min-width: 0;
+
+    padding: 13px;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.025);
+
+    text-align: left;
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.weapon-card:hover,
+.equipment-card:hover,
+.helicopter-card:hover {
+    background: rgba(201, 255, 103, 0.06);
+}
+
+.weapon-card.selected,
+.equipment-card.selected,
+.helicopter-card.selected {
+    border-color: var(--color-primary);
+
+    background: rgba(201, 255, 103, 0.08);
+
+    box-shadow: inset 3px 0 var(--color-primary);
+}
+
+.weapon-card-icon,
+.equipment-card-icon,
+.helicopter-card-icon {
+    display: grid;
+    place-items: center;
+
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+
+    color: var(--color-primary);
+    background: rgba(201, 255, 103, 0.06);
+
+    font-size: 23px;
+}
+
+.weapon-card-info,
+.equipment-card-info,
+.helicopter-card-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+
+    min-width: 0;
+}
+
+.weapon-card-info strong,
+.equipment-card-info strong,
+.helicopter-card-info strong {
+    overflow: hidden;
+
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.weapon-card-info small,
+.equipment-card-info small,
+.helicopter-card-info small {
+    color: var(--color-text-soft);
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.weapon-card-price,
+.equipment-card-price,
+.helicopter-card-price {
+    color: var(--color-primary);
+
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.weapon-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    margin-top: 3px;
+}
+
+.weapon-card-stats span {
+    padding: 3px 5px;
+
+    border-radius: 4px;
+
+    color: var(--color-text-soft);
+    background: rgba(255, 255, 255, 0.06);
+
+    font-size: 8px;
+}
+
+.card-locked {
+    opacity: 0.58;
+}
+
+.card-equipped::after {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+
+    content: "ÉQUIPÉ";
+
+    color: var(--color-primary);
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+}
+
+
+/* =========================================================
+   17. COMMANDES DE PILOTAGE
+========================================================= */
+
+.helicopter-hud {
+    position: absolute;
+    z-index: 32;
+
+    left: 50%;
+    bottom: calc(175px + var(--safe-bottom));
+
+    width: min(380px, calc(100vw - 30px));
+
+    padding: 13px;
+
+    transform: translateX(-50%);
+}
+
+.helicopter-hud-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 12px;
+}
+
+.helicopter-hud-header span {
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.helicopter-hud-header strong {
+    color: var(--color-primary);
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.helicopter-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.helicopter-stat-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    padding: 9px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.helicopter-stat-grid small {
+    color: var(--color-text-muted);
+
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.helicopter-stat-grid strong {
+    color: var(--color-primary);
+    font-size: 13px;
+}
+
+.helicopter-controls-hint {
+    margin-top: 10px;
+
+    color: var(--color-text-soft);
+    font-size: 10px;
+}
+
+.helicopter-flight-controls {
+    position: absolute;
+    z-index: 70;
+
+    left: 50%;
+    bottom: calc(15px + var(--safe-bottom));
+
+    width: min(390px, calc(100vw - 20px));
+
+    padding: 12px;
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-medium);
+
+    background: rgba(5, 15, 9, 0.94);
+
+    box-shadow: var(--shadow-panel);
+
+    transform: translateX(-50%);
+    backdrop-filter: blur(14px);
+}
+
+.flight-controls-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+}
+
+.flight-controls-header > strong {
+    color: var(--color-primary);
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.flight-control-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.flight-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    min-width: 0;
+    min-height: 55px;
+
+    padding: 5px 2px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.flight-button > span {
+    color: var(--color-primary);
+    font-size: 19px;
+}
+
+.flight-button small {
+    font-size: 7px;
+    font-weight: 900;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.flight-button:active {
+    background: rgba(201, 255, 103, 0.14);
+}
+
+.flight-button-danger {
+    border-color: rgba(255, 91, 98, 0.35);
+}
+
+.flight-button-danger > span {
+    color: var(--color-danger);
+}
+
+.flight-controls-note {
+    margin: 10px 0 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   18. PANNEAU DE COMMUNICATION
+========================================================= */
+
+.communication-panel {
+    position: absolute;
+    z-index: 120;
+
+    top: calc(var(--topbar-height) + 10px + var(--safe-top));
+    left: 50%;
+
+    display: flex;
+    flex-direction: column;
+
+    width: min(470px, calc(100vw - 24px));
+    max-height: calc(
+        100dvh - var(--topbar-height) - 24px
+        - var(--safe-top) - var(--safe-bottom)
+    );
+
+    padding: 15px;
+
+    overflow: hidden;
+
+    transform: translateX(-50%);
+}
+
+.communication-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    flex-shrink: 0;
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.communication-header small {
+    color: var(--color-primary);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+.communication-header h2 {
+    margin: 4px 0 0;
+
+    font-size: 17px;
+    font-weight: 950;
+}
+
+.expert-roster {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    margin: 12px 0;
+}
+
+.expert-card {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+
+    min-width: 0;
+
+    padding: 9px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.025);
+
+    text-align: left;
+}
+
+.expert-card-active,
+.expert-card.selected {
+    border-color: var(--color-primary);
+
+    background: rgba(201, 255, 103, 0.07);
+}
+
+.expert-avatar {
+    display: grid;
+    place-items: center;
+
+    width: 31px;
+    height: 31px;
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: 8px;
+
+    color: var(--color-primary);
+    background: rgba(201, 255, 103, 0.08);
+
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.expert-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.expert-card-info strong {
+    overflow: hidden;
+
+    font-size: 9px;
+    font-weight: 900;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.expert-card-info small {
+    color: var(--color-text-muted);
+
+    font-size: 7px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.expert-card .expert-online-dot {
+    position: absolute;
+    top: 11px;
+    right: 10px;
+
+    width: 6px;
+    height: 6px;
+}
+
+.communication-routing {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    margin-bottom: 10px;
+}
+
+.communication-routing label {
+    color: var(--color-text-muted);
+
+    font-size: 8px;
+    font-weight: 900;
+}
+
+.communication-routing select,
+.settings-list select {
+    min-width: 0;
+    min-height: 35px;
+
+    padding: 6px 8px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+
+    color: var(--color-text);
+    background: #0b1b12;
+
+    font-size: 10px;
+}
+
+.communication-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    min-height: 90px;
+    max-height: 190px;
+
+    flex: 1;
+
+    padding: 10px;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.chat-system-message,
+.chat-message {
+    max-width: 95%;
+
+    padding: 10px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.chat-message {
+    align-self: flex-start;
+}
+
+.chat-message.from-player {
+    align-self: flex-end;
+
+    border-color: rgba(201, 255, 103, 0.22);
+
+    background: rgba(201, 255, 103, 0.06);
+}
+
+.chat-message.from-ally {
+    border-left: 3px solid var(--color-secondary);
+}
+
+.chat-message.from-system {
+    border-left: 3px solid var(--color-warning);
+}
+
+.chat-message-header,
+.chat-system-message > strong {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    color: var(--color-primary);
+
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.chat-message-header time {
+    color: var(--color-text-muted);
+
+    font-size: 8px;
+    font-weight: 500;
+}
+
+.chat-message p,
+.chat-system-message p {
+    margin: 5px 0 0;
+
+    color: var(--color-text-soft);
+
+    font-size: 11px;
+    line-height: 1.65;
+
+    overflow-wrap: anywhere;
+}
+
+.interaction-search-area {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    flex-shrink: 0;
+
+    margin-top: 12px;
+}
+
+.interaction-search-area label,
+.custom-message-form > label {
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+
+.interaction-search-area input,
+.custom-message-row input {
+    width: 100%;
+    min-width: 0;
+    min-height: 39px;
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+
+    color: var(--color-text);
+    background: rgba(0, 0, 0, 0.22);
+
+    font-size: 11px;
+}
+
+.interaction-search-area input::placeholder,
+.custom-message-row input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.interaction-category-tabs {
+    display: flex;
+    gap: 6px;
+
+    flex-shrink: 0;
+
+    margin: 11px 0 9px;
+
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+
+    scrollbar-width: none;
+}
+
+.interaction-category-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.interaction-category-tab {
+    flex-shrink: 0;
+
+    min-height: 30px;
+
+    padding: 6px 10px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+
+    color: var(--color-text-soft);
+    background: rgba(255, 255, 255, 0.025);
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+}
+
+.interaction-category-tab.active {
+    border-color: var(--color-primary);
+
+    color: #15200c;
+    background: var(--color-primary);
+}
+
+.interaction-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 7px;
+
+    min-height: 80px;
+    max-height: 200px;
+
+    flex-shrink: 1;
+
+    padding: 2px 3px 9px 0;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.interaction-button {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    min-width: 0;
+    min-height: 40px;
+
+    padding: 9px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.025);
+
+    font-size: 10px;
+    line-height: 1.45;
+    text-align: left;
+
+    overflow-wrap: anywhere;
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.interaction-button:hover {
+    border-color: var(--color-border-strong);
+    background: rgba(201, 255, 103, 0.07);
+}
+
+.interaction-button:active {
+    background: rgba(201, 255, 103, 0.14);
+}
+
+.interaction-button .interaction-icon {
+    flex-shrink: 0;
+
+    color: var(--color-primary);
+
+    font-size: 13px;
+}
+
+.interaction-button .interaction-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.interaction-loading,
+.interaction-empty {
+    grid-column: 1 / -1;
+
+    margin: 10px 0;
+
+    color: var(--color-text-muted);
+
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.custom-message-form {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    margin-top: 10px;
+    padding-top: 10px;
+
+    border-top: 1px solid var(--color-border);
+}
+
+.custom-message-row {
+    display: flex;
+    gap: 7px;
+}
+
+.custom-message-row .btn {
+    flex-shrink: 0;
+
+    min-height: 39px;
+    padding: 8px 11px;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   19. JOURNAL TACTIQUE
+========================================================= */
+
+.tactical-log-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+
+    min-height: 0;
+    flex: 1;
+
+    margin: 13px 0;
+    padding-right: 3px;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.tactical-log-entry {
+    display: grid;
+    grid-template-columns: 55px minmax(0, 1fr);
+    gap: 10px;
+
+    padding: 10px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.tactical-log-entry time {
+    color: var(--color-primary);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.tactical-log-entry p {
+    margin: 0;
+
+    color: var(--color-text-soft);
+
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+.empty-state {
+    padding: 20px 10px;
+
+    color: var(--color-text-muted);
+
+    font-size: 11px;
+    text-align: center;
+}
+
+
+/* =========================================================
+   20. PARAMÈTRES
+========================================================= */
+
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    flex: 1;
+
+    margin: 12px 0;
+    overflow-y: auto;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding: 13px 2px;
+
+    border-bottom: 1px solid var(--color-border);
+}
+
+.setting-row > span {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    min-width: 0;
+}
+
+.setting-row strong {
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.setting-row small {
+    color: var(--color-text-muted);
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.setting-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+
+    accent-color: var(--color-primary);
+}
+
+.setting-row input[type="range"] {
+    width: 95px;
+    flex-shrink: 0;
+
+    accent-color: var(--color-primary);
+}
+
+.setting-row select {
+    max-width: 130px;
+}
+
+
+/* =========================================================
+   21. SAUVEGARDE ET SYNCHRONISATION
+========================================================= */
+
+.save-status-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin: 15px 0;
+    padding: 15px;
+}
+
+.save-status-card > span {
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.save-status-card > strong {
+    color: var(--color-primary);
+    font-size: 16px;
+}
+
+.save-status-card > small {
+    color: var(--color-text-soft);
+    font-size: 10px;
+    overflow-wrap: anywhere;
+}
+
+.panel-warning {
+    margin: 13px 0 0;
+
+    color: var(--color-warning);
+
+    font-size: 10px;
+    line-height: 1.7;
+}
+
+.sync-status-panel {
+    position: absolute;
+    z-index: 30;
+
+    top: calc(var(--topbar-height) + 115px + var(--safe-top));
+    right: calc(12px + var(--safe-right));
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    width: 220px;
+
+    padding: 10px;
+}
+
+.sync-status-indicator {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: var(--color-warning);
+}
+
+.sync-status-indicator.online {
+    background: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.sync-status-indicator.error {
+    background: var(--color-danger);
+}
+
+.sync-status-panel > div {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.sync-status-panel strong {
+    color: var(--color-text-soft);
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+}
+
+.sync-status-panel small {
+    overflow: hidden;
+
+    color: var(--color-text-muted);
+
+    font-size: 9px;
+    line-height: 1.5;
+
+    overflow-wrap: anywhere;
+}
+
+.sync-status-panel .small-icon-button {
+    color: var(--color-primary);
+}
+
+
+/* =========================================================
+   22. CONTRÔLE TACTILE ET CIBLE
+========================================================= */
+
+.touch-control-hint {
+    position: absolute;
+    z-index: 15;
+
+    top: calc(var(--topbar-height) + 8px + var(--safe-top));
+    left: 50%;
+
+    width: max-content;
+    max-width: calc(100vw - 30px);
+
+    padding: 7px 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: var(--radius-pill);
+
+    color: rgba(255, 255, 255, 0.74);
+    background: rgba(3, 11, 6, 0.5);
+
+    font-size: 9px;
+    text-align: center;
+
+    pointer-events: none;
+
+    transform: translateX(-50%);
+}
+
+.target-indicator {
+    position: absolute;
+    z-index: 33;
+
+    top: 44%;
+    left: 50%;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 9px 12px;
+
+    border: 1px solid rgba(255, 91, 98, 0.45);
+    border-radius: 8px;
+
+    background: rgba(29, 8, 8, 0.8);
+
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.target-reticle {
+    color: var(--color-danger);
+    font-size: 23px;
+}
+
+.target-indicator > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.target-indicator strong {
+    color: var(--color-danger);
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.target-indicator small {
+    color: var(--color-text-soft);
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   23. FENÊTRES MODALES
+========================================================= */
+
+.modal-overlay {
+    position: absolute;
+    z-index: 500;
+
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        calc(20px + var(--safe-top))
+        calc(16px + var(--safe-right))
+        calc(20px + var(--safe-bottom))
+        calc(16px + var(--safe-left));
+
+    overflow-y: auto;
+
+    background: rgba(1, 5, 3, 0.78);
+
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+}
+
+.modal-card {
+    width: min(100%, 420px);
+
+    padding: 25px;
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-large);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(15, 33, 20, 0.99),
+            rgba(4, 13, 8, 0.99)
+        );
+
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+
+    animation: modal-appear 200ms ease-out;
+}
+
+@keyframes modal-appear {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-card .section-eyebrow {
+    margin: 0 0 12px;
+}
+
+.modal-card h2 {
+    margin: 0 0 12px;
+
+    font-size: 25px;
+    font-weight: 950;
+    letter-spacing: -0.6px;
+}
+
+.modal-card > p:not(.section-eyebrow) {
+    color: var(--color-text-soft);
+
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.modal-button-row {
+    display: flex;
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+.modal-button-row .btn {
+    flex: 1;
+}
+
+.mission-result-card {
+    text-align: center;
+}
+
+.mission-result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+
+    margin: 20px 0;
+}
+
+.mission-result-stats > div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    padding: 12px 5px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.mission-result-stats small {
+    color: var(--color-text-muted);
+
+    font-size: 8px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.mission-result-stats strong {
+    color: var(--color-primary);
+
+    font-size: 18px;
+    font-weight: 950;
+}
+
+
+/* =========================================================
+   24. NOTIFICATIONS
+========================================================= */
+
+.notification-stack {
+    position: absolute;
+    z-index: 150;
+
+    top: calc(var(--topbar-height) + 10px + var(--safe-top));
+    left: 50%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    width: min(360px, calc(100vw - 30px));
+
+    pointer-events: none;
+
+    transform: translateX(-50%);
+}
+
+.game-notification {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    padding: 12px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+
+    background: rgba(5, 15, 9, 0.95);
+
+    box-shadow: var(--shadow-panel);
+
+    animation: notification-appear 200ms ease-out;
+}
+
+.game-notification.success {
+    border-left: 3px solid var(--color-primary);
+}
+
+.game-notification.warning {
+    border-left: 3px solid var(--color-warning);
+}
+
+.game-notification.error {
+    border-left: 3px solid var(--color-danger);
+}
+
+.game-notification.info {
+    border-left: 3px solid var(--color-info);
+}
+
+.game-notification-icon {
+    color: var(--color-primary);
+    font-size: 15px;
+}
+
+.game-notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.game-notification-content strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.game-notification-content p {
+    margin: 0;
+
+    color: var(--color-text-soft);
+
+    font-size: 10px;
+    line-height: 1.6;
+
+    overflow-wrap: anywhere;
+}
+
+@keyframes notification-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.global-toast {
+    position: absolute;
+    z-index: 900;
+
+    left: 50%;
+    bottom: calc(18px + var(--safe-bottom));
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: max-content;
+    max-width: calc(100vw - 30px);
+
+    padding: 12px 16px;
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: 9px;
+
+    color: var(--color-text);
+    background: rgba(5, 15, 9, 0.96);
+
+    box-shadow: var(--shadow-panel);
+
+    font-size: 11px;
+    line-height: 1.5;
+
+    transform: translateX(-50%);
+}
+
+#globalToastIcon {
+    color: var(--color-primary);
+    font-weight: 900;
+}
+
+#globalToastMessage {
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   25. ÉCRAN D'ERREUR
+========================================================= */
+
+.game-error-screen {
+    position: absolute;
+    z-index: 1000;
+
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(2, 7, 4, 0.97);
+}
+
+.error-card {
+    width: min(100%, 440px);
+
+    padding: 25px;
+
+    border: 1px solid rgba(255, 91, 98, 0.35);
+    border-radius: var(--radius-large);
+
+    background: #09150e;
+}
+
+.error-card h2 {
+    margin: 0 0 12px;
+
+    color: var(--color-danger);
+
+    font-size: 21px;
+    line-height: 1.35;
+}
+
+.error-card p {
+    margin-bottom: 20px;
+
+    color: var(--color-text-soft);
+
+    font-size: 12px;
+    line-height: 1.8;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   26. ÉTATS DE DISPONIBILITÉ
+========================================================= */
+
+.is-disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    filter: grayscale(0.6);
+}
+
+.is-active {
+    border-color: var(--color-primary) !important;
+
+    color: var(--color-primary) !important;
+    background: rgba(201, 255, 103, 0.1) !important;
+}
+
+.is-danger {
+    border-color: var(--color-danger) !important;
+    color: var(--color-danger) !important;
+}
+
+.is-success {
+    border-color: var(--color-primary) !important;
+    color: var(--color-primary) !important;
+}
+
+.pulse {
+    animation: pulse-effect 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse-effect {
+    0%,
+    100% {
+        box-shadow: 0 0 0 rgba(201, 255, 103, 0);
+    }
+
+    50% {
+        box-shadow: 0 0 17px rgba(201, 255, 103, 0.2);
+    }
+}
+
+
+/* =========================================================
+   27. ÉCRANS ANDROID ET PETITS TÉLÉPHONES
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .main-menu {
+        padding:
+            calc(15px + var(--safe-top))
+            calc(14px + var(--safe-right))
+            calc(16px + var(--safe-bottom))
+            calc(14px + var(--safe-left));
+    }
+
+    .menu-header {
+        gap: 8px;
+    }
+
+    .brand-symbol {
+        width: 40px;
+        height: 40px;
+
+        border-radius: 10px;
+
+        font-size: 15px;
+    }
+
+    .brand-block {
+        gap: 9px;
+    }
+
+    .brand-kicker {
+        font-size: 8px;
+        letter-spacing: 1.2px;
+    }
+
+    .brand-block h1 {
+        font-size: 14px;
+    }
+
+    .menu-status {
+        font-size: 8px;
+    }
+
+    .menu-hero {
+        padding: 45px 0;
+    }
+
+    .menu-hero h2 {
+        font-size: clamp(35px, 10vw, 58px);
+        letter-spacing: -1.8px;
+    }
+
+    .menu-hero > p:not(.section-eyebrow) {
+        font-size: 13px;
+    }
+
+    .menu-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .menu-actions .btn {
+        width: 100%;
+    }
+
+    .menu-bottom-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .menu-feature {
+        padding: 12px;
+    }
+
+    .feature-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .game-topbar {
+        gap: 7px;
+
+        padding-right: calc(8px + var(--safe-right));
+        padding-left: calc(8px + var(--safe-left));
+    }
+
+    .game-topbar .icon-button {
+        width: 33px;
+        height: 33px;
+    }
+
+    .game-brand strong {
+        font-size: 10px;
+    }
+
+    .game-brand small {
+        font-size: 8px;
+    }
+
+    .topbar-status {
+        gap: 4px;
+        font-size: 7px;
+    }
+
+    .mission-panel {
+        top: calc(var(--topbar-height) + 10px + var(--safe-top));
+        left: calc(8px + var(--safe-left));
+
+        width: min(200px, calc(50vw - 14px));
+
+        padding: 10px;
+    }
+
+    .mission-panel h2 {
+        margin: 9px 0 5px;
+
+        font-size: 10px;
+    }
+
+    .mission-panel > p {
+        margin-bottom: 9px;
+
+        font-size: 9px;
+        line-height: 1.5;
+    }
+
+    .mission-objectives {
+        gap: 7px;
+        margin: 10px 0;
+    }
+
+    .objective-item {
+        gap: 6px;
+        font-size: 9px;
+    }
+
+    .mission-footer strong {
+        font-size: 15px;
+    }
+
+    .player-hud {
+        top: auto;
+        bottom: calc(160px + var(--safe-bottom));
+
+        left: 50%;
+
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+
+        width: min(320px, calc(100vw - 20px));
+        max-width: calc(100vw - 20px);
+
+        padding: 9px 10px;
+    }
+
+    .hud-player-card {
+        gap: 7px;
+        min-width: 0;
+    }
+
+    .player-avatar {
+        width: 31px;
+        height: 31px;
+        font-size: 14px;
+    }
+
+    .player-information strong {
+        font-size: 9px;
+    }
+
+    .player-information small {
+        font-size: 7px;
+    }
+
+    .state-badge {
+        font-size: 7px;
+        padding: 3px 4px;
+    }
+
+    .hud-vitals {
+        grid-column: 1 / -1;
+        grid-row: 2;
+
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .hud-ammunition {
+        grid-column: 2;
+        grid-row: 1;
+
+        min-width: 60px;
+    }
+
+    .hud-ammunition > div strong {
+        font-size: 18px;
+    }
+
+    .hud-ammunition > span:first-child {
+        font-size: 7px;
+    }
+
+    .minimap-panel {
+        top: auto;
+        right: calc(8px + var(--safe-right));
+        bottom: calc(158px + var(--safe-bottom));
+
+        width: 118px;
+
+        padding: 7px;
+    }
+
+    .minimap-panel .panel-heading > span {
+        font-size: 8px;
+        letter-spacing: 0.4px;
+    }
+
+    .minimap-panel > canvas {
+        margin: 6px 0;
+    }
+
+    .map-legend {
+        grid-template-columns: 1fr;
+        gap: 4px;
+
+        margin-bottom: 7px;
+    }
+
+    .map-legend span {
+        gap: 4px;
+        font-size: 8px;
+    }
+
+    .map-legend i {
+        width: 6px;
+        height: 6px;
+    }
+
+    .coordinates-row {
+        display: block;
+        margin-bottom: 7px;
+        padding-top: 6px;
+    }
+
+    .coordinates-row > span,
+    .coordinates-row strong {
+        display: block;
+        font-size: 8px;
+    }
+
+    .coordinates-row strong {
+        margin-top: 4px;
+    }
+
+    .minimap-panel .btn {
+        min-height: 30px;
+
+        padding: 6px 4px;
+
+        font-size: 7px;
+    }
+
+    .camera-controls {
+        top: 37%;
+        right: calc(8px + var(--safe-right));
+        gap: 6px;
+    }
+
+    .control-button {
+        width: 36px;
+        height: 36px;
+
+        border-radius: 10px;
+
+        font-size: 17px;
+    }
+
+    .zoom-button {
+        font-size: 22px;
+    }
+
+    .movement-control {
+        left: calc(10px + var(--safe-left));
+        bottom: calc(18px + var(--safe-bottom));
+
+        width: 118px;
+    }
+
+    .movement-joystick {
+        width: 108px;
+        height: 108px;
+    }
+
+    .joystick-knob {
+        width: 43px;
+        height: 43px;
+    }
+
+    .joystick-ring::before {
+        inset: 12px;
+    }
+
+    .player-action-controls {
+        right: calc(9px + var(--safe-right));
+        bottom: calc(17px + var(--safe-bottom));
+
+        grid-template-columns: repeat(3, 52px);
+        gap: 5px;
+    }
+
+    .action-button {
+        min-height: 48px;
+        padding: 4px 2px;
+
+        border-radius: 8px;
+    }
+
+    .action-icon {
+        font-size: 17px;
+    }
+
+    .action-button > span:last-child {
+        font-size: 6px;
+    }
+
+    .floating-panel-button {
+        min-height: 31px;
+
+        gap: 5px;
+        padding: 6px 8px;
+
+        font-size: 8px;
+    }
+
+    .floating-button-icon {
+        font-size: 14px;
+    }
+
+    .weapon-library-button {
+        top: calc(50% + 3px);
+        left: calc(8px + var(--safe-left));
+    }
+
+    .equipment-button {
+        top: calc(50% + 41px);
+        left: calc(8px + var(--safe-left));
+    }
+
+    .helicopter-library-button {
+        top: calc(50% + 79px);
+        left: calc(8px + var(--safe-left));
+    }
+
+    .tactical-log-button {
+        top: calc(var(--topbar-height) + 11px + var(--safe-top));
+        right: calc(8px + var(--safe-right));
+    }
+
+    .settings-button {
+        top: calc(var(--topbar-height) + 49px + var(--safe-top));
+        right: calc(8px + var(--safe-right));
+    }
+
+    .sync-status-panel {
+        top: calc(var(--topbar-height) + 88px + var(--safe-top));
+        right: calc(8px + var(--safe-right));
+
+        width: 150px;
+        padding: 7px;
+
+        gap: 6px;
+    }
+
+    .sync-status-panel strong {
+        font-size: 7px;
+    }
+
+    .sync-status-panel small {
+        font-size: 8px;
+    }
+
+    .sync-status-panel .small-icon-button {
+        width: 23px;
+        height: 23px;
+    }
+
+    .communication-button {
+        left: 50%;
+        bottom: calc(133px + var(--safe-bottom));
+
+        min-height: 33px;
+    }
+
+    .communication-panel {
+        top: calc(var(--topbar-height) + 6px + var(--safe-top));
+
+        width: calc(100vw - 12px);
+        max-height: calc(
+            100dvh - var(--topbar-height) - 12px
+            - var(--safe-top) - var(--safe-bottom)
+        );
+
+        padding: 10px;
+    }
+
+    .communication-header {
+        padding-bottom: 9px;
+    }
+
+    .communication-header h2 {
+        font-size: 15px;
+    }
+
+    .expert-roster {
+        gap: 5px;
+        margin: 9px 0;
+    }
+
+    .expert-card {
+        gap: 5px;
+        padding: 7px;
+    }
+
+    .expert-avatar {
+        width: 27px;
+        height: 27px;
+        font-size: 12px;
+    }
+
+    .expert-card-info strong {
+        font-size: 8px;
+    }
+
+    .expert-card-info small {
+        font-size: 6px;
+    }
+
+    .communication-routing {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .communication-routing label {
+        font-size: 8px;
+    }
+
+    .communication-routing select {
+        min-height: 31px;
+        font-size: 10px;
+    }
+
+    .communication-messages {
+        min-height: 70px;
+        max-height: 145px;
+
+        padding: 8px;
+    }
+
+    .interaction-search-area {
+        margin-top: 9px;
+    }
+
+    .interaction-search-area input {
+        min-height: 35px;
+        padding: 8px 10px;
+    }
+
+    .interaction-category-tabs {
+        margin: 8px 0;
+    }
+
+    .interaction-category-tab {
+        min-height: 27px;
+        padding: 5px 8px;
+        font-size: 7px;
+    }
+
+    .interaction-buttons {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        min-height: 65px;
+        max-height: 165px;
+
+        gap: 5px;
+    }
+
+    .interaction-button {
+        min-height: 36px;
+        padding: 7px;
+
+        font-size: 9px;
+    }
+
+    .custom-message-form {
+        margin-top: 7px;
+        padding-top: 7px;
+    }
+
+    .custom-message-row input {
+        min-height: 35px;
+        padding: 7px;
+
+        font-size: 10px;
+    }
+
+    .custom-message-row .btn {
+        min-height: 35px;
+        padding: 6px 8px;
+
+        font-size: 8px;
+    }
+
+    .drawer-panel {
+        top: calc(var(--topbar-height) + 6px + var(--safe-top));
+        right: calc(6px + var(--safe-right));
+        bottom: calc(6px + var(--safe-bottom));
+
+        width: calc(100vw - 12px);
+
+        padding: 12px;
+    }
+
+    .drawer-header h2 {
+        font-size: 16px;
+    }
+
+    .weapon-card,
+    .equipment-card,
+    .helicopter-card {
+        padding: 10px;
+        gap: 9px;
+    }
+
+    .weapon-card-icon,
+    .equipment-card-icon,
+    .helicopter-card-icon {
+        width: 40px;
+        height: 40px;
+
+        font-size: 19px;
+    }
+
+    .weapon-card-info strong,
+    .equipment-card-info strong,
+    .helicopter-card-info strong {
+        font-size: 11px;
+    }
+
+    .helicopter-hud {
+        bottom: calc(143px + var(--safe-bottom));
+
+        width: min(290px, calc(100vw - 20px));
+
+        padding: 9px;
+    }
+
+    .helicopter-stat-grid {
+        gap: 6px;
+    }
+
+    .helicopter-stat-grid > div {
+        padding: 7px;
+    }
+
+    .helicopter-stat-grid strong {
+        font-size: 11px;
+    }
+
+    .helicopter-flight-controls {
+        bottom: calc(8px + var(--safe-bottom));
+
+        width: calc(100vw - 12px);
+
+        padding: 8px;
+    }
+
+    .flight-control-grid {
+        gap: 4px;
+    }
+
+    .flight-button {
+        min-height: 46px;
+        border-radius: 6px;
+    }
+
+    .flight-button > span {
+        font-size: 16px;
+    }
+
+    .flight-button small {
+        font-size: 6px;
+    }
+
+    .flight-controls-note {
+        font-size: 8px;
+    }
+
+    .touch-control-hint {
+        top: calc(var(--topbar-height) + 5px + var(--safe-top));
+
+        padding: 5px 8px;
+
+        font-size: 8px;
+    }
+
+    .modal-card {
+        padding: 20px;
+    }
+
+    .modal-card h2 {
+        font-size: 22px;
+    }
+
+    .mission-result-stats {
+        gap: 5px;
+    }
+
+    .mission-result-stats > div {
+        padding: 10px 3px;
+    }
+
+    .mission-result-stats small {
+        font-size: 7px;
+    }
+
+    .mission-result-stats strong {
+        font-size: 15px;
+    }
+}
+
+
+/* =========================================================
+   28. TRÈS PETITS ÉCRANS
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .topbar-status {
+        display: none;
+    }
+
+    .game-brand strong {
+        font-size: 9px;
+    }
+
+    .mission-panel {
+        width: min(170px, calc(48vw - 10px));
+    }
+
+    .minimap-panel {
+        width: 103px;
+    }
+
+    .player-action-controls {
+        grid-template-columns: repeat(3, 46px);
+        gap: 4px;
+    }
+
+    .action-button {
+        min-height: 45px;
+    }
+
+    .movement-control {
+        left: calc(6px + var(--safe-left));
+        width: 100px;
+    }
+
+    .movement-joystick {
+        width: 96px;
+        height: 96px;
+    }
+
+    .joystick-knob {
+        width: 38px;
+        height: 38px;
+    }
+
+    .communication-panel {
+        padding: 8px;
+    }
+
+    .interaction-buttons {
+        grid-template-columns: 1fr;
+        max-height: 145px;
+    }
+
+    .expert-card {
+        padding: 6px;
+    }
+
+    .expert-card-info strong {
+        font-size: 7px;
+    }
+
+    .floating-panel-button {
+        padding: 5px 6px;
+        font-size: 7px;
+    }
+
+    .sync-status-panel {
+        width: 133px;
+    }
+}
+
+
+/* =========================================================
+   29. TABLETTES ET ÉCRANS MOYENS
+========================================================= */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+
+    .mission-panel {
+        width: 250px;
+    }
+
+    .minimap-panel {
+        width: 180px;
+    }
+
+    .player-hud {
+        gap: 12px;
+    }
+
+    .player-action-controls {
+        grid-template-columns: repeat(3, 62px);
+    }
+
+    .communication-panel {
+        width: min(450px, calc(100vw - 30px));
+    }
+}
+
+
+/* =========================================================
+   30. GRANDS ÉCRANS
+========================================================= */
+
+@media (min-width: 1101px) {
+
+    .game-topbar {
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+
+    .mission-panel {
+        left: calc(20px + var(--safe-left));
+        width: 300px;
+    }
+
+    .minimap-panel {
+        right: calc(20px + var(--safe-right));
+    }
+
+    .movement-control {
+        left: calc(30px + var(--safe-left));
+        bottom: calc(30px + var(--safe-bottom));
+    }
+
+    .player-action-controls {
+        right: calc(30px + var(--safe-right));
+        bottom: calc(30px + var(--safe-bottom));
+
+        grid-template-columns: repeat(3, 72px);
+    }
+
+    .floating-panel-button {
+        min-height: 40px;
+        padding: 9px 13px;
+    }
+}
+
+
+/* =========================================================
+   31. MODE PAYSAGE SUR ANDROID
+========================================================= */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    .game-topbar {
+        min-height: 46px;
+
+        padding-top: calc(5px + var(--safe-top));
+        padding-bottom: 5px;
+    }
+
+    .game-topbar .icon-button {
+        width: 31px;
+        height: 31px;
+    }
+
+    .mission-panel {
+        top: calc(53px + var(--safe-top));
+
+        width: 175px;
+
+        padding: 8px;
+    }
+
+    .mission-panel h2 {
+        margin: 7px 0 4px;
+        font-size: 9px;
+    }
+
+    .mission-panel > p {
+        margin-bottom: 7px;
+        font-size: 8px;
+    }
+
+    .mission-objectives {
+        gap: 5px;
+        margin: 7px 0;
+    }
+
+    .objective-item {
+        font-size: 8px;
+    }
+
+    .minimap-panel {
+        top: calc(53px + var(--safe-top));
+        width: 130px;
+        padding: 7px;
+    }
+
+    .minimap-panel > canvas {
+        margin: 5px 0;
+    }
+
+    .map-legend {
+        gap: 4px;
+        margin-bottom: 5px;
+    }
+
+    .map-legend span {
+        font-size: 7px;
+    }
+
+    .player-hud {
+        top: calc(53px + var(--safe-top));
+
+        bottom: auto;
+
+        max-width: 350px;
+        padding: 7px 9px;
+    }
+
+    .player-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .hud-vitals {
+        gap: 4px;
+    }
+
+    .hud-ammunition > div strong {
+        font-size: 17px;
+    }
+
+    .movement-control {
+        left: calc(10px + var(--safe-left));
+        bottom: calc(8px + var(--safe-bottom));
+    }
+
+    .movement-joystick {
+        width: 90px;
+        height: 90px;
+    }
+
+    .joystick-knob {
+        width: 37px;
+        height: 37px;
+    }
+
+    .control-caption {
+        font-size: 7px;
+    }
+
+    .player-action-controls {
+        right: calc(10px + var(--safe-right));
+        bottom: calc(8px + var(--safe-bottom));
+
+        grid-template-columns: repeat(4, 52px);
+        gap: 4px;
+    }
+
+    .action-button {
+        min-height: 42px;
+        padding: 3px;
+    }
+
+    .action-icon {
+        font-size: 15px;
+    }
+
+    .action-button > span:last-child {
+        font-size: 6px;
+    }
+
+    .camera-controls {
+        top: 38%;
+    }
+
+    .communication-panel {
+        top: calc(49px + var(--safe-top));
+
+        max-height: calc(
+            100dvh - 58px - var(--safe-top) - var(--safe-bottom)
+        );
+
+        width: min(420px, calc(100vw - 20px));
+    }
+
+    .communication-messages {
+        max-height: 95px;
+        min-height: 55px;
+    }
+
+    .interaction-buttons {
+        max-height: 95px;
+    }
+
+    .helicopter-flight-controls {
+        bottom: calc(5px + var(--safe-bottom));
+
+        width: min(390px, calc(100vw - 12px));
+    }
+
+    .flight-button {
+        min-height: 39px;
+    }
+
+    .flight-button > span {
+        font-size: 14px;
+    }
+
+    .flight-controls-note {
+        margin-top: 5px;
+        font-size: 7px;
+    }
+
+    .helicopter-hud {
+        bottom: calc(100px + var(--safe-bottom));
+    }
+
+    .floating-panel-button {
+        min-height: 29px;
+        padding: 5px 8px;
+    }
+
+    .weapon-library-button {
+        top: calc(50% + 0px);
+    }
+
+    .equipment-button {
+        top: calc(50% + 35px);
+    }
+
+    .helicopter-library-button {
+        top: calc(50% + 70px);
+    }
+}
+
+
+/* =========================================================
+   32. ACCESSIBILITÉ ET RÉDUCTION DES ANIMATIONS
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* =========================================================
+   33. SUPPORT TACTILE
+========================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+    button {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn,
+    .icon-button,
+    .small-icon-button,
+    .control-button,
+    .action-button,
+    .flight-button,
+    .floating-panel-button,
+    .interaction-button {
+        touch-action: manipulation;
+    }
+
+    .game-canvas {
+        touch-action: none;
+    }
+
+    .movement-joystick,
+    .joystick-knob {
+        touch-action: none;
+    }
+
+    .communication-messages,
+    .interaction-buttons,
+    .weapon-library-list,
+    .equipment-library-list,
+    .helicopter-library-list,
+    .tactical-log-entries,
+    .settings-list {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+
+/* =========================================================
+   34. FIN DU FICHIER
+========================================================= */
