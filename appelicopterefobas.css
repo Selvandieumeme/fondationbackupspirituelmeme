@@ -4334,237 +4334,319 @@ svg {
 
 
 
+
+
+
+
+
+
+
+
 /* =========================================================
    FOBAS ELITE STRIKE 3D
-   ISOLATED COMBAT SCREEN LAYOUT
-   Objektif: libere mitan ekran jwèt la
+   PATCH ISOLE — MITAN EKRAN AN DWE RETE LIB
+   Konpatib ak ID HTML ou voye a
 ========================================================= */
 
-/* 1. Kontenè jwèt la */
-#helicopterGameApp .game-screen {
+#helicopterGameApp {
     position: relative !important;
+    overflow: hidden !important;
+    isolation: isolate;
+}
+
+#gameScreen {
+    position: absolute !important;
+    inset: 0 !important;
     overflow: hidden !important;
 }
 
-/* 2. Ba anlè a rete kole anlè */
-#helicopterGameApp .game-topbar {
+/* Mond 3D la kouvri tout zòn jwèt la */
+#gameWorld {
     position: absolute !important;
-    top: 8px !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+    pointer-events: auto !important;
+}
+
+#gameCanvas {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1 !important;
+    touch-action: none;
+}
+
+/* Ba anlè ekran an */
+#gameScreen > .game-topbar {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 100 !important;
+}
+
+/* Panno enfòmasyon yo rete sou kote, pa nan mitan */
+#missionPanel {
+    position: absolute !important;
+    top: 65px !important;
     left: 8px !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: min(190px, 24vw) !important;
+    max-height: 23vh !important;
+    overflow-y: auto !important;
+    z-index: 20 !important;
+}
+
+#minimapPanel {
+    position: absolute !important;
+    top: 65px !important;
     right: 8px !important;
-    width: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: min(160px, 20vw) !important;
+    max-height: 23vh !important;
+    overflow: auto !important;
+    z-index: 20 !important;
+}
+
+#minimapCanvas {
     max-width: 100% !important;
-    z-index: 1000 !important;
+    height: auto !important;
 }
 
-/* 3. Ti fenèt misyon an sou bò gòch anlè */
-#helicopterGameApp .mission-panel {
+#playerHud {
     position: absolute !important;
-    top: 65px !important;
     left: 8px !important;
-    right: auto !important;
-    bottom: auto !important;
-    width: min(210px, 25vw) !important;
-    max-height: 24vh !important;
-    overflow-y: auto !important;
-    z-index: 300 !important;
-}
-
-/* 4. Kat sante jwè a rete sou bò gòch anba */
-#helicopterGameApp .player-hud {
-    position: absolute !important;
-    left: 10px !important;
-    bottom: 12px !important;
+    bottom: 8px !important;
     top: auto !important;
     right: auto !important;
-    width: min(220px, 27vw) !important;
-    max-height: 20vh !important;
-    z-index: 500 !important;
+    width: min(205px, 27vw) !important;
+    max-height: 18vh !important;
+    overflow: auto !important;
+    z-index: 30 !important;
 }
 
-/* 5. Minimap la ale nan kwen anlè adwat */
-#helicopterGameApp .minimap-panel {
+#helicopterHud {
+    position: absolute !important;
+    top: 160px !important;
+    right: 8px !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: min(180px, 22vw) !important;
+    max-height: 18vh !important;
+    overflow: auto !important;
+    z-index: 30 !important;
+}
+
+/* Kamera ak joystick */
+#cameraControls {
+    position: absolute !important;
+    top: 42% !important;
+    right: 8px !important;
+    left: auto !important;
+    bottom: auto !important;
+    z-index: 60 !important;
+}
+
+#movementControl {
+    position: absolute !important;
+    left: 12px !important;
+    bottom: 15px !important;
+    top: auto !important;
+    right: auto !important;
+    z-index: 60 !important;
+}
+
+/* Bouton aksyon yo rete nan kwen anba adwat */
+#playerActionControls {
+    position: absolute !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    left: auto !important;
+    top: auto !important;
+    z-index: 60 !important;
+    max-width: 42vw !important;
+}
+
+/* Bouton pou ouvri lòt fenèt yo rete bò ekran an */
+#openWeaponLibraryButton,
+#openEquipmentButton,
+#openHelicopterLibraryButton,
+#openCommunicationButton,
+#openTacticalLogButton,
+#openSettingsButton {
+    z-index: 80 !important;
+}
+
+/* Panno siplemantè yo pa dwe rete nan mitan jwèt la */
+#weaponLibraryPanel,
+#equipmentPanel,
+#helicopterLibraryPanel,
+#communicationPanel,
+#tacticalLogPanel,
+#settingsPanel,
+#saveManagementPanel {
+    position: absolute !important;
+    top: 60px !important;
+    right: 8px !important;
+    left: auto !important;
+    bottom: 8px !important;
+    width: min(360px, 88vw) !important;
+    max-width: 88vw !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    z-index: 200 !important;
+}
+
+/* Fenèt sa yo pa dwe bouche mitan ekran an */
+#syncStatusPanel {
+    position: absolute !important;
+    top: 55px !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translateX(-50%) !important;
+    width: max-content !important;
+    max-width: 65vw !important;
+    z-index: 40 !important;
+}
+
+/* Endikatè ak mesaj yo rete piti */
+#targetIndicator {
+    position: absolute !important;
+    top: 18% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 45 !important;
+}
+
+#touchControlHint {
+    position: absolute !important;
+    top: 48px !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translateX(-50%) !important;
+    max-width: 65vw !important;
+    z-index: 35 !important;
+}
+
+#notificationStack {
     position: absolute !important;
     top: 65px !important;
-    right: 8px !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: min(155px, 19vw) !important;
-    max-height: 20vh !important;
-    overflow: hidden !important;
-    z-index: 300 !important;
-}
-
-/* 6. Enfòmasyon elikoptè a rete sou bò dwat */
-#helicopterGameApp .helicopter-hud {
-    position: absolute !important;
-    top: 175px !important;
-    right: 8px !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: min(190px, 22vw) !important;
-    max-height: 22vh !important;
-    overflow-y: auto !important;
-    z-index: 300 !important;
-}
-
-/* 7. Kontwòl kamera yo rete sou bò dwat */
-#helicopterGameApp .camera-controls {
-    position: absolute !important;
-    right: 12px !important;
-    top: 43% !important;
-    left: auto !important;
-    bottom: auto !important;
-    transform: translateY(-50%) !important;
-    z-index: 700 !important;
-}
-
-/* 8. Joystick la rete nan kwen anba agoch */
-#helicopterGameApp .movement-control {
-    position: absolute !important;
-    left: 18px !important;
-    bottom: 25px !important;
-    top: auto !important;
+    left: 50% !important;
     right: auto !important;
-    z-index: 800 !important;
+    bottom: auto !important;
+    transform: translateX(-50%) !important;
+    width: min(300px, 65vw) !important;
+    max-height: 18vh !important;
+    overflow: hidden !important;
+    z-index: 50 !important;
+    pointer-events: none !important;
 }
 
-/* 9. Bouton tire, vize ak rechaje yo rete anba adwat */
-#helicopterGameApp .player-action-controls {
-    position: absolute !important;
-    right: 18px !important;
-    bottom: 20px !important;
-    left: auto !important;
-    top: auto !important;
-    z-index: 800 !important;
-}
-
-/* 10. Kontwòl vòl yo rete toupre bò dwat la */
-#helicopterGameApp .helicopter-flight-controls {
-    position: absolute !important;
-    right: 12px !important;
-    bottom: 125px !important;
-    left: auto !important;
-    top: auto !important;
-    max-width: 150px !important;
-    z-index: 700 !important;
-}
-
-/* 11. Bouton ouvèti lòt fenèt yo rete sou rebò ekran an */
-#helicopterGameApp .floating-panel-button,
-#helicopterGameApp .weapon-library-button,
-#helicopterGameApp .equipment-button,
-#helicopterGameApp .helicopter-library-button,
-#helicopterGameApp .communication-button,
-#helicopterGameApp .tactical-log-button,
-#helicopterGameApp .settings-button {
-    position: relative !important;
-    z-index: 1200 !important;
-}
-
-/* 12. Tout gwo fenèt siplemantè yo pa kouvri mitan jwèt la */
-#helicopterGameApp .drawer-panel,
-#helicopterGameApp .communication-panel,
-#helicopterGameApp .sync-status-panel,
-#helicopterGameApp .save-status-card {
-    max-width: min(340px, 85vw) !important;
-    max-height: 75vh !important;
-    overflow-y: auto !important;
-    z-index: 1500 !important;
-}
-
-/* 13. Fenèt ki make hidden yo rete kache */
-#helicopterGameApp .hidden {
+/* Kache tout eleman ki make hidden, menm si gen lòt règ CSS */
+#helicopterGameApp .hidden,
+#helicopterGameApp [hidden] {
     display: none !important;
 }
 
-/* 14. Kenbe yon zòn san fenèt nan mitan ekran an */
-#helicopterGameApp .game-world,
-#helicopterGameApp .game-canvas,
-#helicopterGameApp canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-}
-
-/* 15. Sou telefòn: redwi fenèt yo pou libere plis espas */
+/* Sou telefòn, panno yo vin pi piti */
 @media (max-width: 600px) {
-    #helicopterGameApp .mission-panel {
-        top: 58px !important;
-        left: 5px !important;
-        width: 125px !important;
+    #missionPanel {
+        top: 54px !important;
+        left: 4px !important;
+        width: 112px !important;
         max-height: 15vh !important;
         font-size: 10px !important;
     }
 
-    #helicopterGameApp .minimap-panel {
-        top: 58px !important;
-        right: 5px !important;
-        width: 95px !important;
-        max-height: 13vh !important;
-    }
-
-    #helicopterGameApp .helicopter-hud {
-        top: 145px !important;
-        right: 5px !important;
-        width: 115px !important;
+    #minimapPanel {
+        top: 54px !important;
+        right: 4px !important;
+        width: 100px !important;
         max-height: 15vh !important;
-        font-size: 10px !important;
     }
 
-    #helicopterGameApp .player-hud {
-        left: 5px !important;
-        bottom: 8px !important;
-        width: 125px !important;
+    #playerHud {
+        left: 4px !important;
+        bottom: 5px !important;
+        width: 118px !important;
         max-height: 13vh !important;
         font-size: 10px !important;
     }
 
-    #helicopterGameApp .movement-control {
-        left: 8px !important;
-        bottom: 75px !important;
+    #helicopterHud {
+        top: 135px !important;
+        right: 4px !important;
+        width: 108px !important;
+        max-height: 13vh !important;
+        font-size: 10px !important;
     }
 
-    #helicopterGameApp .player-action-controls {
-        right: 8px !important;
-        bottom: 75px !important;
+    #movementControl {
+        left: 5px !important;
+        bottom: 65px !important;
     }
 
-    #helicopterGameApp .camera-controls {
+    #playerActionControls {
         right: 5px !important;
+        bottom: 65px !important;
+        max-width: 48vw !important;
     }
 
-    #helicopterGameApp .helicopter-flight-controls {
-        right: 5px !important;
-        bottom: 170px !important;
-        max-width: 105px !important;
+    #cameraControls {
+        right: 4px !important;
+    }
+
+    #syncStatusPanel {
+        top: 43px !important;
+        max-width: 55vw !important;
+        font-size: 9px !important;
+    }
+
+    #touchControlHint {
+        display: none !important;
     }
 }
 
-/* 16. Ekran orizontal */
+/* Ekran telefòn an orizontal */
 @media (orientation: landscape) and (max-height: 500px) {
-    #helicopterGameApp .mission-panel {
-        top: 48px !important;
-        max-height: 17vh !important;
+    #missionPanel {
+        top: 44px !important;
+        max-height: 14vh !important;
     }
 
-    #helicopterGameApp .minimap-panel {
-        top: 48px !important;
-        max-height: 16vh !important;
+    #minimapPanel {
+        top: 44px !important;
+        max-height: 14vh !important;
     }
 
-    #helicopterGameApp .helicopter-hud {
-        top: 125px !important;
-        max-height: 17vh !important;
+    #playerHud {
+        max-height: 12vh !important;
     }
 
-    #helicopterGameApp .player-hud {
-        max-height: 15vh !important;
+    #helicopterHud {
+        top: 115px !important;
+        max-height: 13vh !important;
+    }
+
+    #syncStatusPanel {
+        top: 42px !important;
+    }
+
+    #touchControlHint {
+        display: none !important;
     }
 }
-
 
 /* =========================================================
    34. FIN DU FICHIER
