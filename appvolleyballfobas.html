@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+
+    <meta name="theme-color" content="#071a27">
+    <meta name="description"
+          content="FOBAS Volleyball Champions 3D — Jeu de volleyball 3D avec PlayCanvas, équipes IA, championnats et 40 missions.">
+
+    <title>FOBAS VOLLEYBALL CHAMPIONS 3D</title>
+
+    <link rel="stylesheet" href="appvolleyballfobas.css">
+
+    <script>
+        window.FOBAS_VOLLEYBALL_CONFIG = Object.freeze({
+            version: "1.0.0",
+            engine: "PlayCanvas",
+            enginePackage: "playcanvas",
+            database: "FOBAS_VOLLEYBALL_CHAMPIONS_DB",
+            databaseVersion: 1,
+            missionCount: 40,
+            playersPerTeam: 11,
+            playerNames: [
+                "Ranise",
+                "MEME",
+                "Kerlande",
+                "Nina",
+                "Dieuben",
+                "Junior",
+                "Monise",
+                "Lise",
+                "Selvandieu",
+                "Natacha",
+                "Sabine",
+                "Ricardo",
+                "Raoul",
+                "Toutin",
+                "Ydeja",
+                "Lannda"
+            ]
+        });
+    </script>
+</head>
+
+<body>
+<div id="volleyballApp" class="volleyball-app">
+
+    <!-- ÉCRAN DE CHARGEMENT -->
+    <section id="loadingScreen"
+             class="loading-screen"
+             aria-live="polite">
+
+        <div class="loading-brand">
+            <div class="loading-ball">🏐</div>
+
+            <p class="brand-label">FOBAS SPORTS INTERACTIVE</p>
+
+            <h1>VOLLEYBALL<br>CHAMPIONS 3D</h1>
+
+            <p id="loadingMessage">
+                Préparation du stade et du moteur 3D...
+            </p>
+
+            <div class="loading-progress-track">
+                <div id="loadingProgress"
+                     class="loading-progress"></div>
+            </div>
+
+            <p class="loading-small">
+                PLAYCANVAS ENGINE · ANDROID FIRST
+            </p>
+        </div>
+    </section>
+
+
+    <!-- EN-TÊTE PRINCIPAL -->
+    <header id="gameHeader" class="game-header">
+
+        <div class="brand-block">
+            <span class="brand-symbol">🏐</span>
+
+            <div>
+                <strong>FOBAS</strong>
+                <small>VOLLEYBALL CHAMPIONS</small>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button id="profileButton"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Profil du joueur"
+                    title="Profil">
+                👤
+            </button>
+
+            <button id="soundButton"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Activer ou désactiver le son"
+                    title="Son">
+                🔊
+            </button>
+
+            <button id="pauseButton"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Pause"
+                    title="Pause">
+                ⏸
+            </button>
+        </div>
+    </header>
+
+
+    <!-- ZONE PRINCIPALE -->
+    <main id="gameMain" class="game-main">
+
+        <!-- SCÈNE 3D PLAYCANVAS -->
+        <section id="stadiumSection"
+                 class="stadium-section"
+                 aria-label="Terrain de volleyball en 3D">
+
+            <canvas id="volleyballCanvas"
+                    aria-label="Terrain 3D interactif de volleyball">
+            </canvas>
+
+            <div id="engineStatus" class="engine-status">
+                INITIALISATION DU MOTEUR 3D...
+            </div>
+
+            <!-- SCORE -->
+            <div id="scoreboard" class="scoreboard">
+
+                <div class="score-team score-team-left">
+                    <span id="homeTeamName">FOBAS LEGENDS</span>
+                    <strong id="homeScore">0</strong>
+                </div>
+
+                <div class="score-center">
+                    <span>VS</span>
+                    <small id="setLabel">SET 1</small>
+                </div>
+
+                <div class="score-team score-team-right">
+                    <span id="awayTeamName">MASTER STARS</span>
+                    <strong id="awayScore">0</strong>
+                </div>
+            </div>
+
+            <!-- INFORMATIONS MATCH -->
+            <div id="matchInfo" class="match-info">
+                <span id="missionLabel">MISSION 01 / 40</span>
+                <span id="matchClock">00:00</span>
+            </div>
+
+            <!-- MESSAGE DE MATCH -->
+            <div id="gameMessage"
+                 class="game-message"
+                 role="status"
+                 aria-live="polite">
+                Bienvenue dans FOBAS Volleyball Champions 3D !
+            </div>
+
+            <!-- COMMANDES CAMÉRA -->
+            <div class="camera-controls">
+
+                <button id="zoomOutButton"
+                        type="button"
+                        aria-label="Réduire le zoom">
+                    −
+                </button>
+
+                <span id="zoomLevel">100%</span>
+
+                <button id="zoomInButton"
+                        type="button"
+                        aria-label="Augmenter le zoom">
+                    +
+                </button>
+
+                <button id="cameraResetButton"
+                        type="button"
+                        aria-label="Réinitialiser la caméra"
+                        title="Caméra">
+                    🎥
+                </button>
+            </div>
+
+            <!-- INDICATION ZOOM TACTILE -->
+            <div id="pinchHint" class="pinch-hint">
+                👆👆 Utilisez deux doigts pour zoomer
+            </div>
+
+            <!-- INDICATEUR DE CHARGEMENT DU TERRAIN -->
+            <div id="stadiumLoader" class="stadium-loader">
+                <span class="stadium-loader-ball">🏐</span>
+                <span>Chargement du stade 3D...</span>
+            </div>
+
+        </section>
+
+
+        <!-- MENU PRINCIPAL -->
+        <section id="mainMenu" class="main-menu">
+
+            <div class="menu-introduction">
+                <p class="section-eyebrow">
+                    LE GRAND RENDEZ-VOUS DU VOLLEYBALL
+                </p>
+
+                <h2>Devenez une légende !</h2>
+
+                <p>
+                    Affrontez des équipes puissantes, progressez
+                    dans votre carrière et remportez les championnats.
+                </p>
+            </div>
+
+            <div class="menu-grid">
+
+                <button id="playButton"
+                        class="menu-card primary-card"
+                        type="button">
+                    <span class="menu-card-icon">🏐</span>
+                    <strong>JOUER</strong>
+                    <small>Commencer un match</small>
+                </button>
+
+                <button id="careerButton"
+                        class="menu-card"
+                        type="button">
+                    <span class="menu-card-icon">🏆</span>
+                    <strong>CARRIÈRE</strong>
+                    <small>40 missions évolutives</small>
+                </button>
+
+                <button id="championshipButton"
+                        class="menu-card"
+                        type="button">
+                    <span class="menu-card-icon">🥇</span>
+                    <strong>CHAMPIONNATS</strong>
+                    <small>Compétitions et trophées</small>
+                </button>
+
+                <button id="tournamentButton"
+                        class="menu-card"
+                        type="button">
+                    <span class="menu-card-icon">⚔️</span>
+                    <strong>TOURNOIS</strong>
+                    <small>Défis entre équipes</small>
+                </button>
+
+                <button id="teamsButton"
+                        class="menu-card"
+                        type="button">
+                    <span class="menu-card-icon">👥</span>
+                    <strong>ÉQUIPES</strong>
+                    <small>Choisir vos joueurs</small>
+                </button>
+
+                <button id="equipmentButton"
+                        class="menu-card"
+                        type="button">
+                    <span class="menu-card-icon">👕</span>
+                    <strong>ÉQUIPEMENTS</strong>
+                    <small>Tenues et ballons</small>
+                </button>
+
+                <button id="howToPlayButton"
+                        class="menu-card"
+                        type="button">
+                    <span class="menu-card-icon">🎮</span>
+                    <strong>COMMENT JOUER</strong>
+                    <small>Commandes et règles</small>
+                </button>
+
+                <button id="settingsButton"
+                        class="menu-card"
+                        type="button">
+                    <span class="menu-card-icon">⚙️</span>
+                    <strong>PARAMÈTRES</strong>
+                    <small>Son et graphismes</small>
+                </button>
+
+            </div>
+
+            <div class="save-actions">
+
+                <button id="saveButton"
+                        class="action-button"
+                        type="button">
+                    💾 SAUVEGARDER
+                </button>
+
+                <button id="loadButton"
+                        class="action-button"
+                        type="button">
+                    📂 CHARGER
+                </button>
+
+                <button id="resetButton"
+                        class="action-button danger-button"
+                        type="button">
+                    ↺ INITIALISER
+                </button>
+
+            </div>
+
+            <p id="saveStatus"
+               class="save-status"
+               role="status"
+               aria-live="polite">
+                Vos données seront enregistrées dans IndexedDB.
+            </p>
+        </section>
+
+
+        <!-- PANNEAU PROFIL -->
+        <section id="profilePanel"
+                 class="game-panel"
+                 hidden>
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-eyebrow">VOTRE IDENTITÉ SPORTIVE</p>
+                    <h2>Profil du joueur</h2>
+                </div>
+
+                <button id="closeProfileButton"
+                        class="close-button"
+                        type="button"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <div class="profile-card">
+                <div id="profileAvatar" class="profile-avatar">
+                    🏐
+                </div>
+
+                <div class="profile-details">
+                    <label for="profileName">Nom du joueur</label>
+
+                    <input id="profileName"
+                           type="text"
+                           maxlength="30"
+                           value="Champion FOBAS"
+                           autocomplete="nickname">
+
+                    <label for="profileTeam">Équipe favorite</label>
+
+                    <select id="profileTeam">
+                        <option value="FOBAS LEGENDS">FOBAS LEGENDS</option>
+                        <option value="MASTER STARS">MASTER STARS</option>
+                        <option value="ROYAL VOLLEY">ROYAL VOLLEY</option>
+                        <option value="CARIBBEAN ELITE">CARIBBEAN ELITE</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="statistics-grid">
+                <div class="stat-card">
+                    <span>Matchs gagnés</span>
+                    <strong id="profileWins">0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Matchs joués</span>
+                    <strong id="profileMatches">0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Missions terminées</span>
+                    <strong id="profileMissions">0 / 40</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Trophées</span>
+                    <strong id="profileTrophies">0</strong>
+                </div>
+            </div>
+
+            <button id="saveProfileButton"
+                    class="action-button primary-action"
+                    type="button">
+                ENREGISTRER LE PROFIL
+            </button>
+        </section>
+
+
+        <!-- PANNEAU CARRIÈRE -->
+        <section id="careerPanel"
+                 class="game-panel"
+                 hidden>
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-eyebrow">PROGRESSION SPORTIVE</p>
+                    <h2>Carrière · 40 missions</h2>
+                </div>
+
+                <button id="closeCareerButton"
+                        class="close-button"
+                        type="button"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <div class="career-progress">
+                <div class="progress-label">
+                    <span>Progression globale</span>
+                    <strong id="careerProgressText">0 %</strong>
+                </div>
+
+                <div class="progress-track">
+                    <div id="careerProgressBar"
+                         class="progress-fill"></div>
+                </div>
+            </div>
+
+            <div id="missionList" class="mission-list">
+                <!-- Les 40 missions seront générées par JavaScript. -->
+            </div>
+        </section>
+
+
+        <!-- PANNEAU CHAMPIONNATS -->
+        <section id="championshipPanel"
+                 class="game-panel"
+                 hidden>
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-eyebrow">COMPÉTITIONS OFFICIELLES</p>
+                    <h2>Championnats</h2>
+                </div>
+
+                <button id="closeChampionshipButton"
+                        class="close-button"
+                        type="button"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <div class="competition-list">
+
+                <article class="competition-card">
+                    <span>🌴</span>
+                    <div>
+                        <h3>Caribbean Volleyball Cup</h3>
+                        <p>Affrontez les équipes des Caraïbes.</p>
+                    </div>
+                    <button type="button"
+                            data-competition="caribbean">
+                        PARTICIPER
+                    </button>
+                </article>
+
+                <article class="competition-card">
+                    <span>🏆</span>
+                    <div>
+                        <h3>FOBAS Elite Championship</h3>
+                        <p>Le championnat des équipes maîtres.</p>
+                    </div>
+                    <button type="button"
+                            data-competition="elite">
+                        PARTICIPER
+                    </button>
+                </article>
+
+                <article class="competition-card">
+                    <span>🌍</span>
+                    <div>
+                        <h3>World Champions Tournament</h3>
+                        <p>Le défi international ultime.</p>
+                    </div>
+                    <button type="button"
+                            data-competition="world">
+                        PARTICIPER
+                    </button>
+                </article>
+
+            </div>
+        </section>
+
+
+        <!-- PANNEAU ÉQUIPES -->
+        <section id="teamsPanel"
+                 class="game-panel"
+                 hidden>
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-eyebrow">11 JOUEURS PAR ÉQUIPE</p>
+                    <h2>Gestion des équipes</h2>
+                </div>
+
+                <button id="closeTeamsButton"
+                        class="close-button"
+                        type="button"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <div class="team-selectors">
+
+                <div class="form-group">
+                    <label for="homeTeamSelect">Équipe locale</label>
+
+                    <select id="homeTeamSelect">
+                        <option value="FOBAS LEGENDS">FOBAS LEGENDS</option>
+                        <option value="ROYAL VOLLEY">ROYAL VOLLEY</option>
+                        <option value="CARIBBEAN ELITE">CARIBBEAN ELITE</option>
+                        <option value="RISING CHAMPIONS">RISING CHAMPIONS</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="awayTeamSelect">Équipe adverse</label>
+
+                    <select id="awayTeamSelect">
+                        <option value="MASTER STARS">MASTER STARS</option>
+                        <option value="ROYAL VOLLEY">ROYAL VOLLEY</option>
+                        <option value="CARIBBEAN ELITE">CARIBBEAN ELITE</option>
+                        <option value="RISING CHAMPIONS">RISING CHAMPIONS</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div id="teamRoster" class="team-roster">
+                <!-- Les compositions seront générées par JavaScript. -->
+            </div>
+
+            <button id="confirmTeamsButton"
+                    class="action-button primary-action"
+                    type="button">
+                CONFIRMER LES ÉQUIPES
+            </button>
+        </section>
+
+
+        <!-- PANNEAU ÉQUIPEMENTS -->
+        <section id="equipmentPanel"
+                 class="game-panel"
+                 hidden>
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-eyebrow">PERSONNALISATION</p>
+                    <h2>Ballons et équipements</h2>
+                </div>
+
+                <button id="closeEquipmentButton"
+                        class="close-button"
+                        type="button"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <h3>Choisir le ballon</h3>
+
+            <div class="equipment-options">
+
+                <button type="button"
+                        class="equipment-option selected"
+                        data-ball="classic">
+                    <span>🏐</span>
+                    <strong>Classique</strong>
+                </button>
+
+                <button type="button"
+                        class="equipment-option"
+                        data-ball="gold">
+                    <span>🌟</span>
+                    <strong>Champion</strong>
+                </button>
+
+                <button type="button"
+                        class="equipment-option"
+                        data-ball="ocean">
+                    <span>🌊</span>
+                    <strong>Océan</strong>
+                </button>
+
+                <button type="button"
+                        class="equipment-option"
+                        data-ball="fire">
+                    <span>🔥</span>
+                    <strong>Flamme</strong>
+                </button>
+
+            </div>
+
+            <h3>Style des tenues</h3>
+
+            <div class="equipment-options">
+
+                <button type="button"
+                        class="equipment-option selected"
+                        data-kit="royal">
+                    <span>👕</span>
+                    <strong>Royal</strong>
+                </button>
+
+                <button type="button"
+                        class="equipment-option"
+                        data-kit="ocean">
+                    <span>🌊</span>
+                    <strong>Océan</strong>
+                </button>
+
+                <button type="button"
+                        class="equipment-option"
+                        data-kit="fire">
+                    <span>🔥</span>
+                    <strong>Flamme</strong>
+                </button>
+
+            </div>
+
+            <p id="equipmentStatus"
+               role="status"
+               aria-live="polite">
+                Sélectionnez votre ballon et vos tenues.
+            </p>
+        </section>
+
+
+        <!-- PANNEAU COMMENT JOUER -->
+        <section id="howToPlayPanel"
+                 class="game-panel"
+                 hidden>
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-eyebrow">GUIDE DU CHAMPION</p>
+                    <h2>Comment jouer</h2>
+                </div>
+
+                <button id="closeHowToPlayButton"
+                        class="close-button"
+                        type="button"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <div class="tutorial-list">
+
+                <article>
+                    <span>🕹️</span>
+                    <div>
+                        <h3>Déplacer le joueur</h3>
+                        <p>
+                            Utilisez le joystick pour déplacer votre
+                            joueur sur le terrain.
+                        </p>
+                    </div>
+                </article>
+
+                <article>
+                    <span>🏐</span>
+                    <div>
+                        <h3>Servir</h3>
+                        <p>
+                            Lancez le ballon pour commencer le point
+                            et mettre l'équipe adverse sous pression.
+                        </p>
+                    </div>
+                </article>
+
+                <article>
+                    <span>🤝</span>
+                    <div>
+                        <h3>Faire une passe</h3>
+                        <p>
+                            Coordonnez-vous avec vos coéquipiers
+                            pour préparer une attaque.
+                        </p>
+                    </div>
+                </article>
+
+                <article>
+                    <span>⚡</span>
+                    <div>
+                        <h3>Smacher et bloquer</h3>
+                        <p>
+                            Attaquez au bon moment et sautez devant
+                            le filet pour tenter de bloquer l'adversaire.
+                        </p>
+                    </div>
+                </article>
+
+                <article>
+                    <span>👆</span>
+                    <div>
+                        <h3>Caméra et zoom</h3>
+                        <p>
+                            Utilisez deux doigts sur l'écran Android
+                            pour zoomer, ou les boutons + et −.
+                        </p>
+                    </div>
+                </article>
+
+                <article>
+                    <span>🏆</span>
+                    <div>
+                        <h3>Gagner un match</h3>
+                        <p>
+                            Marquez des points, remportez les sets
+                            et terminez les objectifs de chaque mission.
+                        </p>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+
+        <!-- PANNEAU PARAMÈTRES -->
+        <section id="settingsPanel"
+                 class="game-panel"
+                 hidden>
+
+            <div class="panel-heading">
+                <div>
+                    <p class="section-eyebrow">CONFIGURATION DU JEU</p>
+                    <h2>Paramètres</h2>
+                </div>
+
+                <button id="closeSettingsButton"
+                        class="close-button"
+                        type="button"
+                        aria-label="Fermer">
+                    ✕
+                </button>
+            </div>
+
+            <div class="setting-row">
+                <label for="musicVolume">Volume de la musique</label>
+                <input id="musicVolume"
+                       type="range"
+                       min="0"
+                       max="100"
+                       value="55">
+                <output id="musicVolumeValue">55 %</output>
+            </div>
+
+            <div class="setting-row">
+                <label for="effectsVolume">Volume des effets sonores</label>
+                <input id="effectsVolume"
+                       type="range"
+                       min="0"
+                       max="100"
+                       value="75">
+                <output id="effectsVolumeValue">75 %</output>
+            </div>
+
+            <div class="setting-row">
+                <label for="graphicsQuality">Qualité graphique</label>
+                <select id="graphicsQuality">
+                    <option value="high">Élevée</option>
+                    <option value="medium">Moyenne</option>
+                    <option value="low">Économie de batterie</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <label for="crowdSound">Ambiance du stade</label>
+                <input id="crowdSound"
+                       type="checkbox"
+                       checked>
+            </div>
+
+            <button id="saveSettingsButton"
+                    class="action-button primary-action"
+                    type="button">
+                ENREGISTRER LES PARAMÈTRES
+            </button>
+        </section>
+
+
+        <!-- ZONE DE JEU -->
+        <section id="matchControls"
+                 class="match-controls"
+                 hidden>
+
+            <div class="match-control-header">
+                <div>
+                    <strong id="activePlayerName">Selvandieu</strong>
+                    <small id="activePlayerPosition">Joueur actif</small>
+                </div>
+
+                <button id="leaveMatchButton"
+                        class="small-action-button"
+                        type="button">
+                    QUITTER LE MATCH
+                </button>
+            </div>
+
+            <div class="match-control-layout">
+
+                <!-- JOYSTICK -->
+                <div class="joystick-area">
+                    <span>SE DÉPLACER</span>
+
+                    <div id="joystickBase"
+                         class="joystick-base"
+                         role="application"
+                         aria-label="Joystick de déplacement">
+
+                        <div id="joystickStick"
+                             class="joystick-stick">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="action-controls">
+
+                    <button id="serveButton"
+                            class="game-action serve-action"
+                            type="button">
+                        <span>🏐</span>
+                        <strong>SERVICE</strong>
+                    </button>
+
+                    <button id="passButton"
+                            class="game-action"
+                            type="button">
+                        <span>🤝</span>
+                        <strong>PASSE</strong>
+                    </button>
+
+                    <button id="smashButton"
+                            class="game-action smash-action"
+                            type="button">
+                        <span>⚡</span>
+                        <strong>SMASH</strong>
+                    </button>
+
+                    <button id="blockButton"
+                            class="game-action"
+                            type="button">
+                        <span>🛡️</span>
+                        <strong>BLOCAGE</strong>
+                    </button>
+
+                    <button id="switchPlayerButton"
+                            class="game-action"
+                            type="button">
+                        <span>🔄</span>
+                        <strong>JOUEUR</strong>
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="match-footer">
+                <span id="ballState">Ballon en attente</span>
+                <span id="matchObjective">Objectif : gagner le match</span>
+            </div>
+        </section>
+
+
+        <!-- RÉSULTAT DU MATCH -->
+        <section id="matchResultPanel"
+                 class="game-panel result-panel"
+                 hidden>
+
+            <div class="result-icon" id="resultIcon">🏆</div>
+
+            <p class="section-eyebrow">RÉSULTAT DU MATCH</p>
+
+            <h2 id="resultTitle">Match terminé !</h2>
+
+            <p id="resultDescription">
+                Consultez votre résultat.
+            </p>
+
+            <div class="result-score">
+                <strong id="resultHomeScore">0</strong>
+                <span>—</span>
+                <strong id="resultAwayScore">0</strong>
+            </div>
+
+            <button id="nextMissionButton"
+                    class="action-button primary-action"
+                    type="button">
+                MISSION SUIVANTE
+            </button>
+
+            <button id="returnMenuButton"
+                    class="action-button"
+                    type="button">
+                RETOUR AU MENU
+            </button>
+        </section>
+
+    </main>
+
+
+    <!-- NAVIGATION INFÉRIEURE -->
+    <nav id="bottomNavigation"
+         class="bottom-navigation"
+         aria-label="Navigation principale">
+
+        <button id="navHomeButton"
+                type="button"
+                class="nav-button active">
+            <span>🏠</span>
+            <small>Accueil</small>
+        </button>
+
+        <button id="navCareerButton"
+                type="button"
+                class="nav-button">
+            <span>🏆</span>
+            <small>Carrière</small>
+        </button>
+
+        <button id="navTeamsButton"
+                type="button"
+                class="nav-button">
+            <span>👥</span>
+            <small>Équipes</small>
+        </button>
+
+        <button id="navProfileButton"
+                type="button"
+                class="nav-button">
+            <span>👤</span>
+            <small>Profil</small>
+        </button>
+
+    </nav>
+
+
+    <!-- NOTIFICATIONS -->
+    <div id="notification"
+         class="notification"
+         role="status"
+         aria-live="polite">
+    </div>
+
+    <!-- BOÎTE DE DIALOGUE -->
+    <dialog id="confirmationDialog"
+            class="confirmation-dialog">
+
+        <div class="dialog-content">
+            <h2 id="dialogTitle">Confirmation</h2>
+
+            <p id="dialogMessage">
+                Confirmez-vous cette action ?
+            </p>
+
+            <div class="dialog-actions">
+                <button id="dialogCancelButton"
+                        class="action-button"
+                        type="button">
+                    ANNULER
+                </button>
+
+                <button id="dialogConfirmButton"
+                        class="action-button danger-button"
+                        type="button">
+                    CONFIRMER
+                </button>
+            </div>
+        </div>
+    </dialog>
+
+
+    <!-- PLAYCANVAS ET LOGIQUE DU JEU -->
+    <script type="module"
+            src="appvolleyballfobas.js"></script>
+
+</div>
+</body>
+</html>
