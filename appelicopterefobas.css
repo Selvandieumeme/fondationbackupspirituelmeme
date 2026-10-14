@@ -4655,30 +4655,6 @@ svg {
 
 
 
-
-/* =====================================================
-   FOBAS ELITE STRIKE 3D
-   KORÈKSYON FENÈT « PRÉPARATION DU MONDE 3D »
-   ===================================================== */
-
-/* Pa kite mesaj chajman an bloke mitan ekran an */
-#helicopterGameApp #worldLoadingNotice {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    animation: none !important;
-}
-
-/* Konsève vizibilite canvas 3D la */
-#helicopterGameApp #gameWorld,
-#helicopterGameApp #gameCanvas {
-    pointer-events: auto;
-}
-
-
-
-
 /* =========================================================
    34. FIN DU FICHIER
 ========================================================= */
