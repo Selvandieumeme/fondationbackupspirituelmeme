@@ -1,933 +1,864 @@
 /* ============================================================
    FOBAS ELITE STRIKE 3D
-   JavaScript principal
-   Compatible avec le HTML fourni et Babylon.js 9.30.0
-   Stockage : IndexedDB
-   Compatible Android / tactile / clavier
+   JavaScript principal — Version 2.0.0
+   Babylon.js 9.30.0
+   40 missions | 3 experts | IA | Armes | Hélicoptères
+   IndexedDB | Android | Touch | Sauvegarde automatique
 ============================================================ */
+
+import {
+    Engine,
+    Scene,
+    Vector3,
+    Color3,
+    Color4,
+    HemisphericLight,
+    DirectionalLight,
+    StandardMaterial,
+    MeshBuilder,
+    TransformNode,
+    ArcRotateCamera,
+    DynamicTexture,
+    Ray,
+    Scalar,
+    Animation
+} from "@babylonjs/core";
 
 (() => {
     "use strict";
 
     /* =========================================================
-       1. CONFIGURATION
+       1. CONFIGURATION GÉNÉRALE
     ========================================================= */
 
     const CONFIG = Object.freeze({
-        appName: "FOBAS ELITE STRIKE 3D",
+        name: "FOBAS ELITE STRIKE 3D",
         version: "2.0.0",
-        databaseName: "FOBASEliteStrikeDB",
+        database: "FOBASEliteStrikeDB",
         databaseVersion: 1,
-        saveKey: "game-save",
-        settingsKey: "game-settings",
-        contentKey: "dynamic-content",
-        syncInterval: 10 * 60 * 1000,
-        autosaveInterval: 60 * 1000,
-        worldSize: 260,
-        enemyCount: 18,
+        saveKey: "main-save",
+        worldSize: 280,
+        enemyCount: 7,
+        maxEnemies: 12,
         maxHealth: 100,
         maxArmor: 100,
-        playerWalkSpeed: 6,
-        playerSprintSpeed: 10,
-        allySpeed: 5.5,
-        cameraMinRadius: 5,
-        cameraMaxRadius: 28,
-        cameraInitialRadius: 12,
-        maxChatMessages: 200,
-        maxLogEntries: 150,
-        infiniteReserveAmmo: true,
-        damageReduction: 0.95,
-        interactionRange: 5
+        walkSpeed: 6,
+        sprintSpeed: 10,
+        enemySpeed: 2.2,
+        allySpeed: 4.4,
+        cameraMin: 5,
+        cameraMax: 32,
+        cameraStart: 13,
+        autosaveInterval: 60000,
+        syncInterval: 600000,
+        reloadDuration: 1400,
+        fireInterval: 170,
+        enemyFireInterval: 1250,
+        allyFireInterval: 750,
+        interactionDistance: 5,
+        helicopterBoardDistance: 7,
+        playerDamage: 7,
+        enemyDamage: 5
     });
 
     const $ = id => document.getElementById(id);
 
-    const clamp = (value, min, max) =>
-        Math.max(min, Math.min(max, value));
-
-    const random = (min, max) =>
-        Math.random() * (max - min) + min;
-
-    const randomInt = (min, max) =>
-        Math.floor(random(min, max + 1));
-
-    const distance2D = (a, b) =>
-        Math.hypot((a.x || 0) - (b.x || 0), (a.z || 0) - (b.z || 0));
-
-    const formatTime = seconds => {
-        const s = Math.max(0, Math.floor(seconds || 0));
-        return String(Math.floor(s / 60)).padStart(2, "0") +
-            ":" + String(s % 60).padStart(2, "0");
-    };
-
-    const escapeHTML = value =>
-        String(value ?? "").replace(/[&<>"']/g, char => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        })[char]);
-
-    const deepClone = value =>
-        JSON.parse(JSON.stringify(value));
-
-    const now = () => performance.now();
-
-    /* =========================================================
-       2. DONNÉES DES ARMES
-    ========================================================= */
-
-    const DEFAULT_WEAPONS = [
-        {
-            id: "pistol",
-            name: "Pistolet tactique",
-            damage: 25,
-            range: 40,
-            fireRate: 320,
-            magazine: 15,
-            reserve: Infinity,
-            accuracy: 0.96,
-            price: 0
-        },
-        {
-            id: "rifle",
-            name: "Fusil d'assaut",
-            damage: 34,
-            range: 100,
-            fireRate: 190,
-            magazine: 30,
-            reserve: Infinity,
-            accuracy: 0.94,
-            price: 0
-        },
-        {
-            id: "smg",
-            name: "Mitraillette tactique",
-            damage: 22,
-            range: 55,
-            fireRate: 105,
-            magazine: 40,
-            reserve: Infinity,
-            accuracy: 0.86,
-            price: 100
-        },
-        {
-            id: "shotgun",
-            name: "Fusil à pompe",
-            damage: 65,
-            range: 24,
-            fireRate: 650,
-            magazine: 8,
-            reserve: Infinity,
-            accuracy: 0.80,
-            price: 150
-        },
-        {
-            id: "marksman",
-            name: "Fusil de précision",
-            damage: 90,
-            range: 170,
-            fireRate: 900,
-            magazine: 10,
-            reserve: Infinity,
-            accuracy: 0.99,
-            price: 250
-        },
-        {
-            id: "heavy",
-            name: "Mitrailleuse lourde",
-            damage: 42,
-            range: 115,
-            fireRate: 145,
-            magazine: 75,
-            reserve: Infinity,
-            accuracy: 0.87,
-            price: 350
+    const ui = new Proxy({}, {
+        get(_, id) {
+            return $(id);
         }
-    ];
-
-    const DEFAULT_EQUIPMENT = [
-        {
-            id: "standard",
-            name: "Protection standard",
-            description: "Équipement tactique de base.",
-            armor: 100,
-            damageReduction: 0.95,
-            price: 0
-        },
-        {
-            id: "heavy",
-            name: "Armure renforcée",
-            description: "Protection avancée pour les trois experts.",
-            armor: 150,
-            damageReduction: 0.97,
-            price: 200
-        },
-        {
-            id: "elite",
-            name: "Protection Elite",
-            description: "Protection tactique maximale.",
-            armor: 200,
-            damageReduction: 0.98,
-            price: 400
-        }
-    ];
-
-    const DEFAULT_HELICOPTERS = [
-        {
-            id: "scout",
-            name: "Hélicoptère de reconnaissance",
-            speed: 32,
-            maxAltitude: 28,
-            health: 100,
-            fuel: 100,
-            weaponDamage: 45,
-            price: 0
-        },
-        {
-            id: "assault",
-            name: "Hélicoptère d'assaut",
-            speed: 38,
-            maxAltitude: 35,
-            health: 150,
-            fuel: 100,
-            weaponDamage: 65,
-            price: 250
-        },
-        {
-            id: "heavy",
-            name: "Hélicoptère lourd",
-            speed: 26,
-            maxAltitude: 30,
-            health: 220,
-            fuel: 150,
-            weaponDamage: 85,
-            price: 450
-        }
-    ];
-
-    const MISSION_TEMPLATES = [
-        {
-            title: "Premier contact",
-            description: "Explorez la zone et sécurisez votre équipe.",
-            objectives: [
-                { type: "reach", label: "Rejoindre la zone tactique", target: 1 },
-                { type: "team", label: "Rassembler les deux experts", target: 2 },
-                { type: "kill", label: "Neutraliser les hostiles", target: 3 }
-            ]
-        },
-        {
-            title: "Périmètre hostile",
-            description: "Éliminez les menaces et protégez vos alliés.",
-            objectives: [
-                { type: "kill", label: "Neutraliser les hostiles", target: 6 },
-                { type: "reach", label: "Atteindre le point de contrôle", target: 1 }
-            ]
-        },
-        {
-            title: "Extraction aérienne",
-            description: "Rejoignez un hélicoptère et préparez l'extraction.",
-            objectives: [
-                { type: "board", label: "Monter dans un hélicoptère", target: 1 },
-                { type: "fly", label: "Voler pendant 15 secondes", target: 15 },
-                { type: "reach", label: "Atteindre la zone d'extraction", target: 1 }
-            ]
-        },
-        {
-            title: "Supériorité tactique",
-            description: "Coordonnez les experts et neutralisez les adversaires.",
-            objectives: [
-                { type: "kill", label: "Neutraliser les hostiles", target: 10 },
-                { type: "team", label: "Rassembler les deux experts", target: 2 }
-            ]
-        },
-        {
-            title: "Dernière opération",
-            description: "Terminez tous les objectifs de la zone.",
-            objectives: [
-                { type: "kill", label: "Neutraliser les hostiles", target: 12 },
-                { type: "reach", label: "Atteindre le point final", target: 1 },
-                { type: "team", label: "Garder l'équipe opérationnelle", target: 2 }
-            ]
-        }
-    ];
-
-    const DEFAULT_INTERACTIONS = [
-        ["position", "where", "Où es-tu ?", "position"],
-        ["position", "follow", "Suivez-moi", "follow"],
-        ["position", "hold", "Maintenez la position", "hold"],
-        ["position", "regroup", "Regroupez l'équipe", "regroup"],
-        ["position", "protect", "Protégez Selvandieu", "protect"],
-        ["position", "advance", "Avancez", "advance"],
-        ["position", "retreat", "Repli tactique", "retreat"],
-        ["position", "cover", "Couvrez-moi", "cover"],
-        ["position", "rally", "Rassemblement", "rally"],
-        ["position", "patrol", "Patrouille locale", "patrol"],
-
-        ["threat", "enemy", "Signalez les ennemis", "enemy"],
-        ["threat", "attack", "Engagez les ennemis", "attack"],
-        ["threat", "ceasefire", "Cessez le feu", "ceasefire"],
-        ["threat", "focus", "Concentrez le tir", "focus"],
-        ["threat", "defend", "Défendez la zone", "defend"],
-        ["threat", "clear", "Nettoyez la zone", "clear"],
-        ["threat", "sniper", "Recherchez les tireurs", "sniper"],
-        ["threat", "danger", "Signalez les dangers", "danger"],
-        ["threat", "flank", "Contournez l'ennemi", "flank"],
-        ["threat", "suppress", "Tir de couverture", "suppress"],
-
-        ["team", "status", "État de l'équipe", "status"],
-        ["team", "health", "État de santé", "health"],
-        ["team", "ready", "Êtes-vous prêts ?", "ready"],
-        ["team", "heal", "Rassemblement sanitaire", "heal"],
-        ["team", "protect", "Protection rapprochée", "protect"],
-        ["team", "assist", "Assistez le joueur", "assist"],
-        ["team", "split", "Formation dispersée", "split"],
-        ["team", "formation", "Formation tactique", "formation"],
-        ["team", "regroup", "Retour auprès du joueur", "regroup"],
-        ["team", "report", "Rapport de situation", "report"],
-
-        ["helicopter", "locateheli", "Localisez un hélicoptère", "locateheli"],
-        ["helicopter", "board", "Montez dans l'hélicoptère", "board"],
-        ["helicopter", "prepare_boarding", "Préparez l'embarquement", "prepare_boarding"],
-        ["helicopter", "takeoff", "Préparez le décollage", "takeoff"],
-        ["helicopter", "land", "Préparez l'atterrissage", "land"],
-        ["helicopter", "hover", "Stabilisez le véhicule", "hover"],
-        ["helicopter", "exit", "Descendez du véhicule", "exit"],
-        ["helicopter", "aircover", "Couverture aérienne", "aircover"],
-        ["helicopter", "extract", "Préparez l'extraction", "extract"],
-        ["helicopter", "vehicle_status", "État de l'hélicoptère", "vehicle_status"],
-
-        ["mission", "mission", "État de la mission", "mission"],
-        ["mission", "objectives", "Liste des objectifs", "objectives"],
-        ["mission", "next", "Mission suivante", "next"],
-        ["mission", "checkpoint", "Atteindre le point de contrôle", "checkpoint"],
-        ["mission", "secure", "Sécurisez la zone", "secure"],
-        ["mission", "search", "Recherchez les hostiles", "search"],
-        ["mission", "extract", "Rejoignez l'extraction", "extract"],
-        ["mission", "save", "Sauvegardez la progression", "save"],
-        ["mission", "coordinates", "Coordonnées du joueur", "coordinates"],
-        ["mission", "report", "Rapport opérationnel", "report"]
-    ].map(([category, id, label, command]) => ({
-        category, id, label, command
-    }));
-
-    /* =========================================================
-       3. ÉTAT CENTRAL DU JEU
-    ========================================================= */
+    });
 
     const state = {
         initialized: false,
-        initializing: false,
         running: false,
         paused: false,
-        gameStarted: false,
-        missionComplete: false,
+        gameOver: false,
+        missionIndex: 0,
+        score: 0,
+        kills: 0,
+        missionKills: 0,
+        missionStart: 0,
+        missionElapsed: 0,
+        lastShot: 0,
+        lastAutoSave: 0,
+        lastSync: 0,
+        reloading: false,
+        aiming: false,
+        crouching: false,
+        sprinting: false,
+        moving: false,
+        interactionDone: false,
+        surviveStarted: 0,
+        selectedWeapon: "rifle",
+        selectedEquipment: "standard",
+        selectedHelicopter: "falcon",
+        currentHelicopter: null,
+        selectedExpert: "selvandieu",
+        messageCount: 0,
+        unreadMessages: 0,
+        interactionCategory: "position",
+        interactionSearch: "",
+        pendingConfirmation: null,
+        graphicsQuality: "medium",
+        cameraSensitivity: 5,
+        soundEnabled: true,
+        musicEnabled: false,
+        showCoordinates: true,
+        showMinimap: true,
+        autoSaveEnabled: true,
+        touchFire: false,
+        joystick: { x: 0, z: 0 },
+        keys: new Set(),
+        lastFrame: performance.now(),
+        time: 0,
+        activeMission: null,
+        missionCompleted: false,
+        missionFailed: false
+    };
 
+    const world = {
         engine: null,
         scene: null,
         camera: null,
         canvas: null,
-
         materials: {},
-        actors: new Map(),
+        player: null,
+        allies: [],
         enemies: [],
         helicopters: [],
-        bullets: [],
-
-        selectedWeaponId: "rifle",
-        selectedEquipmentId: "standard",
-        selectedHelicopterId: "scout",
-
-        selectedInteractionCategory: "position",
-        selectedExpertId: "ranise",
-        selectedWeaponLibraryId: "rifle",
-        selectedEquipmentLibraryId: "standard",
-        selectedHelicopterLibraryId: "scout",
-
-        health: 100,
-        armor: 100,
-        ammo: 30,
-        reserveAmmo: Infinity,
-        score: 0,
-        kills: 0,
-
-        missionIndex: 0,
-        mission: null,
-        missionStartTime: 0,
-        missionElapsed: 0,
-
-        lastSaveTime: null,
-        lastShotAt: 0,
-        lastHelicopterShotAt: 0,
-        lastReinforcementAt: 0,
-        lastAutoSaveAt: 0,
-
-        player: {
-            id: "selvandieu",
-            name: "Selvandieu",
-            type: "player",
-            x: 0,
-            z: 0,
-            health: 100,
-            armor: 100,
-            alive: true,
-            weaponId: "rifle",
-            equipmentId: "standard",
-            lastShotAt: 0,
-            inHelicopter: false,
-            helicopterId: null,
-            crouching: false,
-            jumping: false,
-            jumpUntil: 0,
-            targetId: null,
-            yaw: 0
-        },
-
-        allies: [
-            {
-                id: "ranise",
-                name: "Ranise",
-                type: "ally",
-                x: -4,
-                z: -3,
-                health: 100,
-                armor: 100,
-                alive: true,
-                behavior: "follow",
-                targetId: null,
-                lastShotAt: 0,
-                weaponId: "rifle",
-                inHelicopter: false,
-                helicopterId: null,
-                yaw: 0
-            },
-            {
-                id: "kerlande",
-                name: "Kerlande",
-                type: "ally",
-                x: 4,
-                z: -3,
-                health: 100,
-                armor: 100,
-                alive: true,
-                behavior: "follow",
-                targetId: null,
-                lastShotAt: 0,
-                weaponId: "heavy",
-                inHelicopter: false,
-                helicopterId: null,
-                yaw: 0
-            }
-        ],
-
-        input: {
-            forward: false,
-            backward: false,
-            left: false,
-            right: false,
-            sprint: false,
-            fire: false,
-            aim: false,
-            jump: false,
-            joystickX: 0,
-            joystickY: 0,
-            flight: {
-                accelerate: false,
-                brake: false,
-                ascend: false,
-                descend: false,
-                turnLeft: false,
-                turnRight: false
-            }
-        },
-
-        cameraTarget: null,
-        settings: {
-            soundEnabled: true,
-            musicEnabled: false,
-            showCoordinates: true,
-            showMinimap: true,
-            autoSaveEnabled: true,
-            graphicsQuality: "medium",
-            cameraSensitivity: 5
-        },
-
-        database: null,
-        saving: false,
-        dynamicContent: {
-            weapons: DEFAULT_WEAPONS,
-            equipment: DEFAULT_EQUIPMENT,
-            helicopters: DEFAULT_HELICOPTERS,
-            interactions: DEFAULT_INTERACTIONS,
-            missions: MISSION_TEMPLATES
-        },
-
-        chatMessages: [],
-        unreadMessages: 0,
-        tacticalLogs: [],
-        toastTimer: null,
-        confirmationCallback: null,
-        lastFrameTime: 0,
-        elapsedSinceStart: 0,
-        interactionCooldowns: new Map()
+        buildings: [],
+        trees: [],
+        effects: [],
+        missionMarker: null,
+        ground: null,
+        lastEnemyUpdate: 0,
+        lastAllyUpdate: 0,
+        lastMinimapUpdate: 0,
+        animationTime: 0
     };
 
+    const player = {
+        id: "selvandieu",
+        name: "Selvandieu",
+        health: 100,
+        armor: 100,
+        speed: CONFIG.walkSpeed,
+        alive: true,
+        weapon: "rifle",
+        ammo: 30,
+        reserve: 9999,
+        kills: 0,
+        position: new Vector3(0, 0, 0),
+        heading: 0,
+        jumping: false,
+        jumpVelocity: 0,
+        isBoarded: false,
+        crouching: false
+    };
+
+    const teamData = [
+        {
+            id: "ranise",
+            name: "Ranise",
+            color: new Color3(0.15, 0.55, 1),
+            role: "Expert tactique",
+            health: 100,
+            armor: 100,
+            alive: true
+        },
+        {
+            id: "kerlande",
+            name: "Kerlande",
+            color: new Color3(0.8, 0.3, 1),
+            role: "Expert de soutien",
+            health: 100,
+            armor: 100,
+            alive: true
+        }
+    ];
+
     /* =========================================================
-       4. INTERFACE UTILITAIRE
+       2. ARMES ET ÉQUIPEMENTS
     ========================================================= */
 
-    function showElement(id) {
-        const element = $(id);
-        if (element) element.classList.remove("hidden");
+    const WEAPONS = [
+        {
+            id: "pistol",
+            name: "Pistolet tactique",
+            damage: 22,
+            magazine: 15,
+            interval: 320,
+            range: 48,
+            price: 0,
+            description: "Arme secondaire polyvalente."
+        },
+        {
+            id: "rifle",
+            name: "Fusil d'assaut",
+            damage: 30,
+            magazine: 30,
+            interval: 170,
+            range: 85,
+            price: 0,
+            description: "Arme principale équilibrée."
+        },
+        {
+            id: "smg",
+            name: "Fusil compact",
+            damage: 18,
+            magazine: 40,
+            interval: 105,
+            range: 48,
+            price: 300,
+            description: "Cadence de tir élevée."
+        },
+        {
+            id: "shotgun",
+            name: "Fusil à pompe",
+            damage: 58,
+            magazine: 8,
+            interval: 650,
+            range: 20,
+            price: 500,
+            description: "Puissant à courte portée."
+        },
+        {
+            id: "sniper",
+            name: "Fusil de précision",
+            damage: 90,
+            magazine: 5,
+            interval: 1100,
+            range: 150,
+            price: 1000,
+            description: "Précision et portée élevées."
+        },
+        {
+            id: "lmg",
+            name: "Mitrailleuse légère",
+            damage: 24,
+            magazine: 60,
+            interval: 135,
+            range: 95,
+            price: 1200,
+            description: "Soutien à cadence soutenue."
+        }
+    ];
+
+    const EQUIPMENT = [
+        {
+            id: "standard",
+            name: "Équipement standard",
+            armor: 0,
+            health: 0,
+            speed: 0,
+            price: 0
+        },
+        {
+            id: "armor",
+            name: "Gilet pare-balles renforcé",
+            armor: 50,
+            health: 0,
+            speed: -0.3,
+            price: 350
+        },
+        {
+            id: "medkit",
+            name: "Trousse médicale",
+            armor: 0,
+            health: 35,
+            speed: 0,
+            price: 250
+        },
+        {
+            id: "light",
+            name: "Équipement léger",
+            armor: 10,
+            health: 0,
+            speed: 1.4,
+            price: 300
+        },
+        {
+            id: "heavy",
+            name: "Équipement lourd",
+            armor: 80,
+            health: 0,
+            speed: -1,
+            price: 650
+        }
+    ];
+
+    const HELICOPTERS = [
+        {
+            id: "falcon",
+            name: "FALCON — Transport tactique",
+            speed: 32,
+            health: 100,
+            fuel: 100,
+            altitude: 0,
+            price: 0,
+            color: new Color3(0.22, 0.29, 0.25)
+        },
+        {
+            id: "raptor",
+            name: "RAPTOR — Soutien aérien",
+            speed: 42,
+            health: 120,
+            fuel: 100,
+            altitude: 0,
+            price: 900,
+            color: new Color3(0.3, 0.22, 0.18)
+        },
+        {
+            id: "titan",
+            name: "TITAN — Transport lourd",
+            speed: 25,
+            health: 180,
+            fuel: 140,
+            altitude: 0,
+            price: 1400,
+            color: new Color3(0.18, 0.25, 0.34)
+        },
+        {
+            id: "ghost",
+            name: "GHOST — Reconnaissance",
+            speed: 48,
+            health: 90,
+            fuel: 120,
+            altitude: 0,
+            price: 1800,
+            color: new Color3(0.28, 0.3, 0.32)
+        },
+        {
+            id: "guardian",
+            name: "GUARDIAN — Escorte",
+            speed: 35,
+            health: 150,
+            fuel: 110,
+            altitude: 0,
+            price: 2200,
+            color: new Color3(0.3, 0.25, 0.12)
+        }
+    ];
+
+    /* =========================================================
+       3. LES 40 MISSIONS
+    ========================================================= */
+
+    const MISSION_TITLES = [
+        "Premier contact",
+        "Sécurisation du périmètre",
+        "Reconnaissance avancée",
+        "Extraction d'urgence",
+        "Neutralisation des menaces",
+        "Protection du convoi",
+        "Infiltration du secteur",
+        "Récupération des renseignements",
+        "Défense du point stratégique",
+        "Opération nocturne",
+        "Recherche des survivants",
+        "Sécurisation du dépôt",
+        "Interception ennemie",
+        "Assistance aux alliés",
+        "Reconquête du territoire",
+        "Opération haute altitude",
+        "Périmètre sous contrôle",
+        "Assaut coordonné",
+        "Évacuation tactique",
+        "Défense avancée",
+        "Mission de reconnaissance",
+        "Zone de ravitaillement",
+        "Opération de sauvetage",
+        "Patrouille spéciale",
+        "Infiltration du camp",
+        "Protection de la base",
+        "Poursuite tactique",
+        "Récupération stratégique",
+        "Assaut sur la colline",
+        "Contrôle aérien",
+        "Sécurisation des installations",
+        "Mission de renfort",
+        "Opération de nuit avancée",
+        "Défense du secteur central",
+        "Évacuation de l'équipe",
+        "Reconquête avancée",
+        "Opération de soutien",
+        "Assaut final préparatoire",
+        "Dernière ligne de défense",
+        "Opération Elite Strike"
+    ];
+
+    const MISSION_DESCRIPTIONS = [
+        "Explorez le secteur, identifiez les menaces et sécurisez la zone.",
+        "Éliminez les unités hostiles et atteignez le point tactique indiqué.",
+        "Coordonnez Ranise et Kerlande pour accomplir les objectifs.",
+        "Utilisez votre équipement et vos déplacements pour terminer la mission.",
+        "Restez vigilant : les ennemis peuvent riposter."
+    ];
+
+    const MISSION_TYPES = [
+        "eliminate",
+        "reach",
+        "interact",
+        "survive",
+        "eliminate",
+        "board",
+        "reach",
+        "eliminate",
+        "interact",
+        "survive"
+    ];
+
+    function createMission(index) {
+        const number = index + 1;
+        const type = MISSION_TYPES[index % MISSION_TYPES.length];
+        const enemyCount = Math.min(
+            4 + Math.floor(index / 3),
+            CONFIG.maxEnemies
+        );
+
+        const radius = 28 + (index % 5) * 8;
+
+        const objectives = [
+            {
+                id: "eliminate",
+                type: "eliminate",
+                text: `Neutraliser ${enemyCount} unités hostiles`,
+                required: enemyCount,
+                current: 0,
+                completed: false
+            }
+        ];
+
+        if (type === "reach") {
+            objectives.push({
+                id: "reach",
+                type: "reach",
+                text: "Atteindre la zone tactique indiquée",
+                required: 1,
+                current: 0,
+                completed: false
+            });
+        } else if (type === "interact") {
+            objectives.push({
+                id: "interact",
+                type: "interact",
+                text: "Interagir avec le point de mission",
+                required: 1,
+                current: 0,
+                completed: false
+            });
+        } else if (type === "survive") {
+            objectives.push({
+                id: "survive",
+                type: "survive",
+                text: `Survivre pendant ${25 + index * 2} secondes`,
+                required: 25 + index * 2,
+                current: 0,
+                completed: false
+            });
+        } else if (type === "board") {
+            objectives.push({
+                id: "board",
+                type: "board",
+                text: "Monter dans un hélicoptère puis revenir au sol",
+                required: 1,
+                current: 0,
+                completed: false
+            });
+        } else {
+            objectives.push({
+                id: "reach",
+                type: "reach",
+                text: "Rejoindre le point d'extraction",
+                required: 1,
+                current: 0,
+                completed: false
+            });
+        }
+
+        return {
+            id: number,
+            title: MISSION_TITLES[index],
+            description:
+                MISSION_DESCRIPTIONS[index % MISSION_DESCRIPTIONS.length],
+            enemyCount,
+            radius,
+            zone: new Vector3(
+                ((index * 17) % 100) - 50,
+                0,
+                ((index * 23) % 100) - 50
+            ),
+            type,
+            objectives,
+            reward: 150 + index * 50,
+            completed: false
+        };
     }
 
-    function hideElement(id) {
-        const element = $(id);
-        if (element) element.classList.add("hidden");
+    const MISSIONS = Array.from(
+        { length: 40 },
+        (_, index) => createMission(index)
+    );
+
+    /* =========================================================
+       4. OUTILS GÉNÉRAUX
+    ========================================================= */
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
     }
 
-    function toggleElement(id) {
-        const element = $(id);
-        if (element) element.classList.toggle("hidden");
+    function random(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    function randomInt(min, max) {
+        return Math.floor(random(min, max + 1));
+    }
+
+    function distance(a, b) {
+        return Vector3.Distance(a, b);
+    }
+
+    function formatTime(seconds) {
+        const total = Math.max(0, Math.floor(seconds));
+        const minutes = String(Math.floor(total / 60)).padStart(2, "0");
+        const secs = String(total % 60).padStart(2, "0");
+        return `${minutes}:${secs}`;
     }
 
     function setText(id, value) {
         const element = $(id);
-        if (element) element.textContent = String(value ?? "");
+        if (element) element.textContent = String(value);
     }
 
     function setWidth(id, value) {
         const element = $(id);
         if (element) {
-            element.style.width = clamp(Number(value) || 0, 0, 100) + "%";
+            element.style.width = `${clamp(value, 0, 100)}%`;
         }
+    }
+
+    function show(element) {
+        if (element) element.classList.remove("hidden");
+    }
+
+    function hide(element) {
+        if (element) element.classList.add("hidden");
+    }
+
+    function toggle(element) {
+        if (element) element.classList.toggle("hidden");
     }
 
     function toast(message, icon = "ℹ") {
         setText("globalToastMessage", message);
         setText("globalToastIcon", icon);
-        showElement("globalToast");
+        show(ui.globalToast);
 
         if (state.toastTimer) clearTimeout(state.toastTimer);
 
         state.toastTimer = setTimeout(() => {
-            hideElement("globalToast");
-        }, 3200);
+            hide(ui.globalToast);
+        }, 3000);
     }
 
-    function addLog(message, type = "info") {
-        const entry = {
-            time: new Date().toLocaleTimeString(),
-            message: String(message),
-            type
-        };
-
-        state.tacticalLogs.unshift(entry);
-        state.tacticalLogs = state.tacticalLogs.slice(0, CONFIG.maxLogEntries);
-
-        renderTacticalLog();
-    }
-
-    function renderTacticalLog() {
-        const container = $("tacticalLogEntries");
+    function logEvent(message, type = "info") {
+        const container = ui.tacticalLogEntries;
         if (!container) return;
 
-        if (!state.tacticalLogs.length) {
-            container.innerHTML =
-                '<p class="empty-state">Aucun événement enregistré.</p>';
+        const empty = container.querySelector(".empty-state");
+        if (empty) empty.remove();
+
+        const entry = document.createElement("article");
+        entry.className = `tactical-log-entry tactical-log-${type}`;
+
+        const time = document.createElement("small");
+        time.textContent = new Date().toLocaleTimeString();
+
+        const text = document.createElement("p");
+        text.textContent = message;
+
+        entry.append(time, text);
+        container.prepend(entry);
+
+        while (container.children.length > 100) {
+            container.lastElementChild.remove();
+        }
+    }
+
+    function notify(message) {
+        const stack = ui.notificationStack;
+        if (!stack) {
+            toast(message);
             return;
         }
 
-        container.innerHTML = state.tacticalLogs.map(entry => `
-            <article class="tactical-log-entry">
-                <small>${escapeHTML(entry.time)}</small>
-                <p>${escapeHTML(entry.message)}</p>
-            </article>
-        `).join("");
+        const item = document.createElement("div");
+        item.className = "game-notification";
+        item.textContent = message;
+        stack.prepend(item);
+
+        setTimeout(() => item.remove(), 4500);
     }
 
-    function openPanel(id) {
-        closeAllPanels(id);
-        showElement(id);
-    }
+    function playTone(frequency = 500, duration = 0.08) {
+        if (!state.soundEnabled) return;
 
-    function closePanel(id) {
-        hideElement(id);
-    }
+        try {
+            const AudioContextClass =
+                window.AudioContext || window.webkitAudioContext;
 
-    function closeAllPanels(exceptId = "") {
-        [
-            "weaponLibraryPanel",
-            "equipmentPanel",
-            "helicopterLibraryPanel",
-            "communicationPanel",
-            "tacticalLogPanel",
-            "settingsPanel",
-            "saveManagementPanel"
-        ].forEach(id => {
-            if (id !== exceptId) hideElement(id);
-        });
-    }
+            if (!AudioContextClass) return;
 
-    function showLoadingProgress(percent, message) {
-        setWidth("loadingProgressBar", percent);
-        setText("loadingProgressText", message + " " + Math.round(percent) + " %");
-        setText("loadingMessage", message);
-    }
+            const context = new AudioContextClass();
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
 
-    function hideWorldLoading() {
-        hideElement("worldLoadingNotice");
-        hideElement("loadingScreen");
+            oscillator.type = "square";
+            oscillator.frequency.value = frequency;
+            gain.gain.value = 0.025;
+
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+
+            oscillator.start();
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                context.currentTime + duration
+            );
+
+            oscillator.stop(context.currentTime + duration);
+
+            setTimeout(() => context.close(), duration * 1000 + 100);
+        } catch (_) {
+            // Le jeu continue même si l'audio n'est pas disponible.
+        }
     }
 
     /* =========================================================
        5. INDEXEDDB
     ========================================================= */
 
+    let databasePromise = null;
+
     function openDatabase() {
-        return new Promise((resolve, reject) => {
+        if (databasePromise) return databasePromise;
+
+        databasePromise = new Promise((resolve, reject) => {
             if (!("indexedDB" in window)) {
-                reject(new Error("IndexedDB n'est pas disponible."));
+                reject(new Error("IndexedDB indisponible"));
                 return;
             }
 
             const request = indexedDB.open(
-                CONFIG.databaseName,
+                CONFIG.database,
                 CONFIG.databaseVersion
             );
 
-            request.onupgradeneeded = event => {
-                const db = event.target.result;
+            request.onupgradeneeded = () => {
+                const db = request.result;
 
                 if (!db.objectStoreNames.contains("saves")) {
-                    db.createObjectStore("saves", { keyPath: "key" });
+                    db.createObjectStore("saves", {
+                        keyPath: "id"
+                    });
                 }
 
-                if (!db.objectStoreNames.contains("settings")) {
-                    db.createObjectStore("settings", { keyPath: "key" });
-                }
-
-                if (!db.objectStoreNames.contains("content")) {
-                    db.createObjectStore("content", { keyPath: "key" });
+                if (!db.objectStoreNames.contains("events")) {
+                    db.createObjectStore("events", {
+                        autoIncrement: true
+                    });
                 }
             };
-
-            request.onsuccess = () => {
-                state.database = request.result;
-                resolve(state.database);
-            };
-
-            request.onerror = () => reject(
-                request.error || new Error("Impossible d'ouvrir IndexedDB.")
-            );
-        });
-    }
-
-    function dbRequest(storeName, mode, operation) {
-        return new Promise((resolve, reject) => {
-            if (!state.database) {
-                reject(new Error("Base de données non initialisée."));
-                return;
-            }
-
-            const transaction = state.database.transaction(storeName, mode);
-            const store = transaction.objectStore(storeName);
-
-            let request;
-
-            try {
-                request = operation(store);
-            } catch (error) {
-                reject(error);
-                return;
-            }
 
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
+
+        return databasePromise;
     }
 
-    function dbGet(store, key) {
-        return dbRequest(store, "readonly", objectStore => objectStore.get(key));
+    async function dbSave(data) {
+        const db = await openDatabase();
+
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction("saves", "readwrite");
+            const store = transaction.objectStore("saves");
+
+            store.put({
+                id: CONFIG.saveKey,
+                savedAt: new Date().toISOString(),
+                data
+            });
+
+            transaction.oncomplete = () => resolve(true);
+            transaction.onerror = () => reject(transaction.error);
+            transaction.onabort = () => reject(transaction.error);
+        });
     }
 
-    function dbPut(store, record) {
-        return dbRequest(store, "readwrite", objectStore => objectStore.put(record));
+    async function dbLoad() {
+        const db = await openDatabase();
+
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction("saves", "readonly");
+            const request = transaction
+                .objectStore("saves")
+                .get(CONFIG.saveKey);
+
+            request.onsuccess = () => {
+                resolve(request.result || null);
+            };
+
+            request.onerror = () => reject(request.error);
+        });
     }
 
-    function dbDelete(store, key) {
-        return dbRequest(store, "readwrite", objectStore => objectStore.delete(key));
+    async function dbDelete() {
+        const db = await openDatabase();
+
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction("saves", "readwrite");
+
+            transaction.objectStore("saves").delete(CONFIG.saveKey);
+
+            transaction.oncomplete = () => resolve(true);
+            transaction.onerror = () => reject(transaction.error);
+        });
     }
 
-    async function initializeDatabase() {
-        try {
-            await openDatabase();
-            setText("saveStorageStatus", "IndexedDB opérationnel");
-            return true;
-        } catch (error) {
-            console.error(error);
-            setText("saveStorageStatus", "Stockage local indisponible");
-            return false;
-        }
-    }
-
-    /* =========================================================
-       6. SAUVEGARDE ET CHARGEMENT
-    ========================================================= */
-
-    function makeSaveSnapshot() {
+    function getSaveData() {
         return {
             version: CONFIG.version,
-            timestamp: Date.now(),
-
             missionIndex: state.missionIndex,
-            missionComplete: state.missionComplete,
             score: state.score,
             kills: state.kills,
-
             player: {
-                x: state.player.x,
-                z: state.player.z,
-                health: state.player.health,
-                armor: state.player.armor,
-                weaponId: state.player.weaponId,
-                equipmentId: state.player.equipmentId,
-                inHelicopter: state.player.inHelicopter,
-                helicopterId: state.player.helicopterId
+                health: player.health,
+                armor: player.armor,
+                ammo: player.ammo,
+                reserve: player.reserve,
+                weapon: player.weapon,
+                position: {
+                    x: player.position.x,
+                    y: player.position.y,
+                    z: player.position.z
+                }
             },
-
-            allies: state.allies.map(ally => ({
-                id: ally.id,
-                x: ally.x,
-                z: ally.z,
-                health: ally.health,
-                armor: ally.armor,
-                alive: ally.alive,
-                behavior: ally.behavior,
-                weaponId: ally.weaponId,
-                inHelicopter: ally.inHelicopter,
-                helicopterId: ally.helicopterId
+            team: teamData.map(member => ({
+                id: member.id,
+                health: member.health,
+                armor: member.armor,
+                alive: member.alive
             })),
-
-            selectedWeaponId: state.selectedWeaponId,
-            selectedEquipmentId: state.selectedEquipmentId,
-            selectedHelicopterId: state.selectedHelicopterId,
-
-            enemies: state.enemies.map(enemy => ({
-                id: enemy.id,
-                x: enemy.x,
-                z: enemy.z,
-                health: enemy.health,
-                alive: enemy.alive
-            })),
-
-            helicopters: state.helicopters.map(heli => ({
-                id: heli.id,
-                definitionId: heli.definitionId,
-                x: heli.x,
-                z: heli.z,
-                altitude: heli.altitude,
-                yaw: heli.yaw,
-                speed: heli.speed,
-                health: heli.health,
-                fuel: heli.fuel,
-                landed: heli.landed,
-                destroyed: heli.destroyed
-            }))
+            selectedEquipment: state.selectedEquipment,
+            selectedHelicopter: state.selectedHelicopter,
+            missionCompleted: MISSIONS.map(m => m.completed),
+            timestamp: Date.now()
         };
     }
 
-    async function saveGame(silent = false) {
-        if (state.saving) return false;
-
-        state.saving = true;
-
+    async function saveGame(showMessage = true) {
         try {
-            if (!state.database) await initializeDatabase();
+            await dbSave(getSaveData());
 
-            if (!state.database) {
-                throw new Error("Le stockage local est indisponible.");
-            }
+            setText("lastSaveTime", new Date().toLocaleTimeString());
+            setText("saveStorageStatus", "Sauvegarde locale confirmée");
 
-            await dbPut("saves", {
-                key: CONFIG.saveKey,
-                data: makeSaveSnapshot()
-            });
+            if (showMessage) toast("Partie sauvegardée avec succès.", "✓");
 
-            await dbPut("settings", {
-                key: CONFIG.settingsKey,
-                data: state.settings
-            });
-
-            state.lastSaveTime = Date.now();
-
-            setText(
-                "lastSaveTime",
-                new Date(state.lastSaveTime).toLocaleString()
-            );
-
-            setText("saveStorageStatus", "Sauvegarde IndexedDB réussie");
-
-            if (!silent) toast("Progression sauvegardée.", "✓");
-
-            addLog("Progression sauvegardée.");
+            logEvent("Progression sauvegardée.", "success");
             return true;
-
         } catch (error) {
-            console.error("Erreur de sauvegarde :", error);
-            if (!silent) toast("Échec de la sauvegarde.", "!");
+            console.error("Sauvegarde:", error);
+            setText("saveStorageStatus", "Stockage indisponible");
+            if (showMessage) toast("Impossible de sauvegarder la partie.", "!");
             return false;
-
-        } finally {
-            state.saving = false;
         }
     }
 
     async function loadGame() {
         try {
-            if (!state.database) await initializeDatabase();
-
-            if (!state.database) {
-                toast("Le stockage local est indisponible.", "!");
-                return false;
-            }
-
-            const record = await dbGet("saves", CONFIG.saveKey);
+            const record = await dbLoad();
 
             if (!record || !record.data) {
-                toast("Aucune sauvegarde trouvée.", "!");
+                toast("Aucune sauvegarde disponible.");
                 return false;
             }
 
             const data = record.data;
 
-            state.missionIndex = Math.max(0, Number(data.missionIndex) || 0);
+            state.missionIndex = clamp(
+                Number(data.missionIndex) || 0,
+                0,
+                MISSIONS.length - 1
+            );
+
             state.score = Math.max(0, Number(data.score) || 0);
             state.kills = Math.max(0, Number(data.kills) || 0);
 
-            Object.assign(state.player, data.player || {});
+            if (data.player) {
+                player.health = clamp(Number(data.player.health) || 100, 1, 100);
+                player.armor = clamp(Number(data.player.armor) || 100, 0, 100);
+                player.ammo = clamp(Number(data.player.ammo) || 30, 0, 60);
+                player.reserve = 9999;
+                player.weapon = data.player.weapon || "rifle";
 
-            state.player.health = clamp(
-                Number(state.player.health) || 100,
-                1,
-                CONFIG.maxHealth
-            );
+                if (data.player.position) {
+                    player.position.set(
+                        Number(data.player.position.x) || 0,
+                        0,
+                        Number(data.player.position.z) || 0
+                    );
+                }
+            }
 
-            state.player.armor = Math.max(0, Number(state.player.armor) || 0);
-            state.player.alive = true;
-
-            if (Array.isArray(data.allies)) {
-                data.allies.forEach(savedAlly => {
-                    const ally = state.allies.find(a => a.id === savedAlly.id);
-                    if (ally) {
-                        Object.assign(ally, savedAlly);
-                        ally.health = Math.max(1, Number(ally.health) || 100);
-                        ally.alive = true;
+            if (Array.isArray(data.team)) {
+                data.team.forEach(saved => {
+                    const member = teamData.find(m => m.id === saved.id);
+                    if (member) {
+                        member.health = clamp(Number(saved.health) || 100, 0, 100);
+                        member.armor = clamp(Number(saved.armor) || 100, 0, 100);
+                        member.alive = saved.alive !== false && member.health > 0;
                     }
                 });
             }
 
-            state.selectedWeaponId = data.selectedWeaponId || "rifle";
-            state.selectedEquipmentId = data.selectedEquipmentId || "standard";
-            state.selectedHelicopterId = data.selectedHelicopterId || "scout";
-
-            state.missionComplete = false;
-
-            if (state.initialized) {
-                rebuildActors();
-                restoreSavedWorld(data);
-                setupMission(state.missionIndex);
-                updateAllHUD();
+            if (Array.isArray(data.missionCompleted)) {
+                data.missionCompleted.forEach((completed, index) => {
+                    if (MISSIONS[index]) {
+                        MISSIONS[index].completed = Boolean(completed);
+                    }
+                });
             }
 
+            state.selectedEquipment = data.selectedEquipment || "standard";
+            state.selectedHelicopter = data.selectedHelicopter || "falcon";
+
             toast("Sauvegarde chargée.", "✓");
-            addLog("Sauvegarde précédente restaurée.");
-
             return true;
-
         } catch (error) {
-            console.error("Erreur de chargement :", error);
-            toast("Impossible de charger la sauvegarde.", "!");
+            console.error("Chargement:", error);
+            toast("Erreur lors du chargement de la sauvegarde.", "!");
             return false;
         }
     }
 
-    function restoreSavedWorld(data) {
-        if (Array.isArray(data.enemies)) {
-            data.enemies.forEach(saved => {
-                const enemy = state.enemies.find(item => item.id === saved.id);
-                if (enemy) {
-                    enemy.x = saved.x;
-                    enemy.z = saved.z;
-                    enemy.health = saved.health;
-                    enemy.alive = saved.alive;
-                    updateActorMesh(enemy);
-                }
-            });
-        }
-
-        if (Array.isArray(data.helicopters)) {
-            data.helicopters.forEach(saved => {
-                const heli = state.helicopters.find(item => item.id === saved.id);
-                if (heli) Object.assign(heli, saved);
-            });
-        }
-    }
-
-    async function resetGame() {
-        state.player.x = 0;
-        state.player.z = 0;
-        state.player.health = 100;
-        state.player.armor = 100;
-        state.player.alive = true;
-        state.player.inHelicopter = false;
-        state.player.helicopterId = null;
-
-        state.allies.forEach((ally, index) => {
-            ally.x = index === 0 ? -4 : 4;
-            ally.z = -3;
-            ally.health = 100;
-            ally.armor = 100;
-            ally.alive = true;
-            ally.inHelicopter = false;
-            ally.helicopterId = null;
-            ally.behavior = "follow";
-            ally.targetId = null;
-        });
-
-        state.score = 0;
-        state.kills = 0;
-        state.missionIndex = 0;
-        state.missionComplete = false;
-        state.elapsedSinceStart = 0;
-        state.ammo = 30;
-        state.reserveAmmo = Infinity;
-
-        if (state.initialized) {
-            rebuildActors();
-            spawnHelicopters();
-            spawnEnemies();
-            setupMission(0);
-        }
-
-        await saveGame(true);
-        updateAllHUD();
-        toast("Partie réinitialisée.", "✓");
-    }
-
     /* =========================================================
-       7. MATÉRIAUX ET ENVIRONNEMENT 3D
+       6. MATÉRIAUX BABYLON.JS
     ========================================================= */
 
     function makeMaterial(name, color, options = {}) {
-        const material = new BABYLON.StandardMaterial(name, state.scene);
+        const material = new StandardMaterial(name, world.scene);
 
-        material.diffuseColor = BABYLON.Color3.FromHexString(color);
-        material.specularColor = new BABYLON.Color3(0.25, 0.25, 0.25);
+        material.diffuseColor = color;
+        material.specularColor = options.specular ||
+            new Color3(0.25, 0.25, 0.25);
 
         if (options.emissive) {
-            material.emissiveColor = BABYLON.Color3.FromHexString(options.emissive);
+            material.emissiveColor = options.emissive;
         }
 
         if (options.alpha !== undefined) {
@@ -938,2049 +869,2437 @@
     }
 
     function createMaterials() {
-        state.materials.ground = makeMaterial("ground", "#34483b");
-        state.materials.road = makeMaterial("road", "#343a39");
-        state.materials.building = makeMaterial("building", "#777e7b");
-        state.materials.player = makeMaterial("player", "#20d7a0");
-        state.materials.ally = makeMaterial("ally", "#2d9bff");
-        state.materials.enemy = makeMaterial("enemy", "#c63737");
-        state.materials.weapon = makeMaterial("weapon", "#202626");
-        state.materials.helicopter = makeMaterial("helicopter", "#3d5144");
-        state.materials.glass = makeMaterial("glass", "#2b6370", { alpha: 0.65 });
-        state.materials.marker = makeMaterial("marker", "#f6c945", {
-            emissive: "#4b3c10"
-        });
-        state.materials.tracer = makeMaterial("tracer", "#ffd66b", {
-            emissive: "#ffb52c"
-        });
+        world.materials.ground = makeMaterial(
+            "groundMaterial",
+            new Color3(0.24, 0.31, 0.22)
+        );
+
+        world.materials.road = makeMaterial(
+            "roadMaterial",
+            new Color3(0.20, 0.21, 0.19)
+        );
+
+        world.materials.roadLine = makeMaterial(
+            "roadLineMaterial",
+            new Color3(0.72, 0.69, 0.47),
+            { emissive: new Color3(0.08, 0.07, 0.02) }
+        );
+
+        world.materials.player = makeMaterial(
+            "playerMaterial",
+            new Color3(0.15, 0.35, 0.22)
+        );
+
+        world.materials.allyBlue = makeMaterial(
+            "allyBlueMaterial",
+            new Color3(0.12, 0.34, 0.75)
+        );
+
+        world.materials.allyPurple = makeMaterial(
+            "allyPurpleMaterial",
+            new Color3(0.42, 0.16, 0.67)
+        );
+
+        world.materials.enemy = makeMaterial(
+            "enemyMaterial",
+            new Color3(0.62, 0.12, 0.09)
+        );
+
+        world.materials.enemyAccent = makeMaterial(
+            "enemyAccentMaterial",
+            new Color3(0.19, 0.06, 0.05)
+        );
+
+        world.materials.skin = makeMaterial(
+            "skinMaterial",
+            new Color3(0.48, 0.31, 0.22)
+        );
+
+        world.materials.weapon = makeMaterial(
+            "weaponMaterial",
+            new Color3(0.09, 0.10, 0.10),
+            { specular: new Color3(0.6, 0.6, 0.6) }
+        );
+
+        world.materials.building1 = makeMaterial(
+            "buildingMaterial1",
+            new Color3(0.39, 0.38, 0.31)
+        );
+
+        world.materials.building2 = makeMaterial(
+            "buildingMaterial2",
+            new Color3(0.29, 0.32, 0.29)
+        );
+
+        world.materials.roof = makeMaterial(
+            "roofMaterial",
+            new Color3(0.19, 0.21, 0.19)
+        );
+
+        world.materials.tree = makeMaterial(
+            "treeMaterial",
+            new Color3(0.16, 0.29, 0.16)
+        );
+
+        world.materials.trunk = makeMaterial(
+            "trunkMaterial",
+            new Color3(0.28, 0.19, 0.12)
+        );
+
+        world.materials.glass = makeMaterial(
+            "glassMaterial",
+            new Color3(0.15, 0.37, 0.43),
+            {
+                alpha: 0.65,
+                specular: new Color3(0.8, 0.8, 0.8)
+            }
+        );
+
+        world.materials.marker = makeMaterial(
+            "missionMarkerMaterial",
+            new Color3(0.2, 0.9, 0.5),
+            {
+                emissive: new Color3(0.1, 0.55, 0.2),
+                alpha: 0.85
+            }
+        );
+
+        world.materials.bullet = makeMaterial(
+            "bulletMaterial",
+            new Color3(1, 0.67, 0.13),
+            { emissive: new Color3(1, 0.3, 0.02) }
+        );
+
+        world.materials.helicopter = makeMaterial(
+            "helicopterMaterial",
+            new Color3(0.22, 0.29, 0.25)
+        );
+
+        world.materials.helicopterGlass = makeMaterial(
+            "helicopterGlass",
+            new Color3(0.14, 0.32, 0.38),
+            { alpha: 0.75 }
+        );
     }
 
+    /* =========================================================
+       7. TERRAIN ET ENVIRONNEMENT 3D
+    ========================================================= */
+
     function createGround() {
-        const ground = BABYLON.MeshBuilder.CreateGround(
+        const ground = MeshBuilder.CreateGround(
             "battlefieldGround",
             {
                 width: CONFIG.worldSize,
                 height: CONFIG.worldSize,
-                subdivisions: 2
+                subdivisions: 4
             },
-            state.scene
+            world.scene
         );
 
-        ground.material = state.materials.ground;
-        ground.isPickable = false;
+        ground.material = world.materials.ground;
+        ground.receiveShadows = true;
+        world.ground = ground;
 
-        for (let i = -5; i <= 5; i++) {
-            const roadX = BABYLON.MeshBuilder.CreateBox(
-                "roadX" + i,
-                {
-                    width: CONFIG.worldSize,
-                    height: 0.06,
-                    depth: 5
-                },
-                state.scene
+        // Route principale
+        const road = MeshBuilder.CreateGround(
+            "mainRoad",
+            { width: 15, height: CONFIG.worldSize },
+            world.scene
+        );
+
+        road.position.y = 0.025;
+        road.material = world.materials.road;
+
+        const crossRoad = MeshBuilder.CreateGround(
+            "crossRoad",
+            { width: CONFIG.worldSize, height: 12 },
+            world.scene
+        );
+
+        crossRoad.position.y = 0.03;
+        crossRoad.material = world.materials.road;
+
+        for (let z = -120; z < 125; z += 10) {
+            const line = MeshBuilder.CreateBox(
+                `roadLine_${z}`,
+                { width: 0.22, height: 0.025, depth: 4 },
+                world.scene
             );
 
-            roadX.position.set(0, 0.035, i * 35);
-            roadX.material = state.materials.road;
-            roadX.isPickable = false;
-
-            const roadZ = BABYLON.MeshBuilder.CreateBox(
-                "roadZ" + i,
-                {
-                    width: 5,
-                    height: 0.06,
-                    depth: CONFIG.worldSize
-                },
-                state.scene
-            );
-
-            roadZ.position.set(i * 35, 0.04, 0);
-            roadZ.material = state.materials.road;
-            roadZ.isPickable = false;
+            line.position.set(0, 0.055, z);
+            line.material = world.materials.roadLine;
         }
 
-        for (let i = 0; i < 32; i++) {
-            const x = random(-115, 115);
-            const z = random(-115, 115);
+        createBuildings();
+        createTrees();
+        createMissionMarker();
+    }
 
-            if (Math.abs(x) < 14 || Math.abs(z) < 14) continue;
+    function createBuildings() {
+        for (let i = 0; i < 30; i++) {
+            let x = random(-115, 115);
+            let z = random(-115, 115);
 
-            const building = BABYLON.MeshBuilder.CreateBox(
-                "building_" + i,
+            if (Math.abs(x) < 18 || Math.abs(z) < 15) {
+                x += x >= 0 ? 30 : -30;
+                z += z >= 0 ? 25 : -25;
+            }
+
+            const width = random(7, 15);
+            const depth = random(7, 15);
+            const height = random(4, 12);
+
+            const building = MeshBuilder.CreateBox(
+                `building_${i}`,
                 {
-                    width: random(5, 12),
-                    depth: random(5, 12),
-                    height: random(3, 10)
+                    width,
+                    depth,
+                    height
                 },
-                state.scene
+                world.scene
             );
 
-            building.position.set(x, building.scaling.y / 2 + 2, z);
-            building.position.y = building.getBoundingInfo()
-                .boundingBox.extendSize.y;
+            building.position.set(x, height / 2, z);
+            building.material =
+                i % 2 === 0
+                    ? world.materials.building1
+                    : world.materials.building2;
 
-            building.material = state.materials.building;
-            building.isPickable = false;
+            const roof = MeshBuilder.CreateBox(
+                `buildingRoof_${i}`,
+                {
+                    width: width + 0.4,
+                    depth: depth + 0.4,
+                    height: 0.4
+                },
+                world.scene
+            );
+
+            roof.position.set(x, height + 0.2, z);
+            roof.material = world.materials.roof;
+
+            const windowRows = Math.max(1, Math.floor(height / 3));
+
+            for (let row = 0; row < windowRows; row++) {
+                for (let side = -1; side <= 1; side += 2) {
+                    const windowMesh = MeshBuilder.CreateBox(
+                        `window_${i}_${row}_${side}`,
+                        {
+                            width: 1.1,
+                            height: 0.9,
+                            depth: 0.08
+                        },
+                        world.scene
+                    );
+
+                    windowMesh.position.set(
+                        x + side * (width / 2 + 0.045),
+                        1.8 + row * 2.4,
+                        z
+                    );
+
+                    windowMesh.material = world.materials.glass;
+                }
+            }
+
+            world.buildings.push(building, roof);
+        }
+    }
+
+    function createTrees() {
+        for (let i = 0; i < 85; i++) {
+            const x = random(-130, 130);
+            const z = random(-130, 130);
+
+            if (Math.abs(x) < 12 || Math.abs(z) < 10) continue;
+
+            const trunk = MeshBuilder.CreateCylinder(
+                `treeTrunk_${i}`,
+                {
+                    height: random(2.5, 4.2),
+                    diameter: 0.7
+                },
+                world.scene
+            );
+
+            trunk.position.set(x, 1.5, z);
+            trunk.material = world.materials.trunk;
+
+            const crown = MeshBuilder.CreateSphere(
+                `treeCrown_${i}`,
+                {
+                    diameter: random(3, 5),
+                    segments: 6
+                },
+                world.scene
+            );
+
+            crown.position.set(x, random(3.2, 4.5), z);
+            crown.material = world.materials.tree;
+
+            world.trees.push(trunk, crown);
+        }
+    }
+
+    function createMissionMarker() {
+        if (world.missionMarker) {
+            world.missionMarker.dispose();
         }
 
-        const marker = BABYLON.MeshBuilder.CreateCylinder(
-            "missionMarker",
+        const root = new TransformNode("missionMarkerRoot", world.scene);
+
+        const ring = MeshBuilder.CreateTorus(
+            "missionMarkerRing",
             {
-                diameter: 3,
-                height: 0.2,
+                diameter: 5,
+                thickness: 0.16,
                 tessellation: 32
             },
-            state.scene
+            world.scene
         );
 
-        marker.position.set(25, 0.12, 25);
-        marker.material = state.materials.marker;
-        marker.isPickable = false;
-    }
+        ring.parent = root;
+        ring.position.y = 0.12;
+        ring.material = world.materials.marker;
 
-    function createLighting() {
-        const light = new BABYLON.HemisphericLight(
-            "ambientLight",
-            new BABYLON.Vector3(0, 1, 0),
-            state.scene
+        const pillar = MeshBuilder.CreateCylinder(
+            "missionMarkerPillar",
+            {
+                height: 4,
+                diameterTop: 0.12,
+                diameterBottom: 0.65,
+                tessellation: 10
+            },
+            world.scene
         );
 
-        light.intensity = 0.95;
+        pillar.parent = root;
+        pillar.position.y = 2;
+        pillar.material = world.materials.marker;
 
-        const directional = new BABYLON.DirectionalLight(
-            "sunLight",
-            new BABYLON.Vector3(-0.4, -1, 0.3),
-            state.scene
+        const light = MeshBuilder.CreateSphere(
+            "missionMarkerLight",
+            { diameter: 0.8, segments: 10 },
+            world.scene
         );
 
-        directional.position = new BABYLON.Vector3(30, 60, -20);
-        directional.intensity = 0.8;
-    }
+        light.parent = root;
+        light.position.y = 4;
+        light.material = world.materials.marker;
 
-    function createCamera() {
-        state.camera = new BABYLON.ArcRotateCamera(
-            "gameCamera",
-            -Math.PI / 2,
-            Math.PI / 3,
-            CONFIG.cameraInitialRadius,
-            new BABYLON.Vector3(0, 1, 0),
-            state.scene
-        );
-
-        state.camera.lowerRadiusLimit = CONFIG.cameraMinRadius;
-        state.camera.upperRadiusLimit = CONFIG.cameraMaxRadius;
-        state.camera.wheelPrecision = 30;
-        state.camera.panningSensibility = 0;
-        state.camera.angularSensibilityX = 900;
-        state.camera.angularSensibilityY = 900;
-        state.camera.inertia = 0.72;
-        state.camera.attachControl(state.canvas, true);
-
-        state.cameraTarget = new BABYLON.Vector3(0, 1, 0);
+        root.position.copyFrom(MISSIONS[state.missionIndex].zone);
+        world.missionMarker = root;
     }
 
     /* =========================================================
-       8. CRÉATION DES PERSONNAGES
+       8. PERSONNAGES 3D
     ========================================================= */
 
     function createCharacterMesh(actor) {
-        if (!state.scene || actor.inHelicopter) return null;
-
-        const root = new BABYLON.TransformNode(
-            "actor_" + actor.id,
-            state.scene
+        const root = new TransformNode(
+            `character_${actor.id}_${Date.now()}_${Math.random()}`,
+            world.scene
         );
 
-        const body = BABYLON.MeshBuilder.CreateCapsule(
-            "body_" + actor.id,
+        const isEnemy = actor.type === "enemy";
+        const isPlayer = actor.id === "selvandieu";
+
+        const bodyMaterial = isEnemy
+            ? world.materials.enemy
+            : actor.id === "ranise"
+                ? world.materials.allyBlue
+                : actor.id === "kerlande"
+                    ? world.materials.allyPurple
+                    : world.materials.player;
+
+        function part(name, size, position, material, shape = "box") {
+            let mesh;
+
+            if (shape === "sphere") {
+                mesh = MeshBuilder.CreateSphere(
+                    name,
+                    {
+                        diameter: size.x,
+                        segments: 12
+                    },
+                    world.scene
+                );
+            } else if (shape === "cylinder") {
+                mesh = MeshBuilder.CreateCylinder(
+                    name,
+                    {
+                        height: size.y,
+                        diameter: size.x,
+                        tessellation: 12
+                    },
+                    world.scene
+                );
+            } else {
+                mesh = MeshBuilder.CreateBox(
+                    name,
+                    {
+                        width: size.x,
+                        height: size.y,
+                        depth: size.z
+                    },
+                    world.scene
+                );
+            }
+
+            mesh.parent = root;
+            mesh.position.set(position.x, position.y, position.z);
+            mesh.material = material;
+            mesh.isPickable = false;
+
+            return mesh;
+        }
+
+        part(
+            "torso",
+            new Vector3(0.9, 1.05, 0.5),
+            new Vector3(0, 1.55, 0),
+            bodyMaterial
+        );
+
+        part(
+            "head",
+            new Vector3(0.52, 0.52, 0.52),
+            new Vector3(0, 2.38, 0),
+            world.materials.skin,
+            "sphere"
+        );
+
+        part(
+            "helmet",
+            new Vector3(0.61, 0.23, 0.61),
+            new Vector3(0, 2.63, 0),
+            isEnemy ? world.materials.enemyAccent : bodyMaterial,
+            "sphere"
+        );
+
+        // Jambes
+        const legLeft = part(
+            "leftLeg",
+            new Vector3(0.31, 0.82, 0.36),
+            new Vector3(-0.23, 0.65, 0),
+            bodyMaterial
+        );
+
+        const legRight = part(
+            "rightLeg",
+            new Vector3(0.31, 0.82, 0.36),
+            new Vector3(0.23, 0.65, 0),
+            bodyMaterial
+        );
+
+        // Bras
+        const armLeft = part(
+            "leftArm",
+            new Vector3(0.28, 0.83, 0.31),
+            new Vector3(-0.62, 1.55, 0),
+            bodyMaterial
+        );
+
+        const armRight = part(
+            "rightArm",
+            new Vector3(0.28, 0.83, 0.31),
+            new Vector3(0.62, 1.55, 0),
+            bodyMaterial
+        );
+
+        // Arme visible dans les mains
+        const weapon = part(
+            "heldWeapon",
+            new Vector3(0.14, 0.15, 1.0),
+            new Vector3(0.38, 1.46, 0.65),
+            world.materials.weapon
+        );
+
+        weapon.rotation.x = Math.PI / 2;
+
+        // Chargeur
+        const magazine = part(
+            "weaponMagazine",
+            new Vector3(0.09, 0.26, 0.13),
+            new Vector3(0.38, 1.29, 0.54),
+            world.materials.weapon
+        );
+
+        magazine.rotation.x = Math.PI / 2;
+
+        // Petit indicateur de santé pour les alliés et ennemis
+        const healthRoot = new TransformNode(
+            `healthRoot_${actor.id}_${Math.random()}`,
+            world.scene
+        );
+
+        const healthBar = MeshBuilder.CreateBox(
+            `healthBar_${actor.id}_${Math.random()}`,
             {
-                height: 1.45,
-                radius: 0.32,
-                tessellation: 8
+                width: 1.25,
+                height: 0.1,
+                depth: 0.06
             },
-            state.scene
+            world.scene
         );
 
-        body.parent = root;
-        body.position.y = 0.95;
+        healthBar.parent = healthRoot;
+        healthBar.position.y = 3.15;
+        healthBar.material = isEnemy
+            ? world.materials.enemy
+            : world.materials.marker;
 
-        const head = BABYLON.MeshBuilder.CreateSphere(
-            "head_" + actor.id,
-            { diameter: 0.42, segments: 12 },
-            state.scene
-        );
+        healthRoot.parent = root;
+        healthRoot.position.y = 0;
 
-        head.parent = root;
-        head.position.y = 1.82;
-
-        const weapon = BABYLON.MeshBuilder.CreateBox(
-            "weapon_" + actor.id,
-            {
-                width: 0.12,
-                height: 0.13,
-                depth: 1.05
-            },
-            state.scene
-        );
-
-        weapon.parent = root;
-        weapon.position.set(0.3, 1.35, 0.52);
-        weapon.rotation.x = -0.04;
-        weapon.material = state.materials.weapon;
-
-        const color = actor.type === "enemy"
-            ? state.materials.enemy
-            : actor.type === "player"
-                ? state.materials.player
-                : state.materials.ally;
-
-        body.material = color;
-        head.material = color;
-
-        root.position.set(actor.x, 0, actor.z);
-
-        actor.mesh = root;
-        actor.bodyMesh = body;
-        actor.headMesh = head;
-        actor.weaponMesh = weapon;
-
-        root.metadata = { actorId: actor.id };
-
-        return root;
+        return {
+            root,
+            legLeft,
+            legRight,
+            armLeft,
+            armRight,
+            weapon,
+            healthBar,
+            healthRoot,
+            animationOffset: Math.random() * 10,
+            bodyMaterial
+        };
     }
 
-    function createEnemyMesh(enemy) {
-        return createCharacterMesh(enemy);
+    function createPlayer() {
+        player.position.set(0, 0, 0);
+
+        const actor = {
+            id: "selvandieu",
+            name: "Selvandieu",
+            type: "player",
+            health: player.health,
+            armor: player.armor,
+            alive: true,
+            position: player.position,
+            rotation: 0
+        };
+
+        world.player = {
+            actor,
+            ...createCharacterMesh(actor)
+        };
+
+        world.player.root.position.copyFrom(player.position);
     }
 
-    function rebuildActors() {
-        if (!state.scene) return;
+    function createAllies() {
+        world.allies = [];
 
-        state.actors.forEach(mesh => {
-            if (mesh && !mesh.isDisposed()) mesh.dispose(false, true);
-        });
-
-        state.actors.clear();
-
-        const allActors = [
-            state.player,
-            ...state.allies,
-            ...state.enemies
-        ];
-
-        allActors.forEach(actor => {
-            if (!actor.alive || actor.inHelicopter) return;
+        teamData.forEach((member, index) => {
+            const actor = {
+                id: member.id,
+                name: member.name,
+                type: "ally",
+                health: member.health,
+                armor: member.armor,
+                alive: member.alive,
+                position: new Vector3(index === 0 ? -3 : 3, 0, -4),
+                rotation: 0,
+                lastShot: 0
+            };
 
             const mesh = createCharacterMesh(actor);
-            if (mesh) state.actors.set(actor.id, mesh);
+            mesh.root.position.copyFrom(actor.position);
+
+            world.allies.push({
+                actor,
+                ...mesh
+            });
         });
     }
 
-    function updateActorMesh(actor) {
-        const mesh = actor.mesh;
-
-        if (!mesh || mesh.isDisposed()) return;
-
-        mesh.position.x = actor.x;
-        mesh.position.z = actor.z;
-        mesh.rotation.y = actor.yaw || 0;
-
-        if (actor.jumping) {
-            mesh.position.y = 0.7;
-        } else {
-            mesh.position.y = 0;
-        }
-
-        if (!actor.alive || actor.inHelicopter) {
-            mesh.setEnabled(false);
-        } else {
-            mesh.setEnabled(true);
-        }
-    }
-
-    function syncActorMeshes() {
-        const actors = [state.player, ...state.allies, ...state.enemies];
-
-        actors.forEach(actor => {
-            if (!actor.alive || actor.inHelicopter) {
-                if (actor.mesh) actor.mesh.setEnabled(false);
-                return;
-            }
-
-            if (!actor.mesh || actor.mesh.isDisposed()) {
-                createCharacterMesh(actor);
-            }
-
-            updateActorMesh(actor);
+    function spawnEnemies(count) {
+        world.enemies.forEach(enemy => {
+            if (enemy.root) enemy.root.dispose();
         });
+
+        world.enemies = [];
+
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count + random(-0.3, 0.3);
+            const radius = random(28, 52);
+
+            const position = new Vector3(
+                Math.cos(angle) * radius,
+                0,
+                Math.sin(angle) * radius
+            );
+
+            const actor = {
+                id: `enemy_${state.missionIndex}_${i}_${Date.now()}`,
+                name: `Unité hostile ${i + 1}`,
+                type: "enemy",
+                health: 100 + Math.floor(state.missionIndex * 2),
+                armor: 0,
+                alive: true,
+                position,
+                rotation: 0,
+                lastShot: 0,
+                lastSeen: 0,
+                patrolAngle: angle
+            };
+
+            const mesh = createCharacterMesh(actor);
+            mesh.root.position.copyFrom(position);
+
+            world.enemies.push({
+                actor,
+                ...mesh
+            });
+        }
     }
 
     /* =========================================================
-       9. ENNEMIS ET RENFORTS
+       9. HÉLICOPTÈRES 3D
     ========================================================= */
 
-    function spawnEnemies() {
-        state.enemies.forEach(enemy => {
-            if (enemy.mesh && !enemy.mesh.isDisposed()) enemy.mesh.dispose();
+    function createHelicopterMesh(vehicle) {
+        const root = new TransformNode(
+            `helicopterRoot_${vehicle.id}_${Math.random()}`,
+            world.scene
+        );
+
+        function box(name, size, pos, material) {
+            const mesh = MeshBuilder.CreateBox(
+                name,
+                {
+                    width: size.x,
+                    height: size.y,
+                    depth: size.z
+                },
+                world.scene
+            );
+
+            mesh.parent = root;
+            mesh.position.copyFrom(pos);
+            mesh.material = material;
+            mesh.isPickable = false;
+
+            return mesh;
+        }
+
+        function cylinder(name, diameter, height, pos, material) {
+            const mesh = MeshBuilder.CreateCylinder(
+                name,
+                {
+                    diameter,
+                    height,
+                    tessellation: 16
+                },
+                world.scene
+            );
+
+            mesh.parent = root;
+            mesh.position.copyFrom(pos);
+            mesh.material = material;
+
+            return mesh;
+        }
+
+        box(
+            "helicopterBody",
+            new Vector3(2.4, 1.5, 4.1),
+            new Vector3(0, 0, 0),
+            world.materials.helicopter
+        );
+
+        const nose = MeshBuilder.CreateSphere(
+            `helicopterNose_${vehicle.id}`,
+            { diameter: 1.7, segments: 12 },
+            world.scene
+        );
+
+        nose.parent = root;
+        nose.position.set(0, 0.05, 2);
+        nose.scaling.set(1, 0.72, 1.2);
+        nose.material = world.materials.helicopter;
+
+        box(
+            "helicopterCockpit",
+            new Vector3(1.9, 0.9, 1.2),
+            new Vector3(0, 0.38, 1.55),
+            world.materials.helicopterGlass
+        );
+
+        box(
+            "helicopterTail",
+            new Vector3(0.4, 0.4, 4.4),
+            new Vector3(0, 0.1, -3.5),
+            world.materials.helicopter
+        );
+
+        box(
+            "helicopterTailFin",
+            new Vector3(0.35, 1.3, 0.9),
+            new Vector3(0, 0.8, -5.3),
+            world.materials.helicopter
+        );
+
+        const mast = cylinder(
+            "rotorMast",
+            0.25,
+            1.3,
+            new Vector3(0, 1.05, 0),
+            world.materials.weapon
+        );
+
+        const rotorRoot = new TransformNode(
+            `mainRotor_${vehicle.id}`,
+            world.scene
+        );
+
+        rotorRoot.parent = root;
+        rotorRoot.position.y = 1.7;
+
+        for (let i = 0; i < 4; i++) {
+            const blade = MeshBuilder.CreateBox(
+                `rotorBlade_${vehicle.id}_${i}`,
+                {
+                    width: 0.24,
+                    height: 0.08,
+                    depth: 7.5
+                },
+                world.scene
+            );
+
+            blade.parent = rotorRoot;
+            blade.rotation.y = (Math.PI / 2) * i;
+            blade.material = world.materials.weapon;
+        }
+
+        const tailRotor = MeshBuilder.CreateBox(
+            `tailRotor_${vehicle.id}`,
+            {
+                width: 0.12,
+                height: 1.8,
+                depth: 0.18
+            },
+            world.scene
+        );
+
+        tailRotor.parent = root;
+        tailRotor.position.set(0.32, 0.8, -5.2);
+        tailRotor.material = world.materials.weapon;
+
+        box(
+            "leftLandingSkid",
+            new Vector3(0.15, 0.15, 3.6),
+            new Vector3(-1.15, -0.85, 0),
+            world.materials.weapon
+        );
+
+        box(
+            "rightLandingSkid",
+            new Vector3(0.15, 0.15, 3.6),
+            new Vector3(1.15, -0.85, 0),
+            world.materials.weapon
+        );
+
+        return {
+            root,
+            rotorRoot,
+            tailRotor,
+            mast
+        };
+    }
+
+    function createHelicopters() {
+        world.helicopters = [];
+
+        HELICOPTERS.forEach((definition, index) => {
+            const vehicle = {
+                ...definition,
+                position: new Vector3(
+                    12 + index * 8,
+                    0,
+                    12 + index * 4
+                ),
+                velocity: 0,
+                verticalVelocity: 0,
+                heading: 0,
+                landed: true,
+                selected: index === 0,
+                occupied: false,
+                rotorSpeed: 0,
+                health: definition.health,
+                fuel: definition.fuel,
+                altitude: 0,
+                targetAltitude: 0,
+                targetSpeed: 0
+            };
+
+            const mesh = createHelicopterMesh(vehicle);
+            mesh.root.position.copyFrom(vehicle.position);
+
+            world.helicopters.push({
+                vehicle,
+                ...mesh
+            });
         });
-
-        state.enemies = [];
-
-        for (let i = 0; i < CONFIG.enemyCount; i++) {
-            const enemy = {
-                id: "enemy_" + i,
-                name: "Hostile " + (i + 1),
-                type: "enemy",
-                x: random(-105, 105),
-                z: random(-105, 105),
-                health: 100,
-                armor: 0,
-                alive: true,
-                weaponId: "rifle",
-                lastShotAt: 0,
-                targetId: null,
-                yaw: 0,
-                speed: random(1.0, 2.4)
-            };
-
-            if (Math.hypot(enemy.x, enemy.z) < 20) {
-                enemy.x += 35;
-                enemy.z += 35;
-            }
-
-            state.enemies.push(enemy);
-        }
-
-        if (state.scene) {
-            state.enemies.forEach(enemy => createEnemyMesh(enemy));
-        }
-    }
-
-    function maybeSpawnReinforcements() {
-        const aliveCount = state.enemies.filter(enemy => enemy.alive).length;
-
-        if (aliveCount > 5 || state.enemies.length > 70) return;
-
-        for (let i = 0; i < 5; i++) {
-            const enemy = {
-                id: "reinforcement_" + Date.now() + "_" + i,
-                name: "Renfort hostile",
-                type: "enemy",
-                x: state.player.x + random(-35, 35),
-                z: state.player.z + random(-35, 35),
-                health: 100,
-                armor: 0,
-                alive: true,
-                weaponId: "rifle",
-                lastShotAt: 0,
-                targetId: null,
-                yaw: 0,
-                speed: random(1.2, 2.4)
-            };
-
-            state.enemies.push(enemy);
-
-            if (state.scene) createEnemyMesh(enemy);
-        }
-
-        addLog("Des renforts hostiles approchent.", "warning");
-    }
-
-    /* =========================================================
-       10. HÉLICOPTÈRES
-    ========================================================= */
-
-    function getHelicopterDefinition(id) {
-        return state.dynamicContent.helicopters.find(item => item.id === id)
-            || DEFAULT_HELICOPTERS[0];
     }
 
     function getCurrentHelicopter() {
-        return state.helicopters.find(heli =>
-            heli.id === state.player.helicopterId
-        ) || null;
+        return world.helicopters.find(
+            item => item.vehicle.id === state.selectedHelicopter
+        ) || world.helicopters[0] || null;
     }
 
-    function createHelicopterMesh(heli) {
-        const root = new BABYLON.TransformNode(
-            "helicopter_" + heli.id,
-            state.scene
-        );
+    function setSelectedHelicopter(id) {
+        const selected = HELICOPTERS.find(item => item.id === id);
 
-        const body = BABYLON.MeshBuilder.CreateBox(
-            "heliBody_" + heli.id,
-            {
-                width: 1.8,
-                height: 1.1,
-                depth: 4.0
-            },
-            state.scene
-        );
+        if (!selected) return;
 
-        body.parent = root;
-        body.material = state.materials.helicopter;
-
-        const cockpit = BABYLON.MeshBuilder.CreateBox(
-            "heliCockpit_" + heli.id,
-            {
-                width: 1.35,
-                height: 0.7,
-                depth: 1.2
-            },
-            state.scene
-        );
-
-        cockpit.parent = root;
-        cockpit.position.set(0, 0.35, 1.4);
-        cockpit.material = state.materials.glass;
-
-        const tail = BABYLON.MeshBuilder.CreateBox(
-            "heliTail_" + heli.id,
-            {
-                width: 0.3,
-                height: 0.3,
-                depth: 3.0
-            },
-            state.scene
-        );
-
-        tail.parent = root;
-        tail.position.set(0, 0.1, -3.0);
-        tail.material = state.materials.helicopter;
-
-        const rotor = BABYLON.MeshBuilder.CreateBox(
-            "heliRotor_" + heli.id,
-            {
-                width: 7,
-                height: 0.08,
-                depth: 0.15
-            },
-            state.scene
-        );
-
-        rotor.parent = root;
-        rotor.position.y = 0.8;
-        rotor.material = state.materials.weapon;
-
-        heli.mesh = root;
-        heli.bodyMesh = body;
-        heli.rotorMesh = rotor;
-
-        updateHelicopterMesh(heli);
-    }
-
-    function updateHelicopterMesh(heli) {
-        if (!heli.mesh || heli.mesh.isDisposed()) return;
-
-        heli.mesh.position.set(heli.x, heli.altitude + 0.8, heli.z);
-        heli.mesh.rotation.y = heli.yaw || 0;
-
-        if (heli.rotorMesh && !heli.landed && !heli.destroyed) {
-            heli.rotorMesh.rotation.y += 0.2;
+        if (selected.price > state.score) {
+            toast(`Il faut ${selected.price} points pour débloquer ce véhicule.`);
+            return;
         }
 
-        if (heli.destroyed) heli.mesh.setEnabled(false);
-    }
+        state.selectedHelicopter = id;
 
-    function spawnHelicopters() {
-        state.helicopters.forEach(heli => {
-            if (heli.mesh && !heli.mesh.isDisposed()) heli.mesh.dispose(false, true);
+        world.helicopters.forEach(item => {
+            item.vehicle.selected = item.vehicle.id === id;
         });
 
-        state.helicopters = [];
+        const heli = getCurrentHelicopter();
 
-        const positions = [
-            { x: 14, z: 10 },
-            { x: -25, z: 20 },
-            { x: 35, z: -20 },
-            { x: -45, z: -35 },
-            { x: 65, z: 45 }
-        ];
-
-        DEFAULT_HELICOPTERS.forEach((definition, index) => {
-            const position = positions[index % positions.length];
-
-            const heli = {
-                id: "heli_" + index,
-                definitionId: definition.id,
-                name: definition.name,
-                x: position.x,
-                z: position.z,
-                altitude: 0,
-                yaw: 0,
-                speed: 0,
-                health: definition.health,
-                fuel: definition.fuel,
-                landed: true,
-                destroyed: false,
-                occupied: false,
-                passengers: [],
-                maxAltitude: definition.maxAltitude,
-                maxSpeed: definition.speed,
-                verticalTarget: 0,
-                targetX: null,
-                targetZ: null,
-                velocityX: 0,
-                velocityZ: 0,
-                enemyVehicle: false
-            };
-
-            state.helicopters.push(heli);
-
-            if (state.scene) createHelicopterMesh(heli);
-        });
+        if (heli) {
+            setText("currentHelicopterName", heli.vehicle.name);
+        }
 
         renderHelicopterLibrary();
-    }
-
-    function findNearestAccessibleHelicopter(actor = state.player) {
-        let best = null;
-        let bestDistance = Infinity;
-
-        state.helicopters.forEach(heli => {
-            if (heli.destroyed || !heli.landed || heli.altitude > 1.5) return;
-
-            const d = distance2D(actor, heli);
-
-            if (d < bestDistance) {
-                bestDistance = d;
-                best = heli;
-            }
-        });
-
-        return best && bestDistance <= 12 ? best : null;
-    }
-
-    function boardHelicopter() {
-        if (state.player.inHelicopter) {
-            toast("Vous êtes déjà dans un hélicoptère.", "!");
-            return false;
-        }
-
-        const heli = findNearestAccessibleHelicopter();
-
-        if (!heli) {
-            toast("Aucun hélicoptère accessible à proximité.", "!");
-            return false;
-        }
-
-        if (!heli.landed || heli.altitude > 1.5 || heli.destroyed) {
-            toast("L'hélicoptère doit être posé pour embarquer.", "!");
-            return false;
-        }
-
-        state.player.inHelicopter = true;
-        state.player.helicopterId = heli.id;
-        heli.occupied = true;
-
-        state.player.x = heli.x;
-        state.player.z = heli.z;
-
-        if (state.player.mesh) state.player.mesh.setEnabled(false);
-
-        setText("playerStateBadge", "À BORD");
-        showElement("helicopterHud");
-        showElement("helicopterFlightControls");
-
-        addLog("Selvandieu est monté dans " + heli.name + ".");
-        toast("Embarquement effectué.", "✓");
-
-        updateAllHUD();
-        return true;
-    }
-
-    function exitHelicopter() {
-        const heli = getCurrentHelicopter();
-
-        if (!heli) {
-            state.player.inHelicopter = false;
-            state.player.helicopterId = null;
-            hideElement("helicopterHud");
-            hideElement("helicopterFlightControls");
-            return false;
-        }
-
-        if (!heli.landed || heli.altitude > 1.5) {
-            toast("Atterrissez avant de descendre.", "!");
-            return false;
-        }
-
-        state.player.inHelicopter = false;
-        state.player.helicopterId = null;
-        heli.occupied = false;
-
-        state.player.x = heli.x + 2.5;
-        state.player.z = heli.z;
-
-        if (state.player.mesh) {
-            state.player.mesh.position.set(state.player.x, 0, state.player.z);
-            state.player.mesh.setEnabled(true);
-        }
-
-        hideElement("helicopterHud");
-        hideElement("helicopterFlightControls");
-
-        setText("playerStateBadge", "AU SOL");
-
-        addLog("Selvandieu est descendu de l'hélicoptère.");
-        toast("Vous êtes au sol.", "✓");
-
-        updateAllHUD();
-        return true;
-    }
-
-    function helicopterTakeoff() {
-        const heli = getCurrentHelicopter();
-
-        if (!heli) {
-            toast("Montez d'abord dans un hélicoptère.", "!");
-            return false;
-        }
-
-        if (heli.destroyed) {
-            toast("Ce véhicule est détruit.", "!");
-            return false;
-        }
-
-        if (!heli.landed) {
-            toast("L'hélicoptère est déjà en vol.", "!");
-            return false;
-        }
-
-        heli.landed = false;
-        heli.verticalTarget = Math.min(heli.maxAltitude, 12);
-
-        addLog("Décollage initié.");
-        toast("Décollage en cours.", "✓");
-
-        return true;
-    }
-
-    function helicopterLand() {
-        const heli = getCurrentHelicopter();
-
-        if (!heli) {
-            toast("Aucun hélicoptère piloté.", "!");
-            return false;
-        }
-
-        heli.verticalTarget = 0;
-        heli.landed = false;
-
-        addLog("Atterrissage initié.");
-        toast("Descente progressive en cours.", "✓");
-
-        return true;
-    }
-
-    function helicopterHover() {
-        const heli = getCurrentHelicopter();
-        if (!heli) return;
-
-        heli.verticalTarget = heli.altitude;
-        heli.speed = 0;
-        heli.velocityX = 0;
-        heli.velocityZ = 0;
-
-        toast("Hélicoptère stabilisé.", "✓");
-    }
-
-    function fireHelicopterWeapon() {
-        const heli = getCurrentHelicopter();
-
-        if (!heli || heli.landed || heli.destroyed) {
-            toast("Le tir aérien nécessite un hélicoptère en vol.", "!");
-            return false;
-        }
-
-        if (now() - state.lastHelicopterShotAt < 280) return false;
-
-        state.lastHelicopterShotAt = now();
-
-        const definition = getHelicopterDefinition(heli.definitionId);
-        const target = getNearestEnemy(heli, 125);
-
-        createVisualShot(
-            new BABYLON.Vector3(heli.x, heli.altitude + 1, heli.z),
-            target
-                ? new BABYLON.Vector3(target.x, 1, target.z)
-                : new BABYLON.Vector3(
-                    heli.x + Math.sin(heli.yaw) * 35,
-                    heli.altitude,
-                    heli.z + Math.cos(heli.yaw) * 35
-                )
-        );
-
-        if (target) {
-            damageActor(target, definition.weaponDamage, state.player);
-        }
-
-        return true;
-    }
-
-    function updateHelicopterPhysics(dt) {
-        state.helicopters.forEach(heli => {
-            if (heli.destroyed) return;
-
-            if (heli.id === state.player.helicopterId) {
-                const flight = state.input.flight;
-
-                if (flight.accelerate) {
-                    heli.speed = clamp(heli.speed + 10 * dt, 0, heli.maxSpeed);
-                }
-
-                if (flight.brake) {
-                    heli.speed = Math.max(0, heli.speed - 16 * dt);
-                }
-
-                if (flight.turnLeft) heli.yaw -= 1.5 * dt;
-                if (flight.turnRight) heli.yaw += 1.5 * dt;
-
-                if (flight.ascend) {
-                    heli.verticalTarget = clamp(
-                        heli.verticalTarget + 10 * dt,
-                        0,
-                        heli.maxAltitude
-                    );
-                    heli.landed = false;
-                }
-
-                if (flight.descend) {
-                    heli.verticalTarget = Math.max(0, heli.verticalTarget - 10 * dt);
-                    heli.landed = false;
-                }
-
-                const forwardX = Math.sin(heli.yaw);
-                const forwardZ = Math.cos(heli.yaw);
-
-                heli.x += forwardX * heli.speed * dt;
-                heli.z += forwardZ * heli.speed * dt;
-
-                heli.altitude +=
-                    (heli.verticalTarget - heli.altitude) *
-                    Math.min(1, dt * 1.8);
-
-                if (heli.altitude <= 0.08 && heli.verticalTarget <= 0.01) {
-                    heli.altitude = 0;
-                    heli.landed = true;
-                    heli.speed *= Math.max(0, 1 - dt * 2);
-                } else {
-                    heli.landed = false;
-                }
-
-                heli.fuel = Math.max(0, heli.fuel - dt * 0.015);
-
-                if (heli.fuel <= 0) {
-                    heli.speed = Math.max(0, heli.speed - 12 * dt);
-                    heli.verticalTarget = Math.max(0, heli.verticalTarget - 2 * dt);
-                }
-
-                if (state.player.inHelicopter) {
-                    state.player.x = heli.x;
-                    state.player.z = heli.z;
-                }
-
-                if (heli.landed && state.player.inHelicopter) {
-                    setText("helicopterStatus", "AU SOL");
-                } else {
-                    setText("helicopterStatus", "EN VOL");
-                }
-
-                setText("helicopterSpeed", Math.round(heli.speed * 3.6));
-                setText("helicopterAltitude", Math.round(heli.altitude));
-                setText("helicopterHealth", Math.round(heli.health) + " %");
-                setText("helicopterFuel", Math.round(heli.fuel) + " %");
-
-            } else {
-                heli.rotorPhase = (heli.rotorPhase || 0) + dt * 12;
-            }
-
-            updateHelicopterMesh(heli);
-        });
-
-        const current = getCurrentHelicopter();
-
-        if (!current) {
-            hideElement("helicopterHud");
-            hideElement("helicopterFlightControls");
-        }
+        toast(`Hélicoptère sélectionné : ${selected.name}`, "✓");
     }
 
     /* =========================================================
-       11. ARMES ET TIRS
+       10. INITIALISATION DU MOTEUR 3D
     ========================================================= */
 
-    function getWeapon(id = state.selectedWeaponId) {
-        return state.dynamicContent.weapons.find(weapon => weapon.id === id)
-            || DEFAULT_WEAPONS[1];
-    }
-
-    function getEquipment(id = state.selectedEquipmentId) {
-        return state.dynamicContent.equipment.find(item => item.id === id)
-            || DEFAULT_EQUIPMENT[0];
-    }
-
-    function getNearestEnemy(origin = state.player, maxRange = Infinity) {
-        let best = null;
-        let bestDistance = maxRange;
-
-        for (const enemy of state.enemies) {
-            if (!enemy.alive || enemy.inHelicopter) continue;
-
-            const d = distance2D(origin, enemy);
-
-            if (d < bestDistance) {
-                bestDistance = d;
-                best = enemy;
-            }
+    async function initializeBabylon() {
+        if (world.engine) {
+            try {
+                world.engine.stopRenderLoop();
+                world.scene && world.scene.dispose();
+                world.engine.dispose();
+            } catch (_) {}
         }
 
-        return best;
-    }
+        const canvas = ui.gameCanvas;
 
-    function createVisualShot(from, to) {
-        if (!state.scene || !BABYLON.Vector3) return;
+        if (!canvas) {
+            throw new Error("Canvas gameCanvas introuvable.");
+        }
 
-        const line = BABYLON.MeshBuilder.CreateLines(
-            "shot_" + Date.now() + "_" + Math.random(),
+        world.canvas = canvas;
+
+        const quality = state.graphicsQuality;
+        const antialias = quality !== "low";
+
+        world.engine = new Engine(
+            canvas,
+            antialias,
             {
-                points: [from, to],
-                updatable: false
-            },
-            state.scene
+                preserveDrawingBuffer: false,
+                stencil: true,
+                adaptToDeviceRatio: true,
+                powerPreference: "high-performance"
+            }
         );
 
-        line.color = new BABYLON.Color3(1, 0.72, 0.22);
+        world.scene = new Scene(world.engine);
+        world.scene.clearColor = new Color4(0.48, 0.65, 0.75, 1);
+        world.scene.ambientColor = new Color3(0.38, 0.38, 0.38);
+        world.scene.collisionsEnabled = true;
+
+        const hemi = new HemisphericLight(
+            "ambientLight",
+            new Vector3(0, 1, 0),
+            world.scene
+        );
+
+        hemi.intensity = quality === "high" ? 0.9 : 0.75;
+        hemi.diffuse = new Color3(0.86, 0.9, 1);
+        hemi.groundColor = new Color3(0.25, 0.28, 0.2);
+
+        const sun = new DirectionalLight(
+            "sunLight",
+            new Vector3(-0.6, -1, 0.45),
+            world.scene
+        );
+
+        sun.position = new Vector3(50, 90, -40);
+        sun.intensity = quality === "high" ? 1.25 : 1.05;
+
+        world.camera = new ArcRotateCamera(
+            "followCamera",
+            -Math.PI / 2,
+            1.08,
+            CONFIG.cameraStart,
+            Vector3.Zero(),
+            world.scene
+        );
+
+        world.camera.lowerRadiusLimit = CONFIG.cameraMin;
+        world.camera.upperRadiusLimit = CONFIG.cameraMax;
+        world.camera.lowerBetaLimit = 0.25;
+        world.camera.upperBetaLimit = 1.52;
+        world.camera.wheelPrecision = 35;
+        world.camera.panningSensibility = 0;
+        world.camera.inertia = 0.82;
+        world.camera.angularSensibilityX = 650 / state.cameraSensitivity;
+        world.camera.angularSensibilityY = 650 / state.cameraSensitivity;
+        world.camera.attachControl(canvas, true);
+
+        createMaterials();
+        createGround();
+        createPlayer();
+        createAllies();
+        createHelicopters();
+        spawnEnemies(MISSIONS[state.missionIndex].enemyCount);
+
+        updateCameraTarget();
+        updatePlayerHUD();
+        updateMissionUI();
+
+        world.engine.runRenderLoop(() => {
+            if (!world.scene || !world.scene.activeCamera) return;
+
+            const now = performance.now();
+            const dt = clamp((now - state.lastFrame) / 1000, 0, 0.05);
+
+            state.lastFrame = now;
+
+            if (state.running && !state.paused && !state.gameOver) {
+                updateGameLoop(dt, now);
+            }
+
+            animateWorld(dt);
+            world.scene.render();
+        });
+
+        window.addEventListener("resize", () => {
+            if (world.engine) world.engine.resize();
+        });
+
+        hide(ui.worldLoadingNotice);
+        state.initialized = true;
+    }
+
+    /* =========================================================
+       11. CAMÉRA ET VISIBILITÉ
+    ========================================================= */
+
+    function updateCameraTarget() {
+        if (!world.camera) return;
+
+        const target = player.isBoarded && state.currentHelicopter
+            ? state.currentHelicopter.root.position
+            : world.player
+                ? world.player.root.position
+                : Vector3.Zero();
+
+        world.camera.setTarget(
+            new Vector3(target.x, target.y + 1.6, target.z)
+        );
+    }
+
+    function zoomCamera(direction) {
+        if (!world.camera) return;
+
+        world.camera.radius = clamp(
+            world.camera.radius + direction,
+            CONFIG.cameraMin,
+            CONFIG.cameraMax
+        );
+    }
+
+    function resetCamera() {
+        if (!world.camera) return;
+
+        world.camera.radius = CONFIG.cameraStart;
+        world.camera.beta = 1.08;
+        world.camera.alpha = -Math.PI / 2;
+        updateCameraTarget();
+
+        toast("Caméra recentrée.");
+    }
+
+    function centerCamera() {
+        if (!world.camera || !world.player) return;
+
+        world.camera.setTarget(
+            world.player.root.position.add(new Vector3(0, 1.6, 0))
+        );
+
+        toast("Caméra recentrée sur Selvandieu.");
+    }
+
+    /* =========================================================
+       12. MOUVEMENT ET ANIMATION
+    ========================================================= */
+
+    function updatePlayerMovement(dt) {
+        if (!player.alive || player.isBoarded || !world.player) return;
+
+        let x = state.joystick.x;
+        let z = state.joystick.z;
+
+        if (state.keys.has("KeyW") || state.keys.has("ArrowUp")) z += 1;
+        if (state.keys.has("KeyS") || state.keys.has("ArrowDown")) z -= 1;
+        if (state.keys.has("KeyA") || state.keys.has("ArrowLeft")) x -= 1;
+        if (state.keys.has("KeyD") || state.keys.has("ArrowRight")) x += 1;
+
+        const length = Math.hypot(x, z);
+        state.moving = length > 0.1;
+
+        if (!state.moving) return;
+
+        x /= length;
+        z /= length;
+
+        const cameraAlpha = world.camera ? world.camera.alpha : 0;
+
+        const forward = new Vector3(
+            -Math.sin(cameraAlpha),
+            0,
+            -Math.cos(cameraAlpha)
+        );
+
+        const right = new Vector3(
+            -forward.z,
+            0,
+            forward.x
+        );
+
+        const direction = forward.scale(z).add(right.scale(x));
+
+        if (direction.lengthSquared() > 0) direction.normalize();
+
+        const sprint =
+            state.sprinting ||
+            state.keys.has("ShiftLeft") ||
+            state.keys.has("ShiftRight");
+
+        const equipment = EQUIPMENT.find(
+            item => item.id === state.selectedEquipment
+        );
+
+        const speed = (
+            sprint ? CONFIG.sprintSpeed : CONFIG.walkSpeed
+        ) + (equipment ? equipment.speed : 0);
+
+        player.position.addInPlace(direction.scale(speed * dt));
+
+        player.position.x = clamp(
+            player.position.x,
+            -CONFIG.worldSize / 2 + 3,
+            CONFIG.worldSize / 2 - 3
+        );
+
+        player.position.z = clamp(
+            player.position.z,
+            -CONFIG.worldSize / 2 + 3,
+            CONFIG.worldSize / 2 - 3
+        );
+
+        if (state.crouching) {
+            player.position.y = 0;
+        }
+
+        world.player.root.position.copyFrom(player.position);
+
+        player.heading = Math.atan2(direction.x, direction.z);
+        world.player.root.rotation.y = player.heading;
+
+        updateCameraTarget();
+    }
+
+    function updateJump(dt) {
+        if (!player.jumping || !world.player) return;
+
+        player.jumpVelocity -= 18 * dt;
+        player.position.y += player.jumpVelocity * dt;
+
+        if (player.position.y <= 0) {
+            player.position.y = 0;
+            player.jumpVelocity = 0;
+            player.jumping = false;
+        }
+
+        world.player.root.position.y = player.position.y;
+    }
+
+    function animateCharacter(mesh, dt) {
+        if (!mesh || !mesh.root) return;
+
+        const moving = mesh.actor
+            ? mesh.actor.type === "player"
+                ? state.moving
+                : mesh.actor.alive
+            : false;
+
+        const t = state.time * 8 + mesh.animationOffset;
+
+        if (moving) {
+            mesh.legLeft.rotation.x = Math.sin(t) * 0.48;
+            mesh.legRight.rotation.x = -Math.sin(t) * 0.48;
+            mesh.armLeft.rotation.x = -Math.sin(t) * 0.2;
+            mesh.armRight.rotation.x = Math.sin(t) * 0.2;
+        } else {
+            mesh.legLeft.rotation.x = 0;
+            mesh.legRight.rotation.x = 0;
+            mesh.armLeft.rotation.x = 0;
+            mesh.armRight.rotation.x = 0;
+        }
+
+        if (mesh.healthBar) {
+            const health = mesh.actor.health || 0;
+
+            mesh.healthBar.scaling.x = Math.max(0.01, health / 100);
+            mesh.healthBar.setEnabled(
+                mesh.actor.type === "enemy" && mesh.actor.alive
+            );
+        }
+    }
+
+    function animateWorld(dt) {
+        state.time += dt;
+
+        world.allies.forEach(mesh => animateCharacter(mesh, dt));
+        world.enemies.forEach(mesh => animateCharacter(mesh, dt));
+
+        if (world.player) animateCharacter(world.player, dt);
+
+        world.helicopters.forEach(mesh => {
+            const v = mesh.vehicle;
+
+            v.rotorSpeed = v.occupied || v.altitude > 0.2
+                ? Math.min(1, v.rotorSpeed + dt * 1.5)
+                : Math.max(0.05, v.rotorSpeed - dt);
+
+            mesh.rotorRoot.rotation.y += dt * 35 * v.rotorSpeed;
+            mesh.tailRotor.rotation.z += dt * 35 * v.rotorSpeed;
+
+            if (v.occupied) {
+                mesh.root.position.copyFrom(v.position);
+                mesh.root.position.y = v.altitude;
+                mesh.root.rotation.y = v.heading;
+            }
+        });
+
+        world.effects = world.effects.filter(effect => {
+            effect.life -= dt;
+
+            if (effect.life <= 0) {
+                effect.mesh.dispose();
+                return false;
+            }
+
+            if (effect.mesh.material) {
+                effect.mesh.material.alpha = clamp(effect.life * 4, 0, 1);
+            }
+
+            return true;
+        });
+    }
+
+    /* =========================================================
+       13. TIR ET RECHARGEMENT
+    ========================================================= */
+
+    function currentWeapon() {
+        return WEAPONS.find(w => w.id === player.weapon) || WEAPONS[1];
+    }
+
+    function reloadWeapon(manual = true) {
+        if (state.reloading || player.ammo >= currentWeapon().magazine) {
+            return;
+        }
+
+        state.reloading = true;
+
+        toast("Rechargement en cours…", "↻");
+        logEvent("Rechargement de l'arme.", "info");
+
+        const duration = CONFIG.reloadDuration;
 
         setTimeout(() => {
-            if (line && !line.isDisposed()) line.dispose();
-        }, 95);
+            player.ammo = currentWeapon().magazine;
+            player.reserve = 9999;
+            state.reloading = false;
+
+            updatePlayerHUD();
+
+            if (manual) toast("Rechargement terminé.", "✓");
+            playTone(700, 0.05);
+        }, duration);
     }
 
-    function actorPosition(actor) {
-        if (actor === state.player && actor.inHelicopter) {
-            const heli = getCurrentHelicopter();
+    function getNearestEnemy(maxDistance = Infinity) {
+        if (!world.player) return null;
 
-            if (heli) {
-                return new BABYLON.Vector3(
-                    heli.x,
-                    heli.altitude + 1,
-                    heli.z
-                );
+        let nearest = null;
+        let nearestDistance = maxDistance;
+
+        world.enemies.forEach(enemy => {
+            if (!enemy.actor.alive) return;
+
+            const d = distance(
+                world.player.root.position,
+                enemy.root.position
+            );
+
+            if (d < nearestDistance) {
+                nearest = enemy;
+                nearestDistance = d;
             }
-        }
+        });
 
-        return new BABYLON.Vector3(actor.x, 1.35, actor.z);
+        return nearest;
     }
 
-    function fireWeapon(shooter = state.player, target = null) {
-        if (!shooter || !shooter.alive || state.paused || !state.running) {
-            return false;
+    function createTracer(start, end) {
+        const line = MeshBuilder.CreateLines(
+            `tracer_${Date.now()}_${Math.random()}`,
+            {
+                points: [start.clone(), end.clone()],
+                updatable: false
+            },
+            world.scene
+        );
+
+        line.color = new Color3(1, 0.7, 0.2);
+        line.isPickable = false;
+
+        world.effects.push({
+            mesh: line,
+            life: 0.09
+        });
+    }
+
+    function muzzleEffect(position) {
+        const flash = MeshBuilder.CreateSphere(
+            `muzzle_${Date.now()}`,
+            { diameter: 0.3, segments: 6 },
+            world.scene
+        );
+
+        flash.position.copyFrom(position);
+        flash.material = world.materials.bullet;
+
+        world.effects.push({
+            mesh: flash,
+            life: 0.08
+        });
+    }
+
+    function shootPlayer() {
+        if (!state.running || state.paused || state.gameOver) return;
+        if (!player.alive || player.isBoarded) return;
+
+        if (state.reloading) {
+            toast("Patientez pendant le rechargement.");
+            return;
         }
 
-        if (shooter === state.player && shooter.inHelicopter) {
-            return fireHelicopterWeapon();
+        const weapon = currentWeapon();
+        const now = performance.now();
+
+        if (now - state.lastShot < weapon.interval) return;
+        state.lastShot = now;
+
+        if (player.ammo <= 0) {
+            reloadWeapon(false);
+            return;
         }
 
-        const weapon = getWeapon(shooter.weaponId || state.selectedWeaponId);
-        const timestamp = now();
+        player.ammo--;
 
-        if (timestamp - (shooter.lastShotAt || 0) < weapon.fireRate) {
-            return false;
-        }
+        const origin = world.player.root.position.add(
+            new Vector3(0, 1.5, 0)
+        );
 
-        if (shooter === state.player && state.ammo <= 0) {
-            reloadWeapon(true);
-            return false;
-        }
-
-        if (!target) {
-            target = shooter.targetId
-                ? state.enemies.find(enemy => enemy.id === shooter.targetId && enemy.alive)
-                : null;
-        }
-
-        if (!target) target = getNearestEnemy(shooter, weapon.range);
-
-        const origin = actorPosition(shooter);
-
-        let destination;
+        let target = getNearestEnemy(weapon.range);
 
         if (target) {
-            const distance = distance2D(shooter, target);
+            const enemyPos = target.root.position.add(
+                new Vector3(0, 1.3, 0)
+            );
 
-            if (distance > weapon.range) {
+            const direction = enemyPos.subtract(origin).normalize();
+
+            // La visée favorise l'ennemi le plus proche de l'axe de la caméra.
+            const cameraDirection = world.camera
+                ? world.camera.target.subtract(world.camera.position).normalize()
+                : new Vector3(0, 0, 1);
+
+            const dot = Vector3.Dot(direction, cameraDirection);
+
+            if (dot < -0.15 && state.aiming) {
                 target = null;
             }
         }
 
         if (target) {
-            const spread = (1 - weapon.accuracy) * 9;
-
-            destination = new BABYLON.Vector3(
-                target.x + random(-spread, spread),
-                1.2 + random(-spread * 0.1, spread * 0.1),
-                target.z + random(-spread, spread)
+            const enemyPos = target.root.position.add(
+                new Vector3(0, 1.2, 0)
             );
 
-            if (distance2D(shooter, target) <= weapon.range) {
-                damageActor(target, weapon.damage, shooter);
-            }
+            createTracer(origin, enemyPos);
+            muzzleEffect(origin.add(new Vector3(0.35, 0, 0.6)));
 
+            const d = distance(origin, enemyPos);
+            const falloff = clamp(1 - d / (weapon.range * 1.5), 0.4, 1);
+
+            damageEnemy(target, Math.round(weapon.damage * falloff));
+
+            playTone(170, 0.035);
         } else {
-            const yaw = shooter.yaw || 0;
+            const forward = world.camera
+                ? world.camera.target.subtract(world.camera.position).normalize()
+                : new Vector3(0, 0, 1);
 
-            destination = new BABYLON.Vector3(
-                shooter.x + Math.sin(yaw) * weapon.range,
-                1.2,
-                shooter.z + Math.cos(yaw) * weapon.range
-            );
+            const end = origin.add(forward.scale(weapon.range));
+            createTracer(origin, end);
+            muzzleEffect(origin.add(new Vector3(0.35, 0, 0.6)));
+
+            playTone(170, 0.035);
         }
-
-        createVisualShot(origin, destination);
-
-        shooter.lastShotAt = timestamp;
-
-        if (shooter === state.player) {
-            state.lastShotAt = timestamp;
-
-            if (state.ammo > 0) state.ammo--;
-
-            if (state.ammo <= 0) {
-                setTimeout(() => reloadWeapon(true), 150);
-            }
-        }
-
-        return true;
-    }
-
-    function reloadWeapon(automatic = false) {
-        const weapon = getWeapon();
-
-        if (state.ammo >= weapon.magazine) return false;
-
-        if (CONFIG.infiniteReserveAmmo) {
-            state.ammo = weapon.magazine;
-            state.reserveAmmo = Infinity;
-
-            updatePlayerHUD();
-
-            if (!automatic) toast("Chargeur rechargé.", "✓");
-
-            return true;
-        }
-
-        const amount = Math.min(
-            weapon.magazine - state.ammo,
-            state.reserveAmmo
-        );
-
-        if (amount <= 0) {
-            toast("Aucune munition disponible.", "!");
-            return false;
-        }
-
-        state.ammo += amount;
-        state.reserveAmmo -= amount;
 
         updatePlayerHUD();
 
-        if (!automatic) toast("Rechargement terminé.", "✓");
-
-        return true;
+        if (player.ammo <= 0) {
+            reloadWeapon(false);
+        }
     }
 
-    function performMeleeAttack() {
-        const target = getNearestEnemy(state.player, 3.5);
+    function damageEnemy(enemy, damage) {
+        if (!enemy || !enemy.actor.alive) return;
 
-        if (!target) {
-            toast("Aucun ennemi à portée de combat rapproché.", "!");
-            return;
-        }
+        enemy.actor.health -= damage;
 
-        damageActor(target, 50, state.player);
-        addLog("Attaque rapprochée exécutée.");
-    }
+        if (enemy.actor.health <= 0) {
+            enemy.actor.health = 0;
+            enemy.actor.alive = false;
+            enemy.root.setEnabled(false);
 
-    /* =========================================================
-       12. PROTECTION ET DÉGÂTS
-    ========================================================= */
+            state.kills++;
+            state.missionKills++;
+            state.score += 25;
+            player.kills++;
 
-    function damageActor(actor, damage, attacker = null) {
-        if (!actor || !actor.alive) return false;
+            toast(`${enemy.actor.name} neutralisé.`, "✓");
+            logEvent(`${enemy.actor.name} neutralisé.`, "success");
 
-        if (actor.type === "enemy") {
-            actor.health -= damage;
-
-            if (actor.health <= 0) {
-                actor.health = 0;
-                actor.alive = false;
-
-                state.kills++;
-                state.score += 100;
-
-                if (actor.mesh) actor.mesh.setEnabled(false);
-
-                if (attacker && attacker.type === "ally") {
-                    addLog(attacker.name + " a neutralisé un hostile.");
-                } else {
-                    addLog("Hostile neutralisé.");
-                }
-
-                updateObjectiveProgress("kill", 1);
-                updateAllHUD();
-            }
-
-            return true;
-        }
-
-        const equipment = getEquipment(actor.equipmentId || state.selectedEquipmentId);
-        const reduction = Math.max(
-            CONFIG.damageReduction,
-            Number(equipment.damageReduction) || 0
-        );
-
-        const reducedDamage = Math.max(1, damage * (1 - reduction));
-
-        let remaining = reducedDamage;
-
-        if (actor.armor > 0) {
-            const absorbed = Math.min(actor.armor, remaining);
-            actor.armor -= absorbed;
-            remaining -= absorbed;
-        }
-
-        actor.health -= remaining;
-
-        if (actor.health <= 0) {
-            actor.health = 1;
-            actor.alive = true;
-
-            addLog(actor.name + " est protégé par son équipement tactique.");
-        }
-
-        if (actor === state.player) {
-            state.health = actor.health;
-            state.armor = actor.armor;
+            updateKillObjective();
             updatePlayerHUD();
+            updateMissionUI();
+
+            playTone(850, 0.07);
         }
-
-        updateTeamStatus();
-        return true;
     }
 
-    function damagePlayer(damage) {
-        return damageActor(state.player, damage);
-    }
+    function updateKillObjective() {
+        const mission = state.activeMission;
+        if (!mission) return;
 
-    function applyProtectionToTeam() {
-        const equipment = getEquipment();
-
-        [state.player, ...state.allies].forEach(actor => {
-            actor.equipmentId = equipment.id;
-            actor.armor = Math.max(actor.armor || 0, equipment.armor);
-            actor.health = Math.max(1, actor.health || 100);
-            actor.alive = true;
-        });
-
-        state.health = state.player.health;
-        state.armor = state.player.armor;
-
-        updateAllHUD();
-    }
-
-    /* =========================================================
-       13. MOUVEMENT DU JOUEUR ET DES ALLIÉS
-    ========================================================= */
-
-    function getPlayerSpeed() {
-        return state.input.sprint
-            ? CONFIG.playerSprintSpeed
-            : CONFIG.playerWalkSpeed;
-    }
-
-    function updatePlayerMovement(dt) {
-        const player = state.player;
-
-        if (!player.alive || player.inHelicopter) return;
-
-        let x = 0;
-        let z = 0;
-
-        x += state.input.joystickX;
-        z += state.input.joystickY;
-
-        if (state.input.forward) z += 1;
-        if (state.input.backward) z -= 1;
-        if (state.input.left) x -= 1;
-        if (state.input.right) x += 1;
-
-        const magnitude = Math.hypot(x, z);
-
-        if (magnitude > 1) {
-            x /= magnitude;
-            z /= magnitude;
-        }
-
-        if (magnitude > 0.05) {
-            const speed = getPlayerSpeed();
-            const cameraYaw = state.camera ? state.camera.alpha : 0;
-
-            const worldX = x * Math.cos(cameraYaw) - z * Math.sin(cameraYaw);
-            const worldZ = x * Math.sin(cameraYaw) + z * Math.cos(cameraYaw);
-
-            player.x += worldX * speed * dt;
-            player.z += worldZ * speed * dt;
-
-            player.yaw = Math.atan2(worldX, worldZ);
-        }
-
-        player.x = clamp(player.x, -125, 125);
-        player.z = clamp(player.z, -125, 125);
-
-        if (player.jumping && now() > player.jumpUntil) {
-            player.jumping = false;
-        }
-
-        updateActorMesh(player);
-    }
-
-    function moveActorToward(actor, targetX, targetZ, speed, dt) {
-        const dx = targetX - actor.x;
-        const dz = targetZ - actor.z;
-        const d = Math.hypot(dx, dz);
-
-        if (d < 0.05) return;
-
-        const step = Math.min(d, speed * dt);
-
-        actor.x += dx / d * step;
-        actor.z += dz / d * step;
-        actor.yaw = Math.atan2(dx, dz);
-
-        updateActorMesh(actor);
-    }
-
-    function updateAllyMovement(dt) {
-        state.allies.forEach((ally, index) => {
-            if (!ally.alive || ally.inHelicopter) return;
-
-            if (ally.behavior === "hold") return;
-
-            if (ally.behavior === "attack") {
-                const target = getNearestEnemy(ally, 100);
-
-                if (target && distance2D(ally, target) > 12) {
-                    moveActorToward(
-                        ally,
-                        target.x - Math.sign(target.x - ally.x) * 7,
-                        target.z - Math.sign(target.z - ally.z) * 7,
-                        CONFIG.allySpeed,
-                        dt
-                    );
-                }
-
-                return;
-            }
-
-            if (ally.behavior === "retreat") {
-                const dx = ally.x - state.player.x;
-                const dz = ally.z - state.player.z;
-                const d = Math.max(1, Math.hypot(dx, dz));
-
-                moveActorToward(
-                    ally,
-                    ally.x + dx / d * 8,
-                    ally.z + dz / d * 8,
-                    CONFIG.allySpeed,
-                    dt
-                );
-
-                return;
-            }
-
-            const formationOffset = index === 0 ? -3 : 3;
-
-            const targetX = state.player.x + formationOffset;
-            const targetZ = state.player.z - 4;
-
-            if (distance2D(ally, state.player) > 6) {
-                moveActorToward(
-                    ally,
-                    targetX,
-                    targetZ,
-                    CONFIG.allySpeed,
-                    dt
-                );
-            }
-        });
-    }
-
-    /* =========================================================
-       14. IA DES ALLIÉS : DÉTECTION ET TIRS AUTOMATIQUES
-    ========================================================= */
-
-    function updateAllyCombat() {
-        const timestamp = now();
-
-        state.allies.forEach(ally => {
-            if (!ally.alive || ally.inHelicopter) return;
-            if (ally.behavior === "hold" && !ally.targetId) {
-                // Un allié immobile peut quand même défendre sa position.
-            }
-
-            let target = ally.targetId
-                ? state.enemies.find(enemy =>
-                    enemy.id === ally.targetId && enemy.alive
-                )
-                : null;
-
-            if (!target) {
-                target = getNearestEnemy(ally, 100);
-                ally.targetId = target ? target.id : null;
-            }
-
-            if (!target) return;
-
-            const weapon = getWeapon(ally.weaponId || "rifle");
-            const d = distance2D(ally, target);
-
-            if (d > weapon.range) return;
-
-            ally.yaw = Math.atan2(target.x - ally.x, target.z - ally.z);
-
-            if (timestamp - (ally.lastShotAt || 0) >= weapon.fireRate) {
-                fireWeapon(ally, target);
-            }
-        });
-    }
-
-    /* =========================================================
-       15. IA ENNEMIE
-    ========================================================= */
-
-    function findNearestLivingTarget(enemy) {
-        const targets = [state.player, ...state.allies].filter(actor =>
-            actor.alive && !actor.inHelicopter
+        const objective = mission.objectives.find(
+            item => item.type === "eliminate"
         );
 
-        let best = null;
-        let bestDistance = Infinity;
+        if (!objective) return;
 
-        targets.forEach(actor => {
-            const d = distance2D(enemy, actor);
+        objective.current = Math.min(
+            objective.required,
+            mission.enemyCount -
+                world.enemies.filter(e => e.actor.alive).length
+        );
 
-            if (d < bestDistance) {
-                best = actor;
-                bestDistance = d;
-            }
-        });
+        objective.completed = objective.current >= objective.required;
 
-        return best;
-    }
-
-    function updateEnemyAI(dt) {
-        const timestamp = now();
-
-        state.enemies.forEach(enemy => {
-            if (!enemy.alive) return;
-
-            const target = findNearestLivingTarget(enemy);
-            if (!target) return;
-
-            const d = distance2D(enemy, target);
-
-            enemy.yaw = Math.atan2(target.x - enemy.x, target.z - enemy.z);
-
-            if (d > 18) {
-                moveActorToward(
-                    enemy,
-                    target.x - Math.sin(enemy.yaw) * 12,
-                    target.z - Math.cos(enemy.yaw) * 12,
-                    enemy.speed,
-                    dt
-                );
-            }
-
-            if (d < 48 && timestamp - enemy.lastShotAt > 900) {
-                enemy.lastShotAt = timestamp;
-
-                const weapon = getWeapon("rifle");
-
-                createVisualShot(
-                    actorPosition(enemy),
-                    actorPosition(target)
-                );
-
-                damageActor(target, weapon.damage * 0.6, enemy);
-            }
-        });
-    }
-
-    /* =========================================================
-       16. MISSIONS ET OBJECTIFS
-    ========================================================= */
-
-    function setupMission(index = state.missionIndex) {
-        const templates = state.dynamicContent.missions.length
-            ? state.dynamicContent.missions
-            : MISSION_TEMPLATES;
-
-        const template = templates[index % templates.length];
-
-        state.missionIndex = index;
-        state.missionComplete = false;
-        state.missionStartTime = Date.now();
-        state.missionElapsed = 0;
-
-        state.mission = {
-            title: template.title,
-            description: template.description,
-            objectives: template.objectives.map((objective, i) => ({
-                id: "objective_" + i,
-                type: objective.type,
-                label: objective.label,
-                target: objective.target,
-                progress: 0,
-                complete: false
-            }))
-        };
-
-        renderMission();
-        updateMissionHUD();
-        setText("missionHeaderLabel", "OPÉRATION " +
-            String(index + 1).padStart(3, "0"));
-
-        addLog("Mission lancée : " + template.title);
-    }
-
-    function renderMission() {
-        if (!state.mission) return;
-
-        setText("missionTitle", state.mission.title.toUpperCase());
-        setText("missionDescription", state.mission.description);
-
-        const container = $("missionObjectives");
-        if (!container) return;
-
-        container.innerHTML = state.mission.objectives.map(objective => `
-            <li class="objective-item ${objective.complete ? "completed" : ""}">
-                <span class="objective-marker"></span>
-                <span>
-                    ${escapeHTML(objective.label)}
-                    <small>
-                        ${Math.min(objective.progress, objective.target)}
-                        / ${objective.target}
-                    </small>
-                </span>
-            </li>
-        `).join("");
-    }
-
-    function updateObjectiveProgress(type, amount = 1) {
-        if (!state.mission || state.missionComplete) return;
-
-        state.mission.objectives.forEach(objective => {
-            if (objective.type !== type || objective.complete) return;
-
-            objective.progress = Math.min(
-                objective.target,
-                objective.progress + amount
-            );
-
-            objective.complete = objective.progress >= objective.target;
-        });
-
-        renderMission();
-        updateMissionHUD();
         checkMissionCompletion();
     }
 
-    function updateMissionHUD() {
-        if (!state.mission) return;
+    /* =========================================================
+       14. DOMMAGES, SANTÉ ET IA ENNEMIE
+    ========================================================= */
 
-        const objectives = state.mission.objectives;
-        const completeCount = objectives.filter(item => item.complete).length;
+    function damagePlayer(amount) {
+        if (!player.alive || state.gameOver) return;
 
-        const percent = objectives.length
-            ? completeCount / objectives.length * 100
+        let remaining = amount;
+
+        if (player.armor > 0) {
+            const absorbed = Math.min(player.armor, remaining * 0.7);
+            player.armor -= absorbed;
+            remaining -= absorbed;
+        }
+
+        player.health -= remaining;
+        player.health = clamp(player.health, 0, 100);
+        player.armor = clamp(player.armor, 0, 100);
+
+        updatePlayerHUD();
+
+        if (player.health <= 0) {
+            player.alive = false;
+            state.missionFailed = true;
+            state.gameOver = true;
+
+            showMissionResult(false);
+            logEvent("Selvandieu est hors de combat.", "danger");
+        }
+    }
+
+    function damageAlly(mesh, amount) {
+        if (!mesh.actor.alive) return;
+
+        mesh.actor.health -= amount;
+
+        const member = teamData.find(m => m.id === mesh.actor.id);
+
+        if (member) member.health = Math.max(0, mesh.actor.health);
+
+        if (mesh.actor.health <= 0) {
+            mesh.actor.health = 0;
+            mesh.actor.alive = false;
+            mesh.root.setEnabled(false);
+
+            if (member) member.alive = false;
+
+            toast(`${mesh.actor.name} est hors de combat.`, "!");
+            logEvent(`${mesh.actor.name} est hors de combat.`, "danger");
+        }
+    }
+
+    function updateEnemyAI(dt, now) {
+        world.enemies.forEach(enemy => {
+            const actor = enemy.actor;
+
+            if (!actor.alive) return;
+
+            const target = world.player.root.position;
+            const d = distance(actor.position, target);
+
+            if (d < 60) {
+                const direction = target.subtract(actor.position);
+                direction.y = 0;
+
+                if (direction.lengthSquared() > 0) {
+                    direction.normalize();
+                    actor.rotation = Math.atan2(direction.x, direction.z);
+                    enemy.root.rotation.y = actor.rotation;
+                }
+
+                if (d > 10) {
+                    actor.position.addInPlace(
+                        direction.scale(CONFIG.enemySpeed * dt)
+                    );
+
+                    enemy.root.position.copyFrom(actor.position);
+                }
+
+                if (
+                    d < 40 &&
+                    now - actor.lastShot > CONFIG.enemyFireInterval
+                ) {
+                    actor.lastShot = now;
+
+                    const accuracy = Math.random();
+
+                    if (accuracy < 0.55) {
+                        damagePlayer(CONFIG.enemyDamage);
+                    }
+
+                    const start = enemy.root.position.add(
+                        new Vector3(0, 1.5, 0)
+                    );
+
+                    const end = world.player.root.position.add(
+                        new Vector3(0, 1.2, 0)
+                    );
+
+                    createTracer(start, end);
+                }
+            } else {
+                actor.patrolAngle += dt * 0.25;
+
+                actor.position.x += Math.cos(actor.patrolAngle) * dt * 0.4;
+                actor.position.z += Math.sin(actor.patrolAngle) * dt * 0.4;
+
+                enemy.root.position.copyFrom(actor.position);
+            }
+
+            actor.position.x = clamp(actor.position.x, -135, 135);
+            actor.position.z = clamp(actor.position.z, -135, 135);
+        });
+    }
+
+    /* =========================================================
+       15. ALLIÉS IA : SUIVI ET TIR AUTOMATIQUE
+    ========================================================= */
+
+    function updateAllyAI(dt, now) {
+        world.allies.forEach((ally, index) => {
+            const actor = ally.actor;
+
+            if (!actor.alive) return;
+
+            const playerPosition = player.position;
+
+            const desired = playerPosition.add(
+                new Vector3(
+                    index === 0 ? -3 : 3,
+                    0,
+                    -3 - index
+                )
+            );
+
+            const dPlayer = distance(actor.position, playerPosition);
+
+            if (dPlayer > 5) {
+                const direction = desired.subtract(actor.position);
+                direction.y = 0;
+
+                if (direction.lengthSquared() > 0) {
+                    direction.normalize();
+
+                    actor.position.addInPlace(
+                        direction.scale(CONFIG.allySpeed * dt)
+                    );
+
+                    actor.rotation = Math.atan2(direction.x, direction.z);
+                    ally.root.rotation.y = actor.rotation;
+                    ally.root.position.copyFrom(actor.position);
+                }
+            }
+
+            const target = world.enemies
+                .filter(enemy => enemy.actor.alive)
+                .map(enemy => ({
+                    enemy,
+                    distance: distance(actor.position, enemy.actor.position)
+                }))
+                .filter(item => item.distance < 45)
+                .sort((a, b) => a.distance - b.distance)[0];
+
+            if (target && now - actor.lastShot >= CONFIG.allyFireInterval) {
+                actor.lastShot = now;
+
+                const enemy = target.enemy;
+
+                const start = ally.root.position.add(
+                    new Vector3(0.35, 1.45, 0.5)
+                );
+
+                const end = enemy.root.position.add(
+                    new Vector3(0, 1.3, 0)
+                );
+
+                createTracer(start, end);
+
+                if (Math.random() < 0.72) {
+                    damageEnemy(enemy, 18);
+                }
+            }
+        });
+    }
+
+    /* =========================================================
+       16. HÉLICOPTÈRES : EMBARQUEMENT ET PILOTAGE
+    ========================================================= */
+
+    function findNearestHelicopter() {
+        return world.helicopters
+            .map(mesh => ({
+                mesh,
+                distance: distance(player.position, mesh.vehicle.position)
+            }))
+            .sort((a, b) => a.distance - b.distance)[0] || null;
+    }
+
+    function boardHelicopter() {
+        if (player.isBoarded) {
+            toast("Vous êtes déjà dans un hélicoptère.");
+            return;
+        }
+
+        const nearest = findNearestHelicopter();
+
+        if (
+            !nearest ||
+            nearest.distance > CONFIG.helicopterBoardDistance ||
+            !nearest.mesh.vehicle.landed
+        ) {
+            toast("Approchez-vous d'un hélicoptère posé au sol.");
+            return;
+        }
+
+        const heli = nearest.mesh.vehicle;
+
+        state.currentHelicopter = nearest.mesh;
+        state.selectedHelicopter = heli.id;
+        player.isBoarded = true;
+        heli.occupied = true;
+
+        show(ui.helicopterHud);
+        show(ui.helicopterFlightControls);
+
+        setText("playerStateBadge", "PILOTE");
+        setText("helicopterStatus", "AU SOL");
+        setText("currentHelicopterName", heli.name);
+
+        toast(`Vous êtes monté dans ${heli.name}.`, "✓");
+        logEvent(`Embarquement dans ${heli.name}.`, "success");
+
+        updatePlayerHUD();
+    }
+
+    function exitHelicopter(force = false) {
+        if (!player.isBoarded || !state.currentHelicopter) {
+            toast("Vous n'êtes dans aucun hélicoptère.");
+            return;
+        }
+
+        const mesh = state.currentHelicopter;
+        const heli = mesh.vehicle;
+
+        if (!heli.landed && !force) {
+            toast("Atterrissez avant de quitter l'hélicoptère.");
+            return;
+        }
+
+        heli.occupied = false;
+        player.isBoarded = false;
+
+        player.position.set(
+            heli.position.x + 3,
+            0,
+            heli.position.z
+        );
+
+        world.player.root.position.copyFrom(player.position);
+
+        state.currentHelicopter = null;
+
+        hide(ui.helicopterHud);
+        hide(ui.helicopterFlightControls);
+
+        setText("playerStateBadge", "AU SOL");
+
+        toast("Vous êtes descendu de l'hélicoptère.");
+        logEvent("Débarquement de l'hélicoptère.", "info");
+
+        updatePlayerHUD();
+    }
+
+    function helicopterTakeoff() {
+        if (!player.isBoarded || !state.currentHelicopter) {
+            toast("Montez dans un hélicoptère avant de décoller.");
+            return;
+        }
+
+        const heli = state.currentHelicopter.vehicle;
+
+        if (!heli.landed) {
+            toast("L'hélicoptère est déjà en vol.");
+            return;
+        }
+
+        heli.landed = false;
+        heli.targetAltitude = 12;
+        heli.targetSpeed = 10;
+
+        setText("helicopterStatus", "DÉCOLLAGE");
+        toast("Décollage engagé.", "↑");
+    }
+
+    function helicopterLand() {
+        if (!player.isBoarded || !state.currentHelicopter) {
+            toast("Vous devez piloter un hélicoptère.");
+            return;
+        }
+
+        const heli = state.currentHelicopter.vehicle;
+
+        heli.targetAltitude = 0;
+        heli.targetSpeed = 0;
+
+        setText("helicopterStatus", "ATTERRISSAGE");
+        toast("Procédure d'atterrissage engagée.", "↓");
+    }
+
+    function updateHelicopterPhysics(dt) {
+        const mesh = state.currentHelicopter;
+
+        if (!player.isBoarded || !mesh) return;
+
+        const heli = mesh.vehicle;
+
+        heli.altitude = Scalar.Lerp(
+            heli.altitude,
+            heli.targetAltitude,
+            clamp(dt * 0.7, 0, 1)
+        );
+
+        heli.velocity = Scalar.Lerp(
+            heli.velocity,
+            heli.targetSpeed,
+            clamp(dt * 0.6, 0, 1)
+        );
+
+        if (heli.altitude < 0.15 && heli.targetAltitude === 0) {
+            heli.altitude = 0;
+            heli.landed = true;
+            heli.velocity = 0;
+
+            setText("helicopterStatus", "AU SOL");
+        } else if (heli.altitude > 0.5) {
+            heli.landed = false;
+
+            if (heli.altitude < heli.targetAltitude - 0.3) {
+                setText("helicopterStatus", "MONTÉE");
+            } else {
+                setText("helicopterStatus", "EN VOL");
+            }
+        }
+
+        const forward = new Vector3(
+            Math.sin(heli.heading),
+            0,
+            Math.cos(heli.heading)
+        );
+
+        heli.position.addInPlace(
+            forward.scale(heli.velocity * dt)
+        );
+
+        heli.position.x = clamp(heli.position.x, -130, 130);
+        heli.position.z = clamp(heli.position.z, -130, 130);
+
+        heli.fuel = Math.max(0, heli.fuel - dt * 0.025);
+
+        mesh.root.position.set(
+            heli.position.x,
+            heli.altitude,
+            heli.position.z
+        );
+
+        player.position.set(
+            heli.position.x,
+            heli.altitude,
+            heli.position.z
+        );
+
+        updateCameraTarget();
+        updateHelicopterHUD();
+
+        if (heli.fuel <= 0 && !heli.landed) {
+            heli.targetSpeed = 0;
+            heli.targetAltitude = Math.max(0, heli.altitude - 3 * dt);
+            toast("Carburant épuisé : atterrissez immédiatement.", "!");
+        }
+
+        checkBoardMission();
+    }
+
+    function helicopterAccelerate() {
+        if (!state.currentHelicopter || !player.isBoarded) {
+            toast("Vous devez être dans l'hélicoptère.");
+            return;
+        }
+
+        const heli = state.currentHelicopter.vehicle;
+
+        if (heli.landed) {
+            helicopterTakeoff();
+            return;
+        }
+
+        heli.targetSpeed = clamp(heli.targetSpeed + 5, 0, 50);
+    }
+
+    function helicopterBrake() {
+        if (!state.currentHelicopter) return;
+
+        const heli = state.currentHelicopter.vehicle;
+        heli.targetSpeed = Math.max(0, heli.targetSpeed - 10);
+    }
+
+    function helicopterAscend() {
+        if (!state.currentHelicopter) return;
+
+        const heli = state.currentHelicopter.vehicle;
+
+        heli.landed = false;
+        heli.targetAltitude = clamp(heli.targetAltitude + 5, 0, 80);
+    }
+
+    function helicopterDescend() {
+        if (!state.currentHelicopter) return;
+
+        const heli = state.currentHelicopter.vehicle;
+        heli.targetAltitude = Math.max(0, heli.targetAltitude - 5);
+    }
+
+    function helicopterTurn(direction) {
+        if (!state.currentHelicopter) return;
+
+        state.currentHelicopter.vehicle.heading += direction * 0.18;
+    }
+
+    function helicopterHover() {
+        if (!state.currentHelicopter) return;
+
+        const heli = state.currentHelicopter.vehicle;
+
+        heli.targetSpeed = 0;
+        heli.targetAltitude = heli.altitude;
+
+        toast("Stabilisation activée.");
+    }
+
+    function updateHelicopterHUD() {
+        if (!state.currentHelicopter) return;
+
+        const heli = state.currentHelicopter.vehicle;
+
+        setText("helicopterSpeed", Math.round(heli.velocity * 3.6));
+        setText("helicopterAltitude", Math.round(heli.altitude * 10));
+        setText("helicopterHealth", `${Math.round(heli.health)} %`);
+        setText("helicopterFuel", `${Math.round(heli.fuel)} %`);
+    }
+
+    function checkBoardMission() {
+        const mission = state.activeMission;
+        if (!mission) return;
+
+        const objective = mission.objectives.find(
+            item => item.type === "board"
+        );
+
+        if (!objective) return;
+
+        if (player.isBoarded && !state.currentHelicopter.vehicle.landed) {
+            objective.current = 0.5;
+        } else if (
+            player.isBoarded &&
+            state.currentHelicopter.vehicle.landed
+        ) {
+            objective.current = 1;
+            objective.completed = true;
+        } else if (objective.current > 0) {
+            objective.current = 1;
+            objective.completed = true;
+        }
+
+        updateMissionUI();
+        checkMissionCompletion();
+    }
+
+    /* =========================================================
+       17. OBJECTIFS DE MISSION
+    ========================================================= */
+
+    function startMission(index) {
+        if (index < 0 || index >= MISSIONS.length) {
+            toast("Toutes les missions sont terminées.", "★");
+            return;
+        }
+
+        state.missionIndex = index;
+        state.activeMission = createMission(index);
+        state.missionKills = 0;
+        state.missionStart = performance.now();
+        state.missionElapsed = 0;
+        state.interactionDone = false;
+        state.missionCompleted = false;
+        state.missionFailed = false;
+        state.gameOver = false;
+        state.running = true;
+        state.paused = false;
+        state.reloading = false;
+
+        player.alive = true;
+        player.health = Math.max(1, player.health);
+        player.armor = Math.max(0, player.armor);
+        player.ammo = currentWeapon().magazine;
+        player.reserve = 9999;
+
+        if (world.player) {
+            world.player.root.setEnabled(true);
+            world.player.root.position.copyFrom(player.position);
+        }
+
+        teamData.forEach(member => {
+            member.health = Math.max(1, member.health);
+            member.alive = true;
+        });
+
+        if (world.allies.length) {
+            world.allies.forEach((mesh, index) => {
+                const member = teamData.find(m => m.id === mesh.actor.id);
+
+                if (member) {
+                    mesh.actor.health = member.health;
+                    mesh.actor.alive = true;
+                    mesh.root.setEnabled(true);
+                    mesh.root.position.set(
+                        player.position.x + (index === 0 ? -3 : 3),
+                        0,
+                        player.position.z - 4
+                    );
+                }
+            });
+        }
+
+        if (world.engine) {
+            spawnEnemies(state.activeMission.enemyCount);
+
+            if (world.missionMarker) {
+                world.missionMarker.position.copyFrom(
+                    state.activeMission.zone
+                );
+            }
+        }
+
+        hide(ui.pauseOverlay);
+        hide(ui.missionResultOverlay);
+        hide(ui.gameErrorScreen);
+
+        show(ui.gameScreen);
+        hide(ui.mainMenu);
+
+        updateMissionUI();
+        updatePlayerHUD();
+        updateCameraTarget();
+
+        logEvent(
+            `Mission ${String(index + 1).padStart(3, "0")} : ${state.activeMission.title}`,
+            "success"
+        );
+
+        toast(`Mission ${index + 1}/40 : ${state.activeMission.title}`, "▶");
+    }
+
+    function restartCurrentMission() {
+        startMission(state.missionIndex);
+    }
+
+    function nextMission() {
+        if (state.missionIndex >= MISSIONS.length - 1) {
+            toast("Félicitations ! Les 40 missions sont terminées.", "★");
+            return;
+        }
+
+        state.score += state.activeMission
+            ? state.activeMission.reward
             : 0;
 
-        setText("missionProgressText", Math.round(percent) + "%");
-        setWidth("missionProgressBar", percent);
+        saveGame(false).finally(() => {
+            startMission(state.missionIndex + 1);
+        });
+    }
+
+    function updateMissionUI() {
+        const mission = state.activeMission ||
+            MISSIONS[state.missionIndex];
+
+        if (!mission) return;
+
+        setText(
+            "missionHeaderLabel",
+            `OPÉRATION ${String(state.missionIndex + 1).padStart(3, "0")}/040`
+        );
+
+        setText("missionTitle", mission.title.toUpperCase());
+        setText("missionDescription", mission.description);
         setText("playerScore", state.score);
+
+        const list = ui.missionObjectives;
+
+        if (list) {
+            list.replaceChildren();
+
+            mission.objectives.forEach(objective => {
+                const item = document.createElement("li");
+                item.className = "objective-item";
+
+                const marker = document.createElement("span");
+                marker.className = "objective-marker";
+
+                if (objective.completed) {
+                    marker.textContent = "✓";
+                    item.classList.add("objective-completed");
+                }
+
+                const text = document.createElement("span");
+
+                let progress = "";
+
+                if (objective.type === "eliminate") {
+                    progress = ` (${objective.current}/${objective.required})`;
+                } else if (objective.type === "survive") {
+                    progress = ` (${Math.floor(objective.current)}/${objective.required} s)`;
+                } else if (objective.current > 0 && !objective.completed) {
+                    progress = " (en cours)";
+                }
+
+                text.textContent = objective.text + progress;
+
+                item.append(marker, text);
+                list.append(item);
+            });
+        }
+
+        const completed = mission.objectives.filter(
+            objective => objective.completed
+        ).length;
+
+        const percent = Math.round(
+            (completed / mission.objectives.length) * 100
+        );
+
+        setText("missionProgressText", `${percent} %`);
+        setWidth("missionProgressBar", percent);
     }
 
     function checkMissionCompletion() {
-        if (!state.mission || state.missionComplete) return;
+        const mission = state.activeMission;
 
-        if (state.mission.objectives.every(objective => objective.complete)) {
-            state.missionComplete = true;
+        if (!mission || state.missionCompleted || state.missionFailed) {
+            return;
+        }
+
+        const allComplete = mission.objectives.every(
+            objective => objective.completed
+        );
+
+        if (allComplete) {
+            mission.completed = true;
+            MISSIONS[state.missionIndex].completed = true;
+
+            state.missionCompleted = true;
             state.running = false;
 
+            state.score += mission.reward;
+
+            updateMissionUI();
             showMissionResult(true);
-            saveGame(true);
+
+            saveGame(false);
+
+            logEvent(
+                `Mission ${state.missionIndex + 1} accomplie : ${mission.title}.`,
+                "success"
+            );
         }
     }
 
     function showMissionResult(success) {
-        const objectives = state.mission
-            ? state.mission.objectives
-            : [];
+        state.running = false;
+        state.gameOver = true;
+
+        const mission = state.activeMission;
+
+        setText(
+            "missionResultEyebrow",
+            success ? "RAPPORT D'OPÉRATION" : "ÉCHEC DE MISSION"
+        );
 
         setText(
             "missionResultTitle",
-            success ? "MISSION ACCOMPLIE" : "MISSION TERMINÉE"
+            success ? "MISSION TERMINÉE" : "MISSION ÉCHOUÉE"
         );
 
         setText(
             "missionResultDescription",
             success
-                ? "Tous les objectifs ont été accomplis. Votre équipe a réussi l'opération."
-                : "L'opération est terminée."
+                ? `Mission ${state.missionIndex + 1}/40 accomplie. Votre équipe a terminé les objectifs disponibles.`
+                : "Selvandieu est hors de combat. Vous pouvez recommencer la mission."
         );
 
-        setText("missionResultPoints", state.score);
+        setText(
+            "missionResultPoints",
+            success && mission ? mission.reward : 0
+        );
+
         setText(
             "missionResultObjectives",
-            objectives.filter(item => item.complete).length + "/" + objectives.length
+            mission
+                ? `${mission.objectives.filter(o => o.completed).length}/${mission.objectives.length}`
+                : "0/0"
         );
 
         setText(
             "missionResultTime",
-            formatTime((Date.now() - state.missionStartTime) / 1000)
+            formatTime(state.missionElapsed)
         );
 
-        showElement("missionResultOverlay");
+        if (state.missionIndex >= MISSIONS.length - 1) {
+            setText("nextMissionButton", "CAMPAGNE TERMINÉE");
+            ui.nextMissionButton.disabled = true;
+        } else {
+            setText("nextMissionButton", "MISSION SUIVANTE");
+            ui.nextMissionButton.disabled = false;
+        }
+
+        show(ui.missionResultOverlay);
     }
 
-    function startNextMission() {
-        hideElement("missionResultOverlay");
+    function updateMissionObjectives(dt) {
+        const mission = state.activeMission;
+        if (!mission) return;
 
-        state.missionIndex++;
-        state.running = true;
-        state.paused = false;
-        state.missionComplete = false;
+        mission.objectives.forEach(objective => {
+            if (objective.completed) return;
 
-        state.player.x = 0;
-        state.player.z = 0;
-        state.player.health = 100;
-        state.player.armor = getEquipment().armor;
-        state.player.alive = true;
-        state.player.inHelicopter = false;
-        state.player.helicopterId = null;
+            if (objective.type === "reach") {
+                const d = distance(
+                    player.position,
+                    mission.zone
+                );
 
-        state.allies.forEach((ally, index) => {
-            ally.x = index === 0 ? -4 : 4;
-            ally.z = -3;
-            ally.health = 100;
-            ally.armor = getEquipment().armor;
-            ally.alive = true;
-            ally.inHelicopter = false;
-            ally.helicopterId = null;
-            ally.behavior = "follow";
-            ally.targetId = null;
+                if (d < 7) {
+                    objective.current = 1;
+                    objective.completed = true;
+                    toast("Zone tactique atteinte.", "✓");
+                    logEvent("Zone tactique atteinte.", "success");
+                }
+            }
+
+            if (objective.type === "interact") {
+                if (state.interactionDone) {
+                    objective.current = 1;
+                    objective.completed = true;
+                }
+            }
+
+            if (objective.type === "survive") {
+                objective.current += dt;
+
+                if (objective.current >= objective.required) {
+                    objective.current = objective.required;
+                    objective.completed = true;
+                    toast("Objectif de survie accompli.", "✓");
+                }
+            }
         });
 
-        spawnEnemies();
-        spawnHelicopters();
-        rebuildActors();
-        setupMission(state.missionIndex);
-        applyProtectionToTeam();
-        updateAllHUD();
-
-        addLog("Mission suivante initialisée.");
+        updateMissionUI();
+        checkMissionCompletion();
     }
 
     /* =========================================================
-       17. HUD, CARTE ET COORDONNÉES
+       18. HUD ET MINICARTE
     ========================================================= */
 
     function updatePlayerHUD() {
-        setWidth("playerHealthBar", state.player.health);
-        setText("playerHealthText", Math.round(state.player.health));
+        setText("playerHealthText", Math.round(player.health));
+        setText("playerArmorText", Math.round(player.armor));
 
-        setWidth("playerArmorBar", state.player.armor);
-        setText("playerArmorText", Math.round(state.player.armor));
+        setWidth("playerHealthBar", player.health);
+        setWidth("playerArmorBar", player.armor);
 
-        const weapon = getWeapon();
+        setText("currentWeaponName", currentWeapon().name);
+        setText("currentAmmo", player.ammo);
+        setText("reserveAmmo", "∞");
 
-        setText("currentWeaponName", weapon.name);
-        setText("currentAmmo", state.ammo);
         setText(
-            "reserveAmmo",
-            CONFIG.infiniteReserveAmmo ? "∞" : state.reserveAmmo
+            "playerStateBadge",
+            player.isBoarded ? "PILOTE" :
+                state.crouching ? "ACCROUPI" :
+                    state.sprinting ? "SPRINT" : "AU SOL"
         );
 
-        setText("playerStateBadge", state.player.inHelicopter ? "À BORD" : "AU SOL");
+        setText("playerScore", state.score);
+
+        const remaining = world.enemies.filter(e => e.actor.alive).length;
+        setText("connectionStatus", remaining ? "EN LIGNE" : "ZONE STABLE");
+
+        if (ui.playerCoordinates) {
+            ui.playerCoordinates.textContent =
+                `X: ${player.position.x.toFixed(1)} | Z: ${player.position.z.toFixed(1)}`;
+        }
+
+        updateTargetHUD();
+        drawMinimap();
     }
 
-    function updateTeamStatus() {
-        const ranise = state.allies.find(ally => ally.id === "ranise");
-        const kerlande = state.allies.find(ally => ally.id === "kerlande");
+    function updateTargetHUD() {
+        const target = getNearestEnemy(100);
 
-        const raniseStatus = $("raniseOnlineStatus");
-        const kerlandeStatus = $("kerlandeOnlineStatus");
-
-        if (raniseStatus) {
-            raniseStatus.style.opacity = ranise && ranise.alive ? "1" : "0.3";
+        if (!target) {
+            hide(ui.targetIndicator);
+            return;
         }
 
-        if (kerlandeStatus) {
-            kerlandeStatus.style.opacity = kerlande && kerlande.alive ? "1" : "0.3";
-        }
+        const d = distance(player.position, target.actor.position);
 
-        const panel = $("playerHud");
+        setText("targetName", target.actor.name);
+        setText("targetDistance", `DISTANCE : ${Math.round(d)} m`);
 
-        if (panel) {
-            panel.dataset.teamReady = String(
-                state.allies.every(ally => ally.alive)
-            );
-        }
-    }
-
-    function updateCoordinates() {
-        setText(
-            "playerCoordinates",
-            "X: " + state.player.x.toFixed(1) +
-            " | Z: " + state.player.z.toFixed(1)
-        );
+        show(ui.targetIndicator);
     }
 
     function drawMinimap() {
-        const canvas = $("minimapCanvas");
-        if (!canvas || !state.settings.showMinimap) return;
+        const canvas = ui.minimapCanvas;
+
+        if (!canvas || !state.showMinimap) return;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
         const width = canvas.width;
         const height = canvas.height;
+        const scale = width / CONFIG.worldSize;
 
         ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = "#10231b";
+
+        ctx.fillStyle = "#17271c";
         ctx.fillRect(0, 0, width, height);
 
-        ctx.strokeStyle = "rgba(100,180,140,.22)";
-        ctx.lineWidth = 1;
+        // Routes
+        ctx.fillStyle = "#45483f";
+        ctx.fillRect(width / 2 - scale * 7.5, 0, scale * 15, height);
+        ctx.fillRect(0, height / 2 - scale * 6, width, scale * 12);
 
-        for (let i = 0; i <= 10; i++) {
-            const p = i * width / 10;
+        // Bâtiments simplifiés
+        ctx.fillStyle = "#77776a";
 
-            ctx.beginPath();
-            ctx.moveTo(p, 0);
-            ctx.lineTo(p, height);
-            ctx.stroke();
+        world.buildings.forEach(mesh => {
+            if (!mesh || mesh.name.includes("Roof")) return;
 
-            ctx.beginPath();
-            ctx.moveTo(0, p);
-            ctx.lineTo(width, p);
-            ctx.stroke();
-        }
+            const x = (mesh.position.x + CONFIG.worldSize / 2) * scale;
+            const z = (mesh.position.z + CONFIG.worldSize / 2) * scale;
 
-        const toMap = actor => ({
-            x: width / 2 + actor.x / CONFIG.worldSize * width,
-            y: height / 2 + actor.z / CONFIG.worldSize * height
+            ctx.fillRect(x - 2, z - 2, 4, 4);
         });
 
-        const drawDot = (actor, color, radius = 4) => {
-            if (!actor.alive) return;
+        function mapPoint(position) {
+            return {
+                x: (position.x + CONFIG.worldSize / 2) * scale,
+                y: (position.z + CONFIG.worldSize / 2) * scale
+            };
+        }
 
-            const p = toMap(actor);
+        // Ennemis
+        world.enemies.forEach(enemy => {
+            if (!enemy.actor.alive) return;
 
+            const p = mapPoint(enemy.actor.position);
+
+            ctx.fillStyle = "#f04444";
             ctx.beginPath();
-            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = color;
+            ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
             ctx.fill();
-        };
-
-        state.helicopters.forEach(heli => {
-            if (heli.destroyed) return;
-            drawDot(heli, "#f5d45c", 4);
         });
 
-        state.enemies.forEach(enemy => drawDot(enemy, "#f34b4b", 3));
-        state.allies.forEach(ally => drawDot(ally, "#55aaff", 4));
-        drawDot(state.player, "#34e6a6", 5);
-    }
+        // Alliés
+        world.allies.forEach(ally => {
+            if (!ally.actor.alive) return;
 
-    function updateHelicopterHUD() {
-        const heli = getCurrentHelicopter();
+            const p = mapPoint(ally.actor.position);
 
-        if (!heli) {
-            hideElement("helicopterHud");
-            hideElement("helicopterFlightControls");
-            return;
+            ctx.fillStyle = "#4ca3ff";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Hélicoptères
+        world.helicopters.forEach(mesh => {
+            const p = mapPoint(mesh.vehicle.position);
+
+            ctx.fillStyle = "#f4cf58";
+            ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+        });
+
+        // Objectif
+        if (state.activeMission) {
+            const p = mapPoint(state.activeMission.zone);
+
+            ctx.strokeStyle = "#37ff8b";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+            ctx.stroke();
         }
 
-        showElement("helicopterHud");
-        showElement("helicopterFlightControls");
-    }
+        // Joueur
+        const p = mapPoint(player.position);
 
-    function updateAllHUD() {
-        updatePlayerHUD();
-        updateCoordinates();
-        updateMissionHUD();
-        updateTeamStatus();
-        updateHelicopterHUD();
-        drawMinimap();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x, p.y - 8);
+        ctx.stroke();
     }
 
     /* =========================================================
-       18. COMMUNICATION TACTIQUE
+       19. ARSENAL
     ========================================================= */
 
-    function addChatMessage(sender, message, type = "expert") {
-        const record = {
-            sender,
-            message,
-            type,
-            timestamp: new Date().toLocaleTimeString()
-        };
-
-        state.chatMessages.push(record);
-        state.chatMessages = state.chatMessages.slice(-CONFIG.maxChatMessages);
-
-        const container = $("communicationMessages");
-        if (container) {
-            const article = document.createElement("article");
-
-            article.className = type === "system"
-                ? "chat-system-message"
-                : "chat-message";
-
-            const heading = document.createElement("strong");
-            heading.textContent = sender;
-
-            const paragraph = document.createElement("p");
-            paragraph.textContent = message;
-
-            const time = document.createElement("small");
-            time.textContent = record.timestamp;
-
-            article.append(heading, paragraph, time);
-            container.appendChild(article);
-
-            container.scrollTop = container.scrollHeight;
-        }
-
-        if ($("communicationPanel")?.classList.contains("hidden")) {
-            state.unreadMessages++;
-            setText("unreadMessagesBadge", state.unreadMessages);
-            showElement("unreadMessagesBadge");
-        }
-    }
-
-    function getExpertName(id) {
-        if (id === "selvandieu") return "Selvandieu";
-
-        const ally = state.allies.find(item => item.id === id);
-        return ally ? ally.name : "Système";
-    }
-
-    function getInteractionResponse(command, senderId) {
-        const ally = state.allies.find(item => item.id === senderId);
-
-        switch (command) {
-            case "where":
-            case "position":
-                return ally
-                    ? `${ally.name} : position X ${ally.x.toFixed(1)}, Z ${ally.z.toFixed(1)}.`
-                    : `Selvandieu : position X ${state.player.x.toFixed(1)}, Z ${state.player.z.toFixed(1)}.`;
-
-            case "follow":
-            case "regroup":
-            case "rally":
-                if (ally) ally.behavior = "follow";
-                else state.allies.forEach(item => item.behavior = "follow");
-                return "Reçu. Retour en formation auprès de Selvandieu.";
-
-            case "hold":
-                if (ally) ally.behavior = "hold";
-                else state.allies.forEach(item => item.behavior = "hold");
-                return "Position maintenue. Surveillance active.";
-
-            case "advance":
-            case "cover":
-            case "assist":
-            case "protect":
-                if (ally) ally.behavior = "follow";
-                else state.allies.forEach(item => item.behavior = "follow");
-                return "Ordre reçu. Progression tactique engagée.";
-
-            case "retreat":
-                if (ally) ally.behavior = "retreat";
-                else state.allies.forEach(item => item.behavior = "retreat");
-                return "Repli tactique en cours.";
-
-            case "attack":
-            case "focus":
-            case "clear":
-            case "flank":
-            case "suppress":
-            case "defend":
-                if (ally) ally.behavior = "attack";
-                else state.allies.forEach(item => item.behavior = "attack");
-                return "Engagement autorisé. Recherche et neutralisation des hostiles.";
-
-            case "ceasefire":
-                if (ally) ally.behavior = "hold";
-                else state.allies.forEach(item => item.behavior = "hold");
-                return "Cessez-le-feu reçu. Les experts conservent leur position.";
-
-            case "enemy": {
-                const count = state.enemies.filter(item => item.alive).length;
-                return `${count} hostile(s) encore détecté(s) dans la zone.`;
-            }
-
-            case "status":
-            case "health":
-            case "report":
-            case "ready":
-                return teamStatusText();
-
-            case "mission":
-            case "objectives":
-                return state.mission
-                    ? `Mission : ${state.mission.title}. ${state.mission.objectives.filter(o => o.complete).length}/${state.mission.objectives.length} objectifs terminés.`
-                    : "Aucune mission active.";
-
-            case "coordinates":
-                return `Coordonnées : X ${state.player.x.toFixed(1)}, Z ${state.player.z.toFixed(1)}.`;
-
-            case "locateheli": {
-                const heli = findNearestAccessibleHelicopter(state.player);
-                return heli
-                    ? `${heli.name} repéré à ${distance2D(state.player, heli).toFixed(1)} mètres.`
-                    : "Aucun hélicoptère posé à portée immédiate.";
-            }
-
-            case "prepare_boarding":
-                return findNearestAccessibleHelicopter(state.player)
-                    ? "Hélicoptère posé et accessible. Utilisez MONTER pour embarquer."
-                    : "Aucun hélicoptère accessible pour l'instant.";
-
-            case "board":
-                if (ally) {
-                    return boardAlly(ally)
-                        ? `${ally.name} a embarqué dans l'hélicoptère.`
-                        : "L'embarquement est impossible. Le véhicule doit être posé et proche.";
-                }
-
-                return boardHelicopter()
-                    ? "Selvandieu est à bord."
-                    : "Impossible d'embarquer maintenant.";
-
-            case "takeoff":
-                return helicopterTakeoff()
-                    ? "Décollage initié."
-                    : "Embarquez d'abord dans un hélicoptère.";
-
-            case "land":
-                helicopterLand();
-                return "Ordre d'atterrissage transmis.";
-
-            case "hover":
-                helicopterHover();
-                return "Stabilisation demandée.";
-
-            case "exit":
-                return exitHelicopter()
-                    ? "Descente effectuée."
-                    : "L'atterrissage est nécessaire avant de descendre.";
-
-            case "vehicle_status": {
-                const heli = getCurrentHelicopter();
-                return heli
-                    ? `${heli.name} : altitude ${heli.altitude.toFixed(1)} m, vitesse ${heli.speed.toFixed(1)} km/h.`
-                    : "Aucun hélicoptère piloté.";
-            }
-
-            case "save":
-                saveGame();
-                return "Demande de sauvegarde envoyée.";
-
-            case "next":
-                return "Terminez les objectifs actifs avant de passer à la mission suivante.";
-
-            case "secure":
-            case "search":
-            case "checkpoint":
-            case "extract":
-                return "Ordre reçu. Continuez vers la zone opérationnelle.";
-
-            case "heal":
-                if (ally) {
-                    ally.health = 100;
-                    ally.armor = Math.max(ally.armor, 100);
-                } else {
-                    state.allies.forEach(item => {
-                        item.health = 100;
-                        item.armor = Math.max(item.armor, 100);
-                    });
-                }
-                updateTeamStatus();
-                return "L'équipe a reçu une remise en condition tactique.";
-
-            case "aircover":
-                return "Couverture aérienne disponible lorsque l'hélicoptère est en vol.";
-
-            case "sniper":
-            case "danger":
-            case "formation":
-            case "patrol":
-            case "split":
-                return "Ordre tactique reçu. L'équipe adapte sa formation.";
-
-            default:
-                return "Message reçu. L'équipe reste opérationnelle.";
-        }
-    }
-
-    function boardAlly(ally) {
-        const heli = findNearestAccessibleHelicopter(ally);
-
-        if (!heli || !heli.landed || heli.destroyed) return false;
-
-        ally.inHelicopter = true;
-        ally.helicopterId = heli.id;
-        ally.x = heli.x;
-        ally.z = heli.z;
-
-        heli.passengers = heli.passengers || [];
-        if (!heli.passengers.includes(ally.id)) {
-            heli.passengers.push(ally.id);
-        }
-
-        if (ally.mesh) ally.mesh.setEnabled(false);
-
-        addLog(ally.name + " a embarqué dans " + heli.name + ".");
-        return true;
-    }
-
-    function teamStatusText() {
-        const playerStatus = `Selvandieu : santé ${Math.round(state.player.health)} %, armure ${Math.round(state.player.armor)} %.`;
-
-        const allyStatus = state.allies.map(ally =>
-            `${ally.name} : ${ally.alive ? "opérationnel" : "hors combat"}, santé ${Math.round(ally.health)} %.`
-        ).join(" ");
-
-        return playerStatus + " " + allyStatus;
-    }
-
-    function sendInteraction(command, senderId = state.selectedExpertId) {
-        const senderName = getExpertName(senderId);
-        const response = getInteractionResponse(command, senderId);
-
-        addChatMessage(senderName, "Ordre : " + command);
-        addChatMessage("ÉQUIPE", response);
-
-        addLog(senderName + " : " + command);
-        updateAllHUD();
-    }
-
-    function customMessageResponse(message, recipient) {
-        const text = message.toLowerCase();
-
-        if (/où|position|coordonn/.test(text)) {
-            return getInteractionResponse("where", recipient);
-        }
-
-        if (/attaque|ennemi|ennemis|hostile|tir/.test(text)) {
-            return getInteractionResponse("attack", recipient);
-        }
-
-        if (/suis|suivez|rejoignez|rassemblez/.test(text)) {
-            return getInteractionResponse("follow", recipient);
-        }
-
-        if (/hélicopt|avion|vol|atterri|décoll/.test(text)) {
-            return getInteractionResponse("vehicle_status", recipient);
-        }
-
-        if (/santé|état|prêt|équipe/.test(text)) {
-            return teamStatusText();
-        }
-
-        return "Message reçu. Je confirme la communication et je reste opérationnel.";
-    }
-
-    function sendCustomMessage(message) {
-        const input = $("customMessageInput");
-        const sender = $("messageSenderSelect")?.value || "selvandieu";
-        const recipient = $("messageRecipientSelect")?.value || "all";
-
-        const cleanMessage = String(message || "").trim();
-
-        if (!cleanMessage) {
-            toast("Écrivez un message avant l'envoi.", "!");
-            return;
-        }
-
-        addChatMessage(getExpertName(sender), cleanMessage, "expert");
-
-        const recipients = recipient === "all"
-            ? ["ranise", "kerlande"]
-            : [recipient];
-
-        recipients.forEach(id => {
-            const response = customMessageResponse(cleanMessage, id);
-
-            setTimeout(() => {
-                addChatMessage(getExpertName(id), response, "expert");
-            }, 180 + Math.random() * 350);
-        });
-
-        if (input) input.value = "";
-    }
-
-    function renderInteractionButtons() {
-        const container = $("interactionButtons");
-        if (!container) return;
-
-        const search = ($("interactionSearchInput")?.value || "").toLowerCase();
-        const category = state.selectedInteractionCategory;
-
-        const interactions = state.dynamicContent.interactions.filter(item => {
-            const categoryMatches =
-                category === "all" || item.category === category;
-
-            const searchMatches =
-                !search ||
-                item.label.toLowerCase().includes(search) ||
-                item.command.toLowerCase().includes(search);
-
-            return categoryMatches && searchMatches;
-        });
-
-        container.innerHTML = "";
-
-        if (!interactions.length) {
-            container.innerHTML =
-                '<p class="empty-state">Aucune interaction correspondante.</p>';
-            return;
-        }
-
-        interactions.forEach(interaction => {
-            const button = document.createElement("button");
-
-            button.type = "button";
-            button.className = "interaction-button";
-            button.dataset.command = interaction.command;
-            button.textContent = interaction.label;
-
-            button.addEventListener("click", () => {
-                const sender = $("messageSenderSelect")?.value || "selvandieu";
-                sendInteraction(interaction.command, sender);
-            });
-
-            container.appendChild(button);
-        });
-    }
-
-    /* =========================================================
-       19. BIBLIOTHÈQUE D'ARMES
-    ========================================================= */
+    let selectedWeaponId = player.weapon;
 
     function renderWeaponLibrary() {
-        const container = $("weaponLibraryList");
+        const container = ui.weaponLibraryList;
         if (!container) return;
 
-        setText("weaponPurchasePoints", state.score);
+        container.replaceChildren();
 
-        container.innerHTML = state.dynamicContent.weapons.map(weapon => `
-            <button
-                type="button"
-                class="weapon-card ${state.selectedWeaponLibraryId === weapon.id ? "selected" : ""}"
-                data-weapon-id="${escapeHTML(weapon.id)}"
-            >
-                <strong>${escapeHTML(weapon.name)}</strong>
-                <span>Dégâts : ${weapon.damage}</span>
-                <span>Portée : ${weapon.range} m</span>
-                <span>Chargeur : ${weapon.magazine}</span>
-                <small>${weapon.price ? "Coût : " + weapon.price + " points" : "Disponible"}</small>
-            </button>
-        `).join("");
+        WEAPONS.forEach(weapon => {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = "weapon-card";
 
-        container.querySelectorAll("[data-weapon-id]").forEach(button => {
-            button.addEventListener("click", () => {
-                state.selectedWeaponLibraryId = button.dataset.weaponId;
+            if (weapon.id === selectedWeaponId) {
+                card.classList.add("selected");
+            }
+
+            const title = document.createElement("strong");
+            title.textContent = weapon.name;
+
+            const details = document.createElement("p");
+            details.textContent =
+                `Dégâts ${weapon.damage} · Chargeur ${weapon.magazine} · Portée ${weapon.range} m`;
+
+            const price = document.createElement("small");
+            price.textContent = weapon.price
+                ? `${weapon.price} points`
+                : "Disponible";
+
+            card.append(title, details, price);
+
+            card.addEventListener("click", () => {
+                selectedWeaponId = weapon.id;
                 renderWeaponLibrary();
             });
+
+            container.append(card);
         });
+
+        setText("weaponPurchasePoints", state.score);
     }
 
     function equipSelectedWeapon() {
-        const weapon = getWeapon(state.selectedWeaponLibraryId);
+        const weapon = WEAPONS.find(w => w.id === selectedWeaponId);
 
-        if (weapon.price > state.score && weapon.id !== "rifle" && weapon.id !== "pistol") {
-            toast("Vous n'avez pas assez de points pour cette arme.", "!");
-            return;
+        if (!weapon) return;
+
+        if (weapon.price > 0 && player.weapon !== weapon.id) {
+            if (state.score < weapon.price) {
+                toast(`Il faut ${weapon.price} points pour débloquer cette arme.`);
+                return;
+            }
+
+            state.score -= weapon.price;
         }
 
-        state.selectedWeaponId = weapon.id;
-        state.player.weaponId = weapon.id;
+        player.weapon = weapon.id;
+        player.ammo = weapon.magazine;
+        player.reserve = 9999;
+        state.reloading = false;
 
-        state.allies.forEach((ally, index) => {
-            ally.weaponId = index === 0 ? weapon.id : "heavy";
-        });
+        updatePlayerHUD();
+        renderWeaponLibrary();
 
-        state.ammo = weapon.magazine;
-        state.reserveAmmo = Infinity;
-
-        rebuildActors();
-        updateAllHUD();
-
-        toast(weapon.name + " équipée.", "✓");
-        addLog("Arme sélectionnée : " + weapon.name);
+        toast(`${weapon.name} équipée.`, "✓");
+        logEvent(`Arme équipée : ${weapon.name}.`, "success");
     }
 
     /* =========================================================
-       20. BIBLIOTHÈQUE D'ÉQUIPEMENTS
+       20. ÉQUIPEMENTS
     ========================================================= */
 
+    let selectedEquipmentId = state.selectedEquipment;
+
     function renderEquipmentLibrary() {
-        const container = $("equipmentLibraryList");
+        const container = ui.equipmentLibraryList;
         if (!container) return;
 
-        setText("equipmentPurchasePoints", state.score);
+        container.replaceChildren();
 
-        container.innerHTML = state.dynamicContent.equipment.map(item => `
-            <button
-                type="button"
-                class="equipment-card ${state.selectedEquipmentLibraryId === item.id ? "selected" : ""}"
-                data-equipment-id="${escapeHTML(item.id)}"
-            >
-                <strong>${escapeHTML(item.name)}</strong>
-                <span>Armure : ${item.armor}</span>
-                <span>Réduction : ${Math.round(item.damageReduction * 100)} %</span>
-                <small>${item.price ? "Coût : " + item.price + " points" : "Disponible"}</small>
-                <p>${escapeHTML(item.description)}</p>
-            </button>
-        `).join("");
+        EQUIPMENT.forEach(item => {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = "equipment-card";
 
-        container.querySelectorAll("[data-equipment-id]").forEach(button => {
-            button.addEventListener("click", () => {
-                state.selectedEquipmentLibraryId = button.dataset.equipmentId;
+            if (item.id === selectedEquipmentId) {
+                card.classList.add("selected");
+            }
+
+            const title = document.createElement("strong");
+            title.textContent = item.name;
+
+            const details = document.createElement("p");
+            details.textContent =
+                `Armure +${item.armor} · Santé +${item.health} · Vitesse ${item.speed >= 0 ? "+" : ""}${item.speed}`;
+
+            const price = document.createElement("small");
+            price.textContent = item.price ? `${item.price} points` : "Gratuit";
+
+            card.append(title, details, price);
+
+            card.addEventListener("click", () => {
+                selectedEquipmentId = item.id;
                 renderEquipmentLibrary();
             });
+
+            container.append(card);
         });
+
+        setText("equipmentPurchasePoints", state.score);
     }
 
     function equipSelectedEquipment() {
-        const item = getEquipment(state.selectedEquipmentLibraryId);
+        const item = EQUIPMENT.find(
+            equipment => equipment.id === selectedEquipmentId
+        );
 
-        if (item.price > state.score && item.id !== "standard") {
-            toast("Points insuffisants pour cet équipement.", "!");
+        if (!item) return;
+
+        if (item.price > state.score) {
+            toast(`Il faut ${item.price} points pour cet équipement.`);
             return;
         }
 
-        state.selectedEquipmentId = item.id;
+        if (
+            item.id !== state.selectedEquipment &&
+            item.price > 0
+        ) {
+            state.score -= item.price;
+        }
 
-        applyProtectionToTeam();
+        state.selectedEquipment = item.id;
 
-        toast(item.name + " appliquée à l'équipe.", "✓");
-        addLog("Équipement appliqué : " + item.name);
+        player.armor = clamp(
+            player.armor + item.armor,
+            0,
+            CONFIG.maxArmor
+        );
+
+        player.health = clamp(
+            player.health + item.health,
+            0,
+            CONFIG.maxHealth
+        );
+
+        updatePlayerHUD();
+        renderEquipmentLibrary();
+
+        toast(`${item.name} appliqué.`, "✓");
     }
 
     /* =========================================================
@@ -2988,1296 +3307,1333 @@
     ========================================================= */
 
     function renderHelicopterLibrary() {
-        const container = $("helicopterLibraryList");
+        const container = ui.helicopterLibraryList;
         if (!container) return;
 
-        const current = getCurrentHelicopter();
+        container.replaceChildren();
 
-        setText(
-            "currentHelicopterName",
-            current ? current.name.toUpperCase() : "AUCUN HÉLICOPTÈRE"
-        );
+        HELICOPTERS.forEach(heli => {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = "helicopter-card";
 
-        container.innerHTML = state.dynamicContent.helicopters.map(heli => `
-            <button
-                type="button"
-                class="helicopter-card ${state.selectedHelicopterLibraryId === heli.id ? "selected" : ""}"
-                data-helicopter-id="${escapeHTML(heli.id)}"
-            >
-                <strong>${escapeHTML(heli.name)}</strong>
-                <span>Vitesse maximale : ${heli.speed} km/h</span>
-                <span>Altitude maximale : ${heli.maxAltitude} m</span>
-                <span>Armement : ${heli.weaponDamage}</span>
-                <small>${heli.price ? "Coût : " + heli.price + " points" : "Disponible"}</small>
-            </button>
-        `).join("");
+            if (heli.id === state.selectedHelicopter) {
+                card.classList.add("selected");
+            }
 
-        container.querySelectorAll("[data-helicopter-id]").forEach(button => {
-            button.addEventListener("click", () => {
-                state.selectedHelicopterLibraryId = button.dataset.helicopterId;
+            const title = document.createElement("strong");
+            title.textContent = heli.name;
+
+            const details = document.createElement("p");
+            details.textContent =
+                `Vitesse ${heli.speed} · Résistance ${heli.health}`;
+
+            const price = document.createElement("small");
+            price.textContent = heli.price
+                ? `${heli.price} points`
+                : "Disponible";
+
+            card.append(title, details, price);
+
+            card.addEventListener("click", () => {
+                selectedHelicopterId = heli.id;
                 renderHelicopterLibrary();
             });
+
+            container.append(card);
         });
     }
 
-    function selectHelicopter() {
-        const definition = getHelicopterDefinition(
-            state.selectedHelicopterLibraryId
-        );
+    let selectedHelicopterId = state.selectedHelicopter;
 
-        const existing = state.helicopters.find(heli =>
-            heli.definitionId === definition.id && !heli.destroyed
-        );
+    function confirmHelicopterSelection() {
+        setSelectedHelicopter(selectedHelicopterId);
+    }
 
-        if (existing) {
-            state.selectedHelicopterId = definition.id;
-            toast(definition.name + " sélectionné.", "✓");
-            renderHelicopterLibrary();
+    /* =========================================================
+       22. COMMUNICATION TACTIQUE
+    ========================================================= */
+
+    const INTERACTIONS = [
+        { id: "position1", category: "position", text: "Où es-tu ?", command: "position" },
+        { id: "position2", category: "position", text: "Rejoins ma position.", command: "follow" },
+        { id: "position3", category: "position", text: "Maintiens ta position.", command: "hold" },
+        { id: "position4", category: "position", text: "Avance vers l'objectif.", command: "advance" },
+        { id: "position5", category: "position", text: "Recule vers la sécurité.", command: "retreat" },
+        { id: "position6", category: "position", text: "Reste près de moi.", command: "stay" },
+        { id: "position7", category: "position", text: "Prends position à gauche.", command: "left" },
+        { id: "position8", category: "position", text: "Prends position à droite.", command: "right" },
+        { id: "position9", category: "position", text: "Couvre mon déplacement.", command: "cover" },
+        { id: "position10", category: "position", text: "Signale ta position.", command: "report" },
+
+        { id: "threat1", category: "threat", text: "Repère les ennemis.", command: "spot" },
+        { id: "threat2", category: "threat", text: "Attaque les ennemis.", command: "attack" },
+        { id: "threat3", category: "threat", text: "Concentre le feu.", command: "focus" },
+        { id: "threat4", category: "threat", text: "Protège l'équipe.", command: "protect" },
+        { id: "threat5", category: "threat", text: "Élimine la menace proche.", command: "nearest" },
+        { id: "threat6", category: "threat", text: "Reste en défense.", command: "defend" },
+        { id: "threat7", category: "threat", text: "Surveille les hauteurs.", command: "highground" },
+        { id: "threat8", category: "threat", text: "Vérifie les environs.", command: "scan" },
+        { id: "threat9", category: "threat", text: "Ne tire pas.", command: "ceasefire" },
+        { id: "threat10", category: "threat", text: "Prépare-toi au combat.", command: "ready" },
+
+        { id: "team1", category: "team", text: "État de l'équipe ?", command: "status" },
+        { id: "team2", category: "team", text: "Besoin de soutien.", command: "support" },
+        { id: "team3", category: "team", text: "Bien reçu.", command: "ack" },
+        { id: "team4", category: "team", text: "Restez ensemble.", command: "together" },
+        { id: "team5", category: "team", text: "Protégez Ranise.", command: "protectranise" },
+        { id: "team6", category: "team", text: "Protégez Kerlande.", command: "protectkerlande" },
+        { id: "team7", category: "team", text: "Rassemblement.", command: "regroup" },
+        { id: "team8", category: "team", text: "Je suis prêt.", command: "readyteam" },
+        { id: "team9", category: "team", text: "Mission en cours.", command: "missionstatus" },
+        { id: "team10", category: "team", text: "Bon travail.", command: "goodwork" },
+
+        { id: "heli1", category: "helicopter", text: "Localise un hélicoptère.", command: "findheli" },
+        { id: "heli2", category: "helicopter", text: "Prépare l'extraction.", command: "extract" },
+        { id: "heli3", category: "helicopter", text: "L'hélicoptère est prêt.", command: "heliready" },
+        { id: "heli4", category: "helicopter", text: "Zone d'atterrissage ?", command: "landingzone" },
+        { id: "heli5", category: "helicopter", text: "Sécurise la zone d'atterrissage.", command: "securelanding" },
+        { id: "heli6", category: "helicopter", text: "Reste au sol.", command: "stayground" },
+        { id: "heli7", category: "helicopter", text: "Décollage imminent.", command: "takeoff" },
+        { id: "heli8", category: "helicopter", text: "Retour à la base.", command: "returnbase" },
+        { id: "heli9", category: "helicopter", text: "Soutien aérien demandé.", command: "airsupport" },
+        { id: "heli10", category: "helicopter", text: "Extraction terminée.", command: "extracted" },
+
+        { id: "mission1", category: "mission", text: "Quel est l'objectif ?", command: "objective" },
+        { id: "mission2", category: "mission", text: "Avance sur la mission.", command: "missionadvance" },
+        { id: "mission3", category: "mission", text: "Sécurise le point.", command: "securepoint" },
+        { id: "mission4", category: "mission", text: "Interagis avec l'objectif.", command: "interact" },
+        { id: "mission5", category: "mission", text: "Prépare l'extraction.", command: "missionextract" },
+        { id: "mission6", category: "mission", text: "Mission presque terminée.", command: "almostdone" },
+        { id: "mission7", category: "mission", text: "Vérifie les objectifs.", command: "checkobjectives" },
+        { id: "mission8", category: "mission", text: "Reste vigilant.", command: "vigilant" },
+        { id: "mission9", category: "mission", text: "Récupère les renseignements.", command: "intel" },
+        { id: "mission10", category: "mission", text: "Termine l'opération.", command: "finishmission" }
+    ];
+
+    function selectedRecipientName() {
+        const recipient = ui.messageRecipientSelect
+            ? ui.messageRecipientSelect.value
+            : "all";
+
+        if (recipient === "all") return "Toute l'équipe";
+
+        const member = teamData.find(m => m.id === recipient);
+
+        return member ? member.name : "Équipe";
+    }
+
+    function selectedSenderName() {
+        const sender = ui.messageSenderSelect
+            ? ui.messageSenderSelect.value
+            : "selvandieu";
+
+        if (sender === "selvandieu") return "Selvandieu";
+
+        const member = teamData.find(m => m.id === sender);
+
+        return member ? member.name : "Système";
+    }
+
+    function addChatMessage(sender, text, type = "normal") {
+        const container = ui.communicationMessages;
+        if (!container) return;
+
+        const article = document.createElement("article");
+        article.className = `chat-message chat-message-${type}`;
+
+        const strong = document.createElement("strong");
+        strong.textContent = sender;
+
+        const paragraph = document.createElement("p");
+        paragraph.textContent = text;
+
+        const time = document.createElement("small");
+        time.textContent = new Date().toLocaleTimeString();
+
+        article.append(strong, paragraph, time);
+        container.append(article);
+        container.scrollTop = container.scrollHeight;
+
+        state.messageCount++;
+
+        if (ui.unreadMessagesBadge) {
+            state.unreadMessages++;
+            ui.unreadMessagesBadge.textContent = state.unreadMessages;
+            show(ui.unreadMessagesBadge);
+        }
+    }
+
+    function executeInteraction(command, text) {
+        switch (command) {
+            case "follow":
+            case "stay":
+            case "regroup":
+            case "together":
+                world.allies.forEach((ally, index) => {
+                    ally.actor.position.set(
+                        player.position.x + (index === 0 ? -2 : 2),
+                        0,
+                        player.position.z - 3
+                    );
+
+                    ally.root.position.copyFrom(ally.actor.position);
+                });
+                break;
+
+            case "attack":
+            case "focus":
+            case "nearest":
+            case "spot":
+                world.allies.forEach(ally => {
+                    ally.actor.lastShot = 0;
+                });
+                toast("Ordre d'engagement transmis aux alliés.");
+                break;
+
+            case "retreat":
+                world.allies.forEach((ally, index) => {
+                    ally.actor.position.set(
+                        player.position.x + (index === 0 ? -6 : 6),
+                        0,
+                        player.position.z - 8
+                    );
+                    ally.root.position.copyFrom(ally.actor.position);
+                });
+                break;
+
+            case "interact":
+            case "securepoint":
+            case "intel":
+                interactWithObjective();
+                break;
+
+            case "takeoff":
+                if (player.isBoarded) helicopterTakeoff();
+                break;
+
+            case "extract":
+            case "missionextract":
+                if (player.isBoarded) {
+                    helicopterLand();
+                } else {
+                    toast("Approchez-vous de l'hélicoptère d'extraction.");
+                }
+                break;
+
+            case "status":
+                toast(
+                    `Selvandieu ${Math.round(player.health)} HP · ` +
+                    `Ranise ${Math.round(teamData[0].health)} HP · ` +
+                    `Kerlande ${Math.round(teamData[1].health)} HP`
+                );
+                break;
+
+            case "objective":
+            case "checkobjectives":
+                updateMissionUI();
+                toast("Objectifs de mission actualisés.");
+                break;
+
+            case "finishmission":
+            case "missionadvance":
+                toast("Accomplissez tous les objectifs avant de continuer.");
+                break;
+
+            default:
+                toast(`Ordre tactique transmis : ${text}`);
+        }
+
+        const sender = selectedSenderName();
+        const recipient = selectedRecipientName();
+
+        addChatMessage(sender, `${text} → ${recipient}`, "normal");
+
+        if (recipient === "Toute l'équipe" || recipient !== sender) {
+            const responses = [
+                "Bien reçu. J'exécute l'ordre.",
+                "Compris. Je reste vigilant.",
+                "Ordre confirmé.",
+                "Je m'en occupe.",
+                "Reçu. Je couvre le secteur."
+            ];
+
+            setTimeout(() => {
+                addChatMessage(
+                    recipient === "Toute l'équipe" ? "Ranise" : recipient,
+                    responses[randomInt(0, responses.length - 1)],
+                    "reply"
+                );
+            }, 400);
+        }
+
+        logEvent(`Communication : ${text}`, "info");
+    }
+
+    function renderInteractions() {
+        const container = ui.interactionButtons;
+        if (!container) return;
+
+        container.replaceChildren();
+
+        const search = state.interactionSearch.toLowerCase();
+
+        const items = INTERACTIONS.filter(item => {
+            const categoryMatch =
+                state.interactionCategory === "all" ||
+                item.category === state.interactionCategory;
+
+            const searchMatch =
+                !search ||
+                item.text.toLowerCase().includes(search) ||
+                item.command.toLowerCase().includes(search);
+
+            return categoryMatch && searchMatch;
+        });
+
+        if (!items.length) {
+            const empty = document.createElement("p");
+            empty.className = "empty-state";
+            empty.textContent = "Aucune interaction trouvée.";
+            container.append(empty);
             return;
         }
 
-        const heli = {
-            id: "heli_custom_" + Date.now(),
-            definitionId: definition.id,
-            name: definition.name,
-            x: state.player.x + 8,
-            z: state.player.z + 8,
-            altitude: 0,
-            yaw: 0,
-            speed: 0,
-            health: definition.health,
-            fuel: definition.fuel,
-            landed: true,
-            destroyed: false,
-            occupied: false,
-            passengers: [],
-            maxAltitude: definition.maxAltitude,
-            maxSpeed: definition.speed,
-            verticalTarget: 0,
-            velocityX: 0,
-            velocityZ: 0
-        };
+        items.forEach(item => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "interaction-button";
+            button.textContent = item.text;
 
-        state.helicopters.push(heli);
-
-        if (state.scene) createHelicopterMesh(heli);
-
-        state.selectedHelicopterId = definition.id;
-
-        renderHelicopterLibrary();
-        addLog("Véhicule ajouté : " + definition.name);
-        toast("Hélicoptère disponible.", "✓");
-    }
-
-    /* =========================================================
-       22. CAMÉRA ET GESTES TACTILES
-    ========================================================= */
-
-    function zoomCamera(direction) {
-        if (!state.camera) return;
-
-        state.camera.radius = clamp(
-            state.camera.radius + direction,
-            CONFIG.cameraMinRadius,
-            CONFIG.cameraMaxRadius
-        );
-    }
-
-    function resetCamera() {
-        if (!state.camera) return;
-
-        state.camera.alpha = -Math.PI / 2;
-        state.camera.beta = Math.PI / 3;
-        state.camera.radius = CONFIG.cameraInitialRadius;
-
-        centerCamera();
-    }
-
-    function centerCamera() {
-        if (!state.camera) return;
-
-        const position = state.player.inHelicopter
-            ? getCurrentHelicopter()
-            : state.player;
-
-        if (!position) return;
-
-        state.camera.setTarget(
-            new BABYLON.Vector3(
-                position.x,
-                position.altitude !== undefined
-                    ? position.altitude + 1
-                    : 1,
-                position.z
-            )
-        );
-    }
-
-    function installTouchCameraControls() {
-        const canvas = state.canvas;
-        if (!canvas) return;
-
-        let initialPinchDistance = 0;
-        let initialRadius = CONFIG.cameraInitialRadius;
-        let lastTouch = null;
-
-        canvas.addEventListener("touchstart", event => {
-            if (event.touches.length === 2 && state.camera) {
-                const a = event.touches[0];
-                const b = event.touches[1];
-
-                initialPinchDistance = Math.hypot(
-                    a.clientX - b.clientX,
-                    a.clientY - b.clientY
-                );
-
-                initialRadius = state.camera.radius;
-            } else if (event.touches.length === 1) {
-                lastTouch = {
-                    x: event.touches[0].clientX,
-                    y: event.touches[0].clientY
-                };
-            }
-        }, { passive: true });
-
-        canvas.addEventListener("touchmove", event => {
-            if (!state.camera) return;
-
-            if (event.touches.length === 2 && initialPinchDistance > 0) {
-                const a = event.touches[0];
-                const b = event.touches[1];
-
-                const currentDistance = Math.hypot(
-                    a.clientX - b.clientX,
-                    a.clientY - b.clientY
-                );
-
-                state.camera.radius = clamp(
-                    initialRadius * initialPinchDistance / currentDistance,
-                    CONFIG.cameraMinRadius,
-                    CONFIG.cameraMaxRadius
-                );
-            } else if (event.touches.length === 1 && lastTouch) {
-                const touch = event.touches[0];
-
-                const dx = touch.clientX - lastTouch.x;
-                const dy = touch.clientY - lastTouch.y;
-
-                const sensitivity =
-                    (11 - state.settings.cameraSensitivity) * 0.001;
-
-                state.camera.alpha -= dx * sensitivity;
-                state.camera.beta = clamp(
-                    state.camera.beta + dy * sensitivity,
-                    0.15,
-                    Math.PI / 2.05
-                );
-
-                lastTouch = {
-                    x: touch.clientX,
-                    y: touch.clientY
-                };
-            }
-        }, { passive: true });
-
-        canvas.addEventListener("touchend", () => {
-            initialPinchDistance = 0;
-            lastTouch = null;
-        }, { passive: true });
-    }
-
-    /* =========================================================
-       23. JOYSTICK
-    ========================================================= */
-
-    function installJoystick() {
-        const joystick = $("movementJoystick");
-        const knob = $("joystickKnob");
-
-        if (!joystick || !knob) return;
-
-        let activePointer = null;
-
-        const updateJoystick = event => {
-            const rect = joystick.getBoundingClientRect();
-
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            const maxRadius = rect.width * 0.3;
-
-            let dx = event.clientX - centerX;
-            let dy = event.clientY - centerY;
-
-            const distance = Math.hypot(dx, dy);
-
-            if (distance > maxRadius) {
-                dx = dx / distance * maxRadius;
-                dy = dy / distance * maxRadius;
-            }
-
-            state.input.joystickX = clamp(dx / maxRadius, -1, 1);
-            state.input.joystickY = clamp(-dy / maxRadius, -1, 1);
-
-            knob.style.transform =
-                `translate(${dx}px, ${dy}px)`;
-        };
-
-        joystick.addEventListener("pointerdown", event => {
-            activePointer = event.pointerId;
-
-            try {
-                joystick.setPointerCapture(event.pointerId);
-            } catch (_) {}
-
-            updateJoystick(event);
-        });
-
-        joystick.addEventListener("pointermove", event => {
-            if (event.pointerId !== activePointer) return;
-            updateJoystick(event);
-        });
-
-        const release = event => {
-            if (activePointer !== null &&
-                event.pointerId !== undefined &&
-                event.pointerId !== activePointer) return;
-
-            activePointer = null;
-            state.input.joystickX = 0;
-            state.input.joystickY = 0;
-
-            knob.style.transform = "translate(0, 0)";
-        };
-
-        joystick.addEventListener("pointerup", release);
-        joystick.addEventListener("pointercancel", release);
-        joystick.addEventListener("lostpointercapture", release);
-    }
-
-    /* =========================================================
-       24. CLAVIER
-    ========================================================= */
-
-    function installKeyboardControls() {
-        const keys = new Set();
-
-        window.addEventListener("keydown", event => {
-            const key = event.key.toLowerCase();
-
-            if ([
-                "arrowup", "arrowdown", "arrowleft", "arrowright", " "
-            ].includes(key)) {
-                event.preventDefault();
-            }
-
-            keys.add(key);
-
-            state.input.forward = keys.has("w") || keys.has("arrowup");
-            state.input.backward = keys.has("s") || keys.has("arrowdown");
-            state.input.left = keys.has("a") || keys.has("arrowleft");
-            state.input.right = keys.has("d") || keys.has("arrowright");
-            state.input.sprint = keys.has("shift");
-
-            if (key === "r" && !event.repeat) reloadWeapon();
-            if (key === "e" && !event.repeat) boardHelicopter();
-            if (key === "q" && !event.repeat) exitHelicopter();
-            if (key === "f" && !event.repeat) interactWithNearestObject();
-            if (key === " " && !event.repeat) jumpPlayer();
-
-            if (key === "escape") {
-                if (state.paused) resumeGame();
-                else pauseGame();
-            }
-
-            state.input.flight.accelerate = keys.has("w") && state.player.inHelicopter;
-            state.input.flight.brake = keys.has("s") && state.player.inHelicopter;
-            state.input.flight.turnLeft = keys.has("a") && state.player.inHelicopter;
-            state.input.flight.turnRight = keys.has("d") && state.player.inHelicopter;
-            state.input.flight.ascend = keys.has("shift") && state.player.inHelicopter;
-            state.input.flight.descend = keys.has("control") && state.player.inHelicopter;
-        });
-
-        window.addEventListener("keyup", event => {
-            keys.delete(event.key.toLowerCase());
-
-            state.input.forward = keys.has("w") || keys.has("arrowup");
-            state.input.backward = keys.has("s") || keys.has("arrowdown");
-            state.input.left = keys.has("a") || keys.has("arrowleft");
-            state.input.right = keys.has("d") || keys.has("arrowright");
-            state.input.sprint = keys.has("shift");
-
-            state.input.flight.accelerate = keys.has("w") && state.player.inHelicopter;
-            state.input.flight.brake = keys.has("s") && state.player.inHelicopter;
-            state.input.flight.turnLeft = keys.has("a") && state.player.inHelicopter;
-            state.input.flight.turnRight = keys.has("d") && state.player.inHelicopter;
-            state.input.flight.ascend = keys.has("shift") && state.player.inHelicopter;
-            state.input.flight.descend = keys.has("control") && state.player.inHelicopter;
-        });
-
-        window.addEventListener("blur", () => {
-            keys.clear();
-
-            state.input.forward = false;
-            state.input.backward = false;
-            state.input.left = false;
-            state.input.right = false;
-            state.input.sprint = false;
-            state.input.fire = false;
-
-            Object.keys(state.input.flight).forEach(key => {
-                state.input.flight[key] = false;
+            button.addEventListener("click", () => {
+                executeInteraction(item.command, item.text);
             });
+
+            container.append(button);
         });
     }
 
-    /* =========================================================
-       25. ACTIONS DU JOUEUR
-    ========================================================= */
+    function sendCustomMessage(event) {
+        event.preventDefault();
 
-    function jumpPlayer() {
-        if (state.player.inHelicopter) return;
+        const input = ui.customMessageInput;
+        if (!input) return;
 
-        state.player.jumping = true;
-        state.player.jumpUntil = now() + 600;
+        const text = input.value.trim();
 
-        updateActorMesh(state.player);
-    }
-
-    function toggleCrouch() {
-        state.player.crouching = !state.player.crouching;
-
-        toast(
-            state.player.crouching
-                ? "Position accroupie."
-                : "Position debout.",
-            "✓"
-        );
-    }
-
-    function aimWeapon() {
-        state.input.aim = !state.input.aim;
-
-        if (state.camera) {
-            state.camera.radius = state.input.aim
-                ? CONFIG.cameraMinRadius
-                : CONFIG.cameraInitialRadius;
-        }
-
-        toast(state.input.aim ? "Visée activée." : "Visée désactivée.", "⌖");
-    }
-
-    function interactWithNearestObject() {
-        if (state.player.inHelicopter) {
-            if (getCurrentHelicopter()?.landed) exitHelicopter();
-            else toast("Atterrissez avant de quitter l'hélicoptère.", "!");
+        if (!text) {
+            toast("Écrivez un message avant de l'envoyer.");
             return;
         }
 
-        const heli = findNearestAccessibleHelicopter();
+        addChatMessage(
+            selectedSenderName(),
+            `${text} → ${selectedRecipientName()}`,
+            "normal"
+        );
 
-        if (heli) {
+        logEvent(`Message personnalisé envoyé : ${text}`, "info");
+
+        input.value = "";
+        toast("Message envoyé.", "✓");
+    }
+
+    /* =========================================================
+       23. INTERACTIONS DE MISSION
+    ========================================================= */
+
+    function interactWithObjective() {
+        if (!state.running || state.paused) return;
+
+        const mission = state.activeMission;
+
+        if (!mission) return;
+
+        if (distance(player.position, mission.zone) > 12) {
+            toast("Approchez-vous du marqueur vert pour interagir.");
+            return;
+        }
+
+        state.interactionDone = true;
+
+        const objective = mission.objectives.find(
+            item => item.type === "interact"
+        );
+
+        if (objective) {
+            objective.current = 1;
+            objective.completed = true;
+        }
+
+        toast("Interaction avec l'objectif réussie.", "✓");
+        logEvent("Objectif tactique activé.", "success");
+
+        updateMissionUI();
+        checkMissionCompletion();
+    }
+
+    function performInteraction() {
+        if (player.isBoarded) {
+            if (state.currentHelicopter &&
+                state.currentHelicopter.vehicle.landed) {
+                exitHelicopter();
+            } else {
+                toast("Atterrissez avant de descendre.");
+            }
+            return;
+        }
+
+        const nearest = findNearestHelicopter();
+
+        if (
+            nearest &&
+            nearest.distance < CONFIG.helicopterBoardDistance
+        ) {
             boardHelicopter();
             return;
         }
 
-        const distance = Math.hypot(state.player.x - 25, state.player.z - 25);
+        interactWithObjective();
+    }
 
-        if (distance < 6) {
-            updateObjectiveProgress("reach", 1);
-            toast("Point de contrôle atteint.", "✓");
-        } else {
-            toast("Aucun objet interactif à portée.", "!");
+    function meleeAttack() {
+        if (!state.running || state.paused || player.isBoarded) return;
+
+        const enemy = getNearestEnemy(3.5);
+
+        if (!enemy) {
+            toast("Aucun ennemi à portée de combat rapproché.");
+            return;
         }
+
+        damageEnemy(enemy, 45);
+        toast("Attaque de combat rapproché.", "✦");
     }
 
     /* =========================================================
-       26. PAUSE ET ÉCRANS
+       24. PARAMÈTRES
     ========================================================= */
 
-    function pauseGame() {
-        if (!state.gameStarted || state.paused) return;
+    function applySettings() {
+        state.soundEnabled = Boolean(ui.soundEnabled?.checked);
+        state.musicEnabled = Boolean(ui.musicEnabled?.checked);
+        state.showCoordinates = Boolean(ui.showCoordinates?.checked);
+        state.showMinimap = Boolean(ui.showMinimap?.checked);
+        state.autoSaveEnabled = Boolean(ui.autoSaveEnabled?.checked);
 
-        state.paused = true;
-        state.running = false;
+        state.graphicsQuality = ui.graphicsQuality?.value || "medium";
 
-        showElement("pauseOverlay");
-    }
-
-    function resumeGame() {
-        hideElement("pauseOverlay");
-
-        state.paused = false;
-        state.running = true;
-        state.gameStarted = true;
-
-        state.lastFrameTime = performance.now();
-    }
-
-    async function startGame() {
-        if (!state.initialized) {
-            await initializeBabylon();
-        }
-
-        if (!state.initialized) return;
-
-        hideElement("mainMenu");
-        hideElement("missionResultOverlay");
-        hideElement("pauseOverlay");
-        showElement("gameScreen");
-
-        state.gameStarted = true;
-        state.running = true;
-        state.paused = false;
-
-        state.player.alive = true;
-
-        if (!state.mission) setupMission(state.missionIndex);
-
-        state.lastFrameTime = performance.now();
-
-        updateAllHUD();
-        addLog("Session de jeu démarrée.");
-    }
-
-    async function continueGame() {
-        const loaded = await loadGame();
-
-        if (loaded) {
-            await startGame();
-        } else {
-            await startGame();
-        }
-    }
-
-    function returnToMenu() {
-        state.running = false;
-        state.paused = false;
-        state.gameStarted = false;
-
-        hideElement("pauseOverlay");
-        hideElement("missionResultOverlay");
-        hideElement("gameScreen");
-        showElement("mainMenu");
-
-        closeAllPanels();
-    }
-
-    function showConfirmation(title, message, callback) {
-        setText("confirmationTitle", title);
-        setText("confirmationMessage", message);
-
-        state.confirmationCallback = callback;
-
-        showElement("confirmationDialog");
-    }
-
-    /* =========================================================
-       27. PARAMÈTRES
-    ========================================================= */
-
-    async function loadSettings() {
-        try {
-            if (!state.database) await initializeDatabase();
-
-            if (state.database) {
-                const record = await dbGet("settings", CONFIG.settingsKey);
-
-                if (record && record.data) {
-                    Object.assign(state.settings, record.data);
-                }
-            }
-        } catch (error) {
-            console.warn("Chargement des paramètres :", error);
-        }
-
-        applySettingsToControls();
-    }
-
-    function applySettingsToControls() {
-        const mapping = {
-            soundEnabled: state.settings.soundEnabled,
-            musicEnabled: state.settings.musicEnabled,
-            showCoordinates: state.settings.showCoordinates,
-            showMinimap: state.settings.showMinimap,
-            autoSaveEnabled: state.settings.autoSaveEnabled
-        };
-
-        Object.entries(mapping).forEach(([id, value]) => {
-            const element = $(id);
-            if (element) element.checked = Boolean(value);
-        });
-
-        if ($("graphicsQuality")) {
-            $("graphicsQuality").value = state.settings.graphicsQuality;
-        }
-
-        if ($("cameraSensitivity")) {
-            $("cameraSensitivity").value = state.settings.cameraSensitivity;
-        }
-    }
-
-    async function applySettings() {
-        state.settings.soundEnabled = $("soundEnabled")?.checked ?? true;
-        state.settings.musicEnabled = $("musicEnabled")?.checked ?? false;
-        state.settings.showCoordinates = $("showCoordinates")?.checked ?? true;
-        state.settings.showMinimap = $("showMinimap")?.checked ?? true;
-        state.settings.autoSaveEnabled = $("autoSaveEnabled")?.checked ?? true;
-        state.settings.graphicsQuality = $("graphicsQuality")?.value || "medium";
-        state.settings.cameraSensitivity = Number(
-            $("cameraSensitivity")?.value || 5
+        state.cameraSensitivity = Number(
+            ui.cameraSensitivity?.value || 5
         );
 
-        const coordinates = $("playerCoordinates");
-        if (coordinates) {
-            coordinates.style.display = state.settings.showCoordinates ? "" : "none";
+        if (world.camera) {
+            world.camera.angularSensibilityX =
+                650 / state.cameraSensitivity;
+
+            world.camera.angularSensibilityY =
+                650 / state.cameraSensitivity;
         }
 
-        const minimap = $("minimapPanel");
-        if (minimap) {
-            minimap.style.display = state.settings.showMinimap ? "" : "none";
+        if (ui.playerCoordinates) {
+            ui.playerCoordinates.style.display =
+                state.showCoordinates ? "" : "none";
         }
 
-        if (state.engine) {
-            const ratio = state.settings.graphicsQuality === "high"
-                ? 1
-                : state.settings.graphicsQuality === "low"
-                    ? 0.65
-                    : 0.85;
-
-            state.engine.setHardwareScalingLevel(1 / ratio);
-            state.engine.resize();
-        }
-
-        if (state.database) {
-            await dbPut("settings", {
-                key: CONFIG.settingsKey,
-                data: state.settings
-            }).catch(console.error);
+        if (ui.minimapCanvas) {
+            ui.minimapCanvas.style.display =
+                state.showMinimap ? "" : "none";
         }
 
         toast("Paramètres appliqués.", "✓");
     }
 
     async function toggleFullscreen() {
-        const root = $("helicopterGameApp");
-
         try {
             if (!document.fullscreenElement) {
-                await root.requestFullscreen();
+                await ui.helicopterGameApp.requestFullscreen();
             } else {
                 await document.exitFullscreen();
             }
-        } catch (error) {
-            console.warn(error);
-            toast("Le plein écran n'est pas disponible sur cet appareil.", "!");
+        } catch (_) {
+            toast("Le mode plein écran n'est pas disponible.");
         }
     }
 
     /* =========================================================
-       28. CONTENU DYNAMIQUE
+       25. PAUSE, CONFIRMATION ET NAVIGATION
     ========================================================= */
 
-    function mergeDynamicContent(remote = {}) {
-        if (Array.isArray(remote.weapons) && remote.weapons.length) {
-            state.dynamicContent.weapons = remote.weapons;
-        }
+    function pauseGame() {
+        if (!state.running) return;
 
-        if (Array.isArray(remote.equipment) && remote.equipment.length) {
-            state.dynamicContent.equipment = remote.equipment;
-        }
-
-        if (Array.isArray(remote.helicopters) && remote.helicopters.length) {
-            state.dynamicContent.helicopters = remote.helicopters;
-        }
-
-        if (Array.isArray(remote.interactions) && remote.interactions.length) {
-            state.dynamicContent.interactions = remote.interactions;
-        }
-
-        if (Array.isArray(remote.missions) && remote.missions.length) {
-            state.dynamicContent.missions = remote.missions;
-        }
-
-        renderInteractionButtons();
-        renderWeaponLibrary();
-        renderEquipmentLibrary();
-        renderHelicopterLibrary();
+        state.paused = true;
+        show(ui.pauseOverlay);
+        logEvent("Mission mise en pause.", "info");
     }
 
-    async function loadCachedContent() {
-        if (!state.database) return;
+    function resumeGame() {
+        state.paused = false;
+        hide(ui.pauseOverlay);
+        state.lastFrame = performance.now();
+        toast("Mission reprise.");
+    }
+
+    function openConfirmation(title, message, callback) {
+        setText("confirmationTitle", title);
+        setText("confirmationMessage", message);
+
+        state.pendingConfirmation = callback;
+
+        show(ui.confirmationDialog);
+    }
+
+    function closeConfirmation() {
+        hide(ui.confirmationDialog);
+        state.pendingConfirmation = null;
+    }
+
+    function confirmPendingAction() {
+        const action = state.pendingConfirmation;
+
+        closeConfirmation();
+
+        if (typeof action === "function") {
+            action();
+        }
+    }
+
+    function returnToMenu() {
+        state.running = false;
+        state.paused = false;
+
+        hide(ui.gameScreen);
+        hide(ui.pauseOverlay);
+        hide(ui.missionResultOverlay);
+        show(ui.mainMenu);
+
+        saveGame(false);
+    }
+
+    /* =========================================================
+       26. SYNCHRONISATION
+    ========================================================= */
+
+    async function synchronizeGame() {
+        setText("syncStatusText", "Vérification des données locales…");
 
         try {
-            const record = await dbGet("content", CONFIG.contentKey);
+            // Les missions et interactions sont générées localement.
+            // L'application ne dépend pas d'un serveur externe.
+            renderInteractions();
+            renderWeaponLibrary();
+            renderEquipmentLibrary();
+            renderHelicopterLibrary();
 
-            if (record && record.data) {
-                mergeDynamicContent(record.data);
+            setText(
+                "syncStatusText",
+                `Prêt · ${MISSIONS.length} missions · ${INTERACTIONS.length} interactions`
+            );
+
+            if (ui.syncStatusIndicator) {
+                ui.syncStatusIndicator.style.backgroundColor = "#3edb8b";
             }
+
+            state.lastSync = Date.now();
+            return true;
         } catch (error) {
-            console.warn("Contenu en cache indisponible :", error);
+            console.error("Synchronisation:", error);
+
+            setText("syncStatusText", "Mode local — synchronisation partielle");
+
+            if (ui.syncStatusIndicator) {
+                ui.syncStatusIndicator.style.backgroundColor = "#f4bb43";
+            }
+
+            return false;
         }
-    }
-
-    async function syncDynamicContent() {
-        setText("syncStatusText", "Contenu local opérationnel");
-        const indicator = $("syncStatusIndicator");
-
-        if (indicator) indicator.style.backgroundColor = "#2ad69b";
-
-        // Aucun endpoint distant n'est défini dans le HTML.
-        // Le jeu fonctionne en mode local et conserve les données en IndexedDB.
-
-        if (state.database) {
-            await dbPut("content", {
-                key: CONFIG.contentKey,
-                data: state.dynamicContent
-            }).catch(console.error);
-        }
-
-        renderInteractionButtons();
-
-        toast("Contenu tactique actualisé.", "✓");
-    }
-
-    async function initializeDynamicContent() {
-        mergeDynamicContent({
-            weapons: DEFAULT_WEAPONS,
-            equipment: DEFAULT_EQUIPMENT,
-            helicopters: DEFAULT_HELICOPTERS,
-            interactions: DEFAULT_INTERACTIONS,
-            missions: MISSION_TEMPLATES
-        });
-
-        await loadCachedContent();
-        await syncDynamicContent();
     }
 
     /* =========================================================
-       29. BOUCLE PRINCIPALE
+       27. BOUCLE PRINCIPALE
     ========================================================= */
 
-    function updateGameLoop() {
-        if (!state.running || state.paused || !state.scene) return;
-
-        const timestamp = performance.now();
-
-        const dt = clamp(
-            (timestamp - (state.lastFrameTime || timestamp)) / 1000,
-            0,
-            0.05
-        );
-
-        state.lastFrameTime = timestamp;
-        state.elapsedSinceStart += dt;
-        state.missionElapsed += dt;
-
+    function updateGameLoop(dt, now) {
         updatePlayerMovement(dt);
-        updateAllyMovement(dt);
+        updateJump(dt);
 
-        updateAllyCombat();
-        updateEnemyAI(dt);
+        if (now - world.lastEnemyUpdate > 100) {
+            updateEnemyAI(dt, now);
+            world.lastEnemyUpdate = now;
+        }
+
+        if (now - world.lastAllyUpdate > 100) {
+            updateAllyAI(dt, now);
+            world.lastAllyUpdate = now;
+        }
+
         updateHelicopterPhysics(dt);
+        updateMissionObjectives(dt);
 
-        if (state.input.fire) {
-            fireWeapon(state.player);
-        }
+        state.missionElapsed = (now - state.missionStart) / 1000;
 
-        if (state.player.inHelicopter) {
-            state.player.x = getCurrentHelicopter()?.x ?? state.player.x;
-            state.player.z = getCurrentHelicopter()?.z ?? state.player.z;
-        }
-
-        if (state.mission) {
-            const reachDistance = Math.hypot(
-                state.player.x - 25,
-                state.player.z - 25
-            );
-
-            if (reachDistance < 6) {
-                updateObjectiveProgress("reach", 0);
-            }
-
-            const flyObjective = state.mission.objectives.find(
-                objective => objective.type === "fly" && !objective.complete
-            );
-
-            if (flyObjective && state.player.inHelicopter) {
-                const heli = getCurrentHelicopter();
-
-                if (heli && !heli.landed) {
-                    flyObjective.progress = Math.min(
-                        flyObjective.target,
-                        flyObjective.progress + dt
-                    );
-
-                    flyObjective.complete =
-                        flyObjective.progress >= flyObjective.target;
-                }
-            }
-        }
-
-        if (timestamp - state.lastReinforcementAt > 90000) {
-            state.lastReinforcementAt = timestamp;
-            maybeSpawnReinforcements();
+        if (now - world.lastMinimapUpdate > 250) {
+            updatePlayerHUD();
+            world.lastMinimapUpdate = now;
         }
 
         if (
-            state.settings.autoSaveEnabled &&
-            timestamp - state.lastAutoSaveAt > CONFIG.autosaveInterval
+            state.autoSaveEnabled &&
+            now - state.lastAutoSave > CONFIG.autosaveInterval
         ) {
-            state.lastAutoSaveAt = timestamp;
-            saveGame(true);
+            state.lastAutoSave = now;
+            saveGame(false);
         }
 
-        if (Math.floor(state.elapsedSinceStart) % 2 === 0) {
-            updateAllHUD();
-        }
-
-        syncActorMeshes();
-
-        state.scene.render();
-    }
-
-    /* =========================================================
-       30. INITIALISATION BABYLON.JS
-    ========================================================= */
-
-    async function initializeBabylon() {
-        if (state.initializing) return;
-        if (state.initialized && state.engine && !state.engine.isDisposed) return;
-
-        state.initializing = true;
-
-        showElement("loadingScreen");
-        hideElement("gameErrorScreen");
-
-        showLoadingProgress(10, "Chargement du moteur graphique…");
-
-        try {
-            if (!window.BABYLON) {
-                const module = await import("@babylonjs/core");
-                window.BABYLON = module;
-            }
-
-            showLoadingProgress(30, "Création du moteur 3D…");
-
-            state.canvas = $("gameCanvas");
-
-            if (!state.canvas) {
-                throw new Error("Élément gameCanvas introuvable.");
-            }
-
-            if (state.engine) {
-                try {
-                    state.engine.stopRenderLoop();
-                    state.engine.dispose();
-                } catch (_) {}
-            }
-
-            state.engine = new BABYLON.Engine(
-                state.canvas,
-                true,
-                {
-                    preserveDrawingBuffer: false,
-                    stencil: true,
-                    antialias: true,
-                    adaptToDeviceRatio: true
-                }
-            );
-
-            state.scene = new BABYLON.Scene(state.engine);
-            state.scene.clearColor = new BABYLON.Color4(0.025, 0.07, 0.05, 1);
-
-            showLoadingProgress(45, "Construction du terrain…");
-
-            createMaterials();
-            createGround();
-            createLighting();
-            createCamera();
-
-            showLoadingProgress(60, "Déploiement des unités…");
-
-            spawnEnemies();
-            spawnHelicopters();
-            rebuildActors();
-
-            showLoadingProgress(75, "Initialisation des interfaces…");
-
-            installTouchCameraControls();
-            bindAllControls();
-
-            setupMission(state.missionIndex);
-
-            state.initialized = true;
-
-            state.engine.runRenderLoop(() => {
-                if (!state.scene || state.scene.isDisposed) return;
-
-                if (state.running && !state.paused) {
-                    updateGameLoop();
-                } else {
-                    state.scene.render();
-                }
-            });
-
-            window.addEventListener("resize", () => {
-                if (state.engine) state.engine.resize();
-            });
-
-            showLoadingProgress(100, "Monde tactique prêt…");
-
-            // L'écran central est masqué lorsque la scène 3D est prête.
-            hideWorldLoading();
-
-            hideElement("gameErrorScreen");
-            showElement("mainMenu");
-
-            updateAllHUD();
-
-            addLog("Moteur Babylon.js initialisé avec succès.");
-
-        } catch (error) {
-            console.error("Initialisation Babylon.js :", error);
-
-            setText(
-                "gameErrorMessage",
-                error && error.message
-                    ? error.message
-                    : "Erreur inconnue pendant l'initialisation."
-            );
-
-            showElement("gameErrorScreen");
-            hideElement("worldLoadingNotice");
-
-        } finally {
-            state.initializing = false;
+        if (Date.now() - state.lastSync > CONFIG.syncInterval) {
+            synchronizeGame();
         }
     }
 
     /* =========================================================
-       31. LIAISON DES BOUTONS
+       28. CONTRÔLES TACTILES ET CLAVIER
     ========================================================= */
 
-    function onClick(id, callback) {
-        const element = $(id);
-        if (!element) return;
+    function installKeyboardControls() {
+        window.addEventListener("keydown", event => {
+            state.keys.add(event.code);
 
-        element.addEventListener("click", event => {
-            event.preventDefault();
-            callback(event);
+            if (
+                ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]
+                    .includes(event.code)
+            ) {
+                event.preventDefault();
+            }
+
+            if (event.repeat) return;
+
+            switch (event.code) {
+                case "Space":
+                    if (!player.jumping && !player.isBoarded) {
+                        player.jumping = true;
+                        player.jumpVelocity = 7;
+                    }
+                    break;
+
+                case "KeyR":
+                    reloadWeapon(true);
+                    break;
+
+                case "KeyF":
+                    performInteraction();
+                    break;
+
+                case "KeyC":
+                    state.crouching = !state.crouching;
+                    break;
+
+                case "KeyE":
+                    performInteraction();
+                    break;
+
+                case "KeyQ":
+                    meleeAttack();
+                    break;
+
+                case "Escape":
+                    if (state.running && !state.paused) {
+                        pauseGame();
+                    } else if (state.paused) {
+                        resumeGame();
+                    }
+                    break;
+            }
+        });
+
+        window.addEventListener("keyup", event => {
+            state.keys.delete(event.code);
+        });
+
+        window.addEventListener("blur", () => {
+            state.keys.clear();
+            state.joystick.x = 0;
+            state.joystick.z = 0;
+            state.sprinting = false;
         });
     }
 
-    function bindHoldButton(id, inputKey) {
-        const element = $(id);
-        if (!element) return;
+    function installJoystick() {
+        const joystick = ui.movementJoystick;
+        const knob = ui.joystickKnob;
 
-        const start = event => {
-            event.preventDefault();
-            state.input.flight[inputKey] = true;
-        };
+        if (!joystick || !knob) return;
 
-        const stop = event => {
-            event.preventDefault();
-            state.input.flight[inputKey] = false;
-        };
+        let activePointer = null;
 
-        element.addEventListener("pointerdown", start);
-        element.addEventListener("pointerup", stop);
-        element.addEventListener("pointercancel", stop);
-        element.addEventListener("pointerleave", stop);
-        element.addEventListener("lostpointercapture", stop);
+        function updateFromPointer(event) {
+            const rect = joystick.getBoundingClientRect();
+
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const maxRadius = Math.min(rect.width, rect.height) * 0.32;
+
+            let dx = event.clientX - centerX;
+            let dy = event.clientY - centerY;
+
+            const length = Math.hypot(dx, dy);
+
+            if (length > maxRadius) {
+                dx = dx / length * maxRadius;
+                dy = dy / length * maxRadius;
+            }
+
+            state.joystick.x = dx / maxRadius;
+            state.joystick.z = -dy / maxRadius;
+
+            knob.style.transform =
+                `translate(${dx}px, ${dy}px)`;
+        }
+
+        joystick.addEventListener("pointerdown", event => {
+            activePointer = event.pointerId;
+
+            try {
+                joystick.setPointerCapture(activePointer);
+            } catch (_) {}
+
+            updateFromPointer(event);
+        });
+
+        joystick.addEventListener("pointermove", event => {
+            if (event.pointerId !== activePointer) return;
+            updateFromPointer(event);
+        });
+
+        function releasePointer(event) {
+            if (
+                activePointer !== null &&
+                event.pointerId !== undefined &&
+                event.pointerId !== activePointer
+            ) {
+                return;
+            }
+
+            activePointer = null;
+            state.joystick.x = 0;
+            state.joystick.z = 0;
+            knob.style.transform = "translate(0, 0)";
+        }
+
+        joystick.addEventListener("pointerup", releasePointer);
+        joystick.addEventListener("pointercancel", releasePointer);
+        joystick.addEventListener("lostpointercapture", releasePointer);
     }
 
-    function bindAllControls() {
-        onClick("startGameButton", startGame);
-        onClick("continueGameButton", continueGame);
+    function installCameraTouchControls() {
+        const canvas = ui.gameCanvas;
+        if (!canvas) return;
 
-        onClick("backToMenuButton", () => {
-            showConfirmation(
+        let pointers = new Map();
+        let lastX = 0;
+        let lastY = 0;
+        let lastPinch = 0;
+
+        canvas.addEventListener("pointerdown", event => {
+            pointers.set(event.pointerId, {
+                x: event.clientX,
+                y: event.clientY
+            });
+
+            if (pointers.size === 2) {
+                const pts = Array.from(pointers.values());
+
+                lastPinch = Math.hypot(
+                    pts[0].x - pts[1].x,
+                    pts[0].y - pts[1].y
+                );
+            }
+
+            lastX = event.clientX;
+            lastY = event.clientY;
+        });
+
+        canvas.addEventListener("pointermove", event => {
+            if (!pointers.has(event.pointerId)) return;
+
+            const previous = pointers.get(event.pointerId);
+
+            pointers.set(event.pointerId, {
+                x: event.clientX,
+                y: event.clientY
+            });
+
+            if (pointers.size >= 2) {
+                const pts = Array.from(pointers.values());
+
+                const pinch = Math.hypot(
+                    pts[0].x - pts[1].x,
+                    pts[0].y - pts[1].y
+                );
+
+                if (lastPinch > 0 && world.camera) {
+                    const difference = lastPinch - pinch;
+
+                    world.camera.radius = clamp(
+                        world.camera.radius + difference * 0.035,
+                        CONFIG.cameraMin,
+                        CONFIG.cameraMax
+                    );
+                }
+
+                lastPinch = pinch;
+                return;
+            }
+
+            const dx = event.clientX - previous.x;
+            const dy = event.clientY - previous.y;
+
+            if (world.camera) {
+                world.camera.alpha -= dx * 0.004;
+                world.camera.beta = clamp(
+                    world.camera.beta + dy * 0.003,
+                    0.25,
+                    1.52
+                );
+            }
+
+            lastX = event.clientX;
+            lastY = event.clientY;
+        });
+
+        function removePointer(event) {
+            pointers.delete(event.pointerId);
+
+            if (pointers.size < 2) {
+                lastPinch = 0;
+            }
+        }
+
+        canvas.addEventListener("pointerup", removePointer);
+        canvas.addEventListener("pointercancel", removePointer);
+    }
+
+    /* =========================================================
+       29. LIAISON DES BOUTONS HTML
+    ========================================================= */
+
+    function bind(id, event, callback) {
+        const element = $(id);
+
+        if (!element) {
+            console.warn(`[FOBAS] Élément HTML manquant : #${id}`);
+            return;
+        }
+
+        element.addEventListener(event, callback);
+    }
+
+    function bindClick(id, callback) {
+        bind(id, "click", callback);
+    }
+
+    function bindPanel(openId, closeId, panelId) {
+        bindClick(openId, () => show($(panelId)));
+        bindClick(closeId, () => hide($(panelId)));
+    }
+
+    function installButtons() {
+        // Menu
+        bindClick("startGameButton", async () => {
+            if (!state.initialized) {
+                show(ui.loadingScreen);
+
+                try {
+                    await initializeBabylon();
+                } catch (error) {
+                    showGameError(error);
+                    return;
+                }
+
+                hide(ui.loadingScreen);
+            }
+
+            startMission(0);
+        });
+
+        bindClick("continueGameButton", async () => {
+            if (!state.initialized) {
+                try {
+                    await initializeBabylon();
+                } catch (error) {
+                    showGameError(error);
+                    return;
+                }
+            }
+
+            const loaded = await loadGame();
+
+            if (loaded) {
+                startMission(state.missionIndex);
+            } else {
+                startMission(0);
+            }
+        });
+
+        // Navigation principale
+        bindClick("backToMenuButton", () => {
+            openConfirmation(
                 "Retour au menu",
-                "Voulez-vous sauvegarder avant de revenir au menu ?",
+                "Voulez-vous sauvegarder votre progression avant de revenir au menu ?",
+                returnToMenu
+            );
+        });
+
+        bindClick("saveGameButton", () => saveGame(true));
+        bindClick("pauseGameButton", pauseGame);
+        bindClick("resumeGameButton", resumeGame);
+        bindClick("pauseSaveButton", () => saveGame(true));
+
+        bindClick("pauseSettingsButton", () => {
+            hide(ui.pauseOverlay);
+            show(ui.settingsPanel);
+        });
+
+        bindClick("pauseReturnMenuButton", returnToMenu);
+        bindClick("resultReturnMenuButton", returnToMenu);
+
+        // Mission
+        bindClick("toggleMissionPanelButton", () => {
+            const panel = ui.missionPanel;
+            if (!panel) return;
+
+            panel.classList.toggle("mission-panel-collapsed");
+        });
+
+        bindClick("nextMissionButton", nextMission);
+        bindClick("retryMissionButton", restartCurrentMission);
+
+        // Carte
+        bindClick("toggleMapButton", () => {
+            toggle(ui.minimapCanvas);
+        });
+
+        bindClick("centerCameraButton", centerCamera);
+
+        // Caméra
+        bindClick("zoomInButton", () => zoomCamera(-2));
+        bindClick("zoomOutButton", () => zoomCamera(2));
+        bindClick("resetCameraButton", resetCamera);
+
+        // Contrôles du joueur
+        bindClick("shootButton", shootPlayer);
+        bindClick("aimButton", () => {
+            state.aiming = !state.aiming;
+            ui.aimButton?.classList.toggle("active", state.aiming);
+
+            if (world.camera) {
+                world.camera.radius = state.aiming
+                    ? CONFIG.cameraMin
+                    : CONFIG.cameraStart;
+            }
+
+            toast(state.aiming ? "Visée activée." : "Visée désactivée.");
+        });
+
+        bindClick("reloadButton", () => reloadWeapon(true));
+
+        bindClick("jumpButton", () => {
+            if (!player.jumping && !player.isBoarded) {
+                player.jumping = true;
+                player.jumpVelocity = 7;
+            }
+        });
+
+        bindClick("crouchButton", () => {
+            state.crouching = !state.crouching;
+            ui.crouchButton?.classList.toggle("active", state.crouching);
+            toast(state.crouching ? "Position accroupie." : "Position debout.");
+        });
+
+        bindClick("sprintButton", () => {
+            state.sprinting = !state.sprinting;
+            ui.sprintButton?.classList.toggle("active", state.sprinting);
+            toast(state.sprinting ? "Sprint activé." : "Sprint désactivé.");
+        });
+
+        bindClick("meleeButton", meleeAttack);
+        bindClick("interactButton", performInteraction);
+
+        // Bibliothèques
+        bindPanel(
+            "openWeaponLibraryButton",
+            "closeWeaponLibraryButton",
+            "weaponLibraryPanel"
+        );
+
+        bindPanel(
+            "openEquipmentButton",
+            "closeEquipmentButton",
+            "equipmentPanel"
+        );
+
+        bindPanel(
+            "openHelicopterLibraryButton",
+            "closeHelicopterLibraryButton",
+            "helicopterLibraryPanel"
+        );
+
+        bindClick("confirmWeaponButton", equipSelectedWeapon);
+        bindClick("confirmEquipmentButton", equipSelectedEquipment);
+        bindClick("selectHelicopterButton", confirmHelicopterSelection);
+        bindClick("boardHelicopterButton", boardHelicopter);
+        bindClick("exitHelicopterButton", () => exitHelicopter());
+        bindClick("helicopterExitButton", () => exitHelicopter());
+
+        // Vol
+        bindClick("helicopterTakeoffButton", helicopterTakeoff);
+        bindClick("helicopterLandButton", helicopterLand);
+        bindClick("helicopterAccelerateButton", helicopterAccelerate);
+        bindClick("helicopterBrakeButton", helicopterBrake);
+        bindClick("helicopterAscendButton", helicopterAscend);
+        bindClick("helicopterDescendButton", helicopterDescend);
+        bindClick("helicopterTurnLeftButton", () => helicopterTurn(-1));
+        bindClick("helicopterTurnRightButton", () => helicopterTurn(1));
+        bindClick("helicopterHoverButton", helicopterHover);
+
+        bindClick("closeFlightControlsButton", () => {
+            if (!player.isBoarded) {
+                hide(ui.helicopterFlightControls);
+            } else {
+                toast("Les commandes de vol restent disponibles pendant le pilotage.");
+            }
+        });
+
+        // Communication
+        bindPanel(
+            "openCommunicationButton",
+            "closeCommunicationButton",
+            "communicationPanel"
+        );
+
+        bindClick("selectSelvandieuButton", () => {
+            state.selectedExpert = "selvandieu";
+            if (ui.messageSenderSelect) {
+                ui.messageSenderSelect.value = "selvandieu";
+            }
+        });
+
+        bindClick("selectRaniseButton", () => {
+            state.selectedExpert = "ranise";
+            if (ui.messageSenderSelect) {
+                ui.messageSenderSelect.value = "ranise";
+            }
+        });
+
+        bindClick("selectKerlandeButton", () => {
+            state.selectedExpert = "kerlande";
+            if (ui.messageSenderSelect) {
+                ui.messageSenderSelect.value = "kerlande";
+            }
+        });
+
+        bind("customMessageForm", "submit", sendCustomMessage);
+
+        bind("interactionSearchInput", "input", event => {
+            state.interactionSearch = event.target.value || "";
+            renderInteractions();
+        });
+
+        document.querySelectorAll("[data-interaction-category]")
+            .forEach(button => {
+                button.addEventListener("click", () => {
+                    state.interactionCategory =
+                        button.dataset.interactionCategory;
+
+                    document.querySelectorAll("[data-interaction-category]")
+                        .forEach(tab => tab.classList.remove("active"));
+
+                    button.classList.add("active");
+
+                    renderInteractions();
+                });
+            });
+
+        // Journal
+        bindPanel(
+            "openTacticalLogButton",
+            "closeTacticalLogButton",
+            "tacticalLogPanel"
+        );
+
+        bindClick("clearTacticalLogButton", () => {
+            if (ui.tacticalLogEntries) {
+                ui.tacticalLogEntries.replaceChildren();
+
+                const empty = document.createElement("p");
+                empty.className = "empty-state";
+                empty.textContent = "Aucun événement enregistré.";
+
+                ui.tacticalLogEntries.append(empty);
+            }
+
+            toast("Journal tactique effacé.");
+        });
+
+        // Paramètres
+        bindPanel(
+            "openSettingsButton",
+            "closeSettingsButton",
+            "settingsPanel"
+        );
+
+        bindClick("applySettingsButton", applySettings);
+        bindClick("fullscreenButton", toggleFullscreen);
+
+        // Sauvegarde
+        bindClick("closeSaveManagementButton", () => {
+            hide(ui.saveManagementPanel);
+        });
+
+        bindClick("saveNowButton", () => saveGame(true));
+        bindClick("loadSavedGameButton", async () => {
+            const loaded = await loadGame();
+
+            if (loaded) {
+                startMission(state.missionIndex);
+            }
+        });
+
+        bindClick("resetGameButton", () => {
+            openConfirmation(
+                "Réinitialiser la partie",
+                "Cette action supprimera la sauvegarde locale et réinitialisera votre progression. Continuer ?",
                 async () => {
-                    await saveGame(true);
+                    await dbDelete();
+
+                    state.score = 0;
+                    state.kills = 0;
+                    state.missionIndex = 0;
+
+                    player.health = 100;
+                    player.armor = 100;
+                    player.ammo = 30;
+                    player.weapon = "rifle";
+
+                    MISSIONS.forEach(mission => {
+                        mission.completed = false;
+                    });
+
+                    toast("Progression réinitialisée.", "✓");
                     returnToMenu();
                 }
             );
         });
 
-        onClick("saveGameButton", () => openPanel("saveManagementPanel"));
-        onClick("pauseGameButton", pauseGame);
-        onClick("resumeGameButton", resumeGame);
+        // Synchronisation
+        bindClick("syncNowButton", synchronizeGame);
 
-        onClick("pauseSaveButton", async () => {
-            await saveGame();
-        });
+        // Dialogues
+        bindClick("confirmActionButton", confirmPendingAction);
+        bindClick("cancelActionButton", closeConfirmation);
 
-        onClick("pauseSettingsButton", () => {
-            hideElement("pauseOverlay");
-            openPanel("settingsPanel");
-        });
+        // Erreur moteur
+        bindClick("retryGameInitializationButton", async () => {
+            hide(ui.gameErrorScreen);
 
-        onClick("pauseReturnMenuButton", () => {
-            showConfirmation(
-                "Retour au menu",
-                "Revenir au menu principal ?",
-                returnToMenu
-            );
-        });
-
-        onClick("toggleMissionPanelButton", () => {
-            const title = $("missionTitle");
-            const description = $("missionDescription");
-            const objectives = $("missionObjectives");
-
-            [title, description, objectives].forEach(element => {
-                if (element) element.classList.toggle("hidden");
-            });
-        });
-
-        onClick("toggleMapButton", () => toggleElement("minimapCanvas"));
-        onClick("centerCameraButton", centerCamera);
-        onClick("zoomInButton", () => zoomCamera(-2));
-        onClick("zoomOutButton", () => zoomCamera(2));
-        onClick("resetCameraButton", resetCamera);
-
-        onClick("interactButton", interactWithNearestObject);
-        onClick("shootButton", () => fireWeapon(state.player));
-        onClick("aimButton", aimWeapon);
-        onClick("reloadButton", () => reloadWeapon());
-        onClick("jumpButton", jumpPlayer);
-        onClick("crouchButton", toggleCrouch);
-
-        const sprintButton = $("sprintButton");
-
-        if (sprintButton) {
-            const start = event => {
-                event.preventDefault();
-                state.input.sprint = true;
-            };
-
-            const stop = event => {
-                event.preventDefault();
-                state.input.sprint = false;
-            };
-
-            sprintButton.addEventListener("pointerdown", start);
-            sprintButton.addEventListener("pointerup", stop);
-            sprintButton.addEventListener("pointercancel", stop);
-            sprintButton.addEventListener("pointerleave", stop);
-        }
-
-        onClick("meleeButton", performMeleeAttack);
-
-        onClick("openWeaponLibraryButton", () => {
-            renderWeaponLibrary();
-            openPanel("weaponLibraryPanel");
-        });
-
-        onClick("closeWeaponLibraryButton", () => closePanel("weaponLibraryPanel"));
-        onClick("confirmWeaponButton", equipSelectedWeapon);
-
-        onClick("openEquipmentButton", () => {
-            renderEquipmentLibrary();
-            openPanel("equipmentPanel");
-        });
-
-        onClick("closeEquipmentButton", () => closePanel("equipmentPanel"));
-        onClick("confirmEquipmentButton", equipSelectedEquipment);
-
-        onClick("openHelicopterLibraryButton", () => {
-            renderHelicopterLibrary();
-            openPanel("helicopterLibraryPanel");
-        });
-
-        onClick("closeHelicopterLibraryButton", () => closePanel("helicopterLibraryPanel"));
-        onClick("selectHelicopterButton", selectHelicopter);
-        onClick("boardHelicopterButton", boardHelicopter);
-        onClick("exitHelicopterButton", exitHelicopter);
-
-        onClick("helicopterTakeoffButton", helicopterTakeoff);
-        onClick("helicopterLandButton", helicopterLand);
-        onClick("helicopterHoverButton", helicopterHover);
-        onClick("helicopterExitButton", exitHelicopter);
-
-        bindHoldButton("helicopterAccelerateButton", "accelerate");
-        bindHoldButton("helicopterBrakeButton", "brake");
-        bindHoldButton("helicopterAscendButton", "ascend");
-        bindHoldButton("helicopterDescendButton", "descend");
-        bindHoldButton("helicopterTurnLeftButton", "turnLeft");
-        bindHoldButton("helicopterTurnRightButton", "turnRight");
-
-        onClick("closeFlightControlsButton", () => {
-            hideElement("helicopterFlightControls");
-        });
-
-        onClick("openCommunicationButton", () => {
-            state.unreadMessages = 0;
-            hideElement("unreadMessagesBadge");
-
-            openPanel("communicationPanel");
-            renderInteractionButtons();
-        });
-
-        onClick("closeCommunicationButton", () => closePanel("communicationPanel"));
-
-        onClick("selectSelvandieuButton", () => {
-            state.selectedExpertId = "selvandieu";
-            if ($("messageSenderSelect")) $("messageSenderSelect").value = "selvandieu";
-        });
-
-        onClick("selectRaniseButton", () => {
-            state.selectedExpertId = "ranise";
-            if ($("messageSenderSelect")) $("messageSenderSelect").value = "ranise";
-        });
-
-        onClick("selectKerlandeButton", () => {
-            state.selectedExpertId = "kerlande";
-            if ($("messageSenderSelect")) $("messageSenderSelect").value = "kerlande";
-        });
-
-        const customForm = $("customMessageForm");
-
-        if (customForm) {
-            customForm.addEventListener("submit", event => {
-                event.preventDefault();
-                sendCustomMessage($("customMessageInput")?.value || "");
-            });
-        }
-
-        const searchInput = $("interactionSearchInput");
-
-        if (searchInput) {
-            searchInput.addEventListener("input", renderInteractionButtons);
-        }
-
-        document.querySelectorAll("[data-interaction-category]").forEach(button => {
-            button.addEventListener("click", () => {
-                state.selectedInteractionCategory =
-                    button.dataset.interactionCategory;
-
-                document.querySelectorAll("[data-interaction-category]")
-                    .forEach(item => item.classList.remove("active"));
-
-                button.classList.add("active");
-
-                renderInteractionButtons();
-            });
-        });
-
-        onClick("openTacticalLogButton", () => openPanel("tacticalLogPanel"));
-        onClick("closeTacticalLogButton", () => closePanel("tacticalLogPanel"));
-
-        onClick("clearTacticalLogButton", () => {
-            state.tacticalLogs = [];
-            renderTacticalLog();
-        });
-
-        onClick("openSettingsButton", () => openPanel("settingsPanel"));
-        onClick("closeSettingsButton", () => closePanel("settingsPanel"));
-        onClick("applySettingsButton", applySettings);
-        onClick("fullscreenButton", toggleFullscreen);
-
-        onClick("closeSaveManagementButton", () => closePanel("saveManagementPanel"));
-        onClick("saveNowButton", () => saveGame());
-        onClick("loadSavedGameButton", loadGame);
-
-        onClick("resetGameButton", () => {
-            showConfirmation(
-                "Réinitialiser la partie",
-                "Cette action réinitialisera la progression enregistrée. Continuer ?",
-                resetGame
-            );
-        });
-
-        onClick("syncNowButton", syncDynamicContent);
-
-        onClick("confirmActionButton", async () => {
-            hideElement("confirmationDialog");
-
-            const callback = state.confirmationCallback;
-            state.confirmationCallback = null;
-
-            if (typeof callback === "function") {
-                await callback();
+            try {
+                await initializeBabylon();
+                startMission(state.missionIndex);
+            } catch (error) {
+                showGameError(error);
             }
         });
 
-        onClick("cancelActionButton", () => {
-            hideElement("confirmationDialog");
-            state.confirmationCallback = null;
+        bindClick("errorReturnMenuButton", () => {
+            hide(ui.gameErrorScreen);
+            show(ui.mainMenu);
+            hide(ui.gameScreen);
         });
+    }
 
-        onClick("nextMissionButton", startNextMission);
+    /* =========================================================
+       30. GESTION DES ERREURS
+    ========================================================= */
 
-        onClick("retryMissionButton", () => {
-            hideElement("missionResultOverlay");
+    function showGameError(error) {
+        console.error("[FOBAS ELITE STRIKE 3D]", error);
 
-            state.running = true;
-            state.paused = false;
+        hide(ui.loadingScreen);
+        show(ui.gameErrorScreen);
 
-            state.player.health = 100;
-            state.player.armor = getEquipment().armor;
-            state.player.x = 0;
-            state.player.z = 0;
-            state.player.alive = true;
-            state.player.inHelicopter = false;
-            state.player.helicopterId = null;
+        setText(
+            "gameErrorMessage",
+            error && error.message
+                ? error.message
+                : "Une erreur inconnue empêche l'initialisation du moteur 3D."
+        );
+    }
 
-            state.allies.forEach((ally, index) => {
-                ally.health = 100;
-                ally.armor = getEquipment().armor;
-                ally.alive = true;
-                ally.x = index === 0 ? -4 : 4;
-                ally.z = -3;
-                ally.inHelicopter = false;
-                ally.helicopterId = null;
-                ally.behavior = "follow";
-                ally.targetId = null;
-            });
+    window.addEventListener("error", event => {
+        console.error("[FOBAS JS]", event.error || event.message);
+    });
 
-            spawnEnemies();
-            spawnHelicopters();
-            rebuildActors();
-            setupMission(state.missionIndex);
-            updateAllHUD();
-        });
+    window.addEventListener("unhandledrejection", event => {
+        console.error("[FOBAS Promise]", event.reason);
+    });
 
-        onClick("resultReturnMenuButton", returnToMenu);
+    /* =========================================================
+       31. INITIALISATION DE L'INTERFACE
+    ========================================================= */
 
-        onClick("retryGameInitializationButton", initializeBabylon);
-        onClick("errorReturnMenuButton", returnToMenu);
-
-        // Maintenir le bouton de tir permet un tir continu.
-        const shootButton = $("shootButton");
-
-        if (shootButton) {
-            shootButton.addEventListener("pointerdown", event => {
-                event.preventDefault();
-                state.input.fire = true;
-                fireWeapon(state.player);
-            });
-
-            const stopFire = () => {
-                state.input.fire = false;
-            };
-
-            shootButton.addEventListener("pointerup", stopFire);
-            shootButton.addEventListener("pointercancel", stopFire);
-            shootButton.addEventListener("pointerleave", stopFire);
-            shootButton.addEventListener("lostpointercapture", stopFire);
+    function updateLoading(percent, message) {
+        if (ui.loadingProgressBar) {
+            ui.loadingProgressBar.style.width = `${percent}%`;
         }
 
-        installJoystick();
-        installKeyboardControls();
+        setText("loadingProgressText", `${message} ${percent} %`);
+        setText("loadingMessage", message);
+    }
 
-        renderInteractionButtons();
-        renderWeaponLibrary();
-        renderEquipmentLibrary();
-        renderHelicopterLibrary();
-        renderTacticalLog();
+    async function boot() {
+        try {
+            updateLoading(15, "Préparation du système…");
+
+            installButtons();
+            installKeyboardControls();
+            installJoystick();
+            installCameraTouchControls();
+
+            updateLoading(30, "Initialisation des données locales…");
+
+            try {
+                await openDatabase();
+
+                setText(
+                    "saveStorageStatus",
+                    "IndexedDB disponible"
+                );
+            } catch (error) {
+                console.warn("IndexedDB non disponible :", error);
+
+                setText(
+                    "saveStorageStatus",
+                    "Mode sans sauvegarde persistante"
+                );
+            }
+
+            updateLoading(50, "Chargement des missions…");
+
+            renderWeaponLibrary();
+            renderEquipmentLibrary();
+            renderHelicopterLibrary();
+            renderInteractions();
+
+            await synchronizeGame();
+
+            updateLoading(70, "Préparation de l'interface…");
+
+            const saved = await dbLoad().catch(() => null);
+
+            if (saved && saved.data) {
+                setText("continueGameButton", "CONTINUER LA PARTIE");
+                setText("saveStorageStatus", "Sauvegarde détectée");
+            } else {
+                if (ui.continueGameButton) {
+                    ui.continueGameButton.disabled = false;
+                }
+            }
+
+            updateLoading(100, "Système prêt…");
+
+            setTimeout(() => {
+                hide(ui.loadingScreen);
+                show(ui.mainMenu);
+            }, 250);
+
+            state.initialized = false;
+
+            logEvent(
+                "Système FOBAS ELITE STRIKE 3D initialisé.",
+                "success"
+            );
+        } catch (error) {
+            showGameError(error);
+        }
     }
 
     /* =========================================================
        32. API PUBLIQUE DU JEU
+       Utile pour le débogage et les extensions futures.
     ========================================================= */
 
     window.FOBAS_ELITE_STRIKE = {
-        config: CONFIG,
+        version: CONFIG.version,
 
-        get state() {
-            return state;
+        getState() {
+            return {
+                missionIndex: state.missionIndex,
+                score: state.score,
+                kills: state.kills,
+                running: state.running,
+                paused: state.paused,
+                playerHealth: player.health,
+                playerArmor: player.armor,
+                playerAmmo: player.ammo,
+                remainingEnemies: world.enemies.filter(
+                    enemy => enemy.actor.alive
+                ).length
+            };
         },
 
-        start: startGame,
-        pause: pauseGame,
-        resume: resumeGame,
-        save: saveGame,
-        load: loadGame,
-        reset: resetGame,
-
-        nextMission: startNextMission,
-        fire: () => fireWeapon(state.player),
-        reload: () => reloadWeapon(),
-
+        startMission,
+        nextMission,
+        restartCurrentMission,
+        saveGame,
+        loadGame,
+        pauseGame,
+        resumeGame,
+        shootPlayer,
+        reloadWeapon,
         boardHelicopter,
         exitHelicopter,
         helicopterTakeoff,
         helicopterLand,
+        synchronizeGame,
 
-        sendInteraction,
-        sendCustomMessage,
-
-        addInteraction(interaction) {
-            if (!interaction || !interaction.id || !interaction.command) {
-                throw new Error("Une interaction doit avoir un id et une commande.");
-            }
-
-            state.dynamicContent.interactions.push(interaction);
-            renderInteractionButtons();
-        },
-
-        addMission(mission) {
-            if (!mission || !mission.title || !Array.isArray(mission.objectives)) {
-                throw new Error("Mission invalide.");
-            }
-
-            state.dynamicContent.missions.push(mission);
-        },
-
-        getTeamStatus: teamStatusText,
-
-        sync: syncDynamicContent
+        getMissions() {
+            return MISSIONS.map(mission => ({
+                id: mission.id,
+                title: mission.title,
+                completed: mission.completed
+            }));
+        }
     };
 
     /* =========================================================
        33. DÉMARRAGE
     ========================================================= */
 
-    async function boot() {
-        try {
-            showLoadingProgress(5, "Préparation du système tactique…");
-
-            await initializeDatabase();
-            await loadSettings();
-            await initializeDynamicContent();
-
-            showLoadingProgress(20, "Préparation du moteur 3D…");
-
-            await initializeBabylon();
-
-            if (state.initialized) {
-                hideWorldLoading();
-                showElement("mainMenu");
-                updateAllHUD();
-            }
-
-            setInterval(() => {
-                syncDynamicContent();
-            }, CONFIG.syncInterval);
-
-        } catch (error) {
-            console.error("Erreur de démarrage :", error);
-
-            setText(
-                "gameErrorMessage",
-                error && error.message
-                    ? error.message
-                    : "Impossible de démarrer le système tactique."
-            );
-
-            showElement("gameErrorScreen");
-        }
-    }
-
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", boot, { once: true });
+        document.addEventListener("DOMContentLoaded", boot, {
+            once: true
+        });
     } else {
         boot();
     }
 
 })();
+
+
+
+
+
+
+
+
+
+
+
 
 
 
