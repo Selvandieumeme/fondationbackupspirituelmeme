@@ -4310,6 +4310,752 @@ svg {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   FOBAS ELITE STRIKE 3D
+   PATCH CSS INDÉPENDANT — VERSION 1.0.0
+   Objectif :
+   - Libérer l'écran de jeu 3D
+   - Réduire l'encombrement des panneaux
+   - Préserver les contrôles existants
+   - Améliorer l'affichage Android
+   - Préparer les boutons de réduction et réouverture
+   IMPORTANT :
+   Ajouter ce bloc à la FIN de app el icopterefobas.css
+   sans supprimer les styles existants.
+========================================================= */
+
+
+/* =========================================================
+   1. PRIORITÉ À LA ZONE DE JEU
+========================================================= */
+
+#helicopterGameApp {
+    isolation: isolate;
+}
+
+#helicopterGameApp .game-screen {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+#helicopterGameApp .game-world,
+#helicopterGameApp .game-viewport,
+#helicopterGameApp .game-scene {
+    min-width: 0;
+    min-height: 0;
+}
+
+#helicopterGameApp .game-canvas,
+#helicopterGameApp canvas.game-canvas {
+    display: block;
+    max-width: 100%;
+}
+
+#helicopterGameApp .game-canvas {
+    touch-action: none;
+}
+
+
+/* =========================================================
+   2. ÉVITER QUE LES PANNEAUX MASQUÉS RESTENT VISIBLES
+========================================================= */
+
+#helicopterGameApp .hidden,
+#helicopterGameApp [hidden],
+#helicopterGameApp .is-hidden,
+#helicopterGameApp .panel-hidden,
+#helicopterGameApp .is-minimized {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   3. PANNEAU DE MISSION
+========================================================= */
+
+#helicopterGameApp .mission-panel {
+    max-width: min(300px, calc(100vw - 20px));
+    max-height: min(48dvh, 420px);
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+#helicopterGameApp .mission-panel > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#helicopterGameApp .mission-panel .panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+
+/* =========================================================
+   4. MINIMAP
+========================================================= */
+
+#helicopterGameApp .minimap-panel {
+    width: min(190px, 31vw);
+    max-width: calc(100vw - 16px);
+    max-height: 42dvh;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+#helicopterGameApp .minimap-panel canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+
+/* =========================================================
+   5. HUD DU JOUEUR
+========================================================= */
+
+#helicopterGameApp .player-hud {
+    max-width: min(360px, calc(100vw - 20px));
+    min-width: 0;
+
+    overflow: hidden;
+}
+
+#helicopterGameApp .hud-player-card,
+#helicopterGameApp .player-information,
+#helicopterGameApp .hud-vitals,
+#helicopterGameApp .hud-ammunition {
+    min-width: 0;
+}
+
+#helicopterGameApp .player-information strong,
+#helicopterGameApp .player-information small {
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   6. CONTRÔLES DE CAMÉRA
+========================================================= */
+
+#helicopterGameApp .camera-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+
+    max-width: calc(100vw - 12px);
+}
+
+#helicopterGameApp .camera-controls button {
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   7. JOYSTICK ET ACTIONS DU JOUEUR
+   Garder les commandes tactiles accessibles.
+========================================================= */
+
+#helicopterGameApp .movement-control,
+#helicopterGameApp .movement-joystick,
+#helicopterGameApp .joystick-knob {
+    flex-shrink: 0;
+}
+
+#helicopterGameApp .player-action-controls {
+    max-width: calc(100vw - 12px);
+}
+
+#helicopterGameApp .player-action-controls button {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   8. BOUTONS D'ACCÈS AUX PANNEAUX
+========================================================= */
+
+#helicopterGameApp .floating-panel-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    max-width: calc(100vw - 16px);
+    min-width: 0;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
+}
+
+#helicopterGameApp .floating-panel-button:focus-visible,
+#helicopterGameApp .icon-button:focus-visible,
+#helicopterGameApp .small-icon-button:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+
+/* =========================================================
+   9. PANNEAUX LATÉRAUX
+========================================================= */
+
+#helicopterGameApp .drawer-panel {
+    max-width: calc(100vw - 12px);
+    max-height: calc(
+        100dvh
+        - var(--topbar-height)
+        - var(--safe-top)
+        - var(--safe-bottom)
+        - 12px
+    );
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+#helicopterGameApp .drawer-panel > * {
+    min-width: 0;
+}
+
+#helicopterGameApp .weapon-library-list,
+#helicopterGameApp .equipment-library-list,
+#helicopterGameApp .helicopter-library-list {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   10. COMMUNICATION
+========================================================= */
+
+#helicopterGameApp .communication-panel {
+    width: min(450px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+
+    max-height: calc(
+        100dvh
+        - var(--topbar-height)
+        - var(--safe-top)
+        - var(--safe-bottom)
+        - 12px
+    );
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+#helicopterGameApp .communication-panel > * {
+    min-width: 0;
+}
+
+#helicopterGameApp .communication-messages,
+#helicopterGameApp .interaction-buttons {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+#helicopterGameApp .custom-message-row {
+    min-width: 0;
+}
+
+#helicopterGameApp .custom-message-row input {
+    min-width: 0;
+    max-width: 100%;
+}
+
+
+/* =========================================================
+   11. PANNEAU DE SYNCHRONISATION
+========================================================= */
+
+#helicopterGameApp .sync-status-panel {
+    width: min(220px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+
+    min-width: 0;
+}
+
+#helicopterGameApp .sync-status-panel > div {
+    min-width: 0;
+}
+
+#helicopterGameApp .sync-status-panel small {
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   12. HUD DE L'HÉLICOPTÈRE
+========================================================= */
+
+#helicopterGameApp .helicopter-hud {
+    width: min(310px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+
+    max-height: 38dvh;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   13. COMMANDES DE VOL
+========================================================= */
+
+#helicopterGameApp .helicopter-flight-controls {
+    max-width: calc(100vw - 12px);
+
+    max-height: 45dvh;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+#helicopterGameApp .flight-control-grid {
+    min-width: 0;
+}
+
+#helicopterGameApp .flight-button {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   14. JOURNAL TACTIQUE ET PARAMÈTRES
+========================================================= */
+
+#helicopterGameApp .tactical-log-entries,
+#helicopterGameApp .settings-list {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+#helicopterGameApp .tactical-log-entries > *,
+#helicopterGameApp .settings-list > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   15. BOUTONS DE FERMETURE ET DE RÉDUCTION
+   Styles applicables si ces boutons existent déjà en HTML.
+========================================================= */
+
+#helicopterGameApp .panel-close-button,
+#helicopterGameApp .panel-minimize-button,
+#helicopterGameApp .panel-toggle-button,
+#helicopterGameApp [data-panel-close],
+#helicopterGameApp [data-panel-minimize],
+#helicopterGameApp [data-panel-toggle] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+
+    padding: 0;
+
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.045);
+
+    font: inherit;
+    font-size: 15px;
+    line-height: 1;
+
+    cursor: pointer;
+    touch-action: manipulation;
+
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease,
+        transform 160ms ease;
+}
+
+#helicopterGameApp .panel-close-button:hover,
+#helicopterGameApp .panel-minimize-button:hover,
+#helicopterGameApp .panel-toggle-button:hover,
+#helicopterGameApp [data-panel-close]:hover,
+#helicopterGameApp [data-panel-minimize]:hover,
+#helicopterGameApp [data-panel-toggle]:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(201, 255, 103, 0.08);
+}
+
+#helicopterGameApp .panel-close-button:active,
+#helicopterGameApp .panel-minimize-button:active,
+#helicopterGameApp .panel-toggle-button:active,
+#helicopterGameApp [data-panel-close]:active,
+#helicopterGameApp [data-panel-minimize]:active,
+#helicopterGameApp [data-panel-toggle]:active {
+    transform: scale(0.95);
+}
+
+
+/* =========================================================
+   16. MODE PANNEAU RÉDUIT
+   À activer via une classe CSS ou un attribut HTML.
+========================================================= */
+
+#helicopterGameApp .panel-collapsed > :not(.panel-heading):not(.drawer-header):not(.communication-header),
+#helicopterGameApp [data-collapsed="true"] > :not(.panel-heading):not(.drawer-header):not(.communication-header) {
+    display: none !important;
+}
+
+#helicopterGameApp .panel-collapsed,
+#helicopterGameApp [data-collapsed="true"] {
+    width: max-content;
+    max-width: calc(100vw - 16px);
+
+    max-height: none;
+    overflow: visible;
+}
+
+#helicopterGameApp .panel-collapsed .panel-heading,
+#helicopterGameApp .panel-collapsed .drawer-header,
+#helicopterGameApp .panel-collapsed .communication-header {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+
+/* =========================================================
+   17. NOTIFICATIONS : NE PAS BLOQUER LES COMMANDES
+========================================================= */
+
+#helicopterGameApp .notification-stack {
+    max-width: calc(100vw - 20px);
+    pointer-events: none;
+}
+
+#helicopterGameApp .game-notification {
+    max-width: 100%;
+    pointer-events: none;
+}
+
+#helicopterGameApp .global-toast {
+    max-width: calc(100vw - 20px);
+    overflow-wrap: anywhere;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   18. MODALES : PRIORITÉ SEULEMENT LORSQU'ELLES SONT OUVERTES
+========================================================= */
+
+#helicopterGameApp .modal-overlay[hidden],
+#helicopterGameApp .modal-overlay.hidden {
+    display: none !important;
+}
+
+#helicopterGameApp .modal-overlay:not(.hidden):not([hidden]) {
+    z-index: 500;
+}
+
+
+/* =========================================================
+   19. ANDROID — PORTRAIT
+========================================================= */
+
+@media (max-width: 700px) and (orientation: portrait) {
+
+    #helicopterGameApp .mission-panel {
+        width: min(170px, calc(46vw - 10px));
+        max-height: 31dvh;
+    }
+
+    #helicopterGameApp .minimap-panel {
+        width: min(105px, 29vw);
+        max-height: 29dvh;
+    }
+
+    #helicopterGameApp .sync-status-panel {
+        width: min(135px, 38vw);
+        padding: 6px;
+    }
+
+    #helicopterGameApp .player-hud {
+        width: min(285px, calc(100vw - 16px));
+    }
+
+    #helicopterGameApp .helicopter-hud {
+        width: min(245px, calc(100vw - 16px));
+        max-height: 28dvh;
+    }
+
+    #helicopterGameApp .communication-panel,
+    #helicopterGameApp .drawer-panel {
+        width: calc(100vw - 12px);
+        max-width: calc(100vw - 12px);
+    }
+
+    #helicopterGameApp .communication-panel {
+        max-height: calc(
+            100dvh
+            - var(--topbar-height)
+            - var(--safe-top)
+            - var(--safe-bottom)
+            - 8px
+        );
+    }
+
+    #helicopterGameApp .helicopter-flight-controls {
+        max-height: 33dvh;
+    }
+
+    #helicopterGameApp .floating-panel-button {
+        min-height: 29px;
+        padding: 5px 7px;
+        font-size: 8px;
+    }
+}
+
+
+/* =========================================================
+   20. ANDROID — PAYSAGE
+========================================================= */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    #helicopterGameApp .mission-panel {
+        width: min(160px, 24vw);
+        max-height: 42dvh;
+    }
+
+    #helicopterGameApp .minimap-panel {
+        width: min(120px, 20vw);
+        max-height: 40dvh;
+    }
+
+    #helicopterGameApp .player-hud {
+        width: min(300px, 39vw);
+        max-height: 30dvh;
+    }
+
+    #helicopterGameApp .sync-status-panel {
+        width: min(145px, 23vw);
+    }
+
+    #helicopterGameApp .helicopter-hud {
+        max-height: 24dvh;
+    }
+
+    #helicopterGameApp .helicopter-flight-controls {
+        max-height: 30dvh;
+    }
+
+    #helicopterGameApp .communication-panel,
+    #helicopterGameApp .drawer-panel {
+        max-height: calc(
+            100dvh
+            - var(--topbar-height)
+            - var(--safe-top)
+            - var(--safe-bottom)
+            - 8px
+        );
+    }
+
+    #helicopterGameApp .touch-control-hint {
+        max-width: 45vw;
+    }
+}
+
+
+/* =========================================================
+   21. TRÈS PETITS ÉCRANS
+========================================================= */
+
+@media (max-width: 380px) {
+
+    #helicopterGameApp .mission-panel {
+        width: min(145px, calc(44vw - 8px));
+    }
+
+    #helicopterGameApp .minimap-panel {
+        width: min(95px, 27vw);
+    }
+
+    #helicopterGameApp .sync-status-panel {
+        width: min(118px, 35vw);
+    }
+
+    #helicopterGameApp .floating-panel-button {
+        gap: 4px;
+        padding: 5px;
+        font-size: 7px;
+    }
+
+    #helicopterGameApp .panel-close-button,
+    #helicopterGameApp .panel-minimize-button,
+    #helicopterGameApp .panel-toggle-button,
+    #helicopterGameApp [data-panel-close],
+    #helicopterGameApp [data-panel-minimize],
+    #helicopterGameApp [data-panel-toggle] {
+        width: 29px;
+        min-width: 29px;
+        height: 29px;
+    }
+}
+
+
+/* =========================================================
+   22. TABLETTES
+========================================================= */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+
+    #helicopterGameApp .mission-panel {
+        max-width: 240px;
+        max-height: 45dvh;
+    }
+
+    #helicopterGameApp .minimap-panel {
+        max-width: 165px;
+    }
+
+    #helicopterGameApp .communication-panel,
+    #helicopterGameApp .drawer-panel {
+        max-height: calc(100dvh - 24px);
+    }
+}
+
+
+/* =========================================================
+   23. ORDINATEURS ET GRANDS ÉCRANS
+========================================================= */
+
+@media (min-width: 1101px) {
+
+    #helicopterGameApp .mission-panel {
+        max-height: 55dvh;
+    }
+
+    #helicopterGameApp .minimap-panel {
+        max-height: 48dvh;
+    }
+
+    #helicopterGameApp .communication-panel,
+    #helicopterGameApp .drawer-panel {
+        max-height: calc(100dvh - 30px);
+    }
+}
+
+
+/* =========================================================
+   24. ACCESSIBILITÉ
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    #helicopterGameApp .panel-close-button,
+    #helicopterGameApp .panel-minimize-button,
+    #helicopterGameApp .panel-toggle-button,
+    #helicopterGameApp [data-panel-close],
+    #helicopterGameApp [data-panel-minimize],
+    #helicopterGameApp [data-panel-toggle] {
+        transition: none;
+    }
+}
+
+
+/* =========================================================
+   25. FIN DU PATCH CSS INDÉPENDANT
+========================================================= */
+
+
+
+
+
+
+
 /* =========================================================
    34. FIN DU FICHIER
 ========================================================= */
