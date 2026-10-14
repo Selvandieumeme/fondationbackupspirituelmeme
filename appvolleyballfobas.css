@@ -1,0 +1,3191 @@
+/* ============================================================
+   FOBAS VOLLEYBALL CHAMPIONS 3D
+   Fichier : appvolleyballfobas.css
+   Version : 1.0.0
+   Design   : Cinematic 3D Sports Experience
+   Plateformes : Android, tablette, ordinateur
+   Compatible avec : appvolleyballfobas.html
+============================================================ */
+
+/* ============================================================
+   01. VARIABLES GLOBALES
+============================================================ */
+
+:root {
+    color-scheme: dark;
+
+    --fobas-bg: #07111e;
+    --fobas-bg-deep: #030914;
+    --fobas-panel: rgba(12, 25, 43, 0.96);
+    --fobas-panel-light: rgba(20, 39, 63, 0.96);
+
+    --fobas-primary: #00e5ff;
+    --fobas-primary-dark: #009bb8;
+    --fobas-secondary: #ffca55;
+    --fobas-gold: #ffd76a;
+    --fobas-green: #47f2a2;
+    --fobas-red: #ff5571;
+
+    --fobas-text: #f4f8ff;
+    --fobas-text-soft: #b7c7db;
+    --fobas-text-muted: #8194ac;
+
+    --fobas-border: rgba(155, 202, 255, 0.16);
+    --fobas-border-bright: rgba(0, 229, 255, 0.42);
+
+    --fobas-radius-sm: 10px;
+    --fobas-radius-md: 17px;
+    --fobas-radius-lg: 24px;
+    --fobas-radius-xl: 30px;
+
+    --fobas-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.35);
+
+    --fobas-glow:
+        0 0 22px rgba(0, 229, 255, 0.16);
+
+    --fobas-safe-top: env(safe-area-inset-top, 0px);
+    --fobas-safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    --fobas-font:
+        Inter,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    --fobas-transition:
+        180ms ease;
+}
+
+/* ============================================================
+   02. RÈGLES GÉNÉRALES
+============================================================ */
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--fobas-bg-deep);
+    scroll-behavior: smooth;
+}
+
+body {
+    width: 100%;
+    min-width: 280px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+
+    color: var(--fobas-text);
+    background:
+        radial-gradient(
+            ellipse at 50% 0%,
+            rgba(0, 153, 205, 0.13),
+            transparent 52%
+        ),
+        linear-gradient(
+            160deg,
+            #0b1b2e 0%,
+            #07111e 52%,
+            #030914 100%
+        );
+
+    font-family: var(--fobas-font);
+    font-size: 14px;
+    line-height: 1.5;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+}
+
+button,
+select,
+input[type="range"] {
+    touch-action: manipulation;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--fobas-primary);
+    outline-offset: 3px;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+}
+
+img,
+canvas,
+svg {
+    max-width: 100%;
+}
+
+img {
+    display: block;
+}
+
+canvas {
+    display: block;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+::selection {
+    color: #00131d;
+    background: var(--fobas-primary);
+}
+
+/* Barre de défilement */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #23516a #07111e;
+}
+
+*::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #23516a;
+    border-radius: 20px;
+}
+
+/* ============================================================
+   03. CONTENEUR PRINCIPAL
+============================================================ */
+
+#volleyballApp,
+#app,
+.app-container {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+#volleyballApp {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+}
+
+.app-shell {
+    width: 100%;
+    max-width: 1600px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin-inline: auto;
+    padding-bottom: calc(80px + var(--fobas-safe-bottom));
+}
+
+/* ============================================================
+   04. FOND CINÉMATIQUE
+============================================================ */
+
+.background-effects {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.background-effects::before,
+.background-effects::after {
+    position: absolute;
+    content: "";
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.18;
+}
+
+.background-effects::before {
+    width: 300px;
+    height: 300px;
+    top: -100px;
+    left: -90px;
+    background: #00bce8;
+}
+
+.background-effects::after {
+    width: 260px;
+    height: 260px;
+    right: -100px;
+    bottom: 10%;
+    background: #6845ff;
+}
+
+/* ============================================================
+   05. ÉCRAN DE CHARGEMENT
+============================================================ */
+
+#loadingScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 28px;
+
+    background:
+        radial-gradient(
+            circle at 50% 38%,
+            rgba(0, 184, 230, 0.19),
+            transparent 34%
+        ),
+        linear-gradient(
+            145deg,
+            #071b31,
+            #030914 72%
+        );
+
+    text-align: center;
+
+    transition:
+        opacity 350ms ease,
+        visibility 350ms ease;
+}
+
+#loadingScreen.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#loadingScreen .loading-logo {
+    display: grid;
+    place-items: center;
+
+    width: 96px;
+    height: 96px;
+
+    margin-bottom: 24px;
+
+    border: 1px solid rgba(0, 229, 255, 0.48);
+    border-radius: 28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(0, 229, 255, 0.2),
+            rgba(0, 65, 100, 0.1)
+        );
+
+    box-shadow:
+        0 0 40px rgba(0, 229, 255, 0.2),
+        inset 0 0 20px rgba(0, 229, 255, 0.08);
+
+    font-size: 42px;
+}
+
+#loadingScreen h1 {
+    margin: 0 0 8px;
+
+    color: #fff;
+
+    font-size: clamp(21px, 5vw, 35px);
+    font-weight: 900;
+    letter-spacing: 1.6px;
+    line-height: 1.2;
+}
+
+#loadingMessage {
+    max-width: 400px;
+    margin: 12px 0;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 13px;
+}
+
+#loadingProgress {
+    width: min(100%, 330px);
+    height: 7px;
+
+    margin-top: 20px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+#loadingProgress::-webkit-progress-bar {
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#loadingProgress::-webkit-progress-value {
+    border-radius: 20px;
+    background: linear-gradient(
+        90deg,
+        #00a6d6,
+        #00f0ff,
+        #8affed
+    );
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.55);
+}
+
+#loadingProgress::-moz-progress-bar {
+    border-radius: 20px;
+    background: linear-gradient(
+        90deg,
+        #00a6d6,
+        #00f0ff,
+        #8affed
+    );
+}
+
+/* ============================================================
+   06. EN-TÊTE DU JEU
+============================================================ */
+
+.app-header,
+.game-header,
+header {
+    position: relative;
+    z-index: 30;
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding:
+        calc(12px + var(--fobas-safe-top))
+        15px
+        12px;
+
+    border-bottom: 1px solid var(--fobas-border);
+
+    background: rgba(4, 13, 25, 0.84);
+
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+
+.brand-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.brand-icon {
+    display: grid;
+    flex: 0 0 43px;
+    place-items: center;
+
+    width: 43px;
+    height: 43px;
+
+    border: 1px solid rgba(0, 229, 255, 0.38);
+    border-radius: 14px;
+
+    background: linear-gradient(
+        145deg,
+        rgba(0, 229, 255, 0.22),
+        rgba(0, 111, 168, 0.1)
+    );
+
+    box-shadow: var(--fobas-glow);
+
+    font-size: 23px;
+}
+
+.brand-text {
+    min-width: 0;
+}
+
+.brand-text h1,
+.brand-title {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: clamp(12px, 3.5vw, 17px);
+    font-weight: 900;
+    letter-spacing: 0.65px;
+    line-height: 1.25;
+}
+
+.brand-text p,
+.brand-subtitle {
+    margin: 4px 0 0;
+
+    color: var(--fobas-primary);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* ============================================================
+   07. BOUTONS GÉNÉRAUX
+============================================================ */
+
+button {
+    border: 0;
+    cursor: pointer;
+
+    transition:
+        transform var(--fobas-transition),
+        background var(--fobas-transition),
+        border-color var(--fobas-transition),
+        box-shadow var(--fobas-transition),
+        opacity var(--fobas-transition);
+}
+
+button:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+
+    padding: 0;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 14px;
+
+    color: var(--fobas-text);
+    background: rgba(255, 255, 255, 0.055);
+
+    font-size: 19px;
+}
+
+.icon-button:hover {
+    border-color: var(--fobas-border-bright);
+    background: rgba(0, 229, 255, 0.1);
+}
+
+.primary-button,
+.secondary-button,
+.danger-button,
+.gold-button,
+.menu-button,
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-height: 46px;
+
+    padding: 12px 16px;
+
+    border: 1px solid transparent;
+    border-radius: 14px;
+
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.3;
+    text-align: center;
+    text-decoration: none;
+}
+
+.primary-button {
+    color: #00131d;
+
+    background: linear-gradient(
+        135deg,
+        #7af7ff,
+        #00d7f2 65%,
+        #00a9d0
+    );
+
+    box-shadow:
+        0 7px 22px rgba(0, 203, 239, 0.2);
+}
+
+.primary-button:hover {
+    box-shadow:
+        0 9px 28px rgba(0, 203, 239, 0.35);
+    filter: brightness(1.06);
+}
+
+.secondary-button {
+    border-color: var(--fobas-border);
+    color: var(--fobas-text);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.secondary-button:hover {
+    border-color: var(--fobas-border-bright);
+    background: rgba(0, 229, 255, 0.1);
+}
+
+.gold-button {
+    color: #261800;
+    background: linear-gradient(135deg, #fff0a4, #ffc044 70%, #ff9e25);
+    box-shadow: 0 7px 22px rgba(255, 190, 50, 0.15);
+}
+
+.danger-button {
+    border-color: rgba(255, 85, 113, 0.3);
+    color: #fff;
+    background: rgba(255, 61, 94, 0.14);
+}
+
+.danger-button:hover {
+    background: rgba(255, 61, 94, 0.25);
+}
+
+.menu-button {
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 56px;
+
+    padding: 13px 15px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 16px;
+
+    color: var(--fobas-text);
+    background:
+        linear-gradient(
+            110deg,
+            rgba(24, 46, 72, 0.9),
+            rgba(11, 25, 44, 0.8)
+        );
+
+    text-align: left;
+}
+
+.menu-button:hover {
+    border-color: var(--fobas-border-bright);
+    background:
+        linear-gradient(
+            110deg,
+            rgba(0, 140, 180, 0.19),
+            rgba(11, 25, 44, 0.95)
+        );
+}
+
+.menu-button .menu-icon {
+    display: grid;
+    flex: 0 0 36px;
+    place-items: center;
+
+    width: 36px;
+    height: 36px;
+
+    border-radius: 11px;
+
+    background: rgba(0, 229, 255, 0.09);
+
+    font-size: 19px;
+}
+
+.menu-button .menu-label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+
+    min-width: 0;
+}
+
+.menu-button .menu-label strong {
+    color: #fff;
+    font-size: 13px;
+}
+
+.menu-button .menu-label small {
+    color: var(--fobas-text-muted);
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.menu-button .menu-arrow {
+    color: var(--fobas-primary);
+    font-size: 20px;
+}
+
+/* ============================================================
+   08. SECTIONS ET CARTES
+============================================================ */
+
+.section-container {
+    padding: 16px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-bottom: 14px;
+}
+
+.section-heading h2,
+.section-title {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.2px;
+}
+
+.section-heading p {
+    margin: 4px 0 0;
+    color: var(--fobas-text-muted);
+    font-size: 12px;
+}
+
+.panel-card,
+.game-card,
+.stat-card {
+    border: 1px solid var(--fobas-border);
+    border-radius: var(--fobas-radius-lg);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20, 40, 64, 0.94),
+            rgba(8, 19, 34, 0.97)
+        );
+
+    box-shadow: var(--fobas-shadow);
+}
+
+.panel-card {
+    padding: 18px;
+}
+
+.game-card {
+    overflow: hidden;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+/* ============================================================
+   09. MENU PRINCIPAL
+============================================================ */
+
+#mainMenu {
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    padding: 17px 15px 26px;
+}
+
+#mainMenu .hero-section {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    min-height: 225px;
+
+    margin-bottom: 18px;
+    padding: 24px 20px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(0, 229, 255, 0.23);
+    border-radius: 25px;
+
+    background:
+        radial-gradient(
+            ellipse at 80% 25%,
+            rgba(0, 229, 255, 0.2),
+            transparent 42%
+        ),
+        linear-gradient(
+            145deg,
+            #153b58,
+            #0b2038 55%,
+            #07111e
+        );
+}
+
+#mainMenu .hero-section::before {
+    position: absolute;
+    top: -55px;
+    right: -35px;
+
+    width: 190px;
+    height: 190px;
+
+    content: "🏐";
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid rgba(0, 229, 255, 0.16);
+    border-radius: 50%;
+
+    background: rgba(0, 229, 255, 0.045);
+
+    font-size: 100px;
+    opacity: 0.7;
+
+    transform: rotate(-17deg);
+}
+
+#mainMenu .hero-section > * {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    width: fit-content;
+
+    margin-bottom: 12px;
+    padding: 6px 10px;
+
+    border: 1px solid rgba(0, 229, 255, 0.25);
+    border-radius: 30px;
+
+    color: var(--fobas-primary);
+    background: rgba(0, 229, 255, 0.08);
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+#mainMenu .hero-section h2 {
+    max-width: 420px;
+    margin: 0;
+
+    color: #fff;
+
+    font-size: clamp(24px, 6.5vw, 38px);
+    font-weight: 950;
+    letter-spacing: -0.8px;
+    line-height: 1.05;
+}
+
+#mainMenu .hero-section p {
+    max-width: 320px;
+    margin: 11px 0 0;
+
+    color: #c7d8e9;
+
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+#playButton {
+    width: 100%;
+    min-height: 54px;
+
+    margin-bottom: 17px;
+
+    border-radius: 16px;
+
+    font-size: 15px;
+    letter-spacing: 0.3px;
+}
+
+#mainMenu .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+#mainMenu .menu-grid > button {
+    min-width: 0;
+}
+
+#mainMenu .menu-grid .wide-button {
+    grid-column: 1 / -1;
+}
+
+#saveStatus {
+    min-height: 20px;
+    margin: 14px 2px 0;
+
+    color: var(--fobas-text-muted);
+    font-size: 11px;
+    text-align: center;
+}
+
+/* ============================================================
+   10. STADE ET SCÈNE 3D
+============================================================ */
+
+#stadiumSection {
+    position: relative;
+
+    width: 100%;
+    min-height: 400px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            #07172b,
+            #112d40 52%,
+            #0a1a23
+        );
+
+    isolation: isolate;
+}
+
+#volleyballCanvas {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+
+    outline: none;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 20%,
+            #6d9da7 0%,
+            #254d62 40%,
+            #0a192a 100%
+        );
+
+    touch-action: none;
+}
+
+#stadiumSection canvas {
+    width: 100%;
+    height: 100%;
+}
+
+#stadiumSection:fullscreen {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    background: #02070d;
+}
+
+#stadiumSection:fullscreen #volleyballCanvas {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+}
+
+#engineStatus {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 8;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    max-width: calc(100% - 24px);
+
+    padding: 7px 10px;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 30px;
+
+    color: #d8f8ff;
+    background: rgba(1, 11, 21, 0.74);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+#engineStatus::before {
+    width: 7px;
+    height: 7px;
+
+    content: "";
+
+    border-radius: 50%;
+    background: var(--fobas-green);
+
+    box-shadow: 0 0 10px rgba(71, 242, 162, 0.6);
+}
+
+#stadiumLoader {
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    color: #fff;
+    background: rgba(3, 10, 20, 0.86);
+
+    text-align: center;
+
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+#stadiumLoader .loader-spinner {
+    width: 42px;
+    height: 42px;
+
+    margin-bottom: 16px;
+
+    border: 3px solid rgba(255, 255, 255, 0.13);
+    border-top-color: var(--fobas-primary);
+    border-radius: 50%;
+
+    animation: fobas-spin 850ms linear infinite;
+}
+
+#stadiumLoader p {
+    margin: 0;
+    color: var(--fobas-text-soft);
+    font-size: 12px;
+}
+
+@keyframes fobas-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================================
+   11. TABLEAU DE SCORE
+============================================================ */
+
+#scoreboard {
+    position: absolute;
+    top: 47px;
+    left: 50%;
+    z-index: 7;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+
+    width: min(94%, 540px);
+
+    padding: 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+
+    background: rgba(3, 11, 22, 0.83);
+
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
+
+    transform: translateX(-50%);
+
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+}
+
+.team-score {
+    min-width: 0;
+    text-align: center;
+}
+
+#homeTeamName,
+#awayTeamName {
+    display: block;
+
+    overflow: hidden;
+
+    color: #dceaff;
+
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#homeScore,
+#awayScore {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #fff;
+
+    font-size: clamp(29px, 7vw, 43px);
+    font-weight: 950;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+#homeScore {
+    text-shadow: 0 0 20px rgba(0, 229, 255, 0.25);
+}
+
+#awayScore {
+    text-shadow: 0 0 20px rgba(255, 85, 113, 0.22);
+}
+
+.score-middle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    min-width: 54px;
+}
+
+.score-vs {
+    color: var(--fobas-secondary);
+
+    font-size: 10px;
+    font-weight: 950;
+    letter-spacing: 1.5px;
+}
+
+#setLabel {
+    padding: 4px 7px;
+
+    border: 1px solid rgba(255, 202, 85, 0.25);
+    border-radius: 7px;
+
+    color: var(--fobas-gold);
+    background: rgba(255, 202, 85, 0.08);
+
+    font-size: 9px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   12. INFOS DE MISSION ET CHRONOMÈTRE
+============================================================ */
+
+#missionLabel,
+#matchClock {
+    position: absolute;
+    z-index: 6;
+
+    padding: 7px 10px;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 10px;
+
+    color: #fff;
+    background: rgba(3, 11, 22, 0.75);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+#missionLabel {
+    top: 157px;
+    left: 12px;
+    max-width: 65%;
+}
+
+#matchClock {
+    top: 157px;
+    right: 12px;
+
+    color: var(--fobas-gold);
+    font-variant-numeric: tabular-nums;
+}
+
+#gameMessage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 12;
+
+    width: max-content;
+    max-width: calc(100% - 40px);
+
+    padding: 12px 18px;
+
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 14px;
+
+    color: #fff;
+    background: rgba(3, 11, 22, 0.91);
+
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.3);
+
+    font-size: 14px;
+    font-weight: 900;
+    text-align: center;
+
+    pointer-events: none;
+
+    transform: translate(-50%, -50%);
+}
+
+/* ============================================================
+   13. ZOOM ET CAMÉRA
+============================================================ */
+
+.camera-controls {
+    position: absolute;
+    right: 12px;
+    bottom: 15px;
+    z-index: 10;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#zoomOutButton,
+#zoomInButton,
+#cameraResetButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+    padding: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 13px;
+
+    color: #fff;
+    background: rgba(3, 11, 22, 0.83);
+
+    font-size: 21px;
+    font-weight: 800;
+
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+#zoomOutButton:hover,
+#zoomInButton:hover,
+#cameraResetButton:hover {
+    border-color: var(--fobas-primary);
+    background: rgba(0, 145, 180, 0.5);
+}
+
+#zoomLevel {
+    min-width: 43px;
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 900;
+    text-align: center;
+}
+
+#pinchHint {
+    position: absolute;
+    bottom: 19px;
+    left: 12px;
+    z-index: 5;
+
+    max-width: calc(100% - 180px);
+
+    padding: 8px 10px;
+
+    border-radius: 10px;
+
+    color: #e3f7ff;
+    background: rgba(3, 11, 22, 0.65);
+
+    font-size: 10px;
+    line-height: 1.4;
+
+    pointer-events: none;
+}
+
+/* ============================================================
+   14. CONTRÔLES DU MATCH
+============================================================ */
+
+#matchControls {
+    position: relative;
+    z-index: 15;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+
+    padding: 14px;
+
+    border-top: 1px solid var(--fobas-border);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(8, 22, 38, 0.98),
+            rgba(4, 12, 23, 1)
+        );
+}
+
+.player-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 12px 14px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 15px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+#activePlayerName {
+    display: block;
+
+    color: #fff;
+
+    font-size: 13px;
+    font-weight: 900;
+}
+
+#activePlayerPosition {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--fobas-primary);
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+#ballState {
+    padding: 6px 9px;
+
+    border-radius: 9px;
+
+    color: var(--fobas-gold);
+    background: rgba(255, 202, 85, 0.1);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+#matchObjective {
+    margin: 0;
+
+    padding: 10px 12px;
+
+    border-left: 3px solid var(--fobas-primary);
+    border-radius: 0 10px 10px 0;
+
+    color: var(--fobas-text-soft);
+    background: rgba(0, 229, 255, 0.055);
+
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.match-control-layout {
+    display: grid;
+    grid-template-columns: minmax(110px, 0.9fr) minmax(0, 1.4fr);
+    align-items: center;
+    gap: 12px;
+}
+
+#joystickBase {
+    position: relative;
+
+    display: grid;
+    place-items: center;
+
+    width: min(100%, 148px);
+    aspect-ratio: 1;
+
+    margin-inline: auto;
+
+    border: 2px solid rgba(0, 229, 255, 0.3);
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(0, 229, 255, 0.12),
+            rgba(0, 229, 255, 0.035) 64%,
+            rgba(0, 0, 0, 0.1)
+        );
+
+    box-shadow:
+        inset 0 0 25px rgba(0, 229, 255, 0.08),
+        0 0 18px rgba(0, 229, 255, 0.06);
+
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#joystickBase::before {
+    position: absolute;
+    inset: 18%;
+
+    content: "";
+
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+
+    pointer-events: none;
+}
+
+#joystickStick {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    display: grid;
+    place-items: center;
+
+    width: 42%;
+    height: 42%;
+
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+
+    background: linear-gradient(
+        145deg,
+        #50f1ff,
+        #008bbd
+    );
+
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.32),
+        0 0 18px rgba(0, 229, 255, 0.28);
+
+    transform: translate(-50%, -50%);
+
+    pointer-events: none;
+}
+
+.match-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+#serveButton,
+#passButton,
+#smashButton,
+#blockButton,
+#switchPlayerButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    min-width: 0;
+    min-height: 65px;
+
+    padding: 9px 6px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 14px;
+
+    color: #fff;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(26, 48, 74, 0.95),
+            rgba(9, 22, 39, 0.98)
+        );
+
+    font-size: 11px;
+    font-weight: 900;
+}
+
+#serveButton::before {
+    content: "🏐";
+    font-size: 21px;
+}
+
+#passButton::before {
+    content: "🤲";
+    font-size: 21px;
+}
+
+#smashButton::before {
+    content: "⚡";
+    font-size: 21px;
+}
+
+#blockButton::before {
+    content: "🛡️";
+    font-size: 21px;
+}
+
+#switchPlayerButton::before {
+    content: "🔄";
+    font-size: 21px;
+}
+
+#serveButton:hover,
+#passButton:hover,
+#smashButton:hover,
+#blockButton:hover,
+#switchPlayerButton:hover {
+    border-color: var(--fobas-border-bright);
+    background: rgba(0, 143, 185, 0.23);
+}
+
+#smashButton {
+    border-color: rgba(255, 202, 85, 0.35);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(116, 70, 14, 0.4),
+            rgba(38, 25, 13, 0.92)
+        );
+}
+
+#smashButton:hover {
+    border-color: var(--fobas-gold);
+}
+
+#leaveMatchButton {
+    width: 100%;
+}
+
+/* ============================================================
+   15. PANNEAUX ET FENÊTRES
+============================================================ */
+
+#profilePanel,
+#careerPanel,
+#championshipPanel,
+#teamsPanel,
+#equipmentPanel,
+#howToPlayPanel,
+#settingsPanel {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        calc(15px + var(--fobas-safe-top))
+        14px
+        calc(15px + var(--fobas-safe-bottom));
+
+    overflow-y: auto;
+
+    background: rgba(1, 7, 15, 0.83);
+
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+
+    animation: fobas-fade-in 180ms ease;
+}
+
+#profilePanel[hidden],
+#careerPanel[hidden],
+#championshipPanel[hidden],
+#teamsPanel[hidden],
+#equipmentPanel[hidden],
+#howToPlayPanel[hidden],
+#settingsPanel[hidden] {
+    display: none !important;
+}
+
+.panel-content {
+    position: relative;
+
+    width: min(100%, 560px);
+    max-height: 100%;
+
+    padding: 22px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 39, 64, 0.99),
+            rgba(5, 15, 29, 0.99)
+        );
+
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(0, 229, 255, 0.055);
+
+    animation: fobas-panel-up 220ms ease;
+}
+
+.panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+
+    margin-bottom: 22px;
+}
+
+.panel-header h2 {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: 22px;
+    font-weight: 950;
+    line-height: 1.25;
+}
+
+.panel-header p {
+    margin: 7px 0 0;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.panel-close {
+    display: grid;
+    flex: 0 0 39px;
+    place-items: center;
+
+    width: 39px;
+    height: 39px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 12px;
+
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+
+    font-size: 21px;
+}
+
+.panel-close:hover {
+    border-color: var(--fobas-red);
+    background: rgba(255, 85, 113, 0.12);
+}
+
+@keyframes fobas-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fobas-panel-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================================
+   16. PROFIL DU JOUEUR
+============================================================ */
+
+.profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    margin-bottom: 20px;
+    padding: 17px;
+
+    border: 1px solid rgba(0, 229, 255, 0.17);
+    border-radius: 19px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0, 160, 200, 0.15),
+            rgba(255, 255, 255, 0.025)
+        );
+}
+
+#profileAvatar {
+    display: grid;
+    flex: 0 0 68px;
+    place-items: center;
+
+    width: 68px;
+    height: 68px;
+
+    border: 2px solid rgba(0, 229, 255, 0.5);
+    border-radius: 22px;
+
+    color: #fff;
+    background: linear-gradient(135deg, #137b9a, #16234d);
+
+    font-size: 30px;
+}
+
+.profile-identity {
+    min-width: 0;
+}
+
+#profileName {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: 19px;
+    font-weight: 950;
+
+    overflow-wrap: anywhere;
+}
+
+#profileTeam {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--fobas-primary);
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+
+    margin-bottom: 20px;
+}
+
+.profile-stat {
+    padding: 14px 12px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 15px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.profile-stat strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 24px;
+    font-weight: 950;
+    line-height: 1.2;
+}
+
+.profile-stat span {
+    display: block;
+
+    margin-top: 6px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+#saveProfileButton {
+    width: 100%;
+}
+
+/* ============================================================
+   17. CARRIÈRE ET MISSIONS
+============================================================ */
+
+#careerProgressText {
+    margin-bottom: 9px;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.progress-track {
+    width: 100%;
+    height: 10px;
+
+    margin-bottom: 22px;
+
+    overflow: hidden;
+
+    border-radius: 30px;
+
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#careerProgressBar {
+    display: block;
+
+    width: 0%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: linear-gradient(
+        90deg,
+        #008fc4,
+        #00e5ff,
+        #9affeb
+    );
+
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+
+    transition: width 350ms ease;
+}
+
+#missionList {
+    display: grid;
+    gap: 10px;
+
+    max-height: 52vh;
+    max-height: 52dvh;
+
+    padding: 1px 3px 5px 1px;
+
+    overflow-y: auto;
+}
+
+.mission-card,
+.mission-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 72px;
+
+    padding: 13px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 15px;
+
+    color: #fff;
+    background: rgba(255, 255, 255, 0.035);
+
+    text-align: left;
+}
+
+.mission-card:hover,
+.mission-item:hover {
+    border-color: var(--fobas-border-bright);
+    background: rgba(0, 229, 255, 0.065);
+}
+
+.mission-card.is-completed,
+.mission-item.is-completed {
+    border-color: rgba(71, 242, 162, 0.27);
+    background: rgba(71, 242, 162, 0.055);
+}
+
+.mission-number {
+    display: grid;
+    flex: 0 0 42px;
+    place-items: center;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    color: var(--fobas-primary);
+    background: rgba(0, 229, 255, 0.1);
+
+    font-size: 12px;
+    font-weight: 950;
+}
+
+.mission-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.mission-details strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.mission-details small {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.mission-status {
+    color: var(--fobas-gold);
+    font-size: 17px;
+}
+
+/* ============================================================
+   18. CHAMPIONNATS ET TOURNOIS
+============================================================ */
+
+.competition-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.competition-card {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-height: 102px;
+    padding: 17px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 18px;
+
+    color: #fff;
+    background:
+        linear-gradient(
+            125deg,
+            rgba(24, 49, 77, 0.96),
+            rgba(7, 19, 35, 0.98)
+        );
+
+    text-align: left;
+}
+
+.competition-card:hover {
+    border-color: rgba(255, 202, 85, 0.5);
+    background:
+        linear-gradient(
+            125deg,
+            rgba(104, 75, 28, 0.3),
+            rgba(7, 19, 35, 0.98)
+        );
+}
+
+.competition-icon {
+    display: grid;
+    flex: 0 0 54px;
+    place-items: center;
+
+    width: 54px;
+    height: 54px;
+
+    border: 1px solid rgba(255, 202, 85, 0.25);
+    border-radius: 17px;
+
+    background: rgba(255, 202, 85, 0.09);
+
+    font-size: 27px;
+}
+
+.competition-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.competition-info strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 950;
+}
+
+.competition-info small {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.competition-arrow {
+    color: var(--fobas-gold);
+    font-size: 21px;
+}
+
+/* ============================================================
+   19. ÉQUIPES ET SÉLECTION DES JOUEURS
+============================================================ */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-bottom: 17px;
+}
+
+.form-group label {
+    color: #dce9f8;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.form-control,
+select,
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    min-height: 47px;
+
+    padding: 12px 13px;
+
+    border: 1px solid rgba(155, 202, 255, 0.2);
+    border-radius: 12px;
+
+    color: #fff;
+    background: #0a192b;
+
+    outline: none;
+}
+
+select {
+    cursor: pointer;
+}
+
+select option {
+    color: #fff;
+    background: #0a192b;
+}
+
+.form-control:focus,
+select:focus,
+input[type="text"]:focus,
+input[type="number"]:focus {
+    border-color: var(--fobas-primary);
+    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.08);
+}
+
+#teamRoster {
+    display: grid;
+    gap: 8px;
+
+    max-height: 34vh;
+    max-height: 34dvh;
+
+    margin: 16px 0;
+
+    overflow-y: auto;
+}
+
+.roster-player {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 11px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 13px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.roster-number {
+    display: grid;
+    flex: 0 0 35px;
+    place-items: center;
+
+    width: 35px;
+    height: 35px;
+
+    border-radius: 10px;
+
+    color: var(--fobas-primary);
+    background: rgba(0, 229, 255, 0.09);
+
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.roster-player strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 12px;
+}
+
+.roster-player small {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+}
+
+#confirmTeamsButton {
+    width: 100%;
+}
+
+/* ============================================================
+   20. BALLONS ET ÉQUIPEMENTS
+============================================================ */
+
+.equipment-section {
+    margin-bottom: 24px;
+}
+
+.equipment-section h3 {
+    margin: 0 0 12px;
+
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.equipment-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.equipment-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+
+    min-height: 112px;
+    padding: 14px 9px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 16px;
+
+    color: #fff;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.equipment-option:hover,
+.equipment-option.is-selected,
+.equipment-option[aria-pressed="true"] {
+    border-color: var(--fobas-primary);
+
+    background: rgba(0, 229, 255, 0.085);
+
+    box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.045);
+}
+
+.equipment-preview {
+    display: grid;
+    place-items: center;
+
+    width: 51px;
+    height: 51px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    font-size: 31px;
+}
+
+.equipment-option strong {
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.equipment-option small {
+    color: var(--fobas-text-muted);
+    font-size: 10px;
+}
+
+#equipmentStatus {
+    min-height: 20px;
+    margin-top: 15px;
+
+    color: var(--fobas-green);
+
+    font-size: 11px;
+    text-align: center;
+}
+
+/* ============================================================
+   21. AIDE ET COMMENT JOUER
+============================================================ */
+
+.how-to-list {
+    display: grid;
+    gap: 12px;
+}
+
+.how-to-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+
+    padding: 14px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 15px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.how-to-icon {
+    display: grid;
+    flex: 0 0 41px;
+    place-items: center;
+
+    width: 41px;
+    height: 41px;
+
+    border-radius: 12px;
+
+    color: var(--fobas-primary);
+    background: rgba(0, 229, 255, 0.09);
+
+    font-size: 20px;
+}
+
+.how-to-step strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.how-to-step p {
+    margin: 5px 0 0;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+/* ============================================================
+   22. PARAMÈTRES
+============================================================ */
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid var(--fobas-border);
+}
+
+.setting-row:last-child {
+    border-bottom: 0;
+}
+
+.setting-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-label strong {
+    display: block;
+
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.setting-label small {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--fobas-text-muted);
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.setting-control {
+    flex: 0 1 48%;
+    min-width: 110px;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 7px;
+
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    accent-color: var(--fobas-primary);
+
+    cursor: pointer;
+}
+
+.range-value {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--fobas-primary);
+
+    font-size: 10px;
+    font-weight: 900;
+    text-align: right;
+}
+
+.switch-control {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+
+    width: 48px;
+    height: 27px;
+}
+
+.switch-control input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+}
+
+.switch-track {
+    position: absolute;
+    inset: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 30px;
+
+    background: #233246;
+
+    cursor: pointer;
+
+    transition: background var(--fobas-transition);
+}
+
+.switch-track::before {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+
+    width: 19px;
+    height: 19px;
+
+    content: "";
+
+    border-radius: 50%;
+
+    background: #fff;
+
+    transition: transform var(--fobas-transition);
+}
+
+.switch-control input:checked + .switch-track {
+    background: #008fae;
+}
+
+.switch-control input:checked + .switch-track::before {
+    transform: translateX(21px);
+}
+
+/* ============================================================
+   23. RÉSULTAT DU MATCH
+============================================================ */
+
+#matchResultPanel {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        calc(18px + var(--fobas-safe-top))
+        15px
+        calc(18px + var(--fobas-safe-bottom));
+
+    overflow-y: auto;
+
+    background: rgba(1, 6, 14, 0.88);
+
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+
+    animation: fobas-fade-in 220ms ease;
+}
+
+#matchResultPanel[hidden] {
+    display: none !important;
+}
+
+.result-card {
+    width: min(100%, 480px);
+
+    padding: 25px 20px;
+
+    border: 1px solid rgba(255, 202, 85, 0.25);
+    border-radius: 26px;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 0%,
+            rgba(255, 202, 85, 0.13),
+            transparent 48%
+        ),
+        linear-gradient(
+            145deg,
+            #152b43,
+            #07111e
+        );
+
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+
+    text-align: center;
+
+    animation: fobas-panel-up 240ms ease;
+}
+
+#resultIcon {
+    display: grid;
+    place-items: center;
+
+    width: 82px;
+    height: 82px;
+
+    margin: 0 auto 18px;
+
+    border: 1px solid rgba(255, 202, 85, 0.35);
+    border-radius: 26px;
+
+    color: var(--fobas-gold);
+    background: rgba(255, 202, 85, 0.09);
+
+    font-size: 43px;
+}
+
+#resultTitle {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: clamp(23px, 6vw, 32px);
+    font-weight: 950;
+    line-height: 1.15;
+}
+
+#resultDescription {
+    margin: 12px 0 20px;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.result-score {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 23px;
+    padding: 18px 12px;
+
+    border: 1px solid var(--fobas-border);
+    border-radius: 17px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+#resultHomeScore,
+#resultAwayScore {
+    color: #fff;
+
+    font-size: 34px;
+    font-weight: 950;
+    font-variant-numeric: tabular-nums;
+}
+
+.result-score .result-separator {
+    color: var(--fobas-gold);
+
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.result-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+#nextMissionButton,
+#returnMenuButton {
+    width: 100%;
+}
+
+/* ============================================================
+   24. NAVIGATION INFÉRIEURE
+============================================================ */
+
+#bottomNavigation {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 200;
+
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3px;
+
+    padding:
+        9px
+        8px
+        calc(9px + var(--fobas-safe-bottom));
+
+    border-top: 1px solid rgba(155, 202, 255, 0.15);
+
+    background: rgba(3, 11, 22, 0.94);
+
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+}
+
+#bottomNavigation button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    min-width: 0;
+    min-height: 51px;
+
+    padding: 6px 3px;
+
+    border: 1px solid transparent;
+    border-radius: 12px;
+
+    color: var(--fobas-text-muted);
+    background: transparent;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+#bottomNavigation button::first-letter {
+    font-size: 18px;
+}
+
+#bottomNavigation button:hover,
+#bottomNavigation button.active,
+#bottomNavigation button[aria-current="page"] {
+    border-color: rgba(0, 229, 255, 0.14);
+
+    color: var(--fobas-primary);
+    background: rgba(0, 229, 255, 0.075);
+}
+
+/* ============================================================
+   25. NOTIFICATIONS
+============================================================ */
+
+#notification {
+    position: fixed;
+    top: calc(15px + var(--fobas-safe-top));
+    left: 50%;
+    z-index: 20000;
+
+    width: max-content;
+    max-width: calc(100% - 30px);
+
+    padding: 13px 17px;
+
+    border: 1px solid rgba(0, 229, 255, 0.25);
+    border-radius: 14px;
+
+    color: #fff;
+    background: rgba(7, 24, 42, 0.97);
+
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.35),
+        0 0 20px rgba(0, 229, 255, 0.07);
+
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.5;
+    text-align: center;
+
+    overflow-wrap: anywhere;
+
+    transform: translate(-50%, -150%);
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        transform 250ms ease,
+        opacity 250ms ease;
+}
+
+#notification.show,
+#notification.is-visible {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+#notification.success {
+    border-color: rgba(71, 242, 162, 0.4);
+}
+
+#notification.error {
+    border-color: rgba(255, 85, 113, 0.45);
+}
+
+/* ============================================================
+   26. DIALOGUE DE CONFIRMATION
+============================================================ */
+
+#confirmationDialog {
+    position: fixed;
+    inset: 0;
+    z-index: 15000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+
+    background: rgba(0, 5, 12, 0.82);
+
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+#confirmationDialog[hidden] {
+    display: none !important;
+}
+
+.dialog-card {
+    width: min(100%, 410px);
+
+    padding: 23px;
+
+    border: 1px solid var(--fobas-border-bright);
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #142c47,
+            #07111e
+        );
+
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+}
+
+#dialogTitle {
+    margin: 0;
+
+    color: #fff;
+
+    font-size: 20px;
+    font-weight: 950;
+}
+
+#dialogMessage {
+    margin: 12px 0 22px;
+
+    color: var(--fobas-text-soft);
+
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+.dialog-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+#dialogCancelButton,
+#dialogConfirmButton {
+    width: 100%;
+}
+
+/* ============================================================
+   27. ÉTATS DES ÉLÉMENTS
+============================================================ */
+
+.is-hidden {
+    display: none !important;
+}
+
+.is-visible {
+    display: flex !important;
+}
+
+.is-active {
+    border-color: var(--fobas-primary) !important;
+    color: var(--fobas-primary) !important;
+}
+
+.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.text-primary {
+    color: var(--fobas-primary);
+}
+
+.text-gold {
+    color: var(--fobas-gold);
+}
+
+.text-success {
+    color: var(--fobas-green);
+}
+
+.text-danger {
+    color: var(--fobas-red);
+}
+
+.text-muted {
+    color: var(--fobas-text-muted);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.mt-12 {
+    margin-top: 12px;
+}
+
+.mb-12 {
+    margin-bottom: 12px;
+}
+
+/* ============================================================
+   28. ÉCRANS ANDROID ET PETITS TÉLÉPHONES
+============================================================ */
+
+@media (max-width: 360px) {
+    .app-header {
+        gap: 7px;
+        padding-right: 9px;
+        padding-left: 9px;
+    }
+
+    .brand-icon {
+        flex-basis: 37px;
+        width: 37px;
+        height: 37px;
+        font-size: 19px;
+    }
+
+    .brand-text h1,
+    .brand-title {
+        font-size: 11px;
+        letter-spacing: 0;
+    }
+
+    .header-actions {
+        gap: 4px;
+    }
+
+    .icon-button {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        border-radius: 11px;
+    }
+
+    #mainMenu {
+        padding: 12px 10px 22px;
+    }
+
+    #mainMenu .hero-section {
+        min-height: 205px;
+        padding: 19px 15px;
+    }
+
+    #mainMenu .hero-section::before {
+        right: -65px;
+        font-size: 80px;
+    }
+
+    #mainMenu .menu-grid {
+        gap: 7px;
+    }
+
+    .menu-button {
+        gap: 7px;
+        min-height: 53px;
+        padding: 10px 9px;
+    }
+
+    .menu-button .menu-icon {
+        flex-basis: 30px;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .menu-button .menu-label strong {
+        font-size: 11px;
+    }
+
+    .menu-button .menu-label small {
+        font-size: 9px;
+    }
+
+    #scoreboard {
+        gap: 6px;
+        padding: 9px;
+    }
+
+    #homeTeamName,
+    #awayTeamName {
+        font-size: 9px;
+    }
+
+    #homeScore,
+    #awayScore {
+        font-size: 29px;
+    }
+
+    .score-middle {
+        min-width: 43px;
+    }
+
+    #missionLabel,
+    #matchClock {
+        top: 144px;
+        font-size: 9px;
+    }
+
+    .match-control-layout {
+        grid-template-columns: minmax(85px, 0.8fr) minmax(0, 1.5fr);
+        gap: 8px;
+    }
+
+    #joystickBase {
+        width: 100%;
+        max-width: 118px;
+    }
+
+    #serveButton,
+    #passButton,
+    #smashButton,
+    #blockButton,
+    #switchPlayerButton {
+        min-height: 59px;
+        font-size: 10px;
+    }
+
+    .panel-content {
+        padding: 17px 14px;
+    }
+}
+
+/* ============================================================
+   29. TÉLÉPHONES EN MODE PAYSAGE
+============================================================ */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .app-shell {
+        padding-bottom: 0;
+    }
+
+    .app-header {
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    #stadiumSection {
+        min-height: 310px;
+        height: 72vh;
+    }
+
+    #volleyballCanvas {
+        min-height: 310px;
+    }
+
+    #scoreboard {
+        top: 39px;
+        width: min(75%, 450px);
+        padding: 7px 10px;
+    }
+
+    #homeScore,
+    #awayScore {
+        font-size: 29px;
+    }
+
+    #missionLabel,
+    #matchClock {
+        top: 119px;
+    }
+
+    #matchControls {
+        grid-template-columns: 1fr;
+    }
+
+    #bottomNavigation {
+        display: none;
+    }
+
+    #profilePanel,
+    #careerPanel,
+    #championshipPanel,
+    #teamsPanel,
+    #equipmentPanel,
+    #howToPlayPanel,
+    #settingsPanel {
+        justify-content: flex-start;
+    }
+
+    .panel-content {
+        max-height: 92vh;
+        max-height: 92dvh;
+    }
+}
+
+/* ============================================================
+   30. TABLETTES
+============================================================ */
+
+@media (min-width: 600px) {
+    .app-header {
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+
+    #mainMenu {
+        padding: 25px 24px 32px;
+    }
+
+    #mainMenu .hero-section {
+        min-height: 285px;
+        padding: 30px;
+    }
+
+    #mainMenu .hero-section::before {
+        top: -50px;
+        right: 35px;
+
+        width: 250px;
+        height: 250px;
+
+        font-size: 145px;
+    }
+
+    #mainMenu .menu-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    #mainMenu .menu-grid .wide-button {
+        grid-column: auto;
+    }
+
+    .section-container {
+        padding: 24px;
+    }
+
+    #stadiumSection {
+        min-height: 520px;
+    }
+
+    #volleyballCanvas {
+        min-height: 520px;
+    }
+
+    #matchControls {
+        padding: 20px;
+    }
+
+    .match-control-layout {
+        grid-template-columns: minmax(150px, 0.75fr) minmax(0, 1.5fr);
+        gap: 20px;
+    }
+
+    #joystickBase {
+        width: min(100%, 175px);
+    }
+
+    .match-actions {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    #serveButton,
+    #passButton,
+    #smashButton,
+    #blockButton,
+    #switchPlayerButton {
+        min-height: 82px;
+    }
+
+    .profile-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .competition-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .equipment-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .result-actions {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ============================================================
+   31. ORDINATEURS ET GRANDS ÉCRANS
+============================================================ */
+
+@media (min-width: 900px) {
+    .app-shell {
+        padding-bottom: 30px;
+    }
+
+    .app-header {
+        padding: 18px 32px;
+    }
+
+    .brand-icon {
+        width: 50px;
+        height: 50px;
+        flex-basis: 50px;
+        font-size: 27px;
+    }
+
+    #mainMenu {
+        padding: 32px;
+    }
+
+    #mainMenu .hero-section {
+        min-height: 330px;
+        padding: 38px;
+    }
+
+    #mainMenu .hero-section h2 {
+        font-size: 46px;
+    }
+
+    #mainMenu .menu-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    #mainMenu .menu-grid .wide-button {
+        grid-column: auto;
+    }
+
+    .menu-button {
+        min-height: 70px;
+        padding: 14px;
+    }
+
+    #stadiumSection {
+        min-height: 600px;
+        height: min(68vh, 760px);
+    }
+
+    #volleyballCanvas {
+        min-height: 600px;
+    }
+
+    #scoreboard {
+        top: 55px;
+    }
+
+    #missionLabel,
+    #matchClock {
+        top: 175px;
+    }
+
+    #matchControls {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 22px 30px;
+    }
+
+    .match-control-layout {
+        grid-template-columns: 180px minmax(0, 1fr);
+        gap: 25px;
+    }
+
+    #joystickBase {
+        width: 155px;
+    }
+
+    .match-actions {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    #bottomNavigation {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        left: auto;
+
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+
+        padding: 15px 20px;
+
+        border-top: 1px solid var(--fobas-border);
+
+        background: rgba(3, 11, 22, 0.55);
+    }
+
+    #bottomNavigation button {
+        flex-direction: row;
+        gap: 9px;
+
+        width: auto;
+        min-width: 125px;
+        min-height: 43px;
+
+        padding: 10px 16px;
+
+        font-size: 12px;
+    }
+}
+
+/* ============================================================
+   32. ACCESSIBILITÉ ET MOUVEMENTS RÉDUITS
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================================
+   33. FIN DU CSS
+   FOBAS VOLLEYBALL CHAMPIONS 3D
+============================================================ */
