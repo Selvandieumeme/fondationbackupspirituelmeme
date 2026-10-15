@@ -610,7 +610,189 @@ button:active:not(:disabled) {
 .menu-button:hover {
     border-color: var(--fobas-border-bright);
     background:
-        linear-gradient(
+        linear-gradient/* ============================================================
+   36. FOBAS VOLLEYBALL — CORRECTION STRUCTURELLE
+   Objectif : terrain intact, commandes hors du terrain.
+   Ne modifie ni PlayCanvas ni la logique JavaScript.
+============================================================ */
+
+/*
+ * 1. Le stade devient une zone 3D distincte.
+ * Le canvas conserve son positionnement actuel.
+ */
+#gameMain > #stadiumSection {
+    position: relative !important;
+    display: block !important;
+
+    width: 100% !important;
+    height: clamp(400px, 65vh, 620px) !important;
+    min-height: 400px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+    isolation: isolate;
+}
+
+/*
+ * 2. Le canvas occupe uniquement la surface du stade.
+ */
+#stadiumSection > #volleyballCanvas {
+    position: absolute !important;
+    inset: 0 !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+
+    max-width: 100% !important;
+}
+
+/*
+ * 3. Les boutons de zoom restent dans une rangée
+ * située sous le stade, dans le flux normal.
+ */
+#stadiumSection > .camera-controls {
+    position: absolute !important;
+
+    top: auto !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    left: 8px !important;
+
+    transform: none !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+
+    width: auto !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 6px !important;
+
+    z-index: 20 !important;
+}
+
+/*
+ * 4. L'indication tactile est placée au-dessus
+ * de la rangée des commandes de caméra.
+ */
+#stadiumSection > #pinchHint {
+    position: absolute !important;
+
+    top: auto !important;
+    right: auto !important;
+    bottom: 62px !important;
+    left: 8px !important;
+
+    transform: none !important;
+
+    max-width: calc(100% - 16px) !important;
+    margin: 0 !important;
+
+    z-index: 19 !important;
+}
+
+/*
+ * 5. Le panneau de commandes commence après le stade.
+ * Il ne peut pas recouvrir le canvas par sa position.
+ */
+#gameMain > #matchControls {
+    position: relative !important;
+
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    transform: none !important;
+    float: none !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 10px 0 16px !important;
+
+    box-sizing: border-box !important;
+    z-index: 2 !important;
+}
+
+/*
+ * 6. Le panneau reste caché si l'attribut hidden
+ * est activé par le JavaScript.
+ */
+#gameMain > #matchControls[hidden] {
+    display: none !important;
+}
+
+/*
+ * 7. Les cinq actions restent dans le panneau,
+ * sans positionnement absolu.
+ */
+#matchControls .action-controls {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+#matchControls .action-controls .game-action {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    box-sizing: border-box !important;
+}
+
+/*
+ * 8. Adaptation aux petits écrans Android.
+ */
+@media (max-width: 380px) {
+    #gameMain > #stadiumSection {
+        height: 400px !important;
+        min-height: 400px !important;
+    }
+
+    #stadiumSection > .camera-controls {
+        gap: 4px !important;
+        padding: 4px !important;
+    }
+
+    #zoomOutButton,
+    #zoomInButton,
+    #cameraResetButton {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    #matchControls .action-controls {
+        gap: 2px !important;
+    }
+}
+
+/* FIN DU BLOC 36 */(
             110deg,
             rgba(0, 140, 180, 0.19),
             rgba(11, 25, 44, 0.95)
@@ -3519,215 +3701,131 @@ input[type="range"] {
 
 
 
-
-
-
 /* ============================================================
-   35. FOBAS VOLLEYBALL CHAMPIONS 3D
-   CORRECTION CIBLEE : COMMANDES SOUS LE TERRAIN
-   Compatible avec la structure HTML fournie.
-   Le bloc 34 reste intact.
+   36. FOBAS VOLLEYBALL — CORRECTION STRUCTURELLE
+   Objectif : terrain intact, commandes hors du terrain.
+   Ne modifie ni PlayCanvas ni la logique JavaScript.
 ============================================================ */
 
-/* 1. Conserver la structure verticale de la zone principale. */
-#gameMain.game-main {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-}
-
-/* 2. Le terrain garde sa position et ses éléments internes. */
+/*
+ * 1. Le stade devient une zone 3D distincte.
+ * Le canvas conserve son positionnement actuel.
+ */
 #gameMain > #stadiumSection {
-    position: relative;
-    flex: 0 0 auto;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-}
-
-/* 3. Le canvas reste contenu dans le stade. */
-#stadiumSection > #volleyballCanvas {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
-/* 4. Les commandes occupent leur propre ligne SOUS le stade. */
-#gameMain > #matchControls.match-controls {
     position: relative !important;
-    inset: auto !important;
+    display: block !important;
+
+    width: 100% !important;
+    height: clamp(400px, 65vh, 620px) !important;
+    min-height: 400px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: hidden !important;
+    isolation: isolate;
+}
+
+/*
+ * 2. Le canvas occupe uniquement la surface du stade.
+ */
+#stadiumSection > #volleyballCanvas {
+    position: absolute !important;
+    inset: 0 !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+
+    max-width: 100% !important;
+}
+
+/*
+ * 3. Les boutons de zoom restent dans une rangée
+ * située sous le stade, dans le flux normal.
+ */
+#stadiumSection > .camera-controls {
+    position: absolute !important;
+
+    top: auto !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    left: 8px !important;
+
+    transform: none !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+
+    width: auto !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 6px !important;
+
+    z-index: 20 !important;
+}
+
+/*
+ * 4. L'indication tactile est placée au-dessus
+ * de la rangée des commandes de caméra.
+ */
+#stadiumSection > #pinchHint {
+    position: absolute !important;
+
+    top: auto !important;
+    right: auto !important;
+    bottom: 62px !important;
+    left: 8px !important;
+
+    transform: none !important;
+
+    max-width: calc(100% - 16px) !important;
+    margin: 0 !important;
+
+    z-index: 19 !important;
+}
+
+/*
+ * 5. Le panneau de commandes commence après le stade.
+ * Il ne peut pas recouvrir le canvas par sa position.
+ */
+#gameMain > #matchControls {
+    position: relative !important;
+
     top: auto !important;
     right: auto !important;
     bottom: auto !important;
     left: auto !important;
 
-    float: none !important;
     transform: none !important;
-
-    flex: 0 0 auto !important;
-    order: 10;
+    float: none !important;
 
     width: 100% !important;
-    min-width: 0 !important;
     max-width: 100% !important;
 
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-
     margin: 10px 0 16px !important;
-    padding: 12px !important;
 
     box-sizing: border-box !important;
-    overflow: visible !important;
-
-    border: 1px solid rgba(90, 180, 230, 0.3);
-    border-radius: 14px;
-
-    background: #081522;
-
-    z-index: 2;
+    z-index: 2 !important;
 }
 
-/* 5. Respecter l'attribut hidden du HTML. */
-#gameMain > #matchControls.match-controls[hidden] {
+/*
+ * 6. Le panneau reste caché si l'attribut hidden
+ * est activé par le JavaScript.
+ */
+#gameMain > #matchControls[hidden] {
     display: none !important;
 }
 
-/* 6. Quand JavaScript retire hidden, afficher le panneau. */
-#gameMain > #matchControls.match-controls:not([hidden]) {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
-}
-
-/* 7. En-tête des commandes. */
-#matchControls > .match-control-header {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-
-    margin: 0 !important;
-    padding: 0 0 8px !important;
-    gap: 8px !important;
-}
-
-/* 8. Nom et position du joueur. */
-#matchControls #activePlayerName {
-    display: block;
-    color: #fff;
-    font-size: 13px;
-    line-height: 1.4;
-}
-
-#matchControls #activePlayerPosition {
-    display: block;
-    color: #a9c3d9;
-    font-size: 10px;
-    line-height: 1.4;
-}
-
-/* 9. Bouton quitter : aucune position flottante. */
-#matchControls #leaveMatchButton {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    flex: 0 1 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-
-    height: auto !important;
-    min-height: 34px !important;
-    max-height: none !important;
-
-    margin: 0 !important;
-    padding: 8px 11px !important;
-
-    box-sizing: border-box !important;
-    white-space: normal !important;
-    font-size: 10px;
-}
-
-/* 10. Joystick et boutons sur une même ligne. */
-#matchControls > .match-control-layout {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    display: grid !important;
-    grid-template-columns: minmax(64px, 0.65fr) minmax(0, 3fr) !important;
-    align-items: center !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 9px !important;
-
-    box-sizing: border-box !important;
-}
-
-/* 11. Zone du joystick. */
-#matchControls .joystick-area {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 6px !important;
-}
-
-#matchControls .joystick-area > span {
-    font-size: 9px;
-    line-height: 1.3;
-    text-align: center;
-}
-
-/* 12. Joystick. */
-#matchControls #joystickBase {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    width: min(100%, 82px) !important;
-    height: auto !important;
-    aspect-ratio: 1 / 1;
-
-    min-width: 0 !important;
-    margin: 0 auto !important;
-
-    box-sizing: border-box !important;
-}
-
-/* 13. Cibler le véritable nom de classe HTML : action-controls. */
+/*
+ * 7. Les cinq actions restent dans le panneau,
+ * sans positionnement absolu.
+ */
 #matchControls .action-controls {
     position: relative !important;
     inset: auto !important;
@@ -3735,172 +3833,58 @@ input[type="range"] {
 
     display: grid !important;
     grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    align-items: stretch !important;
 
     width: 100% !important;
-    min-width: 0 !important;
     max-width: 100% !important;
+    min-width: 0 !important;
 
-    height: auto !important;
+    gap: 4px !important;
     margin: 0 !important;
     padding: 0 !important;
-    gap: 5px !important;
 
     box-sizing: border-box !important;
 }
 
-/* 14. Les cinq boutons restent dans leur propre zone. */
-#matchControls .action-controls > .game-action {
+#matchControls .action-controls .game-action {
     position: relative !important;
     inset: auto !important;
     transform: none !important;
-
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
 
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
 
-    height: auto !important;
-    min-height: 58px !important;
-    max-height: none !important;
-
-    margin: 0 !important;
-    padding: 5px 2px !important;
-    gap: 4px !important;
-
     box-sizing: border-box !important;
-    overflow-wrap: anywhere !important;
-    white-space: normal !important;
-
-    font-size: 9px !important;
-    line-height: 1.2 !important;
-    text-align: center !important;
 }
 
-/* 15. Icônes des commandes. */
-#matchControls .action-controls > .game-action > span {
-    display: block !important;
-    margin: 0 !important;
-
-    font-size: 17px !important;
-    line-height: 1.1 !important;
-}
-
-/* 16. Libellés des commandes. */
-#matchControls .action-controls > .game-action > strong {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-
-    font-size: clamp(6px, 1.9vw, 10px) !important;
-    line-height: 1.2 !important;
-    text-align: center !important;
-
-    overflow-wrap: anywhere !important;
-}
-
-/* 17. Informations en bas des commandes. */
-#matchControls > .match-footer {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    justify-content: space-between !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-
-    margin: 0 !important;
-    padding: 8px 0 0 !important;
-    gap: 5px 10px !important;
-
-    box-sizing: border-box !important;
-
-    color: #b7cce0;
-    font-size: 10px;
-    line-height: 1.4;
-}
-
-/* 18. Message de match : reste dans la scène 3D. */
-#stadiumSection > #gameMessage {
-    pointer-events: none;
-}
-
-/* 19. Petits téléphones Android. */
+/*
+ * 8. Adaptation aux petits écrans Android.
+ */
 @media (max-width: 380px) {
-    #gameMain > #matchControls.match-controls:not([hidden]) {
-        padding: 8px !important;
-        gap: 8px !important;
+    #gameMain > #stadiumSection {
+        height: 400px !important;
+        min-height: 400px !important;
     }
 
-    #matchControls > .match-control-layout {
-        grid-template-columns: minmax(48px, 0.6fr) minmax(0, 3fr) !important;
-        gap: 5px !important;
-    }
-
-    #matchControls #joystickBase {
-        width: min(100%, 58px) !important;
-    }
-
-    #matchControls .action-controls {
-        gap: 3px !important;
-    }
-
-    #matchControls .action-controls > .game-action {
-        min-height: 51px !important;
-        padding: 4px 1px !important;
-        gap: 3px !important;
-    }
-
-    #matchControls .action-controls > .game-action > span {
-        font-size: 14px !important;
-    }
-
-    #matchControls .action-controls > .game-action > strong {
-        font-size: 6px !important;
-    }
-
-    #matchControls #leaveMatchButton {
-        font-size: 9px !important;
-        padding: 7px !important;
-    }
-}
-
-/* 20. Écrans très étroits : éviter les débordements horizontaux. */
-@media (max-width: 320px) {
-    #matchControls > .match-control-layout {
-        grid-template-columns: 42px minmax(0, 1fr) !important;
+    #stadiumSection > .camera-controls {
         gap: 4px !important;
+        padding: 4px !important;
+    }
+
+    #zoomOutButton,
+    #zoomInButton,
+    #cameraResetButton {
+        width: 36px !important;
+        height: 36px !important;
     }
 
     #matchControls .action-controls {
         gap: 2px !important;
     }
-
-    #matchControls .action-controls > .game-action {
-        min-height: 46px !important;
-        font-size: 7px !important;
-    }
-
-    #matchControls .action-controls > .game-action > span {
-        font-size: 12px !important;
-    }
-
-    #matchControls .action-controls > .game-action > strong {
-        font-size: 5px !important;
-    }
 }
 
-/* ============================================================
-   FIN DU BLOC 35
-============================================================ */
+/* FIN DU BLOC 36 */
+
 
 
 
