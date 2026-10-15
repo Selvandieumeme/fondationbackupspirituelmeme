@@ -3522,119 +3522,212 @@ input[type="range"] {
 
 
 
-
 /* ============================================================
-   35. FOBAS VOLLEYBALL — POSITION FIXE DES COMMANDES
-   Objectif : terrain entièrement visible, commandes en dessous.
+   35. FOBAS VOLLEYBALL CHAMPIONS 3D
+   CORRECTION CIBLEE : COMMANDES SOUS LE TERRAIN
+   Compatible avec la structure HTML fournie.
+   Le bloc 34 reste intact.
 ============================================================ */
 
-/* L'application utilise une disposition verticale. */
-#volleyballApp {
+/* 1. Conserver la structure verticale de la zone principale. */
+#gameMain.game-main {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    min-height: 100dvh;
-}
-
-/* La zone principale empile le stade et les commandes. */
-#gameMain {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+    align-items: stretch;
     width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
-/* Le stade garde sa place dans le flux normal. */
+/* 2. Le terrain garde sa position et ses éléments internes. */
 #gameMain > #stadiumSection {
-    position: relative !important;
-    inset: auto !important;
-    float: none !important;
-    transform: none !important;
-
-    order: 1;
+    position: relative;
     flex: 0 0 auto;
     width: 100%;
     min-width: 0;
-    margin: 0;
-    overflow: hidden;
+    box-sizing: border-box;
 }
 
-/* Le canvas reste dans les limites du stade. */
+/* 3. Le canvas reste contenu dans le stade. */
 #stadiumSection > #volleyballCanvas {
     display: block;
     width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
 }
 
-/* Les commandes de caméra quittent la superposition du terrain
-   et sont positionnées dans le flux normal sous le stade. */
-#stadiumSection > .camera-controls {
+/* 4. Les commandes occupent leur propre ligne SOUS le stade. */
+#gameMain > #matchControls.match-controls {
     position: relative !important;
     inset: auto !important;
     top: auto !important;
     right: auto !important;
     bottom: auto !important;
     left: auto !important;
-    transform: none !important;
+
     float: none !important;
-
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 10px;
-    z-index: 1;
-}
-
-/* L'indication du zoom tactile reste sous les commandes caméra. */
-#stadiumSection > #pinchHint {
-    position: relative !important;
-    inset: auto !important;
     transform: none !important;
 
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 4px 8px;
-    text-align: center;
-}
-
-/* Le panneau du match se trouve après le stade dans le document. */
-#gameMain > #matchControls {
-    order: 2;
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-    float: none !important;
+    flex: 0 0 auto !important;
+    order: 10;
 
     width: 100% !important;
+    min-width: 0 !important;
     max-width: 100% !important;
-    height: auto !important;
-    box-sizing: border-box !important;
 
-    margin: 8px 0 14px !important;
-    z-index: 1;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin: 10px 0 16px !important;
+    padding: 12px !important;
+
+    box-sizing: border-box !important;
+    overflow: visible !important;
+
+    border: 1px solid rgba(90, 180, 230, 0.3);
+    border-radius: 14px;
+
+    background: #081522;
+
+    z-index: 2;
 }
 
-/* Respecte le masquage géré par JavaScript. */
-#gameMain > #matchControls[hidden] {
+/* 5. Respecter l'attribut hidden du HTML. */
+#gameMain > #matchControls.match-controls[hidden] {
     display: none !important;
 }
 
-/* Les commandes apparaissent lorsque le match est actif. */
-#gameMain > #matchControls:not([hidden]) {
+/* 6. Quand JavaScript retire hidden, afficher le panneau. */
+#gameMain > #matchControls.match-controls:not([hidden]) {
     display: flex !important;
     flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+}
+
+/* 7. En-tête des commandes. */
+#matchControls > .match-control-header {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 0 8px !important;
     gap: 8px !important;
 }
 
-/* Les cinq actions restent dans leur propre zone. */
+/* 8. Nom et position du joueur. */
+#matchControls #activePlayerName {
+    display: block;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+#matchControls #activePlayerPosition {
+    display: block;
+    color: #a9c3d9;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+/* 9. Bouton quitter : aucune position flottante. */
+#matchControls #leaveMatchButton {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    flex: 0 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    height: auto !important;
+    min-height: 34px !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+    padding: 8px 11px !important;
+
+    box-sizing: border-box !important;
+    white-space: normal !important;
+    font-size: 10px;
+}
+
+/* 10. Joystick et boutons sur une même ligne. */
+#matchControls > .match-control-layout {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    display: grid !important;
+    grid-template-columns: minmax(64px, 0.65fr) minmax(0, 3fr) !important;
+    align-items: center !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 9px !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 11. Zone du joystick. */
+#matchControls .joystick-area {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 6px !important;
+}
+
+#matchControls .joystick-area > span {
+    font-size: 9px;
+    line-height: 1.3;
+    text-align: center;
+}
+
+/* 12. Joystick. */
+#matchControls #joystickBase {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    width: min(100%, 82px) !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+
+    min-width: 0 !important;
+    margin: 0 auto !important;
+
+    box-sizing: border-box !important;
+}
+
+/* 13. Cibler le véritable nom de classe HTML : action-controls. */
 #matchControls .action-controls {
     position: relative !important;
     inset: auto !important;
@@ -3642,44 +3735,179 @@ input[type="range"] {
 
     display: grid !important;
     grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: 4px !important;
+    align-items: stretch !important;
 
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
-    box-sizing: border-box;
+
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 5px !important;
+
+    box-sizing: border-box !important;
 }
 
-/* Les boutons ne peuvent pas dépasser de leur colonne. */
-#matchControls .action-controls .game-action {
+/* 14. Les cinq boutons restent dans leur propre zone. */
+#matchControls .action-controls > .game-action {
     position: relative !important;
     inset: auto !important;
     transform: none !important;
 
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
+
+    height: auto !important;
+    min-height: 58px !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+    padding: 5px 2px !important;
+    gap: 4px !important;
+
     box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
 }
 
-/* Évite les débordements sur les petits écrans Android. */
+/* 15. Icônes des commandes. */
+#matchControls .action-controls > .game-action > span {
+    display: block !important;
+    margin: 0 !important;
+
+    font-size: 17px !important;
+    line-height: 1.1 !important;
+}
+
+/* 16. Libellés des commandes. */
+#matchControls .action-controls > .game-action > strong {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+
+    font-size: clamp(6px, 1.9vw, 10px) !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+
+    overflow-wrap: anywhere !important;
+}
+
+/* 17. Informations en bas des commandes. */
+#matchControls > .match-footer {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 8px 0 0 !important;
+    gap: 5px 10px !important;
+
+    box-sizing: border-box !important;
+
+    color: #b7cce0;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+/* 18. Message de match : reste dans la scène 3D. */
+#stadiumSection > #gameMessage {
+    pointer-events: none;
+}
+
+/* 19. Petits téléphones Android. */
 @media (max-width: 380px) {
-    #stadiumSection > .camera-controls {
-        gap: 6px;
-        padding: 8px 4px;
+    #gameMain > #matchControls.match-controls:not([hidden]) {
+        padding: 8px !important;
+        gap: 8px !important;
     }
 
-    #matchControls .match-control-layout {
-        grid-template-columns: 48px minmax(0, 1fr) !important;
+    #matchControls > .match-control-layout {
+        grid-template-columns: minmax(48px, 0.6fr) minmax(0, 3fr) !important;
+        gap: 5px !important;
+    }
+
+    #matchControls #joystickBase {
+        width: min(100%, 58px) !important;
+    }
+
+    #matchControls .action-controls {
+        gap: 3px !important;
+    }
+
+    #matchControls .action-controls > .game-action {
+        min-height: 51px !important;
+        padding: 4px 1px !important;
+        gap: 3px !important;
+    }
+
+    #matchControls .action-controls > .game-action > span {
+        font-size: 14px !important;
+    }
+
+    #matchControls .action-controls > .game-action > strong {
+        font-size: 6px !important;
+    }
+
+    #matchControls #leaveMatchButton {
+        font-size: 9px !important;
+        padding: 7px !important;
+    }
+}
+
+/* 20. Écrans très étroits : éviter les débordements horizontaux. */
+@media (max-width: 320px) {
+    #matchControls > .match-control-layout {
+        grid-template-columns: 42px minmax(0, 1fr) !important;
         gap: 4px !important;
     }
 
     #matchControls .action-controls {
         gap: 2px !important;
     }
+
+    #matchControls .action-controls > .game-action {
+        min-height: 46px !important;
+        font-size: 7px !important;
+    }
+
+    #matchControls .action-controls > .game-action > span {
+        font-size: 12px !important;
+    }
+
+    #matchControls .action-controls > .game-action > strong {
+        font-size: 5px !important;
+    }
 }
 
-/* FIN DU BLOC 35 */
+/* ============================================================
+   FIN DU BLOC 35
+============================================================ */
+
+
+
+
+
+
+
 
 
 
