@@ -3185,6 +3185,228 @@ input[type="range"] {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================================
+   34. CORRECTION UI DU TERRAIN ET DES COMMANDES
+   Objectif :
+   - Pa kouvri teren an ak bouton yo.
+   - Alinye bouton yo anba teren ekip pa nou an.
+   - Kenbe mesaj match la lwen sant teren an.
+   - Pa modifye kamera ni motè 3D.
+============================================================ */
+
+/* 1. Teren an rete jan li ye a. */
+#stadiumSection {
+    position: relative;
+    overflow: hidden;
+}
+
+/* 2. Mesaj match la pa dwe kouvri sant teren an. */
+#gameMessage {
+    top: 12px;
+    left: 50%;
+    z-index: 11;
+
+    width: max-content;
+    max-width: calc(100% - 150px);
+
+    padding: 8px 12px;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+    line-height: 1.4;
+
+    transform: translateX(-50%);
+}
+
+/* 3. Kontwòl yo rete anba teren an, nan pwòp seksyon yo. */
+#matchControls {
+    position: relative;
+    z-index: 15;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+
+    width: 100%;
+    padding: 12px;
+
+    overflow: visible;
+}
+
+/* 4. Enfòmasyon sou jwè a pa pran twòp espas. */
+#matchControls .player-status {
+    min-width: 0;
+    padding: 8px 11px;
+}
+
+/* 5. Objektif match la rete kontra. */
+#matchObjective {
+    padding: 7px 10px;
+    font-size: 10px;
+}
+
+/* 6. Joystick ak bouton yo nan menm zòn kontwòl la. */
+#matchControls .match-control-layout {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+}
+
+/* 7. Joystick la rete sou bò gòch la. */
+#matchControls #joystickBase {
+    width: 86px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* 8. Bouton yo aliyen youn akote lòt.
+   Sou ti ekran, yo ka pase sou de ranje san yo pa
+   kouvri teren an. */
+#matchControls .match-actions {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 5px;
+
+    min-width: 0;
+    width: 100%;
+}
+
+/* 9. Chak bouton rete piti epi fasil pou peze. */
+#matchControls #serveButton,
+#matchControls #passButton,
+#matchControls #smashButton,
+#matchControls #blockButton,
+#matchControls #switchPlayerButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 62px;
+
+    padding: 6px 2px;
+
+    border-radius: 11px;
+
+    font-size: 9px;
+    line-height: 1.2;
+
+    overflow-wrap: anywhere;
+}
+
+/* 10. Ikòn yo pi piti pou bouton yo pa twò wo. */
+#matchControls #serveButton::before,
+#matchControls #passButton::before,
+#matchControls #smashButton::before,
+#matchControls #blockButton::before,
+#matchControls #switchPlayerButton::before {
+    font-size: 17px;
+}
+
+/* 11. Bouton kite match la rete anba kontwòl yo. */
+#matchControls #leaveMatchButton {
+    width: 100%;
+    min-height: 40px;
+}
+
+/* 12. Ti ekran Android. */
+@media (max-width: 480px) {
+    #matchControls {
+        gap: 8px;
+        padding: 9px 7px;
+    }
+
+    #matchControls .match-control-layout {
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    #matchControls #joystickBase {
+        width: 68px;
+    }
+
+    #matchControls .match-actions {
+        gap: 4px;
+    }
+
+    #matchControls #serveButton,
+    #matchControls #passButton,
+    #matchControls #smashButton,
+    #matchControls #blockButton,
+    #matchControls #switchPlayerButton {
+        min-height: 57px;
+        padding: 5px 1px;
+        font-size: 8px;
+    }
+
+    #matchControls #serveButton::before,
+    #matchControls #passButton::before,
+    #matchControls #smashButton::before,
+    #matchControls #blockButton::before,
+    #matchControls #switchPlayerButton::before {
+        font-size: 15px;
+    }
+
+    #gameMessage {
+        top: 9px;
+        max-width: calc(100% - 125px);
+        padding: 6px 9px;
+        font-size: 10px;
+    }
+}
+
+/* 13. Ekran laj, tankou tablèt. */
+@media (min-width: 481px) {
+    #matchControls .match-control-layout {
+        grid-template-columns: 100px minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    #matchControls #joystickBase {
+        width: 92px;
+    }
+
+    #matchControls #serveButton,
+    #matchControls #passButton,
+    #matchControls #smashButton,
+    #matchControls #blockButton,
+    #matchControls #switchPlayerButton {
+        min-height: 65px;
+        font-size: 10px;
+    }
+}
+
+/* ============================================================
+   FIN DE LA CORRECTION UI
+============================================================ */
+
+
+
+
+
+
+
+
 /* ============================================================
    33. FIN DU CSS
    FOBAS VOLLEYBALL CHAMPIONS 3D
