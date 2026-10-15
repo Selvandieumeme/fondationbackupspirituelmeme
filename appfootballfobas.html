@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"
+    >
+
+    <meta name="theme-color" content="#071426">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta
+        name="description"
+        content="FOBAS FOOTBALL ULTIMATE 3D — Jeu de football 3D, équipes locales et internationales, compétitions et arbitre IA."
+    >
+
+    <title>FOBAS FOOTBALL ULTIMATE 3D</title>
+
+    <!-- CSS principal : fichier à la racine GitHub -->
+    <link rel="stylesheet" href="./appfootballfobas.css">
+
+    <!--
+        Configuration publique du jeu.
+        Les trois fichiers restent à la racine du dépôt.
+        Le moteur PlayCanvas sera chargé dynamiquement par le JS.
+    -->
+    <script>
+        window.FOBAS_FOOTBALL_CONFIG = Object.freeze({
+            appName: "FOBAS FOOTBALL ULTIMATE 3D",
+            version: "1.0.0",
+
+            engine: "playcanvas",
+            engineVersion: "2.23.2",
+
+            databaseName: "FOBAS_FOOTBALL_ULTIMATE_DB",
+            databaseVersion: 1,
+
+            playerRosterSize: 18,
+            playersOnFieldPerTeam: 11,
+            substitutesPerTeam: 7,
+
+            initialTeamCount: 100,
+            competitionLevelCount: 7,
+
+            refereeName: "MEME Selvandieu",
+            refereeRole: "IA EXPERT REFEREE 3D",
+
+            defaultLanguage: "fr",
+            mobileFirst: true,
+
+            rootFiles: [
+                "appfootballfobas.html",
+                "appfootballfobas.css",
+                "appfootballfobas.js"
+            ],
+
+            localRegions: [
+                "Môle-Saint-Nicolas",
+                "Mare-Rouge",
+                "Jean-Rabel",
+                "Bombardopolis",
+                "Baie-de-Henne",
+                "Port-de-Paix",
+                "La Tortue",
+                "Bassin-Bleu",
+                "Chansolme",
+                "Saint-Louis-du-Nord",
+                "Anse-à-Foleur"
+            ],
+
+            competitionLevels: [
+                {
+                    id: "local",
+                    name: "Matchs locaux",
+                    description: "Matchs entre les équipes des sections communales."
+                },
+                {
+                    id: "communal",
+                    name: "Championnats communaux",
+                    description: "Compétitions entre les équipes des différentes localités."
+                },
+                {
+                    id: "northwest",
+                    name: "Championnat départemental du Nord-Ouest",
+                    description: "Compétition départementale haïtienne."
+                },
+                {
+                    id: "haiti-national",
+                    name: "Championnat national d'Haïti",
+                    description: "Compétition nationale entre équipes qualifiées."
+                },
+                {
+                    id: "caribbean",
+                    name: "Tournoi régional des Caraïbes",
+                    description: "Compétition régionale internationale."
+                },
+                {
+                    id: "international",
+                    name: "Ligues et championnats internationaux",
+                    description: "Compétitions entre équipes internationales."
+                },
+                {
+                    id: "champions",
+                    name: "Finales et tournoi des champions",
+                    description: "Compétitions finales entre les meilleures équipes."
+                }
+            ],
+
+            playerNames: [
+                "Ranise",
+                "Junior",
+                "Desir",
+                "Kerlande",
+                "Esther",
+                "Ydeja",
+                "Lise",
+                "Nina",
+                "Natacha",
+                "Dieuben",
+                "Ricardo",
+                "Sabine",
+                "Samantha",
+                "Geraldine",
+                "Joceline",
+                "Monise",
+                "Megelene",
+                "Isemeleine",
+                "Chilene",
+                "Celene",
+                "Ernson",
+                "Pierre-Andre",
+                "Jean-Marc",
+                "Emmanuel",
+                "Patrick",
+                "Samuel",
+                "David",
+                "Michael",
+                "Daniel",
+                "Jonathan",
+                "Frantz",
+                "Wilson",
+                "Ronald",
+                "Kevin",
+                "Stephane",
+                "Olivier",
+                "Andre",
+                "Claude",
+                "Fabrice",
+                "Marc-Antoine",
+                "Jean-Robert",
+                "Marie-Louise",
+                "Stephanie",
+                "Melissa",
+                "Vanessa",
+                "Gabrielle",
+                "Nathalie",
+                "Rose",
+                "Marie-Claude",
+                "Jean-Pierre",
+                "Muller",
+                "Ricardo-2",
+                "Junior-2",
+                "Esther-2",
+                "Samuel-2",
+                "David-2",
+                "Patrick-2",
+                "Emmanuel-2",
+                "Nicolas",
+                "Francois",
+                "Sebastien",
+                "Mathieu",
+                "Alexandre",
+                "Antoine",
+                "Christophe",
+                "Philippe",
+                "Bernard",
+                "Thomas",
+                "Louis",
+                "Gabriel",
+                "Raphael",
+                "Nathan",
+                "Noah",
+                "Lucas",
+                "Adam",
+                "Enzo",
+                "Theo",
+                "Hugo",
+                "Leo",
+                "Ethan",
+                "Sarah",
+                "Marie",
+                "Anne",
+                "Claire",
+                "Lucie",
+                "Elodie",
+                "Camille",
+                "Laura",
+                "Julie",
+                "Pauline",
+                "Amelie",
+                "Celine",
+                "Aurelie",
+                "Sophie",
+                "Isabelle",
+                "Caroline",
+                "Florence",
+                "Emilie",
+                "Helene",
+                "Chloe",
+                "Manon"
+            ]
+        });
+    </script>
+
+    <!--
+        JavaScript principal chargé comme module.
+        appfootballfobas.js gèrera l'import() dynamique de PlayCanvas.
+    -->
+    <script type="module" src="./appfootballfobas.js"></script>
+</head>
+
+<body>
+    <div id="footballGameApp" class="football-app">
+
+        <!-- ==================================================
+             ÉCRAN DE CHARGEMENT
+        =================================================== -->
+        <section
+            id="loadingScreen"
+            class="loading-screen"
+            aria-live="polite"
+            aria-label="Chargement du jeu"
+        >
+            <div class="loading-card">
+                <div class="loading-emblem" aria-hidden="true">
+                    <span class="loading-emblem-inner">F</span>
+                </div>
+
+                <p class="brand-eyebrow">FOBAS TACTICAL SYSTEMS</p>
+
+                <h1>FOBAS FOOTBALL</h1>
+                <h2>ULTIMATE 3D</h2>
+
+                <p id="loadingMessage" class="loading-message">
+                    Préparation du moteur 3D...
+                </p>
+
+                <div
+                    class="loading-progress-track"
+                    role="progressbar"
+                    aria-label="Progression du chargement"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0"
+                    id="loadingProgressTrack"
+                >
+                    <div id="loadingProgressBar" class="loading-progress-bar"></div>
+                </div>
+
+                <p id="loadingPercent" class="loading-percent">0 %</p>
+
+                <button
+                    type="button"
+                    id="retryLoadingBtn"
+                    class="ui-button button-primary hidden"
+                >
+                    RÉESSAYER
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================================================
+             BARRE SUPÉRIEURE
+        =================================================== -->
+        <header id="topHeader" class="top-header">
+            <div class="brand-block">
+                <span class="brand-mark" aria-hidden="true">F</span>
+
+                <div class="brand-text">
+                    <strong>FOBAS FOOTBALL</strong>
+                    <small>ULTIMATE 3D</small>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button
+                    type="button"
+                    id="soundToggleBtn"
+                    class="icon-button"
+                    aria-label="Activer ou désactiver le son"
+                    aria-pressed="true"
+                    title="Son"
+                >
+                    🔊
+                </button>
+
+                <button
+                    type="button"
+                    id="pauseGameBtn"
+                    class="icon-button"
+                    aria-label="Mettre le match en pause"
+                    title="Pause"
+                >
+                    ⏸
+                </button>
+
+                <button
+                    type="button"
+                    id="openSettingsBtn"
+                    class="icon-button"
+                    aria-label="Ouvrir les paramètres"
+                    title="Paramètres"
+                >
+                    ⚙
+                </button>
+            </div>
+        </header>
+
+        <!-- ==================================================
+             ZONE PRINCIPALE DE L'APPLICATION
+        =================================================== -->
+        <main id="mainContent" class="main-content">
+
+            <!-- MENU PRINCIPAL -->
+            <section
+                id="mainMenu"
+                class="screen-panel main-menu"
+                aria-labelledby="mainMenuTitle"
+            >
+                <div class="menu-hero">
+                    <p class="hero-kicker">LE FOOTBALL SANS LIMITES</p>
+
+                    <h1 id="mainMenuTitle">
+                        FOBAS FOOTBALL
+                        <span>ULTIMATE 3D</span>
+                    </h1>
+
+                    <p class="hero-description">
+                        Vos équipes. Vos stades. Vos championnats.
+                        Une expérience de football en 3D.
+                    </p>
+
+                    <div class="referee-badge">
+                        <span class="referee-icon" aria-hidden="true">⚖</span>
+
+                        <div>
+                            <strong>MEME Selvandieu</strong>
+                            <small>IA EXPERT REFEREE 3D</small>
+                        </div>
+
+                        <span class="status-dot" aria-label="Arbitre activé"></span>
+                    </div>
+                </div>
+
+                <div class="menu-grid">
+
+                    <button
+                        type="button"
+                        id="playMatchBtn"
+                        class="menu-card menu-card-featured"
+                        data-action="play-match"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">⚽</span>
+                        <span class="menu-card-title">JOUER UN MATCH</span>
+                        <span class="menu-card-description">
+                            Lancer un match de football 3D
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="continueCareerBtn"
+                        class="menu-card"
+                        data-action="continue-career"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">🏆</span>
+                        <span class="menu-card-title">CARRIÈRE</span>
+                        <span class="menu-card-description">
+                            Progresser et débloquer des compétitions
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="championshipsBtn"
+                        class="menu-card"
+                        data-action="championships"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">🥇</span>
+                        <span class="menu-card-title">CHAMPIONNATS</span>
+                        <span class="menu-card-description">
+                            Sept niveaux de compétition
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="tournamentsBtn"
+                        class="menu-card"
+                        data-action="tournaments"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">🌍</span>
+                        <span class="menu-card-title">TOURNOIS</span>
+                        <span class="menu-card-description">
+                            Compétitions régionales et internationales
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="teamsBtn"
+                        class="menu-card"
+                        data-action="teams"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">👥</span>
+                        <span class="menu-card-title">ÉQUIPES</span>
+                        <span class="menu-card-description">
+                            Équipes locales et internationales
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="equipmentBtn"
+                        class="menu-card"
+                        data-action="equipment"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">👕</span>
+                        <span class="menu-card-title">ÉQUIPEMENT</span>
+                        <span class="menu-card-description">
+                            Maillots, ballons et accessoires
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="profileBtn"
+                        class="menu-card"
+                        data-action="profile"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">👤</span>
+                        <span class="menu-card-title">PROFIL</span>
+                        <span class="menu-card-description">
+                            Profil et progression du joueur
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        id="howToPlayBtn"
+                        class="menu-card"
+                        data-action="how-to-play"
+                    >
+                        <span class="menu-card-icon" aria-hidden="true">🎮</span>
+                        <span class="menu-card-title">COMMENT JOUER</span>
+                        <span class="menu-card-description">
+                            Découvrir les commandes
+                        </span>
+                    </button>
+                </div>
+
+                <div class="menu-footer">
+                    <span>ANDROID FIRST</span>
+                    <span>PLAYCANVAS 3D</span>
+                    <span>VERSION 1.0.0</span>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN DE MATCH
+            =================================================== -->
+            <section
+                id="matchScreen"
+                class="screen-panel match-screen hidden"
+                aria-label="Match de football"
+            >
+                <!-- Tableau de score au-dessus du terrain -->
+                <div id="matchHeader" class="match-header">
+                    <div class="match-competition">
+                        <span id="competitionLabel">MATCH LOCAL</span>
+                        <span id="stadiumLabel">STADE FOBAS</span>
+                    </div>
+
+                    <div id="scoreboard" class="scoreboard">
+                        <div class="score-team score-team-home">
+                            <span id="homeTeamName">MARE-ROUGE</span>
+                            <strong id="homeScore">0</strong>
+                        </div>
+
+                        <div class="score-center">
+                            <span id="matchClock">00:00</span>
+                            <small id="matchPeriod">1re MI-TEMPS</small>
+                        </div>
+
+                        <div class="score-team score-team-away">
+                            <strong id="awayScore">0</strong>
+                            <span id="awayTeamName">MÔLE-SAINT-NICOLAS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!--
+                    Zone 3D : le canvas reste distinct des contrôles.
+                    Les boutons de match sont placés après cette zone,
+                    jamais à l'intérieur du canvas.
+                -->
+                <div id="pitchViewport" class="pitch-viewport">
+
+                    <canvas
+                        id="footballCanvas"
+                        class="football-canvas"
+                        aria-label="Terrain de football 3D interactif"
+                    ></canvas>
+
+                    <div id="engineStatus" class="engine-status">
+                        Initialisation du moteur 3D...
+                    </div>
+
+                    <div id="matchAnnouncement" class="match-announcement hidden">
+                        <strong id="announcementTitle"></strong>
+                        <span id="announcementMessage"></span>
+                    </div>
+
+                    <!-- Affichage compact de l'arbitre -->
+                    <div id="refereeStatus" class="referee-status">
+                        <span class="referee-status-icon" aria-hidden="true">⚖</span>
+                        <div>
+                            <strong>MEME Selvandieu</strong>
+                            <small id="refereeDecisionLabel">
+                                Arbitre IA prêt
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Contrôles de caméra -->
+                    <div id="cameraControls" class="camera-controls">
+                        <button
+                            type="button"
+                            id="cameraZoomOutBtn"
+                            class="camera-button"
+                            aria-label="Éloigner la caméra"
+                            title="Zoom arrière"
+                        >
+                            −
+                        </button>
+
+                        <button
+                            type="button"
+                            id="cameraResetBtn"
+                            class="camera-button"
+                            aria-label="Réinitialiser la caméra"
+                            title="Caméra par défaut"
+                        >
+                            ↺
+                        </button>
+
+                        <button
+                            type="button"
+                            id="cameraZoomInBtn"
+                            class="camera-button"
+                            aria-label="Rapprocher la caméra"
+                            title="Zoom avant"
+                        >
+                            +
+                        </button>
+                    </div>
+
+                    <div id="pinchZoomHint" class="pinch-zoom-hint">
+                        👆 Pincez avec deux doigts pour zoomer
+                    </div>
+                </div>
+
+                <!-- Commandes de match : séparées du terrain -->
+                <div id="matchControls" class="match-controls">
+
+                    <div class="movement-control-area">
+                        <div
+                            id="movementJoystick"
+                            class="movement-joystick"
+                            aria-label="Joystick de déplacement"
+                            role="application"
+                        >
+                            <div id="joystickBase" class="joystick-base">
+                                <div id="joystickKnob" class="joystick-knob"></div>
+                            </div>
+                        </div>
+
+                        <span class="control-caption">DÉPLACEMENT</span>
+                    </div>
+
+                    <div class="action-control-area">
+                        <button
+                            type="button"
+                            id="passBtn"
+                            class="action-button action-pass"
+                            data-action="pass"
+                        >
+                            <span aria-hidden="true">➤</span>
+                            <small>PASSE</small>
+                        </button>
+
+                        <button
+                            type="button"
+                            id="shootBtn"
+                            class="action-button action-shoot"
+                            data-action="shoot"
+                        >
+                            <span aria-hidden="true">⚽</span>
+                            <small>TIR</small>
+                        </button>
+
+                        <button
+                            type="button"
+                            id="sprintBtn"
+                            class="action-button action-sprint"
+                            data-action="sprint"
+                        >
+                            <span aria-hidden="true">⚡</span>
+                            <small>SPRINT</small>
+                        </button>
+
+                        <button
+                            type="button"
+                            id="defendBtn"
+                            class="action-button action-defend"
+                            data-action="defend"
+                        >
+                            <span aria-hidden="true">🛡</span>
+                            <small>DÉFENSE</small>
+                        </button>
+
+                        <button
+                            type="button"
+                            id="switchPlayerBtn"
+                            class="action-button action-switch"
+                            data-action="switch-player"
+                        >
+                            <span aria-hidden="true">↔</span>
+                            <small>JOUEUR</small>
+                        </button>
+                    </div>
+
+                    <div class="match-secondary-controls">
+                        <button
+                            type="button"
+                            id="changeCameraBtn"
+                            class="secondary-control-button"
+                        >
+                            📷 CAMÉRA
+                        </button>
+
+                        <button
+                            type="button"
+                            id="showTacticsBtn"
+                            class="secondary-control-button"
+                        >
+                            📋 TACTIQUE
+                        </button>
+
+                        <button
+                            type="button"
+                            id="saveMatchBtn"
+                            class="secondary-control-button"
+                        >
+                            💾 SAUVEGARDER
+                        </button>
+
+                        <button
+                            type="button"
+                            id="exitMatchBtn"
+                            class="secondary-control-button"
+                        >
+                            ↩ MENU
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN DE SÉLECTION DES MATCHS
+            =================================================== -->
+            <section
+                id="matchSetupScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="matchSetupTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">PRÉPARATION</p>
+                        <h2 id="matchSetupTitle">Nouveau match</h2>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <label for="competitionSelect">Compétition</label>
+                    <select id="competitionSelect">
+                        <option value="local">Matchs locaux</option>
+                        <option value="communal">Championnats communaux</option>
+                        <option value="northwest">Championnat départemental du Nord-Ouest</option>
+                        <option value="haiti-national">Championnat national d'Haïti</option>
+                        <option value="caribbean">Tournoi régional des Caraïbes</option>
+                        <option value="international">Ligues internationales</option>
+                        <option value="champions">Finales et tournoi des champions</option>
+                    </select>
+
+                    <label for="homeTeamSelect">Équipe à domicile</label>
+                    <select id="homeTeamSelect">
+                        <option value="mare-rouge">Équipe Mare-Rouge</option>
+                        <option value="mole-saint-nicolas">Équipe Môle-Saint-Nicolas</option>
+                        <option value="jean-rabel">Équipe Jean-Rabel</option>
+                        <option value="bombardopolis">Équipe Bombardopolis</option>
+                        <option value="baie-de-henne">Équipe Baie-de-Henne</option>
+                        <option value="port-de-paix">Équipe Port-de-Paix</option>
+                    </select>
+
+                    <label for="awayTeamSelect">Équipe visiteuse</label>
+                    <select id="awayTeamSelect">
+                        <option value="mole-saint-nicolas">Équipe Môle-Saint-Nicolas</option>
+                        <option value="mare-rouge">Équipe Mare-Rouge</option>
+                        <option value="jean-rabel">Équipe Jean-Rabel</option>
+                        <option value="bombardopolis">Équipe Bombardopolis</option>
+                        <option value="baie-de-henne">Équipe Baie-de-Henne</option>
+                        <option value="port-de-paix">Équipe Port-de-Paix</option>
+                    </select>
+
+                    <label for="stadiumSelect">Stade</label>
+                    <select id="stadiumSelect">
+                        <option value="home">Stade de l'équipe à domicile</option>
+                        <option value="neutral">Terrain neutre</option>
+                    </select>
+
+                    <label for="matchDurationSelect">Durée du match</label>
+                    <select id="matchDurationSelect">
+                        <option value="short">Match rapide</option>
+                        <option value="standard" selected>Match standard</option>
+                        <option value="long">Match long</option>
+                    </select>
+
+                    <button
+                        type="button"
+                        id="confirmMatchBtn"
+                        class="ui-button button-primary button-full"
+                    >
+                        ⚽ LANCER LE MATCH
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN DES CHAMPIONNATS
+            =================================================== -->
+            <section
+                id="championshipScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="championshipTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">SEPT NIVEAUX</p>
+                        <h2 id="championshipTitle">Championnats</h2>
+                    </div>
+                </div>
+
+                <div id="competitionLevelsList" class="competition-levels-list"></div>
+
+                <div class="section-actions">
+                    <button
+                        type="button"
+                        id="startChampionshipBtn"
+                        class="ui-button button-primary button-full"
+                    >
+                        COMMENCER UNE COMPÉTITION
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN DES TOURNOIS
+            =================================================== -->
+            <section
+                id="tournamentScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="tournamentTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">COMPÉTITIONS</p>
+                        <h2 id="tournamentTitle">Tournois</h2>
+                    </div>
+                </div>
+
+                <div id="tournamentList" class="tournament-list"></div>
+
+                <button
+                    type="button"
+                    id="createTournamentBtn"
+                    class="ui-button button-primary button-full"
+                >
+                    CRÉER UN TOURNOI
+                </button>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN DES ÉQUIPES
+            =================================================== -->
+            <section
+                id="teamsScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="teamsTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">ÉQUIPES LOCALES ET MONDIALES</p>
+                        <h2 id="teamsTitle">Équipes</h2>
+                    </div>
+                </div>
+
+                <div class="team-filter-bar">
+                    <label for="teamSearchInput" class="visually-hidden">
+                        Rechercher une équipe
+                    </label>
+
+                    <input
+                        type="search"
+                        id="teamSearchInput"
+                        placeholder="Rechercher une équipe ou une zone..."
+                        autocomplete="off"
+                    >
+
+                    <label for="teamRegionSelect" class="visually-hidden">
+                        Filtrer par région
+                    </label>
+
+                    <select id="teamRegionSelect">
+                        <option value="all">Toutes les régions</option>
+                        <option value="northwest">Nord-Ouest d'Haïti</option>
+                        <option value="haiti">Autres départements d'Haïti</option>
+                        <option value="caribbean">Caraïbes</option>
+                        <option value="americas">Amériques</option>
+                        <option value="europe">Europe</option>
+                        <option value="africa">Afrique</option>
+                        <option value="international">Autres régions</option>
+                    </select>
+                </div>
+
+                <div id="teamsList" class="teams-list"></div>
+
+                <div class="team-list-footer">
+                    <span id="teamCountLabel">Préparation des équipes...</span>
+
+                    <button
+                        type="button"
+                        id="refreshTeamsBtn"
+                        class="ui-button button-secondary"
+                    >
+                        ACTUALISER
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN ÉQUIPEMENT
+            =================================================== -->
+            <section
+                id="equipmentScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="equipmentTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">PERSONNALISATION</p>
+                        <h2 id="equipmentTitle">Équipement</h2>
+                    </div>
+                </div>
+
+                <div class="equipment-tabs" role="tablist" aria-label="Types d'équipement">
+                    <button
+                        type="button"
+                        id="kitsTabBtn"
+                        class="equipment-tab active"
+                        role="tab"
+                        aria-selected="true"
+                        data-equipment-tab="kits"
+                    >
+                        MAILLOTS
+                    </button>
+
+                    <button
+                        type="button"
+                        id="ballsTabBtn"
+                        class="equipment-tab"
+                        role="tab"
+                        aria-selected="false"
+                        data-equipment-tab="balls"
+                    >
+                        BALLONS
+                    </button>
+
+                    <button
+                        type="button"
+                        id="bootsTabBtn"
+                        class="equipment-tab"
+                        role="tab"
+                        aria-selected="false"
+                        data-equipment-tab="boots"
+                    >
+                        CHAUSSURES
+                    </button>
+                </div>
+
+                <div id="equipmentItemsList" class="equipment-items-list"></div>
+
+                <button
+                    type="button"
+                    id="applyEquipmentBtn"
+                    class="ui-button button-primary button-full"
+                >
+                    APPLIQUER L'ÉQUIPEMENT
+                </button>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN PROFIL
+            =================================================== -->
+            <section
+                id="profileScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="profileTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">VOTRE PROGRESSION</p>
+                        <h2 id="profileTitle">Profil du joueur</h2>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <div class="profile-avatar" aria-hidden="true">⚽</div>
+
+                    <label for="profileNameInput">Nom du joueur</label>
+                    <input
+                        type="text"
+                        id="profileNameInput"
+                        maxlength="40"
+                        autocomplete="nickname"
+                        value="Joueur FOBAS"
+                    >
+
+                    <label for="profileFavoriteTeam">Équipe favorite</label>
+                    <select id="profileFavoriteTeam">
+                        <option value="mare-rouge">Mare-Rouge</option>
+                        <option value="mole-saint-nicolas">Môle-Saint-Nicolas</option>
+                        <option value="jean-rabel">Jean-Rabel</option>
+                    </select>
+
+                    <div class="profile-stat-grid">
+                        <div class="profile-stat">
+                            <strong id="profileMatchesPlayed">0</strong>
+                            <span>Matchs</span>
+                        </div>
+
+                        <div class="profile-stat">
+                            <strong id="profileGoalsScored">0</strong>
+                            <span>Buts</span>
+                        </div>
+
+                        <div class="profile-stat">
+                            <strong id="profileTrophies">0</strong>
+                            <span>Trophées</span>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="saveProfileBtn"
+                        class="ui-button button-primary button-full"
+                    >
+                        SAUVEGARDER LE PROFIL
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN COMMENT JOUER
+            =================================================== -->
+            <section
+                id="howToPlayScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="howToPlayTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">GUIDE DU JOUEUR</p>
+                        <h2 id="howToPlayTitle">Comment jouer</h2>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <h3>🎮 Déplacement</h3>
+                    <p>Utilisez le joystick virtuel pour déplacer le joueur contrôlé.</p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>➤ Passe</h3>
+                    <p>Faites une passe à un coéquipier disponible.</p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>⚽ Tir</h3>
+                    <p>Tentez de marquer lorsque vous êtes en position de tir.</p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>⚡ Sprint</h3>
+                    <p>Accélérez temporairement le déplacement du joueur.</p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>🛡 Défense</h3>
+                    <p>Essayez de récupérer le ballon sans commettre de faute.</p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>👆 Zoom à deux doigts</h3>
+                    <p>
+                        Sur Android, rapprochez ou écartez deux doigts sur la zone 3D
+                        pour ajuster la distance de la caméra.
+                    </p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>🧑‍⚖️ Arbitre IA</h3>
+                    <p>
+                        MEME Selvandieu supervise les décisions de match selon
+                        les règles implémentées dans le jeu.
+                    </p>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 ÉCRAN PARAMÈTRES
+            =================================================== -->
+            <section
+                id="settingsScreen"
+                class="screen-panel content-screen hidden"
+                aria-labelledby="settingsTitle"
+            >
+                <div class="section-heading">
+                    <button
+                        type="button"
+                        class="back-button"
+                        data-back="mainMenu"
+                        aria-label="Retour au menu"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+                        <p class="section-kicker">CONFIGURATION</p>
+                        <h2 id="settingsTitle">Paramètres</h2>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <label for="graphicsQualitySelect">Qualité graphique</label>
+                    <select id="graphicsQualitySelect">
+                        <option value="low">Économie de batterie</option>
+                        <option value="medium" selected>Équilibrée</option>
+                        <option value="high">Élevée</option>
+                    </select>
+
+                    <label for="soundVolumeInput">Volume du son</label>
+                    <input
+                        type="range"
+                        id="soundVolumeInput"
+                        min="0"
+                        max="100"
+                        value="70"
+                    >
+
+                    <label for="cameraSensitivityInput">Sensibilité de la caméra</label>
+                    <input
+                        type="range"
+                        id="cameraSensitivityInput"
+                        min="1"
+                        max="100"
+                        value="50"
+                    >
+
+                    <label for="matchDifficultySelect">Difficulté des équipes IA</label>
+                    <select id="matchDifficultySelect">
+                        <option value="easy">Facile</option>
+                        <option value="normal" selected>Normale</option>
+                        <option value="hard">Difficile</option>
+                        <option value="expert">Expert</option>
+                    </select>
+
+                    <label class="toggle-setting" for="vibrationToggle">
+                        <span>Vibrations</span>
+                        <input type="checkbox" id="vibrationToggle" checked>
+                    </label>
+
+                    <label class="toggle-setting" for="commentaryToggle">
+                        <span>Commentaires de l'arbitre</span>
+                        <input type="checkbox" id="commentaryToggle" checked>
+                    </label>
+
+                    <button
+                        type="button"
+                        id="saveSettingsBtn"
+                        class="ui-button button-primary button-full"
+                    >
+                        ENREGISTRER LES PARAMÈTRES
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ==================================================
+             BOÎTE DE DIALOGUE GÉNÉRIQUE
+        =================================================== -->
+        <section
+            id="dialogOverlay"
+            class="dialog-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dialogTitle"
+        >
+            <div class="dialog-card">
+                <div class="dialog-header">
+                    <h2 id="dialogTitle">FOBAS FOOTBALL</h2>
+
+                    <button
+                        type="button"
+                        id="closeDialogBtn"
+                        class="icon-button dialog-close"
+                        aria-label="Fermer la fenêtre"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div id="dialogContent" class="dialog-content"></div>
+
+                <div id="dialogActions" class="dialog-actions"></div>
+            </div>
+        </section>
+
+        <!-- ==================================================
+             NOTIFICATIONS NON BLOQUANTES
+        =================================================== -->
+        <div
+            id="toastContainer"
+            class="toast-container"
+            aria-live="polite"
+            aria-atomic="true"
+        ></div>
+
+        <!-- ==================================================
+             PANNEAU DE PAUSE
+        =================================================== -->
+        <section
+            id="pauseOverlay"
+            class="pause-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pauseTitle"
+        >
+            <div class="pause-card">
+                <p class="section-kicker">MATCH EN COURS</p>
+                <h2 id="pauseTitle">PAUSE</h2>
+
+                <button
+                    type="button"
+                    id="resumeGameBtn"
+                    class="ui-button button-primary button-full"
+                >
+                    ▶ REPRENDRE
+                </button>
+
+                <button
+                    type="button"
+                    id="savePausedMatchBtn"
+                    class="ui-button button-secondary button-full"
+                >
+                    💾 SAUVEGARDER
+                </button>
+
+                <button
+                    type="button"
+                    id="quitPausedMatchBtn"
+                    class="ui-button button-danger button-full"
+                >
+                    ↩ QUITTER LE MATCH
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================================================
+             PANNEAU TACTIQUE
+        =================================================== -->
+        <section
+            id="tacticsOverlay"
+            class="dialog-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tacticsTitle"
+        >
+            <div class="dialog-card">
+                <div class="dialog-header">
+                    <h2 id="tacticsTitle">Tactiques</h2>
+
+                    <button
+                        type="button"
+                        id="closeTacticsBtn"
+                        class="icon-button"
+                        aria-label="Fermer les tactiques"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div class="dialog-content">
+                    <label for="formationSelect">Formation</label>
+                    <select id="formationSelect">
+                        <option value="442">4-4-2</option>
+                        <option value="433" selected>4-3-3</option>
+                        <option value="352">3-5-2</option>
+                        <option value="4231">4-2-3-1</option>
+                        <option value="541">5-4-1</option>
+                    </select>
+
+                    <label for="tacticalStyleSelect">Style de jeu</label>
+                    <select id="tacticalStyleSelect">
+                        <option value="balanced" selected>Équilibré</option>
+                        <option value="attacking">Offensif</option>
+                        <option value="defensive">Défensif</option>
+                        <option value="possession">Possession</option>
+                        <option value="counter">Contre-attaque</option>
+                    </select>
+
+                    <label for="pressureSelect">Pressing</label>
+                    <select id="pressureSelect">
+                        <option value="low">Bas</option>
+                        <option value="medium" selected>Moyen</option>
+                        <option value="high">Haut</option>
+                    </select>
+                </div>
+
+                <div class="dialog-actions">
+                    <button
+                        type="button"
+                        id="applyTacticsBtn"
+                        class="ui-button button-primary button-full"
+                    >
+                        APPLIQUER LES TACTIQUES
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================
+             INFORMATIONS SUR LA SAUVEGARDE
+        =================================================== -->
+        <footer id="appFooter" class="app-footer">
+            <span>FOBAS FOOTBALL ULTIMATE 3D</span>
+            <span id="saveStatusLabel">Sauvegarde locale prête</span>
+        </footer>
+
+    </div>
+</body>
+</html>
