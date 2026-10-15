@@ -1,0 +1,3624 @@
+/* ============================================================
+   FOBAS FOOTBALL ULTIMATE 3D
+   FICHIER : appfootballfobas.css
+   VERSION : 1.0.0
+   STYLE : Football 3D professionnel — Android First
+   MOTEUR : PlayCanvas
+   COMPATIBILITÉ : appfootballfobas.html
+============================================================ */
+
+/* ============================================================
+   01. VARIABLES GLOBALES
+============================================================ */
+
+:root {
+    color-scheme: dark;
+
+    --football-bg: #06111f;
+    --football-bg-deep: #020812;
+    --football-bg-soft: #0b1c30;
+    --football-panel: #10243a;
+    --football-panel-light: #172f49;
+
+    --football-primary: #12d98a;
+    --football-primary-dark: #079c65;
+    --football-primary-glow: rgba(18, 217, 138, 0.22);
+
+    --football-blue: #38a7ff;
+    --football-blue-dark: #1465b2;
+
+    --football-gold: #ffc857;
+    --football-gold-soft: rgba(255, 200, 87, 0.16);
+
+    --football-danger: #ff4f64;
+    --football-warning: #ffb938;
+
+    --football-text: #f5f9ff;
+    --football-text-soft: #c0cede;
+    --football-muted: #8094ad;
+
+    --football-border: rgba(177, 204, 235, 0.15);
+    --football-border-strong: rgba(177, 204, 235, 0.28);
+
+    --football-radius-xs: 7px;
+    --football-radius-sm: 11px;
+    --football-radius-md: 16px;
+    --football-radius-lg: 22px;
+    --football-radius-xl: 30px;
+
+    --football-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.25);
+
+    --football-shadow-strong:
+        0 18px 50px rgba(0, 0, 0, 0.38);
+
+    --football-transition:
+        180ms ease;
+
+    --football-header-height: 62px;
+
+    --football-safe-top:
+        env(safe-area-inset-top, 0px);
+
+    --football-safe-bottom:
+        env(safe-area-inset-bottom, 0px);
+
+    --football-content-max: 1180px;
+
+    font-family:
+        Inter,
+        Roboto,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+}
+
+
+/* ============================================================
+   02. RÈGLES DE BASE
+============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    min-width: 280px;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+
+    background: var(--football-bg-deep);
+
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    scroll-behavior: smooth;
+}
+
+body {
+    width: 100%;
+    min-width: 280px;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+
+    background:
+        radial-gradient(
+            circle at 50% -20%,
+            rgba(25, 112, 160, 0.18),
+            transparent 48%
+        ),
+        var(--football-bg);
+
+    color: var(--football-text);
+
+    font-size: 14px;
+    line-height: 1.5;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    overscroll-behavior-y: contain;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--football-blue);
+    outline-offset: 3px;
+}
+
+button:disabled,
+input:disabled,
+select:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+}
+
+button,
+select {
+    touch-action: manipulation;
+}
+
+img,
+svg,
+canvas {
+    max-width: 100%;
+}
+
+img {
+    display: block;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+    line-height: 1.2;
+}
+
+p {
+    color: var(--football-text-soft);
+}
+
+::selection {
+    background: rgba(18, 217, 138, 0.3);
+    color: #fff;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(155, 184, 216, 0.28);
+    border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(155, 184, 216, 0.48);
+}
+
+
+/* ============================================================
+   03. APPLICATION PRINCIPALE
+============================================================ */
+
+#footballGameApp {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    isolation: isolate;
+
+    background:
+        radial-gradient(
+            ellipse at top,
+            rgba(17, 67, 103, 0.12),
+            transparent 65%
+        );
+}
+
+.football-app {
+    width: 100%;
+}
+
+
+/* ============================================================
+   04. CLASSE UTILITAIRE HIDDEN
+   Cette règle doit rester prioritaire pour les écrans fermés.
+============================================================ */
+
+.hidden {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute !important;
+
+    width: 1px !important;
+    height: 1px !important;
+
+    padding: 0 !important;
+    margin: -1px !important;
+
+    overflow: hidden !important;
+
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+
+    border: 0 !important;
+}
+
+
+/* ============================================================
+   05. ÉCRAN DE CHARGEMENT
+============================================================ */
+
+#loadingScreen {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+
+    padding:
+        calc(24px + var(--football-safe-top))
+        20px
+        calc(24px + var(--football-safe-bottom));
+
+    overflow-y: auto;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(18, 217, 138, 0.13),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 10% 90%,
+            rgba(56, 167, 255, 0.13),
+            transparent 40%
+        ),
+        #020812;
+}
+
+.loading-screen {
+    text-align: center;
+}
+
+.loading-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: min(100%, 420px);
+
+    margin: auto;
+    padding: 30px 22px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: var(--football-radius-xl);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20, 42, 65, 0.94),
+            rgba(5, 16, 29, 0.98)
+        );
+
+    box-shadow: var(--football-shadow-strong);
+
+    text-align: center;
+}
+
+.loading-emblem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 82px;
+    height: 82px;
+
+    margin-bottom: 23px;
+
+    border: 2px solid var(--football-primary);
+
+    border-radius: 26px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 217, 138, 0.22),
+            rgba(56, 167, 255, 0.12)
+        );
+
+    box-shadow:
+        0 0 0 8px rgba(18, 217, 138, 0.045),
+        0 0 38px rgba(18, 217, 138, 0.18);
+
+    transform: rotate(-4deg);
+}
+
+.loading-emblem-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 57px;
+    height: 57px;
+
+    border-radius: 18px;
+
+    background: var(--football-primary);
+
+    color: #032217;
+
+    font-size: 38px;
+    font-weight: 1000;
+
+    transform: rotate(4deg);
+}
+
+.brand-eyebrow {
+    margin-bottom: 12px;
+
+    color: var(--football-primary);
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.loading-card h1 {
+    margin-bottom: 3px;
+
+    color: #fff;
+
+    font-size: clamp(24px, 6vw, 34px);
+    font-weight: 1000;
+
+    letter-spacing: -1.2px;
+}
+
+.loading-card h2 {
+    margin-bottom: 20px;
+
+    color: var(--football-gold);
+
+    font-size: clamp(15px, 4vw, 20px);
+    font-weight: 900;
+
+    letter-spacing: 4px;
+}
+
+.loading-message {
+    min-height: 24px;
+
+    margin-bottom: 17px;
+
+    color: var(--football-text-soft);
+
+    font-size: 12px;
+}
+
+.loading-progress-track {
+    width: 100%;
+    height: 7px;
+
+    overflow: hidden;
+
+    border-radius: 99px;
+
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.loading-progress-bar {
+    width: 0;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--football-primary-dark),
+            var(--football-primary),
+            var(--football-blue)
+        );
+
+    box-shadow: 0 0 14px rgba(18, 217, 138, 0.3);
+
+    transition: width 220ms ease;
+}
+
+.loading-percent {
+    margin: 10px 0 0;
+
+    color: var(--football-primary);
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+
+/* ============================================================
+   06. BARRE SUPÉRIEURE
+============================================================ */
+
+#topHeader {
+    position: relative;
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+    min-height: var(--football-header-height);
+
+    padding:
+        calc(8px + var(--football-safe-top))
+        14px
+        8px;
+
+    border-bottom: 1px solid var(--football-border);
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(7, 21, 37, 0.98),
+            rgba(10, 30, 49, 0.96)
+        );
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.top-header {
+    gap: 10px;
+}
+
+.brand-block {
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+
+    gap: 10px;
+}
+
+.brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 38px;
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 12px;
+
+    background: var(--football-primary);
+
+    color: #042619;
+
+    font-size: 22px;
+    font-weight: 1000;
+
+    box-shadow: 0 0 20px rgba(18, 217, 138, 0.14);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.brand-text strong {
+    overflow: hidden;
+
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 1000;
+
+    letter-spacing: 0.5px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.brand-text small {
+    color: var(--football-primary);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    letter-spacing: 2px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+
+    flex: 0 0 auto;
+
+    gap: 7px;
+}
+
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+
+    padding: 0;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    color: #fff;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition:
+        background var(--football-transition),
+        border-color var(--football-transition),
+        transform var(--football-transition);
+}
+
+.icon-button:hover {
+    border-color: var(--football-primary);
+
+    background: var(--football-primary-glow);
+}
+
+.icon-button:active {
+    transform: scale(0.95);
+}
+
+
+/* ============================================================
+   07. CONTENU PRINCIPAL
+============================================================ */
+
+#mainContent {
+    display: block;
+
+    width: 100%;
+    max-width: var(--football-content-max);
+
+    margin: 0 auto;
+
+    padding:
+        18px
+        14px
+        26px;
+}
+
+.main-content {
+    flex: 1 0 auto;
+    min-width: 0;
+}
+
+.screen-panel {
+    width: 100%;
+    min-width: 0;
+}
+
+.content-screen {
+    animation: screenFadeIn 220ms ease both;
+}
+
+@keyframes screenFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   08. MENU PRINCIPAL
+============================================================ */
+
+#mainMenu {
+    padding-bottom: 14px;
+}
+
+.main-menu {
+    animation: screenFadeIn 300ms ease both;
+}
+
+.menu-hero {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    padding: 25px 19px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: var(--football-radius-lg);
+
+    background:
+        radial-gradient(
+            circle at 100% 0,
+            rgba(18, 217, 138, 0.16),
+            transparent 43%
+        ),
+        linear-gradient(
+            145deg,
+            #102a43,
+            #081626 70%
+        );
+
+    box-shadow: var(--football-shadow);
+}
+
+.menu-hero::after {
+    content: "";
+
+    position: absolute;
+
+    right: -52px;
+    bottom: -86px;
+
+    width: 190px;
+    height: 190px;
+
+    border: 1px solid rgba(18, 217, 138, 0.12);
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 18px rgba(18, 217, 138, 0.025),
+        0 0 0 40px rgba(18, 217, 138, 0.02);
+
+    pointer-events: none;
+}
+
+.hero-kicker {
+    margin-bottom: 12px;
+
+    color: var(--football-primary);
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: 2px;
+}
+
+.menu-hero h1 {
+    position: relative;
+    z-index: 1;
+
+    margin-bottom: 13px;
+
+    color: #fff;
+
+    font-size: clamp(26px, 7vw, 45px);
+    font-weight: 1000;
+
+    letter-spacing: -1.8px;
+    line-height: 1.05;
+}
+
+.menu-hero h1 span {
+    display: block;
+
+    margin-top: 5px;
+
+    color: var(--football-gold);
+
+    font-size: 0.76em;
+    letter-spacing: 3px;
+}
+
+.hero-description {
+    position: relative;
+    z-index: 1;
+
+    max-width: 480px;
+
+    margin-bottom: 22px;
+
+    color: var(--football-text-soft);
+
+    font-size: 12px;
+}
+
+.referee-badge {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    max-width: 340px;
+
+    padding: 12px;
+
+    gap: 11px;
+
+    border: 1px solid rgba(255, 200, 87, 0.23);
+
+    border-radius: 14px;
+
+    background: rgba(0, 0, 0, 0.19);
+}
+
+.referee-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 40px;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+
+    background: var(--football-gold-soft);
+
+    color: var(--football-gold);
+
+    font-size: 22px;
+}
+
+.referee-badge > div {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.referee-badge strong {
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.referee-badge small {
+    margin-top: 3px;
+
+    color: var(--football-gold);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+}
+
+.status-dot {
+    flex: 0 0 9px;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: var(--football-primary);
+
+    box-shadow: 0 0 12px rgba(18, 217, 138, 0.65);
+}
+
+
+/* ============================================================
+   09. GRILLE DU MENU
+============================================================ */
+
+.menu-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 11px;
+
+    margin-top: 17px;
+}
+
+.menu-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    min-width: 0;
+    min-height: 133px;
+
+    padding: 15px 12px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: var(--football-radius-md);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 39, 61, 0.95),
+            rgba(9, 24, 40, 0.96)
+        );
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform var(--football-transition),
+        border-color var(--football-transition),
+        background var(--football-transition),
+        box-shadow var(--football-transition);
+}
+
+.menu-card:hover {
+    border-color: rgba(18, 217, 138, 0.48);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20, 58, 75, 0.98),
+            rgba(9, 28, 43, 0.98)
+        );
+
+    box-shadow: 0 9px 24px rgba(0, 0, 0, 0.16);
+}
+
+.menu-card:active {
+    transform: scale(0.975);
+}
+
+.menu-card-featured {
+    border-color: rgba(18, 217, 138, 0.42);
+
+    background:
+        linear-gradient(
+            140deg,
+            rgba(10, 117, 79, 0.28),
+            rgba(11, 32, 48, 0.98)
+        );
+}
+
+.menu-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 37px;
+    height: 37px;
+
+    margin-bottom: 12px;
+
+    border-radius: 11px;
+
+    background: rgba(255, 255, 255, 0.065);
+
+    font-size: 21px;
+}
+
+.menu-card-title {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #fff;
+
+    font-size: 11px;
+    font-weight: 1000;
+
+    letter-spacing: 0.35px;
+}
+
+.menu-card-description {
+    display: block;
+
+    color: var(--football-muted);
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.menu-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    gap: 8px 16px;
+
+    padding: 21px 5px 5px;
+
+    color: var(--football-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+
+/* ============================================================
+   10. BOUTONS GÉNÉRIQUES
+============================================================ */
+
+.ui-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 44px;
+
+    padding: 12px 16px;
+
+    border: 1px solid transparent;
+
+    border-radius: 12px;
+
+    font-size: 11px;
+    font-weight: 1000;
+
+    letter-spacing: 0.5px;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition:
+        transform var(--football-transition),
+        filter var(--football-transition),
+        background var(--football-transition),
+        border-color var(--football-transition);
+}
+
+.ui-button:active {
+    transform: scale(0.98);
+}
+
+.button-primary {
+    border-color: rgba(18, 217, 138, 0.5);
+
+    background:
+        linear-gradient(
+            110deg,
+            var(--football-primary-dark),
+            var(--football-primary)
+        );
+
+    color: #031d13;
+
+    box-shadow: 0 7px 19px rgba(18, 217, 138, 0.12);
+}
+
+.button-primary:hover {
+    filter: brightness(1.08);
+}
+
+.button-secondary {
+    border-color: var(--football-border-strong);
+
+    background: rgba(255, 255, 255, 0.055);
+
+    color: var(--football-text);
+}
+
+.button-secondary:hover {
+    border-color: var(--football-primary);
+    background: var(--football-primary-glow);
+}
+
+.button-danger {
+    border-color: rgba(255, 79, 100, 0.35);
+
+    background: rgba(255, 79, 100, 0.13);
+
+    color: #ff9aa7;
+}
+
+.button-danger:hover {
+    background: rgba(255, 79, 100, 0.22);
+}
+
+.button-full {
+    width: 100%;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    width: 42px;
+    height: 42px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.04);
+
+    color: #fff;
+
+    font-size: 24px;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   11. TITRES DES ÉCRANS
+============================================================ */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 22px;
+}
+
+.section-heading > div {
+    min-width: 0;
+}
+
+.section-kicker {
+    margin-bottom: 5px;
+
+    color: var(--football-primary);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.section-heading h2 {
+    margin-bottom: 0;
+
+    color: #fff;
+
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 1000;
+
+    letter-spacing: -0.5px;
+}
+
+
+/* ============================================================
+   12. ÉCRAN DE MATCH
+============================================================ */
+
+#matchScreen {
+    width: 100%;
+    max-width: none;
+
+    padding: 0 0 12px;
+}
+
+.match-screen {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0;
+
+    min-width: 0;
+}
+
+#matchHeader {
+    position: relative;
+    z-index: 5;
+
+    width: 100%;
+
+    padding: 10px 10px 11px;
+
+    border-bottom: 1px solid var(--football-border);
+
+    background: rgba(5, 17, 30, 0.97);
+}
+
+.match-header {
+    display: flex;
+    flex-direction: column;
+
+    gap: 9px;
+}
+
+.match-competition {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.match-competition span:first-child {
+    color: var(--football-primary);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+.match-competition span:last-child {
+    overflow: hidden;
+
+    max-width: 60%;
+
+    color: var(--football-muted);
+
+    font-size: 9px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#scoreboard {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-height: 54px;
+
+    padding: 8px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            110deg,
+            rgba(18, 43, 66, 0.95),
+            rgba(7, 22, 38, 0.98)
+        );
+}
+
+.scoreboard {
+    width: 100%;
+}
+
+.score-team {
+    display: flex;
+    align-items: center;
+
+    min-width: 0;
+
+    gap: 8px;
+}
+
+.score-team-home {
+    justify-content: flex-start;
+}
+
+.score-team-away {
+    justify-content: flex-end;
+}
+
+.score-team span {
+    overflow: hidden;
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.score-team strong {
+    flex: 0 0 auto;
+
+    color: var(--football-primary);
+
+    font-size: 26px;
+    font-weight: 1000;
+}
+
+.score-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 64px;
+
+    padding: 0 7px;
+
+    border-right: 1px solid var(--football-border);
+    border-left: 1px solid var(--football-border);
+}
+
+.score-center span {
+    color: var(--football-gold);
+
+    font-size: 13px;
+    font-weight: 1000;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.score-center small {
+    color: var(--football-muted);
+
+    font-size: 7px;
+    font-weight: 800;
+
+    text-align: center;
+}
+
+
+/* ============================================================
+   13. VIEWPORT DU TERRAIN 3D
+============================================================ */
+
+/*
+   Important :
+   Le canvas occupe uniquement le viewport.
+   Les commandes sont dans #matchControls, en dehors du terrain.
+*/
+
+#pitchViewport {
+    position: relative;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    height: clamp(240px, 45vh, 490px);
+
+    min-height: 220px;
+    max-height: 490px;
+
+    overflow: hidden;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #1c7049,
+            #0d4a30 68%,
+            #07331f
+        );
+
+    isolation: isolate;
+}
+
+.pitch-viewport {
+    contain: layout paint;
+}
+
+#footballCanvas {
+    position: absolute;
+    inset: 0;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    min-width: 0;
+    min-height: 0;
+
+    padding: 0;
+    margin: 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    /*
+       Autorise les gestes de caméra gérés par JavaScript.
+       Ne pas remplacer par touch-action:none globalement.
+    */
+    touch-action: none;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+.football-canvas {
+    z-index: 1;
+}
+
+#engineStatus {
+    position: absolute;
+    z-index: 4;
+
+    top: 10px;
+    left: 10px;
+
+    max-width: calc(100% - 20px);
+
+    padding: 6px 9px;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+
+    border-radius: 8px;
+
+    background: rgba(3, 13, 22, 0.76);
+
+    color: #fff;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    pointer-events: none;
+}
+
+.engine-status {
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+}
+
+
+/* ============================================================
+   14. ANNONCES DU MATCH
+============================================================ */
+
+#matchAnnouncement {
+    position: absolute;
+    z-index: 8;
+
+    top: 50%;
+    left: 50%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: min(88%, 380px);
+
+    padding: 17px 19px;
+
+    border: 1px solid rgba(255, 200, 87, 0.42);
+
+    border-radius: 18px;
+
+    background: rgba(3, 13, 22, 0.92);
+
+    box-shadow: var(--football-shadow-strong);
+
+    text-align: center;
+
+    pointer-events: none;
+
+    transform: translate(-50%, -50%);
+
+    animation: announcementPop 220ms ease both;
+}
+
+.match-announcement strong {
+    margin-bottom: 6px;
+
+    color: var(--football-gold);
+
+    font-size: clamp(20px, 6vw, 30px);
+    font-weight: 1000;
+
+    text-transform: uppercase;
+}
+
+.match-announcement span {
+    color: #fff;
+
+    font-size: 12px;
+}
+
+@keyframes announcementPop {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -46%) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+
+/* ============================================================
+   15. STATUT DE L'ARBITRE
+============================================================ */
+
+#refereeStatus {
+    position: absolute;
+    z-index: 5;
+
+    right: 9px;
+    bottom: 9px;
+
+    display: flex;
+    align-items: center;
+
+    max-width: min(68%, 255px);
+
+    padding: 8px 10px;
+
+    gap: 8px;
+
+    border: 1px solid rgba(255, 200, 87, 0.24);
+
+    border-radius: 12px;
+
+    background: rgba(4, 16, 27, 0.87);
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+
+    pointer-events: none;
+}
+
+.referee-status {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.referee-status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 30px;
+
+    width: 30px;
+    height: 30px;
+
+    border-radius: 9px;
+
+    background: var(--football-gold-soft);
+
+    color: var(--football-gold);
+
+    font-size: 17px;
+}
+
+.referee-status > div {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.referee-status strong {
+    overflow: hidden;
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.referee-status small {
+    overflow: hidden;
+
+    margin-top: 2px;
+
+    color: var(--football-gold);
+
+    font-size: 8px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   16. COMMANDES DE CAMÉRA
+============================================================ */
+
+#cameraControls {
+    position: absolute;
+    z-index: 6;
+
+    top: 9px;
+    right: 9px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.camera-controls {
+    pointer-events: auto;
+}
+
+.camera-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    padding: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.22);
+
+    border-radius: 10px;
+
+    background: rgba(3, 14, 24, 0.78);
+
+    color: #fff;
+
+    font-size: 19px;
+    font-weight: 900;
+
+    cursor: pointer;
+
+    touch-action: manipulation;
+
+    transition:
+        background var(--football-transition),
+        border-color var(--football-transition),
+        transform var(--football-transition);
+}
+
+.camera-button:hover {
+    border-color: var(--football-primary);
+
+    background: rgba(8, 66, 49, 0.92);
+}
+
+.camera-button:active {
+    transform: scale(0.92);
+}
+
+#pinchZoomHint {
+    position: absolute;
+    z-index: 3;
+
+    left: 50%;
+    bottom: 12px;
+
+    max-width: calc(100% - 160px);
+
+    padding: 5px 9px;
+
+    border-radius: 8px;
+
+    background: rgba(3, 13, 22, 0.55);
+
+    color: rgba(255, 255, 255, 0.84);
+
+    font-size: 8px;
+
+    text-align: center;
+
+    pointer-events: none;
+
+    transform: translateX(-50%);
+}
+
+.pinch-zoom-hint {
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   17. COMMANDES DU MATCH SOUS LE TERRAIN
+============================================================ */
+
+/*
+   Toutes les commandes principales restent après #pitchViewport
+   dans le flux normal du document.
+   Aucun positionnement absolu sur la surface du terrain.
+*/
+
+#matchControls {
+    position: relative;
+    z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+
+    padding:
+        13px
+        10px
+        calc(13px + var(--football-safe-bottom));
+
+    gap: 13px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+
+    background:
+        linear-gradient(
+            180deg,
+            #091a2b,
+            #06111f
+        );
+
+    overflow: visible;
+}
+
+.match-controls {
+    flex: 0 0 auto;
+}
+
+
+/* ============================================================
+   18. ZONE JOYSTICK
+============================================================ */
+
+.movement-control-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    align-self: center;
+
+    width: 100%;
+    max-width: 180px;
+
+    gap: 5px;
+}
+
+#movementJoystick {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 102px;
+    height: 102px;
+
+    padding: 0;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(56, 167, 255, 0.08),
+            rgba(56, 167, 255, 0.025) 68%,
+            transparent 69%
+        );
+
+    touch-action: none;
+
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.movement-joystick {
+    cursor: crosshair;
+}
+
+#joystickBase {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 88px;
+    height: 88px;
+
+    border: 2px solid rgba(145, 181, 219, 0.38);
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(28, 54, 79, 0.95),
+            rgba(8, 23, 39, 0.96)
+        );
+
+    box-shadow:
+        inset 0 0 15px rgba(0, 0, 0, 0.3),
+        0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+.joystick-base::before,
+.joystick-base::after {
+    content: "";
+
+    position: absolute;
+
+    background: rgba(145, 181, 219, 0.18);
+
+    pointer-events: none;
+}
+
+.joystick-base::before {
+    width: 1px;
+    height: 70%;
+}
+
+.joystick-base::after {
+    width: 70%;
+    height: 1px;
+}
+
+#joystickKnob {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 37px;
+    height: 37px;
+
+    border: 2px solid rgba(255, 255, 255, 0.42);
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            #48b5ff,
+            #1265b2
+        );
+
+    box-shadow:
+        0 4px 13px rgba(0, 0, 0, 0.35),
+        0 0 16px rgba(56, 167, 255, 0.15);
+
+    transform: translate(0, 0);
+
+    will-change: transform;
+
+    pointer-events: none;
+}
+
+.control-caption {
+    color: var(--football-muted);
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 1px;
+}
+
+
+/* ============================================================
+   19. BOUTONS D'ACTION DU MATCH
+============================================================ */
+
+.action-control-area {
+    display: grid;
+
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    align-items: stretch;
+
+    gap: 7px;
+
+    width: 100%;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    min-height: 64px;
+
+    padding: 8px 3px;
+
+    border: 1px solid var(--football-border-strong);
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(24, 48, 72, 0.98),
+            rgba(8, 23, 39, 0.98)
+        );
+
+    cursor: pointer;
+
+    touch-action: manipulation;
+
+    transition:
+        transform var(--football-transition),
+        background var(--football-transition),
+        border-color var(--football-transition);
+}
+
+.action-button > span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 20px;
+    line-height: 1;
+}
+
+.action-button small {
+    display: block;
+
+    color: #fff;
+
+    font-size: 8px;
+    font-weight: 1000;
+
+    letter-spacing: 0.15px;
+}
+
+.action-button:hover {
+    border-color: var(--football-primary);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20, 74, 64, 0.98),
+            rgba(8, 35, 39, 0.98)
+        );
+}
+
+.action-button:active {
+    transform: scale(0.94);
+}
+
+.action-pass > span {
+    color: var(--football-blue);
+}
+
+.action-shoot {
+    border-color: rgba(18, 217, 138, 0.36);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(9, 104, 70, 0.36),
+            rgba(8, 23, 39, 0.98)
+        );
+}
+
+.action-shoot > span {
+    color: var(--football-primary);
+}
+
+.action-sprint > span {
+    color: var(--football-gold);
+}
+
+.action-defend > span {
+    color: #b8a2ff;
+}
+
+.action-switch > span {
+    color: #7edcff;
+}
+
+
+/* ============================================================
+   20. COMMANDES SECONDAIRES DU MATCH
+============================================================ */
+
+.match-secondary-controls {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 7px;
+
+    width: 100%;
+}
+
+.secondary-control-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    min-height: 39px;
+
+    padding: 9px 6px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.035);
+
+    color: var(--football-text-soft);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition:
+        border-color var(--football-transition),
+        background var(--football-transition);
+}
+
+.secondary-control-button:hover {
+    border-color: var(--football-blue);
+
+    background: rgba(56, 167, 255, 0.09);
+}
+
+
+/* ============================================================
+   21. FORMULAIRES
+============================================================ */
+
+.form-card,
+.settings-card,
+.profile-card {
+    padding: 18px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: var(--football-radius-lg);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(17, 38, 60, 0.96),
+            rgba(8, 22, 37, 0.98)
+        );
+
+    box-shadow: var(--football-shadow);
+}
+
+.form-card > label,
+.settings-card > label,
+.profile-card > label,
+.dialog-content > label {
+    display: block;
+
+    margin: 15px 0 7px;
+
+    color: var(--football-text-soft);
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.form-card > label:first-child,
+.settings-card > label:first-child,
+.profile-card > label:first-of-type,
+.dialog-content > label:first-child {
+    margin-top: 0;
+}
+
+.form-card select,
+.settings-card select,
+.profile-card select,
+.profile-card input,
+.dialog-content select,
+.team-filter-bar input,
+.team-filter-bar select {
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--football-border-strong);
+
+    border-radius: 10px;
+
+    background-color: #0b1d31;
+
+    color: #fff;
+
+    font-size: 12px;
+}
+
+.form-card select,
+.settings-card select,
+.profile-card select,
+.dialog-content select,
+.team-filter-bar select {
+    cursor: pointer;
+}
+
+.form-card > button {
+    margin-top: 21px;
+}
+
+input,
+select,
+textarea {
+    accent-color: var(--football-primary);
+}
+
+input[type="range"] {
+    display: block;
+
+    width: 100%;
+    min-height: 28px;
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   22. LISTE DES NIVEAUX DE COMPÉTITION
+============================================================ */
+
+#competitionLevelsList,
+#tournamentList,
+#teamsList,
+#equipmentItemsList {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr);
+
+    gap: 10px;
+
+    width: 100%;
+}
+
+.competition-level-card,
+.tournament-card,
+.team-card,
+.equipment-card {
+    min-width: 0;
+
+    padding: 15px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            140deg,
+            rgba(18, 41, 64, 0.95),
+            rgba(8, 22, 37, 0.98)
+        );
+}
+
+.competition-level-card h3,
+.tournament-card h3,
+.team-card h3,
+.equipment-card h3 {
+    margin-bottom: 7px;
+
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.competition-level-card p,
+.tournament-card p,
+.team-card p,
+.equipment-card p {
+    margin-bottom: 0;
+
+    color: var(--football-muted);
+
+    font-size: 11px;
+}
+
+.competition-level-card,
+.tournament-card,
+.team-card,
+.equipment-card {
+    overflow-wrap: anywhere;
+}
+
+.section-actions {
+    margin-top: 17px;
+}
+
+
+/* ============================================================
+   23. FILTRES ET LISTE DES ÉQUIPES
+============================================================ */
+
+.team-filter-bar {
+    display: flex;
+    flex-direction: column;
+
+    gap: 9px;
+
+    margin-bottom: 16px;
+}
+
+#teamsList {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.team-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.team-card-header {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.team-card-emblem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 42px;
+
+    width: 42px;
+    height: 42px;
+
+    border: 1px solid rgba(18, 217, 138, 0.25);
+
+    border-radius: 12px;
+
+    background: rgba(18, 217, 138, 0.09);
+
+    color: var(--football-primary);
+
+    font-size: 20px;
+}
+
+.team-card-title-block {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.team-card-title-block h3 {
+    margin-bottom: 4px;
+
+    overflow-wrap: anywhere;
+}
+
+.team-card-title-block p {
+    margin-bottom: 0;
+}
+
+.team-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 7px;
+}
+
+.team-card-stats span {
+    padding: 5px 8px;
+
+    border-radius: 7px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    color: var(--football-text-soft);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.team-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    margin-top: 3px;
+}
+
+.team-card-actions button {
+    flex: 1 1 100px;
+
+    min-height: 37px;
+
+    padding: 8px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.04);
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.team-card-actions button:hover {
+    border-color: var(--football-primary);
+}
+
+.team-list-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin-top: 16px;
+    padding-top: 12px;
+
+    border-top: 1px solid var(--football-border);
+}
+
+#teamCountLabel {
+    color: var(--football-muted);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+/* ============================================================
+   24. TOURNOIS
+============================================================ */
+
+#createTournamentBtn {
+    margin-top: 17px;
+}
+
+.tournament-card {
+    position: relative;
+}
+
+.tournament-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 14px;
+    left: 0;
+
+    width: 3px;
+    height: 32px;
+
+    border-radius: 0 4px 4px 0;
+
+    background: var(--football-gold);
+}
+
+
+/* ============================================================
+   25. ÉQUIPEMENT
+============================================================ */
+
+.equipment-tabs {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 6px;
+
+    margin-bottom: 16px;
+}
+
+.equipment-tab {
+    min-width: 0;
+    min-height: 42px;
+
+    padding: 8px 5px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.035);
+
+    color: var(--football-muted);
+
+    font-size: 9px;
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+.equipment-tab.active,
+.equipment-tab[aria-selected="true"] {
+    border-color: rgba(18, 217, 138, 0.48);
+
+    background: rgba(18, 217, 138, 0.12);
+
+    color: var(--football-primary);
+}
+
+.equipment-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 11px;
+}
+
+.equipment-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 92px;
+
+    border-radius: 11px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(56, 167, 255, 0.11),
+            rgba(255, 255, 255, 0.015)
+        );
+
+    font-size: 38px;
+}
+
+.equipment-card button {
+    min-height: 38px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    cursor: pointer;
+}
+
+#applyEquipmentBtn {
+    margin-top: 16px;
+}
+
+
+/* ============================================================
+   26. PROFIL
+============================================================ */
+
+.profile-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    align-self: center;
+
+    width: 88px;
+    height: 88px;
+
+    margin-bottom: 10px;
+
+    border: 2px solid rgba(18, 217, 138, 0.4);
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(18, 217, 138, 0.15),
+            rgba(18, 217, 138, 0.025)
+        );
+
+    font-size: 42px;
+}
+
+.profile-stat-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 8px;
+
+    margin: 13px 0;
+}
+
+.profile-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 0;
+
+    padding: 12px 5px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 11px;
+
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.profile-stat strong {
+    color: var(--football-primary);
+
+    font-size: 21px;
+    font-weight: 1000;
+}
+
+.profile-stat span {
+    color: var(--football-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+
+/* ============================================================
+   27. GUIDE DE JEU
+============================================================ */
+
+.guide-card {
+    margin-bottom: 10px;
+    padding: 15px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 13px;
+
+    background: rgba(15, 35, 55, 0.82);
+}
+
+.guide-card h3 {
+    margin-bottom: 7px;
+
+    color: #fff;
+
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.guide-card p {
+    margin-bottom: 0;
+
+    color: var(--football-text-soft);
+
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+
+/* ============================================================
+   28. PARAMÈTRES
+============================================================ */
+
+.settings-card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.toggle-setting {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    min-height: 46px;
+
+    margin-top: 9px !important;
+    padding: 9px 11px;
+
+    border: 1px solid var(--football-border);
+
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.toggle-setting input {
+    flex: 0 0 auto;
+
+    width: 19px;
+    height: 19px;
+
+    cursor: pointer;
+}
+
+#saveSettingsBtn {
+    margin-top: 17px;
+}
+
+
+/* ============================================================
+   29. DIALOGUES GÉNÉRIQUES
+============================================================ */
+
+#dialogOverlay,
+#tacticsOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+
+    padding:
+        calc(18px + var(--football-safe-top))
+        14px
+        calc(18px + var(--football-safe-bottom));
+
+    overflow-y: auto;
+
+    background: rgba(1, 7, 14, 0.76);
+
+    overscroll-behavior: contain;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.dialog-overlay {
+    animation: overlayFadeIn 160ms ease both;
+}
+
+@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.dialog-card {
+    display: flex;
+    flex-direction: column;
+
+    width: min(100%, 520px);
+    max-height: 100%;
+
+    overflow: hidden;
+
+    border: 1px solid var(--football-border-strong);
+
+    border-radius: var(--football-radius-lg);
+
+    background:
+        linear-gradient(
+            145deg,
+            #112b43,
+            #061423
+        );
+
+    box-shadow: var(--football-shadow-strong);
+}
+
+.dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 15px 16px;
+
+    border-bottom: 1px solid var(--football-border);
+}
+
+.dialog-header h2 {
+    margin-bottom: 0;
+
+    color: #fff;
+
+    font-size: 16px;
+    font-weight: 1000;
+}
+
+.dialog-close {
+    flex: 0 0 34px;
+
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+}
+
+.dialog-content {
+    padding: 17px;
+
+    overflow-y: auto;
+
+    overscroll-behavior: contain;
+}
+
+.dialog-content p {
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    padding: 14px 17px;
+
+    border-top: 1px solid var(--football-border);
+}
+
+.dialog-actions > * {
+    flex: 1 1 130px;
+}
+
+
+/* ============================================================
+   30. PANNEAU DE PAUSE
+============================================================ */
+
+#pauseOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9100;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+
+    padding:
+        calc(20px + var(--football-safe-top))
+        15px
+        calc(20px + var(--football-safe-bottom));
+
+    overflow-y: auto;
+
+    background: rgba(1, 7, 14, 0.84);
+
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+}
+
+.pause-card {
+    display: flex;
+    flex-direction: column;
+
+    width: min(100%, 360px);
+
+    padding: 25px 20px;
+
+    gap: 11px;
+
+    border: 1px solid var(--football-border-strong);
+
+    border-radius: var(--football-radius-lg);
+
+    background:
+        linear-gradient(
+            145deg,
+            #132e47,
+            #061423
+        );
+
+    box-shadow: var(--football-shadow-strong);
+}
+
+.pause-card h2 {
+    margin-bottom: 10px;
+
+    color: var(--football-gold);
+
+    font-size: 32px;
+    font-weight: 1000;
+
+    text-align: center;
+}
+
+.pause-card .section-kicker {
+    text-align: center;
+}
+
+
+/* ============================================================
+   31. PANNEAU TACTIQUE
+============================================================ */
+
+#tacticsOverlay .dialog-card {
+    width: min(100%, 460px);
+}
+
+#tacticsOverlay .dialog-content {
+    display: flex;
+    flex-direction: column;
+
+    gap: 9px;
+}
+
+
+/* ============================================================
+   32. NOTIFICATIONS
+============================================================ */
+
+#toastContainer {
+    position: fixed;
+    z-index: 12000;
+
+    top: calc(75px + var(--football-safe-top));
+    right: 12px;
+    left: 12px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 8px;
+
+    width: auto;
+
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+
+    width: min(100%, 440px);
+
+    padding: 12px 14px;
+
+    gap: 10px;
+
+    border: 1px solid var(--football-border-strong);
+
+    border-radius: 12px;
+
+    background: rgba(8, 25, 41, 0.97);
+
+    color: #fff;
+
+    box-shadow: var(--football-shadow);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    overflow-wrap: anywhere;
+
+    animation: toastIn 180ms ease both;
+}
+
+.toast-success {
+    border-color: rgba(18, 217, 138, 0.4);
+}
+
+.toast-error {
+    border-color: rgba(255, 79, 100, 0.4);
+}
+
+.toast-warning {
+    border-color: rgba(255, 185, 56, 0.4);
+}
+
+.toast-info {
+    border-color: rgba(56, 167, 255, 0.4);
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   33. PIED DE PAGE
+============================================================ */
+
+#appFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    width: 100%;
+
+    padding:
+        12px
+        14px
+        calc(12px + var(--football-safe-bottom));
+
+    gap: 8px;
+
+    border-top: 1px solid var(--football-border);
+
+    background: rgba(3, 12, 22, 0.96);
+
+    color: var(--football-muted);
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.app-footer span:last-child {
+    text-align: right;
+}
+
+
+/* ============================================================
+   34. ÉTATS ET CONTENUS DYNAMIQUES
+============================================================ */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 120px;
+
+    padding: 20px;
+
+    border: 1px dashed var(--football-border-strong);
+
+    border-radius: 14px;
+
+    color: var(--football-muted);
+
+    text-align: center;
+}
+
+.empty-state strong {
+    margin-bottom: 7px;
+
+    color: var(--football-text-soft);
+
+    font-size: 13px;
+}
+
+.empty-state p {
+    margin-bottom: 0;
+
+    font-size: 11px;
+}
+
+.error-state {
+    border-color: rgba(255, 79, 100, 0.38);
+
+    background: rgba(255, 79, 100, 0.06);
+}
+
+.success-text {
+    color: var(--football-primary) !important;
+}
+
+.warning-text {
+    color: var(--football-warning) !important;
+}
+
+.error-text {
+    color: #ff8593 !important;
+}
+
+.loading-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 70px;
+
+    gap: 10px;
+
+    color: var(--football-muted);
+
+    font-size: 11px;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--football-primary);
+
+    border-radius: 50%;
+
+    animation: spinnerRotate 750ms linear infinite;
+}
+
+@keyframes spinnerRotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* ============================================================
+   35. RESPONSIVE — PETITS TÉLÉPHONES
+============================================================ */
+
+@media (max-width: 359px) {
+    :root {
+        --football-header-height: 54px;
+    }
+
+    #topHeader {
+        padding-right: 9px;
+        padding-left: 9px;
+    }
+
+    .brand-block {
+        gap: 7px;
+    }
+
+    .brand-mark {
+        flex-basis: 32px;
+
+        width: 32px;
+        height: 32px;
+
+        border-radius: 10px;
+
+        font-size: 19px;
+    }
+
+    .brand-text strong {
+        max-width: 135px;
+
+        font-size: 10px;
+    }
+
+    .brand-text small {
+        font-size: 8px;
+    }
+
+    .header-actions {
+        gap: 4px;
+    }
+
+    .icon-button {
+        width: 32px;
+        min-width: 32px;
+        height: 32px;
+
+        border-radius: 9px;
+
+        font-size: 14px;
+    }
+
+    #mainContent {
+        padding-right: 9px;
+        padding-left: 9px;
+    }
+
+    .menu-hero {
+        padding: 20px 13px;
+    }
+
+    .menu-grid {
+        gap: 8px;
+    }
+
+    .menu-card {
+        min-height: 125px;
+
+        padding: 12px 9px;
+    }
+
+    .menu-card-title {
+        font-size: 10px;
+    }
+
+    .menu-card-description {
+        font-size: 9px;
+    }
+
+    #pitchViewport {
+        height: clamp(210px, 39vh, 330px);
+        min-height: 200px;
+    }
+
+    #matchControls {
+        padding-right: 7px;
+        padding-left: 7px;
+    }
+
+    .action-control-area {
+        gap: 4px;
+    }
+
+    .action-button {
+        min-height: 58px;
+
+        padding-right: 2px;
+        padding-left: 2px;
+
+        border-radius: 10px;
+    }
+
+    .action-button > span {
+        font-size: 17px;
+    }
+
+    .action-button small {
+        font-size: 7px;
+    }
+
+    .score-team span {
+        font-size: 8px;
+    }
+
+    .score-team strong {
+        font-size: 22px;
+    }
+
+    .score-center {
+        min-width: 52px;
+    }
+
+    .score-center span {
+        font-size: 11px;
+    }
+
+    #pinchZoomHint {
+        max-width: calc(100% - 120px);
+
+        font-size: 7px;
+    }
+
+    .camera-button {
+        width: 29px;
+        height: 29px;
+
+        font-size: 16px;
+    }
+}
+
+
+/* ============================================================
+   36. RESPONSIVE — TÉLÉPHONES STANDARD
+============================================================ */
+
+@media (min-width: 360px) and (max-width: 599px) {
+    #pitchViewport {
+        height: clamp(250px, 44vh, 400px);
+    }
+
+    .movement-control-area {
+        max-width: 200px;
+    }
+}
+
+
+/* ============================================================
+   37. RESPONSIVE — GRANDS TÉLÉPHONES ET TABLETTES
+============================================================ */
+
+@media (min-width: 600px) {
+    #topHeader {
+        padding-right: 22px;
+        padding-left: 22px;
+    }
+
+    #mainContent {
+        padding: 25px 22px 32px;
+    }
+
+    .menu-hero {
+        padding: 34px 30px;
+    }
+
+    .menu-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+
+        gap: 13px;
+    }
+
+    .menu-card {
+        min-height: 145px;
+
+        padding: 18px 15px;
+    }
+
+    .menu-card-title {
+        font-size: 12px;
+    }
+
+    .menu-card-description {
+        font-size: 11px;
+    }
+
+    #pitchViewport {
+        height: clamp(340px, 53vh, 580px);
+        max-height: 580px;
+    }
+
+    #matchControls {
+        padding: 15px 20px calc(15px + var(--football-safe-bottom));
+    }
+
+    .action-control-area {
+        max-width: 650px;
+
+        margin-right: auto;
+        margin-left: auto;
+
+        gap: 12px;
+    }
+
+    .action-button {
+        min-height: 73px;
+    }
+
+    .action-button > span {
+        font-size: 23px;
+    }
+
+    .action-button small {
+        font-size: 10px;
+    }
+
+    .match-secondary-controls {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        gap: 10px;
+    }
+
+    .team-filter-bar {
+        display: grid;
+
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+
+    #teamsList,
+    #competitionLevelsList,
+    #tournamentList,
+    #equipmentItemsList {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-card,
+    .settings-card,
+    .profile-card {
+        padding: 24px;
+    }
+
+    #toastContainer {
+        right: 20px;
+        left: auto;
+
+        width: min(440px, calc(100% - 40px));
+    }
+}
+
+
+/* ============================================================
+   38. RESPONSIVE — ORDINATEURS ET GRANDS ÉCRANS
+============================================================ */
+
+@media (min-width: 900px) {
+    #mainContent {
+        padding-top: 32px;
+        padding-bottom: 38px;
+    }
+
+    .menu-hero {
+        padding: 42px 38px;
+    }
+
+    .menu-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        gap: 15px;
+    }
+
+    .menu-card {
+        min-height: 160px;
+
+        padding: 20px 17px;
+    }
+
+    #pitchViewport {
+        height: min(62vh, 650px);
+        max-height: 650px;
+    }
+
+    .match-screen {
+        max-width: 1180px;
+
+        margin: 0 auto;
+    }
+
+    #matchHeader {
+        padding: 14px 18px;
+    }
+
+    #matchControls {
+        padding-right: 24px;
+        padding-left: 24px;
+    }
+
+    .movement-control-area {
+        max-width: 220px;
+    }
+
+    #teamsList,
+    #competitionLevelsList,
+    #tournamentList,
+    #equipmentItemsList {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .form-card,
+    .settings-card,
+    .profile-card {
+        max-width: 720px;
+
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .guide-card {
+        padding: 19px;
+    }
+}
+
+
+/* ============================================================
+   39. ÉCRAN HORIZONTAL
+============================================================ */
+
+@media (orientation: landscape) and (max-height: 520px) {
+    :root {
+        --football-header-height: 45px;
+    }
+
+    #topHeader {
+        min-height: 45px;
+
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
+    .brand-mark {
+        width: 30px;
+        height: 30px;
+
+        flex-basis: 30px;
+
+        font-size: 17px;
+    }
+
+    .icon-button {
+        width: 30px;
+        min-width: 30px;
+        height: 30px;
+    }
+
+    #matchHeader {
+        padding: 5px 10px;
+    }
+
+    .match-header {
+        gap: 4px;
+    }
+
+    .match-competition {
+        min-height: 13px;
+    }
+
+    #scoreboard {
+        min-height: 39px;
+
+        padding: 4px 8px;
+    }
+
+    .score-team strong {
+        font-size: 20px;
+    }
+
+    .score-center span {
+        font-size: 10px;
+    }
+
+    #pitchViewport {
+        height: 55vh;
+
+        min-height: 170px;
+        max-height: 300px;
+    }
+
+    #matchControls {
+        display: grid;
+
+        grid-template-columns: 120px minmax(0, 1fr);
+
+        align-items: center;
+
+        padding: 7px 12px;
+
+        gap: 9px;
+    }
+
+    .movement-control-area {
+        width: 115px;
+    }
+
+    #movementJoystick {
+        width: 78px;
+        height: 78px;
+    }
+
+    #joystickBase {
+        width: 68px;
+        height: 68px;
+    }
+
+    #joystickKnob {
+        width: 29px;
+        height: 29px;
+    }
+
+    .action-control-area {
+        gap: 6px;
+    }
+
+    .action-button {
+        min-height: 48px;
+    }
+
+    .action-button > span {
+        margin-bottom: 3px;
+
+        font-size: 16px;
+    }
+
+    .action-button small {
+        font-size: 7px;
+    }
+
+    .match-secondary-controls {
+        grid-column: 1 / -1;
+
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .secondary-control-button {
+        min-height: 31px;
+
+        padding: 5px;
+
+        font-size: 8px;
+    }
+
+    #pinchZoomHint {
+        bottom: 6px;
+    }
+
+    #refereeStatus {
+        bottom: 6px;
+
+        padding: 5px 7px;
+    }
+
+    .referee-status-icon {
+        width: 24px;
+        height: 24px;
+
+        flex-basis: 24px;
+
+        font-size: 14px;
+    }
+}
+
+
+/* ============================================================
+   40. ACCESSIBILITÉ ET MOUVEMENT RÉDUIT
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* ============================================================
+   41. PRÉVENTION DES DÉBORDEMENTS
+============================================================ */
+
+#footballGameApp,
+#mainContent,
+.screen-panel,
+.content-screen,
+.menu-hero,
+.form-card,
+.settings-card,
+.profile-card,
+.dialog-card {
+    min-width: 0;
+}
+
+#mainContent,
+.content-screen {
+    overflow-wrap: anywhere;
+}
+
+button,
+input,
+select {
+    max-width: 100%;
+}
+
+#footballCanvas {
+    max-width: none;
+}
+
+
+/* ============================================================
+   42. COMPATIBILITÉ DES PANNEAUX ET ÉTATS
+============================================================ */
+
+/*
+   Ne pas attribuer display:flex ou display:grid aux panneaux
+   quand ils portent la classe .hidden.
+   La règle .hidden !important reste prioritaire.
+*/
+
+#mainMenu:not(.hidden),
+#matchScreen:not(.hidden),
+#matchSetupScreen:not(.hidden),
+#championshipScreen:not(.hidden),
+#tournamentScreen:not(.hidden),
+#teamsScreen:not(.hidden),
+#equipmentScreen:not(.hidden),
+#profileScreen:not(.hidden),
+#howToPlayScreen:not(.hidden),
+#settingsScreen:not(.hidden) {
+    visibility: visible;
+}
+
+
+/* ============================================================
+   43. ZONES INTERACTIVES
+============================================================ */
+
+#footballCanvas,
+#movementJoystick,
+#joystickBase {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#footballCanvas {
+    -webkit-touch-callout: none;
+}
+
+.action-button,
+.camera-button,
+.icon-button,
+.ui-button,
+.menu-card,
+.back-button,
+.secondary-control-button,
+.equipment-tab {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+
+/* ============================================================
+   44. IMPRESSION
+============================================================ */
+
+@media print {
+    #loadingScreen,
+    #topHeader,
+    #matchControls,
+    #dialogOverlay,
+    #pauseOverlay,
+    #tacticsOverlay,
+    #toastContainer,
+    #appFooter {
+        display: none !important;
+    }
+
+    body,
+    #footballGameApp {
+        color: #000;
+        background: #fff;
+    }
+}
+
+/* ============================================================
+   FIN — FOBAS FOOTBALL ULTIMATE 3D CSS v1.0.0
+============================================================ */
