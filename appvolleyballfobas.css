@@ -3192,412 +3192,332 @@ input[type="range"] {
 
 
 
-/* ============================================================
-   34. FOBAS VOLLEYBALL CHAMPIONS 3D
-   FIX STRICT : TOUTES LES COMMANDES SOUS LE TERRAIN
-   Android First — CSS uniquement
-============================================================ */
 
-/* 1. Conteneur principal : disposition verticale obligatoire */
-#gameMain {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    box-sizing: border-box !important;
-}
 
-/* 2. Le terrain occupe une zone séparée */
-#gameMain > #stadiumSection {
-    order: 1 !important;
+
+/* =========================================================
+   FOBAS VOLLEYBALL CHAMPIONS 3D
+   CORRECTION : TERRAIN VISIBLE + COMMANDES COMPACTES
+   CSS uniquement — ne modifie pas le moteur 3D ni la caméra
+========================================================= */
+
+/* 1. Le terrain reste visible et garde sa propre zone */
+#stadiumSection {
     position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-    float: none !important;
-    flex: 0 0 auto !important;
-
-    display: block !important;
     width: 100% !important;
-    height: clamp(300px, 48vh, 520px) !important;
-    min-height: 300px !important;
-    max-height: 520px !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
+    min-height: 340px !important;
+    height: clamp(340px, 56vh, 620px) !important;
     overflow: hidden !important;
-    box-sizing: border-box !important;
     isolation: isolate !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
 }
 
-/* 3. Le canvas ne sort jamais du terrain */
-#gameMain > #stadiumSection > #volleyballCanvas {
+#volleyballCanvas {
     position: absolute !important;
     inset: 0 !important;
     display: block !important;
-
     width: 100% !important;
     height: 100% !important;
     min-height: 0 !important;
-    max-height: none !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
     z-index: 1 !important;
+    touch-action: none;
 }
 
-/* 4. Le panneau de commandes est obligatoirement après le terrain */
-#gameMain > #matchControls {
-    order: 2 !important;
-
-    position: relative !important;
-    inset: auto !important;
-    top: auto !important;
-    right: auto !important;
-    bottom: auto !important;
+/* 2. Les boutons de zoom restent dans un coin supérieur */
+#stadiumSection .camera-controls {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
     left: auto !important;
-
-    transform: none !important;
-    float: none !important;
-    clear: both !important;
-
-    flex: 0 0 auto !important;
-    align-self: stretch !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-
-    margin: 10px 0 18px !important;
-    padding: 8px !important;
-
-    box-sizing: border-box !important;
-    overflow: visible !important;
-
-    background: #081522 !important;
-    border: 1px solid rgba(90, 180, 230, 0.35) !important;
-    border-radius: 12px !important;
-
-    z-index: 2 !important;
-}
-
-/* Le panneau est réellement masqué quand hidden est présent. */
-#gameMain > #matchControls[hidden] {
-    display: none !important;
-}
-
-/* Pendant le match, commandes verticales sous le terrain. */
-#gameMain > #matchControls:not([hidden]) {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 7px !important;
-}
-
-/* 5. En-tête du joueur et bouton Quitter */
-#gameMain > #matchControls .match-control-header {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
+    bottom: auto !important;
+    z-index: 20 !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    flex-wrap: wrap !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 0 6px !important;
-    gap: 6px !important;
+    justify-content: flex-end !important;
+    gap: 5px !important;
+    max-width: calc(100% - 16px) !important;
+    padding: 4px !important;
+    border-radius: 12px !important;
+    background: rgba(8, 15, 30, 0.72) !important;
+    box-sizing: border-box !important;
 }
 
-#gameMain > #matchControls #activePlayerName {
+#stadiumSection .camera-controls button {
+    flex: 0 0 auto !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+}
+
+#stadiumSection #zoomLevel {
+    min-width: 36px !important;
+    padding: 3px !important;
+    font-size: 10px !important;
+    text-align: center !important;
+}
+
+/* 3. Les informations du match restent compactes */
+#engineStatus {
+    top: 7px !important;
+    left: 7px !important;
+    max-width: 55% !important;
+    padding: 5px 7px !important;
+    font-size: 9px !important;
+    z-index: 15 !important;
+}
+
+#scoreboard {
+    top: 42px !important;
+    max-width: calc(100% - 16px) !important;
+    z-index: 14 !important;
+}
+
+#missionLabel,
+#matchClock {
+    top: 125px !important;
+    max-width: 45% !important;
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    z-index: 14 !important;
+}
+
+#missionLabel {
+    left: 7px !important;
+}
+
+#matchClock {
+    right: 7px !important;
+}
+
+#gameMessage {
+    z-index: 13 !important;
+    max-width: calc(100% - 24px) !important;
     font-size: 12px !important;
-    line-height: 1.2 !important;
+    padding: 7px 10px !important;
+    pointer-events: none !important;
 }
 
-#gameMain > #matchControls #activePlayerPosition {
-    font-size: 10px !important;
-    line-height: 1.2 !important;
-}
-
-#gameMain > #matchControls #leaveMatchButton {
+/* 4. Les commandes sont SOUS le terrain, jamais dessus */
+#matchControls {
     position: relative !important;
     inset: auto !important;
-    transform: none !important;
-
-    flex: 0 1 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 30px !important;
-
-    margin: 0 !important;
-    padding: 6px 9px !important;
-    font-size: 10px !important;
-    white-space: normal !important;
-}
-
-/* 6. Disposition joystick + actions */
-#gameMain > #matchControls .match-control-layout {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    display: grid !important;
-    grid-template-columns: 62px minmax(0, 1fr) !important;
-    align-items: center !important;
-
+    z-index: 25 !important;
+    display: block !important;
     width: 100% !important;
-    min-width: 0 !important;
     height: auto !important;
     min-height: 0 !important;
-
     margin: 0 !important;
-    padding: 0 !important;
-    gap: 6px !important;
+    padding: 8px !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    background: #101827 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
 }
 
-/* 7. Joystick */
-#gameMain > #matchControls .joystick-area {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
+/* Respecte l'attribut hidden contrôlé par le jeu */
+#matchControls[hidden] {
+    display: none !important;
+}
 
+/* 5. En-tête joueur : compact */
+#matchControls .match-control-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin: 0 0 7px !important;
+    padding: 0 !important;
+}
+
+#activePlayerName,
+#activePlayerPosition {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+}
+
+#leaveMatchButton {
+    min-height: 30px !important;
+    padding: 5px 9px !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+}
+
+/* 6. Joystick et actions alignés sous le terrain */
+#matchControls .match-control-layout {
+    display: grid !important;
+    grid-template-columns: minmax(76px, 0.65fr) minmax(0, 2fr) !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#matchControls .joystick-area {
+    min-width: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
     gap: 4px !important;
 }
 
-#gameMain > #matchControls .joystick-area > span {
-    font-size: 8px !important;
-    text-align: center !important;
-    line-height: 1.2 !important;
+#matchControls .joystick-area > * {
+    max-width: 100% !important;
 }
 
-#gameMain > #matchControls #joystickBase {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    width: 54px !important;
+#matchControls #joystickBase {
+    width: min(100%, 82px) !important;
     min-width: 0 !important;
-    max-width: 100% !important;
-    height: 54px !important;
-    min-height: 54px !important;
-    max-height: 54px !important;
-
+    max-width: 82px !important;
+    aspect-ratio: 1 / 1 !important;
+    height: auto !important;
     margin: 0 auto !important;
-    box-sizing: border-box !important;
     touch-action: none !important;
 }
 
-/* 8. Les cinq boutons d'action restent dans le panneau */
-#gameMain > #matchControls .action-controls {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
-    display: grid !important;
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    align-items: stretch !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: auto !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 4px !important;
+#matchControls #joystickStick {
+    max-width: 42px !important;
+    max-height: 42px !important;
 }
 
-/* Neutralise les positions flottantes des boutons. */
-#gameMain > #matchControls .action-controls button,
-#gameMain > #matchControls .action-controls .game-action {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-    float: none !important;
+/* 7. Cinq boutons d'action compacts, sans recouvrir le terrain */
+#matchControls .action-controls {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
 
+#matchControls .action-controls button {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-
-    width: 100% !important;
+    gap: 2px !important;
     min-width: 0 !important;
-    max-width: 100% !important;
-
-    height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
-
+    width: 100% !important;
+    min-height: 43px !important;
+    height: auto !important;
+    padding: 4px 2px !important;
     margin: 0 !important;
-    padding: 3px 1px !important;
-    gap: 3px !important;
-
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-
-    font-size: 8px !important;
+    border-radius: 8px !important;
+    font-size: 9px !important;
     line-height: 1.1 !important;
     white-space: normal !important;
+    box-sizing: border-box !important;
 }
 
-#gameMain > #matchControls .action-controls button > span,
-#gameMain > #matchControls .action-controls .game-action > span {
-    display: block !important;
-    position: static !important;
-    font-size: 14px !important;
+#matchControls .action-controls button span {
+    font-size: 15px !important;
     line-height: 1 !important;
-    margin: 0 !important;
 }
 
-#gameMain > #matchControls .action-controls button > strong,
-#gameMain > #matchControls .action-controls .game-action > strong {
+#matchControls .action-controls button strong {
     display: block !important;
-    position: static !important;
-    width: 100% !important;
-    max-width: 100% !important;
-
-    font-size: 7px !important;
+    font-size: 9px !important;
     line-height: 1.1 !important;
     text-align: center !important;
     overflow-wrap: anywhere !important;
 }
 
-/* 9. État du ballon et objectif sous les commandes */
-#gameMain > #matchControls .match-footer {
-    position: relative !important;
-    inset: auto !important;
-    transform: none !important;
-
+/* 8. Statut du ballon et objectif : petite ligne en bas */
+#matchControls .match-footer {
     display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-
-    width: 100% !important;
-    min-width: 0 !important;
-    height: auto !important;
-
-    margin: 0 !important;
-    padding: 5px 0 0 !important;
+    flex-wrap: wrap !important;
     gap: 4px 8px !important;
-
-    font-size: 9px !important;
-    line-height: 1.3 !important;
+    margin: 7px 0 0 !important;
+    padding: 5px 0 0 !important;
+    font-size: 10px !important;
+    line-height: 1.25 !important;
 }
 
-/* 10. Les boutons de zoom restent dans les limites du terrain */
-#gameMain > #stadiumSection .camera-controls {
-    position: absolute !important;
-    top: 8px !important;
-    right: 8px !important;
-    bottom: auto !important;
-    left: auto !important;
-    transform: none !important;
-
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 4px !important;
-
-    max-width: calc(100% - 16px) !important;
-    z-index: 20 !important;
+#ballState,
+#matchObjective {
+    min-width: 0 !important;
+    font-size: 10px !important;
 }
 
-/* Le message ne bloque pas la vue du terrain. */
-#gameMain > #stadiumSection > #gameMessage {
-    z-index: 10 !important;
-    pointer-events: none !important;
-}
-
-/* 11. Petits téléphones */
+/* 9. Téléphones étroits */
 @media (max-width: 380px) {
-    #gameMain > #stadiumSection {
-        height: 44vh !important;
-        min-height: 280px !important;
+    #stadiumSection {
+        min-height: 300px !important;
+        height: 48vh !important;
     }
 
-    #gameMain > #matchControls {
+    #matchControls {
         padding: 6px !important;
     }
 
-    #gameMain > #matchControls .match-control-layout {
-        grid-template-columns: 48px minmax(0, 1fr) !important;
+    #matchControls .match-control-layout {
+        grid-template-columns: 68px minmax(0, 1fr) !important;
+        gap: 5px !important;
+    }
+
+    #matchControls #joystickBase {
+        width: 64px !important;
+        max-width: 64px !important;
+    }
+
+    #matchControls .action-controls {
         gap: 4px !important;
     }
 
-    #gameMain > #matchControls #joystickBase {
-        width: 44px !important;
-        height: 44px !important;
-        min-height: 44px !important;
-        max-height: 44px !important;
+    #matchControls .action-controls button {
+        min-height: 39px !important;
+        padding: 3px 1px !important;
     }
 
-    #gameMain > #matchControls .action-controls {
-        gap: 2px !important;
+    #matchControls .action-controls button strong {
+        font-size: 8px !important;
     }
 
-    #gameMain > #matchControls .action-controls button,
-    #gameMain > #matchControls .action-controls .game-action {
-        height: 42px !important;
-        min-height: 42px !important;
-        max-height: 42px !important;
-        padding: 2px 0 !important;
-    }
-
-    #gameMain > #matchControls .action-controls button > strong,
-    #gameMain > #matchControls .action-controls .game-action > strong {
-        font-size: 6px !important;
+    #stadiumSection .camera-controls button {
+        width: 30px !important;
+        min-width: 30px !important;
+        height: 30px !important;
+        min-height: 30px !important;
     }
 }
 
-/* 12. Mode paysage */
+/* 10. Téléphone en mode paysage */
 @media (max-height: 500px) and (orientation: landscape) {
-    #gameMain > #stadiumSection {
-        height: 68vh !important;
-        min-height: 230px !important;
+    #stadiumSection {
+        min-height: 250px !important;
+        height: 72vh !important;
     }
 
-    #gameMain > #matchControls .match-control-layout {
-        grid-template-columns: 54px minmax(0, 1fr) !important;
+    #matchControls .match-control-layout {
+        grid-template-columns: 68px minmax(0, 1fr) !important;
     }
 
-    #gameMain > #matchControls #joystickBase {
-        width: 46px !important;
-        height: 46px !important;
-        min-height: 46px !important;
-        max-height: 46px !important;
+    #matchControls #joystickBase {
+        width: 58px !important;
+        max-width: 58px !important;
+    }
+
+    #matchControls .action-controls {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    }
+
+    #matchControls .action-controls button {
+        min-height: 36px !important;
     }
 }
-
-/* FIN DU FIX STRICT */
-
-
-
-
 
 
 /* ============================================================
