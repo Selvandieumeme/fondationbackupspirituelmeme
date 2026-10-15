@@ -310,66 +310,152 @@
         });
     }
 
-    /* ========================================================
-       4. CONFIRMATION DIALOG
-       Aucun dialogue de sauvegarde au démarrage.
-    ======================================================== */
 
-    function askConfirmation(title, message, confirmText = "CONFIRMER") {
-        return new Promise(resolve => {
-            const dialog = $("confirmationDialog");
 
-            if (!dialog) {
-                resolve(window.confirm(`${title}\n\n${message}`));
-                return;
+
+
+/* ========================================================
+   4. CONFIRMATION DIALOG
+   Fermé au démarrage.
+   S'ouvre uniquement lors d'une action qui le demande.
+======================================================== */
+
+function closeConfirmationDialog() {
+    const dialog = $("confirmationDialog");
+
+    if (!dialog) return;
+
+    // Fèmen fenèt la san aktive okenn aksyon.
+    if (dialog.open && typeof dialog.close === "function") {
+        dialog.close();
+    }
+
+    dialog.removeAttribute("open");
+    dialog.style.removeProperty("display");
+    dialog.hidden = true;
+
+    // Si yon konfimasyon t ap tann, anile l san danje.
+    if (state.dialogResolve) {
+        const callback = state.dialogResolve;
+        state.dialogResolve = null;
+        callback(false);
+    }
+}
+
+function askConfirmation(
+    title,
+    message,
+    confirmText = "CONFIRMER"
+) {
+    return new Promise(resolve => {
+        const dialog = $("confirmationDialog");
+
+        // Si pa gen fenèt nan HTML la, itilize konfimasyon navigatè a.
+        if (!dialog) {
+            resolve(window.confirm(`${title}\n\n${message}`));
+            return;
+        }
+
+        // Evite kite yon ansyen konfimasyon an plas.
+        if (state.dialogResolve) {
+            const previousCallback = state.dialogResolve;
+            state.dialogResolve = null;
+            previousCallback(false);
+        }
+
+        const titleElement = $("dialogTitle");
+        const messageElement = $("dialogMessage");
+        const confirmButton = $("dialogConfirmButton");
+        const cancelButton = $("dialogCancelButton");
+
+        if (titleElement) {
+            titleElement.textContent = title;
+        }
+
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
+
+        if (confirmButton) {
+            confirmButton.textContent = confirmText;
+        }
+
+        // Prepare fenèt la pou aksyon itilizatè a mande a.
+        dialog.hidden = false;
+        dialog.style.removeProperty("display");
+
+        let completed = false;
+
+        const finish = value => {
+            if (completed) return;
+            completed = true;
+
+            if (dialog.open && typeof dialog.close === "function") {
+                dialog.close();
             }
 
-            const titleElement = $("dialogTitle");
-            const messageElement = $("dialogMessage");
-            const confirmButton = $("dialogConfirmButton");
-            const cancelButton = $("dialogCancelButton");
+            dialog.removeAttribute("open");
+            dialog.style.removeProperty("display");
+            dialog.hidden = true;
 
-            if (titleElement) titleElement.textContent = title;
-            if (messageElement) messageElement.textContent = message;
-            if (confirmButton) confirmButton.textContent = confirmText;
+            dialog.oncancel = null;
 
-            state.dialogResolve = resolve;
+            if (state.dialogResolve) {
+                const callback = state.dialogResolve;
+                state.dialogResolve = null;
+                callback(value);
+            } else {
+                resolve(value);
+            }
+        };
 
-            const finish = value => {
-                if (dialog.open && typeof dialog.close === "function") {
-                    dialog.close();
-                } else {
-                    dialog.removeAttribute("open");
-                }
-
-                if (state.dialogResolve) {
-                    const callback = state.dialogResolve;
-                    state.dialogResolve = null;
-                    callback(value);
-                }
+        // Anile ansyen evènman yo anvan konekte nouvo yo.
+        if (confirmButton) {
+            confirmButton.onclick = event => {
+                event.preventDefault();
+                finish(true);
             };
+        }
 
-            if (confirmButton) {
-                confirmButton.onclick = () => finish(true);
-            }
-
-            if (cancelButton) {
-                cancelButton.onclick = () => finish(false);
-            }
-
-            dialog.oncancel = event => {
+        if (cancelButton) {
+            cancelButton.onclick = event => {
                 event.preventDefault();
                 finish(false);
             };
+        }
 
+        dialog.oncancel = event => {
+            event.preventDefault();
+            finish(false);
+        };
+
+        state.dialogResolve = resolve;
+
+        // Louvri fenèt la sèlman paske yon aksyon mande sa.
+        try {
             if (typeof dialog.showModal === "function") {
-                if (!dialog.open) dialog.showModal();
+                if (!dialog.open) {
+                    dialog.showModal();
+                }
             } else {
+                dialog.hidden = false;
                 dialog.setAttribute("open", "");
                 dialog.style.display = "block";
             }
-        });
-    }
+        } catch (error) {
+            console.error(
+                "Erreur lors de l'ouverture du dialogue :",
+                error
+            );
+
+            dialog.hidden = false;
+            dialog.setAttribute("open", "");
+            dialog.style.display = "block";
+        }
+    });
+}
+
+
 
     /* ========================================================
        5. INDEXEDDB
@@ -2992,101 +3078,178 @@
         initializePinchZoom();
     }
 
-    /* ========================================================
-       27. AUTOSAVE ET INITIALISATION
-    ======================================================== */
 
-    async function initializeStorage() {
-        try {
-            await openDatabase();
-            await loadGame(true);
 
-            setStatus("IndexedDB prêt. Votre progression est conservée.");
-        } catch (error) {
-            console.warn(
-                "[FOBAS] IndexedDB indisponible ; localStorage sera utilisé si possible.",
-                error
-            );
+/* ========================================================
+   27. AUTOSAVE ET INITIALISATION
+   FOBAS VOLLEYBALL CHAMPIONS 3D
+======================================================== */
 
-            state.storageAvailable = false;
+async function initializeStorage() {
+    try {
+        await openDatabase();
+        await loadGame(true);
 
-            await loadGame(true);
+        setStatus("IndexedDB prêt. Votre progression est conservée.");
+    } catch (error) {
+        console.warn(
+            "[FOBAS] IndexedDB indisponible ; localStorage sera utilisé si possible.",
+            error
+        );
 
-            setStatus("Mode de sauvegarde locale activé.");
-        }
+        state.storageAvailable = false;
 
-        // Sauvegarde automatique silencieuse toutes les 10 minutes.
-        setInterval(() => {
-            if (state.matchActive) return;
-            saveGame(true);
-        }, 10 * 60 * 1000);
+        await loadGame(true);
+
+        setStatus("Mode de sauvegarde locale activé.");
     }
 
-    function initializeUI() {
-        // Aucun panneau de confirmation à l'ouverture.
-        setHidden("mainMenu", false);
+    // Sauvegarde automatique silencieuse toutes les 10 minutes.
+    setInterval(() => {
+        if (state.matchActive) return;
 
-        [
-            "profilePanel",
-            "careerPanel",
-            "championshipPanel",
-            "teamsPanel",
-            "equipmentPanel",
-            "howToPlayPanel",
-            "settingsPanel",
-            "matchResultPanel",
-            "matchControls"
-        ].forEach(id => setHidden(id, true));
+        saveGame(true);
+    }, 10 * 60 * 1000);
+}
 
-        setHidden("stadiumSection", true);
 
-        if ($("engineStatus")) {
-            $("engineStatus").textContent = "PRÊT À JOUER";
+/* ========================================================
+   INITIALISATION DE L'INTERFACE
+======================================================== */
+
+function initializeUI() {
+    // 1. Fèmen fenèt konfimasyon an depi jwèt la demare.
+    if (typeof closeConfirmationDialog === "function") {
+        closeConfirmationDialog();
+    } else {
+        const dialog = $("confirmationDialog");
+
+        if (dialog) {
+            if (dialog.open && typeof dialog.close === "function") {
+                dialog.close();
+            }
+
+            dialog.removeAttribute("open");
+            dialog.hidden = true;
+            dialog.style.removeProperty("display");
         }
-
-        if ($("missionLabel")) {
-            $("missionLabel").textContent = "MISSION 01 / 40";
-        }
-
-        if ($("homeTeamName")) $("homeTeamName").textContent = state.homeTeam;
-        if ($("awayTeamName")) $("awayTeamName").textContent = state.awayTeam;
-
-        syncSettingsUI();
-        syncEquipmentUI();
-
-        renderProfile();
-        renderCareer();
-        renderTeams();
     }
 
-    async function boot() {
+    // 2. Montre meni prensipal la.
+    setHidden("mainMenu", false);
+
+    // 3. Kache tout lòt panèl ki pa dwe parèt nan demaraj la.
+    [
+        "profilePanel",
+        "careerPanel",
+        "championshipPanel",
+        "teamsPanel",
+        "equipmentPanel",
+        "howToPlayPanel",
+        "settingsPanel",
+        "matchResultPanel",
+        "matchControls"
+    ].forEach(id => setHidden(id, true));
+
+    // 4. Kache seksyon estad la jiskaske yon match kòmanse.
+    setHidden("stadiumSection", true);
+
+    // 5. Mete mesaj demaraj la.
+    const engineStatus = $("engineStatus");
+
+    if (engineStatus) {
+        engineStatus.textContent = "PRÊT À JOUER";
+    }
+
+    // 6. Kòmanse sou premye misyon an.
+    const missionLabel = $("missionLabel");
+
+    if (missionLabel) {
+        missionLabel.textContent = "MISSION 01 / 40";
+    }
+
+    // 7. Mete non ekip yo sou tablo a.
+    const homeTeamName = $("homeTeamName");
+    const awayTeamName = $("awayTeamName");
+
+    if (homeTeamName) {
+        homeTeamName.textContent = state.homeTeam;
+    }
+
+    if (awayTeamName) {
+        awayTeamName.textContent = state.awayTeam;
+    }
+
+    // 8. Mete paramèt yo ajou.
+    syncSettingsUI();
+    syncEquipmentUI();
+
+    // 9. Montre pwofil, misyon ak ekip yo.
+    renderProfile();
+    renderCareer();
+    renderTeams();
+}
+
+
+/* ========================================================
+   DÉMARRAGE PRINCIPAL
+======================================================== */
+
+async function boot() {
+    // Evite demaraj miltip.
+    if (state.appBooted) return;
+
+    state.appBooted = true;
+
+    try {
+        // Prepare entèfas la san okenn konfimasyon.
         initializeUI();
+
+        // Konekte bouton yo.
         initializeButtons();
 
-        /*
-         * On ouvre d'abord IndexedDB en arrière-plan.
-         * Aucune confirmation utilisateur n'est requise.
-         */
+        // Louvri IndexedDB an aryè-plan.
         initializeStorage().catch(error => {
-            console.warn("[FOBAS] Stockage indisponible.", error);
+            console.warn(
+                "[FOBAS] Erreur d'initialisation du stockage.",
+                error
+            );
         });
 
-        /*
-         * Le moteur 3D est initialisé dès le chargement.
-         * L'écran d'accueil reste accessible même si le moteur échoue.
-         */
+        // Inisyalize motè 3D a.
         const ready = await initializeEngine();
 
         if (ready) {
             updateCamera();
             updateScoreboard();
         }
-    }
+    } catch (error) {
+        console.error(
+            "[FOBAS] Erreur pendant le démarrage du jeu :",
+            error
+        );
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", boot, { once: true });
-    } else {
-        boot();
+        const engineStatus = $("engineStatus");
+
+        if (engineStatus) {
+            engineStatus.textContent =
+                "Le jeu est chargé, mais une fonction nécessite une vérification.";
+        }
     }
+}
+
+
+/* ========================================================
+   LANCEMENT APRÈS CHARGEMENT DU DOCUMENT
+======================================================== */
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, {
+        once: true
+    });
+} else {
+    boot();
+}
+
 
 })();
