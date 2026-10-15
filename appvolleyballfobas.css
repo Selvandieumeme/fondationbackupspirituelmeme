@@ -3518,6 +3518,171 @@ input[type="range"] {
 
 
 
+
+
+
+
+
+/* ============================================================
+   35. FOBAS VOLLEYBALL — POSITION FIXE DES COMMANDES
+   Objectif : terrain entièrement visible, commandes en dessous.
+============================================================ */
+
+/* L'application utilise une disposition verticale. */
+#volleyballApp {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+/* La zone principale empile le stade et les commandes. */
+#gameMain {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+}
+
+/* Le stade garde sa place dans le flux normal. */
+#gameMain > #stadiumSection {
+    position: relative !important;
+    inset: auto !important;
+    float: none !important;
+    transform: none !important;
+
+    order: 1;
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* Le canvas reste dans les limites du stade. */
+#stadiumSection > #volleyballCanvas {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Les commandes de caméra quittent la superposition du terrain
+   et sont positionnées dans le flux normal sous le stade. */
+#stadiumSection > .camera-controls {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    float: none !important;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px;
+    z-index: 1;
+}
+
+/* L'indication du zoom tactile reste sous les commandes caméra. */
+#stadiumSection > #pinchHint {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 4px 8px;
+    text-align: center;
+}
+
+/* Le panneau du match se trouve après le stade dans le document. */
+#gameMain > #matchControls {
+    order: 2;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    float: none !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+
+    margin: 8px 0 14px !important;
+    z-index: 1;
+}
+
+/* Respecte le masquage géré par JavaScript. */
+#gameMain > #matchControls[hidden] {
+    display: none !important;
+}
+
+/* Les commandes apparaissent lorsque le match est actif. */
+#gameMain > #matchControls:not([hidden]) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+/* Les cinq actions restent dans leur propre zone. */
+#matchControls .action-controls {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Les boutons ne peuvent pas dépasser de leur colonne. */
+#matchControls .action-controls .game-action {
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Évite les débordements sur les petits écrans Android. */
+@media (max-width: 380px) {
+    #stadiumSection > .camera-controls {
+        gap: 6px;
+        padding: 8px 4px;
+    }
+
+    #matchControls .match-control-layout {
+        grid-template-columns: 48px minmax(0, 1fr) !important;
+        gap: 4px !important;
+    }
+
+    #matchControls .action-controls {
+        gap: 2px !important;
+    }
+}
+
+/* FIN DU BLOC 35 */
+
+
+
 /* ============================================================
    33. FIN DU CSS
    FOBAS VOLLEYBALL CHAMPIONS 3D
