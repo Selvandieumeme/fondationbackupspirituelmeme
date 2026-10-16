@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta name="theme-color" content="#10131b">
+
+    <meta
+        name="description"
+        content="FOBAS CINÉMA 3D — De Kè, Yon Sèl Destin. Yon fim romantik 3D an kreyòl ayisyen."
+    >
+
+    <meta name="color-scheme" content="dark">
+
+    <title>FOBAS CINÉMA 3D — De Kè, Yon Sèl Destin</title>
+
+    <!-- CSS prensipal -->
+    <link rel="stylesheet" href="./filmfobas.css">
+
+    <!-- PlayCanvas Engine -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/playcanvas@2.23.2/build/playcanvas.min.js"
+        defer
+    ></script>
+
+    <!-- JavaScript prensipal -->
+    <script src="./filmfobas.js" defer></script>
+</head>
+
+<body>
+    <div id="filmApp" class="film-app">
+
+        <!-- ==================================================
+             1. BAR SIPERYÈ
+        =================================================== -->
+
+        <header id="filmHeader" class="film-header">
+
+            <div class="film-brand">
+                <div class="film-brand-icon" aria-hidden="true">F</div>
+
+                <div class="film-brand-text">
+                    <strong>FOBAS CINÉMA 3D</strong>
+                    <span>STUDIO • FILM ROMANTIK</span>
+                </div>
+            </div>
+
+            <div class="film-header-actions">
+
+                <button
+                    id="btnFullscreen"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Mete fim nan an plen ekran"
+                    title="Plen ekran"
+                >
+                    ⛶
+                </button>
+
+                <button
+                    id="btnSettings"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Louvri paramèt fim nan"
+                    title="Paramèt"
+                >
+                    ⚙
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- ==================================================
+             2. ZÒN SINEMA 3D
+        =================================================== -->
+
+        <main id="filmMain" class="film-main">
+
+            <section
+                id="cinemaStage"
+                class="cinema-stage"
+                aria-label="Sèn fim 3D a"
+            >
+
+                <!-- Canvas PlayCanvas -->
+
+                <canvas
+                    id="filmCanvas"
+                    aria-label="Imaj fim 3D a"
+                    tabindex="0"
+                ></canvas>
+
+
+                <!-- EKRAN DEMARAJ -->
+
+                <div
+                    id="loadingScreen"
+                    class="loading-screen"
+                >
+
+                    <div class="loading-logo" aria-hidden="true">
+                        FOBAS
+                    </div>
+
+                    <h1>DE KÈ, YON SÈL DESTIN</h1>
+
+                    <p id="loadingMessage">
+                        Preparasyon estidyo sinematik la...
+                    </p>
+
+                    <div class="loading-progress-track">
+                        <div
+                            id="loadingProgress"
+                            class="loading-progress"
+                        ></div>
+                    </div>
+
+                    <span id="loadingPercent">0%</span>
+
+                    <button
+                        id="btnStartFilm"
+                        class="primary-button"
+                        type="button"
+                        disabled
+                    >
+                        ▶ KÒMANSE FIM NAN
+                    </button>
+
+                </div>
+
+
+                <!-- EKRAN ERÈ -->
+
+                <div
+                    id="errorScreen"
+                    class="error-screen"
+                    hidden
+                    role="alert"
+                >
+
+                    <h2>Nou pa kapab lanse fim nan</h2>
+
+                    <p id="errorMessage">
+                        Yon erè rive pandan preparasyon sèn nan.
+                    </p>
+
+                    <button
+                        id="btnRetry"
+                        class="secondary-button"
+                        type="button"
+                    >
+                        ↻ ESEYE ANKÒ
+                    </button>
+
+                </div>
+
+
+                <!-- TIT SÈN NAN -->
+
+                <div
+                    id="sceneTitle"
+                    class="scene-title"
+                >
+
+                    <span id="sceneNumber">SÈN 01</span>
+
+                    <h2 id="sceneName">
+                        Yon rankont inatandi
+                    </h2>
+
+                    <p id="sceneLocation">
+                        Yon bèl plas piblik
+                    </p>
+
+                </div>
+
+
+                <!-- FENÈT DYALÒG AN KREYÒL -->
+
+                <div
+                    id="dialogueBox"
+                    class="dialogue-box"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    hidden
+                >
+
+                    <div
+                        id="dialogueAvatar"
+                        class="dialogue-avatar"
+                        aria-hidden="true"
+                    >
+                        ♥
+                    </div>
+
+                    <div class="dialogue-content">
+
+                        <div class="dialogue-heading">
+
+                            <strong id="dialogueSpeaker">
+                                NARATÈ
+                            </strong>
+
+                            <span id="dialogueIndex">
+                                1 / 1
+                            </span>
+
+                        </div>
+
+                        <p id="dialogueText"></p>
+
+                    </div>
+
+                    <button
+                        id="btnNextDialogue"
+                        class="dialogue-next-button"
+                        type="button"
+                        aria-label="Pwochen dyalòg"
+                    >
+                        ›
+                    </button>
+
+                </div>
+
+
+                <!-- ENFÒMASYON SINEMATIK -->
+
+                <div
+                    id="cinemaOverlay"
+                    class="cinema-overlay"
+                >
+
+                    <div class="cinema-top-left">
+                        <span
+                            class="live-indicator"
+                            aria-hidden="true"
+                        ></span>
+
+                        <span id="playbackStatus">
+                            PREPARE
+                        </span>
+                    </div>
+
+                    <div class="cinema-top-right">
+
+                        <span id="qualityIndicator">3D</span>
+
+                        <span id="renderIndicator">
+                            PLAYCANVAS
+                        </span>
+
+                    </div>
+
+                    <div class="cinema-bottom-left">
+
+                        <span id="currentSceneLabel">
+                            SÈN 01
+                        </span>
+
+                        <span
+                            class="cinema-separator"
+                            aria-hidden="true"
+                        >
+                            •
+                        </span>
+
+                        <span id="currentLocationLabel">
+                            PLAS PIBLIK
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EKRAN POZ -->
+
+                <div
+                    id="pauseOverlay"
+                    class="pause-overlay"
+                    hidden
+                >
+
+                    <div class="pause-card">
+
+                        <span
+                            class="pause-symbol"
+                            aria-hidden="true"
+                        >
+                            Ⅱ
+                        </span>
+
+                        <h2>FIM NAN AN POZ</h2>
+
+                        <p>
+                            Kontinye istwa Mikaël ak Nadia.
+                        </p>
+
+                        <button
+                            id="btnResumeCenter"
+                            class="primary-button"
+                            type="button"
+                        >
+                            ▶ KONTINYE
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AVÈTISMAN PÈFÒMANS -->
+
+                <div
+                    id="performanceNotice"
+                    class="performance-notice"
+                    role="status"
+                    hidden
+                ></div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 3. ENFÒMASYON FIM NAN
+            =================================================== -->
+
+            <section class="film-information">
+
+                <div class="film-information-main">
+
+                    <div class="film-rating">
+                        <span>FOBAS ORIGINAL</span>
+                        <span>ROMANS 3D</span>
+                    </div>
+
+                    <h1 id="filmTitle">
+                        De Kè, Yon Sèl Destin
+                    </h1>
+
+                    <p id="filmDescription">
+                        Yon rankont pa aza ki pral chanje de lavi pou tout tan.
+                    </p>
+
+                    <div class="film-meta">
+                        <span>20 MINIT</span>
+                        <span aria-hidden="true">•</span>
+                        <span>KREYÒL AYISYEN</span>
+                        <span aria-hidden="true">•</span>
+                        <span>12 SÈN</span>
+                    </div>
+
+                </div>
+
+
+                <!-- PREZANTASYON PÈSONAJ YO -->
+
+                <div class="film-character-cards">
+
+                    <article class="character-card">
+
+                        <div
+                            class="character-initial"
+                            aria-hidden="true"
+                        >
+                            M
+                        </div>
+
+                        <div>
+                            <strong>Mikaël</strong>
+                            <span>Yon kè ki pare pou renmen</span>
+                        </div>
+
+                    </article>
+
+
+                    <article class="character-card">
+
+                        <div
+                            class="character-initial character-female"
+                            aria-hidden="true"
+                        >
+                            N
+                        </div>
+
+                        <div>
+                            <strong>Nadia</strong>
+                            <span>Yon souri ki chanje yon lavi</span>
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 4. LIY TAN FIM NAN
+            =================================================== -->
+
+            <section
+                id="timelinePanel"
+                class="timeline-panel"
+                aria-label="Liy tan fim nan"
+            >
+
+                <div class="timeline-heading">
+
+                    <div>
+
+                        <strong>LIY TAN SINEMA A</strong>
+
+                        <span id="timelineSceneCount">
+                            0 / 12 sèn
+                        </span>
+
+                    </div>
+
+                    <div class="timeline-clock">
+
+                        <span id="currentTime">00:00</span>
+
+                        <span aria-hidden="true">/</span>
+
+                        <span id="totalTime">20:00</span>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="timelineTrack"
+                    class="timeline-track"
+                    role="progressbar"
+                    aria-label="Pwogrè fim nan"
+                    aria-valuemin="0"
+                    aria-valuemax="1200"
+                    aria-valuenow="0"
+                >
+
+                    <div
+                        id="timelineProgress"
+                        class="timeline-progress"
+                    ></div>
+
+                    <div
+                        id="timelineMarkers"
+                        class="timeline-markers"
+                    ></div>
+
+                </div>
+
+
+                <div class="timeline-footer">
+
+                    <span id="timelineStart">00:00</span>
+
+                    <span id="timelineStatus">
+                        Pare pou jwe
+                    </span>
+
+                    <span id="timelineEnd">20:00</span>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 5. KONTWÒL LECTÈ A
+            =================================================== -->
+
+            <section
+                id="playerControls"
+                class="player-controls"
+                aria-label="Kontwòl fim nan"
+            >
+
+                <div class="player-controls-left">
+
+                    <button
+                        id="btnPreviousScene"
+                        class="control-button"
+                        type="button"
+                        title="Sèn anvan"
+                        aria-label="Sèn anvan"
+                    >
+                        ◀|
+                    </button>
+
+                    <button
+                        id="btnRewind"
+                        class="control-button"
+                        type="button"
+                        title="Retounen 10 segonn"
+                        aria-label="Retounen 10 segonn"
+                    >
+                        ↶10
+                    </button>
+
+                    <button
+                        id="btnPlayPause"
+                        class="play-button"
+                        type="button"
+                        aria-label="Jwe fim nan"
+                    >
+                        ▶
+                    </button>
+
+                    <button
+                        id="btnForward"
+                        class="control-button"
+                        type="button"
+                        title="Avanse 10 segonn"
+                        aria-label="Avanse 10 segonn"
+                    >
+                        10↷
+                    </button>
+
+                    <button
+                        id="btnNextScene"
+                        class="control-button"
+                        type="button"
+                        title="Pwochen sèn"
+                        aria-label="Pwochen sèn"
+                    >
+                        |▶
+                    </button>
+
+                </div>
+
+
+                <div class="player-controls-center">
+
+                    <label for="playbackSpeed">
+                        VITÈS
+                    </label>
+
+                    <select id="playbackSpeed">
+
+                        <option value="0.5">0.5×</option>
+
+                        <option value="0.75">0.75×</option>
+
+                        <option value="1" selected>1×</option>
+
+                        <option value="1.25">1.25×</option>
+
+                        <option value="1.5">1.5×</option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="player-controls-right">
+
+                    <button
+                        id="btnCaptions"
+                        class="secondary-button compact-button"
+                        type="button"
+                        aria-pressed="true"
+                    >
+                        💬 TÈKS
+                    </button>
+
+                    <button
+                        id="btnRestart"
+                        class="secondary-button compact-button"
+                        type="button"
+                    >
+                        ↻ REKÒMANSE
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 6. LIS SÈN YO
+            =================================================== -->
+
+            <section
+                id="sceneListPanel"
+                class="scene-list-panel"
+            >
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            ISTWA A
+                        </span>
+
+                        <h2>Tout sèn fim nan</h2>
+
+                    </div>
+
+                    <span
+                        id="sceneListCount"
+                        class="scene-count"
+                    >
+                        12 SÈN
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="sceneList"
+                    class="scene-list"
+                >
+                    <!-- JavaScript ap jenere 12 kat sèn yo. -->
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 7. EKSPÒTASYON VIDEYO
+            =================================================== -->
+
+            <section
+                id="exportPanel"
+                class="export-panel"
+                aria-label="Ekspòtasyon videyo"
+            >
+
+                <div class="export-header">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            PRODUKSYON VIDEO
+                        </span>
+
+                        <h2>Ekspòte fim nan</h2>
+
+                        <p>
+                            Prepare yon fichye videyo pou telechaje
+                            sou aparèy ou.
+                        </p>
+
+                    </div>
+
+                    <div class="export-badge">
+                        MP4 / WEBM
+                    </div>
+
+                </div>
+
+
+                <div class="export-options">
+
+                    <div class="export-option">
+
+                        <label for="exportResolution">
+                            REZOLISYON
+                        </label>
+
+                        <select id="exportResolution">
+
+                            <option value="720">
+                                HD 720p
+                            </option>
+
+                            <option value="1080" selected>
+                                Full HD 1080p
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="export-option">
+
+                        <label for="exportFrameRate">
+                            IMAJ / SEGON
+                        </label>
+
+                        <select id="exportFrameRate">
+
+                            <option value="24" selected>
+                                24 FPS
+                            </option>
+
+                            <option value="30">
+                                30 FPS
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="export-option">
+
+                        <label for="exportFormat">
+                            FÒMA
+                        </label>
+
+                        <select id="exportFormat">
+
+                            <option value="auto" selected>
+                                Otomatik
+                            </option>
+
+                            <option value="mp4">
+                                MP4
+                            </option>
+
+                            <option value="webm">
+                                WebM
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="export-actions">
+
+                    <button
+                        id="btnExportVideo"
+                        class="export-button"
+                        type="button"
+                    >
+
+                        <span aria-hidden="true">🎬</span>
+
+                        <span>
+                            <strong>EKSPÒTE FIM NAN</strong>
+                            <small>Prepare fichye videyo a</small>
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        id="btnCancelExport"
+                        class="secondary-button"
+                        type="button"
+                        disabled
+                    >
+                        ✕ ANILE
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="exportProgressPanel"
+                    class="export-progress-panel"
+                    hidden
+                >
+
+                    <div class="export-progress-heading">
+
+                        <span id="exportStatus">
+                            Preparasyon ekspòtasyon...
+                        </span>
+
+                        <strong id="exportPercent">0%</strong>
+
+                    </div>
+
+                    <div class="export-progress-track">
+
+                        <div
+                            id="exportProgressBar"
+                            class="export-progress-bar"
+                        ></div>
+
+                    </div>
+
+                    <p id="exportDetails">
+                        Tanpri pa fèmen paj la pandan anrejistreman an.
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="exportResult"
+                    class="export-result"
+                    hidden
+                >
+
+                    <div
+                        class="export-result-icon"
+                        aria-hidden="true"
+                    >
+                        ✓
+                    </div>
+
+                    <div class="export-result-content">
+
+                        <strong id="exportResultTitle">
+                            Videyo a pare
+                        </strong>
+
+                        <p id="exportResultMessage"></p>
+
+                        <a
+                            id="btnDownloadVideo"
+                            class="download-button"
+                            href="#"
+                            download="FOBAS-De-Ke-Yon-Seul-Destin.webm"
+                        >
+                            📥 TELECHAJE VIDEYO A
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div class="export-notice">
+
+                    <strong>Enpòtan:</strong>
+
+                    Ekspòtasyon yon fim 20 minit mande anpil memwa.
+                    Rezilta a depann de kapasite aparèy Android la
+                    ak fòma videyo navigatè a sipòte.
+
+                </div>
+
+            </section>
+
+
+            <!-- ==================================================
+                 8. FENÈT PARAMÈT YO
+            =================================================== -->
+
+            <dialog
+                id="settingsDialog"
+                class="settings-dialog"
+                aria-labelledby="settingsDialogTitle"
+            >
+
+                <div class="dialog-header">
+
+                    <h2 id="settingsDialogTitle">
+                        Paramèt sinema
+                    </h2>
+
+                    <button
+                        id="btnCloseSettings"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Fèmen paramèt yo"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+
+                <div class="settings-content">
+
+                    <label class="setting-row">
+
+                        <span>Montre dyalòg yo</span>
+
+                        <input
+                            id="settingCaptions"
+                            type="checkbox"
+                            checked
+                        >
+
+                    </label>
+
+
+                    <label class="setting-row">
+
+                        <span>Animasyon kamera</span>
+
+                        <input
+                            id="settingCameraMotion"
+                            type="checkbox"
+                            checked
+                        >
+
+                    </label>
+
+
+                    <label class="setting-row">
+
+                        <span>Kalite grafik</span>
+
+                        <select id="settingGraphics">
+
+                            <option value="high" selected>
+                                Wo
+                            </option>
+
+                            <option value="medium">
+                                Mwayen
+                            </option>
+
+                            <option value="low">
+                                Ba
+                            </option>
+
+                        </select>
+
+                    </label>
+
+
+                    <label class="setting-row">
+
+                        <span>Kontwòl mobil</span>
+
+                        <input
+                            id="settingMobile"
+                            type="checkbox"
+                            checked
+                        >
+
+                    </label>
+
+                </div>
+
+
+                <div class="dialog-footer">
+
+                    <button
+                        id="btnSaveSettings"
+                        class="primary-button"
+                        type="button"
+                    >
+                        SOVE PARAMÈT YO
+                    </button>
+
+                </div>
+
+            </dialog>
+
+        </main>
+
+
+        <!-- ==================================================
+             9. PYE PAJ
+        =================================================== -->
+
+        <footer class="film-footer">
+
+            <span>© FOBAS CINÉMA 3D</span>
+
+            <span>DE KÈ, YON SÈL DESTIN</span>
+
+            <span>YON ISTWA LANMOU AN KREYÒL</span>
+
+        </footer>
+
+
+        <!-- ==================================================
+             10. NOTIFIKASYON
+        =================================================== -->
+
+        <div
+            id="filmToast"
+            class="film-toast"
+            role="status"
+            aria-live="polite"
+            hidden
+        ></div>
+
+    </div>
+</body>
+</html>
