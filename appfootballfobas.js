@@ -1,2373 +1,108 @@
 /* ============================================================
    FOBAS FOOTBALL ULTIMATE 3D
-   JavaScript principal — Version 1.0.0
+   Fichier : appfootballfobas.js
+   Version : 2.0.0
    Moteur : PlayCanvas 2.23.2
-   Android First — IndexedDB
-   Fichier racine : appfootballfobas.js
+   Plateforme : Android / navigateur mobile et ordinateur
+
+   FONCTIONS :
+   - Chargement sécurisé du moteur 3D
+   - Terrain 3D avec lignes, buts et éclairage
+   - 22 joueurs visibles sur le terrain
+   - Joueurs IA et déplacement
+   - Ballon interactif
+   - Passe, tir, sprint et défense
+   - Caméra avec zoom et commandes tactiles
+   - Navigation entre les écrans HTML
+   - Équipes locales et internationales
+   - Sept niveaux de compétition
+   - Tournois
+   - Équipement
+   - Profil
+   - Tactiques
+   - Paramètres
+   - IndexedDB avec solution de secours
+   - Sauvegarde automatique toutes les 10 minutes
+   - Reprise après erreur de démarrage
+
+   Les éléments HTML sont recherchés par leurs identifiants.
 ============================================================ */
 
 (() => {
     "use strict";
 
     /* ========================================================
-       1. CONFIGURATION ET OUTILS
+       1. CONFIGURATION
     ======================================================== */
 
     const CONFIG = window.FOBAS_FOOTBALL_CONFIG || {};
 
-    const DB_NAME = CONFIG.databaseName || "FOBAS_FOOTBALL_ULTIMATE_DB";
-    const DB_VERSION = CONFIG.databaseVersion || 1;
-
-    const FIELD = {
-        length: 44,
-        width: 28,
-        lineY: 0.045,
-        playerHeight: 1.85,
-        playerRadius: 0.34,
-        ballRadius: 0.32
-    };
-
-    const CAMERA = {
-        distance: 28,
-        minDistance: 13,
-        maxDistance: 47,
-        height: 18,
-        angle: 0.66,
-        minAngle: 0.38,
-        maxAngle: 1.12
-    };
-
-    const $ = id => document.getElementById(id);
-
-    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-    const random = (min, max) => min + Math.random() * (max - min);
-
-    const pick = list => list[Math.floor(Math.random() * list.length)];
-
-    const slug = value => String(value || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-
-    const escapeHTML = value => String(value ?? "").replace(
-        /[&<>"']/g,
-        char => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;"
-        })[char]
-    );
-
-    const teamName = value => {
-        const option = document.querySelector(
-            `#homeTeamSelect option[value="${CSS.escape(String(value))}"], ` +
-            `#awayTeamSelect option[value="${CSS.escape(String(value))}"]`
-        );
-
-        if (option) {
-            return option.textContent.replace(/^Équipe\s*/i, "").trim();
-        }
-
-        return String(value || "FOBAS");
-    };
-
-    const safeText = (id, value) => {
-        const element = $(id);
-        if (element) element.textContent = String(value ?? "");
-    };
-
-    const show = element => element && element.classList.remove("hidden");
-
-    const hide = element => element && element.classList.add("hidden");
-
-    const setLoading = (percent, message) => {
-        const value = clamp(Number(percent) || 0, 0, 100);
-
-        if ($("loadingMessage")) {
-            $("loadingMessage").textContent = message || "Chargement...";
-        }
-
-        if ($("loadingPercent")) {
-            $("loadingPercent").textContent = `${Math.round(value)} %`;
-        }
-
-        if ($("loadingProgressBar")) {
-            $("loadingProgressBar").style.width = `${value}%`;
-        }
-
-        if ($("loadingProgressTrack")) {
-            $("loadingProgressTrack").setAttribute(
-                "aria-valuenow",
-                String(Math.round(value))
-            );
-        }
-    };
-
-    /* ========================================================
-   2. ÉTAT CENTRAL
-======================================================== */
-
-const state = {
-    engine: null,
-    app: null,
-    cameraEntity: null,
-    sceneRoot: null,
-    fieldRoot: null,
-    playerRoot: null,
-    ballEntity: null,
-    ballShadow: null,
-
-    teams: [],
-    homePlayers: [],
-    awayPlayers: [],
-    allPlayers: [],
-    controlledPlayer: null,
-
-    selectedHome: "mare-rouge",
-    selectedAway: "mole-saint-nicolas",
-
-    scoreHome: 0,
-    scoreAway: 0,
-    elapsed: 0,
-    matchLength: 90,
-    matchStarted: false,
-    paused: false,
-    matchFinished: false,
-
-    ballVelocity: { x: 0, y: 0, z: 0 },
-    joystick: { x: 0, y: 0, active: false },
-    sprinting: false,
-    defending: false,
-
-    cameraDistance: CAMERA.distance,
-    cameraAngle: CAMERA.angle,
-    cameraMode: 0,
-
-    db: null,
-    soundEnabled: true,
-    audioContext: null,
-
-    currentScreen: "mainMenu",
-    selectedEquipmentTab: "kits",
-
-    selectedEquipment: {
-        kits: "classic",
-        balls: "classic",
-        boots: "classic"
-    },
-
-    profile: {
-        name: "Joueur FOBAS",
-        favoriteTeam: "mare-rouge",
-        matchesPlayed: 0,
-        goalsScored: 0,
-        trophies: 0
-    },
-
-    settings: {
-        graphics: "medium",
-        volume: 70,
-        cameraSensitivity: 50,
-        difficulty: "normal",
-        vibration: true,
-        commentary: true
-    },
-
-    tactics: {
-        formation: "433",
-        style: "balanced",
-        pressure: "medium"
-    },
-
-    career: {
-        currentMission: 1,
-        completedMissions: [],
-        wins: 0,
-        losses: 0,
-        draws: 0
-    },
-
-    selectedCompetition: "local",
-    selectedChampionship: "local",
-    tournaments: [],
-    activeTournament: null,
-
-    teamsFilter: {
-        query: "",
-        region: "all"
-    },
-
-    animationFrame: 0,
-    lastSave: 0,
-    lastAutoSave: 0,
-
-    // Gestion du minuteur de sauvegarde automatique
-    autoSaveTimer: null,
-
-    lastAITick: 0,
-    lastClockUpdate: 0,
-    lastRefereeTick: 0,
-
-    touchDistance: null,
-
-    loadingFailed: false,
-    booting: false,
-    listenersAttached: false
-};
-
-
-    /* ========================================================
-       3. NOTIFICATIONS NON BLOQUANTES
-    ======================================================== */
-
-    let toastTimer = null;
-
-    function toast(message, type = "info", duration = 2800) {
-        const container = $("toastContainer");
-
-        if (!container) {
-            console.log(`[FOBAS ${type}] ${message}`);
-            return;
-        }
-
-        const item = document.createElement("div");
-        item.className = `fobas-toast fobas-toast-${type}`;
-        item.textContent = message;
-
-        Object.assign(item.style, {
-            position: "relative",
-            margin: "8px",
-            padding: "12px 15px",
-            borderRadius: "12px",
-            color: "#fff",
-            background: type === "error"
-                ? "rgba(150,25,35,.96)"
-                : type === "success"
-                    ? "rgba(14,115,72,.96)"
-                    : "rgba(8,28,51,.96)",
-            border: "1px solid rgba(255,255,255,.15)",
-            boxShadow: "0 8px 28px rgba(0,0,0,.25)",
-            fontSize: "13px",
-            lineHeight: "1.45",
-            pointerEvents: "auto"
-        });
-
-        container.appendChild(item);
-
-        window.setTimeout(() => {
-            item.style.opacity = "0";
-            item.style.transition = "opacity .25s";
-            window.setTimeout(() => item.remove(), 280);
-        }, duration);
-
-        while (container.children.length > 5) {
-            container.firstElementChild.remove();
-        }
-    }
-
-    function announce(title, message, duration = 3200) {
-        const panel = $("matchAnnouncement");
-
-        safeText("announcementTitle", title);
-        safeText("announcementMessage", message);
-
-        if (panel) {
-            show(panel);
-
-            window.clearTimeout(announce._timer);
-
-            announce._timer = window.setTimeout(() => {
-                hide(panel);
-            }, duration);
-        }
-
-        if ($("refereeDecisionLabel")) {
-            $("refereeDecisionLabel").textContent = message;
-        }
-    }
-
-    /* ========================================================
-       4. INDEXEDDB — SAUVEGARDE LOCALE
-    ======================================================== */
-
-    function openDatabase() {
-        return new Promise(resolve => {
-            if (!("indexedDB" in window)) {
-                resolve(null);
-                return;
-            }
-
-            let request;
-
-            try {
-                request = indexedDB.open(DB_NAME, DB_VERSION);
-            } catch (error) {
-                console.warn("IndexedDB indisponible :", error);
-                resolve(null);
-                return;
-            }
-
-            request.onupgradeneeded = event => {
-                const db = event.target.result;
-
-                if (!db.objectStoreNames.contains("records")) {
-                    db.createObjectStore("records", { keyPath: "key" });
-                }
-            };
-
-            request.onsuccess = () => resolve(request.result);
-
-            request.onerror = () => {
-                console.warn("Impossible d'ouvrir IndexedDB.");
-                resolve(null);
-            };
-
-            request.onblocked = () => {
-                console.warn("Ouverture IndexedDB bloquée.");
-                resolve(null);
-            };
-        });
-    }
-
-    function saveRecord(key, value) {
-        const record = {
-            key,
-            value,
-            updatedAt: Date.now()
-        };
-
-        try {
-            localStorage.setItem(`FOBAS_FOOTBALL_${key}`, JSON.stringify(record));
-        } catch (error) {
-            console.warn("LocalStorage indisponible :", error);
-        }
-
-        if (!state.db) return Promise.resolve(false);
-
-        return new Promise(resolve => {
-            try {
-                const transaction = state.db.transaction("records", "readwrite");
-
-                transaction.objectStore("records").put(record);
-
-                transaction.oncomplete = () => resolve(true);
-                transaction.onerror = () => resolve(false);
-                transaction.onabort = () => resolve(false);
-            } catch (error) {
-                console.warn("Sauvegarde IndexedDB impossible :", error);
-                resolve(false);
-            }
-        });
-    }
-
-    function loadRecord(key) {
-        if (!state.db) {
-            try {
-                const stored = localStorage.getItem(`FOBAS_FOOTBALL_${key}`);
-                return Promise.resolve(stored ? JSON.parse(stored).value : null);
-            } catch {
-                return Promise.resolve(null);
-            }
-        }
-
-        return new Promise(resolve => {
-            try {
-                const request = state.db
-                    .transaction("records", "readonly")
-                    .objectStore("records")
-                    .get(key);
-
-                request.onsuccess = () => {
-                    if (request.result) {
-                        resolve(request.result.value);
-                        return;
-                    }
-
-                    try {
-                        const stored = localStorage.getItem(
-                            `FOBAS_FOOTBALL_${key}`
-                        );
-
-                        resolve(stored ? JSON.parse(stored).value : null);
-                    } catch {
-                        resolve(null);
-                    }
-                };
-
-                request.onerror = () => resolve(null);
-            } catch {
-                resolve(null);
-            }
-        });
-    }
-
-    async function saveAll(showMessage = true) {
-        const data = {
-            profile: state.profile,
-            settings: state.settings,
-            career: state.career,
-            tournaments: state.tournaments,
-            selectedEquipment: state.selectedEquipment,
-            selectedCompetition: state.selectedCompetition,
-            tactics: state.tactics,
-            savedAt: Date.now()
-        };
-
-        const results = await Promise.all([
-            saveRecord("appState", data),
-            saveRecord("profile", state.profile),
-            saveRecord("settings", state.settings),
-            saveRecord("career", state.career),
-            saveRecord("tournaments", state.tournaments)
-        ]);
-
-        state.lastSave = Date.now();
-
-        safeText(
-            "saveStatusLabel",
-            `Sauvegardé à ${new Date().toLocaleTimeString()}`
-        );
-
-        if (showMessage) {
-            toast(
-                results.some(Boolean)
-                    ? "Sauvegarde locale effectuée."
-                    : "Sauvegarde locale de secours effectuée.",
-                "success"
-            );
-        }
-
-        return true;
-    }
-
-    async function loadAll() {
-        const saved = await loadRecord("appState");
-
-        if (!saved || typeof saved !== "object") return;
-
-        if (saved.profile) {
-            state.profile = { ...state.profile, ...saved.profile };
-        }
-
-        if (saved.settings) {
-            state.settings = { ...state.settings, ...saved.settings };
-        }
-
-        if (saved.career) {
-            state.career = { ...state.career, ...saved.career };
-        }
-
-        if (Array.isArray(saved.tournaments)) {
-            state.tournaments = saved.tournaments;
-        }
-
-        if (saved.selectedEquipment) {
-            state.selectedEquipment = {
-                ...state.selectedEquipment,
-                ...saved.selectedEquipment
-            };
-        }
-
-        if (saved.selectedCompetition) {
-            state.selectedCompetition = saved.selectedCompetition;
-        }
-
-        if (saved.tactics) {
-            state.tactics = { ...state.tactics, ...saved.tactics };
-        }
-
-        syncProfileUI();
-        syncSettingsUI();
-        syncTacticsUI();
-    }
-
-    /* ========================================================
-       5. ÉQUIPES — GÉNÉRATION DYNAMIQUE
-    ======================================================== */
-
-    const WORLD_TEAMS = [
-        ["Haïti", "haiti"],
-        ["République dominicaine", "caribbean"],
-        ["Jamaïque", "caribbean"],
-        ["Cuba", "caribbean"],
-        ["Porto Rico", "caribbean"],
-        ["Trinité-et-Tobago", "caribbean"],
-        ["Barbade", "caribbean"],
-        ["Guadeloupe", "caribbean"],
-        ["Martinique", "caribbean"],
-        ["États-Unis", "americas"],
-        ["Canada", "americas"],
-        ["Mexique", "americas"],
-        ["Brésil", "americas"],
-        ["Argentine", "americas"],
-        ["Colombie", "americas"],
-        ["Chili", "americas"],
-        ["France", "europe"],
-        ["Espagne", "europe"],
-        ["Angleterre", "europe"],
-        ["Italie", "europe"],
-        ["Allemagne", "europe"],
-        ["Portugal", "europe"],
-        ["Pays-Bas", "europe"],
-        ["Belgique", "europe"],
-        ["Maroc", "africa"],
-        ["Sénégal", "africa"],
-        ["Côte d'Ivoire", "africa"],
-        ["Cameroun", "africa"],
-        ["Nigeria", "africa"],
-        ["Afrique du Sud", "africa"],
-        ["Japon", "international"],
-        ["Corée du Sud", "international"],
-        ["Australie", "international"],
-        ["Arabie saoudite", "international"],
-        ["Qatar", "international"]
-    ];
-
-    function buildTeams() {
-        const teams = [];
-        const localRegions = Array.isArray(CONFIG.localRegions)
-            ? CONFIG.localRegions
-            : [];
-
-        localRegions.forEach((region, index) => {
-            teams.push({
-                id: slug(region),
-                name: region,
-                region: "northwest",
-                country: "Haïti",
-                kind: "local",
-                rating: 58 + (index % 8) * 3
-            });
-
-            for (let section = 1; section <= 3; section++) {
-                teams.push({
-                    id: `${slug(region)}-section-${section}`,
-                    name: `${region} — Section ${section}`,
-                    region: "northwest",
-                    country: "Haïti",
-                    kind: "section",
-                    rating: 48 + ((index + section) % 10) * 3
-                });
-            }
-        });
-
-        [
-            "Cap-Haïtien",
-            "Gonaïves",
-            "Saint-Marc",
-            "Port-au-Prince",
-            "Jacmel",
-            "Les Cayes",
-            "Jérémie",
-            "Hinche",
-            "Fort-Liberté",
-            "Miragoâne",
-            "Petit-Goâve",
-            "Léogâne",
-            "Ouanaminthe",
-            "Cayes-Jacmel",
-            "Anse-à-Galets",
-            "Belladère",
-            "Limbé",
-            "Aquin",
-            "Trou-du-Nord",
-            "Verrettes"
-        ].forEach((name, index) => {
-            teams.push({
-                id: slug(name),
-                name,
-                region: "haiti",
-                country: "Haïti",
-                kind: "national",
-                rating: 60 + (index % 9) * 3
-            });
-        });
-
-        WORLD_TEAMS.forEach(([name, region], index) => {
-            teams.push({
-                id: slug(name),
-                name,
-                region,
-                country: name,
-                kind: "international",
-                rating: 70 + (index % 10) * 3
-            });
-        });
-
-        const bases = [...teams];
-
-        let serial = 1;
-
-        while (teams.length < Math.max(100, Number(CONFIG.initialTeamCount) || 100)) {
-            const base = bases[(serial - 1) % bases.length];
-
-            teams.push({
-                id: `${base.id}-academy-${serial}`,
-                name: `${base.name} ${serial % 2 ? "Academy" : "United"}`,
-                region: base.region,
-                country: base.country,
-                kind: "academy",
-                rating: clamp(base.rating + (serial % 11) - 5, 40, 95)
-            });
-
-            serial++;
-        }
-
-        state.teams = teams;
-
-        populateTeamSelects();
-        renderTeams();
-        renderChampionships();
-        renderTournaments();
-    }
-
-    function populateTeamSelects() {
-        const selects = [$("homeTeamSelect"), $("awayTeamSelect")];
-
-        selects.forEach(select => {
-            if (!select) return;
-
-            const oldValue = select.value;
-            const fragment = document.createDocumentFragment();
-
-            state.teams.forEach(team => {
-                const option = document.createElement("option");
-
-                option.value = team.id;
-                option.textContent = team.name;
-
-                fragment.appendChild(option);
-            });
-
-            select.replaceChildren(fragment);
-
-            if ([...select.options].some(option => option.value === oldValue)) {
-                select.value = oldValue;
-            }
-        });
-
-        if ($("profileFavoriteTeam")) {
-            const select = $("profileFavoriteTeam");
-            const oldValue = state.profile.favoriteTeam;
-
-            const fragment = document.createDocumentFragment();
-
-            state.teams.slice(0, 180).forEach(team => {
-                const option = document.createElement("option");
-                option.value = team.id;
-                option.textContent = team.name;
-                fragment.appendChild(option);
-            });
-
-            select.replaceChildren(fragment);
-
-            if ([...select.options].some(option => option.value === oldValue)) {
-                select.value = oldValue;
-            }
-        }
-    }
-
-    function renderTeams() {
-        const container = $("teamsList");
-        if (!container) return;
-
-        const query = state.teamsFilter.query.toLowerCase();
-        const region = state.teamsFilter.region;
-
-        const filtered = state.teams.filter(team => {
-            const matchesQuery =
-                !query ||
-                team.name.toLowerCase().includes(query) ||
-                team.country.toLowerCase().includes(query);
-
-            const matchesRegion = region === "all" || team.region === region;
-
-            return matchesQuery && matchesRegion;
-        });
-
-        const fragment = document.createDocumentFragment();
-
-        filtered.slice(0, 220).forEach(team => {
-            const card = document.createElement("article");
-
-            card.className = "team-card";
-            card.innerHTML = `
-                <strong>${escapeHTML(team.name)}</strong>
-                <span>${escapeHTML(team.country)} · ${escapeHTML(team.region)}</span>
-                <small>Niveau ${team.rating}/100</small>
-                <button type="button" class="ui-button button-secondary"
-                    data-select-team="${escapeHTML(team.id)}">
-                    Choisir cette équipe
-                </button>
-            `;
-
-            fragment.appendChild(card);
-        });
-
-        container.replaceChildren(fragment);
-
-        safeText(
-            "teamCountLabel",
-            `${filtered.length} équipe(s) disponible(s)`
-        );
-    }
-
-    /* ========================================================
-       6. CHAMPIONNATS ET TOURNOIS
-    ======================================================== */
-
-    function renderChampionships() {
-        const container = $("competitionLevelsList");
-        if (!container) return;
-
-        const levels = Array.isArray(CONFIG.competitionLevels)
+    const APP_NAME =
+        CONFIG.appName || "FOBAS FOOTBALL ULTIMATE 3D";
+
+    const APP_VERSION = CONFIG.version || "2.0.0";
+
+    const DB_NAME =
+        CONFIG.databaseName || "FOBAS_FOOTBALL_ULTIMATE_DB";
+
+    const DB_VERSION =
+        Number(CONFIG.databaseVersion) || 1;
+
+    const PLAYER_NAMES = Array.isArray(CONFIG.playerNames)
+        ? CONFIG.playerNames
+        : [
+            "Ranise",
+            "Junior",
+            "Kerlande",
+            "Nina",
+            "Dieuben",
+            "Lise",
+            "Selvandieu",
+            "Ricardo",
+            "Natacha",
+            "Sabine",
+            "Muller"
+        ];
+
+    const REGIONS = Array.isArray(CONFIG.localRegions)
+        ? CONFIG.localRegions
+        : [
+            "Mare-Rouge",
+            "Môle-Saint-Nicolas",
+            "Jean-Rabel",
+            "Bombardopolis",
+            "Baie-de-Henne",
+            "Port-de-Paix"
+        ];
+
+    const COMPETITION_LEVELS =
+        Array.isArray(CONFIG.competitionLevels)
             ? CONFIG.competitionLevels
             : [];
 
-        const fragment = document.createDocumentFragment();
-
-        levels.forEach((level, index) => {
-            const card = document.createElement("article");
-            card.className = "competition-level-card";
-
-            card.innerHTML = `
-                <strong>${index + 1}. ${escapeHTML(level.name)}</strong>
-                <p>${escapeHTML(level.description)}</p>
-                <button type="button" class="ui-button button-secondary"
-                    data-select-competition="${escapeHTML(level.id)}">
-                    Sélectionner
-                </button>
-            `;
-
-            fragment.appendChild(card);
-        });
-
-        container.replaceChildren(fragment);
-    }
-
-    function renderTournaments() {
-        const container = $("tournamentList");
-        if (!container) return;
-
-        const defaults = [
-            {
-                id: "fobas-cup",
-                name: "Coupe FOBAS",
-                description: "Coupe à élimination directe."
-            },
-            {
-                id: "caribbean-cup",
-                name: "Coupe des Caraïbes",
-                description: "Tournoi régional."
-            },
-            {
-                id: "northwest-cup",
-                name: "Coupe du Nord-Ouest",
-                description: "Compétition départementale."
-            },
-            {
-                id: "world-champions",
-                name: "Tournoi des champions",
-                description: "Compétition internationale."
-            }
-        ];
-
-        const list = [...defaults, ...state.tournaments];
-        const fragment = document.createDocumentFragment();
-
-        list.forEach(tournament => {
-            const card = document.createElement("article");
-            card.className = "tournament-card";
-
-            card.innerHTML = `
-                <strong>${escapeHTML(tournament.name)}</strong>
-                <p>${escapeHTML(tournament.description || "Tournoi FOBAS")}</p>
-                <button type="button" class="ui-button button-secondary"
-                    data-tournament-id="${escapeHTML(tournament.id)}">
-                    Participer
-                </button>
-            `;
-
-            fragment.appendChild(card);
-        });
-
-        container.replaceChildren(fragment);
-    }
-
-    /* ========================================================
-       7. PLAYCANVAS — IMPORTATION DYNAMIQUE
-    ======================================================== */
-
-    async function importPlayCanvas() {
-        const urls = [
-            "https://esm.sh/playcanvas@2.23.2",
-            "https://cdn.jsdelivr.net/npm/playcanvas@2.23.2/build/playcanvas.mjs"
-        ];
-
-        let lastError = null;
-
-        for (const url of urls) {
-            try {
-                const module = await import(url);
-
-                if (module && module.Application && module.Entity) {
-                    return module;
-                }
-
-                throw new Error("API PlayCanvas incomplète.");
-            } catch (error) {
-                lastError = error;
-                console.warn(`Import PlayCanvas échoué : ${url}`, error);
-            }
-        }
-
-        throw lastError || new Error("Impossible de charger PlayCanvas.");
-    }
-
-    function createMaterial(pc, color, options = {}) {
-        const material = new pc.StandardMaterial();
-
-        material.diffuse = new pc.Color(color[0], color[1], color[2]);
-        material.useLighting = true;
-
-        if (options.emissive) {
-            material.emissive = new pc.Color(
-                options.emissive[0],
-                options.emissive[1],
-                options.emissive[2]
-            );
-        }
-
-        if (options.metalness !== undefined) {
-            material.metalness = options.metalness;
-        }
-
-        if (options.gloss !== undefined) {
-            material.gloss = options.gloss;
-        }
-
-        material.update();
-
-        return material;
-    }
-
-    function addPrimitive(name, type, position, scale, material, parent = null) {
-        const pc = state.engine;
-
-        const entity = new pc.Entity(name);
-
-        entity.addComponent("render", {
-            type,
-            material
-        });
-
-        entity.setLocalPosition(position[0], position[1], position[2]);
-        entity.setLocalScale(scale[0], scale[1], scale[2]);
-
-        (parent || state.sceneRoot).addChild(entity);
-
-        return entity;
-    }
-
-    function createBox(name, position, scale, material, parent = null) {
-        return addPrimitive(name, "box", position, scale, material, parent);
-    }
-
-    function createSphere(name, position, scale, material, parent = null) {
-        return addPrimitive(name, "sphere", position, scale, material, parent);
-    }
-
-    function createCylinder(name, position, scale, material, parent = null) {
-        return addPrimitive(name, "cylinder", position, scale, material, parent);
-    }
-
-    function createCapsuleLikePlayer(name, color, parent) {
-        const pc = state.engine;
-        const root = new pc.Entity(name);
-
-        parent.addChild(root);
-
-        const shirtMaterial = createMaterial(pc, color, { gloss: 55 });
-        const shortsMaterial = createMaterial(
-            pc,
-            [0.08, 0.10, 0.15],
-            { gloss: 35 }
-        );
-        const skinMaterial = createMaterial(pc, [0.43, 0.25, 0.15]);
-        const sockMaterial = createMaterial(pc, [0.88, 0.88, 0.84]);
-        const bootMaterial = createMaterial(pc, [0.025, 0.03, 0.035]);
-
-        const body = createCylinder(
-            `${name}-torse`,
-            [0, 1.08, 0],
-            [0.58, 0.75, 0.40],
-            shirtMaterial,
-            root
-        );
-
-        const chest = createSphere(
-            `${name}-poitrine`,
-            [0, 1.30, 0],
-            [0.54, 0.46, 0.40],
-            shirtMaterial,
-            root
-        );
-
-        const shorts = createBox(
-            `${name}-short`,
-            [0, 0.72, 0],
-            [0.48, 0.30, 0.34],
-            shortsMaterial,
-            root
-        );
-
-        const head = createSphere(
-            `${name}-tete`,
-            [0, 1.79, 0],
-            [0.34, 0.37, 0.32],
-            skinMaterial,
-            root
-        );
-
-        const hair = createSphere(
-            `${name}-cheveux`,
-            [0, 1.94, -0.015],
-            [0.35, 0.17, 0.33],
-            bootMaterial,
-            root
-        );
-
-        const leftArm = createCylinder(
-            `${name}-bras-gauche`,
-            [-0.36, 1.13, 0],
-            [0.15, 0.55, 0.16],
-            skinMaterial,
-            root
-        );
-
-        const rightArm = createCylinder(
-            `${name}-bras-droit`,
-            [0.36, 1.13, 0],
-            [0.15, 0.55, 0.16],
-            skinMaterial,
-            root
-        );
-
-        const leftLeg = createCylinder(
-            `${name}-jambe-gauche`,
-            [-0.14, 0.37, 0],
-            [0.17, 0.62, 0.18],
-            sockMaterial,
-            root
-        );
-
-        const rightLeg = createCylinder(
-            `${name}-jambe-droite`,
-            [0.14, 0.37, 0],
-            [0.17, 0.62, 0.18],
-            sockMaterial,
-            root
-        );
-
-        createBox(
-            `${name}-chaussure-gauche`,
-            [-0.14, 0.08, 0.08],
-            [0.22, 0.12, 0.35],
-            bootMaterial,
-            root
-        );
-
-        createBox(
-            `${name}-chaussure-droite`,
-            [0.14, 0.08, 0.08],
-            [0.22, 0.12, 0.35],
-            bootMaterial,
-            root
-        );
-
-        root.setLocalScale(1, 1, 1);
-
-        return {
-            root,
-            body,
-            chest,
-            head,
-            hair,
-            leftArm,
-            rightArm,
-            leftLeg,
-            rightLeg,
-            shorts,
-            team: 0,
-            number: 0,
-            name,
-            speed: 3.6,
-            targetX: 0,
-            targetZ: 0,
-            homeX: 0,
-            homeZ: 0,
-            phase: Math.random() * Math.PI * 2,
-            controlled: false,
-            goalkeeper: false,
-            stamina: 100
-        };
-    }
-
-    /* ========================================================
-       8. TERRAIN — DIMENSIONS ET MARQUAGES
-    ======================================================== */
-
-    function createField() {
-        const pc = state.engine;
-
-        state.fieldRoot = new pc.Entity("FOBAS_FOOTBALL_FIELD");
-        state.sceneRoot.addChild(state.fieldRoot);
-
-        const grassDark = createMaterial(pc, [0.055, 0.24, 0.105]);
-        const grassLight = createMaterial(pc, [0.08, 0.34, 0.13]);
-        const lineMaterial = createMaterial(pc, [0.92, 0.96, 0.91]);
-        const goalMaterial = createMaterial(pc, [0.84, 0.88, 0.91]);
-        const netMaterial = createMaterial(pc, [0.60, 0.70, 0.72]);
-
-        // Terrain extérieur
-        createBox(
-            "Terrain extérieur",
-            [0, -0.18, 0],
-            [FIELD.length + 5, 0.35, FIELD.width + 5],
-            createMaterial(pc, [0.11, 0.13, 0.14]),
-            state.fieldRoot
-        );
-
-        // Herbe
-        createBox(
-            "Pelouse",
-            [0, 0, 0],
-            [FIELD.length, 0.10, FIELD.width],
-            grassDark,
-            state.fieldRoot
-        );
-
-        // Bandes de gazon alternées
-        const stripeCount = 8;
-        const stripeLength = FIELD.length / stripeCount;
-
-        for (let i = 0; i < stripeCount; i++) {
-            if (i % 2 === 0) continue;
-
-            createBox(
-                `Bande gazon ${i}`,
-                [
-                    -FIELD.length / 2 + stripeLength * i + stripeLength / 2,
-                    0.055,
-                    0
-                ],
-                [stripeLength, 0.012, FIELD.width - 0.1],
-                grassLight,
-                state.fieldRoot
-            );
-        }
-
-        const y = FIELD.lineY;
-
-        // Lignes périphériques
-        createBox(
-            "Ligne nord",
-            [0, y, -FIELD.width / 2],
-            [FIELD.length, 0.025, 0.10],
-            lineMaterial,
-            state.fieldRoot
-        );
-
-        createBox(
-            "Ligne sud",
-            [0, y, FIELD.width / 2],
-            [FIELD.length, 0.025, 0.10],
-            lineMaterial,
-            state.fieldRoot
-        );
-
-        createBox(
-            "Ligne gauche",
-            [-FIELD.length / 2, y, 0],
-            [0.10, 0.025, FIELD.width],
-            lineMaterial,
-            state.fieldRoot
-        );
-
-        createBox(
-            "Ligne droite",
-            [FIELD.length / 2, y, 0],
-            [0.10, 0.025, FIELD.width],
-            lineMaterial,
-            state.fieldRoot
-        );
-
-        // Ligne médiane
-        createBox(
-            "Ligne médiane",
-            [0, y + 0.005, 0],
-            [0.07, 0.025, FIELD.width],
-            lineMaterial,
-            state.fieldRoot
-        );
-
-        // Cercle central approximé avec segments
-        const circleRadius = 4.1;
-        const segments = 44;
-
-        for (let i = 0; i < segments; i++) {
-            const a1 = (i / segments) * Math.PI * 2;
-            const a2 = ((i + 1) / segments) * Math.PI * 2;
-
-            const x1 = Math.cos(a1) * circleRadius;
-            const z1 = Math.sin(a1) * circleRadius;
-            const x2 = Math.cos(a2) * circleRadius;
-            const z2 = Math.sin(a2) * circleRadius;
-
-            const dx = x2 - x1;
-            const dz = z2 - z1;
-            const length = Math.sqrt(dx * dx + dz * dz);
-
-            const line = createBox(
-                `Cercle central ${i}`,
-                [(x1 + x2) / 2, y + 0.006, (z1 + z2) / 2],
-                [length, 0.022, 0.055],
-                lineMaterial,
-                state.fieldRoot
-            );
-
-            line.setLocalEulerAngles(0, -Math.atan2(dz, dx) * 180 / Math.PI, 0);
-        }
-
-        // Point central
-        createCylinder(
-            "Point central",
-            [0, y + 0.025, 0],
-            [0.16, 0.025, 0.16],
-            lineMaterial,
-            state.fieldRoot
-        );
-
-        // Surfaces de réparation et petits rectangles
-        for (const sign of [-1, 1]) {
-            const goalX = sign * FIELD.length / 2;
-
-            createBox(
-                `Surface réparation ${sign}`,
-                [goalX - sign * 3.2, y + 0.004, 0],
-                [6.4, 0.025, 15],
-                lineMaterial,
-                state.fieldRoot
-            );
-
-            createBox(
-                `Petite surface ${sign}`,
-                [goalX - sign * 1.1, y + 0.008, 0],
-                [2.2, 0.025, 7],
-                lineMaterial,
-                state.fieldRoot
-            );
-
-            createGoal(sign, goalMaterial, netMaterial);
-        }
-
-        // Éclairage / décor du stade
-        createStadiumDecor();
-    }
-
-    function createGoal(sign, goalMaterial, netMaterial) {
-        const x = sign * (FIELD.length / 2 + 0.75);
-        const zHalf = 3.65;
-        const height = 2.55;
-
-        // Poteaux et barre transversale
-        createCylinder(
-            `Poteau but ${sign} gauche`,
-            [x, height / 2, -zHalf],
-            [0.12, height, 0.12],
-            goalMaterial,
-            state.fieldRoot
-        );
-
-        createCylinder(
-            `Poteau but ${sign} droit`,
-            [x, height / 2, zHalf],
-            [0.12, height, 0.12],
-            goalMaterial,
-            state.fieldRoot
-        );
-
-        createBox(
-            `Barre but ${sign}`,
-            [x, height, 0],
-            [0.14, 0.14, zHalf * 2],
-            goalMaterial,
-            state.fieldRoot
-        );
-
-        // Filet arrière
-        createBox(
-            `Filet but ${sign}`,
-            [x + sign * 1.0, height / 2, 0],
-            [0.035, height, zHalf * 2],
-            netMaterial,
-            state.fieldRoot
-        );
-
-        createBox(
-            `Filet latéral gauche ${sign}`,
-            [x + sign * 0.5, height / 2, -zHalf],
-            [1.0, height, 0.035],
-            netMaterial,
-            state.fieldRoot
-        );
-
-        createBox(
-            `Filet latéral droit ${sign}`,
-            [x + sign * 0.5, height / 2, zHalf],
-            [1.0, height, 0.035],
-            netMaterial,
-            state.fieldRoot
-        );
-    }
-
-    function createStadiumDecor() {
-        const pc = state.engine;
-
-        const standMaterial = createMaterial(pc, [0.17, 0.20, 0.24]);
-        const seatMaterial = createMaterial(pc, [0.07, 0.31, 0.56]);
-        const poleMaterial = createMaterial(pc, [0.23, 0.25, 0.28]);
-        const lightMaterial = createMaterial(
-            pc,
-            [0.92, 0.96, 1.0],
-            { emissive: [0.65, 0.72, 0.86] }
-        );
-
-        for (const side of [-1, 1]) {
-            createBox(
-                `Tribune ${side}`,
-                [0, 0.65, side * (FIELD.width / 2 + 3.5)],
-                [FIELD.length - 3, 1.25, 3.4],
-                standMaterial,
-                state.fieldRoot
-            );
-
-            for (let row = 0; row < 3; row++) {
-                createBox(
-                    `Rang sièges ${side}-${row}`,
-                    [0, 1.0 + row * 0.18, side * (FIELD.width / 2 + 2.5 + row * 0.65)],
-                    [FIELD.length - 5, 0.16, 0.42],
-                    seatMaterial,
-                    state.fieldRoot
-                );
-            }
-        }
-
-        for (const x of [-FIELD.length / 2 - 2.2, FIELD.length / 2 + 2.2]) {
-            for (const z of [-FIELD.width / 2 - 5.5, FIELD.width / 2 + 5.5]) {
-                createCylinder(
-                    `Pylône ${x}-${z}`,
-                    [x, 7, z],
-                    [0.16, 14, 0.16],
-                    poleMaterial,
-                    state.fieldRoot
-                );
-
-                createBox(
-                    `Projecteur ${x}-${z}`,
-                    [x, 13.5, z],
-                    [1.0, 0.32, 0.8],
-                    lightMaterial,
-                    state.fieldRoot
-                );
-            }
-        }
-
-        // Décor extérieur léger
-        createBox(
-            "Sol du stade",
-            [0, -0.42, 0],
-            [FIELD.length + 20, 0.2, FIELD.width + 20],
-            createMaterial(pc, [0.12, 0.15, 0.14]),
-            state.fieldRoot
-        );
-    }
-
-    /* ========================================================
-       9. JOUEURS ET BALLON
-    ======================================================== */
-
-    function makeTeamPlayers(teamIndex, teamColor, teamId) {
-        const names = Array.isArray(CONFIG.playerNames)
-            ? CONFIG.playerNames
-            : ["Joueur 1", "Joueur 2", "Joueur 3"];
-
-        const players = [];
-
-        const positions = [
-            [-19, 0],
-            [-14, -8],
-            [-14, -3],
-            [-14, 3],
-            [-14, 8],
-            [-7, -10],
-            [-7, -3],
-            [-7, 3],
-            [-7, 10],
-            [-2, -5],
-            [-2, 5]
-        ];
-
-        for (let i = 0; i < 11; i++) {
-            const playerName = names[
-                (teamIndex * 11 + i) % names.length
-            ];
-
-            const player = createCapsuleLikePlayer(
-                `${teamId}-${i + 1}-${playerName}`,
-                teamColor,
-                state.playerRoot
-            );
-
-            const side = teamIndex === 0 ? -1 : 1;
-            const formationPos = positions[i];
-
-            const x = formationPos[0] * side;
-            const z = formationPos[1];
-
-            player.team = teamIndex;
-            player.number = i + 1;
-            player.name = playerName;
-            player.homeX = x;
-            player.homeZ = z;
-            player.targetX = x;
-            player.targetZ = z;
-            player.goalkeeper = i === 0;
-            player.speed = i === 0 ? 3.0 : random(3.2, 4.5);
-
-            player.root.setLocalPosition(x, 0, z);
-
-            players.push(player);
-        }
-
-        return players;
-    }
-
-    function createPlayers() {
-        const pc = state.engine;
-
-        state.playerRoot = new pc.Entity("FOBAS_PLAYERS_ROOT");
-        state.sceneRoot.addChild(state.playerRoot);
-
-        const homeColor = [0.08, 0.31, 0.92];
-        const awayColor = [0.88, 0.12, 0.11];
-
-        state.homePlayers = makeTeamPlayers(
-            0,
-            homeColor,
-            slug(teamName(state.selectedHome))
-        );
-
-        state.awayPlayers = makeTeamPlayers(
-            1,
-            awayColor,
-            slug(teamName(state.selectedAway))
-        );
-
-        state.allPlayers = [...state.homePlayers, ...state.awayPlayers];
-
-        state.controlledPlayer = state.homePlayers[9];
-        state.controlledPlayer.controlled = true;
-
-        // Petit marqueur visible au-dessus du joueur contrôlé
-        const markerMaterial = createMaterial(pc, [1.0, 0.84, 0.08], {
-            emissive: [0.35, 0.25, 0.02]
-        });
-
-        const marker = createCylinder(
-            "Marqueur joueur contrôlé",
-            [0, 2.45, 0],
-            [0.48, 0.035, 0.48],
-            markerMaterial,
-            state.controlledPlayer.root
-        );
-
-        marker.setLocalEulerAngles(0, 0, 0);
-
-        // Ballon contrasté et clairement visible
-        const ballMaterial = createMaterial(pc, [0.96, 0.96, 0.92], {
-            gloss: 85
-        });
-
-        state.ballEntity = createSphere(
-            "Ballon FOBAS",
-            [0, FIELD.ballRadius + 0.08, 0],
-            [
-                FIELD.ballRadius * 2,
-                FIELD.ballRadius * 2,
-                FIELD.ballRadius * 2
-            ],
-            ballMaterial,
-            state.sceneRoot
-        );
-
-        // Motif sombre approximatif du ballon
-        const patternMaterial = createMaterial(pc, [0.035, 0.045, 0.055]);
-
-        for (let i = 0; i < 5; i++) {
-            const angle = i * Math.PI * 2 / 5;
-
-            createSphere(
-                `Motif ballon ${i}`,
-                [
-                    Math.cos(angle) * 0.16,
-                    FIELD.ballRadius + 0.08 + Math.sin(angle) * 0.13,
-                    Math.sin(angle) * 0.16
-                ],
-                [0.10, 0.10, 0.10],
-                patternMaterial,
-                state.ballEntity
-            );
-        }
-
-        state.ballShadow = createCylinder(
-            "Ombre ballon",
-            [0, 0.07, 0],
-            [0.65, 0.025, 0.65],
-            createMaterial(pc, [0.025, 0.045, 0.025]),
-            state.sceneRoot
-        );
-
-        state.ballEntity.setLocalPosition(0, FIELD.ballRadius + 0.08, 0);
-    }
-
-    /* ========================================================
-       10. CAMÉRA — PROCHE, LISIBLE, ANDROID
-    ======================================================== */
-
-    function createCamera() {
-        const pc = state.engine;
-
-        state.cameraEntity = new pc.Entity("FOBAS_MATCH_CAMERA");
-
-        state.cameraEntity.addComponent("camera", {
-            clearColor: new pc.Color(0.39, 0.61, 0.80),
-            fov: 48,
-            nearClip: 0.1,
-            farClip: 220
-        });
-
-        state.sceneRoot.addChild(state.cameraEntity);
-
-        state.cameraDistance = 27;
-        state.cameraAngle = 0.66;
-
-        updateCamera(true);
-    }
-
-    function updateCamera(snap = false) {
-        if (!state.cameraEntity) return;
-
-        const player = state.controlledPlayer;
-
-        const targetX = player
-            ? player.root.getPosition().x
-            : 0;
-
-        const targetZ = player
-            ? player.root.getPosition().z
-            : 0;
-
-        const distance = clamp(
-            state.cameraDistance,
-            CAMERA.minDistance,
-            CAMERA.maxDistance
-        );
-
-        const angle = clamp(
-            state.cameraAngle,
-            CAMERA.minAngle,
-            CAMERA.maxAngle
-        );
-
-        const horizontalDistance = Math.cos(angle) * distance;
-        const height = Math.sin(angle) * distance;
-
-        let cameraX = targetX + horizontalDistance * 0.60;
-        let cameraZ = targetZ + horizontalDistance * 0.80;
-
-        if (state.cameraMode === 1) {
-            cameraX = targetX + horizontalDistance;
-            cameraZ = targetZ;
-        } else if (state.cameraMode === 2) {
-            cameraX = 0;
-            cameraZ = FIELD.width * 0.80;
-        }
-
-        const desiredPosition = new state.engine.Vec3(
-            cameraX,
-            height + 1.5,
-            cameraZ
-        );
-
-        const lookTarget = new state.engine.Vec3(
-            targetX,
-            0.8,
-            targetZ
-        );
-
-        if (snap) {
-            state.cameraEntity.setPosition(desiredPosition);
-        } else {
-            const current = state.cameraEntity.getPosition();
-
-            current.lerp(current, desiredPosition, 0.12);
-
-            state.cameraEntity.setPosition(current);
-        }
-
-        state.cameraEntity.lookAt(lookTarget);
-    }
-
-    function setCameraZoom(delta) {
-        state.cameraDistance = clamp(
-            state.cameraDistance + delta,
-            CAMERA.minDistance,
-            CAMERA.maxDistance
-        );
-
-        updateCamera(true);
-        saveRecord("cameraDistance", state.cameraDistance);
-    }
-
-    function resetCamera() {
-        state.cameraDistance = 27;
-        state.cameraAngle = 0.66;
-        state.cameraMode = 0;
-
-        updateCamera(true);
-
-        toast("Caméra rapprochée réinitialisée.");
-    }
-
-    function changeCameraMode() {
-        state.cameraMode = (state.cameraMode + 1) % 3;
-
-        const names = [
-            "Caméra d'action rapprochée",
-            "Caméra latérale",
-            "Vue tactique"
-        ];
-
-        updateCamera(true);
-        toast(names[state.cameraMode]);
-    }
-
-    /* ========================================================
-       11. CRÉATION DU MOTEUR PLAYCANVAS
-    ======================================================== */
-
-    async function createEngine() {
-        const canvas = $("footballCanvas");
-
-        if (!canvas) {
-            throw new Error("Le canvas #footballCanvas est absent du HTML.");
-        }
-
-        state.engine = await importPlayCanvas();
-
-        const pc = state.engine;
-
-        const app = new pc.Application(canvas, {
-            graphicsDeviceOptions: {
-                alpha: false,
-                antialias: true,
-                depth: true,
-                stencil: false,
-                powerPreference: "high-performance",
-                preserveDrawingBuffer: false
-            },
-            mouse: new pc.Mouse(canvas),
-            touch: new pc.TouchDevice(canvas),
-            keyboard: new pc.Keyboard(window)
-        });
-
-        state.app = app;
-
-        app.setCanvasFillMode(pc.FILLMODE_NONE);
-        app.setCanvasResolution(pc.RESOLUTION_AUTO);
-
-        app.scene.ambientLight = new pc.Color(0.52, 0.56, 0.62);
-        app.scene.gammaCorrection = pc.GAMMA_SRGB;
-        app.scene.toneMapping = pc.TONEMAP_ACES;
-
-        if (app.scene.skybox) {
-            // Le fond de caméra est utilisé si aucun skybox n'est chargé.
-        }
-
-        app.start();
-
-        state.sceneRoot = new pc.Entity("FOBAS_SCENE_ROOT");
-        app.root.addChild(state.sceneRoot);
-
-        // Soleil directionnel
-        const sunlight = new pc.Entity("FOBAS_SUNLIGHT");
-
-        sunlight.addComponent("light", {
-            type: "directional",
-            color: new pc.Color(1, 0.95, 0.82),
-            intensity: 1.8,
-            castShadows: true,
-            shadowResolution: 1024,
-            shadowDistance: 70,
-            normalOffsetBias: 0.04
-        });
-
-        sunlight.setEulerAngles(48, 28, 0);
-
-        state.sceneRoot.addChild(sunlight);
-
-        createField();
-        createPlayers();
-        createCamera();
-
-        fitCanvas();
-
-        app.on("update", dt => updateGame(dt));
-
-        window.addEventListener("resize", fitCanvas, { passive: true });
-
-        safeText("engineStatus", "MOTEUR 3D ACTIF · PLAYCANVAS");
-
-        return app;
-    }
-
-    function fitCanvas() {
-        if (!state.app || !$("footballCanvas")) return;
-
-        const canvas = $("footballCanvas");
-        const viewport = $("pitchViewport");
-
-        const rect = viewport
-            ? viewport.getBoundingClientRect()
-            : canvas.getBoundingClientRect();
-
-        const width = Math.max(320, Math.floor(rect.width || window.innerWidth));
-        const height = Math.max(240, Math.floor(rect.height || window.innerHeight * 0.55));
-
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.display = "block";
-
-        try {
-            state.app.resizeCanvas(width, height);
-        } catch (error) {
-            console.warn("Redimensionnement canvas :", error);
-        }
-
-        updateCamera(true);
-    }
-
-    /* ========================================================
-       12. IA DES JOUEURS ET PHYSIQUE SIMPLE
-    ======================================================== */
-
-    function movePlayer(player, x, z, dt, maxSpeed = null) {
-        const position = player.root.getPosition();
-
-        const dx = x - position.x;
-        const dz = z - position.z;
-        const distance = Math.sqrt(dx * dx + dz * dz);
-
-        if (distance < 0.02) return;
-
-        const speed = maxSpeed || player.speed;
-        const step = Math.min(distance, speed * dt);
-
-        const nextX = position.x + dx / distance * step;
-        const nextZ = position.z + dz / distance * step;
-
-        player.root.setPosition(
-            clamp(nextX, -FIELD.length / 2 + 0.5, FIELD.length / 2 - 0.5),
-            0,
-            clamp(nextZ, -FIELD.width / 2 + 0.5, FIELD.width / 2 - 0.5)
-        );
-
-        player.root.setEulerAngles(
-            0,
-            Math.atan2(dx, dz) * 180 / Math.PI,
-            0
-        );
-
-        player.phase += dt * (player.sprinting ? 12 : 8);
-
-        const legSwing = Math.sin(player.phase) * 18;
-
-        player.leftLeg.setLocalEulerAngles(legSwing, 0, 0);
-        player.rightLeg.setLocalEulerAngles(-legSwing, 0, 0);
-        player.leftArm.setLocalEulerAngles(-legSwing * 0.7, 0, 0);
-        player.rightArm.setLocalEulerAngles(legSwing * 0.7, 0, 0);
-    }
-
-    function getBallPosition() {
-        if (!state.ballEntity) return { x: 0, y: 0, z: 0 };
-
-        const p = state.ballEntity.getPosition();
-
-        return { x: p.x, y: p.y, z: p.z };
-    }
-
-    function setBallPosition(x, y, z) {
-        if (!state.ballEntity) return;
-
-        state.ballEntity.setPosition(x, y, z);
-
-        if (state.ballShadow) {
-            state.ballShadow.setPosition(x, 0.07, z);
-        }
-    }
-
-    function nearestPlayerToBall(team) {
-        const players = team === 0 ? state.homePlayers : state.awayPlayers;
-
-        const ball = getBallPosition();
-
-        let nearest = null;
-        let best = Infinity;
-
-        for (const player of players) {
-            const p = player.root.getPosition();
-            const d = Math.hypot(p.x - ball.x, p.z - ball.z);
-
-            if (d < best) {
-                best = d;
-                nearest = player;
-            }
-        }
-
-        return nearest;
-    }
-
-    function updateAI(dt) {
-        if (!state.matchStarted || state.paused || state.matchFinished) return;
-
-        const ball = getBallPosition();
-        const holderHome = nearestPlayerToBall(0);
-        const holderAway = nearestPlayerToBall(1);
-
-        for (const player of state.allPlayers) {
-            if (player === state.controlledPlayer) continue;
-
-            const position = player.root.getPosition();
-            const side = player.team === 0 ? 1 : -1;
-
-            const isNearest = player === holderHome || player === holderAway;
-            const chaseDistance = Math.hypot(
-                position.x - ball.x,
-                position.z - ball.z
-            );
-
-            if (isNearest && chaseDistance > 0.9) {
-                movePlayer(player, ball.x, ball.z, dt, player.speed * 0.86);
-                continue;
-            }
-
-            if (chaseDistance < 1.05 && Math.random() < 0.025) {
-                const targetGoalX = player.team === 0
-                    ? FIELD.length / 2
-                    : -FIELD.length / 2;
-
-                kickBall(player, targetGoalX, random(-2.5, 2.5), 13);
-                continue;
-            }
-
-            const desiredX = clamp(
-                player.homeX + (ball.x * 0.12),
-                -FIELD.length / 2 + 2,
-                FIELD.length / 2 - 2
-            );
-
-            const desiredZ = clamp(
-                player.homeZ + (ball.z * 0.18),
-                -FIELD.width / 2 + 2,
-                FIELD.width / 2 - 2
-            );
-
-            movePlayer(
-                player,
-                desiredX,
-                desiredZ,
-                dt,
-                player.speed * 0.42
-            );
-        }
-    }
-
-    function updateBall(dt) {
-        if (!state.ballEntity || state.paused || !state.matchStarted) return;
-
-        const p = getBallPosition();
-
-        state.ballVelocity.x *= Math.pow(0.985, dt * 60);
-        state.ballVelocity.z *= Math.pow(0.985, dt * 60);
-
-        const x = p.x + state.ballVelocity.x * dt;
-        const z = p.z + state.ballVelocity.z * dt;
-
-        let y = p.y + state.ballVelocity.y * dt;
-
-        state.ballVelocity.y -= 9.8 * dt;
-
-        if (y < FIELD.ballRadius + 0.06) {
-            y = FIELD.ballRadius + 0.06;
-
-            if (state.ballVelocity.y < -1) {
-                state.ballVelocity.y *= -0.34;
-            } else {
-                state.ballVelocity.y = 0;
-            }
-        }
-
-        // Limites latérales
-        if (Math.abs(z) > FIELD.width / 2 - 0.35) {
-            state.ballVelocity.z *= -0.72;
-        }
-
-        // Limites de terrain et buts
-        if (Math.abs(x) > FIELD.length / 2 + 1.0) {
-            const goalScored =
-                Math.abs(z) < 3.45 &&
-                y < 2.7;
-
-            if (goalScored) {
-                const scoringTeam = x > 0 ? 0 : 1;
-                registerGoal(scoringTeam);
-                return;
-            }
-
-            state.ballVelocity.x *= -0.65;
-        }
-
-        setBallPosition(
-            clamp(x, -FIELD.length / 2 - 1.2, FIELD.length / 2 + 1.2),
-            y,
-            clamp(z, -FIELD.width / 2 - 1.2, FIELD.width / 2 + 1.2)
-        );
-
-        if (state.ballEntity) {
-            const velocity = Math.hypot(
-                state.ballVelocity.x,
-                state.ballVelocity.z
-            );
-
-            if (velocity > 0.5) {
-                state.ballEntity.rotate(
-                    state.ballVelocity.z * dt * 50,
-                    0,
-                    -state.ballVelocity.x * dt * 50
-                );
-            }
-        }
-    }
-
-    function kickBall(player, targetX, targetZ, power = 10) {
-        if (!player || !state.ballEntity) return;
-
-        const position = player.root.getPosition();
-        const ball = getBallPosition();
-
-        const dx = targetX - ball.x;
-        const dz = targetZ - ball.z;
-        const length = Math.max(0.01, Math.hypot(dx, dz));
-
-        state.ballVelocity.x = dx / length * power;
-        state.ballVelocity.z = dz / length * power;
-        state.ballVelocity.y = power > 11 ? 2.5 : 0.6;
-
-        setBallPosition(
-            position.x + Math.sign(dx || 1) * 0.55,
-            FIELD.ballRadius + 0.08,
-            position.z
-        );
-    }
-
-    function attachBallToPlayer(player) {
-        if (!player || !state.ballEntity) return;
-
-        const position = player.root.getPosition();
-
-        setBallPosition(
-            position.x + 0.48,
-            FIELD.ballRadius + 0.08,
-            position.z + 0.10
-        );
-
-        state.ballVelocity.x = 0;
-        state.ballVelocity.y = 0;
-        state.ballVelocity.z = 0;
-    }
-
-    /* ========================================================
-       13. ACTIONS DE JEU
-    ======================================================== */
-
-    function passBall() {
-        if (!state.matchStarted || state.paused) return;
-
-        const player = state.controlledPlayer;
-
-        if (!player) return;
-
-        const teammates = state.homePlayers
-            .filter(other => other !== player)
-            .sort((a, b) => {
-                const pa = a.root.getPosition();
-                const pb = b.root.getPosition();
-
-                const ball = getBallPosition();
-
-                const da = Math.hypot(pa.x - ball.x, pa.z - ball.z);
-                const db = Math.hypot(pb.x - ball.x, pb.z - ball.z);
-
-                return da - db;
-            });
-
-        const target = teammates[0];
-
-        if (!target) return;
-
-        const targetPosition = target.root.getPosition();
-
-        kickBall(
-            player,
-            targetPosition.x,
-            targetPosition.z,
-            9.5
-        );
-
-        announce("PASSE", `${player.name} passe le ballon à ${target.name}.`);
-        playTone(560, 0.09);
-    }
-
-    function shootBall() {
-        if (!state.matchStarted || state.paused) return;
-
-        const player = state.controlledPlayer;
-        if (!player) return;
-
-        const targetX = FIELD.length / 2 + 3;
-        const targetZ = random(-2.3, 2.3);
-
-        kickBall(player, targetX, targetZ, 17);
-
-        announce("TIR", `${player.name} tente sa chance !`);
-        playTone(240, 0.16);
-
-        refereeCheckShot();
-    }
-
-    function sprintStart() {
-        state.sprinting = true;
-
-        if (state.controlledPlayer) {
-            state.controlledPlayer.speed = 6.5;
-        }
-    }
-
-    function sprintStop() {
-        state.sprinting = false;
-
-        if (state.controlledPlayer) {
-            state.controlledPlayer.speed = 4.2;
-        }
-    }
-
-    function defendAction() {
-        if (!state.matchStarted || state.paused) return;
-
-        state.defending = true;
-
-        const player = state.controlledPlayer;
-        const opponent = nearestPlayerToBall(1);
-
-        if (!player || !opponent) return;
-
-        const p = player.root.getPosition();
-        const o = opponent.root.getPosition();
-
-        const distance = Math.hypot(p.x - o.x, p.z - o.z);
-
-        if (distance < 2.3) {
-            const ball = getBallPosition();
-
-            state.ballVelocity.x = (p.x - ball.x) * 3.0;
-            state.ballVelocity.z = (p.z - ball.z) * 3.0;
-
-            announce(
-                "RÉCUPÉRATION",
-                `${player.name} tente de reprendre le ballon.`
-            );
-        } else {
-            announce("DÉFENSE", "Approchez-vous de l'adversaire pour récupérer le ballon.");
-        }
-
-        if (CONFIG.refereeName) {
-            refereeCheckContact(distance);
-        }
-    }
-
-    function switchPlayer() {
-        if (!state.homePlayers.length) return;
-
-        const currentIndex = state.homePlayers.indexOf(state.controlledPlayer);
-        const nextIndex = (currentIndex + 1) % state.homePlayers.length;
-
-        if (state.controlledPlayer) {
-            state.controlledPlayer.controlled = false;
-        }
-
-        state.controlledPlayer = state.homePlayers[nextIndex];
-        state.controlledPlayer.controlled = true;
-
-        updateCamera(true);
-
-        announce(
-            "CHANGEMENT",
-            `Vous contrôlez maintenant ${state.controlledPlayer.name}.`
-        );
-    }
-
-    function updateControlledPlayer(dt) {
-        const player = state.controlledPlayer;
-
-        if (!player || !state.matchStarted || state.paused) return;
-
-        const { x, y } = state.joystick;
-
-        if (Math.abs(x) < 0.04 && Math.abs(y) < 0.04) return;
-
-        const position = player.root.getPosition();
-        const speed = state.sprinting ? 6.5 : 4.2;
-
-        const nextX = position.x + x * speed * dt;
-        const nextZ = position.z + y * speed * dt;
-
-        movePlayer(player, nextX, nextZ, dt, speed);
-
-        const ball = getBallPosition();
-
-        if (Math.hypot(position.x - ball.x, position.z - ball.z) < 1.4) {
-            if (
-                Math.hypot(state.ballVelocity.x, state.ballVelocity.z) < 1.2
-            ) {
-                attachBallToPlayer(player);
-            }
-        }
-    }
-
-    /* ========================================================
-       14. ARBITRE IA
-    ======================================================== */
-
-    function refereeCheckShot() {
-        if (!state.settings.commentary) return;
-
-        const ball = getBallPosition();
-
-        if (
-            Math.abs(ball.x) > FIELD.length / 2 - 6 &&
-            Math.abs(ball.z) < 7
-        ) {
-            safeText(
-                "refereeDecisionLabel",
-                `${CONFIG.refereeName || "Arbitre IA"} : tir dangereux`
-            );
-        } else {
-            safeText(
-                "refereeDecisionLabel",
-                `${CONFIG.refereeName || "Arbitre IA"} : jeu en cours`
-            );
-        }
-    }
-
-    function refereeCheckContact(distance) {
-        if (distance < 0.65 && Math.random() < 0.04) {
-            safeText(
-                "refereeDecisionLabel",
-                `${CONFIG.refereeName || "Arbitre IA"} : contact à surveiller`
-            );
-        }
-    }
-
-    function updateReferee() {
-        if (!state.settings.commentary) return;
-
-        if (Date.now() - state.lastRefereeTick < 5000) return;
-
-        state.lastRefereeTick = Date.now();
-
-        const messages = [
-            "Arbitre IA : jeu en cours",
-            "Arbitre IA : surveille les contacts",
-            "Arbitre IA : positionnement correct",
-            "Arbitre IA : restez attentif au ballon"
-        ];
-
-        safeText("refereeDecisionLabel", pick(messages));
-    }
-
-    /* ========================================================
-       15. BUTS, SCORE ET CHRONOMÈTRE
-    ======================================================== */
-
-    function registerGoal(scoringTeam) {
-        if (state.matchFinished) return;
-
-        if (scoringTeam === 0) {
-            state.scoreHome++;
-            state.profile.goalsScored++;
-        } else {
-            state.scoreAway++;
-        }
-
-        safeText("homeScore", state.scoreHome);
-        safeText("awayScore", state.scoreAway);
-
-        const scorer = nearestPlayerToBall(scoringTeam);
-        const name = scorer ? scorer.name : "Joueur";
-
-        announce(
-            "⚽ BUT !",
-            `${scoringTeam === 0 ? teamName(state.selectedHome) : teamName(state.selectedAway)} marque !`
-        );
-
-        toast(`BUT : ${name}`, "success", 4000);
-
-        state.ballVelocity = { x: 0, y: 0, z: 0 };
-        setBallPosition(0, FIELD.ballRadius + 0.08, 0);
-
-        state.allPlayers.forEach(player => {
-            player.root.setLocalPosition(player.homeX, 0, player.homeZ);
-        });
-
-        state.career.currentMission = Math.max(
-            1,
-            state.career.currentMission
-        );
-
-        saveAll(false);
-    }
-
-    function updateClock(dt) {
-        if (!state.matchStarted || state.paused || state.matchFinished) return;
-
-        state.elapsed += dt * (state.matchLength / 540);
-
-        const totalSeconds = Math.floor(state.elapsed * 60);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-
-        safeText(
-            "matchClock",
-            `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-        );
-
-        if (state.elapsed >= state.matchLength) {
-            finishMatch();
-        } else if (state.elapsed >= state.matchLength / 2) {
-            safeText("matchPeriod", "2e MI-TEMPS");
-        } else {
-            safeText("matchPeriod", "1re MI-TEMPS");
-        }
-    }
-
-    function finishMatch() {
-        state.matchFinished = true;
-        state.matchStarted = false;
-
-        state.profile.matchesPlayed++;
-
-        if (state.scoreHome > state.scoreAway) {
-            state.career.wins++;
-            state.career.completedMissions.push(state.career.currentMission);
-            state.profile.trophies += 0;
-        } else if (state.scoreHome < state.scoreAway) {
-            state.career.losses++;
-        } else {
-            state.career.draws++;
-        }
-
-        syncProfileUI();
-
-        showDialog(
-            "FIN DU MATCH",
-            `
-                <p>${escapeHTML(teamName(state.selectedHome))}
-                <strong>${state.scoreHome}</strong> —
-                <strong>${state.scoreAway}</strong>
-                ${escapeHTML(teamName(state.selectedAway))}</p>
-                <p>Match terminé. Votre progression est sauvegardée localement.</p>
-            `,
-            [
-                {
-                    label: "REJOUER",
-                    primary: true,
-                    action: () => startMatch()
-                },
-                {
-                    label: "MENU",
-                    action: () => showScreen("mainMenu")
-                }
-            ]
-        );
-
-        saveAll(false);
-    }
-
-    /* ========================================================
-       16. BOUCLE PRINCIPALE
-    ======================================================== */
-
-    function updateGame(dt) {
-        if (!Number.isFinite(dt) || dt <= 0) return;
-
-        dt = Math.min(dt, 0.05);
-
-        if (state.matchStarted && !state.paused && !state.matchFinished) {
-            updateControlledPlayer(dt);
-            updateAI(dt);
-            updateBall(dt);
-            updateClock(dt);
-            updateReferee();
-
-            updateCamera(false);
-
-            if (Date.now() - state.lastAutoSave > 600000) {
-                state.lastAutoSave = Date.now();
-                saveAll(false);
-            }
-        }
-    }
-
-    /* ========================================================
-       17. LANCEMENT ET CONFIGURATION DU MATCH
-    ======================================================== */
-
-    function readMatchSetup() {
-        state.selectedCompetition = $("competitionSelect")?.value || "local";
-        state.selectedHome = $("homeTeamSelect")?.value || "mare-rouge";
-        state.selectedAway = $("awayTeamSelect")?.value || "mole-saint-nicolas";
-
-        if (state.selectedHome === state.selectedAway) {
-            const alternative = state.teams.find(
-                team => team.id !== state.selectedHome
-            );
-
-            if (alternative) {
-                state.selectedAway = alternative.id;
-
-                if ($("awayTeamSelect")) {
-                    $("awayTeamSelect").value = alternative.id;
-                }
-
-                toast("Les deux équipes doivent être différentes.");
-            }
-        }
-
-        const duration = $("matchDurationSelect")?.value || "standard";
-
-        state.matchLength = duration === "short"
-            ? 45
-            : duration === "long"
-                ? 120
-                : 90;
-    }
-
-    function resetMatchState() {
-        state.scoreHome = 0;
-        state.scoreAway = 0;
-        state.elapsed = 0;
-        state.matchFinished = false;
-        state.paused = false;
-        state.ballVelocity = { x: 0, y: 0, z: 0 };
-
-        safeText("homeScore", "0");
-        safeText("awayScore", "0");
-        safeText("matchClock", "00:00");
-        safeText("matchPeriod", "1re MI-TEMPS");
-    }
-
-    function startMatch() {
-        if (!state.app || !state.engine) {
-            toast("Le moteur 3D n'est pas encore prêt.", "error");
-            return;
-        }
-
-        readMatchSetup();
-        resetMatchState();
-
-        if (state.playerRoot) {
-            state.playerRoot.destroy();
-        }
-
-        if (state.ballEntity) {
-            state.ballEntity.destroy();
-        }
-
-        if (state.ballShadow) {
-            state.ballShadow.destroy();
-        }
-
-        state.homePlayers = [];
-        state.awayPlayers = [];
-        state.allPlayers = [];
-        state.controlledPlayer = null;
-
-        createPlayers();
-
-        safeText("competitionLabel", getCompetitionName(state.selectedCompetition));
-        safeText("stadiumLabel", $("stadiumSelect")?.value === "neutral"
-            ? "STADE NEUTRE"
-            : `STADE ${teamName(state.selectedHome).toUpperCase()}`);
-
-        safeText("homeTeamName", teamName(state.selectedHome).toUpperCase());
-        safeText("awayTeamName", teamName(state.selectedAway).toUpperCase());
-
-        state.matchStarted = true;
-        state.paused = false;
-        state.cameraDistance = 27;
-        state.cameraMode = 0;
-
-        hide($("pauseOverlay"));
-        showScreen("matchScreen");
-        updateCamera(true);
-
-        safeText("engineStatus", "MATCH EN COURS · PLAYCANVAS 3D");
-
-        announce(
-            "COUP D'ENVOI",
-            `${teamName(state.selectedHome)} contre ${teamName(state.selectedAway)}`
-        );
-
-        toast("Le match commence !", "success");
-    }
-
-    function getCompetitionName(id) {
-        const item = (CONFIG.competitionLevels || []).find(
-            competition => competition.id === id
-        );
-
-        return item ? item.name : "MATCH LOCAL";
-    }
-
-    /* ========================================================
-       18. NAVIGATION ENTRE LES ÉCRANS
-    ======================================================== */
+    const ROSTER_SIZE = 18;
+    const PLAYERS_ON_FIELD = 11;
+
+    const FIELD = {
+        width: 28,
+        length: 48,
+        grassHeight: 0.15,
+        lineHeight: 0.025,
+        goalWidth: 7,
+        goalHeight: 2.5
+    };
+
+    const CAMERA = {
+        minHeight: 28,
+        maxHeight: 75,
+        height: 48,
+        zoomStep: 4,
+        angle: 8
+    };
+
+    const AUTOSAVE_INTERVAL = 10 * 60 * 1000;
+
+    const STORAGE_KEY = "FOBAS_FOOTBALL_STATE_V2";
 
     const SCREEN_IDS = [
         "mainMenu",
@@ -2382,40 +117,4201 @@ const state = {
         "settingsScreen"
     ];
 
-    function showScreen(id) {
-        const target = $(id);
+    const ENGINE_IMPORT_URLS = [
+        "https://esm.sh/playcanvas@2.23.2",
+        "https://cdn.jsdelivr.net/npm/playcanvas@2.23.2/build/playcanvas.mjs"
+    ];
 
-        if (!target) {
-            console.warn(`Écran absent : ${id}`);
+
+    /* ========================================================
+       2. ÉTAT CENTRAL
+    ======================================================== */
+
+    const state = {
+        engine: null,
+        app: null,
+        cameraEntity: null,
+        sceneRoot: null,
+        fieldRoot: null,
+        playerRoot: null,
+        ballEntity: null,
+        ballShadow: null,
+
+        teams: [],
+        homePlayers: [],
+        awayPlayers: [],
+        allPlayers: [],
+        controlledPlayer: null,
+
+        selectedHome: "mare-rouge",
+        selectedAway: "mole-saint-nicolas",
+
+        scoreHome: 0,
+        scoreAway: 0,
+
+        elapsed: 0,
+        matchLength: 90,
+
+        matchStarted: false,
+        paused: false,
+        matchFinished: false,
+
+        ballVelocity: {
+            x: 0,
+            y: 0,
+            z: 0
+        },
+
+        joystick: {
+            x: 0,
+            y: 0,
+            active: false
+        },
+
+        sprinting: false,
+        defending: false,
+
+        cameraDistance: CAMERA.height,
+        cameraAngle: CAMERA.angle,
+        cameraMode: 0,
+
+        db: null,
+
+        soundEnabled: true,
+        audioContext: null,
+
+        currentScreen: "mainMenu",
+
+        selectedEquipmentTab: "kits",
+
+        selectedEquipment: {
+            kits: "classic",
+            balls: "classic",
+            boots: "classic"
+        },
+
+        profile: {
+            name: "Joueur FOBAS",
+            favoriteTeam: "mare-rouge",
+            matchesPlayed: 0,
+            goalsScored: 0,
+            trophies: 0
+        },
+
+        settings: {
+            graphics: "medium",
+            volume: 70,
+            cameraSensitivity: 50,
+            difficulty: "normal",
+            vibration: true,
+            commentary: true
+        },
+
+        tactics: {
+            formation: "433",
+            style: "balanced",
+            pressure: "medium"
+        },
+
+        career: {
+            currentMission: 1,
+            completedMissions: [],
+            wins: 0,
+            losses: 0,
+            draws: 0
+        },
+
+        selectedCompetition: "local",
+        selectedChampionship: "local",
+
+        tournaments: [],
+        activeTournament: null,
+
+        teamsFilter: {
+            query: "",
+            region: "all"
+        },
+
+        animationFrame: 0,
+        lastSave: 0,
+        lastAutoSave: 0,
+        autoSaveTimer: null,
+
+        lastAITick: 0,
+        lastClockUpdate: 0,
+        lastRefereeTick: 0,
+
+        touchDistance: null,
+
+        loadingFailed: false,
+        booting: false,
+        listenersAttached: false,
+
+        engineReady: false,
+        engineImporting: false,
+        databaseAvailable: false,
+
+        pointerId: null,
+        joystickPointerId: null,
+
+        lastFrameTime: 0,
+        elapsedFrameTime: 0,
+
+        lastAnnouncement: 0,
+        activeScreenBeforePause: "matchScreen",
+
+        resizeHandler: null,
+        frameHandler: null,
+
+        errorMessage: "",
+        retryCount: 0,
+
+        equipmentItems: {
+            kits: [
+                {
+                    id: "classic",
+                    name: "Maillot classique",
+                    description: "Tenue traditionnelle FOBAS",
+                    color: "#e9f0ff"
+                },
+                {
+                    id: "royal",
+                    name: "Maillot royal",
+                    description: "Tenue royale",
+                    color: "#2255d9"
+                },
+                {
+                    id: "ocean",
+                    name: "Maillot océan",
+                    description: "Tenue inspirée des Caraïbes",
+                    color: "#16a8b9"
+                },
+                {
+                    id: "fire",
+                    name: "Maillot feu",
+                    description: "Tenue rouge dynamique",
+                    color: "#e54c39"
+                },
+                {
+                    id: "gold",
+                    name: "Maillot champion",
+                    description: "Tenue dorée",
+                    color: "#e2b449"
+                }
+            ],
+
+            balls: [
+                {
+                    id: "classic",
+                    name: "Ballon classique",
+                    description: "Ballon de football traditionnel"
+                },
+                {
+                    id: "gold",
+                    name: "Ballon doré",
+                    description: "Ballon spécial championnat"
+                },
+                {
+                    id: "ocean",
+                    name: "Ballon océan",
+                    description: "Ballon édition Caraïbes"
+                },
+                {
+                    id: "fire",
+                    name: "Ballon feu",
+                    description: "Ballon édition spéciale"
+                }
+            ],
+
+            boots: [
+                {
+                    id: "classic",
+                    name: "Chaussures classiques",
+                    description: "Chaussures polyvalentes"
+                },
+                {
+                    id: "speed",
+                    name: "Chaussures vitesse",
+                    description: "Chaussures légères"
+                },
+                {
+                    id: "power",
+                    name: "Chaussures puissance",
+                    description: "Chaussures pour les tirs puissants"
+                }
+            ]
+        }
+    };
+
+
+    /* ========================================================
+       3. OUTILS DOM
+    ======================================================== */
+
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    function exists(id) {
+        return Boolean($(id));
+    }
+
+    function safeText(id, value) {
+        const element = $(id);
+
+        if (element) {
+            element.textContent = String(value ?? "");
+        }
+    }
+
+    function show(element) {
+        if (typeof element === "string") {
+            element = $(element);
+        }
+
+        if (element) {
+            element.classList.remove("hidden");
+            element.removeAttribute("hidden");
+        }
+    }
+
+    function hide(element) {
+        if (typeof element === "string") {
+            element = $(element);
+        }
+
+        if (element) {
+            element.classList.add("hidden");
+            element.setAttribute("hidden", "");
+        }
+    }
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function randomBetween(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    function choose(array) {
+        return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function escapeHTML(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function safeNumber(value, fallback = 0) {
+        const number = Number(value);
+
+        return Number.isFinite(number)
+            ? number
+            : fallback;
+    }
+
+    function safeCall(callback, ...args) {
+        if (typeof callback !== "function") {
+            return undefined;
+        }
+
+        try {
+            return callback(...args);
+        } catch (error) {
+            console.error("[FOBAS] Erreur :", error);
+            return undefined;
+        }
+    }
+
+
+    /* ========================================================
+       4. CHARGEMENT ET NOTIFICATIONS
+    ======================================================== */
+
+    function setLoading(percent, message) {
+        const progress = clamp(
+            Math.round(safeNumber(percent)),
+            0,
+            100
+        );
+
+        safeText("loadingMessage", message);
+        safeText("loadingPercent", progress + " %");
+
+        const bar = $("loadingProgressBar");
+
+        if (bar) {
+            bar.style.width = progress + "%";
+        }
+
+        const track = $("loadingProgressTrack");
+
+        if (track) {
+            track.setAttribute(
+                "aria-valuenow",
+                String(progress)
+            );
+        }
+
+        console.info(
+            "[FOBAS FOOTBALL] " + progress + "% — " + message
+        );
+    }
+
+    function showLoadingError(error) {
+        state.loadingFailed = true;
+
+        const message = error?.message ||
+            "Une erreur inconnue est survenue.";
+
+        state.errorMessage = message;
+
+        setLoading(
+            100,
+            "Échec du chargement : " + message
+        );
+
+        safeText(
+            "engineStatus",
+            "ERREUR : " + message
+        );
+
+        show("loadingScreen");
+        show("retryLoadingBtn");
+
+        toast(
+            "Impossible de lancer le jeu : " + message,
+            "error",
+            9000
+        );
+
+        console.error(
+            "[FOBAS FOOTBALL] Erreur de démarrage :",
+            error
+        );
+    }
+
+    function toast(message, type = "info", duration = 3500) {
+        const container = $("toastContainer");
+
+        if (!container) {
+            console.log("[FOBAS]", message);
             return;
         }
 
-        SCREEN_IDS.forEach(screenId => hide($(screenId)));
+        const item = document.createElement("div");
 
-        show(target);
+        item.className = "toast toast-" + type;
+        item.textContent = String(message);
 
-        state.currentScreen = id;
+        container.appendChild(item);
 
-        if (id === "matchScreen") {
+        window.setTimeout(() => {
+            item.classList.add("toast-leaving");
+
             window.setTimeout(() => {
-                fitCanvas();
-                updateCamera(true);
-            }, 80);
-        }
-
-        if (id === "profileScreen") syncProfileUI();
-        if (id === "settingsScreen") syncSettingsUI();
-
-        if (id === "teamsScreen") renderTeams();
-        if (id === "championshipScreen") renderChampionships();
-        if (id === "tournamentScreen") renderTournaments();
+                item.remove();
+            }, 250);
+        }, duration);
     }
 
+    function announce(title, message, duration = 3000) {
+        safeText("announcementTitle", title);
+        safeText("announcementMessage", message);
+
+        show("matchAnnouncement");
+
+        state.lastAnnouncement = Date.now();
+
+        window.setTimeout(() => {
+            if (
+                Date.now() - state.lastAnnouncement >= duration
+            ) {
+                hide("matchAnnouncement");
+            }
+        }, duration);
+    }
+
+
     /* ========================================================
-       19. DIALOGUES
+       5. STOCKAGE LOCAL
     ======================================================== */
 
-    function showDialog(title, content, actions = []) {
+    function openDatabase() {
+        return new Promise((resolve, reject) => {
+            if (!("indexedDB" in window)) {
+                state.databaseAvailable = false;
+
+                console.warn(
+                    "[FOBAS] IndexedDB indisponible. " +
+                    "Le jeu utilisera le stockage local."
+                );
+
+                resolve(null);
+                return;
+            }
+
+            let request;
+
+            try {
+                request = indexedDB.open(
+                    DB_NAME,
+                    DB_VERSION
+                );
+            } catch (error) {
+                reject(error);
+                return;
+            }
+
+            request.onupgradeneeded = event => {
+                const database = event.target.result;
+
+                if (!database.objectStoreNames.contains("gameState")) {
+                    database.createObjectStore(
+                        "gameState",
+                        { keyPath: "id" }
+                    );
+                }
+            };
+
+            request.onsuccess = event => {
+                state.databaseAvailable = true;
+
+                const database = event.target.result;
+
+                database.onversionchange = () => {
+                    database.close();
+                    state.db = null;
+                    state.databaseAvailable = false;
+                };
+
+                resolve(database);
+            };
+
+            request.onerror = () => {
+                state.databaseAvailable = false;
+
+                reject(
+                    request.error ||
+                    new Error("Impossible d'ouvrir IndexedDB.")
+                );
+            };
+
+            request.onblocked = () => {
+                console.warn(
+                    "[FOBAS] Ouverture IndexedDB bloquée."
+                );
+            };
+        });
+    }
+
+    function databaseRead(key) {
+        return new Promise((resolve, reject) => {
+            if (!state.db) {
+                resolve(null);
+                return;
+            }
+
+            try {
+                const transaction = state.db.transaction(
+                    ["gameState"],
+                    "readonly"
+                );
+
+                const request = transaction
+                    .objectStore("gameState")
+                    .get(key);
+
+                request.onsuccess = () => {
+                    resolve(request.result || null);
+                };
+
+                request.onerror = () => {
+                    reject(
+                        request.error ||
+                        new Error("Lecture IndexedDB impossible.")
+                    );
+                };
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    function databaseWrite(key, value) {
+        return new Promise((resolve, reject) => {
+            if (!state.db) {
+                resolve(false);
+                return;
+            }
+
+            try {
+                const transaction = state.db.transaction(
+                    ["gameState"],
+                    "readwrite"
+                );
+
+                transaction
+                    .objectStore("gameState")
+                    .put({
+                        id: key,
+                        value,
+                        updatedAt: Date.now()
+                    });
+
+                transaction.oncomplete = () => resolve(true);
+
+                transaction.onerror = () => {
+                    reject(
+                        transaction.error ||
+                        new Error("Écriture IndexedDB impossible.")
+                    );
+                };
+
+                transaction.onabort = () => {
+                    reject(
+                        transaction.error ||
+                        new Error("Transaction IndexedDB annulée.")
+                    );
+                };
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    function getPersistentState() {
+        return {
+            version: APP_VERSION,
+
+            selectedHome: state.selectedHome,
+            selectedAway: state.selectedAway,
+
+            scoreHome: state.scoreHome,
+            scoreAway: state.scoreAway,
+
+            profile: state.profile,
+            settings: state.settings,
+            tactics: state.tactics,
+            career: state.career,
+
+            selectedCompetition: state.selectedCompetition,
+            selectedChampionship: state.selectedChampionship,
+
+            tournaments: state.tournaments,
+            activeTournament: state.activeTournament,
+
+            selectedEquipment: state.selectedEquipment,
+            selectedEquipmentTab: state.selectedEquipmentTab,
+
+            soundEnabled: state.soundEnabled,
+
+            savedAt: Date.now()
+        };
+    }
+
+    function restorePersistentState(data) {
+        if (!data || typeof data !== "object") {
+            return;
+        }
+
+        if (data.profile && typeof data.profile === "object") {
+            state.profile = {
+                ...state.profile,
+                ...data.profile
+            };
+        }
+
+        if (data.settings && typeof data.settings === "object") {
+            state.settings = {
+                ...state.settings,
+                ...data.settings
+            };
+        }
+
+        if (data.tactics && typeof data.tactics === "object") {
+            state.tactics = {
+                ...state.tactics,
+                ...data.tactics
+            };
+        }
+
+        if (data.career && typeof data.career === "object") {
+            state.career = {
+                ...state.career,
+                ...data.career
+            };
+
+            if (!Array.isArray(state.career.completedMissions)) {
+                state.career.completedMissions = [];
+            }
+        }
+
+        if (data.selectedEquipment) {
+            state.selectedEquipment = {
+                ...state.selectedEquipment,
+                ...data.selectedEquipment
+            };
+        }
+
+        if (Array.isArray(data.tournaments)) {
+            state.tournaments = data.tournaments;
+        }
+
+        if (data.activeTournament) {
+            state.activeTournament = data.activeTournament;
+        }
+
+        if (data.selectedHome) {
+            state.selectedHome = data.selectedHome;
+        }
+
+        if (data.selectedAway) {
+            state.selectedAway = data.selectedAway;
+        }
+
+        if (data.selectedCompetition) {
+            state.selectedCompetition = data.selectedCompetition;
+        }
+
+        if (data.selectedChampionship) {
+            state.selectedChampionship = data.selectedChampionship;
+        }
+
+        if (data.selectedEquipmentTab) {
+            state.selectedEquipmentTab = data.selectedEquipmentTab;
+        }
+
+        if (typeof data.soundEnabled === "boolean") {
+            state.soundEnabled = data.soundEnabled;
+        }
+    }
+
+    async function loadAll() {
+        let data = null;
+
+        try {
+            const record = await databaseRead("main");
+
+            if (record && record.value) {
+                data = record.value;
+            }
+        } catch (error) {
+            console.warn(
+                "[FOBAS] Lecture IndexedDB échouée :",
+                error
+            );
+        }
+
+        if (!data) {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+
+                if (stored) {
+                    data = JSON.parse(stored);
+                }
+            } catch (error) {
+                console.warn(
+                    "[FOBAS] Lecture du stockage local échouée :",
+                    error
+                );
+            }
+        }
+
+        restorePersistentState(data);
+
+        syncProfileUI();
+        syncSettingsUI();
+        syncTacticsUI();
+    }
+
+    async function saveAll(showMessage = true) {
+        const data = getPersistentState();
+
+        let localSaved = false;
+        let databaseSaved = false;
+
+        try {
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(data)
+            );
+
+            localSaved = true;
+        } catch (error) {
+            console.warn(
+                "[FOBAS] Sauvegarde locale impossible :",
+                error
+            );
+        }
+
+        if (state.db) {
+            try {
+                databaseSaved = await databaseWrite(
+                    "main",
+                    data
+                );
+            } catch (error) {
+                console.warn(
+                    "[FOBAS] Sauvegarde IndexedDB échouée :",
+                    error
+                );
+            }
+        }
+
+        if (localSaved || databaseSaved) {
+            state.lastSave = Date.now();
+
+            safeText(
+                "saveStatusLabel",
+                "Sauvegardé à " +
+                new Date().toLocaleTimeString()
+            );
+
+            if (showMessage) {
+                toast("Progression sauvegardée.", "success");
+            }
+
+            return true;
+        }
+
+        if (showMessage) {
+            toast(
+                "La sauvegarde n'a pas pu être effectuée.",
+                "error"
+            );
+        }
+
+        return false;
+    }
+
+
+    /* ========================================================
+       6. DONNÉES DES ÉQUIPES
+    ======================================================== */
+
+    const TEAM_SEEDS = [
+        {
+            id: "mare-rouge",
+            name: "Mare-Rouge",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#1747a8",
+            secondary: "#ffffff",
+            rating: 78
+        },
+        {
+            id: "mole-saint-nicolas",
+            name: "Môle-Saint-Nicolas",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#e54b3c",
+            secondary: "#ffffff",
+            rating: 79
+        },
+        {
+            id: "jean-rabel",
+            name: "Jean-Rabel",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#12815b",
+            secondary: "#ffffff",
+            rating: 76
+        },
+        {
+            id: "bombardopolis",
+            name: "Bombardopolis",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#e5b63d",
+            secondary: "#17223d",
+            rating: 75
+        },
+        {
+            id: "baie-de-henne",
+            name: "Baie-de-Henne",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#4a6cb4",
+            secondary: "#f2e8d8",
+            rating: 75
+        },
+        {
+            id: "port-de-paix",
+            name: "Port-de-Paix",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#243f88",
+            secondary: "#f0c844",
+            rating: 82
+        },
+        {
+            id: "la-tortue",
+            name: "La Tortue",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#258b75",
+            secondary: "#ffffff",
+            rating: 73
+        },
+        {
+            id: "bassin-bleu",
+            name: "Bassin-Bleu",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#3572d4",
+            secondary: "#ffffff",
+            rating: 73
+        },
+        {
+            id: "chansolme",
+            name: "Chansolme",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#bf3449",
+            secondary: "#ffffff",
+            rating: 72
+        },
+        {
+            id: "saint-louis-du-nord",
+            name: "Saint-Louis-du-Nord",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#d29d28",
+            secondary: "#183c78",
+            rating: 75
+        },
+        {
+            id: "anse-a-foleur",
+            name: "Anse-à-Foleur",
+            region: "northwest",
+            country: "Haïti",
+            primary: "#2384a2",
+            secondary: "#ffffff",
+            rating: 72
+        },
+        {
+            id: "cap-haitien",
+            name: "Cap-Haïtien",
+            region: "haiti",
+            country: "Haïti",
+            primary: "#2b4c91",
+            secondary: "#ffffff",
+            rating: 82
+        },
+        {
+            id: "port-au-prince",
+            name: "Port-au-Prince",
+            region: "haiti",
+            country: "Haïti",
+            primary: "#d43d4b",
+            secondary: "#ffffff",
+            rating: 85
+        },
+        {
+            id: "jacmel",
+            name: "Jacmel",
+            region: "haiti",
+            country: "Haïti",
+            primary: "#218767",
+            secondary: "#ffffff",
+            rating: 78
+        },
+        {
+            id: "les-cayes",
+            name: "Les Cayes",
+            region: "haiti",
+            country: "Haïti",
+            primary: "#dca83b",
+            secondary: "#1b3b78",
+            rating: 78
+        },
+        {
+            id: "fort-liberte",
+            name: "Fort-Liberté",
+            region: "haiti",
+            country: "Haïti",
+            primary: "#4b63b8",
+            secondary: "#ffffff",
+            rating: 75
+        },
+        {
+            id: "haiti-national",
+            name: "Sélection nationale d'Haïti",
+            region: "haiti",
+            country: "Haïti",
+            primary: "#234baf",
+            secondary: "#d83d43",
+            rating: 87
+        },
+        {
+            id: "jamaica",
+            name: "Jamaïque",
+            region: "caribbean",
+            country: "Jamaïque",
+            primary: "#1b8a52",
+            secondary: "#f1ca39",
+            rating: 84
+        },
+        {
+            id: "dominican-republic",
+            name: "République dominicaine",
+            region: "caribbean",
+            country: "République dominicaine",
+            primary: "#df454b",
+            secondary: "#ffffff",
+            rating: 81
+        },
+        {
+            id: "trinidad",
+            name: "Trinité-et-Tobago",
+            region: "caribbean",
+            country: "Trinité-et-Tobago",
+            primary: "#d63b42",
+            secondary: "#ffffff",
+            rating: 80
+        },
+        {
+            id: "cuba",
+            name: "Cuba",
+            region: "caribbean",
+            country: "Cuba",
+            primary: "#d64a4a",
+            secondary: "#ffffff",
+            rating: 79
+        },
+        {
+            id: "usa",
+            name: "États-Unis",
+            region: "americas",
+            country: "États-Unis",
+            primary: "#244b9a",
+            secondary: "#ffffff",
+            rating: 88
+        },
+        {
+            id: "brazil",
+            name: "Brésil",
+            region: "americas",
+            country: "Brésil",
+            primary: "#23834d",
+            secondary: "#f0cf3e",
+            rating: 93
+        },
+        {
+            id: "argentina",
+            name: "Argentine",
+            region: "americas",
+            country: "Argentine",
+            primary: "#8dc7e5",
+            secondary: "#ffffff",
+            rating: 94
+        },
+        {
+            id: "france",
+            name: "France",
+            region: "europe",
+            country: "France",
+            primary: "#2e4fba",
+            secondary: "#ffffff",
+            rating: 94
+        },
+        {
+            id: "spain",
+            name: "Espagne",
+            region: "europe",
+            country: "Espagne",
+            primary: "#d94a3c",
+            secondary: "#e8bd3f",
+            rating: 92
+        },
+        {
+            id: "england",
+            name: "Angleterre",
+            region: "europe",
+            country: "Angleterre",
+            primary: "#e4e8f1",
+            secondary: "#d83b4b",
+            rating: 91
+        },
+        {
+            id: "portugal",
+            name: "Portugal",
+            region: "europe",
+            country: "Portugal",
+            primary: "#258451",
+            secondary: "#d54a3c",
+            rating: 88
+        },
+        {
+            id: "germany",
+            name: "Allemagne",
+            region: "europe",
+            country: "Allemagne",
+            primary: "#262626",
+            secondary: "#e5c13d",
+            rating: 90
+        },
+        {
+            id: "morocco",
+            name: "Maroc",
+            region: "africa",
+            country: "Maroc",
+            primary: "#b52f43",
+            secondary: "#1e7a4b",
+            rating: 87
+        },
+        {
+            id: "senegal",
+            name: "Sénégal",
+            region: "africa",
+            country: "Sénégal",
+            primary: "#21824c",
+            secondary: "#e7d23f",
+            rating: 86
+        },
+        {
+            id: "nigeria",
+            name: "Nigeria",
+            region: "africa",
+            country: "Nigeria",
+            primary: "#23875b",
+            secondary: "#ffffff",
+            rating: 84
+        }
+    ];
+
+    function slugify(text) {
+        return String(text)
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
+    }
+
+    function buildTeams() {
+        const teams = TEAM_SEEDS.map(team => ({ ...team }));
+
+        const localNames = [
+            ...REGIONS,
+            "Gonaïves",
+            "Saint-Marc",
+            "Hinche",
+            "Miragoâne",
+            "Petit-Goâve",
+            "Léogâne",
+            "Port-Salut",
+            "Ouanaminthe",
+            "Limbé",
+            "Plaisance"
+        ];
+
+        localNames.forEach((name, index) => {
+            const id = slugify(name);
+
+            if (teams.some(team => team.id === id)) {
+                return;
+            }
+
+            teams.push({
+                id,
+                name,
+                region: "northwest",
+                country: "Haïti",
+                primary: [
+                    "#234baf",
+                    "#d64545",
+                    "#17845b",
+                    "#e1b43e",
+                    "#6a4eb3",
+                    "#1886a0"
+                ][index % 6],
+                secondary: "#ffffff",
+                rating: 68 + (index % 15)
+            });
+        });
+
+        while (teams.length < (CONFIG.initialTeamCount || 100)) {
+            const index = teams.length;
+
+            teams.push({
+                id: "fobas-club-" + (index + 1),
+                name: "FOBAS Club " + (index + 1),
+                region: [
+                    "northwest",
+                    "haiti",
+                    "caribbean",
+                    "americas",
+                    "europe",
+                    "africa",
+                    "international"
+                ][index % 7],
+                country: "International",
+                primary: [
+                    "#1747a8",
+                    "#e54b3c",
+                    "#12815b",
+                    "#b94ca3",
+                    "#e2b449",
+                    "#288fa6"
+                ][index % 6],
+                secondary: "#ffffff",
+                rating: 65 + (index % 30)
+            });
+        }
+
+        state.teams = teams;
+
+        populateTeamSelects();
+        renderTeams();
+    }
+
+    function getTeam(id) {
+        return state.teams.find(team => team.id === id) ||
+            state.teams[0] ||
+            TEAM_SEEDS[0];
+    }
+
+    function populateTeamSelects() {
+        const homeSelect = $("homeTeamSelect");
+        const awaySelect = $("awayTeamSelect");
+        const favoriteSelect = $("profileFavoriteTeam");
+
+        if (homeSelect) {
+            homeSelect.replaceChildren();
+
+            state.teams.forEach(team => {
+                const option = document.createElement("option");
+
+                option.value = team.id;
+                option.textContent = team.name;
+
+                homeSelect.appendChild(option);
+            });
+
+            homeSelect.value = state.selectedHome;
+
+            if (homeSelect.value !== state.selectedHome) {
+                homeSelect.value = state.teams[0].id;
+                state.selectedHome = homeSelect.value;
+            }
+        }
+
+        if (awaySelect) {
+            awaySelect.replaceChildren();
+
+            state.teams.forEach(team => {
+                const option = document.createElement("option");
+
+                option.value = team.id;
+                option.textContent = team.name;
+
+                awaySelect.appendChild(option);
+            });
+
+            awaySelect.value = state.selectedAway;
+
+            if (awaySelect.value === state.selectedHome) {
+                const alternative = state.teams.find(
+                    team => team.id !== state.selectedHome
+                );
+
+                if (alternative) {
+                    awaySelect.value = alternative.id;
+                    state.selectedAway = alternative.id;
+                }
+            }
+        }
+
+        if (favoriteSelect) {
+            favoriteSelect.replaceChildren();
+
+            state.teams.forEach(team => {
+                const option = document.createElement("option");
+
+                option.value = team.id;
+                option.textContent = team.name;
+
+                favoriteSelect.appendChild(option);
+            });
+
+            favoriteSelect.value = state.profile.favoriteTeam;
+        }
+    }
+
+
+    /* ========================================================
+       7. NAVIGATION ENTRE LES ÉCRANS
+    ======================================================== */
+
+    function showScreen(screenId) {
+        if (!SCREEN_IDS.includes(screenId)) {
+            console.warn(
+                "[FOBAS] Écran inconnu :",
+                screenId
+            );
+
+            return;
+        }
+
+        SCREEN_IDS.forEach(id => {
+            const element = $(id);
+
+            if (element) {
+                element.classList.toggle(
+                    "hidden",
+                    id !== screenId
+                );
+            }
+        });
+
+        state.currentScreen = screenId;
+
+        if (screenId === "teamsScreen") {
+            renderTeams();
+        }
+
+        if (screenId === "equipmentScreen") {
+            renderEquipment();
+        }
+
+        if (screenId === "championshipScreen") {
+            renderChampionships();
+        }
+
+        if (screenId === "tournamentScreen") {
+            renderTournaments();
+        }
+
+        if (screenId === "profileScreen") {
+            syncProfileUI();
+        }
+
+        if (screenId === "settingsScreen") {
+            syncSettingsUI();
+        }
+
+        if (screenId === "matchScreen") {
+            resizeCanvas();
+        }
+
+        window.setTimeout(resizeCanvas, 100);
+    }
+
+    function goToMainMenu() {
+        state.paused = false;
+
+        hide("pauseOverlay");
+        hide("tacticsOverlay");
+        hide("dialogOverlay");
+
+        showScreen("mainMenu");
+    }
+
+
+    /* ========================================================
+       8. MOTEUR PLAYCANVAS
+    ======================================================== */
+
+    async function importPlayCanvas() {
+        if (state.engine) {
+            return state.engine;
+        }
+
+        if (state.engineImporting) {
+            throw new Error(
+                "Le chargement de PlayCanvas est déjà en cours."
+            );
+        }
+
+        state.engineImporting = true;
+
+        let lastError = null;
+
+        try {
+            for (let index = 0; index < ENGINE_IMPORT_URLS.length; index++) {
+                const url = ENGINE_IMPORT_URLS[index];
+
+                setLoading(
+                    48 + index * 4,
+                    "Chargement du moteur 3D (" +
+                    (index + 1) +
+                    "/" +
+                    ENGINE_IMPORT_URLS.length +
+                    ")..."
+                );
+
+                try {
+                    const module = await import(url);
+
+                    const engine = module.Application
+                        ? module
+                        : module.default;
+
+                    if (
+                        !engine ||
+                        typeof engine.Application !== "function" ||
+                        typeof engine.Entity !== "function"
+                    ) {
+                        throw new Error(
+                            "Le module chargé ne fournit pas " +
+                            "les classes PlayCanvas nécessaires."
+                        );
+                    }
+
+                    state.engine = engine;
+
+                    console.info(
+                        "[FOBAS] PlayCanvas chargé depuis :",
+                        url
+                    );
+
+                    return engine;
+                } catch (error) {
+                    lastError = error;
+
+                    console.warn(
+                        "[FOBAS] Échec de l'import PlayCanvas :",
+                        url,
+                        error
+                    );
+                }
+            }
+
+            throw new Error(
+                "PlayCanvas n'a pas pu être chargé. " +
+                "Vérifiez la connexion Internet, le navigateur " +
+                "et les restrictions réseau. Détail : " +
+                (lastError?.message || "erreur inconnue")
+            );
+        } finally {
+            state.engineImporting = false;
+        }
+    }
+
+    function createMaterial(colorHex, options = {}) {
+        const pc = state.engine;
+
+        const material = new pc.StandardMaterial();
+
+        const color = new pc.Color();
+        color.fromString(colorHex || "#ffffff");
+
+        material.diffuse = color;
+
+        material.metalness = options.metalness ?? 0;
+        material.gloss = options.gloss ?? 35;
+
+        if (options.emissive) {
+            const emissive = new pc.Color();
+
+            emissive.fromString(options.emissive);
+
+            material.emissive = emissive;
+        }
+
+        material.update();
+
+        return material;
+    }
+
+    function createPrimitive(
+        name,
+        type,
+        position,
+        scale,
+        material,
+        parent = state.sceneRoot
+    ) {
+        const pc = state.engine;
+
+        const entity = new pc.Entity(name);
+
+        entity.addComponent("render", {
+            type
+        });
+
+        entity.setLocalPosition(
+            position[0],
+            position[1],
+            position[2]
+        );
+
+        entity.setLocalScale(
+            scale[0],
+            scale[1],
+            scale[2]
+        );
+
+        if (material) {
+            entity.render.material = material;
+        }
+
+        parent.addChild(entity);
+
+        return entity;
+    }
+
+    function createBox(
+        name,
+        position,
+        scale,
+        material,
+        parent = state.sceneRoot
+    ) {
+        return createPrimitive(
+            name,
+            "box",
+            position,
+            scale,
+            material,
+            parent
+        );
+    }
+
+    function createSphere(
+        name,
+        position,
+        scale,
+        material,
+        parent = state.sceneRoot
+    ) {
+        return createPrimitive(
+            name,
+            "sphere",
+            position,
+            scale,
+            material,
+            parent
+        );
+    }
+
+    function createCylinder(
+        name,
+        position,
+        scale,
+        material,
+        parent = state.sceneRoot
+    ) {
+        return createPrimitive(
+            name,
+            "cylinder",
+            position,
+            scale,
+            material,
+            parent
+        );
+    }
+
+    function addLight(
+        name,
+        type,
+        color,
+        intensity,
+        position,
+        parent = state.sceneRoot
+    ) {
+        const pc = state.engine;
+
+        const light = new pc.Entity(name);
+
+        light.addComponent("light", {
+            type,
+            color: new pc.Color(
+                color[0],
+                color[1],
+                color[2]
+            ),
+            intensity,
+            castShadows: false
+        });
+
+        if (position) {
+            light.setPosition(
+                position[0],
+                position[1],
+                position[2]
+            );
+        }
+
+        parent.addChild(light);
+
+        return light;
+    }
+
+    function disposeEngineScene() {
+        if (state.app) {
+            try {
+                state.app.destroy();
+            } catch (error) {
+                console.warn(
+                    "[FOBAS] Nettoyage du moteur :",
+                    error
+                );
+            }
+        }
+
+        state.app = null;
+        state.cameraEntity = null;
+        state.sceneRoot = null;
+        state.fieldRoot = null;
+        state.playerRoot = null;
+        state.ballEntity = null;
+        state.ballShadow = null;
+
+        state.homePlayers = [];
+        state.awayPlayers = [];
+        state.allPlayers = [];
+
+        state.controlledPlayer = null;
+
+        state.engineReady = false;
+    }
+
+    async function createEngine() {
+        if (state.engineReady && state.app) {
+            return state.app;
+        }
+
+        const canvas = $("footballCanvas");
+
+        if (!canvas) {
+            throw new Error(
+                "Canvas #footballCanvas introuvable dans le HTML."
+            );
+        }
+
+        const pc = await importPlayCanvas();
+
+        setLoading(58, "Initialisation du moteur graphique...");
+
+        disposeEngineScene();
+
+        let app;
+
+        try {
+            app = new pc.Application(canvas, {
+                graphicsDeviceOptions: {
+                    antialias: true,
+                    alpha: false,
+                    preserveDrawingBuffer: false,
+                    powerPreference: "high-performance"
+                }
+            });
+        } catch (error) {
+            throw new Error(
+                "Impossible de créer l'application PlayCanvas : " +
+                (error?.message || error)
+            );
+        }
+
+        state.app = app;
+
+        try {
+            if (typeof app.setCanvasFillMode === "function") {
+                app.setCanvasFillMode(pc.FILLMODE_NONE);
+            }
+
+            if (typeof app.setCanvasResolution === "function") {
+                app.setCanvasResolution(
+                    pc.RESOLUTION_AUTO
+                );
+            }
+
+            if (app.graphicsDevice) {
+                app.graphicsDevice.maxPixelRatio =
+                    state.settings.graphics === "high"
+                        ? Math.min(window.devicePixelRatio || 1, 2)
+                        : 1;
+            }
+
+            app.scene.ambientLight = new pc.Color(
+                0.48,
+                0.52,
+                0.47
+            );
+
+            state.sceneRoot = app.root;
+
+            state.fieldRoot = new pc.Entity("FootballFieldRoot");
+            app.root.addChild(state.fieldRoot);
+
+            state.playerRoot = new pc.Entity("FootballPlayersRoot");
+            app.root.addChild(state.playerRoot);
+
+            setLoading(64, "Construction du terrain...");
+
+            buildFootballField();
+
+            setLoading(72, "Création des équipes et des joueurs...");
+
+            buildMatchPlayers();
+
+            setLoading(80, "Configuration de la caméra...");
+
+            createCamera();
+
+            createBall();
+
+            addLight(
+                "FootballAmbientLight",
+                "directional",
+                [1, 0.96, 0.88],
+                1.7,
+                [-12, 25, 12]
+            );
+
+            addLight(
+                "FootballFillLight",
+                "directional",
+                [0.72, 0.82, 1],
+                0.55,
+                [12, 20, -10]
+            );
+
+            app.on("update", onEngineUpdate);
+
+            app.start();
+
+            state.engineReady = true;
+
+            resizeCanvas();
+            updateScoreboard();
+
+            console.info(
+                "[FOBAS] Moteur 3D démarré."
+            );
+
+            return app;
+        } catch (error) {
+            disposeEngineScene();
+
+            throw new Error(
+                "Erreur pendant la construction de la scène 3D : " +
+                (error?.message || error)
+            );
+        }
+    }
+
+
+    /* ========================================================
+       9. CONSTRUCTION DU TERRAIN
+    ======================================================== */
+
+    function buildFootballField() {
+        const pc = state.engine;
+
+        const parent = state.fieldRoot;
+
+        const grassDark = createMaterial("#1d693b");
+        const grassLight = createMaterial("#287b43");
+        const lineMaterial = createMaterial("#f3f6ef");
+        const goalMaterial = createMaterial("#e9eef5");
+        const groundMaterial = createMaterial("#183e2b");
+        const blackMaterial = createMaterial("#17202b");
+
+        const width = FIELD.width;
+        const length = FIELD.length;
+        const halfWidth = width / 2;
+        const halfLength = length / 2;
+
+        /* Sol autour du terrain. */
+        createBox(
+            "FootballGround",
+            [0, -0.45, 0],
+            [width + 15, 0.4, length + 15],
+            groundMaterial,
+            parent
+        );
+
+        /* Surface de jeu. */
+        createBox(
+            "FootballPitch",
+            [0, -0.18, 0],
+            [width, FIELD.grassHeight, length],
+            grassDark,
+            parent
+        );
+
+        /* Bandes de gazon pour donner du relief visuel. */
+        const stripeCount = 8;
+        const stripeLength = length / stripeCount;
+
+        for (let i = 0; i < stripeCount; i++) {
+            const z =
+                -halfLength +
+                stripeLength * i +
+                stripeLength / 2;
+
+            createBox(
+                "GrassStripe_" + i,
+                [0, -0.09, z],
+                [width - 0.05, 0.015, stripeLength],
+                i % 2 === 0 ? grassLight : grassDark,
+                parent
+            );
+        }
+
+        const y = 0.012;
+
+        /* Limites du terrain. */
+        createBox(
+            "TouchlineLeft",
+            [-halfWidth, y, 0],
+            [FIELD.lineHeight, 0.03, length],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "TouchlineRight",
+            [halfWidth, y, 0],
+            [FIELD.lineHeight, 0.03, length],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "GoalLineNorth",
+            [0, y, -halfLength],
+            [width, 0.03, FIELD.lineHeight],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "GoalLineSouth",
+            [0, y, halfLength],
+            [width, 0.03, FIELD.lineHeight],
+            lineMaterial,
+            parent
+        );
+
+        /* Ligne centrale. */
+        createBox(
+            "HalfwayLine",
+            [0, y, 0],
+            [width, 0.03, FIELD.lineHeight],
+            lineMaterial,
+            parent
+        );
+
+        /* Cercle central approximé par plusieurs segments. */
+        const circleRadius = 4.5;
+        const segments = 48;
+
+        for (let i = 0; i < segments; i++) {
+            const a1 = (i / segments) * Math.PI * 2;
+            const a2 = ((i + 1) / segments) * Math.PI * 2;
+
+            const x1 = Math.cos(a1) * circleRadius;
+            const z1 = Math.sin(a1) * circleRadius;
+
+            const x2 = Math.cos(a2) * circleRadius;
+            const z2 = Math.sin(a2) * circleRadius;
+
+            const midX = (x1 + x2) / 2;
+            const midZ = (z1 + z2) / 2;
+
+            const dx = x2 - x1;
+            const dz = z2 - z1;
+
+            const lengthSegment = Math.sqrt(
+                dx * dx + dz * dz
+            );
+
+            const line = createBox(
+                "CenterCircleSegment_" + i,
+                [midX, y + 0.003, midZ],
+                [0.045, 0.025, lengthSegment],
+                lineMaterial,
+                parent
+            );
+
+            line.setLocalEulerAngles(
+                0,
+                -Math.atan2(dx, dz) * 180 / Math.PI,
+                0
+            );
+        }
+
+        /* Point central. */
+        createSphere(
+            "CenterSpot",
+            [0, 0.045, 0],
+            [0.15, 0.035, 0.15],
+            lineMaterial,
+            parent
+        );
+
+        /* Surfaces des zones de réparation. */
+        const penaltyWidth = 15;
+        const penaltyLength = 6;
+
+        createBox(
+            "PenaltyNorthLeft",
+            [-penaltyWidth / 2, y + 0.002, -halfLength + penaltyLength / 2],
+            [FIELD.lineHeight, 0.025, penaltyLength],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "PenaltyNorthRight",
+            [penaltyWidth / 2, y + 0.002, -halfLength + penaltyLength / 2],
+            [FIELD.lineHeight, 0.025, penaltyLength],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "PenaltyNorthFront",
+            [0, y + 0.002, -halfLength + penaltyLength],
+            [penaltyWidth, 0.025, FIELD.lineHeight],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "PenaltySouthLeft",
+            [-penaltyWidth / 2, y + 0.002, halfLength - penaltyLength / 2],
+            [FIELD.lineHeight, 0.025, penaltyLength],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "PenaltySouthRight",
+            [penaltyWidth / 2, y + 0.002, halfLength - penaltyLength / 2],
+            [FIELD.lineHeight, 0.025, penaltyLength],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "PenaltySouthFront",
+            [0, y + 0.002, halfLength - penaltyLength],
+            [penaltyWidth, 0.025, FIELD.lineHeight],
+            lineMaterial,
+            parent
+        );
+
+        /* Petites surfaces des buts. */
+        const goalWidth = FIELD.goalWidth;
+        const goalHeight = FIELD.goalHeight;
+
+        const goalDepth = 2.5;
+        const postScale = [0.12, goalHeight, 0.12];
+
+        /* But nord. */
+        createBox(
+            "NorthGoalPostLeft",
+            [-goalWidth / 2, goalHeight / 2 - 0.1, -halfLength - 0.7],
+            postScale,
+            goalMaterial,
+            parent
+        );
+
+        createBox(
+            "NorthGoalPostRight",
+            [goalWidth / 2, goalHeight / 2 - 0.1, -halfLength - 0.7],
+            postScale,
+            goalMaterial,
+            parent
+        );
+
+        createBox(
+            "NorthGoalCrossbar",
+            [0, goalHeight - 0.1, -halfLength - 0.7],
+            [goalWidth, 0.12, 0.12],
+            goalMaterial,
+            parent
+        );
+
+        createBox(
+            "NorthGoalNetBack",
+            [0, goalHeight / 2 - 0.1, -halfLength - goalDepth],
+            [goalWidth, goalHeight, 0.04],
+            blackMaterial,
+            parent
+        );
+
+        /* But sud. */
+        createBox(
+            "SouthGoalPostLeft",
+            [-goalWidth / 2, goalHeight / 2 - 0.1, halfLength + 0.7],
+            postScale,
+            goalMaterial,
+            parent
+        );
+
+        createBox(
+            "SouthGoalPostRight",
+            [goalWidth / 2, goalHeight / 2 - 0.1, halfLength + 0.7],
+            postScale,
+            goalMaterial,
+            parent
+        );
+
+        createBox(
+            "SouthGoalCrossbar",
+            [0, goalHeight - 0.1, halfLength + 0.7],
+            [goalWidth, 0.12, 0.12],
+            goalMaterial,
+            parent
+        );
+
+        createBox(
+            "SouthGoalNetBack",
+            [0, goalHeight / 2 - 0.1, halfLength + goalDepth],
+            [goalWidth, goalHeight, 0.04],
+            blackMaterial,
+            parent
+        );
+
+        /* Petits drapeaux de coin. */
+        const cornerPositions = [
+            [-halfWidth, -halfLength],
+            [halfWidth, -halfLength],
+            [-halfWidth, halfLength],
+            [halfWidth, halfLength]
+        ];
+
+        cornerPositions.forEach((position, index) => {
+            const pole = createCylinder(
+                "CornerPole_" + index,
+                [position[0], 0.75, position[1]],
+                [0.06, 1.5, 0.06],
+                goalMaterial,
+                parent
+            );
+
+            createBox(
+                "CornerFlag_" + index,
+                [
+                    position[0] + 0.2,
+                    1.35,
+                    position[1]
+                ],
+                [0.45, 0.3, 0.04],
+                createMaterial("#f4c43e"),
+                parent
+            );
+        });
+
+        /* Repères de terrain supplémentaires. */
+        createBox(
+            "GoalAreaNorth",
+            [0, y + 0.001, -halfLength + 3.0],
+            [8.0, 0.02, FIELD.lineHeight],
+            lineMaterial,
+            parent
+        );
+
+        createBox(
+            "GoalAreaSouth",
+            [0, y + 0.001, halfLength - 3.0],
+            [8.0, 0.02, FIELD.lineHeight],
+            lineMaterial,
+            parent
+        );
+
+        console.info(
+            "[FOBAS] Terrain construit :",
+            width,
+            "x",
+            length
+        );
+    }
+
+
+    /* ========================================================
+       10. JOUEURS 3D
+    ======================================================== */
+
+    function createPlayerEntity(
+        playerData,
+        team,
+        index,
+        isHome
+    ) {
+        const pc = state.engine;
+
+        const root = new pc.Entity(
+            "Player_" + team.id + "_" + index
+        );
+
+        root.setLocalPosition(
+            playerData.x,
+            0,
+            playerData.z
+        );
+
+        state.playerRoot.addChild(root);
+
+        const kitColor = createMaterial(team.primary);
+        const shortsColor = createMaterial(team.secondary);
+        const skinColor = createMaterial(
+            choose([
+                "#7a4b32",
+                "#986447",
+                "#c28b63",
+                "#5b392b",
+                "#d3a078"
+            ])
+        );
+
+        const sockColor = createMaterial(team.secondary);
+        const bootColor = createMaterial("#20252b");
+
+        const torso = createBox(
+            "Torso",
+            [0, 1.05, 0],
+            [0.58, 0.72, 0.32],
+            kitColor,
+            root
+        );
+
+        const head = createSphere(
+            "Head",
+            [0, 1.67, 0],
+            [0.36, 0.36, 0.36],
+            skinColor,
+            root
+        );
+
+        const shorts = createBox(
+            "Shorts",
+            [0, 0.57, 0],
+            [0.54, 0.26, 0.31],
+            shortsColor,
+            root
+        );
+
+        const leftLeg = createBox(
+            "LeftLeg",
+            [-0.15, 0.28, 0],
+            [0.18, 0.42, 0.19],
+            sockColor,
+            root
+        );
+
+        const rightLeg = createBox(
+            "RightLeg",
+            [0.15, 0.28, 0],
+            [0.18, 0.42, 0.19],
+            sockColor,
+            root
+        );
+
+        const leftBoot = createBox(
+            "LeftBoot",
+            [-0.15, 0.055, -0.05],
+            [0.2, 0.1, 0.3],
+            bootColor,
+            root
+        );
+
+        const rightBoot = createBox(
+            "RightBoot",
+            [0.15, 0.055, -0.05],
+            [0.2, 0.1, 0.3],
+            bootColor,
+            root
+        );
+
+        const leftArm = createBox(
+            "LeftArm",
+            [-0.37, 1.05, 0],
+            [0.17, 0.55, 0.18],
+            kitColor,
+            root
+        );
+
+        const rightArm = createBox(
+            "RightArm",
+            [0.37, 1.05, 0],
+            [0.17, 0.55, 0.18],
+            kitColor,
+            root
+        );
+
+        const numberMaterial = createMaterial("#ffffff");
+
+        const numberMarker = createBox(
+            "PlayerNumberMarker",
+            [0, 1.05, -0.17],
+            [0.17, 0.18, 0.025],
+            numberMaterial,
+            root
+        );
+
+        const player = {
+            id: playerData.id,
+            name: playerData.name,
+
+            teamId: team.id,
+            teamName: team.name,
+
+            isHome,
+
+            root,
+            torso,
+            head,
+            shorts,
+
+            leftLeg,
+            rightLeg,
+            leftBoot,
+            rightBoot,
+
+            leftArm,
+            rightArm,
+            numberMarker,
+
+            x: playerData.x,
+            z: playerData.z,
+
+            targetX: playerData.x,
+            targetZ: playerData.z,
+
+            homeX: playerData.x,
+            homeZ: playerData.z,
+
+            velocityX: 0,
+            velocityZ: 0,
+
+            speed: randomBetween(3.0, 4.5),
+
+            hasBall: false,
+            isGoalkeeper: playerData.position === "GK",
+
+            number: index + 1,
+            aiEnabled: true,
+
+            animationPhase: Math.random() * Math.PI * 2,
+
+            kitMaterial: kitColor
+        };
+
+        root.setLocalScale(1, 1, 1);
+
+        return player;
+    }
+
+    function getFormationPositions(isHome) {
+        const sign = isHome ? 1 : -1;
+
+        const positions = [
+            { x: 0, z: sign * 21.0, position: "GK" },
+
+            { x: -8.2, z: sign * 14.0 },
+            { x: -3.0, z: sign * 15.5 },
+            { x: 3.0, z: sign * 15.5 },
+            { x: 8.2, z: sign * 14.0 },
+
+            { x: -9.0, z: sign * 6.8 },
+            { x: -3.0, z: sign * 7.0 },
+            { x: 3.0, z: sign * 7.0 },
+            { x: 9.0, z: sign * 6.8 },
+
+            { x: -4.0, z: sign * 1.5 },
+            { x: 4.0, z: sign * 1.5 }
+        ];
+
+        return positions;
+    }
+
+    function buildMatchPlayers() {
+        const homeTeam = getTeam(state.selectedHome);
+        const awayTeam = getTeam(state.selectedAway);
+
+        const homePositions = getFormationPositions(true);
+        const awayPositions = getFormationPositions(false);
+
+        state.homePlayers = [];
+        state.awayPlayers = [];
+        state.allPlayers = [];
+
+        for (let index = 0; index < PLAYERS_ON_FIELD; index++) {
+            const name = PLAYER_NAMES[
+                index % PLAYER_NAMES.length
+            ];
+
+            const player = createPlayerEntity(
+                {
+                    id: homeTeam.id + "-player-" + (index + 1),
+                    name,
+                    x: homePositions[index].x,
+                    z: homePositions[index].z,
+                    position: homePositions[index].position
+                },
+                homeTeam,
+                index,
+                true
+            );
+
+            state.homePlayers.push(player);
+            state.allPlayers.push(player);
+        }
+
+        for (let index = 0; index < PLAYERS_ON_FIELD; index++) {
+            const name = PLAYER_NAMES[
+                (index + 11) % PLAYER_NAMES.length
+            ];
+
+            const player = createPlayerEntity(
+                {
+                    id: awayTeam.id + "-player-" + (index + 1),
+                    name,
+                    x: awayPositions[index].x,
+                    z: awayPositions[index].z,
+                    position: awayPositions[index].position
+                },
+                awayTeam,
+                index,
+                false
+            );
+
+            state.awayPlayers.push(player);
+            state.allPlayers.push(player);
+        }
+
+        state.controlledPlayer =
+            state.homePlayers[9] ||
+            state.homePlayers[0] ||
+            null;
+
+        console.info(
+            "[FOBAS] Joueurs créés :",
+            state.allPlayers.length
+        );
+    }
+
+
+    /* ========================================================
+       11. CAMÉRA 3D
+    ======================================================== */
+
+    function createCamera() {
+        const pc = state.engine;
+
+        const camera = new pc.Entity("FootballCamera");
+
+        camera.addComponent("camera", {
+            clearColor: new pc.Color(
+                0.06,
+                0.10,
+                0.15
+            ),
+
+            fov: 55,
+            nearClip: 0.1,
+            farClip: 250,
+
+            frustumCulling: true
+        });
+
+        state.sceneRoot.addChild(camera);
+
+        state.cameraEntity = camera;
+
+        updateCameraPosition(true);
+    }
+
+    function updateCameraPosition(immediate = false) {
+        const camera = state.cameraEntity;
+
+        if (!camera) return;
+
+        const pc = state.engine;
+
+        const distance = clamp(
+            state.cameraDistance,
+            CAMERA.minHeight,
+            CAMERA.maxHeight
+        );
+
+        const controlled = state.controlledPlayer;
+
+        const targetX = controlled ? controlled.x * 0.25 : 0;
+        const targetZ = controlled ? controlled.z * 0.2 : 0;
+
+        let height = distance;
+        let zOffset = distance * 0.25;
+
+        if (state.cameraMode === 1) {
+            height = distance * 0.78;
+            zOffset = distance * 0.72;
+        } else if (state.cameraMode === 2) {
+            height = distance * 1.15;
+            zOffset = distance * 0.06;
+        }
+
+        height = clamp(
+            height,
+            CAMERA.minHeight * 0.7,
+            CAMERA.maxHeight * 1.2
+        );
+
+        const targetPosition = {
+            x: targetX,
+            y: height,
+            z: targetZ + zOffset
+        };
+
+        if (immediate) {
+            camera.setPosition(
+                targetPosition.x,
+                targetPosition.y,
+                targetPosition.z
+            );
+        } else {
+            const current = camera.getPosition();
+
+            const factor = 0.08;
+
+            camera.setPosition(
+                current.x +
+                    (targetPosition.x - current.x) * factor,
+
+                current.y +
+                    (targetPosition.y - current.y) * factor,
+
+                current.z +
+                    (targetPosition.z - current.z) * factor
+            );
+        }
+
+        camera.lookAt(targetX, 0, targetZ);
+
+        const cameraComponent = camera.camera;
+
+        if (cameraComponent) {
+            cameraComponent.fov = state.cameraMode === 2
+                ? 62
+                : 55;
+        }
+    }
+
+    function cameraZoomIn() {
+        state.cameraDistance = clamp(
+            state.cameraDistance - CAMERA.zoomStep,
+            CAMERA.minHeight,
+            CAMERA.maxHeight
+        );
+
+        updateCameraPosition(true);
+    }
+
+    function cameraZoomOut() {
+        state.cameraDistance = clamp(
+            state.cameraDistance + CAMERA.zoomStep,
+            CAMERA.minHeight,
+            CAMERA.maxHeight
+        );
+
+        updateCameraPosition(true);
+    }
+
+    function resetCamera() {
+        state.cameraDistance = CAMERA.height;
+        state.cameraMode = 0;
+
+        updateCameraPosition(true);
+
+        toast("Caméra réinitialisée.");
+    }
+
+    function changeCameraMode() {
+        state.cameraMode = (state.cameraMode + 1) % 3;
+
+        updateCameraPosition(true);
+
+        const labels = [
+            "Vue tactique",
+            "Vue rapprochée",
+            "Vue verticale"
+        ];
+
+        toast(labels[state.cameraMode]);
+    }
+
+    function resizeCanvas() {
+        if (!state.app) return;
+
+        const canvas = $("footballCanvas");
+
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+
+        if (!rect.width || !rect.height) {
+            return;
+        }
+
+        canvas.width = Math.max(
+            1,
+            Math.round(rect.width * Math.min(window.devicePixelRatio || 1, 1.5))
+        );
+
+        canvas.height = Math.max(
+            1,
+            Math.round(rect.height * Math.min(window.devicePixelRatio || 1, 1.5))
+        );
+
+        if (state.app.graphicsDevice) {
+            try {
+                state.app.resizeCanvas(
+                    canvas.width,
+                    canvas.height
+                );
+            } catch (error) {
+                console.warn(
+                    "[FOBAS] Ajustement du canvas :",
+                    error
+                );
+            }
+        }
+    }
+
+
+    /* ========================================================
+       12. BALLON
+    ======================================================== */
+
+    function createBall() {
+        const ballMaterial = createMaterial("#f5f6f7", {
+            gloss: 70
+        });
+
+        const ball = createSphere(
+            "FootballBall",
+            [0, 0.45, 0],
+            [0.55, 0.55, 0.55],
+            ballMaterial,
+            state.sceneRoot
+        );
+
+        state.ballEntity = ball;
+
+        state.ballShadow = createBox(
+            "BallShadow",
+            [0, 0.025, 0],
+            [0.85, 0.025, 0.85],
+            createMaterial("#193824"),
+            state.sceneRoot
+        );
+
+        state.ballVelocity = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+
+        return ball;
+    }
+
+    function getBallPosition() {
+        if (!state.ballEntity) {
+            return { x: 0, y: 0.45, z: 0 };
+        }
+
+        const position = state.ballEntity.getPosition();
+
+        return {
+            x: position.x,
+            y: position.y,
+            z: position.z
+        };
+    }
+
+    function setBallPosition(x, y, z) {
+        if (!state.ballEntity) return;
+
+        state.ballEntity.setPosition(x, y, z);
+
+        if (state.ballShadow) {
+            state.ballShadow.setPosition(x, 0.025, z);
+        }
+    }
+
+    function attachBallToPlayer(player) {
+        if (!player || !state.ballEntity) return;
+
+        state.allPlayers.forEach(item => {
+            item.hasBall = item === player;
+        });
+
+        const offset = player.isHome ? -0.6 : 0.6;
+
+        setBallPosition(
+            player.x,
+            0.45,
+            player.z + offset
+        );
+
+        state.ballVelocity = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+    }
+
+
+    /* ========================================================
+       13. MATCH ET SCORE
+    ======================================================== */
+
+    function updateScoreboard() {
+        const home = getTeam(state.selectedHome);
+        const away = getTeam(state.selectedAway);
+
+        safeText("homeTeamName", home.name.toUpperCase());
+        safeText("awayTeamName", away.name.toUpperCase());
+
+        safeText("homeScore", state.scoreHome);
+        safeText("awayScore", state.scoreAway);
+
+        safeText(
+            "competitionLabel",
+            getCompetitionName(state.selectedCompetition).toUpperCase()
+        );
+
+        safeText(
+            "stadiumLabel",
+            $("stadiumSelect")?.value === "neutral"
+                ? "TERRAIN NEUTRE"
+                : "STADE FOBAS"
+        );
+
+        const elapsedMinutes = Math.floor(state.elapsed);
+
+        const minutes = String(
+            Math.floor(elapsedMinutes)
+        ).padStart(2, "0");
+
+        const seconds = String(
+            Math.floor((state.elapsed % 1) * 60)
+        ).padStart(2, "0");
+
+        safeText(
+            "matchClock",
+            minutes + ":" + seconds
+        );
+
+        safeText(
+            "matchPeriod",
+            state.elapsed < state.matchLength / 2
+                ? "1re MI-TEMPS"
+                : "2e MI-TEMPS"
+        );
+    }
+
+    function getCompetitionName(id) {
+        const competition = COMPETITION_LEVELS.find(
+            item => item.id === id
+        );
+
+        if (competition) {
+            return competition.name;
+        }
+
+        const fallback = {
+            local: "Match local",
+            communal: "Championnat communal",
+            northwest: "Championnat départemental",
+            "haiti-national": "Championnat national",
+            caribbean: "Tournoi des Caraïbes",
+            international: "Compétition internationale",
+            champions: "Tournoi des champions"
+        };
+
+        return fallback[id] || "Match de football";
+    }
+
+    function getMatchDuration() {
+        const selected = $("matchDurationSelect")?.value ||
+            "standard";
+
+        if (selected === "short") return 5;
+        if (selected === "long") return 20;
+
+        return 10;
+    }
+
+    function prepareMatch() {
+        const homeSelect = $("homeTeamSelect");
+        const awaySelect = $("awayTeamSelect");
+        const competitionSelect = $("competitionSelect");
+
+        if (homeSelect) {
+            state.selectedHome = homeSelect.value;
+        }
+
+        if (awaySelect) {
+            state.selectedAway = awaySelect.value;
+        }
+
+        if (state.selectedHome === state.selectedAway) {
+            toast(
+                "Choisissez deux équipes différentes.",
+                "error"
+            );
+
+            return false;
+        }
+
+        if (competitionSelect) {
+            state.selectedCompetition = competitionSelect.value;
+            state.selectedChampionship = competitionSelect.value;
+        }
+
+        state.scoreHome = 0;
+        state.scoreAway = 0;
+
+        state.elapsed = 0;
+        state.matchLength = getMatchDuration();
+
+        state.matchStarted = true;
+        state.paused = false;
+        state.matchFinished = false;
+
+        if (state.app) {
+            disposeEngineScene();
+        }
+
+        showScreen("matchScreen");
+
+        safeText("engineStatus", "Préparation du terrain 3D...");
+
+        state.cameraDistance = CAMERA.height;
+        state.cameraMode = 0;
+
+        createEngine()
+            .then(() => {
+                startMatchSimulation();
+
+                safeText("engineStatus", "MATCH 3D EN COURS");
+
+                announce(
+                    "COUP D'ENVOI",
+                    getTeam(state.selectedHome).name +
+                    " contre " +
+                    getTeam(state.selectedAway).name
+                );
+            })
+            .catch(error => {
+                showLoadingError(error);
+            });
+
+        return true;
+    }
+
+    function startMatchSimulation() {
+        if (!state.engineReady) {
+            return;
+        }
+
+        const kickoffPlayer =
+            state.homePlayers[9] ||
+            state.homePlayers[0];
+
+        if (kickoffPlayer) {
+            state.controlledPlayer = kickoffPlayer;
+            attachBallToPlayer(kickoffPlayer);
+        }
+
+        updateScoreboard();
+        updateCameraPosition(true);
+    }
+
+    function finishMatch() {
+        if (state.matchFinished) return;
+
+        state.matchFinished = true;
+        state.matchStarted = false;
+
+        state.profile.matchesPlayed += 1;
+
+        if (state.scoreHome > state.scoreAway) {
+            state.career.wins += 1;
+            state.profile.trophies += 1;
+        } else if (state.scoreHome < state.scoreAway) {
+            state.career.losses += 1;
+        } else {
+            state.career.draws += 1;
+        }
+
+        state.career.currentMission += 1;
+
+        const completed = state.career.completedMissions;
+
+        if (!completed.includes(state.career.currentMission - 1)) {
+            completed.push(state.career.currentMission - 1);
+        }
+
+        announce(
+            "FIN DU MATCH",
+            state.scoreHome + " - " + state.scoreAway,
+            5000
+        );
+
+        safeText(
+            "engineStatus",
+            "MATCH TERMINÉ"
+        );
+
+        saveAll(false);
+
+        window.setTimeout(() => {
+            showMatchResultDialog();
+        }, 500);
+    }
+
+    function showMatchResultDialog() {
+        openDialog(
+            "Résultat du match",
+            `
+                <div class="result-card">
+                    <h3>${escapeHTML(getTeam(state.selectedHome).name)}</h3>
+                    <p class="result-score">
+                        ${state.scoreHome} - ${state.scoreAway}
+                    </p>
+                    <h3>${escapeHTML(getTeam(state.selectedAway).name)}</h3>
+                    <p>Match terminé.</p>
+                </div>
+            `,
+            [
+                {
+                    label: "REJOUER",
+                    action: () => prepareMatch()
+                },
+                {
+                    label: "MENU PRINCIPAL",
+                    action: () => goToMainMenu()
+                }
+            ]
+        );
+    }
+
+
+    /* ========================================================
+       14. PHYSIQUE ET IA
+    ======================================================== */
+
+    function distance2D(x1, z1, x2, z2) {
+        const dx = x1 - x2;
+        const dz = z1 - z2;
+
+        return Math.sqrt(dx * dx + dz * dz);
+    }
+
+    function findClosestPlayerToBall(players) {
+        if (!players.length) return null;
+
+        const ball = getBallPosition();
+
+        let closest = null;
+        let closestDistance = Infinity;
+
+        for (const player of players) {
+            const distance = distance2D(
+                player.x,
+                player.z,
+                ball.x,
+                ball.z
+            );
+
+            if (distance < closestDistance) {
+                closest = player;
+                closestDistance = distance;
+            }
+        }
+
+        return closest;
+    }
+
+    function updateAI(delta) {
+        if (!state.matchStarted || state.paused) return;
+
+        const ball = getBallPosition();
+
+        const closestHome = findClosestPlayerToBall(
+            state.homePlayers
+        );
+
+        const closestAway = findClosestPlayerToBall(
+            state.awayPlayers
+        );
+
+        const difficulty = state.settings.difficulty;
+
+        const difficultyFactor = {
+            easy: 0.7,
+            normal: 1,
+            hard: 1.2,
+            expert: 1.4
+        }[difficulty] || 1;
+
+        for (const player of state.allPlayers) {
+            if (player === state.controlledPlayer) {
+                continue;
+            }
+
+            let targetX = player.homeX;
+            let targetZ = player.homeZ;
+
+            const attacking = player.isHome
+                ? ball.z < 0
+                : ball.z > 0;
+
+            if (
+                player === closestHome ||
+                player === closestAway
+            ) {
+                targetX = ball.x;
+                targetZ = ball.z;
+            } else {
+                const tacticalOffset = attacking ? 3.5 : -2.0;
+
+                targetZ += player.isHome
+                    ? -tacticalOffset
+                    : tacticalOffset;
+
+                targetX += Math.sin(
+                    state.elapsed * 0.6 +
+                    player.animationPhase
+                ) * 1.3;
+
+                targetZ += Math.cos(
+                    state.elapsed * 0.4 +
+                    player.animationPhase
+                ) * 1.0;
+            }
+
+            targetX = clamp(
+                targetX,
+                -FIELD.width / 2 + 1,
+                FIELD.width / 2 - 1
+            );
+
+            targetZ = clamp(
+                targetZ,
+                -FIELD.length / 2 + 1,
+                FIELD.length / 2 - 1
+            );
+
+            player.targetX = targetX;
+            player.targetZ = targetZ;
+
+            const dx = targetX - player.x;
+            const dz = targetZ - player.z;
+
+            const distance = Math.sqrt(dx * dx + dz * dz);
+
+            if (distance > 0.08) {
+                const speed = player.speed * difficultyFactor;
+
+                const move = Math.min(
+                    distance,
+                    speed * delta
+                );
+
+                player.x += dx / distance * move;
+                player.z += dz / distance * move;
+
+                player.root.setPosition(
+                    player.x,
+                    0,
+                    player.z
+                );
+
+                const angle = Math.atan2(dx, dz);
+
+                player.root.setLocalEulerAngles(
+                    0,
+                    angle * 180 / Math.PI,
+                    0
+                );
+            }
+
+            animatePlayer(player, delta);
+        }
+
+        updateBallPhysics(delta);
+        updateControlledPlayer(delta);
+        checkGoals();
+    }
+
+    function animatePlayer(player, delta) {
+        player.animationPhase += delta * 5;
+
+        const swing = Math.sin(
+            player.animationPhase
+        ) * 0.12;
+
+        if (player.leftLeg) {
+            player.leftLeg.setLocalEulerAngles(
+                swing * 35,
+                0,
+                0
+            );
+        }
+
+        if (player.rightLeg) {
+            player.rightLeg.setLocalEulerAngles(
+                -swing * 35,
+                0,
+                0
+            );
+        }
+
+        if (player.leftArm) {
+            player.leftArm.setLocalEulerAngles(
+                -swing * 20,
+                0,
+                0
+            );
+        }
+
+        if (player.rightArm) {
+            player.rightArm.setLocalEulerAngles(
+                swing * 20,
+                0,
+                0
+            );
+        }
+    }
+
+    function updateControlledPlayer(delta) {
+        const player = state.controlledPlayer;
+
+        if (!player || !state.matchStarted || state.paused) {
+            return;
+        }
+
+        const joystick = state.joystick;
+
+        if (!joystick.active) {
+            return;
+        }
+
+        const speed = player.speed *
+            (state.sprinting ? 1.65 : 1);
+
+        const dx = joystick.x * speed * delta;
+        const dz = joystick.y * speed * delta;
+
+        player.x = clamp(
+            player.x + dx,
+            -FIELD.width / 2 + 0.5,
+            FIELD.width / 2 - 0.5
+        );
+
+        player.z = clamp(
+            player.z + dz,
+            -FIELD.length / 2 + 0.5,
+            FIELD.length / 2 - 0.5
+        );
+
+        player.root.setPosition(
+            player.x,
+            0,
+            player.z
+        );
+
+        if (Math.abs(dx) + Math.abs(dz) > 0.001) {
+            player.root.setLocalEulerAngles(
+                0,
+                Math.atan2(dx, dz) * 180 / Math.PI,
+                0
+            );
+        }
+
+        animatePlayer(player, delta);
+
+        if (
+            distance2D(
+                player.x,
+                player.z,
+                getBallPosition().x,
+                getBallPosition().z
+            ) < 1.4
+        ) {
+            attachBallToPlayer(player);
+        }
+    }
+
+    function updateBallPhysics(delta) {
+        if (!state.ballEntity) return;
+
+        const carrier = state.allPlayers.find(
+            player => player.hasBall
+        );
+
+        if (carrier) {
+            const angle =
+                carrier.root.getEulerAngles().y *
+                Math.PI / 180;
+
+            const x = carrier.x + Math.sin(angle) * 0.65;
+            const z = carrier.z + Math.cos(angle) * 0.65;
+
+            setBallPosition(
+                x,
+                0.45 + Math.abs(Math.sin(state.elapsed * 8)) * 0.08,
+                z
+            );
+
+            return;
+        }
+
+        const ball = getBallPosition();
+
+        ball.x += state.ballVelocity.x * delta;
+        ball.z += state.ballVelocity.z * delta;
+
+        state.ballVelocity.x *= Math.pow(0.985, delta * 60);
+        state.ballVelocity.z *= Math.pow(0.985, delta * 60);
+
+        if (Math.abs(state.ballVelocity.x) < 0.04) {
+            state.ballVelocity.x = 0;
+        }
+
+        if (Math.abs(state.ballVelocity.z) < 0.04) {
+            state.ballVelocity.z = 0;
+        }
+
+        if (Math.abs(ball.x) > FIELD.width / 2 - 0.5) {
+            state.ballVelocity.x *= -0.6;
+
+            ball.x = clamp(
+                ball.x,
+                -FIELD.width / 2 + 0.5,
+                FIELD.width / 2 - 0.5
+            );
+        }
+
+        if (Math.abs(ball.z) > FIELD.length / 2 - 0.5) {
+            state.ballVelocity.z *= -0.6;
+
+            ball.z = clamp(
+                ball.z,
+                -FIELD.length / 2 + 0.5,
+                FIELD.length / 2 - 0.5
+            );
+        }
+
+        setBallPosition(
+            ball.x,
+            0.45,
+            ball.z
+        );
+
+        const closestHome = findClosestPlayerToBall(
+            state.homePlayers
+        );
+
+        const closestAway = findClosestPlayerToBall(
+            state.awayPlayers
+        );
+
+        if (
+            closestHome &&
+            distance2D(
+                closestHome.x,
+                closestHome.z,
+                ball.x,
+                ball.z
+            ) < 0.85
+        ) {
+            attachBallToPlayer(closestHome);
+        } else if (
+            closestAway &&
+            distance2D(
+                closestAway.x,
+                closestAway.z,
+                ball.x,
+                ball.z
+            ) < 0.85
+        ) {
+            attachBallToPlayer(closestAway);
+        }
+    }
+
+    function checkGoals() {
+        const ball = getBallPosition();
+
+        const insideGoal =
+            Math.abs(ball.x) < FIELD.goalWidth / 2;
+
+        if (!insideGoal) return;
+
+        if (ball.z < -FIELD.length / 2 + 0.4) {
+            state.scoreHome += 1;
+            state.profile.goalsScored += 1;
+
+            resetAfterGoal("BUT POUR " + getTeam(state.selectedHome).name);
+        } else if (ball.z > FIELD.length / 2 - 0.4) {
+            state.scoreAway += 1;
+
+            resetAfterGoal("BUT POUR " + getTeam(state.selectedAway).name);
+        }
+    }
+
+    function resetAfterGoal(message) {
+        state.allPlayers.forEach(player => {
+            player.hasBall = false;
+        });
+
+        state.ballVelocity = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+
+        setBallPosition(0, 0.45, 0);
+
+        state.homePlayers.forEach((player, index) => {
+            const positions = getFormationPositions(true);
+
+            player.x = positions[index].x;
+            player.z = positions[index].z;
+
+            player.root.setPosition(
+                player.x,
+                0,
+                player.z
+            );
+        });
+
+        state.awayPlayers.forEach((player, index) => {
+            const positions = getFormationPositions(false);
+
+            player.x = positions[index].x;
+            player.z = positions[index].z;
+
+            player.root.setPosition(
+                player.x,
+                0,
+                player.z
+            );
+        });
+
+        if (state.controlledPlayer) {
+            attachBallToPlayer(state.controlledPlayer);
+        }
+
+        updateScoreboard();
+
+        announce("BUT !", message, 4000);
+
+        safeCall(
+            window.navigator.vibrate?.bind(window.navigator),
+            100
+        );
+    }
+
+    function onEngineUpdate(delta) {
+        const dt = clamp(
+            safeNumber(delta, 0),
+            0,
+            0.05
+        );
+
+        if (!state.app || !state.engineReady) {
+            return;
+        }
+
+        if (state.matchStarted && !state.paused && !state.matchFinished) {
+            state.elapsed += dt * 0.15;
+
+            updateAI(dt);
+            updateScoreboard();
+
+            if (state.elapsed >= state.matchLength) {
+                finishMatch();
+            }
+        }
+
+        updateCameraPosition(false);
+    }
+
+
+    /* ========================================================
+       15. ACTIONS DE FOOTBALL
+    ======================================================== */
+
+    function passBall() {
+        const player = state.controlledPlayer;
+
+        if (!player || !state.matchStarted || state.paused) {
+            toast("Lancez un match pour jouer.", "info");
+            return;
+        }
+
+        const teammate = state.homePlayers
+            .filter(item => item !== player)
+            .sort((a, b) => {
+                const ball = getBallPosition();
+
+                return distance2D(
+                    a.x,
+                    a.z,
+                    ball.x,
+                    ball.z
+                ) - distance2D(
+                    b.x,
+                    b.z,
+                    ball.x,
+                    ball.z
+                );
+            })[0];
+
+        if (!teammate) return;
+
+        state.allPlayers.forEach(item => {
+            item.hasBall = false;
+        });
+
+        state.ballVelocity.x =
+            (teammate.x - player.x) * 1.5;
+
+        state.ballVelocity.z =
+            (teammate.z - player.z) * 1.5;
+
+        setBallPosition(
+            player.x,
+            0.5,
+            player.z
+        );
+
+        announce("PASSE", "Passe vers " + teammate.name);
+
+        window.setTimeout(() => {
+            if (state.matchStarted && !state.paused) {
+                attachBallToPlayer(teammate);
+            }
+        }, 350);
+    }
+
+    function shootBall() {
+        const player = state.controlledPlayer;
+
+        if (!player || !state.matchStarted || state.paused) {
+            toast("Lancez un match pour tirer.", "info");
+            return;
+        }
+
+        state.allPlayers.forEach(item => {
+            item.hasBall = false;
+        });
+
+        const direction = player.isHome ? -1 : 1;
+
+        const power = state.sprinting ? 24 : 18;
+
+        state.ballVelocity = {
+            x: randomBetween(-2.5, 2.5),
+            y: 0,
+            z: direction * power
+        };
+
+        setBallPosition(
+            player.x,
+            0.5,
+            player.z
+        );
+
+        announce("TIR !", "Le ballon est en mouvement.");
+
+        state.profile.goalsScored =
+            safeNumber(state.profile.goalsScored);
+    }
+
+    function switchPlayer() {
+        if (!state.homePlayers.length) {
+            toast("Aucun joueur disponible.", "error");
+            return;
+        }
+
+        const ball = getBallPosition();
+
+        const candidates = state.homePlayers
+            .filter(player => player !== state.controlledPlayer)
+            .sort((a, b) => {
+                return distance2D(
+                    a.x,
+                    a.z,
+                    ball.x,
+                    ball.z
+                ) - distance2D(
+                    b.x,
+                    b.z,
+                    ball.x,
+                    ball.z
+                );
+            });
+
+        state.controlledPlayer = candidates[0] ||
+            state.homePlayers[0];
+
+        toast(
+            "Joueur contrôlé : " +
+            state.controlledPlayer.name
+        );
+
+        updateCameraPosition(true);
+    }
+
+    function toggleSprint(active) {
+        state.sprinting = Boolean(active);
+    }
+
+    function toggleDefend(active) {
+        state.defending = Boolean(active);
+
+        if (state.defending) {
+            const opponent = findClosestPlayerToBall(
+                state.awayPlayers
+            );
+
+            if (opponent) {
+                const player = state.controlledPlayer;
+
+                if (player) {
+                    const distance = distance2D(
+                        player.x,
+                        player.z,
+                        opponent.x,
+                        opponent.z
+                    );
+
+                    if (distance < 2) {
+                        opponent.hasBall = false;
+                        attachBallToPlayer(player);
+
+                        announce(
+                            "RÉCUPÉRATION",
+                            "Vous avez récupéré le ballon."
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+
+    /* ========================================================
+       16. JOYSTICK TACTILE
+    ======================================================== */
+
+    function setupJoystick() {
+        const joystick = $("movementJoystick");
+        const knob = $("joystickKnob");
+        const base = $("joystickBase");
+
+        if (!joystick || !knob || !base) {
+            return;
+        }
+
+        let activePointer = null;
+
+        function resetJoystick() {
+            activePointer = null;
+
+            state.joystick.x = 0;
+            state.joystick.y = 0;
+            state.joystick.active = false;
+
+            knob.style.transform = "translate(0px, 0px)";
+        }
+
+        function updateJoystick(event) {
+            const rect = base.getBoundingClientRect();
+
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            let dx = event.clientX - centerX;
+            let dy = event.clientY - centerY;
+
+            const radius = Math.max(
+                20,
+                Math.min(rect.width, rect.height) * 0.35
+            );
+
+            const length = Math.sqrt(
+                dx * dx + dy * dy
+            );
+
+            if (length > radius) {
+                dx = dx / length * radius;
+                dy = dy / length * radius;
+            }
+
+            state.joystick.x = clamp(
+                dx / radius,
+                -1,
+                1
+            );
+
+            state.joystick.y = clamp(
+                dy / radius,
+                -1,
+                1
+            );
+
+            state.joystick.active = true;
+
+            knob.style.transform =
+                "translate(" + dx + "px, " + dy + "px)";
+        }
+
+        joystick.addEventListener("pointerdown", event => {
+            if (activePointer !== null) return;
+
+            event.preventDefault();
+
+            activePointer = event.pointerId;
+
+            try {
+                joystick.setPointerCapture(event.pointerId);
+            } catch {}
+
+            updateJoystick(event);
+        });
+
+        joystick.addEventListener("pointermove", event => {
+            if (event.pointerId !== activePointer) return;
+
+            event.preventDefault();
+
+            updateJoystick(event);
+        });
+
+        joystick.addEventListener("pointerup", event => {
+            if (event.pointerId === activePointer) {
+                resetJoystick();
+            }
+        });
+
+        joystick.addEventListener("pointercancel", resetJoystick);
+        joystick.addEventListener("lostpointercapture", resetJoystick);
+
+        joystick.addEventListener("contextmenu", event => {
+            event.preventDefault();
+        });
+    }
+
+
+    /* ========================================================
+       17. ZOOM AVEC DEUX DOIGTS
+    ======================================================== */
+
+    function setupPinchZoom() {
+        const viewport = $("pitchViewport");
+
+        if (!viewport) return;
+
+        let initialDistance = null;
+        let initialCameraDistance = null;
+
+        viewport.addEventListener("touchstart", event => {
+            if (event.touches.length === 2) {
+                const a = event.touches[0];
+                const b = event.touches[1];
+
+                initialDistance = Math.hypot(
+                    a.clientX - b.clientX,
+                    a.clientY - b.clientY
+                );
+
+                initialCameraDistance = state.cameraDistance;
+            }
+        }, { passive: true });
+
+        viewport.addEventListener("touchmove", event => {
+            if (
+                event.touches.length !== 2 ||
+                initialDistance === null
+            ) {
+                return;
+            }
+
+            const a = event.touches[0];
+            const b = event.touches[1];
+
+            const distance = Math.hypot(
+                a.clientX - b.clientX,
+                a.clientY - b.clientY
+            );
+
+            const difference = distance - initialDistance;
+
+            state.cameraDistance = clamp(
+                initialCameraDistance - difference * 0.06,
+                CAMERA.minHeight,
+                CAMERA.maxHeight
+            );
+
+            updateCameraPosition(true);
+        }, { passive: true });
+
+        viewport.addEventListener("touchend", event => {
+            if (event.touches.length < 2) {
+                initialDistance = null;
+                initialCameraDistance = null;
+            }
+        }, { passive: true });
+
+        viewport.addEventListener("touchcancel", () => {
+            initialDistance = null;
+            initialCameraDistance = null;
+        }, { passive: true });
+    }
+
+
+    /* ========================================================
+       18. ÉCRAN DES ÉQUIPES
+    ======================================================== */
+
+    function renderTeams() {
+        const container = $("teamsList");
+
+        if (!container) return;
+
+        const query = String(
+            state.teamsFilter.query || ""
+        ).trim().toLowerCase();
+
+        const region = state.teamsFilter.region || "all";
+
+        const filtered = state.teams.filter(team => {
+            const matchesQuery =
+                !query ||
+                team.name.toLowerCase().includes(query) ||
+                team.country.toLowerCase().includes(query);
+
+            const matchesRegion =
+                region === "all" ||
+                team.region === region;
+
+            return matchesQuery && matchesRegion;
+        });
+
+        container.replaceChildren();
+
+        filtered.forEach(team => {
+            const card = document.createElement("article");
+
+            card.className = "team-card";
+
+            card.innerHTML = `
+                <div class="team-card-color"
+                     style="background:${escapeHTML(team.primary)}"></div>
+
+                <div class="team-card-content">
+                    <h3>${escapeHTML(team.name)}</h3>
+                    <p>${escapeHTML(team.country)}</p>
+                    <small>Force : ${team.rating}/100</small>
+                </div>
+
+                <button type="button"
+                        class="ui-button button-secondary"
+                        data-team-home="${escapeHTML(team.id)}">
+                    DOMICILE
+                </button>
+
+                <button type="button"
+                        class="ui-button button-secondary"
+                        data-team-away="${escapeHTML(team.id)}">
+                    VISITEUR
+                </button>
+            `;
+
+            container.appendChild(card);
+        });
+
+        safeText(
+            "teamCountLabel",
+            filtered.length + " équipe(s)"
+        );
+    }
+
+    function selectTeam(id, side) {
+        const team = getTeam(id);
+
+        if (side === "home") {
+            if (team.id === state.selectedAway) {
+                toast(
+                    "Les deux équipes doivent être différentes.",
+                    "error"
+                );
+                return;
+            }
+
+            state.selectedHome = team.id;
+
+            if ($("homeTeamSelect")) {
+                $("homeTeamSelect").value = team.id;
+            }
+        } else {
+            if (team.id === state.selectedHome) {
+                toast(
+                    "Les deux équipes doivent être différentes.",
+                    "error"
+                );
+                return;
+            }
+
+            state.selectedAway = team.id;
+
+            if ($("awayTeamSelect")) {
+                $("awayTeamSelect").value = team.id;
+            }
+        }
+
+        toast(
+            team.name + " sélectionnée comme équipe " +
+            (side === "home" ? "à domicile." : "visiteuse."),
+            "success"
+        );
+
+        saveAll(false);
+    }
+
+    function refreshTeams() {
+        buildTeams();
+        renderTeams();
+
+        toast(
+            state.teams.length + " équipes disponibles.",
+            "success"
+        );
+    }
+
+
+    /* ========================================================
+       19. CHAMPIONNATS
+    ======================================================== */
+
+    function renderChampionships() {
+        const container = $("competitionLevelsList");
+
+        if (!container) return;
+
+        container.replaceChildren();
+
+        const levels = COMPETITION_LEVELS.length
+            ? COMPETITION_LEVELS
+            : [
+                { id: "local", name: "Matchs locaux", description: "Matchs entre clubs locaux." },
+                { id: "communal", name: "Championnats communaux", description: "Compétitions communales." },
+                { id: "northwest", name: "Championnat du Nord-Ouest", description: "Équipes du Nord-Ouest." },
+                { id: "haiti-national", name: "Championnat national", description: "Compétition nationale." },
+                { id: "caribbean", name: "Tournoi des Caraïbes", description: "Compétition régionale." },
+                { id: "international", name: "Compétitions internationales", description: "Équipes du monde." },
+                { id: "champions", name: "Tournoi des champions", description: "Finales." }
+            ];
+
+        levels.forEach((level, index) => {
+            const card = document.createElement("article");
+
+            card.className = "competition-level-card";
+
+            card.innerHTML = `
+                <div class="competition-level-number">
+                    ${index + 1}
+                </div>
+
+                <div>
+                    <h3>${escapeHTML(level.name)}</h3>
+                    <p>${escapeHTML(level.description || "")}</p>
+                </div>
+
+                <button type="button"
+                        class="ui-button button-secondary"
+                        data-competition="${escapeHTML(level.id)}">
+                    CHOISIR
+                </button>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    function selectCompetition(id) {
+        state.selectedCompetition = id;
+        state.selectedChampionship = id;
+
+        if ($("competitionSelect")) {
+            $("competitionSelect").value = id;
+        }
+
+        toast(
+            getCompetitionName(id) + " sélectionné.",
+            "success"
+        );
+
+        saveAll(false);
+    }
+
+
+    /* ========================================================
+       20. TOURNOIS
+    ======================================================== */
+
+    function renderTournaments() {
+        const container = $("tournamentList");
+
+        if (!container) return;
+
+        container.replaceChildren();
+
+        if (!state.tournaments.length) {
+            const empty = document.createElement("div");
+
+            empty.className = "empty-state";
+
+            empty.textContent =
+                "Aucun tournoi créé. Utilisez le bouton ci-dessous.";
+
+            container.appendChild(empty);
+            return;
+        }
+
+        state.tournaments.forEach((tournament, index) => {
+            const card = document.createElement("article");
+
+            card.className = "tournament-card";
+
+            card.innerHTML = `
+                <h3>${escapeHTML(tournament.name)}</h3>
+                <p>${escapeHTML(tournament.type || "Tournoi FOBAS")}</p>
+                <small>${escapeHTML(tournament.createdAt || "")}</small>
+
+                <button type="button"
+                        class="ui-button button-primary"
+                        data-tournament-index="${index}">
+                    SÉLECTIONNER
+                </button>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    function createTournament() {
+        openDialog(
+            "Créer un tournoi",
+            `
+                <label for="newTournamentName">Nom du tournoi</label>
+                <input id="newTournamentName"
+                       type="text"
+                       maxlength="60"
+                       placeholder="Tournoi FOBAS">
+
+                <label for="newTournamentType">Type de tournoi</label>
+                <select id="newTournamentType">
+                    <option value="local">Local</option>
+                    <option value="communal">Communal</option>
+                    <option value="caribbean">Caraïbes</option>
+                    <option value="international">International</option>
+                </select>
+            `,
+            [
+                {
+                    label: "CRÉER",
+                    action: () => {
+                        const name = String(
+                            $("newTournamentName")?.value || ""
+                        ).trim();
+
+                        const type = $("newTournamentType")?.value ||
+                            "local";
+
+                        if (!name) {
+                            toast(
+                                "Entrez le nom du tournoi.",
+                                "error"
+                            );
+                            return;
+                        }
+
+                        const tournament = {
+                            id: "tournament-" + Date.now(),
+                            name,
+                            type,
+                            createdAt: new Date().toLocaleDateString(),
+                            matches: [],
+                            champion: null
+                        };
+
+                        state.tournaments.push(tournament);
+                        state.activeTournament = tournament;
+
+                        saveAll(false);
+
+                        closeDialog();
+                        renderTournaments();
+
+                        toast(
+                            "Tournoi créé : " + name,
+                            "success"
+                        );
+                    }
+                },
+                {
+                    label: "ANNULER",
+                    action: closeDialog
+                }
+            ]
+        );
+    }
+
+
+    /* ========================================================
+       21. ÉQUIPEMENT
+    ======================================================== */
+
+    function renderEquipment() {
+        const container = $("equipmentItemsList");
+
+        if (!container) return;
+
+        const category = state.selectedEquipmentTab;
+
+        const items = state.equipmentItems[category] || [];
+
+        container.replaceChildren();
+
+        document.querySelectorAll("[data-equipment-tab]").forEach(button => {
+            const active =
+                button.dataset.equipmentTab === category;
+
+            button.classList.toggle("active", active);
+
+            button.setAttribute(
+                "aria-selected",
+                String(active)
+            );
+        });
+
+        items.forEach(item => {
+            const card = document.createElement("article");
+
+            card.className = "equipment-item-card";
+
+            const selected =
+                state.selectedEquipment[category] === item.id;
+
+            card.innerHTML = `
+                <div class="equipment-item-preview"
+                     style="background:${escapeHTML(item.color || "#26384e")}">
+                    ${category === "balls" ? "⚽" : category === "boots" ? "👟" : "👕"}
+                </div>
+
+                <div class="equipment-item-info">
+                    <h3>${escapeHTML(item.name)}</h3>
+                    <p>${escapeHTML(item.description)}</p>
+                </div>
+
+                <button type="button"
+                        class="ui-button ${selected ? "button-primary" : "button-secondary"}"
+                        data-equipment-id="${escapeHTML(item.id)}">
+                    ${selected ? "SÉLECTIONNÉ" : "CHOISIR"}
+                </button>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    function selectEquipment(id) {
+        const category = state.selectedEquipmentTab;
+
+        const items = state.equipmentItems[category] || [];
+
+        if (!items.some(item => item.id === id)) {
+            return;
+        }
+
+        state.selectedEquipment[category] = id;
+
+        renderEquipment();
+
+        toast(
+            "Équipement sélectionné.",
+            "success"
+        );
+    }
+
+    function applyEquipment() {
+        const kit = state.selectedEquipment.kits;
+
+        const item = state.equipmentItems.kits.find(
+            equipment => equipment.id === kit
+        );
+
+        if (item && state.controlledPlayer?.kitMaterial) {
+            state.controlledPlayer.kitMaterial.diffuse.fromString(
+                item.color
+            );
+
+            state.controlledPlayer.kitMaterial.update();
+        }
+
+        saveAll(false);
+
+        toast(
+            "Équipement appliqué et sauvegardé.",
+            "success"
+        );
+    }
+
+
+    /* ========================================================
+       22. PROFIL
+    ======================================================== */
+
+    function syncProfileUI() {
+        safeText(
+            "profileMatchesPlayed",
+            state.profile.matchesPlayed
+        );
+
+        safeText(
+            "profileGoalsScored",
+            state.profile.goalsScored
+        );
+
+        safeText(
+            "profileTrophies",
+            state.profile.trophies
+        );
+
+        const nameInput = $("profileNameInput");
+
+        if (
+            nameInput &&
+            document.activeElement !== nameInput
+        ) {
+            nameInput.value = state.profile.name;
+        }
+
+        const favoriteSelect = $("profileFavoriteTeam");
+
+        if (favoriteSelect) {
+            favoriteSelect.value = state.profile.favoriteTeam;
+        }
+    }
+
+    function saveProfile() {
+        const name = String(
+            $("profileNameInput")?.value || ""
+        ).trim();
+
+        const favoriteTeam = $("profileFavoriteTeam")?.value ||
+            state.profile.favoriteTeam;
+
+        if (!name) {
+            toast(
+                "Le nom du joueur ne peut pas être vide.",
+                "error"
+            );
+
+            return;
+        }
+
+        state.profile.name = name.slice(0, 40);
+        state.profile.favoriteTeam = favoriteTeam;
+
+        syncProfileUI();
+
+        saveAll(false);
+
+        toast(
+            "Profil sauvegardé.",
+            "success"
+        );
+    }
+
+
+    /* ========================================================
+       23. PARAMÈTRES
+    ======================================================== */
+
+    function syncSettingsUI() {
+        const graphics = $("graphicsQualitySelect");
+        const volume = $("soundVolumeInput");
+        const sensitivity = $("cameraSensitivityInput");
+        const difficulty = $("matchDifficultySelect");
+        const vibration = $("vibrationToggle");
+        const commentary = $("commentaryToggle");
+
+        if (graphics) {
+            graphics.value = state.settings.graphics;
+        }
+
+        if (volume) {
+            volume.value = state.settings.volume;
+        }
+
+        if (sensitivity) {
+            sensitivity.value = state.settings.cameraSensitivity;
+        }
+
+        if (difficulty) {
+            difficulty.value = state.settings.difficulty;
+        }
+
+        if (vibration) {
+            vibration.checked = state.settings.vibration;
+        }
+
+        if (commentary) {
+            commentary.checked = state.settings.commentary;
+        }
+
+        updateSoundButton();
+    }
+
+    function readSettingsFromUI() {
+        state.settings.graphics =
+            $("graphicsQualitySelect")?.value || "medium";
+
+        state.settings.volume = clamp(
+            safeNumber($("soundVolumeInput")?.value, 70),
+            0,
+            100
+        );
+
+        state.settings.cameraSensitivity = clamp(
+            safeNumber(
+                $("cameraSensitivityInput")?.value,
+                50
+            ),
+            1,
+            100
+        );
+
+        state.settings.difficulty =
+            $("matchDifficultySelect")?.value || "normal";
+
+        state.settings.vibration =
+            Boolean($("vibrationToggle")?.checked);
+
+        state.settings.commentary =
+            Boolean($("commentaryToggle")?.checked);
+    }
+
+    function saveSettings() {
+        readSettingsFromUI();
+
+        if (state.app?.graphicsDevice) {
+            state.app.graphicsDevice.maxPixelRatio =
+                state.settings.graphics === "high"
+                    ? Math.min(window.devicePixelRatio || 1, 2)
+                    : 1;
+        }
+
+        saveAll(false);
+
+        toast(
+            "Paramètres enregistrés.",
+            "success"
+        );
+    }
+
+    function syncTacticsUI() {
+        const formation = $("formationSelect");
+        const style = $("tacticalStyleSelect");
+        const pressure = $("pressureSelect");
+
+        if (formation) {
+            formation.value = state.tactics.formation;
+        }
+
+        if (style) {
+            style.value = state.tactics.style;
+        }
+
+        if (pressure) {
+            pressure.value = state.tactics.pressure;
+        }
+    }
+
+    function applyTactics() {
+        state.tactics.formation =
+            $("formationSelect")?.value || "433";
+
+        state.tactics.style =
+            $("tacticalStyleSelect")?.value || "balanced";
+
+        state.tactics.pressure =
+            $("pressureSelect")?.value || "medium";
+
+        applyFormation();
+
+        saveAll(false);
+
+        closeTactics();
+
+        toast(
+            "Tactiques appliquées.",
+            "success"
+        );
+    }
+
+    function applyFormation() {
+        if (!state.homePlayers.length || !state.awayPlayers.length) {
+            return;
+        }
+
+        const homePositions = getFormationPositions(true);
+        const awayPositions = getFormationPositions(false);
+
+        state.homePlayers.forEach((player, index) => {
+            const position = homePositions[index];
+
+            if (!position) return;
+
+            player.homeX = position.x;
+            player.homeZ = position.z;
+
+            player.targetX = position.x;
+            player.targetZ = position.z;
+        });
+
+        state.awayPlayers.forEach((player, index) => {
+            const position = awayPositions[index];
+
+            if (!position) return;
+
+            player.homeX = position.x;
+            player.homeZ = position.z;
+
+            player.targetX = position.x;
+            player.targetZ = position.z;
+        });
+    }
+
+
+    /* ========================================================
+       24. BOÎTES DE DIALOGUE
+    ======================================================== */
+
+    let dialogActionHandlers = [];
+
+    function openDialog(title, content, actions = []) {
         safeText("dialogTitle", title);
 
         const contentElement = $("dialogContent");
@@ -2428,241 +4324,157 @@ const state = {
         if (actionsElement) {
             actionsElement.replaceChildren();
 
-            actions.forEach(action => {
+            actions.forEach((item, index) => {
                 const button = document.createElement("button");
 
                 button.type = "button";
-                button.className = action.primary
-                    ? "ui-button button-primary"
-                    : "ui-button button-secondary";
+                button.className =
+                    "ui-button " +
+                    (index === 0
+                        ? "button-primary"
+                        : "button-secondary");
 
-                button.textContent = action.label;
+                button.textContent = item.label;
 
                 button.addEventListener("click", () => {
-                    hide($("dialogOverlay"));
-
-                    if (typeof action.action === "function") {
-                        action.action();
-                    }
+                    safeCall(item.action);
                 });
 
                 actionsElement.appendChild(button);
             });
         }
 
-        show($("dialogOverlay"));
+        show("dialogOverlay");
     }
 
     function closeDialog() {
-        hide($("dialogOverlay"));
+        hide("dialogOverlay");
+
+        const content = $("dialogContent");
+        const actions = $("dialogActions");
+
+        if (content) {
+            content.replaceChildren();
+        }
+
+        if (actions) {
+            actions.replaceChildren();
+        }
     }
+
+    function openTactics() {
+        syncTacticsUI();
+        show("tacticsOverlay");
+    }
+
+    function closeTactics() {
+        hide("tacticsOverlay");
+    }
+
 
     /* ========================================================
-       20. PROFIL ET PARAMÈTRES
+       25. PAUSE ET SAUVEGARDE DU MATCH
     ======================================================== */
 
-    function syncProfileUI() {
-        if ($("profileNameInput")) {
-            $("profileNameInput").value = state.profile.name;
+    function pauseMatch() {
+        if (!state.matchStarted) {
+            toast(
+                "Aucun match en cours.",
+                "info"
+            );
+            return;
         }
 
-        if ($("profileFavoriteTeam")) {
-            const optionExists = [...$("profileFavoriteTeam").options]
-                .some(option => option.value === state.profile.favoriteTeam);
+        state.paused = true;
 
-            if (optionExists) {
-                $("profileFavoriteTeam").value = state.profile.favoriteTeam;
-            }
-        }
+        show("pauseOverlay");
 
-        safeText("profileMatchesPlayed", state.profile.matchesPlayed);
-        safeText("profileGoalsScored", state.profile.goalsScored);
-        safeText("profileTrophies", state.profile.trophies);
-    }
-
-    function saveProfile() {
-        state.profile.name =
-            $("profileNameInput")?.value.trim() || "Joueur FOBAS";
-
-        state.profile.favoriteTeam =
-            $("profileFavoriteTeam")?.value || "mare-rouge";
-
-        saveRecord("profile", state.profile);
-        saveAll(false);
-        syncProfileUI();
-
-        toast("Profil sauvegardé.", "success");
-    }
-
-    function syncSettingsUI() {
-        if ($("graphicsQualitySelect")) {
-            $("graphicsQualitySelect").value = state.settings.graphics;
-        }
-
-        if ($("soundVolumeInput")) {
-            $("soundVolumeInput").value = state.settings.volume;
-        }
-
-        if ($("cameraSensitivityInput")) {
-            $("cameraSensitivityInput").value = state.settings.cameraSensitivity;
-        }
-
-        if ($("matchDifficultySelect")) {
-            $("matchDifficultySelect").value = state.settings.difficulty;
-        }
-
-        if ($("vibrationToggle")) {
-            $("vibrationToggle").checked = state.settings.vibration;
-        }
-
-        if ($("commentaryToggle")) {
-            $("commentaryToggle").checked = state.settings.commentary;
-        }
-    }
-
-    function saveSettings() {
-        state.settings.graphics =
-            $("graphicsQualitySelect")?.value || "medium";
-
-        state.settings.volume =
-            Number($("soundVolumeInput")?.value || 70);
-
-        state.settings.cameraSensitivity =
-            Number($("cameraSensitivityInput")?.value || 50);
-
-        state.settings.difficulty =
-            $("matchDifficultySelect")?.value || "normal";
-
-        state.settings.vibration =
-            Boolean($("vibrationToggle")?.checked);
-
-        state.settings.commentary =
-            Boolean($("commentaryToggle")?.checked);
-
-        if (state.app) {
-            state.app.graphicsDevice.maxPixelRatio =
-                state.settings.graphics === "high"
-                    ? Math.min(window.devicePixelRatio || 1, 2)
-                    : state.settings.graphics === "low"
-                        ? 1
-                        : Math.min(window.devicePixelRatio || 1, 1.5);
-        }
-
-        saveRecord("settings", state.settings);
-        saveAll(false);
-
-        toast("Paramètres enregistrés.", "success");
-    }
-
-    function syncTacticsUI() {
-        if ($("formationSelect")) {
-            $("formationSelect").value = state.tactics.formation;
-        }
-
-        if ($("tacticalStyleSelect")) {
-            $("tacticalStyleSelect").value = state.tactics.style;
-        }
-
-        if ($("pressureSelect")) {
-            $("pressureSelect").value = state.tactics.pressure;
-        }
-    }
-
-    function applyTactics() {
-        state.tactics.formation = $("formationSelect")?.value || "433";
-        state.tactics.style = $("tacticalStyleSelect")?.value || "balanced";
-        state.tactics.pressure = $("pressureSelect")?.value || "medium";
-
-        hide($("tacticsOverlay"));
-
-        saveRecord("tactics", state.tactics);
-
-        toast(
-            `Tactiques appliquées : ${state.tactics.formation}, ${state.tactics.style}.`,
-            "success"
+        safeText(
+            "engineStatus",
+            "MATCH EN PAUSE"
         );
     }
 
-    /* ========================================================
-       21. ÉQUIPEMENTS
-    ======================================================== */
+    function resumeMatch() {
+        state.paused = false;
 
-    const EQUIPMENT = {
-        kits: [
-            { id: "classic", name: "Maillot classique FOBAS", price: 0 },
-            { id: "royal", name: "Maillot royal", price: 150 },
-            { id: "ocean", name: "Maillot océan", price: 200 },
-            { id: "fire", name: "Maillot feu", price: 250 },
-            { id: "gold", name: "Maillot champion doré", price: 500 }
-        ],
-        balls: [
-            { id: "classic", name: "Ballon classique", price: 0 },
-            { id: "gold", name: "Ballon doré", price: 120 },
-            { id: "ocean", name: "Ballon océan", price: 140 },
-            { id: "fire", name: "Ballon feu", price: 160 }
-        ],
-        boots: [
-            { id: "classic", name: "Chaussures classiques", price: 0 },
-            { id: "speed", name: "Chaussures vitesse", price: 100 },
-            { id: "control", name: "Chaussures contrôle", price: 150 },
-            { id: "elite", name: "Chaussures élite", price: 300 }
-        ]
-    };
+        hide("pauseOverlay");
 
-    function renderEquipment(tab = state.selectedEquipmentTab) {
-        state.selectedEquipmentTab = tab;
-
-        const container = $("equipmentItemsList");
-        if (!container) return;
-
-        document.querySelectorAll("[data-equipment-tab]").forEach(button => {
-            const active = button.dataset.equipmentTab === tab;
-
-            button.classList.toggle("active", active);
-            button.setAttribute("aria-selected", String(active));
-        });
-
-        const fragment = document.createDocumentFragment();
-
-        (EQUIPMENT[tab] || []).forEach(item => {
-            const card = document.createElement("article");
-
-            card.className = "equipment-card";
-
-            const selected = state.selectedEquipment[tab] === item.id;
-
-            card.innerHTML = `
-                <strong>${escapeHTML(item.name)}</strong>
-                <p>${item.price === 0 ? "Gratuit" : `${item.price} crédits`}</p>
-                <button type="button" class="ui-button ${selected ? "button-primary" : "button-secondary"}"
-                    data-equipment-item="${escapeHTML(item.id)}">
-                    ${selected ? "Sélectionné" : "Choisir"}
-                </button>
-            `;
-
-            fragment.appendChild(card);
-        });
-
-        container.replaceChildren(fragment);
+        safeText(
+            "engineStatus",
+            "MATCH 3D EN COURS"
+        );
     }
 
-    function applyEquipment() {
-        saveRecord("equipment", state.selectedEquipment);
+    function saveCurrentMatch() {
+        saveAll(false).then(success => {
+            if (success) {
+                toast(
+                    "Progression sauvegardée.",
+                    "success"
+                );
+            } else {
+                toast(
+                    "La sauvegarde a échoué.",
+                    "error"
+                );
+            }
+        });
+    }
+
+    function quitMatch() {
+        state.paused = false;
+        state.matchStarted = false;
+
+        hide("pauseOverlay");
+        hide("tacticsOverlay");
+
         saveAll(false);
 
-        toast("Équipement sauvegardé.", "success");
+        goToMainMenu();
     }
 
+
     /* ========================================================
-       22. AUDIO — SANS FICHIER EXTERNE OBLIGATOIRE
+       26. SON ET COMMENTAIRES
     ======================================================== */
 
-    function playTone(frequency = 440, duration = 0.1) {
-        if (!state.soundEnabled || state.settings.volume <= 0) return;
+    function updateSoundButton() {
+        const button = $("soundToggleBtn");
+
+        if (!button) return;
+
+        button.textContent = state.soundEnabled
+            ? "🔊"
+            : "🔇";
+
+        button.setAttribute(
+            "aria-pressed",
+            String(state.soundEnabled)
+        );
+    }
+
+    function toggleSound() {
+        state.soundEnabled = !state.soundEnabled;
+
+        updateSoundButton();
+
+        saveAll(false);
+
+        toast(
+            state.soundEnabled
+                ? "Son activé."
+                : "Son désactivé."
+        );
+    }
+
+    function playBeep(frequency = 440, duration = 0.12) {
+        if (!state.soundEnabled) return;
 
         try {
             const AudioContextClass =
-                window.AudioContext || window.webkitAudioContext;
+                window.AudioContext ||
+                window.webkitAudioContext;
 
             if (!AudioContextClass) return;
 
@@ -2670,753 +4482,726 @@ const state = {
                 state.audioContext = new AudioContextClass();
             }
 
-            if (state.audioContext.state === "suspended") {
-                state.audioContext.resume();
+            const context = state.audioContext;
+
+            if (context.state === "suspended") {
+                context.resume().catch(() => {});
             }
 
-            const oscillator = state.audioContext.createOscillator();
-            const gain = state.audioContext.createGain();
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
 
-            oscillator.type = "sine";
             oscillator.frequency.value = frequency;
+            oscillator.type = "sine";
 
-            gain.gain.value =
-                (state.settings.volume / 100) * 0.07;
-
-            oscillator.connect(gain);
-            gain.connect(state.audioContext.destination);
-
-            oscillator.start();
+            gain.gain.setValueAtTime(
+                0.06,
+                context.currentTime
+            );
 
             gain.gain.exponentialRampToValueAtTime(
                 0.001,
-                state.audioContext.currentTime + duration
+                context.currentTime + duration
             );
 
-            oscillator.stop(state.audioContext.currentTime + duration);
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+
+            oscillator.start();
+            oscillator.stop(
+                context.currentTime + duration
+            );
         } catch (error) {
-            console.warn("Audio indisponible :", error);
+            console.warn(
+                "[FOBAS] Son indisponible :",
+                error
+            );
         }
     }
 
-    function toggleSound() {
-        state.soundEnabled = !state.soundEnabled;
-
-        const button = $("soundToggleBtn");
-
-        if (button) {
-            button.textContent = state.soundEnabled ? "🔊" : "🔇";
-            button.setAttribute("aria-pressed", String(state.soundEnabled));
-        }
-
-        toast(state.soundEnabled ? "Son activé." : "Son désactivé.");
-    }
 
     /* ========================================================
-       23. JOYSTICK ANDROID
+       27. DÉMARRAGE PRINCIPAL
     ======================================================== */
 
-    function attachJoystick() {
-        const joystick = $("movementJoystick");
-        const base = $("joystickBase");
-        const knob = $("joystickKnob");
+    async function boot() {
+        if (state.booting) return;
 
-        if (!joystick || !base || !knob) return;
+        state.booting = true;
+        state.loadingFailed = false;
 
-        let pointerId = null;
+        hide("retryLoadingBtn");
+        show("loadingScreen");
 
-        const reset = () => {
-            state.joystick.x = 0;
-            state.joystick.y = 0;
-            state.joystick.active = false;
-            pointerId = null;
+        const withTimeout = (promise, milliseconds, label) => {
+            let timeoutId;
 
-            knob.style.transform = "translate(-50%, -50%)";
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = window.setTimeout(() => {
+                    reject(
+                        new Error(
+                            label +
+                            " : délai dépassé après " +
+                            Math.round(milliseconds / 1000) +
+                            " secondes."
+                        )
+                    );
+                }, milliseconds);
+            });
+
+            return Promise.race([
+                Promise.resolve(promise),
+                timeoutPromise
+            ]).finally(() => {
+                window.clearTimeout(timeoutId);
+            });
         };
 
-        const update = event => {
-            if (pointerId !== null && event.pointerId !== pointerId) return;
+        try {
+            setLoading(
+                3,
+                "Démarrage de FOBAS FOOTBALL..."
+            );
 
-            const rect = base.getBoundingClientRect();
+            attachEvents();
 
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-
-            const maxRadius = Math.max(20, rect.width * 0.34);
-
-            const dx = event.clientX - centerX;
-            const dy = event.clientY - centerY;
-
-            const distance = Math.hypot(dx, dy);
-            const ratio = distance > maxRadius ? maxRadius / distance : 1;
-
-            const px = dx * ratio;
-            const py = dy * ratio;
-
-            state.joystick.x = clamp(px / maxRadius, -1, 1);
-            state.joystick.y = clamp(py / maxRadius, -1, 1);
-            state.joystick.active = true;
-
-            knob.style.transform =
-                `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
-        };
-
-        joystick.addEventListener("pointerdown", event => {
-            event.preventDefault();
-
-            pointerId = event.pointerId;
+            setLoading(
+                12,
+                "Ouverture de la sauvegarde locale..."
+            );
 
             try {
-                joystick.setPointerCapture(pointerId);
-            } catch {}
+                state.db = await withTimeout(
+                    openDatabase(),
+                    12000,
+                    "Ouverture IndexedDB"
+                );
+            } catch (databaseError) {
+                state.db = null;
 
-            update(event);
-        });
-
-        joystick.addEventListener("pointermove", event => {
-            if (pointerId === null) return;
-
-            event.preventDefault();
-            update(event);
-        });
-
-        joystick.addEventListener("pointerup", reset);
-        joystick.addEventListener("pointercancel", reset);
-        joystick.addEventListener("lostpointercapture", reset);
-    }
-
-    /* ========================================================
-       24. ZOOM PINCH DEUX DOIGTS
-    ======================================================== */
-
-    function attachPinchZoom() {
-        const viewport = $("pitchViewport");
-        if (!viewport) return;
-
-        viewport.style.touchAction = "none";
-
-        let initialDistance = null;
-        let initialZoom = null;
-        let lastZoomUpdate = 0;
-
-        const distanceBetween = touches => {
-            const dx = touches[0].clientX - touches[1].clientX;
-            const dy = touches[0].clientY - touches[1].clientY;
-
-            return Math.hypot(dx, dy);
-        };
-
-        viewport.addEventListener("touchstart", event => {
-            if (event.touches.length === 2) {
-                event.preventDefault();
-
-                initialDistance = distanceBetween(event.touches);
-                initialZoom = state.cameraDistance;
-                lastZoomUpdate = 0;
+                console.warn(
+                    "[FOBAS] IndexedDB indisponible. " +
+                    "Le stockage local sera utilisé.",
+                    databaseError
+                );
             }
-        }, { passive: false });
 
-        viewport.addEventListener("touchmove", event => {
-            if (event.touches.length !== 2 || initialDistance === null) return;
-
-            event.preventDefault();
-
-            const currentDistance = distanceBetween(event.touches);
-            const ratio = initialDistance / Math.max(1, currentDistance);
-
-            state.cameraDistance = clamp(
-                initialZoom * ratio,
-                CAMERA.minDistance,
-                CAMERA.maxDistance
+            setLoading(
+                22,
+                "Chargement du profil et des paramètres..."
             );
 
-            const now = performance.now();
+            await withTimeout(
+                loadAll(),
+                12000,
+                "Chargement des données"
+            );
 
-            if (now - lastZoomUpdate > 25) {
-                updateCamera(true);
-                lastZoomUpdate = now;
+            setLoading(
+                32,
+                "Création des équipes..."
+            );
+
+            buildTeams();
+
+            setLoading(
+                43,
+                "Chargement du moteur PlayCanvas..."
+            );
+
+            await withTimeout(
+                createEngine(),
+                90000,
+                "Initialisation du moteur 3D"
+            );
+
+            setLoading(
+                88,
+                "Synchronisation de l'interface..."
+            );
+
+            renderEquipment();
+            renderChampionships();
+            renderTournaments();
+            renderTeams();
+
+            syncProfileUI();
+            syncSettingsUI();
+            syncTacticsUI();
+
+            updateScoreboard();
+
+            setLoading(
+                100,
+                "Prêt à jouer !"
+            );
+
+            safeText(
+                "engineStatus",
+                "MOTEUR 3D PRÊT"
+            );
+
+            state.booting = false;
+
+            window.setTimeout(() => {
+                hide("loadingScreen");
+            }, 450);
+
+            toast(
+                APP_NAME + " est prêt.",
+                "success"
+            );
+
+            if (state.autoSaveTimer) {
+                window.clearInterval(state.autoSaveTimer);
             }
-        }, { passive: false });
 
-        const resetPinch = () => {
-            initialDistance = null;
-            initialZoom = null;
-        };
+            state.autoSaveTimer = window.setInterval(async () => {
+                try {
+                    await saveAll(false);
 
-        viewport.addEventListener("touchend", event => {
-            if (event.touches.length < 2) resetPinch();
-        }, { passive: true });
+                    state.lastAutoSave = Date.now();
+                } catch (error) {
+                    console.error(
+                        "[FOBAS] Erreur de sauvegarde automatique :",
+                        error
+                    );
+                }
+            }, AUTOSAVE_INTERVAL);
 
-        viewport.addEventListener("touchcancel", resetPinch, { passive: true });
+            console.info(
+                "[FOBAS] Démarrage terminé.",
+                APP_VERSION
+            );
+        } catch (error) {
+            state.booting = false;
 
-        // Souris / stylet : zoom avec la molette si disponible.
-        viewport.addEventListener("wheel", event => {
-            event.preventDefault();
-
-            setCameraZoom(event.deltaY > 0 ? 1.5 : -1.5);
-        }, { passive: false });
+            showLoadingError(error);
+        }
     }
 
+
     /* ========================================================
-       25. ÉVÉNEMENTS DE L'INTERFACE
+       28. RELANCEMENT APRÈS UNE ERREUR
+    ======================================================== */
+
+    async function retryBoot() {
+        if (state.booting) return;
+
+        state.retryCount += 1;
+
+        hide("retryLoadingBtn");
+
+        if (state.autoSaveTimer) {
+            window.clearInterval(state.autoSaveTimer);
+            state.autoSaveTimer = null;
+        }
+
+        disposeEngineScene();
+
+        state.loadingFailed = false;
+
+        setLoading(
+            3,
+            "Nouvelle tentative de démarrage..."
+        );
+
+        await boot();
+    }
+
+
+    /* ========================================================
+       29. ÉVÉNEMENTS ET BOUTONS
     ======================================================== */
 
     function attachEvents() {
-        if (state.listenersAttached) return;
+        if (state.listenersAttached) {
+            return;
+        }
 
         state.listenersAttached = true;
 
-        const on = (id, event, handler) => {
-            const element = $(id);
+        /* Navigation principale. */
 
-            if (element) {
-                element.addEventListener(event, handler);
-            }
-        };
-
-        on("playMatchBtn", "click", () => showScreen("matchSetupScreen"));
-
-        on("continueCareerBtn", "click", () => {
-            showScreen("championshipScreen");
-
-            toast(
-                `Carrière : mission ${state.career.currentMission}.`
-            );
+        $("playMatchBtn")?.addEventListener("click", () => {
+            showScreen("matchSetupScreen");
         });
 
-        on("championshipsBtn", "click", () => showScreen("championshipScreen"));
-        on("tournamentsBtn", "click", () => showScreen("tournamentScreen"));
-        on("teamsBtn", "click", () => showScreen("teamsScreen"));
+        $("continueCareerBtn")?.addEventListener("click", () => {
+            showScreen("championshipScreen");
+        });
 
-        on("equipmentBtn", "click", () => {
-            renderEquipment();
+        $("championshipsBtn")?.addEventListener("click", () => {
+            showScreen("championshipScreen");
+        });
+
+        $("tournamentsBtn")?.addEventListener("click", () => {
+            showScreen("tournamentScreen");
+        });
+
+        $("teamsBtn")?.addEventListener("click", () => {
+            showScreen("teamsScreen");
+        });
+
+        $("equipmentBtn")?.addEventListener("click", () => {
             showScreen("equipmentScreen");
         });
 
-        on("profileBtn", "click", () => showScreen("profileScreen"));
-        on("howToPlayBtn", "click", () => showScreen("howToPlayScreen"));
-        on("openSettingsBtn", "click", () => showScreen("settingsScreen"));
-
-        on("confirmMatchBtn", "click", startMatch);
-
-        on("cameraZoomInBtn", "click", () => setCameraZoom(-2.5));
-        on("cameraZoomOutBtn", "click", () => setCameraZoom(2.5));
-        on("cameraResetBtn", "click", resetCamera);
-        on("changeCameraBtn", "click", changeCameraMode);
-
-        on("passBtn", "click", passBall);
-        on("shootBtn", "click", shootBall);
-        on("defendBtn", "click", defendAction);
-        on("switchPlayerBtn", "click", switchPlayer);
-
-        on("sprintBtn", "pointerdown", event => {
-            event.preventDefault();
-            sprintStart();
+        $("profileBtn")?.addEventListener("click", () => {
+            showScreen("profileScreen");
         });
 
-        on("sprintBtn", "pointerup", sprintStop);
-        on("sprintBtn", "pointercancel", sprintStop);
-        on("sprintBtn", "pointerleave", sprintStop);
-
-        on("saveMatchBtn", "click", () => saveAll(true));
-
-        on("exitMatchBtn", "click", () => {
-            state.matchStarted = false;
-            showScreen("mainMenu");
-            saveAll(false);
+        $("howToPlayBtn")?.addEventListener("click", () => {
+            showScreen("howToPlayScreen");
         });
 
-        on("pauseGameBtn", "click", () => {
-            if (!state.matchStarted) return;
-
-            state.paused = true;
-            show($("pauseOverlay"));
+        $("openSettingsBtn")?.addEventListener("click", () => {
+            showScreen("settingsScreen");
         });
 
-        on("resumeGameBtn", "click", () => {
-            state.paused = false;
-            hide($("pauseOverlay"));
+        /* Boutons de navigation de retour. */
+
+        document.querySelectorAll("[data-back]").forEach(button => {
+            button.addEventListener("click", () => {
+                const target = button.dataset.back;
+
+                showScreen(
+                    SCREEN_IDS.includes(target)
+                        ? target
+                        : "mainMenu"
+                );
+            });
         });
 
-        on("savePausedMatchBtn", "click", () => saveAll(true));
+        /* Match. */
 
-        on("quitPausedMatchBtn", "click", () => {
-            state.paused = false;
-            state.matchStarted = false;
-
-            hide($("pauseOverlay"));
-            showScreen("mainMenu");
-            saveAll(false);
+        $("confirmMatchBtn")?.addEventListener("click", () => {
+            prepareMatch();
         });
 
-        on("soundToggleBtn", "click", toggleSound);
+        $("pauseGameBtn")?.addEventListener("click", pauseMatch);
 
-        on("closeDialogBtn", "click", closeDialog);
+        $("resumeGameBtn")?.addEventListener("click", resumeMatch);
 
-        on("showTacticsBtn", "click", () => {
-            syncTacticsUI();
-            show($("tacticsOverlay"));
+        $("saveMatchBtn")?.addEventListener(
+            "click",
+            saveCurrentMatch
+        );
+
+        $("savePausedMatchBtn")?.addEventListener(
+            "click",
+            saveCurrentMatch
+        );
+
+        $("exitMatchBtn")?.addEventListener("click", quitMatch);
+
+        $("quitPausedMatchBtn")?.addEventListener(
+            "click",
+            quitMatch
+        );
+
+        $("passBtn")?.addEventListener("click", passBall);
+        $("shootBtn")?.addEventListener("click", shootBall);
+        $("switchPlayerBtn")?.addEventListener("click", switchPlayer);
+
+        /* Sprint : maintien du bouton. */
+
+        const sprintButton = $("sprintBtn");
+
+        if (sprintButton) {
+            sprintButton.addEventListener("pointerdown", event => {
+                event.preventDefault();
+                toggleSprint(true);
+            });
+
+            sprintButton.addEventListener("pointerup", () => {
+                toggleSprint(false);
+            });
+
+            sprintButton.addEventListener("pointercancel", () => {
+                toggleSprint(false);
+            });
+
+            sprintButton.addEventListener("lostpointercapture", () => {
+                toggleSprint(false);
+            });
+
+            sprintButton.addEventListener("pointerleave", event => {
+                if (event.buttons === 0) {
+                    toggleSprint(false);
+                }
+            });
+        }
+
+        const defendButton = $("defendBtn");
+
+        if (defendButton) {
+            defendButton.addEventListener("pointerdown", event => {
+                event.preventDefault();
+                toggleDefend(true);
+            });
+
+            defendButton.addEventListener("pointerup", () => {
+                toggleDefend(false);
+            });
+
+            defendButton.addEventListener("pointercancel", () => {
+                toggleDefend(false);
+            });
+
+            defendButton.addEventListener("lostpointercapture", () => {
+                toggleDefend(false);
+            });
+        }
+
+        /* Caméra. */
+
+        $("cameraZoomInBtn")?.addEventListener(
+            "click",
+            cameraZoomIn
+        );
+
+        $("cameraZoomOutBtn")?.addEventListener(
+            "click",
+            cameraZoomOut
+        );
+
+        $("cameraResetBtn")?.addEventListener(
+            "click",
+            resetCamera
+        );
+
+        $("changeCameraBtn")?.addEventListener(
+            "click",
+            changeCameraMode
+        );
+
+        $("showTacticsBtn")?.addEventListener(
+            "click",
+            openTactics
+        );
+
+        $("applyTacticsBtn")?.addEventListener(
+            "click",
+            applyTactics
+        );
+
+        $("closeTacticsBtn")?.addEventListener(
+            "click",
+            closeTactics
+        );
+
+        /* Profil. */
+
+        $("saveProfileBtn")?.addEventListener(
+            "click",
+            saveProfile
+        );
+
+        /* Paramètres. */
+
+        $("saveSettingsBtn")?.addEventListener(
+            "click",
+            saveSettings
+        );
+
+        $("soundToggleBtn")?.addEventListener(
+            "click",
+            toggleSound
+        );
+
+        /* Équipement. */
+
+        document.querySelectorAll("[data-equipment-tab]").forEach(button => {
+            button.addEventListener("click", () => {
+                state.selectedEquipmentTab =
+                    button.dataset.equipmentTab;
+
+                renderEquipment();
+            });
         });
 
-        on("closeTacticsBtn", "click", () => hide($("tacticsOverlay")));
-        on("applyTacticsBtn", "click", applyTactics);
+        $("applyEquipmentBtn")?.addEventListener(
+            "click",
+            applyEquipment
+        );
 
-        on("saveProfileBtn", "click", saveProfile);
-        on("saveSettingsBtn", "click", saveSettings);
+        /* Tournois. */
 
-        on("kitsTabBtn", "click", () => renderEquipment("kits"));
-        on("ballsTabBtn", "click", () => renderEquipment("balls"));
-        on("bootsTabBtn", "click", () => renderEquipment("boots"));
-        on("applyEquipmentBtn", "click", applyEquipment);
+        $("createTournamentBtn")?.addEventListener(
+            "click",
+            createTournament
+        );
 
-        on("teamSearchInput", "input", event => {
-            state.teamsFilter.query = event.target.value.trim();
+        /* Équipes. */
+
+        $("teamSearchInput")?.addEventListener("input", event => {
+            state.teamsFilter.query = event.target.value;
             renderTeams();
         });
 
-        on("teamRegionSelect", "change", event => {
+        $("teamRegionSelect")?.addEventListener("change", event => {
             state.teamsFilter.region = event.target.value;
             renderTeams();
         });
 
-        on("refreshTeamsBtn", "click", () => {
-            buildTeams();
-            toast("Liste des équipes actualisée.", "success");
-        });
+        $("refreshTeamsBtn")?.addEventListener(
+            "click",
+            refreshTeams
+        );
 
-        on("startChampionshipBtn", "click", () => {
-            if ($("competitionSelect")) {
-                $("competitionSelect").value = state.selectedChampionship;
+        /* Dialogue générique. */
+
+        $("closeDialogBtn")?.addEventListener(
+            "click",
+            closeDialog
+        );
+
+        $("dialogOverlay")?.addEventListener("click", event => {
+            if (event.target === $("dialogOverlay")) {
+                closeDialog();
             }
-
-            showScreen("matchSetupScreen");
         });
 
-        on("createTournamentBtn", "click", () => {
-            const name = `Tournoi FOBAS ${state.tournaments.length + 1}`;
+        /* Bouton de nouvelle tentative. */
 
-            state.tournaments.push({
-                id: `tournament-${Date.now()}`,
-                name,
-                description: "Tournoi créé localement."
-            });
+        $("retryLoadingBtn")?.addEventListener(
+            "click",
+            retryBoot
+        );
 
-            renderTournaments();
-            saveRecord("tournaments", state.tournaments);
-
-            toast("Nouveau tournoi créé.", "success");
-        });
+        /* Délégation des événements des listes dynamiques. */
 
         document.addEventListener("click", event => {
-            const backButton = event.target.closest("[data-back]");
+            const homeButton = event.target.closest(
+                "[data-team-home]"
+            );
 
-            if (backButton) {
-                showScreen(backButton.dataset.back || "mainMenu");
+            if (homeButton) {
+                selectTeam(
+                    homeButton.dataset.teamHome,
+                    "home"
+                );
+
                 return;
             }
 
-            const competitionButton =
-                event.target.closest("[data-select-competition]");
+            const awayButton = event.target.closest(
+                "[data-team-away]"
+            );
+
+            if (awayButton) {
+                selectTeam(
+                    awayButton.dataset.teamAway,
+                    "away"
+                );
+
+                return;
+            }
+
+            const competitionButton = event.target.closest(
+                "[data-competition]"
+            );
 
             if (competitionButton) {
-                state.selectedChampionship =
-                    competitionButton.dataset.selectCompetition;
-
-                if ($("competitionSelect")) {
-                    $("competitionSelect").value = state.selectedChampionship;
-                }
-
-                document.querySelectorAll("[data-select-competition]")
-                    .forEach(button => button.classList.remove("active"));
-
-                competitionButton.classList.add("active");
-
-                toast(`Compétition choisie : ${
-                    getCompetitionName(state.selectedChampionship)
-                }`);
-
-                return;
-            }
-
-            const teamButton = event.target.closest("[data-select-team]");
-
-            if (teamButton) {
-                const teamId = teamButton.dataset.selectTeam;
-
-                showDialog(
-                    "CHOISIR UNE ÉQUIPE",
-                    `<p>Utiliser <strong>${escapeHTML(teamName(teamId))}</strong> comme équipe à domicile ou visiteuse ?</p>`,
-                    [
-                        {
-                            label: "À DOMICILE",
-                            primary: true,
-                            action: () => {
-                                if ($("homeTeamSelect")) {
-                                    $("homeTeamSelect").value = teamId;
-                                }
-
-                                showScreen("matchSetupScreen");
-                            }
-                        },
-                        {
-                            label: "VISITEUSE",
-                            action: () => {
-                                if ($("awayTeamSelect")) {
-                                    $("awayTeamSelect").value = teamId;
-                                }
-
-                                showScreen("matchSetupScreen");
-                            }
-                        }
-                    ]
+                selectCompetition(
+                    competitionButton.dataset.competition
                 );
 
                 return;
             }
 
-            const equipmentButton =
-                event.target.closest("[data-equipment-item]");
+            const equipmentButton = event.target.closest(
+                "[data-equipment-id]"
+            );
 
             if (equipmentButton) {
-                state.selectedEquipment[state.selectedEquipmentTab] =
-                    equipmentButton.dataset.equipmentItem;
+                selectEquipment(
+                    equipmentButton.dataset.equipmentId
+                );
 
-                renderEquipment();
                 return;
             }
 
-            const tournamentButton =
-                event.target.closest("[data-tournament-id]");
+            const tournamentButton = event.target.closest(
+                "[data-tournament-index]"
+            );
 
             if (tournamentButton) {
-                const id = tournamentButton.dataset.tournamentId;
+                const index = Number(
+                    tournamentButton.dataset.tournamentIndex
+                );
 
-                state.activeTournament = id;
+                const tournament = state.tournaments[index];
 
-                toast("Tournoi sélectionné.", "success");
+                if (tournament) {
+                    state.activeTournament = tournament;
 
-                if ($("competitionSelect")) {
-                    $("competitionSelect").value = "champions";
+                    toast(
+                        "Tournoi sélectionné : " +
+                        tournament.name,
+                        "success"
+                    );
+
+                    saveAll(false);
                 }
 
-                showScreen("matchSetupScreen");
+                return;
+            }
+
+            const actionButton = event.target.closest(
+                "[data-action]"
+            );
+
+            if (actionButton) {
+                const action = actionButton.dataset.action;
+
+                switch (action) {
+                    case "pass":
+                        passBall();
+                        break;
+
+                    case "shoot":
+                        shootBall();
+                        break;
+
+                    case "sprint":
+                        toggleSprint(!state.sprinting);
+                        break;
+
+                    case "defend":
+                        toggleDefend(!state.defending);
+                        break;
+
+                    case "switch-player":
+                        switchPlayer();
+                        break;
+
+                    case "play-match":
+                        showScreen("matchSetupScreen");
+                        break;
+
+                    case "continue-career":
+                        showScreen("championshipScreen");
+                        break;
+
+                    case "championships":
+                        showScreen("championshipScreen");
+                        break;
+
+                    case "tournaments":
+                        showScreen("tournamentScreen");
+                        break;
+
+                    case "teams":
+                        showScreen("teamsScreen");
+                        break;
+
+                    case "equipment":
+                        showScreen("equipmentScreen");
+                        break;
+
+                    case "profile":
+                        showScreen("profileScreen");
+                        break;
+
+                    case "how-to-play":
+                        showScreen("howToPlayScreen");
+                        break;
+                }
             }
         });
 
-        // Éviter la pause permanente quand l'application passe en arrière-plan.
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden && state.matchStarted) {
-                state.paused = true;
-                show($("pauseOverlay"));
-            }
-        });
+        /* Redimensionnement. */
 
-        // Sauvegarde de sécurité avant fermeture.
+        state.resizeHandler = () => {
+            resizeCanvas();
+        };
+
+        window.addEventListener(
+            "resize",
+            state.resizeHandler,
+            { passive: true }
+        );
+
+        window.addEventListener(
+            "orientationchange",
+            state.resizeHandler,
+            { passive: true }
+        );
+
+        /* Sauvegarde avant fermeture de page. */
+
         window.addEventListener("pagehide", () => {
-            saveAll(false);
-        });
-
-        attachJoystick();
-        attachPinchZoom();
-    }
-
-    /* ========================================================
-       26. ÉTAT D'ERREUR DU CHARGEMENT
-    ======================================================== */
-
-    function showLoadingError(error) {
-        state.loadingFailed = true;
-
-        console.error("FOBAS FOOTBALL — Erreur de démarrage :", error);
-
-        setLoading(
-            100,
-            "Impossible de charger le moteur 3D. Vérifiez la connexion Internet puis réessayez."
-        );
-
-        if ($("retryLoadingBtn")) {
-            show($("retryLoadingBtn"));
-        }
-
-        if ($("engineStatus")) {
-            $("engineStatus").textContent =
-                "ERREUR MOTEUR 3D · Touchez RÉESSAYER";
-        }
-
-        toast(
-            "Le moteur 3D n'a pas pu démarrer. Vérifiez Internet.",
-            "error",
-            6000
-        );
-    }
-
-   /* ========================================================
-   27. DÉMARRAGE PRINCIPAL
-   FOBAS FOOTBALL ULTIMATE 3D
-   Chargement sécurisé + sauvegarde automatique
-======================================================== */
-
-async function boot() {
-    if (state.booting) return;
-
-    state.booting = true;
-    state.loadingFailed = false;
-
-    hide($("retryLoadingBtn"));
-    show($("loadingScreen"));
-
-    /*
-     * Limite de temps pour éviter un chargement bloqué.
-     * Attention : cette limite ne peut pas annuler une
-     * opération déjà lancée en arrière-plan.
-     */
-    const withTimeout = (promise, milliseconds, label) => {
-        let timeoutId;
-
-        const timeoutPromise = new Promise((_, reject) => {
-            timeoutId = window.setTimeout(() => {
-                reject(
-                    new Error(
-                        label + " : délai dépassé après " +
-                        Math.round(milliseconds / 1000) +
-                        " secondes."
-                    )
-                );
-            }, milliseconds);
-        });
-
-        return Promise.race([
-            Promise.resolve(promise),
-            timeoutPromise
-        ]).finally(() => {
-            window.clearTimeout(timeoutId);
-        });
-    };
-
-    try {
-        /* 1. Préparation de l'interface */
-        setLoading(5, "Préparation de l'interface...");
-
-        attachEvents();
-
-        /* 2. Ouverture de la base de données */
-        setLoading(15, "Ouverture de la sauvegarde locale...");
-
-        state.db = await withTimeout(
-            openDatabase(),
-            15000,
-            "Ouverture IndexedDB"
-        );
-
-        /* 3. Chargement des données */
-        setLoading(25, "Chargement du profil et des paramètres...");
-
-        await withTimeout(
-            loadAll(),
-            15000,
-            "Chargement des données"
-        );
-
-        /* 4. Construction des équipes */
-        setLoading(35, "Création des équipes...");
-
-        buildTeams();
-
-        /* 5. Initialisation du moteur 3D */
-        setLoading(45, "Chargement du moteur PlayCanvas...");
-
-        await withTimeout(
-            createEngine(),
-            60000,
-            "Initialisation de PlayCanvas"
-        );
-
-        /* 6. Préparation de l'interface du jeu */
-        setLoading(85, "Préparation du terrain et des joueurs...");
-
-        renderEquipment();
-        syncProfileUI();
-        syncSettingsUI();
-        syncTacticsUI();
-
-        /* 7. Fin du démarrage */
-        setLoading(100, "Prêt à jouer !");
-
-        safeText("engineStatus", "MOTEUR 3D PRÊT");
-
-        state.booting = false;
-
-        window.setTimeout(() => {
-            hide($("loadingScreen"));
-        }, 500);
-
-        toast(
-            "FOBAS FOOTBALL ULTIMATE 3D est prêt.",
-            "success"
-        );
-
-        /* 8. Sauvegarde automatique toutes les 10 minutes */
-        if (state.autoSaveTimer) {
-            window.clearInterval(state.autoSaveTimer);
-            state.autoSaveTimer = null;
-        }
-
-        state.autoSaveTimer = window.setInterval(async () => {
             try {
-                if (!state.db) return;
+                const data = getPersistentState();
 
-                await saveAll(false);
-
-                state.lastAutoSave = Date.now();
-
-                console.info(
-                    "[FOBAS FOOTBALL] Sauvegarde automatique effectuée."
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify(data)
                 );
-            } catch (saveError) {
-                console.error(
-                    "[FOBAS FOOTBALL] Erreur de sauvegarde automatique :",
-                    saveError
-                );
-            }
-        }, 600000);
-
-        console.info(
-            "[FOBAS FOOTBALL] Démarrage terminé avec succès."
-        );
-
-    } catch (error) {
-        state.booting = false;
-        state.loadingFailed = true;
-
-        console.error(
-            "[FOBAS FOOTBALL] Échec du démarrage :",
-            error
-        );
-
-        /*
-         * Afficher l'erreur dans l'écran de chargement
-         * pour faciliter le diagnostic.
-         */
-        try {
-            showLoadingError(error);
-        } catch (displayError) {
-            console.error(
-                "[FOBAS FOOTBALL] Impossible d'afficher l'erreur :",
-                displayError
-            );
-
-            setLoading(
-                100,
-                "Échec du démarrage : " +
-                (error?.message || "erreur inconnue")
-            );
-
-            show($("retryLoadingBtn"));
-        }
-    }
-}
-
-
-/* ========================================================
-   27.1. BOUTON DE NOUVELLE TENTATIVE
-======================================================== */
-
-if ($("retryLoadingBtn")) {
-    $("retryLoadingBtn").addEventListener("click", async () => {
-        if (state.booting) return;
-
-        /*
-         * Arrêter l'ancien minuteur de sauvegarde,
-         * s'il existe.
-         */
-        if (state.autoSaveTimer) {
-            window.clearInterval(state.autoSaveTimer);
-            state.autoSaveTimer = null;
-        }
-
-        /*
-         * Arrêter l'ancienne application PlayCanvas.
-         */
-        if (state.app) {
-            try {
-                state.app.destroy();
             } catch (error) {
                 console.warn(
-                    "[FOBAS FOOTBALL] Nettoyage de l'ancienne application :",
+                    "[FOBAS] Sauvegarde de fermeture impossible :",
                     error
                 );
             }
-        }
+        });
 
-        /*
-         * Réinitialiser les références du moteur.
-         */
-        state.app = null;
-        state.engine = null;
-        state.sceneRoot = null;
-        state.cameraEntity = null;
-        state.fieldRoot = null;
-        state.playerRoot = null;
-        state.ballEntity = null;
-        state.ballShadow = null;
+        setupJoystick();
+        setupPinchZoom();
+    }
 
-        state.homePlayers = [];
-        state.awayPlayers = [];
-        state.allPlayers = [];
-        state.controlledPlayer = null;
-
-        state.loadingFailed = false;
-
-        /*
-         * Relancer le démarrage.
-         */
-        await boot();
-    });
-}
 
     /* ========================================================
-       28. EXPOSITION FACULTATIVE POUR LE DÉBOGAGE
+       30. GESTION DES ERREURS GLOBALES
     ======================================================== */
 
-    window.FOBAS_FOOTBALL_GAME = {
-        getState: () => ({
-            matchStarted: state.matchStarted,
-            paused: state.paused,
-            scoreHome: state.scoreHome,
-            scoreAway: state.scoreAway,
-            playerCount: state.allPlayers.length,
-            homeTeam: teamName(state.selectedHome),
-            awayTeam: teamName(state.selectedAway),
-            cameraDistance: state.cameraDistance,
-            engineReady: Boolean(state.app)
-        }),
+    window.addEventListener("error", event => {
+        console.error(
+            "[FOBAS] Erreur JavaScript :",
+            event.message,
+            event.filename,
+            event.lineno
+        );
+    });
 
-        save: () => saveAll(true),
+    window.addEventListener("unhandledrejection", event => {
+        console.error(
+            "[FOBAS] Promesse rejetée sans gestion :",
+            event.reason
+        );
+    });
 
-        zoomIn: () => setCameraZoom(-2.5),
 
-        zoomOut: () => setCameraZoom(2.5),
+    /* ========================================================
+       31. INITIALISATION
+    ======================================================== */
 
-        resetCamera,
-
-        startMatch,
-
-        pause: () => {
-            state.paused = true;
-            show($("pauseOverlay"));
-        },
-
-        resume: () => {
-            state.paused = false;
-            hide($("pauseOverlay"));
+    function startApplication() {
+        if (state.booting || state.engineReady) {
+            return;
         }
-    };
 
-    // Lancer le jeu sans bloquer la page si une fonction échoue.
+        console.info(
+            "[FOBAS FOOTBALL] JavaScript chargé.",
+            APP_VERSION
+        );
+
+        boot().catch(error => {
+            state.booting = false;
+            showLoadingError(error);
+        });
+    }
+
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", boot, { once: true });
+        document.addEventListener(
+            "DOMContentLoaded",
+            startApplication,
+            { once: true }
+        );
     } else {
-        boot();
+        startApplication();
     }
 
 })();
