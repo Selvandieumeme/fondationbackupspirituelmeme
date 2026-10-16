@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ht">
 <head>
@@ -6,7 +5,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     >
 
     <meta name="theme-color" content="#10131b">
@@ -32,13 +31,24 @@
     <link rel="stylesheet" href="./filmfobas.css">
 
     <!--
-        ENTEGRASYON PLAYCANVAS
+        ========================================================
+        FOBAS CINÉMA 3D — ENTEGRASYON MOTÈ 3D
+        ========================================================
 
-        PlayCanvas 2.23.2 dwe chaje dinamikman
-        nan filmfobas.js atravè import().
+        Fichye JavaScript prensipal:
+        ./filmfobas.js
 
-        Pa ajoute script klasik PlayCanvas.
-        Pa ajoute lòt konfigirasyon window.
+        Metòd chajman:
+        ES MODULE + import() DINAMIK
+
+        Vèsyon PlayCanvas:
+        2.23.2
+
+        RÈG ENTEGRASYON:
+        - Pa ajoute yon dezyèm script PlayCanvas isit la.
+        - Pa ajoute yon lòt fichye JavaScript prensipal.
+        - filmfobas.js responsab inisyalizasyon motè 3D a.
+        - Tout ID HTML yo dwe rete konpatib ak JavaScript la.
     -->
 
     <script type="module" src="./filmfobas.js"></script>
@@ -54,12 +64,22 @@
         <header id="filmHeader" class="film-header">
 
             <div class="film-brand">
-                <div class="film-brand-icon" aria-hidden="true">F</div>
+
+                <div
+                    class="film-brand-icon"
+                    aria-hidden="true"
+                >
+                    F
+                </div>
 
                 <div class="film-brand-text">
+
                     <strong>FOBAS CINÉMA 3D</strong>
+
                     <span>STUDIO • FILM ROMANTIK</span>
+
                 </div>
+
             </div>
 
             <div class="film-header-actions">
@@ -80,6 +100,8 @@
                     type="button"
                     aria-label="Louvri paramèt fim nan"
                     title="Paramèt"
+                    aria-haspopup="dialog"
+                    aria-controls="settingsDialog"
                 >
                     ⚙
                 </button>
@@ -108,14 +130,21 @@
                 ></canvas>
 
 
-                <!-- EKRAN DEMARAJ -->
+                <!-- ==========================================
+                     EKRAN DEMARAJ
+                =========================================== -->
 
                 <div
                     id="loadingScreen"
                     class="loading-screen"
+                    role="status"
+                    aria-live="polite"
                 >
 
-                    <div class="loading-logo" aria-hidden="true">
+                    <div
+                        class="loading-logo"
+                        aria-hidden="true"
+                    >
                         FOBAS
                     </div>
 
@@ -125,11 +154,20 @@
                         Preparasyon estidyo sinematik la...
                     </p>
 
-                    <div class="loading-progress-track">
+                    <div
+                        class="loading-progress-track"
+                        role="progressbar"
+                        aria-label="Pwogrè preparasyon fim nan"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                    >
+
                         <div
                             id="loadingProgress"
                             class="loading-progress"
                         ></div>
+
                     </div>
 
                     <span id="loadingPercent">0%</span>
@@ -146,13 +184,16 @@
                 </div>
 
 
-                <!-- EKRAN ERÈ -->
+                <!-- ==========================================
+                     EKRAN ERÈ
+                =========================================== -->
 
                 <div
                     id="errorScreen"
                     class="error-screen"
                     hidden
                     role="alert"
+                    aria-live="assertive"
                 >
 
                     <h2>Nou pa kapab lanse fim nan</h2>
@@ -172,11 +213,14 @@
                 </div>
 
 
-                <!-- TIT SÈN NAN -->
+                <!-- ==========================================
+                     TIT SÈN NAN
+                =========================================== -->
 
                 <div
                     id="sceneTitle"
                     class="scene-title"
+                    aria-live="polite"
                 >
 
                     <span id="sceneNumber">SÈN 01</span>
@@ -192,7 +236,9 @@
                 </div>
 
 
-                <!-- DYALÒG AN KREYÒL -->
+                <!-- ==========================================
+                     DYALÒG AN KREYÒL
+                =========================================== -->
 
                 <div
                     id="dialogueBox"
@@ -240,7 +286,9 @@
                 </div>
 
 
-                <!-- ENFÒMASYON SINEMATIK -->
+                <!-- ==========================================
+                     ENFÒMASYON SINEMATIK
+                =========================================== -->
 
                 <div
                     id="cinemaOverlay"
@@ -292,7 +340,9 @@
                 </div>
 
 
-                <!-- EKRAN POZ -->
+                <!-- ==========================================
+                     EKRAN POZ
+                =========================================== -->
 
                 <div
                     id="pauseOverlay"
@@ -328,12 +378,15 @@
                 </div>
 
 
-                <!-- AVÈTISMAN PÈFÒMANS -->
+                <!-- ==========================================
+                     AVÈTISMAN PÈFÒMANS
+                =========================================== -->
 
                 <div
                     id="performanceNotice"
                     class="performance-notice"
                     role="status"
+                    aria-live="polite"
                     hidden
                 ></div>
 
@@ -344,13 +397,20 @@
                  3. ENFÒMASYON FIM NAN
             =================================================== -->
 
-            <section class="film-information">
+            <section
+                id="filmInformation"
+                class="film-information"
+                aria-labelledby="filmTitle"
+            >
 
                 <div class="film-information-main">
 
                     <div class="film-rating">
+
                         <span>FOBAS ORIGINAL</span>
+
                         <span>ROMANS 3D</span>
+
                     </div>
 
                     <h1 id="filmTitle">
@@ -392,8 +452,13 @@
                         </div>
 
                         <div>
+
                             <strong>Mikaël</strong>
-                            <span>Yon kè ki pare pou renmen</span>
+
+                            <span>
+                                Yon kè ki pare pou renmen
+                            </span>
+
                         </div>
 
                     </article>
@@ -409,8 +474,13 @@
                         </div>
 
                         <div>
+
                             <strong>Nadia</strong>
-                            <span>Yon souri ki chanje yon lavi</span>
+
+                            <span>
+                                Yon souri ki chanje yon lavi
+                            </span>
+
                         </div>
 
                     </article>
@@ -563,7 +633,10 @@
                         VITÈS
                     </label>
 
-                    <select id="playbackSpeed">
+                    <select
+                        id="playbackSpeed"
+                        aria-label="Vitès lekti fim nan"
+                    >
 
                         <option value="0.5">0.5×</option>
 
@@ -611,6 +684,7 @@
             <section
                 id="sceneListPanel"
                 class="scene-list-panel"
+                aria-labelledby="sceneListHeading"
             >
 
                 <div class="section-heading">
@@ -621,7 +695,9 @@
                             ISTWA A
                         </span>
 
-                        <h2>Tout sèn fim nan</h2>
+                        <h2 id="sceneListHeading">
+                            Tout sèn fim nan
+                        </h2>
 
                     </div>
 
@@ -638,6 +714,7 @@
                 <div
                     id="sceneList"
                     class="scene-list"
+                    aria-label="Lis sèn ki disponib yo"
                 >
                     <!-- filmfobas.js ap jenere 12 kat sèn yo. -->
                 </div>
@@ -652,7 +729,7 @@
             <section
                 id="exportPanel"
                 class="export-panel"
-                aria-label="Ekspòtasyon videyo"
+                aria-labelledby="exportHeading"
             >
 
                 <div class="export-header">
@@ -660,10 +737,12 @@
                     <div>
 
                         <span class="section-eyebrow">
-                            PRODUKSYON VIDEO
+                            PRODUKSYON VIDEYO
                         </span>
 
-                        <h2>Ekspòte fim nan</h2>
+                        <h2 id="exportHeading">
+                            Ekspòte fim nan
+                        </h2>
 
                         <p>
                             Prepare yon fichye videyo pou telechaje
@@ -761,8 +840,13 @@
                         <span aria-hidden="true">🎬</span>
 
                         <span>
+
                             <strong>EKSPÒTE FIM NAN</strong>
-                            <small>Prepare fichye videyo a</small>
+
+                            <small>
+                                Prepare fichye videyo a
+                            </small>
+
                         </span>
 
                     </button>
@@ -784,6 +868,8 @@
                     id="exportProgressPanel"
                     class="export-progress-panel"
                     hidden
+                    role="status"
+                    aria-live="polite"
                 >
 
                     <div class="export-progress-heading">
@@ -796,7 +882,14 @@
 
                     </div>
 
-                    <div class="export-progress-track">
+                    <div
+                        class="export-progress-track"
+                        role="progressbar"
+                        aria-label="Pwogrè ekspòtasyon videyo a"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="0"
+                    >
 
                         <div
                             id="exportProgressBar"
@@ -816,6 +909,8 @@
                     id="exportResult"
                     class="export-result"
                     hidden
+                    role="status"
+                    aria-live="polite"
                 >
 
                     <div
@@ -1001,3 +1096,18 @@
     </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
