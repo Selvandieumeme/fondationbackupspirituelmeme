@@ -109,110 +109,117 @@
     };
 
     /* ========================================================
-       2. ÉTAT CENTRAL
-    ======================================================== */
+   2. ÉTAT CENTRAL
+======================================================== */
 
-    const state = {
-        engine: null,
-        app: null,
-        cameraEntity: null,
-        sceneRoot: null,
-        fieldRoot: null,
-        playerRoot: null,
-        ballEntity: null,
-        ballShadow: null,
+const state = {
+    engine: null,
+    app: null,
+    cameraEntity: null,
+    sceneRoot: null,
+    fieldRoot: null,
+    playerRoot: null,
+    ballEntity: null,
+    ballShadow: null,
 
-        teams: [],
-        homePlayers: [],
-        awayPlayers: [],
-        allPlayers: [],
-        controlledPlayer: null,
+    teams: [],
+    homePlayers: [],
+    awayPlayers: [],
+    allPlayers: [],
+    controlledPlayer: null,
 
-        selectedHome: "mare-rouge",
-        selectedAway: "mole-saint-nicolas",
+    selectedHome: "mare-rouge",
+    selectedAway: "mole-saint-nicolas",
 
-        scoreHome: 0,
-        scoreAway: 0,
-        elapsed: 0,
-        matchLength: 90,
-        matchStarted: false,
-        paused: false,
-        matchFinished: false,
+    scoreHome: 0,
+    scoreAway: 0,
+    elapsed: 0,
+    matchLength: 90,
+    matchStarted: false,
+    paused: false,
+    matchFinished: false,
 
-        ballVelocity: { x: 0, y: 0, z: 0 },
-        joystick: { x: 0, y: 0, active: false },
-        sprinting: false,
-        defending: false,
+    ballVelocity: { x: 0, y: 0, z: 0 },
+    joystick: { x: 0, y: 0, active: false },
+    sprinting: false,
+    defending: false,
 
-        cameraDistance: CAMERA.distance,
-        cameraAngle: CAMERA.angle,
-        cameraMode: 0,
+    cameraDistance: CAMERA.distance,
+    cameraAngle: CAMERA.angle,
+    cameraMode: 0,
 
-        db: null,
-        soundEnabled: true,
-        audioContext: null,
+    db: null,
+    soundEnabled: true,
+    audioContext: null,
 
-        currentScreen: "mainMenu",
-        selectedEquipmentTab: "kits",
-        selectedEquipment: {
-            kits: "classic",
-            balls: "classic",
-            boots: "classic"
-        },
+    currentScreen: "mainMenu",
+    selectedEquipmentTab: "kits",
 
-        profile: {
-            name: "Joueur FOBAS",
-            favoriteTeam: "mare-rouge",
-            matchesPlayed: 0,
-            goalsScored: 0,
-            trophies: 0
-        },
+    selectedEquipment: {
+        kits: "classic",
+        balls: "classic",
+        boots: "classic"
+    },
 
-        settings: {
-            graphics: "medium",
-            volume: 70,
-            cameraSensitivity: 50,
-            difficulty: "normal",
-            vibration: true,
-            commentary: true
-        },
+    profile: {
+        name: "Joueur FOBAS",
+        favoriteTeam: "mare-rouge",
+        matchesPlayed: 0,
+        goalsScored: 0,
+        trophies: 0
+    },
 
-        tactics: {
-            formation: "433",
-            style: "balanced",
-            pressure: "medium"
-        },
+    settings: {
+        graphics: "medium",
+        volume: 70,
+        cameraSensitivity: 50,
+        difficulty: "normal",
+        vibration: true,
+        commentary: true
+    },
 
-        career: {
-            currentMission: 1,
-            completedMissions: [],
-            wins: 0,
-            losses: 0,
-            draws: 0
-        },
+    tactics: {
+        formation: "433",
+        style: "balanced",
+        pressure: "medium"
+    },
 
-        selectedCompetition: "local",
-        selectedChampionship: "local",
-        tournaments: [],
-        activeTournament: null,
+    career: {
+        currentMission: 1,
+        completedMissions: [],
+        wins: 0,
+        losses: 0,
+        draws: 0
+    },
 
-        teamsFilter: {
-            query: "",
-            region: "all"
-        },
+    selectedCompetition: "local",
+    selectedChampionship: "local",
+    tournaments: [],
+    activeTournament: null,
 
-        animationFrame: 0,
-        lastSave: 0,
-        lastAutoSave: 0,
-        lastAITick: 0,
-        lastClockUpdate: 0,
-        lastRefereeTick: 0,
+    teamsFilter: {
+        query: "",
+        region: "all"
+    },
 
-        touchDistance: null,
-        loadingFailed: false,
-        booting: false,
-        listenersAttached: false
-    };
+    animationFrame: 0,
+    lastSave: 0,
+    lastAutoSave: 0,
+
+    // Gestion du minuteur de sauvegarde automatique
+    autoSaveTimer: null,
+
+    lastAITick: 0,
+    lastClockUpdate: 0,
+    lastRefereeTick: 0,
+
+    touchDistance: null,
+
+    loadingFailed: false,
+    booting: false,
+    listenersAttached: false
+};
+
 
     /* ========================================================
        3. NOTIFICATIONS NON BLOQUANTES
@@ -3143,92 +3150,229 @@
         );
     }
 
-    /* ========================================================
-       27. DÉMARRAGE PRINCIPAL
-    ======================================================== */
+   /* ========================================================
+   27. DÉMARRAGE PRINCIPAL
+   FOBAS FOOTBALL ULTIMATE 3D
+   Chargement sécurisé + sauvegarde automatique
+======================================================== */
 
-    async function boot() {
-        if (state.booting) return;
+async function boot() {
+    if (state.booting) return;
 
-        state.booting = true;
-        state.loadingFailed = false;
+    state.booting = true;
+    state.loadingFailed = false;
 
-        hide($("retryLoadingBtn"));
+    hide($("retryLoadingBtn"));
+    show($("loadingScreen"));
 
-        show($("loadingScreen"));
+    /*
+     * Limite de temps pour éviter un chargement bloqué.
+     * Attention : cette limite ne peut pas annuler une
+     * opération déjà lancée en arrière-plan.
+     */
+    const withTimeout = (promise, milliseconds, label) => {
+        let timeoutId;
 
+        const timeoutPromise = new Promise((_, reject) => {
+            timeoutId = window.setTimeout(() => {
+                reject(
+                    new Error(
+                        label + " : délai dépassé après " +
+                        Math.round(milliseconds / 1000) +
+                        " secondes."
+                    )
+                );
+            }, milliseconds);
+        });
+
+        return Promise.race([
+            Promise.resolve(promise),
+            timeoutPromise
+        ]).finally(() => {
+            window.clearTimeout(timeoutId);
+        });
+    };
+
+    try {
+        /* 1. Préparation de l'interface */
         setLoading(5, "Préparation de l'interface...");
 
+        attachEvents();
+
+        /* 2. Ouverture de la base de données */
+        setLoading(15, "Ouverture de la sauvegarde locale...");
+
+        state.db = await withTimeout(
+            openDatabase(),
+            15000,
+            "Ouverture IndexedDB"
+        );
+
+        /* 3. Chargement des données */
+        setLoading(25, "Chargement du profil et des paramètres...");
+
+        await withTimeout(
+            loadAll(),
+            15000,
+            "Chargement des données"
+        );
+
+        /* 4. Construction des équipes */
+        setLoading(35, "Création des équipes...");
+
+        buildTeams();
+
+        /* 5. Initialisation du moteur 3D */
+        setLoading(45, "Chargement du moteur PlayCanvas...");
+
+        await withTimeout(
+            createEngine(),
+            60000,
+            "Initialisation de PlayCanvas"
+        );
+
+        /* 6. Préparation de l'interface du jeu */
+        setLoading(85, "Préparation du terrain et des joueurs...");
+
+        renderEquipment();
+        syncProfileUI();
+        syncSettingsUI();
+        syncTacticsUI();
+
+        /* 7. Fin du démarrage */
+        setLoading(100, "Prêt à jouer !");
+
+        safeText("engineStatus", "MOTEUR 3D PRÊT");
+
+        state.booting = false;
+
+        window.setTimeout(() => {
+            hide($("loadingScreen"));
+        }, 500);
+
+        toast(
+            "FOBAS FOOTBALL ULTIMATE 3D est prêt.",
+            "success"
+        );
+
+        /* 8. Sauvegarde automatique toutes les 10 minutes */
+        if (state.autoSaveTimer) {
+            window.clearInterval(state.autoSaveTimer);
+            state.autoSaveTimer = null;
+        }
+
+        state.autoSaveTimer = window.setInterval(async () => {
+            try {
+                if (!state.db) return;
+
+                await saveAll(false);
+
+                state.lastAutoSave = Date.now();
+
+                console.info(
+                    "[FOBAS FOOTBALL] Sauvegarde automatique effectuée."
+                );
+            } catch (saveError) {
+                console.error(
+                    "[FOBAS FOOTBALL] Erreur de sauvegarde automatique :",
+                    saveError
+                );
+            }
+        }, 600000);
+
+        console.info(
+            "[FOBAS FOOTBALL] Démarrage terminé avec succès."
+        );
+
+    } catch (error) {
+        state.booting = false;
+        state.loadingFailed = true;
+
+        console.error(
+            "[FOBAS FOOTBALL] Échec du démarrage :",
+            error
+        );
+
+        /*
+         * Afficher l'erreur dans l'écran de chargement
+         * pour faciliter le diagnostic.
+         */
         try {
-            attachEvents();
-
-            setLoading(15, "Ouverture de la sauvegarde locale...");
-
-            state.db = await openDatabase();
-
-            setLoading(25, "Chargement du profil et des paramètres...");
-
-            await loadAll();
-
-            setLoading(35, "Création des équipes...");
-
-            buildTeams();
-
-            setLoading(48, "Chargement du moteur PlayCanvas...");
-
-            await createEngine();
-
-            setLoading(82, "Préparation du terrain et des joueurs...");
-
-            renderEquipment();
-
-            syncProfileUI();
-            syncSettingsUI();
-            syncTacticsUI();
-
-            setLoading(100, "Prêt à jouer !");
-
-            safeText("engineStatus", "MOTEUR 3D PRÊT");
-
-            window.setTimeout(() => {
-                hide($("loadingScreen"));
-            }, 300);
-
-            state.booting = false;
-
-            toast("FOBAS FOOTBALL ULTIMATE 3D est prêt.", "success");
-
-            // Sauvegarde automatique toutes les 10 minutes.
-            window.setInterval(() => {
-                saveAll(false);
-            }, 600000);
-
-        } catch (error) {
-            state.booting = false;
             showLoadingError(error);
+        } catch (displayError) {
+            console.error(
+                "[FOBAS FOOTBALL] Impossible d'afficher l'erreur :",
+                displayError
+            );
+
+            setLoading(
+                100,
+                "Échec du démarrage : " +
+                (error?.message || "erreur inconnue")
+            );
+
+            show($("retryLoadingBtn"));
         }
     }
+}
 
-    if ($("retryLoadingBtn")) {
-        $("retryLoadingBtn").addEventListener("click", () => {
-            if (state.app) {
-                try {
-                    state.app.destroy();
-                } catch {}
+
+/* ========================================================
+   27.1. BOUTON DE NOUVELLE TENTATIVE
+======================================================== */
+
+if ($("retryLoadingBtn")) {
+    $("retryLoadingBtn").addEventListener("click", async () => {
+        if (state.booting) return;
+
+        /*
+         * Arrêter l'ancien minuteur de sauvegarde,
+         * s'il existe.
+         */
+        if (state.autoSaveTimer) {
+            window.clearInterval(state.autoSaveTimer);
+            state.autoSaveTimer = null;
+        }
+
+        /*
+         * Arrêter l'ancienne application PlayCanvas.
+         */
+        if (state.app) {
+            try {
+                state.app.destroy();
+            } catch (error) {
+                console.warn(
+                    "[FOBAS FOOTBALL] Nettoyage de l'ancienne application :",
+                    error
+                );
             }
+        }
 
-            state.app = null;
-            state.engine = null;
-            state.sceneRoot = null;
-            state.cameraEntity = null;
-            state.fieldRoot = null;
-            state.playerRoot = null;
-            state.ballEntity = null;
-            state.ballShadow = null;
+        /*
+         * Réinitialiser les références du moteur.
+         */
+        state.app = null;
+        state.engine = null;
+        state.sceneRoot = null;
+        state.cameraEntity = null;
+        state.fieldRoot = null;
+        state.playerRoot = null;
+        state.ballEntity = null;
+        state.ballShadow = null;
 
-            boot();
-        });
-    }
+        state.homePlayers = [];
+        state.awayPlayers = [];
+        state.allPlayers = [];
+        state.controlledPlayer = null;
+
+        state.loadingFailed = false;
+
+        /*
+         * Relancer le démarrage.
+         */
+        await boot();
+    });
+}
 
     /* ========================================================
        28. EXPOSITION FACULTATIVE POUR LE DÉBOGAGE
