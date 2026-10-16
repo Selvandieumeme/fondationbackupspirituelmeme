@@ -2465,7 +2465,1034 @@
                     await target.requestFullscreen();
                 } else if (target.webkitRequestFullscreen) {
                     target.webkitRequestFullscreen();
-       
+                } else {
+                    showToast(
+                        "Navigatè sa a pa sipòte plen ekran."
+                    );
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
 
+        } catch (error) {
+            console.warn(
+                "[FOBAS CINÉMA] Plen ekran pa disponib :",
+                error
+            );
 
+            showToast(
+                "Navigatè a pa pèmèt chanje mòd ekran an."
+            );
+        }
+    }
+
+    /* ========================================================
+       26. OUVERTURE DES PARAMÈTRES
+    ======================================================== */
+
+    function openSettings() {
+        if (typeof dom.settingsDialog.showModal === "function") {
+            if (!dom.settingsDialog.open) {
+                dom.settingsDialog.showModal();
+            }
+        } else {
+            showToast(
+                "Fenèt paramèt la pa sipòte nan navigatè sa a."
+            );
+        }
+    }
+
+    function closeSettings() {
+        if (dom.settingsDialog.open) {
+            dom.settingsDialog.close();
+        }
+    }
+
+    /* ========================================================
+       27. EXPORT VIDÉO — DÉTECTION DES FORMATS
+    ======================================================== */
+
+    function getSupportedMimeType(preferredFormat) {
+        if (!window.MediaRecorder) {
+            return null;
+        }
+
+        const candidates = [];
+
+        if (preferredFormat === "mp4") {
+            candidates.push(
+                "video/mp4;codecs=avc1.42E01E",
+                "video/mp4"
+            );
+        } else if (preferredFormat === "webm") {
+            candidates.push(
+                "video/webm;codecs=vp9",
+                "video/webm;codecs=vp8",
+                "video/webm"
+            );
+        } else {
+            candidates.push(
+                "video/mp4;codecs=avc1.42E01E",
+                "video/mp4",
+                "video/webm;codecs=vp9",
+                "video/webm;codecs=vp8",
+                "video/webm"
+            );
+        }
+
+        for (const type of candidates) {
+            try {
+                if (MediaRecorder.isTypeSupported(type)) {
+                    return type;
+                }
+            } catch (error) {
+                console.warn(
+                    "[FOBAS CINÉMA] MIME non vérifiable :",
+                    type,
+                    error
+                );
+            }
+        }
+
+        return "";
+    }
+
+    function updateExportProgress(percent, message) {
+        const value = clamp(
+            Number(percent) || 0,
+            0,
+            100
+        );
+
+        dom.exportPercent.textContent =
+            Math.round(value) + "%";
+
+        dom.exportProgressBar.style.width =
+            value + "%";
+
+        const track =
+            dom.exportProgressBar.parentElement;
+
+        if (track) {
+            track.setAttribute(
+                "aria-valuenow",
+                String(Math.round(value))
+            );
+        }
+
+        if (message) {
+            dom.exportStatus.textContent = message;
+        }
+    }
+
+    function showExportResult(message, title = "Videyo a pare") {
+        dom.exportResult.hidden = false;
+
+        dom.exportResultTitle.textContent = title;
+
+        dom.exportResultMessage.textContent = message;
+    }
+
+    function stopExportStream() {
+        if (state.exportStream) {
+            for (const track of state.exportStream.getTracks()) {
+                try {
+                    track.stop();
+                } catch (_) {
+                    // Pa gen lòt aksyon nesesè.
+                }
+            }
+
+            state.exportStream = null;
+        }
+    }
+
+    function cleanupExportUI() {
+        state.exportBusy = false;
+
+        dom.btnExportVideo.disabled = false;
+
+        dom.btnCancelExport.disabled = true;
+    }
+
+    /* ========================================================
+       28. LANCEMENT DE L'EXPORT VIDÉO
+    ======================================================== */
+
+    async function exportVideo() {
+        if (state.exportBusy) {
+            showToast("Yon ekspòtasyon deja an kou.");
+            return;
+        }
+
+        if (!state.initialized || !state.app) {
+            showToast("Fim nan poko pare pou ekspòtasyon.");
+            return;
+        }
+
+        if (!window.MediaRecorder) {
+            showExportResult(
+                "Navigatè sa a pa sipòte MediaRecorder. " +
+                "Eseye yon navigatè Android ki sipòte anrejistreman videyo.",
+                "Ekspòtasyon pa disponib"
+            );
+
+            dom.exportProgressPanel.hidden = true;
+
+            return;
+        }
+
+        if (
+            typeof dom.canvas.captureStream !== "function"
+        ) {
+            showExportResult(
+                "Navigatè sa a pa sipòte captureStream sou canvas la.",
+                "Ekspòtasyon pa disponib"
+            );
+
+            return;
+        }
+
+        const selectedFormat =
+            dom.exportFormat.value || "auto";
+
+        const mimeType =
+            getSupportedMimeType(selectedFormat);
+
+        if (mimeType === null || mimeType === "") {
+            showExportResult(
+                selectedFormat === "mp4"
+                    ? "Navigatè a pa rapòte okenn codec MP4/WebM ki sipòte pou MediaRecorder."
+                    : "Navigatè a pa rapòte yon fòma videyo ki sipòte.",
+                "Fòma videyo pa disponib"
+            );
+
+            return;
+        }
+
+        const resolution =
+            Number(dom.exportResolution.value) || 720;
+
+        const fps =
+            Number(dom.exportFrameRate.value) || 24;
+
+        if (![720, 1080].includes(resolution)) {
+            showToast("Rezolisyon sa a pa valab.");
+            return;
+        }
+
+        if (![24, 30].includes(fps)) {
+            showToast("Vitès imaj sa a pa valab.");
+            return;
+        }
+
+        state.exportBusy = true;
+
+        state.exportCancelled = false;
+
+        state.exportChunks = [];
+
+        dom.btnExportVideo.disabled = true;
+
+        dom.btnCancelExport.disabled = false;
+
+        dom.exportResult.hidden = true;
+
+        dom.exportProgressPanel.hidden = false;
+
+        updateExportProgress(
+            0,
+            "Preparasyon anrejistreman videyo..."
+        );
+
+        const wasPlaying = state.playing;
+        const wasPaused = state.paused;
+
+        const originalTime = state.currentTime;
+
+        const originalWidth = dom.canvas.width;
+        const originalHeight = dom.canvas.height;
+
+        let recorder = null;
+
+        let startedAt = 0;
+
+        let progressTimer = null;
+
+        try {
+            /*
+             * captureStream() anrejistre sa canvas la rann.
+             * Li pa ajoute yon track odyo otomatikman.
+             */
+
+            state.exportStream =
+                dom.canvas.captureStream(fps);
+
+            const options = {
+                mimeType: mimeType,
+
+                videoBitsPerSecond:
+                    resolution >= 1080
+                        ? 6500000
+                        : 3500000
+            };
+
+            recorder = new MediaRecorder(
+                state.exportStream,
+                options
+            );
+
+            state.exportRecorder = recorder;
+
+            recorder.ondataavailable = (event) => {
+                if (
+                    event.data &&
+                    event.data.size > 0
+                ) {
+                    state.exportChunks.push(event.data);
+                }
+            };
+
+            recorder.onerror = (event) => {
+                console.error(
+                    "[FOBAS CINÉMA] Erè MediaRecorder :",
+                    event
+                );
+
+                showToast(
+                    "Yon erè rive pandan anrejistreman videyo a."
+                );
+            };
+
+            recorder.onstop = () => {
+                clearInterval(progressTimer);
+
+                stopExportStream();
+
+                state.exportRecorder = null;
+
+                if (state.exportCancelled) {
+                    state.exportChunks = [];
+
+                    dom.exportProgressPanel.hidden = true;
+
+                    cleanupExportUI();
+
+                    showToast("Ekspòtasyon an anile.");
+
+                    return;
+                }
+
+                try {
+                    if (state.exportChunks.length === 0) {
+                        throw new Error(
+                            "Pa gen okenn done videyo ki anrejistre."
+                        );
+                    }
+
+                    const blob = new Blob(
+                        state.exportChunks,
+                        { type: mimeType }
+                    );
+
+                    if (!blob.size) {
+                        throw new Error(
+                            "Fichye videyo a vid."
+                        );
+                    }
+
+                    const url = URL.createObjectURL(blob);
+
+                    const isMP4 =
+                        mimeType.toLowerCase().includes("mp4");
+
+                    const extension =
+                        isMP4 ? "mp4" : "webm";
+
+                    const filename =
+                        "FOBAS-De-Ke-Yon-Seul-Destin." +
+                        extension;
+
+                    dom.btnDownloadVideo.href = url;
+
+                    dom.btnDownloadVideo.download = filename;
+
+                    dom.exportProgressPanel.hidden = true;
+
+                    showExportResult(
+                        "Fichye " +
+                        extension.toUpperCase() +
+                        " a pare. Gwosè li: " +
+                        formatFileSize(blob.size) +
+                        ". Tape bouton telechajman an pou sove li.",
+                        "Videyo a pare"
+                    );
+
+                    showToast(
+                        "Ekspòtasyon fini: " +
+                        formatFileSize(blob.size),
+                        5000
+                    );
+
+                } catch (error) {
+                    console.error(error);
+
+                    showExportResult(
+                        error.message ||
+                        "Nou pa t kapab prepare fichye videyo a.",
+                        "Erè ekspòtasyon"
+                    );
+                }
+
+                cleanupExportUI();
+            };
+
+            recorder.start(1000);
+
+            startedAt = performance.now();
+
+            /*
+             * Anrejistreman fèt an tan reyèl.
+             * Nou pa pretann yon fim 20 minit ka ekspòte
+             * imedyatman nan navigatè a.
+             */
+
+            const exportDuration =
+                CONFIG.duration;
+
+            updateExportProgress(
+                0,
+                "Anrejistreman kòmanse. Dire estimatif: 20 minit."
+            );
+
+            /*
+             * Nou mete fim nan an mouvman pou anrejistre
+             * sèn yo youn apre lòt pandan ekspòtasyon an.
+             */
+
+            state.currentTime = 0;
+
+            state.currentScene = 0;
+
+            state.currentDialogue = 0;
+
+            buildScene(0);
+
+            state.playing = true;
+
+            state.paused = false;
+
+            state.ended = false;
+
+            dom.pauseOverlay.hidden = true;
+
+            dom.loadingScreen.hidden = true;
+
+            dom.playbackStatus.textContent = "AP ANREJISTRE";
+
+            dom.btnPlayPause.textContent = "Ⅱ";
+
+            progressTimer = setInterval(() => {
+                if (!state.exportBusy) {
+                    clearInterval(progressTimer);
+                    return;
+                }
+
+                const elapsed =
+                    (performance.now() - startedAt) / 1000;
+
+                const percent = Math.min(
+                    99,
+                    (elapsed / exportDuration) * 100
+                );
+
+                updateExportProgress(
+                    percent,
+                    "Anrejistreman an ap kontinye. " +
+                    "Tan pase: " +
+                    formatTime(elapsed) +
+                    " / " +
+                    formatTime(exportDuration)
+                );
+
+                if (
+                    elapsed >= exportDuration &&
+                    recorder &&
+                    recorder.state !== "inactive"
+                ) {
+                    state.currentTime = CONFIG.duration;
+
+                    recorder.stop();
+                }
+
+            }, 500);
+
+        } catch (error) {
+            console.error(
+                "[FOBAS CINÉMA] Ekspòtasyon echwe :",
+                error
+            );
+
+            clearInterval(progressTimer);
+
+            stopExportStream();
+
+            state.exportRecorder = null;
+
+            state.exportChunks = [];
+
+            state.playing = wasPlaying;
+
+            state.paused = wasPaused;
+
+            state.currentTime = originalTime;
+
+            if (recorder && recorder.state !== "inactive") {
+                try {
+                    recorder.stop();
+                } catch (_) {
+                    // Anrejistrè a deja fèmen.
+                }
+            }
+
+            dom.exportProgressPanel.hidden = true;
+
+            cleanupExportUI();
+
+            showExportResult(
+                error.message ||
+                "Nou pa t kapab kòmanse ekspòtasyon an.",
+                "Erè ekspòtasyon"
+            );
+
+        } finally {
+            /*
+             * Rezolisyon canvas la pa chanje nan aplikasyon sa a.
+             * Valè yo konsève pou evite pèdi rann 3D a.
+             */
+
+            if (
+                originalWidth > 0 &&
+                originalHeight > 0 &&
+                !state.exportBusy
+            ) {
+                dom.canvas.width = originalWidth;
+                dom.canvas.height = originalHeight;
+            }
+        }
+    }
+
+    /* ========================================================
+       29. ANNULATION DE L'EXPORT
+    ======================================================== */
+
+    function cancelExport() {
+        if (!state.exportBusy) return;
+
+        state.exportCancelled = true;
+
+        dom.btnCancelExport.disabled = true;
+
+        updateExportProgress(
+            0,
+            "Anilasyon ekspòtasyon..."
+        );
+
+        const recorder = state.exportRecorder;
+
+        if (
+            recorder &&
+            recorder.state !== "inactive"
+        ) {
+            try {
+                recorder.stop();
+            } catch (error) {
+                console.warn(
+                    "[FOBAS CINÉMA] Anilasyon anrejistreman :",
+                    error
+                );
+            }
+        } else {
+            stopExportStream();
+
+            cleanupExportUI();
+
+            dom.exportProgressPanel.hidden = true;
+        }
+    }
+
+    /* ========================================================
+       30. REDIMENSIONNEMENT
+    ======================================================== */
+
+    function handleResize() {
+        if (!state.app) return;
+
+        try {
+            state.app.resizeCanvas(
+                dom.canvas.clientWidth,
+                dom.canvas.clientHeight
+            );
+
+            updateCameraPosition(true);
+
+        } catch (error) {
+            console.warn(
+                "[FOBAS CINÉMA] Redimensionnement :",
+                error
+            );
+        }
+    }
+
+    /* ========================================================
+       31. ÉVÉNEMENTS DU NAVIGATEUR
+    ======================================================== */
+
+    function handleVisibilityChange() {
+        if (
+            document.hidden &&
+            state.playing &&
+            !state.exportBusy
+        ) {
+            pauseFilm();
+
+            showToast(
+                "Fim nan mete an poz paske paj la pa vizib."
+            );
+        }
+    }
+
+    /* ========================================================
+       32. CONNEXION DE TOUS LES BOUTONS
+    ======================================================== */
+
+    function bindEvents() {
+        if (state.listenersAttached) return;
+
+        state.listenersAttached = true;
+
+        dom.btnStartFilm.addEventListener(
+            "click",
+            startFilm
+        );
+
+        dom.btnRetry.addEventListener(
+            "click",
+            retryInitialization
+        );
+
+        dom.btnFullscreen.addEventListener(
+            "click",
+            toggleFullscreen
+        );
+
+        dom.btnSettings.addEventListener(
+            "click",
+            openSettings
+        );
+
+        dom.btnCloseSettings.addEventListener(
+            "click",
+            closeSettings
+        );
+
+        dom.btnSaveSettings.addEventListener(
+            "click",
+            saveSettings
+        );
+
+        dom.btnResumeCenter.addEventListener(
+            "click",
+            resumeFilm
+        );
+
+        dom.btnPlayPause.addEventListener(
+            "click",
+            () => {
+                if (state.ended) {
+                    restartFilm();
+                } else {
+                    togglePlayPause();
+                }
+            }
+        );
+
+        dom.btnPreviousScene.addEventListener(
+            "click",
+            previousScene
+        );
+
+        dom.btnNextScene.addEventListener(
+            "click",
+            nextScene
+        );
+
+        dom.btnRewind.addEventListener(
+            "click",
+            () => seekSeconds(-10)
+        );
+
+        dom.btnForward.addEventListener(
+            "click",
+            () => seekSeconds(10)
+        );
+
+        dom.btnRestart.addEventListener(
+            "click",
+            restartFilm
+        );
+
+        dom.btnNextDialogue.addEventListener(
+            "click",
+            nextDialogue
+        );
+
+        dom.btnCaptions.addEventListener(
+            "click",
+            toggleCaptions
+        );
+
+        dom.playbackSpeed.addEventListener(
+            "change",
+            updatePlaybackSpeed
+        );
+
+        dom.btnExportVideo.addEventListener(
+            "click",
+            exportVideo
+        );
+
+        dom.btnCancelExport.addEventListener(
+            "click",
+            cancelExport
+        );
+
+        dom.timelineTrack.addEventListener(
+            "click",
+            (event) => {
+                if (!state.initialized) return;
+
+                /*
+                 * Yon klik sou liy tan an pèmèt itilizatè a
+                 * chwazi pozisyon fim nan.
+                 */
+
+                const rect =
+                    dom.timelineTrack.getBoundingClientRect();
+
+                if (rect.width <= 0) return;
+
+                const ratio = clamp(
+                    (event.clientX - rect.left) / rect.width,
+                    0,
+                    1
+                );
+
+                const targetTime =
+                    ratio * CONFIG.duration;
+
+                if (targetTime >= CONFIG.duration) {
+                    finishFilm();
+                    return;
+                }
+
+                const targetScene =
+                    getSceneIndexFromTime(targetTime);
+
+                const wasPlaying = state.playing;
+
+                seekToScene(targetScene);
+
+                state.currentTime = targetTime;
+
+                state.playing = wasPlaying;
+
+                state.paused = !wasPlaying;
+
+                updateTimeline();
+            }
+        );
+
+        dom.settingsDialog.addEventListener(
+            "click",
+            (event) => {
+                if (event.target === dom.settingsDialog) {
+                    closeSettings();
+                }
+            }
+        );
+
+        document.addEventListener(
+            "visibilitychange",
+            handleVisibilityChange
+        );
+
+        window.addEventListener(
+            "resize",
+            handleResize
+        );
+
+        window.addEventListener(
+            "orientationchange",
+            () => {
+                setTimeout(handleResize, 150);
+            }
+        );
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+                if (
+                    state.exportRecorder &&
+                    state.exportRecorder.state !== "inactive"
+                ) {
+                    try {
+                        state.exportRecorder.stop();
+                    } catch (_) {
+                        // Pa gen lòt aksyon nesesè.
+                    }
+                }
+
+                stopExportStream();
+            }
+        );
+
+        /*
+         * Klavye:
+         * Space = poz/kontinye
+         * Left = retounen 10 segonn
+         * Right = avanse 10 segonn
+         */
+
+        document.addEventListener(
+            "keydown",
+            (event) => {
+                if (
+                    event.target instanceof HTMLInputElement ||
+                    event.target instanceof HTMLSelectElement ||
+                    event.target instanceof HTMLTextAreaElement
+                ) {
+                    return;
+                }
+
+                if (
+                    event.key === " " &&
+                    !dom.settingsDialog.open
+                ) {
+                    event.preventDefault();
+
+                    togglePlayPause();
+                }
+
+                if (event.key === "ArrowLeft") {
+                    seekSeconds(-10);
+                }
+
+                if (event.key === "ArrowRight") {
+                    seekSeconds(10);
+                }
+
+                if (event.key === "Escape") {
+                    if (dom.settingsDialog.open) {
+                        closeSettings();
+                    }
+                }
+            }
+        );
+    }
+
+    /* ========================================================
+       33. INITIALISATION ET RELANCE
+    ======================================================== */
+
+    async function initialize() {
+        if (state.initializing) return;
+
+        state.initializing = true;
+
+        state.initialized = false;
+
+        dom.errorScreen.hidden = true;
+
+        dom.loadingScreen.hidden = false;
+
+        dom.btnStartFilm.disabled = true;
+
+        dom.performanceNotice.hidden = true;
+
+        try {
+            setLoading(
+                2,
+                "Preparasyon FOBAS CINÉMA 3D..."
+            );
+
+            const pc = await loadPlayCanvas();
+
+            setLoading(
+                25,
+                "Kreyasyon motè grafik 3D..."
+            );
+
+            if (state.app) {
+                try {
+                    state.app.destroy();
+                } catch (_) {
+                    // Motè a deja fèmen.
+                }
+
+                state.app = null;
+            }
+
+            state.sceneEntities = [];
+
+            state.characters = {};
+
+            createEngine(pc);
+
+            setLoading(
+                48,
+                "Preparasyon anviwònman sinematik..."
+            );
+
+            buildScene(0);
+
+            setLoading(
+                72,
+                "Preparasyon pèsonaj ak 12 sèn yo..."
+            );
+
+            createSceneList();
+
+            setLoading(
+                88,
+                "Koneksyon bouton ak kontwòl yo..."
+            );
+
+            state.currentTime = 0;
+
+            state.currentScene = 0;
+
+            state.currentDialogue = 0;
+
+            state.playing = false;
+
+            state.paused = false;
+
+            state.ended = false;
+
+            state.playbackSpeed = 1;
+
+            dom.playbackSpeed.value = "1";
+
+            updateTimeline();
+
+            updateDialogue();
+
+            updateSceneInformation(0);
+
+            setLoading(
+                100,
+                "FOBAS CINÉMA 3D pare pou kòmanse."
+            );
+
+            state.initialized = true;
+
+            state.initializing = false;
+
+            dom.btnStartFilm.disabled = false;
+
+            dom.loadingScreen.hidden = false;
+
+            dom.errorScreen.hidden = true;
+
+            dom.playbackStatus.textContent = "PARE";
+
+            dom.renderIndicator.textContent =
+                "PLAYCANVAS 2.23.2";
+
+            state.lastFrameTime = performance.now();
+
+            showToast("Preparasyon fim nan fini.");
+
+        } catch (error) {
+            state.initializing = false;
+
+            state.initialized = false;
+
+            showError(error);
+        }
+    }
+
+    async function retryInitialization() {
+        dom.errorScreen.hidden = true;
+
+        dom.loadingScreen.hidden = false;
+
+        setLoading(
+            0,
+            "Nou ap eseye lanse aplikasyon an ankò..."
+        );
+
+        await initialize();
+    }
+
+    /* ========================================================
+       34. BOUCLE D'ANIMATION
+    ======================================================== */
+
+    function startAnimationLoop() {
+        const loop = () => {
+            try {
+                frameUpdate();
+            } catch (error) {
+                console.error(
+                    "[FOBAS CINÉMA] Erè nan animasyon an :",
+                    error
+                );
+            }
+
+            requestAnimationFrame(loop);
+        };
+
+        requestAnimationFrame(loop);
+    }
+
+    /* ========================================================
+       35. DÉMARRAGE DE L'APPLICATION
+    ======================================================== */
+
+    async function boot() {
+        loadSettings();
+
+        bindEvents();
+
+        createSceneList();
+
+        updateTimeline();
+
+        startAnimationLoop();
+
+        await initialize();
+    }
+
+    /*
+     * Si le document est déjà prêt, démarrer immédiatement.
+     * Sinon, attendre DOMContentLoaded.
+     */
+
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            boot,
+            { once: true }
+        );
+    } else {
+        boot();
+    }
+
+})();
 
