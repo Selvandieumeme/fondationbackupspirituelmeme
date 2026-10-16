@@ -29,17 +29,19 @@
 
     <title>FOBAS CINÉMA 3D — De Kè, Yon Sèl Destin</title>
 
-    <!-- CSS prensipal -->
     <link rel="stylesheet" href="./filmfobas.css">
 
     <!--
-        PlayCanvas 2.23.2 ap chaje dinamikman
-        nan filmfobas.js avèk import().
-        Pa ajoute playcanvas.min.js kòm script klasik.
+        ENTEGRASYON PLAYCANVAS
+
+        PlayCanvas 2.23.2 dwe chaje dinamikman
+        nan filmfobas.js atravè import().
+
+        Pa ajoute script klasik PlayCanvas.
+        Pa ajoute lòt konfigirasyon window.
     -->
 
-    <!-- JavaScript prensipal -->
-    <script src="./filmfobas.js" defer></script>
+    <script type="module" src="./filmfobas.js"></script>
 </head>
 
 <body>
@@ -98,8 +100,6 @@
                 class="cinema-stage"
                 aria-label="Sèn fim 3D a"
             >
-
-                <!-- CANVAS PLAYCANVAS -->
 
                 <canvas
                     id="filmCanvas"
@@ -192,7 +192,7 @@
                 </div>
 
 
-                <!-- FENÈT DYALÒG AN KREYÒL -->
+                <!-- DYALÒG AN KREYÒL -->
 
                 <div
                     id="dialogueBox"
@@ -639,7 +639,7 @@
                     id="sceneList"
                     class="scene-list"
                 >
-                    <!-- JavaScript ap jenere 12 kat sèn yo. -->
+                    <!-- filmfobas.js ap jenere 12 kat sèn yo. -->
                 </div>
 
             </section>
@@ -1001,4 +1001,3 @@
     </div>
 </body>
 </html>
-
