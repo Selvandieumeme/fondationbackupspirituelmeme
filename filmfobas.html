@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ht">
 <head>
@@ -17,16 +18,25 @@
 
     <meta name="color-scheme" content="dark">
 
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+    >
+
     <title>FOBAS CINÉMA 3D — De Kè, Yon Sèl Destin</title>
 
     <!-- CSS prensipal -->
     <link rel="stylesheet" href="./filmfobas.css">
 
-    <!-- PlayCanvas Engine -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/playcanvas@2.23.2/build/playcanvas.min.js"
-        defer
-    ></script>
+    <!--
+        PlayCanvas 2.23.2 ap chaje dinamikman
+        nan filmfobas.js avèk import().
+        Pa ajoute playcanvas.min.js kòm script klasik.
+    -->
 
     <!-- JavaScript prensipal -->
     <script src="./filmfobas.js" defer></script>
@@ -89,7 +99,7 @@
                 aria-label="Sèn fim 3D a"
             >
 
-                <!-- Canvas PlayCanvas -->
+                <!-- CANVAS PLAYCANVAS -->
 
                 <canvas
                     id="filmCanvas"
@@ -238,6 +248,7 @@
                 >
 
                     <div class="cinema-top-left">
+
                         <span
                             class="live-indicator"
                             aria-hidden="true"
@@ -246,6 +257,7 @@
                         <span id="playbackStatus">
                             PREPARE
                         </span>
+
                     </div>
 
                     <div class="cinema-top-right">
@@ -350,11 +362,17 @@
                     </p>
 
                     <div class="film-meta">
+
                         <span>20 MINIT</span>
+
                         <span aria-hidden="true">•</span>
+
                         <span>KREYÒL AYISYEN</span>
+
                         <span aria-hidden="true">•</span>
+
                         <span>12 SÈN</span>
+
                     </div>
 
                 </div>
@@ -983,3 +1001,4 @@
     </div>
 </body>
 </html>
+
