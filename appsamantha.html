@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#101522">
+    <meta name="description" content="Samantha : gestion des ventes, achats, stocks, inventaires et rapports.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <title>Samantha — Gestion commerciale</title>
+
+    <link rel="stylesheet" href="appsamantha.css">
+    <script src="https://code.playcanvas.com/playcanvas-stable.min.js"></script>
+    <script src="appsamantha.js" defer></script>
+</head>
+
+<body>
+<noscript>
+    <div class="noscript-warning">
+        JavaScript doit être activé pour utiliser Samantha.
+    </div>
+</noscript>
+
+<div id="app" class="app-shell">
+
+    <!-- =====================================================
+         1. EN-TÊTE
+    ====================================================== -->
+    <header id="appHeader" class="app-header">
+        <div class="brand-area">
+            <button type="button"
+                    id="menuToggle"
+                    class="icon-button"
+                    data-action="toggle-menu"
+                    aria-label="Ouvrir le menu"
+                    aria-controls="mainNavigation"
+                    aria-expanded="false"
+                    title="Menu">
+                ☰
+            </button>
+
+            <div class="brand-mark" aria-hidden="true">
+                <span>S</span>
+            </div>
+
+            <div class="brand-text">
+                <h1>Samantha</h1>
+                <p>Gestion commerciale intelligente</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <span id="connectionStatus"
+                  class="status-indicator"
+                  role="status"
+                  aria-live="polite">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span id="connectionStatusText">Initialisation...</span>
+            </span>
+
+            <button type="button"
+                    id="saveAllButton"
+                    class="button button-primary button-small"
+                    data-action="save-all"
+                    title="Enregistrer les modifications">
+                <span aria-hidden="true">▣</span>
+                <span>Enregistrer</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- =====================================================
+         2. NAVIGATION
+    ====================================================== -->
+    <aside id="mainNavigation"
+           class="main-navigation"
+           aria-label="Navigation principale">
+
+        <div class="navigation-heading">
+            <span>ESPACE DE GESTION</span>
+            <button type="button"
+                    class="icon-button navigation-close"
+                    data-action="close-menu"
+                    aria-label="Fermer le menu">
+                ×
+            </button>
+        </div>
+
+        <nav class="navigation-links">
+            <button type="button"
+                    class="nav-link active"
+                    data-view="dashboard"
+                    data-action="navigate"
+                    aria-current="page">
+                <span class="nav-icon" aria-hidden="true">⌂</span>
+                <span>Tableau de bord</span>
+            </button>
+
+            <button type="button" class="nav-link"
+                    data-view="products" data-action="navigate">
+                <span class="nav-icon" aria-hidden="true">▦</span>
+                <span>Produits</span>
+            </button>
+
+            <button type="button" class="nav-link"
+                    data-view="sales" data-action="navigate">
+                <span class="nav-icon" aria-hidden="true">↗</span>
+                <span>Ventes</span>
+            </button>
+
+            <button type="button" class="nav-link"
+                    data-view="purchases" data-action="navigate">
+                <span class="nav-icon" aria-hidden="true">↙</span>
+                <span>Achats</span>
+            </button>
+
+            <button type="button" class="nav-link"
+                    data-view="inventory" data-action="navigate">
+                <span class="nav-icon" aria-hidden="true">▤</span>
+                <span>Inventaire</span>
+            </button>
+
+            <button type="button" class="nav-link"
+                    data-view="history" data-action="navigate">
+                <span class="nav-icon" aria-hidden="true">◷</span>
+                <span>Historique</span>
+            </button>
+
+            <button type="button" class="nav-link"
+                    data-view="reports" data-action="navigate">
+                <span class="nav-icon" aria-hidden="true">▥</span>
+                <span>Rapports</span>
+            </button>
+
+            <button type="button" class="nav-link"
+                    data-view="settings" data-action="navigate">
+                <span class="nav-icon" aria-hidden="true">⚙</span>
+                <span>Paramètres</span>
+            </button>
+        </nav>
+
+        <div class="navigation-footer">
+            <span class="storage-indicator" aria-hidden="true">●</span>
+            <div>
+                <strong>Stockage local</strong>
+                <small id="storageStatus">Vérification...</small>
+            </div>
+        </div>
+    </aside>
+
+    <div id="navigationOverlay"
+         class="navigation-overlay"
+         data-action="close-menu"
+         aria-hidden="true"></div>
+
+    <!-- =====================================================
+         3. CONTENU PRINCIPAL
+    ====================================================== -->
+    <main id="mainContent" class="main-content">
+
+        <div class="page-toolbar">
+            <div class="breadcrumb">
+                <span>Samantha</span>
+                <span aria-hidden="true">/</span>
+                <strong id="currentPageName">Tableau de bord</strong>
+            </div>
+
+            <div class="toolbar-actions">
+                <label for="displayCurrency" class="visually-hidden">
+                    Devise d'affichage
+                </label>
+
+                <select id="displayCurrency" name="displayCurrency">
+                    <option value="HTG">HTG — Gourde haïtienne</option>
+                    <option value="USD" selected>USD — Dollar américain</option>
+                    <option value="EUR">EUR — Euro</option>
+                </select>
+
+                <button type="button"
+                        class="button button-secondary"
+                        data-action="refresh-data">
+                    <span aria-hidden="true">⟳</span>
+                    <span>Actualiser</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- =================================================
+             4. TABLEAU DE BORD
+        ================================================== -->
+        <section id="view-dashboard"
+                 class="app-view active"
+                 data-view-panel="dashboard"
+                 aria-labelledby="dashboardTitle">
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">VUE D'ENSEMBLE</p>
+                    <h2 id="dashboardTitle">Tableau de bord</h2>
+                    <p>Suivez les performances de votre activité.</p>
+                </div>
+
+                <div class="heading-actions">
+                    <button type="button"
+                            class="button button-secondary"
+                            data-action="export-dashboard">
+                        Exporter
+                    </button>
+
+                    <button type="button"
+                            class="button button-primary"
+                            data-action="new-sale">
+                        + Nouvelle vente
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <div class="stat-card-top">
+                        <span>Chiffre d'affaires</span>
+                        <span class="stat-icon" aria-hidden="true">↗</span>
+                    </div>
+                    <strong id="dashboardRevenue">0,00</strong>
+                    <small>Ventes validées</small>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-card-top">
+                        <span>Bénéfice brut réalisé</span>
+                        <span class="stat-icon" aria-hidden="true">◆</span>
+                    </div>
+                    <strong id="dashboardProfit">0,00</strong>
+                    <small>Revenus moins coût des produits vendus</small>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-card-top">
+                        <span>Valeur du stock</span>
+                        <span class="stat-icon" aria-hidden="true">▦</span>
+                    </div>
+                    <strong id="dashboardStockValue">0,00</strong>
+                    <small>Évaluation au coût d'achat</small>
+                </article>
+
+                <article class="stat-card">
+                    <div class="stat-card-top">
+                        <span>Produits en rupture</span>
+                        <span class="stat-icon" aria-hidden="true">!</span>
+                    </div>
+                    <strong id="dashboardOutOfStock">0</strong>
+                    <small>Produits dont le stock est nul</small>
+                </article>
+            </div>
+
+            <div class="dashboard-grid">
+                <section class="panel scene-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Espace visuel 3D</h3>
+                            <p>Explorez votre espace de gestion.</p>
+                        </div>
+                        <span id="engineStatus" class="engine-status">
+                            Préparation du moteur 3D
+                        </span>
+                    </div>
+
+                    <div id="sceneViewport"
+                         class="scene-viewport"
+                         aria-label="Scène interactive en trois dimensions">
+
+                        <canvas id="playcanvas"
+                                tabindex="0"
+                                aria-label="Scène 3D interactive. Utilisez les gestes tactiles pour explorer.">
+                        </canvas>
+
+                        <div id="sceneLoading" class="scene-loading">
+                            <span class="loading-spinner" aria-hidden="true"></span>
+                            <span>Chargement de l'environnement 3D...</span>
+                        </div>
+
+                        <div class="scene-overlay scene-overlay-top">
+                            <span class="scene-badge">Samantha 3D</span>
+                            <button type="button"
+                                    class="icon-button scene-icon-button"
+                                    data-action="scene-reset"
+                                    title="Réinitialiser la vue 3D"
+                                    aria-label="Réinitialiser la vue 3D">
+                                ⟳
+                            </button>
+                        </div>
+
+                        <div class="scene-controls">
+                            <button type="button" class="scene-control"
+                                    data-action="scene-zoom-in"
+                                    aria-label="Zoom avant" title="Zoom avant">+</button>
+
+                            <button type="button" class="scene-control"
+                                    data-action="scene-zoom-out"
+                                    aria-label="Zoom arrière" title="Zoom arrière">−</button>
+
+                            <button type="button" class="scene-control"
+                                    data-action="scene-rotate-left"
+                                    aria-label="Tourner à gauche" title="Tourner à gauche">↶</button>
+
+                            <button type="button" class="scene-control"
+                                    data-action="scene-rotate-right"
+                                    aria-label="Tourner à droite" title="Tourner à droite">↷</button>
+
+                            <button type="button" class="scene-control"
+                                    data-action="scene-reset"
+                                    aria-label="Vue initiale" title="Vue initiale">⌂</button>
+
+                            <button type="button" class="scene-control"
+                                    data-action="scene-fullscreen"
+                                    aria-label="Plein écran" title="Plein écran">⛶</button>
+                        </div>
+
+                        <div class="scene-overlay scene-overlay-bottom">
+                            <span>Glisser : rotation</span>
+                            <span>Deux doigts : zoom et déplacement</span>
+                        </div>
+                    </div>
+
+                    <div class="scene-footer">
+                        <span id="sceneMessage" role="status">
+                            Environnement graphique
+                        </span>
+                        <button type="button"
+                                class="button button-secondary button-small"
+                                data-action="scene-reload">
+                            Recharger la scène
+                        </button>
+                    </div>
+                </section>
+
+                <section class="panel quick-actions-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Actions rapides</h3>
+                            <p>Accédez aux opérations essentielles.</p>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions-grid">
+                        <button type="button" class="quick-action"
+                                data-action="new-sale">
+                            <span class="quick-action-icon">↗</span>
+                            <strong>Nouvelle vente</strong>
+                            <small>Enregistrer une vente</small>
+                        </button>
+
+                        <button type="button" class="quick-action"
+                                data-action="new-purchase">
+                            <span class="quick-action-icon">↙</span>
+                            <strong>Nouvel achat</strong>
+                            <small>Réapprovisionner le stock</small>
+                        </button>
+
+                        <button type="button" class="quick-action"
+                                data-action="new-inventory">
+                            <span class="quick-action-icon">▤</span>
+                            <strong>Inventaire</strong>
+                            <small>Compter le stock physique</small>
+                        </button>
+
+                        <button type="button" class="quick-action"
+                                data-action="open-daily-report">
+                            <span class="quick-action-icon">▥</span>
+                            <strong>Rapport journalier</strong>
+                            <small>Consulter les résultats</small>
+                        </button>
+                    </div>
+
+                    <div class="panel-divider"></div>
+
+                    <div class="panel-heading compact-heading">
+                        <div>
+                            <h3>État du stock</h3>
+                            <p>Disponibilité des produits.</p>
+                        </div>
+                        <button type="button" class="text-button"
+                                data-action="navigate-inventory">
+                            Voir tout
+                        </button>
+                    </div>
+
+                    <div id="dashboardStockAlerts" class="stock-alert-list">
+                        <p class="empty-state">
+                            Les alertes apparaîtront après le chargement des données.
+                        </p>
+                    </div>
+                </section>
+            </div>
+
+            <section class="panel recent-activity-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Activité récente</h3>
+                        <p>Dernières opérations enregistrées.</p>
+                    </div>
+                    <button type="button" class="text-button"
+                            data-action="navigate-history">
+                        Consulter l'historique
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="recentActivityTable">
+                        <thead>
+                            <tr>
+                                <th>Date et heure</th>
+                                <th>Référence</th>
+                                <th>Opération</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentActivityBody">
+                            <tr>
+                                <td colspan="5" class="empty-cell">
+                                    Aucune opération chargée.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             5. PRODUITS
+        ================================================== -->
+        <section id="view-products"
+                 class="app-view"
+                 data-view-panel="products"
+                 aria-labelledby="productsTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">CATALOGUE</p>
+                    <h2 id="productsTitle">Gestion des produits</h2>
+                    <p>Gérez les 50 emplacements de produits.</p>
+                </div>
+
+                <div class="heading-actions">
+                    <button type="button" class="button button-secondary"
+                            data-action="export-products">Exporter</button>
+                    <button type="button" class="button button-primary"
+                            data-action="save-products">Enregistrer les produits</button>
+                </div>
+            </div>
+
+            <div class="stats-grid compact-stats">
+                <article class="stat-card">
+                    <span>Emplacements disponibles</span>
+                    <strong id="productSlotCount">50</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Produits actifs</span>
+                    <strong id="activeProductCount">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span>En stock</span>
+                    <strong id="inStockProductCount">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span>En rupture</span>
+                    <strong id="outOfStockProductCount">0</strong>
+                </article>
+            </div>
+
+            <section class="panel">
+                <div class="filter-bar">
+                    <div class="field-group search-field">
+                        <label for="productSearch">Rechercher un produit</label>
+                        <input type="search" id="productSearch"
+                               placeholder="Nom ou référence..." autocomplete="off">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="productStockFilter">État du stock</label>
+                        <select id="productStockFilter">
+                            <option value="all">Tous les états</option>
+                            <option value="in-stock">En stock</option>
+                            <option value="out-of-stock">Rupture de stock</option>
+                            <option value="inactive">Emplacements libres</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="button button-secondary"
+                            data-action="reset-product-filters">
+                        Réinitialiser
+                    </button>
+                </div>
+
+                <form id="productForm" autocomplete="off">
+                    <input type="hidden" id="productId" name="productId">
+
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="productSlot">Emplacement</label>
+                            <select id="productSlot" name="productSlot" required>
+                                <option value="">Choisir un emplacement</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="productName">Nom du produit</label>
+                            <input type="text" id="productName" name="productName"
+                                   maxlength="120" placeholder="Nom du produit" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="productReference">Référence</label>
+                            <input type="text" id="productReference"
+                                   name="productReference" maxlength="80"
+                                   placeholder="Référence facultative">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="productInitialStock">Stock initial</label>
+                            <input type="number" id="productInitialStock"
+                                   name="productInitialStock" min="0" step="1" value="0">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="productPurchasePrice">Prix d'achat unitaire</label>
+                            <input type="number" id="productPurchasePrice"
+                                   name="productPurchasePrice" min="0" step="0.01"
+                                   inputmode="decimal" value="0.00">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="productSalePrice">Prix de vente unitaire</label>
+                            <input type="number" id="productSalePrice"
+                                   name="productSalePrice" min="0" step="0.01"
+                                   inputmode="decimal" value="0.00">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="productCurrency">Devise des prix</label>
+                            <select id="productCurrency" name="productCurrency">
+                                <option value="HTG">HTG</option>
+                                <option value="USD" selected>USD</option>
+                                <option value="EUR">EUR</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="productLowStockThreshold">Seuil d'alerte</label>
+                            <input type="number" id="productLowStockThreshold"
+                                   name="productLowStockThreshold"
+                                   min="0" step="1" value="5">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary"
+                                id="saveProductButton">
+                            Enregistrer le produit
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="reset-product-form">
+                            Réinitialiser
+                        </button>
+                        <button type="button" class="button button-danger-outline"
+                                data-action="cancel-product-edit">
+                            Annuler la modification
+                        </button>
+                    </div>
+
+                    <p class="form-help">
+                        La modification du nom d'un produit ne doit pas effacer son
+                        historique. Les transactions passées doivent conserver leur
+                        description d'origine.
+                    </p>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Liste des produits</h3>
+                        <p>Les emplacements restent identifiables après modification.</p>
+                    </div>
+                    <span id="productListCount" class="result-count">0 produit</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Emplacement</th>
+                                <th>Référence</th>
+                                <th>Produit</th>
+                                <th>Stock</th>
+                                <th>Prix d'achat</th>
+                                <th>Prix de vente</th>
+                                <th>État</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <tr>
+                                <td colspan="8" class="empty-cell">
+                                    Chargement du catalogue...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             6. VENTES
+        ================================================== -->
+        <section id="view-sales"
+                 class="app-view"
+                 data-view-panel="sales"
+                 aria-labelledby="salesTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">TRANSACTIONS</p>
+                    <h2 id="salesTitle">Nouvelle vente</h2>
+                    <p>Sélectionnez les produits dans le catalogue disponible.</p>
+                </div>
+            </div>
+
+            <form id="saleForm" autocomplete="off">
+                <section class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Informations de la vente</h3>
+                            <p>Les ventes validées sont conservées dans l'historique.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="saleDate">Date et heure de vente</label>
+                            <input type="datetime-local" id="saleDate"
+                                   name="saleDate" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="saleReference">Référence de vente</label>
+                            <input type="text" id="saleReference"
+                                   name="saleReference" readonly
+                                   placeholder="Générée automatiquement">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="saleCurrency">Devise de la vente</label>
+                            <select id="saleCurrency" name="saleCurrency" required>
+                                <option value="HTG">HTG — Gourde haïtienne</option>
+                                <option value="USD" selected>USD — Dollar américain</option>
+                                <option value="EUR">EUR — Euro</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="saleCustomer">Client (facultatif)</label>
+                            <input type="text" id="saleCustomer" name="saleCustomer"
+                                   maxlength="120" placeholder="Nom du client">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Ajouter des produits</h3>
+                            <p>Les noms proviennent du catalogue.</p>
+                        </div>
+                        <button type="button" class="button button-secondary"
+                                data-action="add-sale-line">
+                            + Ajouter un produit
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="saleLinesTable">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Stock disponible</th>
+                                    <th>Coût unitaire</th>
+                                    <th>Prix de vente unitaire</th>
+                                    <th>Quantité</th>
+                                    <th>Total ligne</th>
+                                    <th>Bénéfice brut estimé</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saleLinesBody">
+                                <tr class="empty-row">
+                                    <td colspan="8" class="empty-cell">
+                                        Ajoutez un produit pour commencer.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sale-summary">
+                        <div class="summary-line">
+                            <span>Nombre d'articles</span>
+                            <strong id="saleTotalUnits">0</strong>
+                        </div>
+                        <div class="summary-line">
+                            <span>Coût total des produits vendus</span>
+                            <strong id="saleTotalCost">0,00</strong>
+                        </div>
+                        <div class="summary-line">
+                            <span>Chiffre d'affaires</span>
+                            <strong id="saleTotalRevenue">0,00</strong>
+                        </div>
+                        <div class="summary-line summary-total">
+                            <span>Bénéfice brut estimé</span>
+                            <strong id="saleTotalProfit">0,00</strong>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="saleNotes">Notes</label>
+                        <textarea id="saleNotes" name="saleNotes" rows="3"
+                                  maxlength="1000"
+                                  placeholder="Informations complémentaires..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="validateSaleButton"
+                                class="button button-primary">
+                            Valider la vente
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="save-sale-draft">
+                            Enregistrer comme brouillon
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="reset-sale-form">
+                            Réinitialiser
+                        </button>
+                        <button type="button" class="button button-danger-outline"
+                                data-action="cancel-sale">
+                            Annuler
+                        </button>
+                    </div>
+
+                    <p class="form-help">
+                        Une vente ne peut pas être validée si la quantité demandée dépasse
+                        le stock disponible. Le mouvement de stock et la transaction
+                        doivent être enregistrés ensemble.
+                    </p>
+                </section>
+            </form>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Ventes récentes</h3>
+                        <p>Consultez les transactions enregistrées.</p>
+                    </div>
+                    <button type="button" class="text-button"
+                            data-action="navigate-history">
+                        Voir l'historique complet
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="recentSalesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Référence</th>
+                                <th>Produits</th>
+                                <th>Quantité</th>
+                                <th>Montant</th>
+                                <th>Bénéfice brut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentSalesBody">
+                            <tr>
+                                <td colspan="7" class="empty-cell">
+                                    Aucune vente enregistrée.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             7. ACHATS
+        ================================================== -->
+        <section id="view-purchases"
+                 class="app-view"
+                 data-view-panel="purchases"
+                 aria-labelledby="purchasesTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">APPROVISIONNEMENT</p>
+                    <h2 id="purchasesTitle">Enregistrer un achat</h2>
+                    <p>Les achats validés augmentent le stock disponible.</p>
+                </div>
+            </div>
+
+            <form id="purchaseForm" autocomplete="off">
+                <section class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Informations de l'achat</h3>
+                            <p>Conservez les coûts et les quantités de chaque approvisionnement.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="purchaseDate">Date et heure d'achat</label>
+                            <input type="datetime-local" id="purchaseDate"
+                                   name="purchaseDate" required>
+                        </div>
+                        <div class="field-group">
+                            <label for="purchaseReference">Référence d'achat</label>
+                            <input type="text" id="purchaseReference"
+                                   name="purchaseReference" readonly
+                                   placeholder="Générée automatiquement">
+                        </div>
+                        <div class="field-group">
+                            <label for="purchaseCurrency">Devise de l'achat</label>
+                            <select id="purchaseCurrency" name="purchaseCurrency" required>
+                                <option value="HTG">HTG — Gourde haïtienne</option>
+                                <option value="USD" selected>USD — Dollar américain</option>
+                                <option value="EUR">EUR — Euro</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label for="purchaseSupplier">Fournisseur (facultatif)</label>
+                            <input type="text" id="purchaseSupplier"
+                                   name="purchaseSupplier" maxlength="120"
+                                   placeholder="Nom du fournisseur">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Produits achetés</h3>
+                            <p>Sélectionnez les produits existants dans le catalogue.</p>
+                        </div>
+                        <button type="button" class="button button-secondary"
+                                data-action="add-purchase-line">
+                            + Ajouter un produit
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="purchaseLinesTable">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Quantité achetée</th>
+                                    <th>Prix d'achat unitaire</th>
+                                    <th>Total ligne</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseLinesBody">
+                                <tr class="empty-row">
+                                    <td colspan="5" class="empty-cell">
+                                        Ajoutez un produit pour commencer.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="purchase-summary">
+                        <div class="summary-line">
+                            <span>Quantité totale achetée</span>
+                            <strong id="purchaseTotalUnits">0</strong>
+                        </div>
+                        <div class="summary-line summary-total">
+                            <span>Montant total de l'achat</span>
+                            <strong id="purchaseTotalAmount">0,00</strong>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="purchaseNotes">Notes</label>
+                        <textarea id="purchaseNotes" name="purchaseNotes"
+                                  rows="3" maxlength="1000"
+                                  placeholder="Informations complémentaires..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" id="validatePurchaseButton"
+                                class="button button-primary">
+                            Valider l'achat
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="save-purchase-draft">
+                            Enregistrer comme brouillon
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="reset-purchase-form">
+                            Réinitialiser
+                        </button>
+                        <button type="button" class="button button-danger-outline"
+                                data-action="cancel-purchase">
+                            Annuler
+                        </button>
+                    </div>
+
+                    <p class="form-help">
+                        Chaque approvisionnement conserve son coût d'achat historique.
+                        Les achats validés sont ajoutés au stock et à l'historique.
+                    </p>
+                </section>
+            </form>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Historique des achats</h3>
+                        <p>Retrouvez les montants et les détails de chaque réception.</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="purchasesHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Référence</th>
+                                <th>Fournisseur</th>
+                                <th>Produits</th>
+                                <th>Quantité</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchasesHistoryBody">
+                            <tr>
+                                <td colspan="7" class="empty-cell">
+                                    Aucun achat enregistré.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             8. INVENTAIRE ET SORTIES DE STOCK
+        ================================================== -->
+        <section id="view-inventory"
+                 class="app-view"
+                 data-view-panel="inventory"
+                 aria-labelledby="inventoryTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">CONTRÔLE DES STOCKS</p>
+                    <h2 id="inventoryTitle">Inventaire physique</h2>
+                    <p>Comparez le stock théorique au stock réellement compté.</p>
+                </div>
+                <div class="heading-actions">
+                    <button type="button" class="button button-secondary"
+                            data-action="export-inventory">
+                        Exporter l'inventaire
+                    </button>
+                    <button type="button" class="button button-primary"
+                            data-action="new-inventory">
+                        Nouvel inventaire
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <span>Références inventoriées</span>
+                    <strong id="inventoryProductCount">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Écarts positifs</span>
+                    <strong id="inventoryPositiveVariance">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Écarts négatifs</span>
+                    <strong id="inventoryNegativeVariance">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Écart total en unités</span>
+                    <strong id="inventoryTotalVariance">0</strong>
+                </article>
+            </div>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Session d'inventaire</h3>
+                        <p>Chaque session doit être datée et conservée.</p>
+                    </div>
+                </div>
+
+                <form id="inventoryForm" autocomplete="off">
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="inventoryDate">Date de l'inventaire</label>
+                            <input type="datetime-local" id="inventoryDate"
+                                   name="inventoryDate" required>
+                        </div>
+                        <div class="field-group">
+                            <label for="inventoryReference">Référence</label>
+                            <input type="text" id="inventoryReference"
+                                   name="inventoryReference" readonly
+                                   placeholder="Générée automatiquement">
+                        </div>
+                        <div class="field-group">
+                            <label for="inventoryNotes">Observations</label>
+                            <input type="text" id="inventoryNotes"
+                                   name="inventoryNotes" maxlength="500"
+                                   placeholder="Notes de comptage">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="inventoryLinesTable">
+                            <thead>
+                                <tr>
+                                    <th>Emplacement</th>
+                                    <th>Produit</th>
+                                    <th>Stock théorique</th>
+                                    <th>Stock physique</th>
+                                    <th>Écart</th>
+                                    <th>Coût unitaire</th>
+                                    <th>Valeur de l'écart</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryLinesBody">
+                                <tr>
+                                    <td colspan="7" class="empty-cell">
+                                        Lancez une session pour afficher les produits.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="button button-secondary"
+                                data-action="load-inventory-count">
+                            Charger les stocks théoriques
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="recalculate-inventory">
+                            Recalculer les écarts
+                        </button>
+                        <button type="submit" class="button button-primary"
+                                id="saveInventoryButton">
+                            Enregistrer la session
+                        </button>
+                        <button type="button" class="button button-danger-outline"
+                                data-action="cancel-inventory">
+                            Annuler
+                        </button>
+                    </div>
+
+                    <p class="form-help">
+                        Les écarts doivent être conservés dans une session datée.
+                        Les pertes et casses doivent rester distinctes des ventes.
+                    </p>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Historique des inventaires</h3>
+                        <p>Consultez les sessions précédentes et leurs écarts.</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="inventoryHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Référence</th>
+                                <th>Produits comptés</th>
+                                <th>Écarts</th>
+                                <th>Observations</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryHistoryBody">
+                            <tr>
+                                <td colspan="6" class="empty-cell">
+                                    Aucun inventaire enregistré.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Sorties et pertes de stock</h3>
+                        <p>Enregistrez les casses, pertes et sorties hors vente.</p>
+                    </div>
+                </div>
+
+                <form id="stockExitForm" autocomplete="off">
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="stockExitDate">Date de sortie</label>
+                            <input type="datetime-local" id="stockExitDate"
+                                   name="stockExitDate" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="stockExitProduct">Produit</label>
+                            <select id="stockExitProduct" name="stockExitProduct" required>
+                                <option value="">Choisir un produit</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="stockExitQuantity">Quantité</label>
+                            <input type="number" id="stockExitQuantity"
+                                   name="stockExitQuantity" min="1" step="1" required>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="stockExitReason">Motif</label>
+                            <select id="stockExitReason" name="stockExitReason" required>
+                                <option value="">Choisir un motif</option>
+                                <option value="damage">Casse ou détérioration</option>
+                                <option value="loss">Perte</option>
+                                <option value="personal-use">Utilisation interne</option>
+                                <option value="adjustment">Ajustement autorisé</option>
+                                <option value="other">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="stockExitNotes">Commentaires</label>
+                        <textarea id="stockExitNotes" name="stockExitNotes"
+                                  rows="2" maxlength="500"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            Enregistrer la sortie
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="reset-stock-exit">
+                            Réinitialiser
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Historique des sorties de stock</h3>
+                        <p>Consultez les pertes et autres mouvements non liés aux ventes.</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="stockExitsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Produit</th>
+                                <th>Quantité</th>
+                                <th>Motif</th>
+                                <th>Commentaires</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockExitsBody">
+                            <tr>
+                                <td colspan="6" class="empty-cell">
+                                    Aucune sortie enregistrée.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             9. HISTORIQUE DES OPÉRATIONS
+        ================================================== -->
+        <section id="view-history"
+                 class="app-view"
+                 data-view-panel="history"
+                 aria-labelledby="historyTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">ARCHIVES</p>
+                    <h2 id="historyTitle">Historique des opérations</h2>
+                    <p>Retrouvez les ventes, achats et mouvements de stock.</p>
+                </div>
+
+                <button type="button" class="button button-secondary"
+                        data-action="export-history">
+                    Exporter l'historique
+                </button>
+            </div>
+
+            <section class="panel">
+                <div class="filter-bar">
+                    <div class="field-group">
+                        <label for="historyType">Type d'opération</label>
+                        <select id="historyType">
+                            <option value="all">Toutes les opérations</option>
+                            <option value="sale">Ventes</option>
+                            <option value="purchase">Achats</option>
+                            <option value="inventory">Inventaires</option>
+                            <option value="stock-exit">Sorties de stock</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="historyStartDate">Date de début</label>
+                        <input type="date" id="historyStartDate">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="historyEndDate">Date de fin</label>
+                        <input type="date" id="historyEndDate">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="historySearch">Rechercher</label>
+                        <input type="search" id="historySearch"
+                               placeholder="Référence ou produit..." autocomplete="off">
+                    </div>
+
+                    <button type="button" class="button button-secondary"
+                            data-action="filter-history">
+                        Filtrer
+                    </button>
+
+                    <button type="button" class="button button-secondary"
+                            data-action="reset-history-filters">
+                        Réinitialiser
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Date et heure</th>
+                                <th>Référence</th>
+                                <th>Type</th>
+                                <th>Détails</th>
+                                <th>Montant</th>
+                                <th>Devise</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="8" class="empty-cell">
+                                    Aucune opération chargée.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <span id="historyResultCount">0 opération</span>
+                    <div class="pagination-controls">
+                        <button type="button" class="button button-secondary button-small"
+                                data-action="history-previous-page">
+                            Précédent
+                        </button>
+                        <span id="historyPageInfo">Page 1</span>
+                        <button type="button" class="button button-secondary button-small"
+                                data-action="history-next-page">
+                            Suivant
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Détails de l'opération</h3>
+                        <p>Les détails de l'élément sélectionné apparaîtront ici.</p>
+                    </div>
+                    <button type="button" class="button button-secondary"
+                            data-action="close-history-details">
+                        Fermer les détails
+                    </button>
+                </div>
+
+                <div id="historyDetails" class="details-container">
+                    <p class="empty-state">
+                        Sélectionnez une opération dans l'historique.
+                    </p>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             10. RAPPORTS JOURNALIERS, MENSUELS ET ANNUELS
+        ================================================== -->
+        <section id="view-reports"
+                 class="app-view"
+                 data-view-panel="reports"
+                 aria-labelledby="reportsTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">ANALYSE COMMERCIALE</p>
+                    <h2 id="reportsTitle">Rapports et performances</h2>
+                    <p>Analysez les ventes, les coûts, les bénéfices et les stocks.</p>
+                </div>
+
+                <div class="heading-actions">
+                    <button type="button" class="button button-secondary"
+                            data-action="export-report">
+                        Exporter le rapport
+                    </button>
+                    <button type="button" class="button button-primary"
+                            data-action="generate-report">
+                        Générer le rapport
+                    </button>
+                </div>
+            </div>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Paramètres du rapport</h3>
+                        <p>Choisissez une période précise à analyser.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label for="reportType">Type de rapport</label>
+                        <select id="reportType">
+                            <option value="daily">Rapport journalier</option>
+                            <option value="monthly">Rapport mensuel</option>
+                            <option value="yearly">Rapport annuel</option>
+                            <option value="custom">Période personnalisée</option>
+                            <option value="products">Performance par produit</option>
+                            <option value="stock">Rapport de stock</option>
+                            <option value="purchases">Rapport des achats</option>
+                            <option value="comparison">Comparaison de périodes</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="reportDate">Jour du rapport</label>
+                        <input type="date" id="reportDate">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="reportMonth">Mois du rapport</label>
+                        <input type="month" id="reportMonth">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="reportYear">Année</label>
+                        <input type="number" id="reportYear"
+                               min="2000" max="2200" step="1"
+                               placeholder="Année">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="reportStartDate">Début de période</label>
+                        <input type="date" id="reportStartDate">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="reportEndDate">Fin de période</label>
+                        <input type="date" id="reportEndDate">
+                    </div>
+
+                    <div class="field-group">
+                        <label for="reportCurrency">Devise d'affichage</label>
+                        <select id="reportCurrency">
+                            <option value="HTG">HTG</option>
+                            <option value="USD" selected>USD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="reportProductFilter">Produit</label>
+                        <select id="reportProductFilter">
+                            <option value="all">Tous les produits</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="button button-primary"
+                            data-action="generate-report">
+                        Générer le rapport
+                    </button>
+                    <button type="button" class="button button-secondary"
+                            data-action="reset-report-filters">
+                        Réinitialiser les filtres
+                    </button>
+                    <button type="button" class="button button-secondary"
+                            data-action="print-report">
+                        Imprimer
+                    </button>
+                </div>
+
+                <p class="form-help">
+                    Les rapports doivent être calculés à partir des transactions
+                    enregistrées pour la période sélectionnée. Une devise ne doit
+                    pas être convertie sans taux de change configuré.
+                </p>
+            </section>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <span>Nombre de ventes</span>
+                    <strong id="reportSalesCount">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Quantité vendue</span>
+                    <strong id="reportUnitsSold">0</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Chiffre d'affaires</span>
+                    <strong id="reportRevenue">0,00</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Coût des produits vendus</span>
+                    <strong id="reportCostOfGoods">0,00</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Bénéfice brut réalisé</span>
+                    <strong id="reportGrossProfit">0,00</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Achats de la période</span>
+                    <strong id="reportPurchasesTotal">0,00</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Valeur actuelle du stock</span>
+                    <strong id="reportStockValue">0,00</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Produits en rupture</span>
+                    <strong id="reportStockouts">0</strong>
+                </article>
+            </div>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Résumé de la période</h3>
+                        <p id="reportPeriodLabel">Aucune période sélectionnée.</p>
+                    </div>
+                </div>
+
+                <div id="reportSummary" class="report-summary">
+                    <p class="empty-state">
+                        Configurez la période et générez un rapport.
+                    </p>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Détail des ventes</h3>
+                        <p>Transactions prises en compte dans le rapport.</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="reportSalesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Référence</th>
+                                <th>Produits</th>
+                                <th>Quantité</th>
+                                <th>Chiffre d'affaires</th>
+                                <th>Coût vendu</th>
+                                <th>Bénéfice brut</th>
+                                <th>Devise</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportSalesBody">
+                            <tr>
+                                <td colspan="8" class="empty-cell">
+                                    Aucun rapport généré.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Performance par produit</h3>
+                        <p>Quantités vendues, revenus et bénéfices par référence.</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="reportProductsTable">
+                        <thead>
+                            <tr>
+                                <th>Emplacement</th>
+                                <th>Produit</th>
+                                <th>Quantité vendue</th>
+                                <th>Chiffre d'affaires</th>
+                                <th>Coût vendu</th>
+                                <th>Bénéfice brut</th>
+                                <th>Stock actuel</th>
+                                <th>État</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportProductsBody">
+                            <tr>
+                                <td colspan="8" class="empty-cell">
+                                    Aucun rapport généré.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Comparaison des périodes</h3>
+                        <p>Comparez deux intervalles sans mélanger les devises.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label for="comparisonStartA">Période A — début</label>
+                        <input type="date" id="comparisonStartA">
+                    </div>
+                    <div class="field-group">
+                        <label for="comparisonEndA">Période A — fin</label>
+                        <input type="date" id="comparisonEndA">
+                    </div>
+                    <div class="field-group">
+                        <label for="comparisonStartB">Période B — début</label>
+                        <input type="date" id="comparisonStartB">
+                    </div>
+                    <div class="field-group">
+                        <label for="comparisonEndB">Période B — fin</label>
+                        <input type="date" id="comparisonEndB">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="button button-primary"
+                            data-action="compare-periods">
+                        Comparer les périodes
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="comparisonTable">
+                        <thead>
+                            <tr>
+                                <th>Indicateur</th>
+                                <th>Période A</th>
+                                <th>Période B</th>
+                                <th>Variation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTableBody">
+                            <tr>
+                                <td colspan="4" class="empty-cell">
+                                    Sélectionnez deux périodes pour comparer les résultats.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             11. PARAMÈTRES
+        ================================================== -->
+        <section id="view-settings"
+                 class="app-view"
+                 data-view-panel="settings"
+                 aria-labelledby="settingsTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">CONFIGURATION</p>
+                    <h2 id="settingsTitle">Paramètres de Samantha</h2>
+                    <p>Configurez les devises, le stockage et les préférences.</p>
+                </div>
+            </div>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Informations de l'entreprise</h3>
+                        <p>Ces informations peuvent être utilisées sur les rapports.</p>
+                    </div>
+                </div>
+
+                <form id="businessSettingsForm" autocomplete="off">
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="businessName">Nom de l'entreprise</label>
+                            <input type="text" id="businessName"
+                                   name="businessName" maxlength="150"
+                                   placeholder="Nom de l'entreprise">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="businessPhone">Téléphone</label>
+                            <input type="tel" id="businessPhone"
+                                   name="businessPhone" maxlength="50"
+                                   placeholder="Téléphone">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="businessEmail">Adresse e-mail</label>
+                            <input type="email" id="businessEmail"
+                                   name="businessEmail" maxlength="150"
+                                   placeholder="Adresse e-mail">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="businessAddress">Adresse</label>
+                            <input type="text" id="businessAddress"
+                                   name="businessAddress" maxlength="250"
+                                   placeholder="Adresse de l'entreprise">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            Enregistrer les informations
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Devises et taux de change</h3>
+                        <p>Les taux sont configurables et ne doivent pas être inventés.</p>
+                    </div>
+                </div>
+
+                <form id="currencySettingsForm" autocomplete="off">
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="baseCurrency">Devise de référence</label>
+                            <select id="baseCurrency" name="baseCurrency">
+                                <option value="HTG">HTG — Gourde haïtienne</option>
+                                <option value="USD" selected>USD — Dollar américain</option>
+                                <option value="EUR">EUR — Euro</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="rateHTG">Taux HTG par unité de référence</label>
+                            <input type="number" id="rateHTG" name="rateHTG"
+                                   min="0" step="0.0001" inputmode="decimal"
+                                   placeholder="Saisir le taux vérifié">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="rateUSD">Taux USD par unité de référence</label>
+                            <input type="number" id="rateUSD" name="rateUSD"
+                                   min="0" step="0.0001" inputmode="decimal"
+                                   placeholder="Saisir le taux vérifié">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="rateEUR">Taux EUR par unité de référence</label>
+                            <input type="number" id="rateEUR" name="rateEUR"
+                                   min="0" step="0.0001" inputmode="decimal"
+                                   placeholder="Saisir le taux vérifié">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="exchangeRateDate">Date de mise à jour des taux</label>
+                            <input type="date" id="exchangeRateDate"
+                                   name="exchangeRateDate">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            Enregistrer les taux
+                        </button>
+                        <button type="button" class="button button-secondary"
+                                data-action="reset-exchange-rates">
+                            Réinitialiser les taux
+                        </button>
+                    </div>
+
+                    <p class="form-help">
+                        Les taux doivent être saisis à partir d'une source vérifiée.
+                        Les transactions doivent conserver leur devise et leur montant
+                        d'origine, même si les taux changent ultérieurement.
+                    </p>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Gestion du stock et des coûts</h3>
+                        <p>Choisissez la méthode utilisée pour calculer les coûts.</p>
+                    </div>
+                </div>
+
+                <form id="stockSettingsForm">
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="costMethod">Méthode de valorisation du stock</label>
+                            <select id="costMethod" name="costMethod">
+                                <option value="weighted-average">Coût moyen pondéré</option>
+                                <option value="fifo">Premier entré, premier sorti (FIFO)</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="defaultLowStock">Seuil d'alerte par défaut</label>
+                            <input type="number" id="defaultLowStock"
+                                   name="defaultLowStock" min="0" step="1" value="5">
+                        </div>
+
+                        <div class="field-group">
+                            <label for="autoRefreshMinutes">Vérification périodique (minutes)</label>
+                            <input type="number" id="autoRefreshMinutes"
+                                   name="autoRefreshMinutes" min="1" step="1" value="10">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            Enregistrer les paramètres de stock
+                        </button>
+                    </div>
+
+                    <p class="form-help">
+                        Une vérification périodique des données locales ne synchronise
+                        pas automatiquement plusieurs appareils. Une synchronisation
+                        entre appareils nécessite un service distant configuré.
+                    </p>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Préférences d'affichage</h3>
+                        <p>Réglez l'interface selon votre appareil.</p>
+                    </div>
+                </div>
+
+                <form id="displaySettingsForm">
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label for="themePreference">Thème</label>
+                            <select id="themePreference" name="themePreference">
+                                <option value="system">Selon l'appareil</option>
+                                <option value="light">Clair</option>
+                                <option value="dark">Sombre</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="languagePreference">Langue de l'interface</label>
+                            <select id="languagePreference" name="languagePreference">
+                                <option value="fr" selected>Français</option>
+                            </select>
+                        </div>
+
+                        <div class="field-group">
+                            <label for="numberFormat">Format numérique</label>
+                            <select id="numberFormat" name="numberFormat">
+                                <option value="fr-FR">1 234,56</option>
+                                <option value="en-US">1,234.56</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            Enregistrer les préférences
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Stockage et sauvegarde</h3>
+                        <p>Exportez vos données pour conserver une copie de sécurité.</p>
+                    </div>
+                </div>
+
+                <div class="storage-information">
+                    <div class="storage-info-item">
+                        <span>État de la base de données</span>
+                        <strong id="databaseStatus">Vérification...</strong>
+                    </div>
+                    <div class="storage-info-item">
+                        <span>Dernière sauvegarde</span>
+                        <strong id="lastBackupDate">Aucune sauvegarde connue</strong>
+                    </div>
+                    <div class="storage-info-item">
+                        <span>Dernière vérification</span>
+                        <strong id="lastSyncDate">Non disponible</strong>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="button button-primary"
+                            data-action="export-backup">
+                        Exporter une sauvegarde
+                    </button>
+
+                    <button type="button" class="button button-secondary"
+                            data-action="import-backup">
+                        Importer une sauvegarde
+                    </button>
+
+                    <button type="button" class="button button-secondary"
+                            data-action="verify-database">
+                        Vérifier la base de données
+                    </button>
+
+                    <button type="button" class="button button-secondary"
+                            data-action="refresh-data">
+                        Actualiser les données
+                    </button>
+                </div>
+
+                <input type="file" id="backupFileInput"
+                       accept=".json,application/json" hidden>
+
+                <p class="form-help">
+                    Une sauvegarde doit être vérifiée avant importation. L'importation
+                    ne doit pas écraser les données existantes sans confirmation.
+                </p>
+            </section>
+
+            <section class="panel danger-zone">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Zone de maintenance</h3>
+                        <p>Ces actions peuvent modifier ou effacer des données.</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="button button-secondary"
+                            data-action="clear-cache">
+                        Réinitialiser les données temporaires
+                    </button>
+
+                    <button type="button" class="button button-danger"
+                            data-action="reset-application">
+                        Réinitialiser l'application
+                    </button>
+                </div>
+
+                <p class="form-help">
+                    La réinitialisation complète doit exiger une confirmation explicite
+                    et une sauvegarde préalable. Elle ne doit jamais être exécutée
+                    accidentellement.
+                </p>
+            </section>
+        </section>
+
+        <!-- =================================================
+             12. OUTILS DE SAUVEGARDE ET EXPORT
+        ================================================== -->
+        <section id="view-backup"
+                 class="app-view"
+                 data-view-panel="backup"
+                 aria-labelledby="backupTitle"
+                 hidden>
+
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">PROTECTION DES DONNÉES</p>
+                    <h2 id="backupTitle">Sauvegarde et exportation</h2>
+                    <p>Conservez et restaurez vos données commerciales.</p>
+                </div>
+            </div>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Créer une sauvegarde complète</h3>
+                        <p>Préparez une copie des produits, ventes, achats et inventaires.</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="button button-primary"
+                            data-action="export-backup">
+                        Télécharger la sauvegarde complète
+                    </button>
+                    <button type="button" class="button button-secondary"
+                            data-action="export-products">
+                        Exporter les produits
+                    </button>
+                    <button type="button" class="button button-secondary"
+                            data-action="export-history">
+                        Exporter les opérations
+                    </button>
+                    <button type="button" class="button button-secondary"
+                            data-action="export-report">
+                        Exporter un rapport
+                    </button>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Restaurer une sauvegarde</h3>
+                        <p>Choisissez un fichier de sauvegarde valide.</p>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="backupRestoreFile">Fichier de sauvegarde JSON</label>
+                    <input type="file" id="backupRestoreFile"
+                           accept=".json,application/json">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="button button-primary"
+                            data-action="validate-backup-file">
+                        Vérifier le fichier
+                    </button>
+                    <button type="button" class="button button-secondary"
+                            data-action="restore-backup">
+                        Restaurer les données
+                    </button>
+                </div>
+
+                <div id="backupValidationResult" class="details-container"
+                     aria-live="polite">
+                    <p class="empty-state">
+                        Aucun fichier de sauvegarde sélectionné.
+                    </p>
+                </div>
+            </section>
+        </section>
+
+        <!-- =================================================
+             13. FENÊTRE DE CONFIRMATION
+        ================================================== -->
+        <dialog id="confirmDialog" class="app-dialog">
+            <form method="dialog" id="confirmDialogForm">
+                <div class="dialog-header">
+                    <h2 id="confirmDialogTitle">Confirmer l'action</h2>
+                    <button type="button" class="icon-button"
+                            data-action="close-confirm-dialog"
+                            aria-label="Fermer">
+                        ×
+                    </button>
+                </div>
+
+                <div id="confirmDialogMessage" class="dialog-body">
+                    Voulez-vous continuer ?
+                </div>
+
+                <div class="dialog-actions">
+                    <button type="button" class="button button-secondary"
+                            data-action="close-confirm-dialog">
+                        Annuler
+                    </button>
+                    <button type="button" class="button button-danger"
+                            id="confirmDialogAccept"
+                            data-action="confirm-dialog-accept">
+                        Confirmer
+                    </button>
+                </div>
+            </form>
+        </dialog>
+
+        <!-- =================================================
+             14. FENÊTRE DE DÉTAIL
+        ================================================== -->
+        <dialog id="detailsDialog" class="app-dialog">
+            <div class="dialog-header">
+                <h2 id="detailsDialogTitle">Détails</h2>
+                <button type="button" class="icon-button"
+                        data-action="close-details-dialog"
+                        aria-label="Fermer">
+                    ×
+                </button>
+            </div>
+
+            <div id="detailsDialogContent" class="dialog-body">
+                <p class="empty-state">Aucun détail disponible.</p>
+            </div>
+
+            <div class="dialog-actions">
+                <button type="button" class="button button-secondary"
+                        data-action="close-details-dialog">
+                    Fermer
+                </button>
+                <button type="button" class="button button-primary"
+                        data-action="print-details">
+                    Imprimer
+                </button>
+            </div>
+        </dialog>
+
+        <!-- =================================================
+             15. TOASTS ET NOTIFICATIONS
+        ================================================== -->
+        <div id="toastContainer"
+             class="toast-container"
+             aria-live="polite"
+             aria-atomic="true">
+        </div>
+
+        <div id="globalLoading"
+             class="global-loading"
+             role="status"
+             aria-live="polite"
+             hidden>
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span id="globalLoadingText">Chargement...</span>
+        </div>
+
+        <!-- =================================================
+             16. PIED DE PAGE
+        ================================================== -->
+        <footer id="appFooter" class="app-footer">
+            <div>
+                <span>©</span>
+                <span id="footerYear"></span>
+                <strong>Samantha</strong>
+                <span>— Gestion commerciale</span>
+            </div>
+
+            <div class="footer-actions">
+                <span id="appVersion">Version 1.0.0</span>
+                <button type="button" class="text-button"
+                        data-action="save-all">
+                    Enregistrer les modifications
+                </button>
+            </div>
+        </footer>
+
+    </main>
+</div>
+
+</body>
+</html>
