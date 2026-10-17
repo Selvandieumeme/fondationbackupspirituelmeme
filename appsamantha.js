@@ -1488,253 +1488,393 @@ function renderRecentSales() {
 
 
 
-    /* ========================================================
-       7. ACHATS
-    ======================================================== */
 
-    function createPurchaseLineRow() {
-        const tbody = byId("purchaseLinesBody");
-        if (!tbody) return;
 
-        const empty = tbody.querySelector(".empty-row");
-        if (empty) tbody.innerHTML = "";
 
-        const tr = document.createElement("tr");
-        tr.className = "purchase-line";
+/* ========================================================
+   7. ACHATS
+   50 emplacements dynamiques
+   4 produits de référence :
+   Boxer, Culotte-A, Culotte-B, Collans
+======================================================== */
 
-        tr.innerHTML = `
-            <td>
-                <select class="purchase-product" aria-label="Produit acheté" required>
-                    ${productSelectOptions("", false)}
-                </select>
-            </td>
-            <td>
-                <input class="purchase-quantity" type="number" min="1" step="1"
-                       value="1" inputmode="numeric" aria-label="Quantité achetée" required>
-            </td>
-            <td>
-                <input class="purchase-price" type="number" min="0" step="0.01"
-                       value="0.00" inputmode="decimal" aria-label="Prix d'achat unitaire" required>
-            </td>
-            <td class="purchase-line-total">0,00</td>
-            <td>
-                <button type="button" class="button button-small button-danger-outline"
-                        data-action="remove-purchase-line" aria-label="Retirer la ligne">×</button>
-            </td>
-        `;
+const PURCHASE_PRODUCT_NAMES = [
+    "Boxer",
+    "Culotte-A",
+    "Culotte-B",
+    "Collans"
+];
 
-        tbody.appendChild(tr);
-        updatePurchaseLine(tr);
-        calculatePurchase();
+function createPurchaseLineRow() {
+    const tbody = byId("purchaseLinesBody");
+    if (!tbody) return;
+
+    const empty = tbody.querySelector(".empty-row");
+    if (empty) tbody.innerHTML = "";
+
+    const tr = document.createElement("tr");
+    tr.className = "purchase-line";
+
+    tr.innerHTML = `
+        <td>
+            <select class="purchase-product"
+                    aria-label="Produit acheté"
+                    required>
+                ${productSelectOptions("", false)}
+            </select>
+        </td>
+        <td>
+            <input class="purchase-quantity"
+                   type="number"
+                   min="1"
+                   step="1"
+                   value="1"
+                   inputmode="numeric"
+                   aria-label="Quantité achetée"
+                   required>
+        </td>
+        <td>
+            <input class="purchase-price"
+                   type="number"
+                   min="0"
+                   step="0.01"
+                   value="0.00"
+                   inputmode="decimal"
+                   aria-label="Prix d'achat unitaire"
+                   required>
+        </td>
+        <td class="purchase-line-total">0,00</td>
+        <td>
+            <button type="button"
+                    class="button button-small button-danger-outline"
+                    data-action="remove-purchase-line"
+                    aria-label="Retirer la ligne">×</button>
+        </td>
+    `;
+
+    tbody.appendChild(tr);
+
+    const productSelect = $(".purchase-product", tr);
+
+    if (productSelect) {
+        productSelect.innerHTML = productSelectOptions("", false);
+
+        // Prioriser l'affichage des quatre produits de référence
+        // lorsqu'ils existent déjà dans la liste des produits.
+        const options = Array.from(productSelect.options);
+
+        const referenceOptions = options.filter(option =>
+            PURCHASE_PRODUCT_NAMES.some(name =>
+                option.textContent.trim().includes(name)
+            )
+        );
+
+        referenceOptions.forEach(option => {
+            productSelect.insertBefore(option, productSelect.options[1] || null);
+        });
     }
 
-    function updatePurchaseLine(row) {
+    updatePurchaseLine(tr);
+    calculatePurchase();
+}
+
+function updatePurchaseLine(row) {
+    if (!row) return;
+
+    const product = getProduct($(".purchase-product", row)?.value || "");
+    const quantity = integer($(".purchase-quantity", row)?.value, 0);
+    const currency = validCurrency($("#purchaseCurrency")?.value || "USD");
+    const input = $(".purchase-price", row);
+
+    let price = Math.max(0, toNumber(input?.value));
+
+    if (product && input && !input.dataset.userEdited) {
+        const converted = convertCurrency(
+            productCost(product),
+            productCurrency(product),
+            currency
+        );
+
+        price = converted === null ? productCost(product) : converted;
+        input.value = price.toFixed(2);
+    }
+
+    setLineText(
+        row,
+        ".purchase-line-total",
+        formatMoney(roundMoney(quantity * price), currency)
+    );
+
+    calculatePurchase();
+}
+
+function readPurchaseLines() {
+    return $$("#purchaseLinesBody .purchase-line").map(row => {
         const product = getProduct($(".purchase-product", row)?.value || "");
         const quantity = integer($(".purchase-quantity", row)?.value, 0);
-        const price = Math.max(0, toNumber($(".purchase-price", row)?.value));
+        const unitCost = roundMoney($(".purchase-price", row)?.value);
         const currency = validCurrency($("#purchaseCurrency")?.value || "USD");
 
-        if (product) {
-            const input = $(".purchase-price", row);
-            if (input && !input.dataset.userEdited) {
-                const converted = convertCurrency(productCost(product), productCurrency(product), currency);
-                input.value = (converted === null ? productCost(product) : converted).toFixed(2);
-            }
-        }
+        if (!product || quantity <= 0) return null;
 
-        setLineText(row, ".purchase-line-total",
-            formatMoney(roundMoney(quantity * price), currency));
-
-        calculatePurchase();
-    }
-
-    function readPurchaseLines() {
-        return $$("#purchaseLinesBody .purchase-line").map(row => {
-            const product = getProduct($(".purchase-product", row)?.value || "");
-            const quantity = integer($(".purchase-quantity", row)?.value, 0);
-            const unitCost = roundMoney($(".purchase-price", row)?.value);
-            const currency = validCurrency($("#purchaseCurrency")?.value || "USD");
-
-            if (!product || quantity <= 0) return null;
-
-            return {
-                productId: product.id,
-                slot: product.slot,
-                name: product.name,
-                reference: product.reference || "",
-                quantity,
-                unitCost,
-                unitPrice: unitCost,
-                currency
-            };
-        }).filter(Boolean);
-    }
-
-    function calculatePurchase() {
-        const lines = readPurchaseLines();
-        const units = lines.reduce((sum, line) => sum + line.quantity, 0);
-        const total = roundMoney(lines.reduce((sum, line) =>
-            sum + line.quantity * line.unitCost, 0
-        ));
-
-        const currency = validCurrency($("#purchaseCurrency")?.value || "USD");
-        setText("purchaseTotalUnits", formatNumber(units, 0));
-        setText("purchaseTotalAmount", formatMoney(total, currency));
-    }
-
-    function resetPurchaseForm() {
-        const form = byId("purchaseForm");
-        if (form) form.reset();
-
-        setValue("purchaseDate", localDateTimeValue());
-        setValue("purchaseReference", generateReference("ACH"));
-        setValue("purchaseCurrency", state.settings.displayCurrency || "USD");
-
-        setHTML("purchaseLinesBody", `
-            <tr class="empty-row">
-                <td colspan="5" class="empty-cell">Ajoutez un produit pour commencer.</td>
-            </tr>
-        `);
-
-        calculatePurchase();
-    }
-
-    async function handlePurchaseSubmit(event) {
-        event.preventDefault();
-
-        const lines = readPurchaseLines();
-        if (!lines.length) {
-            toast("Ajoutez au moins un produit à l'achat.", "error");
-            return;
-        }
-
-        const currency = validCurrency($("#purchaseCurrency")?.value || "USD");
-        const units = lines.reduce((sum, line) => sum + line.quantity, 0);
-        const total = roundMoney(lines.reduce((sum, line) =>
-            sum + line.quantity * line.unitCost, 0
-        ));
-
-        const purchase = {
-            id: uid("PUR"),
-            reference: $("#purchaseReference")?.value || generateReference("ACH"),
-            date: normalizeDate($("#purchaseDate")?.value) || nowISO(),
-            supplier: $("#purchaseSupplier")?.value.trim() || "",
-            currency,
-            notes: $("#purchaseNotes")?.value.trim() || "",
-            lines,
-            units,
-            total,
-            status: "validated",
-            createdAt: nowISO()
+        return {
+            productId: product.id,
+            slot: product.slot,
+            name: product.name,
+            reference: product.reference || "",
+            quantity,
+            unitCost,
+            unitPrice: unitCost,
+            currency
         };
+    }).filter(Boolean);
+}
 
-        showLoading("Enregistrement de l'achat...");
+function calculatePurchase() {
+    const lines = readPurchaseLines();
 
-        const snapshots = lines.map(line => {
-            const product = getProduct(line.productId);
-            return product ? { product, stock: productStock(product), cost: productCost(product) } : null;
-        }).filter(Boolean);
+    const units = lines.reduce(
+        (sum, line) => sum + line.quantity,
+        0
+    );
 
+    const total = roundMoney(
+        lines.reduce(
+            (sum, line) => sum + line.quantity * line.unitCost,
+            0
+        )
+    );
+
+    const currency = validCurrency($("#purchaseCurrency")?.value || "USD");
+
+    setText("purchaseTotalUnits", formatNumber(units, 0));
+    setText("purchaseTotalAmount", formatMoney(total, currency));
+}
+
+function resetPurchaseForm() {
+    const form = byId("purchaseForm");
+    if (form) form.reset();
+
+    setValue("purchaseDate", localDateTimeValue());
+    setValue("purchaseReference", generateReference("ACH"));
+    setValue("purchaseCurrency", state.settings.displayCurrency || "USD");
+
+    setHTML("purchaseLinesBody", `
+        <tr class="empty-row">
+            <td colspan="5" class="empty-cell">
+                Ajoutez un produit pour commencer.
+            </td>
+        </tr>
+    `);
+
+    calculatePurchase();
+}
+
+async function handlePurchaseSubmit(event) {
+    event.preventDefault();
+
+    const lines = readPurchaseLines();
+
+    if (!lines.length) {
+        toast("Ajoutez au moins un produit à l'achat.", "error");
+        return;
+    }
+
+    const currency = validCurrency($("#purchaseCurrency")?.value || "USD");
+
+    const units = lines.reduce(
+        (sum, line) => sum + line.quantity,
+        0
+    );
+
+    const total = roundMoney(
+        lines.reduce(
+            (sum, line) => sum + line.quantity * line.unitCost,
+            0
+        )
+    );
+
+    const purchase = {
+        id: uid("PUR"),
+        reference: $("#purchaseReference")?.value || generateReference("ACH"),
+        date: normalizeDate($("#purchaseDate")?.value) || nowISO(),
+        supplier: $("#purchaseSupplier")?.value.trim() || "",
+        currency,
+        notes: $("#purchaseNotes")?.value.trim() || "",
+        lines,
+        units,
+        total,
+        status: "validated",
+        createdAt: nowISO()
+    };
+
+    showLoading("Enregistrement de l'achat...");
+
+    // Une seule sauvegarde initiale par produit, même si
+    // le produit apparaît sur plusieurs lignes de l'achat.
+    const productIds = [...new Set(lines.map(line => line.productId))];
+
+    const snapshots = productIds.map(productId => {
+        const product = getProduct(productId);
+
+        return product
+            ? {
+                product,
+                stock: productStock(product),
+                purchasePrice: product.purchasePrice,
+                lastPurchaseCost: product.lastPurchaseCost
+            }
+            : null;
+    }).filter(Boolean);
+
+    try {
         try {
-            try {
-                for (const line of lines) {
-                    const product = getProduct(line.productId);
-                    if (!product) throw new Error("Un produit de l'achat n'existe plus.");
+            for (const productId of productIds) {
+                const product = getProduct(productId);
 
-                    const oldStock = productStock(product);
-                    const newStock = oldStock + line.quantity;
-                    const purchaseCost = line.unitCost;
-
-                    if (state.settings.costMethod === "weighted-average" && newStock > 0) {
-                        const purchaseCostInProductCurrency = convertCurrency(
-                            purchaseCost,
-                            currency,
-                            productCurrency(product)
-                        );
-
-                        if (purchaseCostInProductCurrency !== null) {
-                            product.purchasePrice = roundMoney(
-                                ((oldStock * productCost(product)) +
-                                    (line.quantity * purchaseCostInProductCurrency)) / newStock
-                            );
-                        }
-                    } else if (state.settings.costMethod === "fifo") {
-                        product.lastPurchaseCost = purchaseCost;
-                    }
-
-                    product.stock = newStock;
-                    product.updatedAt = nowISO();
-                    await writeOne("products", product);
+                if (!product) {
+                    throw new Error("Un produit de l'achat n'existe plus.");
                 }
 
-                await writeOne("purchases", purchase);
-                state.purchases.push(purchase);
-            } catch (error) {
-                snapshots.forEach(snapshot => {
-                    snapshot.product.stock = snapshot.stock;
-                    snapshot.product.purchasePrice = snapshot.cost;
-                });
+                const productLines = lines.filter(
+                    line => line.productId === productId
+                );
 
-                await Promise.all(snapshots.map(snapshot =>
-                    writeOne("products", snapshot.product)
-                ));
-                throw error;
+                const addedQuantity = productLines.reduce(
+                    (sum, line) => sum + line.quantity,
+                    0
+                );
+
+                const addedCost = productLines.reduce(
+                    (sum, line) => sum + line.quantity * line.unitCost,
+                    0
+                );
+
+                const purchaseUnitCost = addedQuantity > 0
+                    ? addedCost / addedQuantity
+                    : 0;
+
+                const oldStock = productStock(product);
+                const newStock = oldStock + addedQuantity;
+
+                if (
+                    state.settings.costMethod === "weighted-average" &&
+                    newStock > 0
+                ) {
+                    const purchaseCostInProductCurrency = convertCurrency(
+                        purchaseUnitCost,
+                        currency,
+                        productCurrency(product)
+                    );
+
+                    if (purchaseCostInProductCurrency !== null) {
+                        product.purchasePrice = roundMoney(
+                            (
+                                oldStock * productCost(product) +
+                                addedQuantity * purchaseCostInProductCurrency
+                            ) / newStock
+                        );
+                    }
+                } else if (state.settings.costMethod === "fifo") {
+                    product.lastPurchaseCost = purchaseUnitCost;
+                }
+
+                product.stock = newStock;
+                product.updatedAt = nowISO();
+
+                await writeOne("products", product);
             }
 
-            markSaved();
-            resetPurchaseForm();
-            renderAll();
-            toast(`Achat ${purchase.reference} enregistré.`, "success");
-        } finally {
-            hideLoading();
-        }
-    }
+            await writeOne("purchases", purchase);
+            state.purchases.push(purchase);
+        } catch (error) {
+            snapshots.forEach(snapshot => {
+                snapshot.product.stock = snapshot.stock;
+                snapshot.product.purchasePrice = snapshot.purchasePrice;
+                snapshot.product.lastPurchaseCost = snapshot.lastPurchaseCost;
+            });
 
-    async function savePurchaseDraft() {
-        const draft = {
-            id: uid("DRAFT"),
-            type: "purchase",
-            reference: $("#purchaseReference")?.value || generateReference("BROUILLON"),
-            date: $("#purchaseDate")?.value || localDateTimeValue(),
-            currency: validCurrency($("#purchaseCurrency")?.value),
-            supplier: $("#purchaseSupplier")?.value || "",
-            notes: $("#purchaseNotes")?.value || "",
-            lines: readPurchaseLines(),
-            updatedAt: nowISO()
-        };
+            await Promise.all(
+                snapshots.map(snapshot =>
+                    writeOne("products", snapshot.product)
+                )
+            );
 
-        state.drafts.push(draft);
-        await writeOne("drafts", draft);
-        toast("Brouillon d'achat enregistré.", "success");
-    }
-
-    function renderPurchasesHistory() {
-        const tbody = byId("purchasesHistoryBody");
-        if (!tbody) return;
-
-        const purchases = [...state.purchases]
-            .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        if (!purchases.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">Aucun achat enregistré.</td></tr>';
-            return;
+            throw error;
         }
 
-        tbody.innerHTML = purchases.map(purchase => `
+        markSaved();
+        resetPurchaseForm();
+        renderAll();
+
+        toast(`Achat ${purchase.reference} enregistré.`, "success");
+    } finally {
+        hideLoading();
+    }
+}
+
+async function savePurchaseDraft() {
+    const draft = {
+        id: uid("DRAFT"),
+        type: "purchase",
+        reference: $("#purchaseReference")?.value || generateReference("BROUILLON"),
+        date: $("#purchaseDate")?.value || localDateTimeValue(),
+        currency: validCurrency($("#purchaseCurrency")?.value),
+        supplier: $("#purchaseSupplier")?.value || "",
+        notes: $("#purchaseNotes")?.value || "",
+        lines: readPurchaseLines(),
+        updatedAt: nowISO()
+    };
+
+    state.drafts.push(draft);
+
+    await writeOne("drafts", draft);
+
+    toast("Brouillon d'achat enregistré.", "success");
+}
+
+function renderPurchasesHistory() {
+    const tbody = byId("purchasesHistoryBody");
+    if (!tbody) return;
+
+    const purchases = [...state.purchases]
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (!purchases.length) {
+        tbody.innerHTML = `
             <tr>
-                <td>${formatDate(purchase.date)}</td>
-                <td>${safeText(purchase.reference)}</td>
-                <td>${safeText(purchase.supplier || "—")}</td>
-                <td>${safeText((purchase.lines || []).map(line => line.name).join(", "))}</td>
-                <td>${formatNumber(purchase.units, 0)}</td>
-                <td>${formatMoney(purchase.total, purchase.currency)}</td>
-                <td>
-                    <button type="button" class="button button-small button-secondary"
-                            data-action="view-transaction" data-type="purchase" data-id="${safeText(purchase.id)}">Détails</button>
+                <td colspan="7" class="empty-cell">
+                    Aucun achat enregistré.
                 </td>
             </tr>
-        `).join("");
+        `;
+        return;
     }
+
+    tbody.innerHTML = purchases.map(purchase => `
+        <tr>
+            <td>${formatDate(purchase.date)}</td>
+            <td>${safeText(purchase.reference)}</td>
+            <td>${safeText(purchase.supplier || "—")}</td>
+            <td>${safeText((purchase.lines || []).map(line => line.name).join(", "))}</td>
+            <td>${formatNumber(purchase.units, 0)}</td>
+            <td>${formatMoney(purchase.total, purchase.currency)}</td>
+            <td>
+                <button type="button"
+                        class="button button-small button-secondary"
+                        data-action="view-transaction"
+                        data-type="purchase"
+                        data-id="${safeText(purchase.id)}">
+                    Détails
+                </button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+
+
+
 
     /* ========================================================
        8. INVENTAIRE PHYSIQUE ET SORTIES
