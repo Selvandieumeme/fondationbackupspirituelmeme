@@ -1080,306 +1080,413 @@ function renderProducts() {
         return (lines || []).some(line => line.currency && line.currency !== currency);
     }
 
-    /* ========================================================
-       6. VENTES
-    ======================================================== */
 
-    function createSaleLineRow() {
-        const tbody = byId("saleLinesBody");
-        if (!tbody) return;
 
-        const empty = tbody.querySelector(".empty-row");
-        if (empty) tbody.innerHTML = "";
 
-        const tr = document.createElement("tr");
-        tr.className = "sale-line";
-        tr.innerHTML = `
-            <td>
-                <select class="line-product" aria-label="Produit de la vente" required>
-                    ${productSelectOptions("", false)}
-                </select>
-            </td>
-            <td class="line-stock">—</td>
-            <td class="line-cost">—</td>
-            <td>
-                <input class="line-price" type="number" min="0" step="0.01"
-                       value="0.00" inputmode="decimal" aria-label="Prix de vente unitaire" required>
-            </td>
-            <td>
-                <input class="line-quantity" type="number" min="1" step="1"
-                       value="1" inputmode="numeric" aria-label="Quantité" required>
-            </td>
-            <td class="line-total">0,00</td>
-            <td class="line-profit">0,00</td>
-            <td>
-                <button type="button" class="button button-small button-danger-outline"
-                        data-action="remove-sale-line" aria-label="Retirer la ligne">×</button>
-            </td>
-        `;
 
-        tbody.appendChild(tr);
-        updateSaleLine(tr);
+
+
+/* ========================================================
+   6. VENTES
+   Produits dynamiques : 50 emplacements
+======================================================== */
+
+function createSaleLineRow() {
+    const tbody = byId("saleLinesBody");
+    if (!tbody) return;
+
+    const empty = tbody.querySelector(".empty-row");
+    if (empty) tbody.innerHTML = "";
+
+    const tr = document.createElement("tr");
+    tr.className = "sale-line";
+
+    tr.innerHTML = `
+        <td>
+            <select class="line-product"
+                    aria-label="Produit de la vente"
+                    required>
+                ${productSelectOptions("", false)}
+            </select>
+        </td>
+        <td class="line-stock">—</td>
+        <td class="line-cost">—</td>
+        <td>
+            <input class="line-price"
+                   type="number"
+                   min="0"
+                   step="0.01"
+                   value="0.00"
+                   inputmode="decimal"
+                   aria-label="Prix de vente unitaire"
+                   required>
+        </td>
+        <td>
+            <input class="line-quantity"
+                   type="number"
+                   min="1"
+                   step="1"
+                   value="1"
+                   inputmode="numeric"
+                   aria-label="Quantité"
+                   required>
+        </td>
+        <td class="line-total">0,00</td>
+        <td class="line-profit">0,00</td>
+        <td>
+            <button type="button"
+                    class="button button-small button-danger-outline"
+                    data-action="remove-sale-line"
+                    aria-label="Retirer la ligne">×</button>
+        </td>
+    `;
+
+    tbody.appendChild(tr);
+
+    // Actualiser la liste des produits dans la nouvelle ligne.
+    const productSelect = $(".line-product", tr);
+
+    if (productSelect) {
+        productSelect.innerHTML = productSelectOptions("", false);
+    }
+
+    updateSaleLine(tr);
+    calculateSale();
+}
+
+function updateSaleLine(row) {
+    if (!row) return;
+
+    const id = $(".line-product", row)?.value || "";
+    const product = getProduct(id);
+    const quantity = integer($(".line-quantity", row)?.value, 1);
+    const priceInput = $(".line-price", row);
+    const saleCurrency = validCurrency($("#saleCurrency")?.value || "USD");
+
+    if (!product) {
+        setLineText(row, ".line-stock", "—");
+        setLineText(row, ".line-cost", "—");
+        setLineText(row, ".line-total", formatMoney(0, saleCurrency));
+        setLineText(row, ".line-profit", formatMoney(0, saleCurrency));
         calculateSale();
+        return;
     }
 
-    function updateSaleLine(row) {
-        if (!row) return;
+    if (priceInput && !priceInput.dataset.userEdited) {
+        const converted = convertCurrency(
+            productPrice(product),
+            productCurrency(product),
+            saleCurrency
+        );
 
-        const id = $(".line-product", row)?.value || "";
-        const product = getProduct(id);
-        const quantity = integer($(".line-quantity", row)?.value, 1);
-        const priceInput = $(".line-price", row);
-        const saleCurrency = validCurrency($("#saleCurrency")?.value || "USD");
-
-        if (!product) {
-            setLineText(row, ".line-stock", "—");
-            setLineText(row, ".line-cost", "—");
-            setLineText(row, ".line-total", formatMoney(0, saleCurrency));
-            setLineText(row, ".line-profit", formatMoney(0, saleCurrency));
-            calculateSale();
-            return;
-        }
-
-        if (priceInput && !priceInput.dataset.userEdited) {
-            const converted = convertCurrency(productPrice(product), productCurrency(product), saleCurrency);
-            priceInput.value = converted === null
-                ? productPrice(product).toFixed(2)
-                : converted.toFixed(2);
-        }
-
-        const unitPrice = Math.max(0, toNumber(priceInput?.value));
-        const convertedCost = convertCurrency(productCost(product), productCurrency(product), saleCurrency);
-        const unitCost = convertedCost === null
-            ? productCost(product)
-            : convertedCost;
-
-        setLineText(row, ".line-stock", formatNumber(productStock(product), 0));
-        setLineText(row, ".line-cost", formatMoney(unitCost, saleCurrency));
-        setLineText(row, ".line-total", formatMoney(roundMoney(unitPrice * quantity), saleCurrency));
-        setLineText(row, ".line-profit", formatMoney(roundMoney((unitPrice - unitCost) * quantity), saleCurrency));
-
-        calculateSale();
+        priceInput.value = converted === null
+            ? productPrice(product).toFixed(2)
+            : converted.toFixed(2);
     }
 
-    function setLineText(row, selector, value) {
-        const element = $(selector, row);
-        if (element) element.textContent = value;
-    }
+    const unitPrice = Math.max(0, toNumber(priceInput?.value));
 
-    function readSaleLines() {
-        const rows = $$("#saleLinesBody .sale-line");
+    const convertedCost = convertCurrency(
+        productCost(product),
+        productCurrency(product),
+        saleCurrency
+    );
 
-        return rows.map(row => {
-            const productId = $(".line-product", row)?.value || "";
-            const product = getProduct(productId);
-            const quantity = integer($(".line-quantity", row)?.value, 0);
-            const unitPrice = roundMoney($(".line-price", row)?.value);
-            const currency = validCurrency($("#saleCurrency")?.value || "USD");
+    const unitCost = convertedCost === null
+        ? productCost(product)
+        : convertedCost;
 
-            if (!product || quantity <= 0) return null;
+    setLineText(row, ".line-stock", formatNumber(productStock(product), 0));
+    setLineText(row, ".line-cost", formatMoney(unitCost, saleCurrency));
+    setLineText(
+        row,
+        ".line-total",
+        formatMoney(roundMoney(unitPrice * quantity), saleCurrency)
+    );
+    setLineText(
+        row,
+        ".line-profit",
+        formatMoney(roundMoney((unitPrice - unitCost) * quantity), saleCurrency)
+    );
 
-            const convertedCost = convertCurrency(
-                productCost(product),
-                productCurrency(product),
-                currency
-            );
+    calculateSale();
+}
 
-            return {
-                productId: product.id,
-                slot: product.slot,
-                name: product.name,
-                reference: product.reference || "",
-                quantity,
-                unitPrice,
-                unitCost: roundMoney(convertedCost === null ? productCost(product) : convertedCost),
-                currency,
-                originalCost: productCost(product),
-                originalCurrency: productCurrency(product)
-            };
-        }).filter(Boolean);
-    }
+function setLineText(row, selector, value) {
+    const element = $(selector, row);
+    if (element) element.textContent = value;
+}
 
-    function calculateSale() {
-        const lines = readSaleLines();
-        const totals = transactionTotals(lines);
+function readSaleLines() {
+    const rows = $$("#saleLinesBody .sale-line");
+
+    return rows.map(row => {
+        const productId = $(".line-product", row)?.value || "";
+        const product = getProduct(productId);
+        const quantity = integer($(".line-quantity", row)?.value, 0);
+        const unitPrice = roundMoney($(".line-price", row)?.value);
         const currency = validCurrency($("#saleCurrency")?.value || "USD");
 
-        setText("saleTotalUnits", formatNumber(totals.units, 0));
-        setText("saleTotalCost", formatMoney(totals.cost, currency));
-        setText("saleTotalRevenue", formatMoney(totals.revenue, currency));
-        setText("saleTotalProfit", formatMoney(totals.profit, currency));
-    }
+        if (!product || quantity <= 0) return null;
 
-    function resetSaleForm() {
-        const form = byId("saleForm");
-        if (form) form.reset();
+        const convertedCost = convertCurrency(
+            productCost(product),
+            productCurrency(product),
+            currency
+        );
 
-        setValue("saleDate", localDateTimeValue());
-        setValue("saleReference", generateReference("VTE"));
-        setValue("saleCurrency", state.settings.displayCurrency || "USD");
-
-        setHTML("saleLinesBody", `
-            <tr class="empty-row">
-                <td colspan="8" class="empty-cell">Ajoutez un produit pour commencer.</td>
-            </tr>
-        `);
-
-        calculateSale();
-    }
-
-    function generateReference(prefix) {
-        const date = new Date();
-        const stamp = [
-            date.getFullYear(),
-            String(date.getMonth() + 1).padStart(2, "0"),
-            String(date.getDate()).padStart(2, "0")
-        ].join("");
-
-        const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
-        return `${prefix}-${stamp}-${suffix}`;
-    }
-
-    async function handleSaleSubmit(event) {
-        event.preventDefault();
-
-        const lines = readSaleLines();
-        const currency = validCurrency($("#saleCurrency")?.value || "USD");
-
-        if (!lines.length) {
-            toast("Ajoutez au moins un produit valide.", "error");
-            return;
-        }
-
-        if (currencyMismatch(lines, currency)) {
-            toast("Les devises des lignes doivent correspondre à la vente.", "error");
-            return;
-        }
-
-        const combined = new Map();
-        lines.forEach(line => {
-            combined.set(line.productId, (combined.get(line.productId) || 0) + line.quantity);
-        });
-
-        for (const [productId, quantity] of combined) {
-            const product = getProduct(productId);
-            if (!product || productStock(product) < quantity) {
-                toast(
-                    `Stock insuffisant pour ${product ? product.name : "un produit"}. Disponible : ${product ? productStock(product) : 0}.`,
-                    "error",
-                    6000
-                );
-                return;
-            }
-        }
-
-        const totals = transactionTotals(lines);
-        if (totals.revenue < 0 || lines.some(line => line.unitPrice < 0)) {
-            toast("Montant de vente invalide.", "error");
-            return;
-        }
-
-        const sale = {
-            id: uid("SALE"),
-            reference: $("#saleReference")?.value || generateReference("VTE"),
-            date: normalizeDate($("#saleDate")?.value) || nowISO(),
-            customer: $("#saleCustomer")?.value.trim() || "",
+        return {
+            productId: product.id,
+            slot: product.slot,
+            name: product.name,
+            reference: product.reference || "",
+            quantity,
+            unitPrice,
+            unitCost: roundMoney(
+                convertedCost === null ? productCost(product) : convertedCost
+            ),
             currency,
-            notes: $("#saleNotes")?.value.trim() || "",
-            lines,
-            units: totals.units,
-            revenue: totals.revenue,
-            cost: totals.cost,
-            profit: totals.profit,
-            status: "validated",
-            createdAt: nowISO()
+            originalCost: productCost(product),
+            originalCurrency: productCurrency(product)
         };
+    }).filter(Boolean);
+}
 
-        showLoading("Validation de la vente...");
+function calculateSale() {
+    const lines = readSaleLines();
+    const totals = transactionTotals(lines);
+    const currency = validCurrency($("#saleCurrency")?.value || "USD");
+
+    setText("saleTotalUnits", formatNumber(totals.units, 0));
+    setText("saleTotalCost", formatMoney(totals.cost, currency));
+    setText("saleTotalRevenue", formatMoney(totals.revenue, currency));
+    setText("saleTotalProfit", formatMoney(totals.profit, currency));
+}
+
+function resetSaleForm() {
+    const form = byId("saleForm");
+    if (form) form.reset();
+
+    setValue("saleDate", localDateTimeValue());
+    setValue("saleReference", generateReference("VTE"));
+    setValue("saleCurrency", state.settings.displayCurrency || "USD");
+
+    setHTML("saleLinesBody", `
+        <tr class="empty-row">
+            <td colspan="8" class="empty-cell">
+                Ajoutez un produit pour commencer.
+            </td>
+        </tr>
+    `);
+
+    calculateSale();
+}
+
+function generateReference(prefix) {
+    const date = new Date();
+
+    const stamp = [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, "0"),
+        String(date.getDate()).padStart(2, "0")
+    ].join("");
+
+    const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+
+    return `${prefix}-${stamp}-${suffix}`;
+}
+
+async function handleSaleSubmit(event) {
+    event.preventDefault();
+
+    const lines = readSaleLines();
+    const currency = validCurrency($("#saleCurrency")?.value || "USD");
+
+    if (!lines.length) {
+        toast("Ajoutez au moins un produit valide.", "error");
+        return;
+    }
+
+    if (currencyMismatch(lines, currency)) {
+        toast("Les devises des lignes doivent correspondre à la vente.", "error");
+        return;
+    }
+
+    const combined = new Map();
+
+    lines.forEach(line => {
+        combined.set(
+            line.productId,
+            (combined.get(line.productId) || 0) + line.quantity
+        );
+    });
+
+    for (const [productId, quantity] of combined) {
+        const product = getProduct(productId);
+
+        if (!product || productStock(product) < quantity) {
+            toast(
+                `Stock insuffisant pour ${product ? product.name : "un produit"}. Disponible : ${product ? productStock(product) : 0}.`,
+                "error",
+                6000
+            );
+            return;
+        }
+    }
+
+    const totals = transactionTotals(lines);
+
+    if (totals.revenue < 0 || lines.some(line => line.unitPrice < 0)) {
+        toast("Montant de vente invalide.", "error");
+        return;
+    }
+
+    const sale = {
+        id: uid("SALE"),
+        reference: $("#saleReference")?.value || generateReference("VTE"),
+        date: normalizeDate($("#saleDate")?.value) || nowISO(),
+        customer: $("#saleCustomer")?.value.trim() || "",
+        currency,
+        notes: $("#saleNotes")?.value.trim() || "",
+        lines,
+        units: totals.units,
+        revenue: totals.revenue,
+        cost: totals.cost,
+        profit: totals.profit,
+        status: "validated",
+        createdAt: nowISO()
+    };
+
+    showLoading("Validation de la vente...");
+
+    try {
+        const snapshots = [
+            ...new Map(
+                [...combined.keys()].map(productId => {
+                    const product = getProduct(productId);
+
+                    return [
+                        productId,
+                        {
+                            product,
+                            stock: product ? productStock(product) : 0
+                        }
+                    ];
+                })
+            ).values()
+        ];
 
         try {
-            const snapshots = lines.map(line => ({
-                product: getProduct(line.productId),
-                stock: productStock(getProduct(line.productId))
-            }));
+            for (const [productId, quantity] of combined) {
+                const product = getProduct(productId);
 
-            try {
-                for (const [productId, quantity] of combined) {
-                    const product = getProduct(productId);
-                    product.stock = productStock(product) - quantity;
-                    product.updatedAt = nowISO();
-                    await writeOne("products", product);
+                if (!product) {
+                    throw new Error(`Produit introuvable : ${productId}`);
                 }
 
-                await writeOne("sales", sale);
-                state.sales.push(sale);
-            } catch (error) {
-                snapshots.forEach(snapshot => {
-                    if (snapshot.product) snapshot.product.stock = snapshot.stock;
-                });
-                await Promise.all(snapshots.map(snapshot =>
-                    snapshot.product ? writeOne("products", snapshot.product) : Promise.resolve()
-                ));
-                throw error;
+                product.stock = productStock(product) - quantity;
+                product.updatedAt = nowISO();
+
+                await writeOne("products", product);
             }
 
-            markSaved();
-            resetSaleForm();
-            renderAll();
-            toast(`Vente ${sale.reference} enregistrée.`, "success");
-        } finally {
-            hideLoading();
-        }
-    }
+            await writeOne("sales", sale);
+            state.sales.push(sale);
+        } catch (error) {
+            snapshots.forEach(snapshot => {
+                if (snapshot.product) {
+                    snapshot.product.stock = snapshot.stock;
+                }
+            });
 
-    async function saveSaleDraft() {
-        const lines = readSaleLines();
+            await Promise.all(
+                snapshots.map(snapshot =>
+                    snapshot.product
+                        ? writeOne("products", snapshot.product)
+                        : Promise.resolve()
+                )
+            );
 
-        const draft = {
-            id: uid("DRAFT"),
-            type: "sale",
-            reference: $("#saleReference")?.value || generateReference("BROUILLON"),
-            date: $("#saleDate")?.value || localDateTimeValue(),
-            currency: validCurrency($("#saleCurrency")?.value),
-            customer: $("#saleCustomer")?.value || "",
-            notes: $("#saleNotes")?.value || "",
-            lines,
-            updatedAt: nowISO()
-        };
-
-        state.drafts.push(draft);
-        await writeOne("drafts", draft);
-        toast("Brouillon de vente enregistré.", "success");
-    }
-
-    function renderRecentSales() {
-        const tbody = byId("recentSalesBody");
-        if (!tbody) return;
-
-        const sales = [...state.sales]
-            .filter(sale => sale.status === "validated")
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .slice(0, 10);
-
-        if (!sales.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">Aucune vente enregistrée.</td></tr>';
-            return;
+            throw error;
         }
 
-        tbody.innerHTML = sales.map(sale => `
+        markSaved();
+        resetSaleForm();
+        renderAll();
+
+        toast(`Vente ${sale.reference} enregistrée.`, "success");
+    } finally {
+        hideLoading();
+    }
+}
+
+async function saveSaleDraft() {
+    const lines = readSaleLines();
+
+    const draft = {
+        id: uid("DRAFT"),
+        type: "sale",
+        reference: $("#saleReference")?.value || generateReference("BROUILLON"),
+        date: $("#saleDate")?.value || localDateTimeValue(),
+        currency: validCurrency($("#saleCurrency")?.value),
+        customer: $("#saleCustomer")?.value || "",
+        notes: $("#saleNotes")?.value || "",
+        lines,
+        updatedAt: nowISO()
+    };
+
+    state.drafts.push(draft);
+
+    await writeOne("drafts", draft);
+
+    toast("Brouillon de vente enregistré.", "success");
+}
+
+function renderRecentSales() {
+    const tbody = byId("recentSalesBody");
+    if (!tbody) return;
+
+    const sales = [...state.sales]
+        .filter(sale => sale.status === "validated")
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 10);
+
+    if (!sales.length) {
+        tbody.innerHTML = `
             <tr>
-                <td>${formatDate(sale.date)}</td>
-                <td>${safeText(sale.reference)}</td>
-                <td>${safeText((sale.lines || []).map(line => line.name).join(", "))}</td>
-                <td>${formatNumber(sale.units, 0)}</td>
-                <td>${formatMoney(sale.revenue, sale.currency)}</td>
-                <td>${formatMoney(sale.profit, sale.currency)}</td>
-                <td>
-                    <button type="button" class="button button-small button-secondary"
-                            data-action="view-transaction" data-type="sale" data-id="${safeText(sale.id)}">Détails</button>
+                <td colspan="7" class="empty-cell">
+                    Aucune vente enregistrée.
                 </td>
             </tr>
-        `).join("");
+        `;
+        return;
     }
+
+    tbody.innerHTML = sales.map(sale => `
+        <tr>
+            <td>${formatDate(sale.date)}</td>
+            <td>${safeText(sale.reference)}</td>
+            <td>${safeText((sale.lines || []).map(line => line.name).join(", "))}</td>
+            <td>${formatNumber(sale.units, 0)}</td>
+            <td>${formatMoney(sale.revenue, sale.currency)}</td>
+            <td>${formatMoney(sale.profit, sale.currency)}</td>
+            <td>
+                <button type="button"
+                        class="button button-small button-secondary"
+                        data-action="view-transaction"
+                        data-type="sale"
+                        data-id="${safeText(sale.id)}">
+                    Détails
+                </button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+
+
+
+
 
     /* ========================================================
        7. ACHATS
