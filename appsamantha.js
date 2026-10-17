@@ -1089,7 +1089,16 @@ function renderProducts() {
 /* ========================================================
    6. VENTES
    Produits dynamiques : 50 emplacements
+   4 produits de référence :
+   Boxer, Culotte-A, Culotte-B, Collans
 ======================================================== */
+
+const SALE_PRODUCT_NAMES = [
+    "Boxer",
+    "Culotte-A",
+    "Culotte-B",
+    "Collans"
+];
 
 function createSaleLineRow() {
     const tbody = byId("saleLinesBody");
@@ -1143,11 +1152,51 @@ function createSaleLineRow() {
 
     tbody.appendChild(tr);
 
-    // Actualiser la liste des produits dans la nouvelle ligne.
     const productSelect = $(".line-product", tr);
 
     if (productSelect) {
         productSelect.innerHTML = productSelectOptions("", false);
+
+        // Placer les quatre produits de référence en premier
+        // sans créer de faux produits ni modifier leurs données.
+        const options = Array.from(productSelect.options);
+        const placeholder = options.find(option => option.value === "");
+
+        const referenceOptions = options.filter(option =>
+            option.value !== "" &&
+            SALE_PRODUCT_NAMES.some(name => {
+                const product = getProduct(option.value);
+                return product &&
+                    String(product.name).trim().toLowerCase() === name.toLowerCase();
+            })
+        );
+
+        referenceOptions.sort((a, b) => {
+            const productA = getProduct(a.value);
+            const productB = getProduct(b.value);
+
+            return SALE_PRODUCT_NAMES.indexOf(productA?.name) -
+                   SALE_PRODUCT_NAMES.indexOf(productB?.name);
+        });
+
+        productSelect.replaceChildren();
+
+        if (placeholder) {
+            productSelect.appendChild(placeholder);
+        }
+
+        referenceOptions.forEach(option => {
+            productSelect.appendChild(option);
+        });
+
+        options.forEach(option => {
+            if (
+                option.value !== "" &&
+                !referenceOptions.some(reference => reference.value === option.value)
+            ) {
+                productSelect.appendChild(option);
+            }
+        });
     }
 
     updateSaleLine(tr);
@@ -1359,23 +1408,16 @@ async function handleSaleSubmit(event) {
 
     showLoading("Validation de la vente...");
 
+    const snapshots = [...combined.keys()].map(productId => {
+        const product = getProduct(productId);
+
+        return {
+            product,
+            stock: product ? productStock(product) : 0
+        };
+    });
+
     try {
-        const snapshots = [
-            ...new Map(
-                [...combined.keys()].map(productId => {
-                    const product = getProduct(productId);
-
-                    return [
-                        productId,
-                        {
-                            product,
-                            stock: product ? productStock(product) : 0
-                        }
-                    ];
-                })
-            ).values()
-        ];
-
         try {
             for (const [productId, quantity] of combined) {
                 const product = getProduct(productId);
