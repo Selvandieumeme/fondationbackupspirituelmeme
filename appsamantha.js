@@ -621,384 +621,409 @@
         }
     }
 
-    /* ========================================================
-       4. PRODUITS ET COÛTS
-    ======================================================== */
 
-    function getProduct(id) {
-        return state.products.find(product => product.id === id) || null;
-    }
 
-    function getProductBySlot(slot) {
-        return state.products.find(product => Number(product.slot) === Number(slot)) || null;
-    }
 
-    function activeProducts() {
-        return state.products
-            .filter(product => product.active !== false && product.name)
-            .sort((a, b) => a.slot - b.slot);
-    }
 
-    function productStock(product) {
-        return Math.max(0, toNumber(product && product.stock));
-    }
 
-    function productCost(product) {
-        return Math.max(0, toNumber(product && product.purchasePrice));
-    }
+/* ========================================================
+   4. PRODUITS ET COÛTS
+======================================================== */
 
-    function productPrice(product) {
-        return Math.max(0, toNumber(product && product.salePrice));
-    }
+function getProduct(id) {
+    return state.products.find(product => product.id === id) || null;
+}
 
-    function productCurrency(product) {
-        return validCurrency(product && product.currency);
-    }
+function getProductBySlot(slot) {
+    return state.products.find(product => Number(product.slot) === Number(slot)) || null;
+}
 
-    function stockValue(currency = null) {
-        return roundMoney(state.products.reduce((total, product) => {
-            if (currency && productCurrency(product) !== currency) return total;
-            return total + productStock(product) * productCost(product);
-        }, 0));
-    }
+function activeProducts() {
+    return state.products
+        .filter(product => product.active !== false && product.name)
+        .sort((a, b) => a.slot - b.slot);
+}
 
-    function getOutOfStockProducts() {
-        return activeProducts().filter(product => productStock(product) <= 0);
-    }
+function productStock(product) {
+    return Math.max(0, toNumber(product && product.stock));
+}
 
-    function getLowStockProducts() {
-        return activeProducts().filter(product => {
-            const threshold = Math.max(
-                0,
-                toNumber(product.lowStockThreshold, state.settings.defaultLowStock)
-            );
+function productCost(product) {
+    return Math.max(0, toNumber(product && product.purchasePrice));
+}
 
-            return productStock(product) > 0 && productStock(product) <= threshold;
-        });
-    }
+function productPrice(product) {
+    return Math.max(0, toNumber(product && product.salePrice));
+}
 
-    function productStatus(product) {
-        if (!product || product.active === false || !product.name) {
-            return { label: "Libre", css: "neutral" };
-        }
+function productCurrency(product) {
+    return validCurrency(product && product.currency);
+}
 
-        if (productStock(product) <= 0) {
-            return { label: "Rupture", css: "danger" };
-        }
+function stockValue(currency = null) {
+    return roundMoney(state.products.reduce((total, product) => {
+        if (currency && productCurrency(product) !== currency) return total;
+        return total + productStock(product) * productCost(product);
+    }, 0));
+}
 
-        const threshold = toNumber(
-            product.lowStockThreshold,
-            state.settings.defaultLowStock
+function getOutOfStockProducts() {
+    return activeProducts().filter(product => productStock(product) <= 0);
+}
+
+function getLowStockProducts() {
+    return activeProducts().filter(product => {
+        const threshold = Math.max(
+            0,
+            toNumber(product.lowStockThreshold, state.settings.defaultLowStock)
         );
 
-        if (productStock(product) <= threshold) {
-            return { label: "Stock faible", css: "warning" };
-        }
+        return productStock(product) > 0 && productStock(product) <= threshold;
+    });
+}
 
-        return { label: "En stock", css: "success" };
+function productStatus(product) {
+    if (!product || product.active === false || !product.name) {
+        return { label: "Libre", css: "neutral" };
     }
 
-    function productSlotOptions(selected = "", includeFree = true) {
-        const parts = ['<option value="">Choisir un emplacement</option>'];
+    if (productStock(product) <= 0) {
+        return { label: "Rupture", css: "danger" };
+    }
 
-        for (let slot = 1; slot <= PRODUCT_SLOTS; slot++) {
-            const product = getProductBySlot(slot);
+    const threshold = toNumber(
+        product.lowStockThreshold,
+        state.settings.defaultLowStock
+    );
 
-            if (!product || product.active === false || !product.name) {
-                if (includeFree) {
-                    parts.push(
-                        `<option value="${slot}" ${String(selected) === String(slot) ? "selected" : ""}>Emplacement ${slot} — Libre</option>`
-                    );
-                }
-            } else {
+    if (productStock(product) <= threshold) {
+        return { label: "Stock faible", css: "warning" };
+    }
+
+    return { label: "En stock", css: "success" };
+}
+
+function productSlotOptions(selected = "", includeFree = true) {
+    const parts = ['<option value="">Choisir un emplacement</option>'];
+
+    for (let slot = 1; slot <= PRODUCT_SLOTS; slot++) {
+        const product = getProductBySlot(slot);
+
+        if (!product || product.active === false || !product.name) {
+            if (includeFree) {
                 parts.push(
-                    `<option value="${slot}" ${String(selected) === String(slot) ? "selected" : ""}>Emplacement ${slot} — ${safeText(product.name)}</option>`
+                    `<option value="${slot}" ${String(selected) === String(slot) ? "selected" : ""}>Emplacement ${slot} — Libre</option>`
                 );
             }
-        }
-
-        return parts.join("");
-    }
-
-    function productSelectOptions(selected = "", includeStock = false) {
-        const parts = ['<option value="">Choisir un produit</option>'];
-
-        activeProducts().forEach(product => {
-            const stock = productStock(product);
-            const disabled = includeStock && stock <= 0 ? "disabled" : "";
-
-            parts.push(
-                `<option value="${safeText(product.id)}" ${product.id === selected ? "selected" : ""} ${disabled}>${safeText(product.name)} — Stock : ${formatNumber(stock, 0)}</option>`
-            );
-        });
-
-        return parts.join("");
-    }
-
-    function populateProductSelectors() {
-        const slot = byId("productSlot");
-        if (slot) {
-            const selected = slot.value;
-            slot.innerHTML = productSlotOptions(selected, true);
-        }
-
-        const exitProduct = byId("stockExitProduct");
-        if (exitProduct) {
-            const selected = exitProduct.value;
-            exitProduct.innerHTML = productSelectOptions(selected);
-        }
-
-        const reportProduct = byId("reportProductFilter");
-        if (reportProduct) {
-            const selected = reportProduct.value || "all";
-            reportProduct.innerHTML =
-                '<option value="all">Tous les produits</option>' +
-                activeProducts().map(product =>
-                    `<option value="${safeText(product.id)}">${safeText(product.name)}</option>`
-                ).join("");
-            reportProduct.value = selected;
-        }
-    }
-
-    function resetProductForm() {
-        const form = byId("productForm");
-        if (form) form.reset();
-
-        setValue("productId", "");
-        setValue("productInitialStock", "0");
-        setValue("productPurchasePrice", "0.00");
-        setValue("productSalePrice", "0.00");
-        setValue("productLowStockThreshold", state.settings.defaultLowStock);
-
-        const slot = byId("productSlot");
-        if (slot) slot.innerHTML = productSlotOptions("", true);
-
-        setText("saveProductButton", "Enregistrer le produit");
-    }
-
-    function editProduct(id) {
-        const product = getProduct(id);
-        if (!product) {
-            toast("Produit introuvable.", "error");
-            return;
-        }
-
-        setValue("productId", product.id);
-        setValue("productSlot", product.slot);
-        setValue("productName", product.name);
-        setValue("productReference", product.reference || "");
-        setValue("productInitialStock", productStock(product));
-        setValue("productPurchasePrice", productCost(product));
-        setValue("productSalePrice", productPrice(product));
-        setValue("productCurrency", productCurrency(product));
-        setValue("productLowStockThreshold", product.lowStockThreshold ?? 5);
-
-        const slot = byId("productSlot");
-        if (slot) {
-            slot.innerHTML = productSlotOptions(String(product.slot), true);
-            slot.value = String(product.slot);
-        }
-
-        setText("saveProductButton", "Enregistrer les modifications");
-        navigate("products");
-
-        const form = byId("productForm");
-        if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
-
-        toast("Produit chargé pour modification.", "info");
-    }
-
-    async function handleProductSubmit(event) {
-        event.preventDefault();
-
-        const id = $("#productId")?.value || "";
-        const slot = integer($("#productSlot")?.value, 0);
-        const name = $("#productName")?.value.trim() || "";
-        const reference = $("#productReference")?.value.trim() || "";
-        const initialStock = toNumber($("#productInitialStock")?.value, 0);
-        const purchasePrice = toNumber($("#productPurchasePrice")?.value, 0);
-        const salePrice = toNumber($("#productSalePrice")?.value, 0);
-        const currency = validCurrency($("#productCurrency")?.value);
-        const lowStockThreshold = integer($("#productLowStockThreshold")?.value, 5);
-
-        if (!slot || slot > PRODUCT_SLOTS) {
-            toast("Choisissez un emplacement valide.", "error");
-            return;
-        }
-
-        if (!name) {
-            toast("Le nom du produit est obligatoire.", "error");
-            return;
-        }
-
-        if (initialStock < 0 || purchasePrice < 0 || salePrice < 0) {
-            toast("Le stock et les prix ne peuvent pas être négatifs.", "error");
-            return;
-        }
-
-        const slotOwner = getProductBySlot(slot);
-        if (slotOwner && slotOwner.id !== id && slotOwner.active !== false && slotOwner.name) {
-            toast("Cet emplacement est déjà occupé par un autre produit.", "error");
-            return;
-        }
-
-        const duplicateReference = state.products.find(product =>
-            product.id !== id &&
-            reference &&
-            product.reference &&
-            product.reference.toLowerCase() === reference.toLowerCase()
-        );
-
-        if (duplicateReference) {
-            toast("Cette référence existe déjà.", "error");
-            return;
-        }
-
-        const existing = id ? getProduct(id) : null;
-
-        if (id && !existing) {
-            toast("Le produit à modifier n'existe plus.", "error");
-            return;
-        }
-
-        if (existing && Number(existing.slot) !== slot) {
-            const target = getProductBySlot(slot);
-            if (target && target.id !== existing.id && target.name && target.active !== false) {
-                toast("L'emplacement choisi est occupé.", "error");
-                return;
-            }
-        }
-
-        const product = {
-            id: existing ? existing.id : uid("PROD"),
-            slot,
-            name,
-            reference,
-            currency,
-            purchasePrice: roundMoney(purchasePrice),
-            salePrice: roundMoney(salePrice),
-            lowStockThreshold,
-            stock: existing ? productStock(existing) : integer(initialStock),
-            active: true,
-            createdAt: existing ? existing.createdAt : nowISO(),
-            updatedAt: nowISO()
-        };
-
-        if (existing) {
-            const index = state.products.findIndex(item => item.id === existing.id);
-            state.products[index] = product;
         } else {
-            state.products.push(product);
-        }
-
-        try {
-            await writeOne("products", product);
-            markSaved();
-            resetProductForm();
-            renderAll();
-            toast(existing ? "Produit modifié." : "Produit enregistré.", "success");
-        } catch (error) {
-            reportError(error);
+            parts.push(
+                `<option value="${slot}" ${String(selected) === String(slot) ? "selected" : ""}>Emplacement ${slot} — ${safeText(product.name)}</option>`
+            );
         }
     }
 
-    async function deleteProduct(id) {
-        const product = getProduct(id);
-        if (!product) return;
+    return parts.join("");
+}
 
-        const hasHistory =
-            state.sales.some(sale => sale.lines?.some(line => line.productId === id)) ||
-            state.purchases.some(purchase => purchase.lines?.some(line => line.productId === id)) ||
-            state.inventories.some(inventory => inventory.lines?.some(line => line.productId === id)) ||
-            state.stockExits.some(exit => exit.productId === id);
+/* ========================================================
+   SÉLECTEUR PRODUITS — 50 EMPLACEMENTS
+   Compatible avec les ventes et les achats.
+======================================================== */
 
-        openConfirm(
-            hasHistory ? "Désactiver le produit" : "Supprimer le produit",
-            hasHistory
-                ? `Le produit « ${product.name} » apparaît dans l'historique. Il sera désactivé sans effacer les anciennes opérations.`
-                : `Supprimer définitivement « ${product.name} » du catalogue ?`,
-            async () => {
-                if (hasHistory) {
-                    product.active = false;
-                    product.updatedAt = nowISO();
-                    await writeOne("products", product);
-                } else {
-                    state.products = state.products.filter(item => item.id !== id);
-                    await deleteOne("products", id);
-                }
+function productSelectOptions(selected = "", includeStock = false) {
+    const parts = ['<option value="">Choisir un produit</option>'];
 
-                renderAll();
-                toast("Opération effectuée.", "success");
-            },
-            hasHistory ? "Désactiver" : "Supprimer"
+    for (let slot = 1; slot <= PRODUCT_SLOTS; slot++) {
+        const product = getProductBySlot(slot);
+
+        if (!product || product.active === false || !product.name) {
+            parts.push(
+                `<option value="" disabled>Emplacement ${slot} — Libre</option>`
+            );
+            continue;
+        }
+
+        const stock = productStock(product);
+        const isSelected = String(product.id) === String(selected);
+        const disabled = includeStock && stock <= 0 ? "disabled" : "";
+
+        parts.push(
+            `<option value="${safeText(product.id)}" ${isSelected ? "selected" : ""} ${disabled}>${slot}. ${safeText(product.name)} — Stock : ${formatNumber(stock, 0)}</option>`
         );
     }
 
-    function filterProducts() {
-        const search = ($("#productSearch")?.value || "").trim().toLowerCase();
-        const filter = $("#productStockFilter")?.value || "all";
+    return parts.join("");
+}
 
-        return state.products
-            .filter(product => {
-                const matchesSearch =
-                    !search ||
-                    String(product.name || "").toLowerCase().includes(search) ||
-                    String(product.reference || "").toLowerCase().includes(search);
-
-                if (!matchesSearch) return false;
-
-                if (filter === "inactive") return !product.name || product.active === false;
-                if (filter === "out-of-stock") return product.name && productStock(product) <= 0;
-                if (filter === "in-stock") return product.name && productStock(product) > 0;
-
-                return true;
-            })
-            .sort((a, b) => a.slot - b.slot);
+function populateProductSelectors() {
+    const slot = byId("productSlot");
+    if (slot) {
+        const selected = slot.value;
+        slot.innerHTML = productSlotOptions(selected, true);
     }
 
-    function renderProducts() {
-        const tbody = byId("productsTableBody");
-        if (!tbody) return;
+    const exitProduct = byId("stockExitProduct");
+    if (exitProduct) {
+        const selected = exitProduct.value;
+        exitProduct.innerHTML = productSelectOptions(selected);
+    }
 
-        const rows = filterProducts();
+    const reportProduct = byId("reportProductFilter");
+    if (reportProduct) {
+        const selected = reportProduct.value || "all";
+        reportProduct.innerHTML =
+            '<option value="all">Tous les produits</option>' +
+            activeProducts().map(product =>
+                `<option value="${safeText(product.id)}">${safeText(product.name)}</option>`
+            ).join("");
+        reportProduct.value = selected;
+    }
+}
 
-        setText("productSlotCount", PRODUCT_SLOTS);
-        setText("activeProductCount", activeProducts().length);
-        setText("inStockProductCount", activeProducts().filter(p => productStock(p) > 0).length);
-        setText("outOfStockProductCount", getOutOfStockProducts().length);
-        setText("productListCount", `${rows.length} produit${rows.length === 1 ? "" : "s"}`);
+function resetProductForm() {
+    const form = byId("productForm");
+    if (form) form.reset();
 
-        if (!rows.length) {
-            tbody.innerHTML = '<tr><td colspan="8" class="empty-cell">Aucun produit trouvé.</td></tr>';
+    setValue("productId", "");
+    setValue("productInitialStock", "0");
+    setValue("productPurchasePrice", "0.00");
+    setValue("productSalePrice", "0.00");
+    setValue("productLowStockThreshold", state.settings.defaultLowStock);
+
+    const slot = byId("productSlot");
+    if (slot) slot.innerHTML = productSlotOptions("", true);
+
+    setText("saveProductButton", "Enregistrer le produit");
+}
+
+function editProduct(id) {
+    const product = getProduct(id);
+    if (!product) {
+        toast("Produit introuvable.", "error");
+        return;
+    }
+
+    setValue("productId", product.id);
+    setValue("productSlot", product.slot);
+    setValue("productName", product.name);
+    setValue("productReference", product.reference || "");
+    setValue("productInitialStock", productStock(product));
+    setValue("productPurchasePrice", productCost(product));
+    setValue("productSalePrice", productPrice(product));
+    setValue("productCurrency", productCurrency(product));
+    setValue("productLowStockThreshold", product.lowStockThreshold ?? 5);
+
+    const slot = byId("productSlot");
+    if (slot) {
+        slot.innerHTML = productSlotOptions(String(product.slot), true);
+        slot.value = String(product.slot);
+    }
+
+    setText("saveProductButton", "Enregistrer les modifications");
+    navigate("products");
+
+    const form = byId("productForm");
+    if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    toast("Produit chargé pour modification.", "info");
+}
+
+async function handleProductSubmit(event) {
+    event.preventDefault();
+
+    const id = $("#productId")?.value || "";
+    const slot = integer($("#productSlot")?.value, 0);
+    const name = $("#productName")?.value.trim() || "";
+    const reference = $("#productReference")?.value.trim() || "";
+    const initialStock = toNumber($("#productInitialStock")?.value, 0);
+    const purchasePrice = toNumber($("#productPurchasePrice")?.value, 0);
+    const salePrice = toNumber($("#productSalePrice")?.value, 0);
+    const currency = validCurrency($("#productCurrency")?.value);
+    const lowStockThreshold = integer($("#productLowStockThreshold")?.value, 5);
+
+    if (!slot || slot > PRODUCT_SLOTS) {
+        toast("Choisissez un emplacement valide.", "error");
+        return;
+    }
+
+    if (!name) {
+        toast("Le nom du produit est obligatoire.", "error");
+        return;
+    }
+
+    if (initialStock < 0 || purchasePrice < 0 || salePrice < 0) {
+        toast("Le stock et les prix ne peuvent pas être négatifs.", "error");
+        return;
+    }
+
+    const slotOwner = getProductBySlot(slot);
+    if (slotOwner && slotOwner.id !== id && slotOwner.active !== false && slotOwner.name) {
+        toast("Cet emplacement est déjà occupé par un autre produit.", "error");
+        return;
+    }
+
+    const duplicateReference = state.products.find(product =>
+        product.id !== id &&
+        reference &&
+        product.reference &&
+        product.reference.toLowerCase() === reference.toLowerCase()
+    );
+
+    if (duplicateReference) {
+        toast("Cette référence existe déjà.", "error");
+        return;
+    }
+
+    const existing = id ? getProduct(id) : null;
+
+    if (id && !existing) {
+        toast("Le produit à modifier n'existe plus.", "error");
+        return;
+    }
+
+    if (existing && Number(existing.slot) !== slot) {
+        const target = getProductBySlot(slot);
+        if (target && target.id !== existing.id && target.name && target.active !== false) {
+            toast("L'emplacement choisi est occupé.", "error");
             return;
         }
-
-        tbody.innerHTML = rows.map(product => {
-            const status = productStatus(product);
-            const inactive = product.active === false || !product.name;
-
-            return `
-                <tr>
-                    <td>${product.slot}</td>
-                    <td>${safeText(product.reference || "—")}</td>
-                    <td><strong>${safeText(product.name || "Emplacement libre")}</strong></td>
-                    <td>${inactive ? "—" : formatNumber(productStock(product), 0)}</td>
-                    <td>${inactive ? "—" : formatMoney(productCost(product), productCurrency(product))}</td>
-                    <td>${inactive ? "—" : formatMoney(productPrice(product), productCurrency(product))}</td>
-                    <td><span class="status-badge status-${status.css}">${status.label}</span></td>
-                    <td class="table-actions">
-                        ${inactive
-                            ? `<button type="button" class="button button-small button-secondary" data-action="use-product-slot" data-slot="${product.slot}">Utiliser</button>`
-                            : `
-                                <button type="button" class="button button-small button-secondary" data-action="edit-product" data-id="${safeText(product.id)}">Modifier</button>
-                                <button type="button" class="button button-small button-danger-outline" data-action="delete-product" data-id="${safeText(product.id)}">Désactiver</button>
-                            `
-                        }
-                    </td>
-                </tr>
-            `;
-        }).join("");
     }
+
+    const product = {
+        id: existing ? existing.id : uid("PROD"),
+        slot,
+        name,
+        reference,
+        currency,
+        purchasePrice: roundMoney(purchasePrice),
+        salePrice: roundMoney(salePrice),
+        lowStockThreshold,
+        stock: existing ? productStock(existing) : integer(initialStock),
+        active: true,
+        createdAt: existing ? existing.createdAt : nowISO(),
+        updatedAt: nowISO()
+    };
+
+    if (existing) {
+        const index = state.products.findIndex(item => item.id === existing.id);
+        state.products[index] = product;
+    } else {
+        state.products.push(product);
+    }
+
+    try {
+        await writeOne("products", product);
+        markSaved();
+        resetProductForm();
+        renderAll();
+        toast(existing ? "Produit modifié." : "Produit enregistré.", "success");
+    } catch (error) {
+        reportError(error);
+    }
+}
+
+async function deleteProduct(id) {
+    const product = getProduct(id);
+    if (!product) return;
+
+    const hasHistory =
+        state.sales.some(sale => sale.lines?.some(line => line.productId === id)) ||
+        state.purchases.some(purchase => purchase.lines?.some(line => line.productId === id)) ||
+        state.inventories.some(inventory => inventory.lines?.some(line => line.productId === id)) ||
+        state.stockExits.some(exit => exit.productId === id);
+
+    openConfirm(
+        hasHistory ? "Désactiver le produit" : "Supprimer le produit",
+        hasHistory
+            ? `Le produit « ${product.name} » apparaît dans l'historique. Il sera désactivé sans effacer les anciennes opérations.`
+            : `Supprimer définitivement « ${product.name} » du catalogue ?`,
+        async () => {
+            if (hasHistory) {
+                product.active = false;
+                product.updatedAt = nowISO();
+                await writeOne("products", product);
+            } else {
+                state.products = state.products.filter(item => item.id !== id);
+                await deleteOne("products", id);
+            }
+
+            renderAll();
+            toast("Opération effectuée.", "success");
+        },
+        hasHistory ? "Désactiver" : "Supprimer"
+    );
+}
+
+function filterProducts() {
+    const search = ($("#productSearch")?.value || "").trim().toLowerCase();
+    const filter = $("#productStockFilter")?.value || "all";
+
+    return state.products
+        .filter(product => {
+            const matchesSearch =
+                !search ||
+                String(product.name || "").toLowerCase().includes(search) ||
+                String(product.reference || "").toLowerCase().includes(search);
+
+            if (!matchesSearch) return false;
+
+            if (filter === "inactive") return !product.name || product.active === false;
+            if (filter === "out-of-stock") return product.name && productStock(product) <= 0;
+            if (filter === "in-stock") return product.name && productStock(product) > 0;
+
+            return true;
+        })
+        .sort((a, b) => a.slot - b.slot);
+}
+
+function renderProducts() {
+    const tbody = byId("productsTableBody");
+    if (!tbody) return;
+
+    const rows = filterProducts();
+
+    setText("productSlotCount", PRODUCT_SLOTS);
+    setText("activeProductCount", activeProducts().length);
+    setText("inStockProductCount", activeProducts().filter(p => productStock(p) > 0).length);
+    setText("outOfStockProductCount", getOutOfStockProducts().length);
+    setText("productListCount", `${rows.length} produit${rows.length === 1 ? "" : "s"}`);
+
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-cell">Aucun produit trouvé.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = rows.map(product => {
+        const status = productStatus(product);
+        const inactive = product.active === false || !product.name;
+
+        return `
+            <tr>
+                <td>${product.slot}</td>
+                <td>${safeText(product.reference || "—")}</td>
+                <td><strong>${safeText(product.name || "Emplacement libre")}</strong></td>
+                <td>${inactive ? "—" : formatNumber(productStock(product), 0)}</td>
+                <td>${inactive ? "—" : formatMoney(productCost(product), productCurrency(product))}</td>
+                <td>${inactive ? "—" : formatMoney(productPrice(product), productCurrency(product))}</td>
+                <td><span class="status-badge status-${status.css}">${status.label}</span></td>
+                <td class="table-actions">
+                    ${inactive
+                        ? `<button type="button" class="button button-small button-secondary" data-action="use-product-slot" data-slot="${product.slot}">Utiliser</button>`
+                        : `
+                            <button type="button" class="button button-small button-secondary" data-action="edit-product" data-id="${safeText(product.id)}">Modifier</button>
+                            <button type="button" class="button button-small button-danger-outline" data-action="delete-product" data-id="${safeText(product.id)}">Désactiver</button>
+                        `
+                    }
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+
+
+
+
 
     /* ========================================================
        5. DEVISES ET VALEURS
