@@ -628,18 +628,8 @@
 
 
 
-
-
-
-
 /* ========================================================
    4. PRODUITS ET COÛTS
-======================================================== */
-
-/* ========================================================
-   4.1 NOMS DES 4 PREMIERS PRODUITS
-   Remplacement des noms dans les emplacements 1 à 4.
-   Aucun emplacement supplémentaire n'est créé.
 ======================================================== */
 
 const FIRST_FOUR_PRODUCT_NAMES = [
@@ -661,52 +651,6 @@ function activeProducts() {
     return state.products
         .filter(product => product.active !== false && product.name)
         .sort((a, b) => a.slot - b.slot);
-}
-
-/* ========================================================
-   REMPLACEMENT DES 4 PREMIERS NOMS
-   Préserve les ID, stocks, prix, références et autres données.
-======================================================== */
-
-async function replaceFirstFourProductNames() {
-    const changedProducts = [];
-
-    FIRST_FOUR_PRODUCT_NAMES.forEach((name, index) => {
-        const product = getProductBySlot(index + 1);
-
-        // Ne pas créer de produit si l'emplacement n'existe pas.
-        if (!product) return;
-
-        if (product.name !== name) {
-            product.name = name;
-            product.updatedAt = nowISO();
-            changedProducts.push(product);
-        }
-
-        // Réactiver le produit si l'ancien emplacement était désactivé.
-        if (product.active === false) {
-            product.active = true;
-
-            if (!changedProducts.includes(product)) {
-                product.updatedAt = nowISO();
-                changedProducts.push(product);
-            }
-        }
-    });
-
-    if (!changedProducts.length) return;
-
-    try {
-        for (const product of changedProducts) {
-            await writeOne("products", product);
-        }
-
-        markSaved();
-        populateProductSelectors();
-        renderAll();
-    } catch (error) {
-        reportError(error);
-    }
 }
 
 function productStock(product) {
@@ -822,30 +766,25 @@ function productSelectOptions(selected = "", includeStock = false) {
 
 function populateProductSelectors() {
     const slot = byId("productSlot");
-
     if (slot) {
         const selected = slot.value;
         slot.innerHTML = productSlotOptions(selected, true);
     }
 
     const exitProduct = byId("stockExitProduct");
-
     if (exitProduct) {
         const selected = exitProduct.value;
         exitProduct.innerHTML = productSelectOptions(selected);
     }
 
     const reportProduct = byId("reportProductFilter");
-
     if (reportProduct) {
         const selected = reportProduct.value || "all";
-
         reportProduct.innerHTML =
             '<option value="all">Tous les produits</option>' +
             activeProducts().map(product =>
                 `<option value="${safeText(product.id)}">${safeText(product.name)}</option>`
             ).join("");
-
         reportProduct.value = selected;
     }
 }
@@ -868,7 +807,6 @@ function resetProductForm() {
 
 function editProduct(id) {
     const product = getProduct(id);
-
     if (!product) {
         toast("Produit introuvable.", "error");
         return;
@@ -885,7 +823,6 @@ function editProduct(id) {
     setValue("productLowStockThreshold", product.lowStockThreshold ?? 5);
 
     const slot = byId("productSlot");
-
     if (slot) {
         slot.innerHTML = productSlotOptions(String(product.slot), true);
         slot.value = String(product.slot);
@@ -895,10 +832,7 @@ function editProduct(id) {
     navigate("products");
 
     const form = byId("productForm");
-
-    if (form) {
-        form.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
 
     toast("Produit chargé pour modification.", "info");
 }
@@ -932,13 +866,7 @@ async function handleProductSubmit(event) {
     }
 
     const slotOwner = getProductBySlot(slot);
-
-    if (
-        slotOwner &&
-        slotOwner.id !== id &&
-        slotOwner.active !== false &&
-        slotOwner.name
-    ) {
+    if (slotOwner && slotOwner.id !== id && slotOwner.active !== false && slotOwner.name) {
         toast("Cet emplacement est déjà occupé par un autre produit.", "error");
         return;
     }
@@ -964,13 +892,7 @@ async function handleProductSubmit(event) {
 
     if (existing && Number(existing.slot) !== slot) {
         const target = getProductBySlot(slot);
-
-        if (
-            target &&
-            target.id !== existing.id &&
-            target.name &&
-            target.active !== false
-        ) {
+        if (target && target.id !== existing.id && target.name && target.active !== false) {
             toast("L'emplacement choisi est occupé.", "error");
             return;
         }
@@ -1054,17 +976,9 @@ function filterProducts() {
 
             if (!matchesSearch) return false;
 
-            if (filter === "inactive") {
-                return !product.name || product.active === false;
-            }
-
-            if (filter === "out-of-stock") {
-                return product.name && productStock(product) <= 0;
-            }
-
-            if (filter === "in-stock") {
-                return product.name && productStock(product) > 0;
-            }
+            if (filter === "inactive") return !product.name || product.active === false;
+            if (filter === "out-of-stock") return product.name && productStock(product) <= 0;
+            if (filter === "in-stock") return product.name && productStock(product) > 0;
 
             return true;
         })
@@ -1079,19 +993,12 @@ function renderProducts() {
 
     setText("productSlotCount", PRODUCT_SLOTS);
     setText("activeProductCount", activeProducts().length);
-    setText(
-        "inStockProductCount",
-        activeProducts().filter(product => productStock(product) > 0).length
-    );
+    setText("inStockProductCount", activeProducts().filter(p => productStock(p) > 0).length);
     setText("outOfStockProductCount", getOutOfStockProducts().length);
-    setText(
-        "productListCount",
-        `${rows.length} produit${rows.length === 1 ? "" : "s"}`
-    );
+    setText("productListCount", `${rows.length} produit${rows.length === 1 ? "" : "s"}`);
 
     if (!rows.length) {
-        tbody.innerHTML =
-            '<tr><td colspan="8" class="empty-cell">Aucun produit trouvé.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-cell">Aucun produit trouvé.</td></tr>';
         return;
     }
 
@@ -1109,19 +1016,20 @@ function renderProducts() {
                 <td>${inactive ? "—" : formatMoney(productPrice(product), productCurrency(product))}</td>
                 <td><span class="status-badge status-${status.css}">${status.label}</span></td>
                 <td class="table-actions">
-                    ${
-                        inactive
-                            ? `<button type="button" class="button button-small button-secondary" data-action="use-product-slot" data-slot="${product.slot}">Utiliser</button>`
-                            : `
-                                <button type="button" class="button button-small button-secondary" data-action="edit-product" data-id="${safeText(product.id)}">Modifier</button>
-                                <button type="button" class="button button-small button-danger-outline" data-action="delete-product" data-id="${safeText(product.id)}">Désactiver</button>
-                            `
+                    ${inactive
+                        ? `<button type="button" class="button button-small button-secondary" data-action="use-product-slot" data-slot="${product.slot}">Utiliser</button>`
+                        : `
+                            <button type="button" class="button button-small button-secondary" data-action="edit-product" data-id="${safeText(product.id)}">Modifier</button>
+                            <button type="button" class="button button-small button-danger-outline" data-action="delete-product" data-id="${safeText(product.id)}">Désactiver</button>
+                        `
                     }
                 </td>
             </tr>
         `;
     }).join("");
 }
+
+
 
 
     /* ========================================================
