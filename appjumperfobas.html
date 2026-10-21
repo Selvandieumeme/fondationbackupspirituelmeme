@@ -2,671 +2,316 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#07111f">
-    <meta name="description" content="NINA JUMPER 3D — Jeu de plateforme et de course avec 50 missions progressives.">
-    <title>NINA JUMPER 3D</title>
+    <meta name="description" content="FOBAS JUMPER 3D — Jeu de course, saut et glissade avec NINA et 50 missions évolutives.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <link rel="stylesheet" href="appjumperfobas.css">
+    <title>FOBAS JUMPER 3D</title>
 
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="./appjumperfobas.css">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2307111f'/%3E%3Cpath d='M25 75 48 20 58 20 75 75 61 75 53 51 43 51 34 75Z' fill='%2300e5ff'/%3E%3C/svg%3E">
 </head>
 
 <body>
-    <main id="appJumper" class="app-jumper" data-app="nina-jumper-3d">
+    <div id="app" class="app-shell" data-app="fobas-jumper-3d" data-version="1.0.0">
 
-        <!-- ÉCRAN DE CHARGEMENT -->
-        <section id="loadingScreen" class="loading-screen" aria-live="polite">
-            <div class="loading-logo">N<span>3D</span></div>
-            <h1>NINA JUMPER 3D</h1>
-            <p id="loadingMessage">Initialisation du moteur 3D...</p>
-            <div class="loading-track">
-                <div id="loadingProgress" class="loading-progress"></div>
-            </div>
-            <p id="loadingPercent">0 %</p>
-        </section>
+        <main id="game-screen" class="game-screen">
+            <section id="game-world" class="game-world" aria-label="Monde 3D du jeu">
 
-        <!-- ZONE PRINCIPALE DU JEU -->
-        <section id="gameScreen" class="game-screen" aria-label="Zone de jeu">
+                <canvas id="gameCanvas" class="game-canvas" aria-label="Terrain de jeu 3D de NINA" tabindex="0"></canvas>
 
-            <canvas
-                id="jumperCanvas"
-                class="jumper-canvas"
-                aria-label="Univers tridimensionnel de NINA"
-            ></canvas>
-
-            <!-- INTERFACE SUPÉRIEURE -->
-            <header id="gameHeader" class="game-header">
-
-                <button
-                    id="menuButton"
-                    class="icon-button"
-                    type="button"
-                    data-action="toggle-menu"
-                    aria-label="Ouvrir le menu"
-                    title="Menu"
-                >☰</button>
-
-                <div class="game-brand">
-                    <span class="brand-symbol">N</span>
-                    <div class="brand-text">
-                        <strong>NINA JUMPER</strong>
-                        <small>3D ADVENTURE</small>
-                    </div>
-                </div>
-
-                <div class="header-actions">
-                    <button
-                        id="saveButton"
-                        class="icon-button"
-                        type="button"
-                        data-action="save"
-                        aria-label="Sauvegarder la progression"
-                        title="Sauvegarder"
-                    >💾</button>
-
-                    <button
-                        id="pauseButton"
-                        class="icon-button"
-                        type="button"
-                        data-action="pause"
-                        aria-label="Mettre le jeu en pause"
-                        title="Pause"
-                    >Ⅱ</button>
-                </div>
-            </header>
-
-            <!-- INDICATEURS DE MISSION -->
-            <section id="gameHud" class="game-hud" aria-label="Statistiques">
-
-                <div class="hud-card">
-                    <span class="hud-label">MISSION</span>
-                    <strong id="currentMission">01 / 50</strong>
-                </div>
-
-                <div class="hud-card">
-                    <span class="hud-label">SCORE</span>
-                    <strong id="scoreValue">0</strong>
-                </div>
-
-                <div class="hud-card">
-                    <span class="hud-label">PIÈCES</span>
-                    <strong id="coinsValue">0</strong>
-                </div>
-
-                <div class="hud-card">
-                    <span class="hud-label">VIES</span>
-                    <strong id="livesValue">❤ ❤ ❤</strong>
-                </div>
-
-                <div class="mission-progress">
-                    <div class="mission-progress-heading">
-                        <span id="missionName">Le premier saut</span>
-                        <span id="missionProgressText">0 %</span>
-                    </div>
-                    <div
-                        id="missionProgressTrack"
-                        class="progress-track"
-                        role="progressbar"
-                        aria-label="Progression de la mission"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                        aria-valuenow="0"
-                    >
-                        <div id="missionProgressBar" class="progress-fill"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- MESSAGE DYNAMIQUE -->
-            <div
-                id="gameNotification"
-                class="game-notification"
-                role="status"
-                aria-live="polite"
-            ></div>
-
-            <!-- OBJECTIF DE LA MISSION -->
-            <aside id="missionObjective" class="mission-objective">
-                <span class="objective-icon">✦</span>
-                <div>
-                    <strong>OBJECTIF</strong>
-                    <p id="objectiveText">Préparez-vous à commencer votre aventure.</p>
-                </div>
-            </aside>
-
-            <!-- COMMANDES DE CAMÉRA -->
-            <div id="cameraControls" class="camera-controls">
-                <button
-                    id="zoomOutButton"
-                    type="button"
-                    class="camera-button"
-                    data-action="zoom-out"
-                    aria-label="Dézoomer"
-                    title="Dézoomer"
-                >−</button>
-
-                <button
-                    id="zoomResetButton"
-                    type="button"
-                    class="camera-button"
-                    data-action="zoom-reset"
-                    aria-label="Réinitialiser le zoom"
-                    title="Réinitialiser le zoom"
-                >⌂</button>
-
-                <button
-                    id="zoomInButton"
-                    type="button"
-                    class="camera-button"
-                    data-action="zoom-in"
-                    aria-label="Zoomer"
-                    title="Zoomer"
-                >+</button>
-
-                <button
-                    id="rotateCameraButton"
-                    type="button"
-                    class="camera-button"
-                    data-action="rotate-camera"
-                    aria-label="Changer l'angle de la caméra"
-                    title="Changer l'angle de caméra"
-                >⟳</button>
-            </div>
-
-            <!-- COMMANDES TACTILES -->
-            <nav id="touchControls" class="touch-controls" aria-label="Commandes tactiles">
-
-                <div id="movementControls" class="movement-controls">
-                    <button
-                        id="leftButton"
-                        class="movement-button"
-                        type="button"
-                        data-action="move-left"
-                        aria-label="Déplacer NINA vers la gauche"
-                    >◀</button>
-
-                    <button
-                        id="rightButton"
-                        class="movement-button"
-                        type="button"
-                        data-action="move-right"
-                        aria-label="Déplacer NINA vers la droite"
-                    >▶</button>
-                </div>
-
-                <div id="actionControls" class="action-controls">
-                    <button
-                        id="slideButton"
-                        class="action-button slide-button"
-                        type="button"
-                        data-action="slide"
-                        aria-label="Glisser sous un obstacle"
-                    >
-                        <span>↓</span>
-                        <small>GLISSER</small>
-                    </button>
-
-                    <button
-                        id="jumpButton"
-                        class="action-button jump-button"
-                        type="button"
-                        data-action="jump"
-                        aria-label="Faire sauter NINA"
-                    >
-                        <span>↑</span>
-                        <strong>JUMP</strong>
-                    </button>
-                </div>
-            </nav>
-
-            <!-- GESTES TACTILES : LE JAVASCRIPT GÈRE LE PINCH ET LE GLISSEMENT -->
-            <div
-                id="gestureSurface"
-                class="gesture-surface"
-                aria-hidden="true"
-                data-gesture-zoom="pinch"
-                data-gesture-movement="swipe"
-            ></div>
-
-            <!-- PANNEAU MENU -->
-            <aside id="sideMenu" class="side-menu hidden" aria-label="Menu du jeu">
-                <div class="menu-heading">
-                    <h2>MENU</h2>
-                    <button
-                        id="closeMenuButton"
-                        class="icon-button"
-                        type="button"
-                        data-action="close-menu"
-                        aria-label="Fermer le menu"
-                    >✕</button>
-                </div>
-
-                <button type="button" data-action="open-missions">🏆 Missions</button>
-                <button type="button" data-action="open-inventory">🎒 Inventaire</button>
-                <button type="button" data-action="open-settings">⚙ Paramètres</button>
-                <button type="button" data-action="save">💾 Sauvegarder</button>
-                <button type="button" data-action="open-help">❔ Comment jouer</button>
-                <button type="button" data-action="return-home">⌂ Accueil</button>
-            </aside>
-
-            <!-- PANNEAU DES MISSIONS -->
-            <section id="missionsPanel" class="overlay-panel hidden" aria-labelledby="missionsTitle">
-                <div class="panel-card missions-card">
-                    <div class="panel-heading">
-                        <div>
-                            <span class="eyebrow">PROGRESSION</span>
-                            <h2 id="missionsTitle">LES 50 MISSIONS</h2>
+                <div id="loading-screen" class="loading-screen">
+                    <div class="loading-content">
+                        <div class="loading-logo" aria-hidden="true">
+                            <span>F</span>
+                            <span>J</span>
                         </div>
 
-                        <button
-                            id="closeMissionsButton"
-                            class="icon-button"
-                            type="button"
-                            data-action="close-panel"
-                            data-panel="missionsPanel"
-                            aria-label="Fermer les missions"
-                        >✕</button>
-                    </div>
+                        <h1>FOBAS JUMPER <span>3D</span></h1>
+                        <p id="loading-message">Préparation du monde de NINA...</p>
 
-                    <p id="missionsSummary">Terminez chaque mission pour débloquer la suivante.</p>
+                        <div id="loading-progress" class="loading-progress-track" role="progressbar" aria-label="Chargement du jeu" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div id="loading-progress-bar" class="loading-progress-bar"></div>
+                        </div>
 
-                    <div class="mission-filters">
-                        <button type="button" data-action="filter-missions" data-filter="all">Toutes</button>
-                        <button type="button" data-action="filter-missions" data-filter="available">Disponibles</button>
-                        <button type="button" data-action="filter-missions" data-filter="completed">Terminées</button>
-                    </div>
-
-                    <div id="missionsList" class="missions-list" aria-live="polite">
-                        <p id="missionsLoading">Préparation des 50 missions...</p>
-                    </div>
-
-                    <div class="panel-actions">
-                        <button
-                            id="startMissionButton"
-                            class="primary-button"
-                            type="button"
-                            data-action="start-selected-mission"
-                        >JOUER LA MISSION</button>
+                        <p class="loading-tip">Préparez-vous à courir, sauter et glisser.</p>
                     </div>
                 </div>
-            </section>
 
-            <!-- PANNEAU DE DÉMARRAGE -->
-            <section id="startPanel" class="overlay-panel start-panel">
-                <div class="panel-card start-card">
-                    <div class="nina-emblem" aria-hidden="true">N</div>
-                    <span class="eyebrow">UNE AVENTURE EN 3D</span>
-                    <h1>NINA <span>JUMPER</span></h1>
-                    <p class="intro-text">
-                        Courez, sautez, esquivez les pièges et relevez
-                        50 missions de plus en plus exigeantes.
-                    </p>
+                <div id="world-overlay" class="world-overlay" aria-hidden="true"></div>
 
-                    <div class="feature-list">
-                        <span>✦ 50 missions évolutives</span>
-                        <span>✦ Univers 3D interactif</span>
-                        <span>✦ Progression sauvegardée</span>
+                <header id="game-hud" class="game-hud">
+                    <div class="hud-brand">
+                        <div class="hud-brand-icon" aria-hidden="true">FJ</div>
+                        <div class="hud-brand-text">
+                            <strong>FOBAS JUMPER</strong>
+                            <span>ULTIMATE RUNNER 3D</span>
+                        </div>
                     </div>
 
-                    <button
-                        id="startGameButton"
-                        class="primary-button"
-                        type="button"
-                        data-action="start-game"
-                    >COMMENCER L'AVENTURE</button>
+                    <div class="hud-status">
+                        <div class="hud-stat">
+                            <span class="hud-stat-label">MISSION</span>
+                            <strong id="mission-number">01 / 50</strong>
+                        </div>
 
-                    <button
-                        id="continueGameButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="continue-game"
-                    >CONTINUER LA PARTIE</button>
+                        <div class="hud-stat">
+                            <span class="hud-stat-label">DISTANCE</span>
+                            <strong id="distance-value">0 m</strong>
+                        </div>
 
-                    <p id="saveStatus" class="save-status">Vérification de la sauvegarde...</p>
-                </div>
-            </section>
-
-            <!-- PANNEAU PAUSE -->
-            <section id="pausePanel" class="overlay-panel hidden" aria-labelledby="pauseTitle">
-                <div class="panel-card compact-card">
-                    <span class="eyebrow">PRENEZ VOTRE TEMPS</span>
-                    <h2 id="pauseTitle">PAUSE</h2>
-
-                    <button
-                        id="resumeButton"
-                        class="primary-button"
-                        type="button"
-                        data-action="resume"
-                    >REPRENDRE</button>
-
-                    <button
-                        id="savePauseButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="save"
-                    >SAUVEGARDER</button>
-
-                    <button
-                        id="restartMissionButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="restart-mission"
-                    >RECOMMENCER LA MISSION</button>
-
-                    <button
-                        id="pauseMenuButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="return-home"
-                    >MENU PRINCIPAL</button>
-                </div>
-            </section>
-
-            <!-- PANNEAU DE FIN DE MISSION -->
-            <section id="missionCompletePanel" class="overlay-panel hidden" aria-labelledby="completeTitle">
-                <div class="panel-card compact-card">
-                    <div class="result-emblem">★</div>
-                    <span class="eyebrow">OBJECTIF ATTEINT</span>
-                    <h2 id="completeTitle">MISSION RÉUSSIE !</h2>
-                    <p id="completeDescription">NINA a terminé cette mission.</p>
-
-                    <div class="result-stats">
-                        <div><small>SCORE</small><strong id="missionFinalScore">0</strong></div>
-                        <div><small>PIÈCES</small><strong id="missionFinalCoins">0</strong></div>
-                        <div><small>ÉTOILES</small><strong id="missionFinalStars">0 / 3</strong></div>
+                        <div class="hud-stat">
+                            <span class="hud-stat-label">SCORE</span>
+                            <strong id="score-value">0</strong>
+                        </div>
                     </div>
 
-                    <button
-                        id="nextMissionButton"
-                        class="primary-button"
-                        type="button"
-                        data-action="next-mission"
-                    >MISSION SUIVANTE</button>
+                    <div class="hud-actions">
+                        <button id="pause-button" class="icon-button" type="button" aria-label="Mettre le jeu en pause" title="Pause">
+                            <span aria-hidden="true">Ⅱ</span>
+                        </button>
 
-                    <button
-                        id="replayMissionButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="restart-mission"
-                    >REJOUER</button>
+                        <button id="sound-button" class="icon-button" type="button" aria-label="Activer ou désactiver le son" title="Son">
+                            <span id="sound-icon" aria-hidden="true">♫</span>
+                        </button>
+                    </div>
+                </header>
 
-                    <button
-                        id="completeSaveButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="save"
-                    >SAUVEGARDER</button>
-                </div>
+                <aside id="nina-panel" class="nina-panel" aria-label="Informations du personnage">
+                    <div class="nina-avatar" aria-hidden="true">
+                        <span>N</span>
+                        <i></i>
+                    </div>
+
+                    <div class="nina-information">
+                        <strong>NINA</strong>
+                        <span id="nina-state">Prête à courir</span>
+
+                        <div id="nina-energy-track" class="nina-energy-track" aria-label="Énergie de NINA">
+                            <div id="nina-energy-bar" class="nina-energy-bar"></div>
+                        </div>
+                    </div>
+                </aside>
+
+                <section id="mission-objective-panel" class="mission-objective-panel" aria-label="Objectif de la mission">
+                    <div class="objective-heading">
+                        <span class="objective-indicator"></span>
+                        <span>OBJECTIF</span>
+                    </div>
+
+                    <strong id="mission-title">Mission 01 — Premier élan</strong>
+                    <p id="mission-description">Apprenez à sauter et à éviter les obstacles.</p>
+
+                    <div class="objective-progress-track">
+                        <div id="mission-progress-bar" class="objective-progress-bar"></div>
+                    </div>
+
+                    <div class="objective-footer">
+                        <span id="mission-progress-text">0 %</span>
+                        <span id="mission-reward">Récompense : 100 XP</span>
+                    </div>
+                </section>
+
+                <div id="game-message" class="game-message" role="status" aria-live="polite" hidden></div>
+
+                <section id="pause-panel" class="modal-panel pause-panel" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+                    <div class="modal-card">
+                        <span class="modal-eyebrow">FOBAS JUMPER 3D</span>
+                        <h2 id="pause-title">Jeu en pause</h2>
+                        <p>NINA attend vos prochaines instructions.</p>
+
+                        <button id="resume-button" class="primary-button" type="button">Reprendre la partie</button>
+                        <button id="pause-save-button" class="secondary-button" type="button">Sauvegarder la progression</button>
+                        <button id="pause-menu-button" class="text-button" type="button">Retour au menu principal</button>
+                    </div>
+                </section>
+
+                <section id="main-menu" class="modal-panel main-menu" role="dialog" aria-modal="true" aria-labelledby="main-menu-title" hidden>
+                    <div class="modal-card main-menu-card">
+                        <div class="menu-logo" aria-hidden="true">
+                            <span>FOBAS</span>
+                            <strong>JUMPER <i>3D</i></strong>
+                        </div>
+
+                        <span class="modal-eyebrow">RUN • JUMP • SLIDE</span>
+                        <h1 id="main-menu-title">L'aventure de NINA</h1>
+
+                        <p class="menu-description">
+                            Courez automatiquement, sautez par-dessus les obstacles et glissez sous les barrières pour terminer les 50 missions.
+                        </p>
+
+                        <div class="menu-progress">
+                            <div class="menu-progress-heading">
+                                <span>Progression générale</span>
+                                <strong id="overall-progress-text">0 / 50</strong>
+                            </div>
+
+                            <div class="menu-progress-track">
+                                <div id="overall-progress-bar" class="menu-progress-bar"></div>
+                            </div>
+                        </div>
+
+                        <button id="start-button" class="primary-button" type="button">
+                            <span aria-hidden="true">▶</span>
+                            Commencer l'aventure
+                        </button>
+
+                        <button id="continue-button" class="secondary-button" type="button" hidden>Continuer ma progression</button>
+                        <button id="missions-button" class="secondary-button" type="button">Choisir une mission débloquée</button>
+                        <button id="menu-save-button" class="text-button" type="button">Sauvegarder maintenant</button>
+
+                        <p class="menu-footer">50 missions évolutives · Contrôle tactile · 3D</p>
+                    </div>
+                </section>
+
+                <section id="missions-panel" class="modal-panel missions-panel" role="dialog" aria-modal="true" aria-labelledby="missions-title" hidden>
+                    <div class="modal-card missions-card">
+                        <div class="modal-heading-row">
+                            <div>
+                                <span class="modal-eyebrow">VOTRE PARCOURS</span>
+                                <h2 id="missions-title">Les 50 missions</h2>
+                            </div>
+
+                            <button id="close-missions-button" class="icon-button" type="button" aria-label="Fermer la liste des missions">×</button>
+                        </div>
+
+                        <p class="missions-intro">Les missions suivantes se débloquent progressivement après vos réussites.</p>
+
+                        <div id="missions-list" class="missions-list" role="list" aria-label="Liste des missions"></div>
+
+                        <div class="missions-actions">
+                            <button id="missions-back-button" class="secondary-button" type="button">Retour</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="mission-complete-panel" class="modal-panel result-panel" role="dialog" aria-modal="true" aria-labelledby="mission-complete-title" hidden>
+                    <div class="modal-card result-card">
+                        <div class="result-icon success-icon" aria-hidden="true">★</div>
+                        <span class="modal-eyebrow">MISSION TERMINÉE</span>
+                        <h2 id="mission-complete-title">Excellent travail !</h2>
+                        <p id="mission-complete-description">NINA a réussi la mission.</p>
+
+                        <div class="result-stats">
+                            <div><span>Score</span><strong id="result-score">0</strong></div>
+                            <div><span>Distance</span><strong id="result-distance">0 m</strong></div>
+                            <div><span>Récompense</span><strong id="result-xp">100 XP</strong></div>
+                        </div>
+
+                        <p id="next-mission-message" class="next-mission-message">La prochaine mission est débloquée.</p>
+                        <button id="next-mission-button" class="primary-button" type="button">Mission suivante</button>
+                        <button id="complete-menu-button" class="secondary-button" type="button">Retour au menu</button>
+                    </div>
+                </section>
+
+                <section id="game-over-panel" class="modal-panel result-panel" role="dialog" aria-modal="true" aria-labelledby="game-over-title" hidden>
+                    <div class="modal-card result-card">
+                        <div class="result-icon failure-icon" aria-hidden="true">!</div>
+                        <span class="modal-eyebrow">FIN DE LA PARTIE</span>
+                        <h2 id="game-over-title">On réessaie ?</h2>
+                        <p id="game-over-description">NINA peut repartir pour une nouvelle tentative.</p>
+
+                        <div class="result-stats">
+                            <div><span>Score</span><strong id="game-over-score">0</strong></div>
+                            <div><span>Distance</span><strong id="game-over-distance">0 m</strong></div>
+                        </div>
+
+                        <button id="retry-button" class="primary-button" type="button">Réessayer la mission</button>
+                        <button id="game-over-menu-button" class="secondary-button" type="button">Retour au menu</button>
+                    </div>
+                </section>
+
+                <section id="reset-confirm-panel" class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="reset-confirm-title" hidden>
+                    <div class="modal-card">
+                        <span class="modal-eyebrow">ATTENTION</span>
+                        <h2 id="reset-confirm-title">Réinitialiser la progression ?</h2>
+
+                        <p>
+                            Cette action effacera les missions débloquées, le score enregistré et les données locales sauvegardées pour ce jeu.
+                        </p>
+
+                        <button id="confirm-reset-button" class="danger-button" type="button">Oui, réinitialiser</button>
+                        <button id="cancel-reset-button" class="secondary-button" type="button">Annuler</button>
+                    </div>
+                </section>
+
+                <nav id="touch-controls" class="touch-controls" aria-label="Commandes tactiles">
+                    <div class="touch-instructions">
+                        <span class="gesture-symbol" aria-hidden="true">↑</span>
+                        <div>
+                            <strong>GLISSER VERS LE HAUT</strong>
+                            <span>Sauter</span>
+                        </div>
+                    </div>
+
+                    <div class="touch-instructions">
+                        <span class="gesture-symbol" aria-hidden="true">↓</span>
+                        <div>
+                            <strong>GLISSER VERS LE BAS</strong>
+                            <span>Se baisser et glisser</span>
+                        </div>
+                    </div>
+
+                    <div class="touch-instructions">
+                        <span class="gesture-symbol" aria-hidden="true">↔</span>
+                        <div>
+                            <strong>DEUX DOIGTS</strong>
+                            <span>Zoom de la caméra</span>
+                        </div>
+                    </div>
+
+                    <button id="jump-button" class="touch-action-button jump-button" type="button" aria-label="Faire sauter NINA">
+                        <span aria-hidden="true">↑</span>
+                        <strong>SAUTER</strong>
+                    </button>
+
+                    <button id="slide-button" class="touch-action-button slide-button" type="button" aria-label="Faire glisser NINA">
+                        <span aria-hidden="true">↓</span>
+                        <strong>GLISSER</strong>
+                    </button>
+                </nav>
+
+                <footer id="game-toolbar" class="game-toolbar">
+                    <div class="toolbar-left">
+                        <button id="toolbar-menu-button" class="toolbar-button" type="button">
+                            <span aria-hidden="true">☰</span>
+                            <span>Menu</span>
+                        </button>
+
+                        <button id="save-button" class="toolbar-button" type="button">
+                            <span aria-hidden="true">▣</span>
+                            <span>Sauvegarder</span>
+                        </button>
+                    </div>
+
+                    <div class="toolbar-center">
+                        <span id="save-status" role="status">Progression non sauvegardée</span>
+                    </div>
+
+                    <div class="toolbar-right">
+                        <button id="zoom-out-button" class="toolbar-button zoom-button" type="button" aria-label="Dézoomer">−</button>
+                        <button id="zoom-in-button" class="toolbar-button zoom-button" type="button" aria-label="Zoomer">+</button>
+
+                        <button id="reset-button" class="toolbar-button reset-button" type="button">
+                            <span aria-hidden="true">↻</span>
+                            <span>Réinitialiser</span>
+                        </button>
+                    </div>
+                </footer>
+
             </section>
+        </main>
 
-            <!-- PANNEAU GAME OVER -->
-            <section id="gameOverPanel" class="overlay-panel hidden" aria-labelledby="gameOverTitle">
-                <div class="panel-card compact-card">
-                    <span class="eyebrow">FIN DE LA COURSE</span>
-                    <h2 id="gameOverTitle">NINA PEUT RECOMMENCER !</h2>
-                    <p>Évitez les obstacles et essayez de battre votre record.</p>
+        <div id="notification-region" class="notification-region" role="status" aria-live="polite" aria-atomic="true"></div>
 
-                    <div class="result-stats">
-                        <div><small>SCORE</small><strong id="gameOverScore">0</strong></div>
-                        <div><small>RECORD</small><strong id="gameOverBest">0</strong></div>
-                    </div>
+        <output id="engine-status" class="engine-status" aria-live="polite">Préparation du moteur 3D...</output>
 
-                    <button
-                        id="retryButton"
-                        class="primary-button"
-                        type="button"
-                        data-action="restart-mission"
-                    >RÉESSAYER</button>
+    </div>
 
-                    <button
-                        id="gameOverSaveButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="save"
-                    >SAUVEGARDER</button>
-
-                    <button
-                        id="gameOverMenuButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="return-home"
-                    >MENU PRINCIPAL</button>
-                </div>
-            </section>
-
-            <!-- PANNEAU PARAMÈTRES -->
-            <section id="settingsPanel" class="overlay-panel hidden" aria-labelledby="settingsTitle">
-                <div class="panel-card settings-card">
-                    <div class="panel-heading">
-                        <h2 id="settingsTitle">PARAMÈTRES</h2>
-                        <button
-                            id="closeSettingsButton"
-                            class="icon-button"
-                            type="button"
-                            data-action="close-panel"
-                            data-panel="settingsPanel"
-                            aria-label="Fermer les paramètres"
-                        >✕</button>
-                    </div>
-
-                    <label class="setting-row" for="qualitySelect">
-                        <span>Qualité graphique</span>
-                        <select id="qualitySelect" name="quality">
-                            <option value="low">Économie</option>
-                            <option value="medium" selected>Équilibrée</option>
-                            <option value="high">Élevée</option>
-                        </select>
-                    </label>
-
-                    <label class="setting-row" for="sensitivityRange">
-                        <span>Sensibilité des commandes</span>
-                        <input id="sensitivityRange" type="range" min="1" max="10" value="5">
-                        <output id="sensitivityValue" for="sensitivityRange">5</output>
-                    </label>
-
-                    <label class="setting-row" for="volumeRange">
-                        <span>Volume sonore</span>
-                        <input id="volumeRange" type="range" min="0" max="100" value="60">
-                        <output id="volumeValue" for="volumeRange">60 %</output>
-                    </label>
-
-                    <label class="setting-toggle" for="soundEnabled">
-                        <span>Activer le son</span>
-                        <input id="soundEnabled" type="checkbox" checked>
-                    </label>
-
-                    <label class="setting-toggle" for="vibrationEnabled">
-                        <span>Vibrations</span>
-                        <input id="vibrationEnabled" type="checkbox" checked>
-                    </label>
-
-                    <button
-                        id="applySettingsButton"
-                        class="primary-button"
-                        type="button"
-                        data-action="apply-settings"
-                    >APPLIQUER</button>
-                </div>
-            </section>
-
-            <!-- PANNEAU INVENTAIRE -->
-            <section id="inventoryPanel" class="overlay-panel hidden" aria-labelledby="inventoryTitle">
-                <div class="panel-card">
-                    <div class="panel-heading">
-                        <h2 id="inventoryTitle">INVENTAIRE</h2>
-                        <button
-                            type="button"
-                            class="icon-button"
-                            data-action="close-panel"
-                            data-panel="inventoryPanel"
-                            aria-label="Fermer l'inventaire"
-                        >✕</button>
-                    </div>
-
-                    <div class="inventory-summary">
-                        <span>Pièces disponibles</span>
-                        <strong id="inventoryCoins">0</strong>
-                    </div>
-
-                    <div id="inventoryList" class="inventory-list">
-                        <p>Les récompenses seront affichées ici.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- PANNEAU AIDE -->
-            <section id="helpPanel" class="overlay-panel hidden" aria-labelledby="helpTitle">
-                <div class="panel-card">
-                    <div class="panel-heading">
-                        <h2 id="helpTitle">COMMENT JOUER</h2>
-                        <button
-                            type="button"
-                            class="icon-button"
-                            data-action="close-panel"
-                            data-panel="helpPanel"
-                            aria-label="Fermer l'aide"
-                        >✕</button>
-                    </div>
-
-                    <ul class="help-list">
-                        <li><strong>JUMP :</strong> sautez au-dessus des obstacles.</li>
-                        <li><strong>GLISSER :</strong> passez sous les barrières basses.</li>
-                        <li><strong>◀ ▶ :</strong> changez de voie.</li>
-                        <li><strong>Glisser le doigt :</strong> contrôlez NINA avec des gestes tactiles.</li>
-                        <li><strong>Deux doigts :</strong> rapprochez ou écartez les doigts pour ajuster le zoom.</li>
-                        <li><strong>Pièces :</strong> ramassez les pièces pour augmenter votre total.</li>
-                        <li><strong>Missions :</strong> terminez les objectifs pour débloquer les défis suivants.</li>
-                    </ul>
-                </div>
-            </section>
-
-            <!-- PANNEAU SAUVEGARDE ET INITIALISATION -->
-            <section id="systemPanel" class="overlay-panel hidden" aria-labelledby="systemTitle">
-                <div class="panel-card">
-                    <div class="panel-heading">
-                        <h2 id="systemTitle">SYSTÈME ET DONNÉES</h2>
-                        <button
-                            type="button"
-                            class="icon-button"
-                            data-action="close-panel"
-                            data-panel="systemPanel"
-                            aria-label="Fermer le panneau système"
-                        >✕</button>
-                    </div>
-
-                    <p id="databaseStatus">Base de données : initialisation en attente.</p>
-                    <p id="systemMessage" role="status" aria-live="polite"></p>
-
-                    <button
-                        id="systemSaveButton"
-                        class="primary-button"
-                        type="button"
-                        data-action="save"
-                    >SAUVEGARDER LES DONNÉES</button>
-
-                    <button
-                        id="exportSaveButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="export-save"
-                    >EXPORTER LA SAUVEGARDE</button>
-
-                    <button
-                        id="importSaveButton"
-                        class="secondary-button"
-                        type="button"
-                        data-action="import-save"
-                    >IMPORTER UNE SAUVEGARDE</button>
-
-                    <button
-                        id="initializeButton"
-                        class="danger-button"
-                        type="button"
-                        data-action="initialize"
-                    >INITIALISER LE JEU</button>
-
-                    <p class="warning-text">
-                        L'initialisation peut supprimer la progression locale.
-                        Une confirmation sera demandée avant toute suppression.
-                    </p>
-
-                    <input
-                        id="importSaveFile"
-                        type="file"
-                        accept="application/json,.json"
-                        hidden
-                    >
-                </div>
-            </section>
-
-            <!-- CONFIRMATION DES ACTIONS IMPORTANTES -->
-            <section id="confirmPanel" class="overlay-panel hidden" aria-labelledby="confirmTitle">
-                <div class="panel-card compact-card">
-                    <h2 id="confirmTitle">CONFIRMATION</h2>
-                    <p id="confirmMessage">Confirmez-vous cette action ?</p>
-                    <div class="panel-actions">
-                        <button
-                            id="confirmYesButton"
-                            class="danger-button"
-                            type="button"
-                            data-action="confirm-yes"
-                        >CONFIRMER</button>
-                        <button
-                            id="confirmNoButton"
-                            class="secondary-button"
-                            type="button"
-                            data-action="confirm-no"
-                        >ANNULER</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- BARRE D'OUTILS SECONDAIRE -->
-            <footer id="gameToolbar" class="game-toolbar">
-                <button
-                    id="fullscreenButton"
-                    type="button"
-                    data-action="fullscreen"
-                    aria-label="Activer le plein écran"
-                    title="Plein écran"
-                >⛶</button>
-
-                <button
-                    id="soundButton"
-                    type="button"
-                    data-action="toggle-sound"
-                    aria-label="Activer ou désactiver le son"
-                    title="Son"
-                >♫</button>
-
-                <button
-                    id="saveToolbarButton"
-                    type="button"
-                    data-action="save"
-                    aria-label="Sauvegarder"
-                    title="Sauvegarder"
-                >💾</button>
-
-                <button
-                    id="systemButton"
-                    type="button"
-                    data-action="open-system"
-                    aria-label="Ouvrir les outils système"
-                    title="Système"
-                >⚙</button>
-            </footer>
-        </section>
-    </main>
-
-    <!--
-      Le moteur PlayCanvas sera chargé dans appjumperfobas.js
-      avec import() et des modules exportés.
-      Aucun moteur graphique n'est chargé ici comme script classique.
-    -->
-    <script type="module" src="appjumperfobas.js"></script>
+    <script type="module" src="./appjumperfobas.js"></script>
 </body>
 </html>
