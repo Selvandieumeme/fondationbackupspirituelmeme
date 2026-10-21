@@ -1,2188 +1,1567 @@
+
 /* ============================================================
-   NINA JUMPER 3D — ENGINE PRINCIPAL
-   ES MODULES • PLAYCANVAS • ANDROID TOUCH
-   Version 1.0
-   ============================================================
-   Architecture:
-   - import() dynamique de PlayCanvas
-   - export pour les extensions futures
-   - 50 missions progressives
-   - Runner automatique, saut et glissade
-   - Contrôles tactiles et pinch-to-zoom
-   - Sauvegarde locale, import/export JSON
-   - Gestion centralisée des data-action
-   - Nettoyage et protection des événements
-   ============================================================ */
+   NINA JUMPER 3D
+   Fichye prensipal : appjumperfobas.js
+   Konpatibilite : appjumperfobas.html
+   Moteur 3D : PlayCanvas 2.14.4
+   50 misyon dinamik, kontwòl Android, zoom, pinch,
+   sove/restore, meni, paramèt ak rekòmansman.
+============================================================ */
 
-const VERSION = "1.0.0";
-const SAVE_KEY = "nina-jumper-3d-save-v1";
-const SETTINGS_KEY = "nina-jumper-3d-settings-v1";
+"use strict";
 
-const $ = (id) => document.getElementById(id);
+(async function NINA_JUMPER_3D() {
+    const $ = id => document.getElementById(id);
+    const $$ = selector => [...document.querySelectorAll(selector)];
 
-const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-const rand = (min, max) => min + Math.random() * (max - min);
-const choice = (items) => items[Math.floor(Math.random() * items.length)];
+    const STORAGE_KEY = "ninaJumper3D_save_v1";
+    const SETTINGS_KEY = "ninaJumper3D_settings_v1";
+    const TOTAL_MISSIONS = 50;
 
-const LANES = [-2.2, 0, 2.2];
-
-const MISSION_THEMES = [
-    "La forêt lumineuse",
-    "Le pont suspendu",
-    "La vallée des cristaux",
-    "Le temple oublié",
-    "La route des étoiles",
-    "Le canyon doré",
-    "Les jardins célestes",
-    "La cité futuriste",
-    "Le désert mystérieux",
-    "La montagne de glace",
-    "La rivière magique",
-    "Le tunnel des ombres",
-    "Les ruines anciennes",
-    "La jungle secrète",
-    "Le volcan rouge",
-    "Le royaume des nuages",
-    "La grotte turquoise",
-    "La ville des robots",
-    "Le labyrinthe vert",
-    "Le palais de cristal",
-    "La piste arc-en-ciel",
-    "La cascade géante",
-    "Le passage des dragons",
-    "La cité sous-marine",
-    "La tour du vent",
-    "Le désert électrique",
-    "La vallée des géants",
-    "Le jardin des lunes",
-    "La forteresse volante",
-    "Le chemin des comètes",
-    "La jungle des géants",
-    "Le temple du tonnerre",
-    "La route des mirages",
-    "Le glacier éternel",
-    "La cité des flammes",
-    "Le pont des tempêtes",
-    "Le royaume mécanique",
-    "La forêt des illusions",
-    "Le canyon des lumières",
-    "La pyramide secrète",
-    "Le sanctuaire céleste",
-    "La vallée des tempêtes",
-    "Le labyrinthe de lave",
-    "Le palais des vents",
-    "La course des étoiles",
-    "Le monde des titans",
-    "La citadelle du soleil",
-    "Le passage dimensionnel",
-    "Le dernier défi",
-    "La légende de NINA"
-];
-
-const MISSION_OBJECTIVES = [
-    "Terminez la course en évitant les obstacles.",
-    "Ramassez des pièces et franchissez la ligne d'arrivée.",
-    "Sautez au-dessus des barrières et esquivez les pièges.",
-    "Enchaînez les sauts et les glissades avec précision.",
-    "Survivez à cette course et obtenez trois étoiles."
-];
-
-/* ------------------------------------------------------------
-   MISSIONS EXTENSIBLES
-   Ajoutez une mission avec registerMission().
-   Chaque mission possède ses propres paramètres.
------------------------------------------------------------- */
-
-export const missionRegistry = [];
-
-export function registerMission(mission) {
-    if (!mission || typeof mission !== "object") {
-        throw new TypeError("Une mission doit être un objet.");
-    }
-
-    if (!mission.name || !String(mission.name).trim()) {
-        throw new Error("Le nom de la mission est obligatoire.");
-    }
-
-    const id = mission.id || `custom-${Date.now()}-${missionRegistry.length}`;
-
-    if (missionRegistry.some((item) => item.id === id)) {
-        throw new Error(`Mission déjà enregistrée : ${id}`);
-    }
-
-    const normalized = {
-        id,
-        name: String(mission.name),
-        description: String(
-            mission.description || "Terminez le parcours."
-        ),
-        distance: Math.max(30, Number(mission.distance) || 100),
-        speed: clamp(Number(mission.speed) || 12, 6, 30),
-        obstacleRate: clamp(Number(mission.obstacleRate) || 1.4, 0.6, 4),
-        coinRate: clamp(Number(mission.coinRate) || 0.9, 0.3, 3),
-        reward: Math.max(0, Number(mission.reward) || 100),
-        color: mission.color || "#29d9ff",
-        ...mission,
-        id
+    const ui = {
+        loading: $("loadingScreen"),
+        loadingMessage: $("loadingMessage"),
+        loadingProgress: $("loadingProgress"),
+        loadingPercent: $("loadingPercent"),
+        gameScreen: $("gameScreen"),
+        canvas: $("jumperCanvas"),
+        start: $("startPanel"),
+        pause: $("pausePanel"),
+        complete: $("missionCompletePanel"),
+        gameOver: $("gameOverPanel"),
+        missions: $("missionsPanel"),
+        missionList: $("missionsList"),
+        sideMenu: $("sideMenu"),
+        notification: $("gameNotification")
     };
 
-    missionRegistry.push(normalized);
-    return normalized;
-}
+    const state = {
+        engineReady: false,
+        running: false,
+        paused: false,
+        gameOver: false,
+        completed: false,
+        initialized: false,
+        score: 0,
+        coins: 0,
+        lives: 3,
+        best: 0,
+        mission: 1,
+        selectedMission: 1,
+        completedMissions: [],
+        unlockedMission: 1,
+        distance: 0,
+        speed: 8,
+        lane: 0,
+        laneTarget: 0,
+        jumpY: 0,
+        jumpVelocity: 0,
+        jumping: false,
+        sliding: false,
+        slideUntil: 0,
+        invulnerableUntil: 0,
+        spawnDistance: 0,
+        elapsed: 0,
+        cameraZoom: 1,
+        cameraAngle: 0,
+        soundEnabled: true,
+        vibrationEnabled: true,
+        quality: "medium",
+        sensitivity: 5,
+        volume: 60,
+        filter: "all",
+        confirmAction: null,
+        lastFrame: 0,
+        animationFrame: 0,
+        entities: [],
+        obstacles: [],
+        collectibles: [],
+        tracks: [],
+        app: null,
+        pc: null,
+        player: null,
+        camera: null,
+        cameraPivot: null,
+        materials: {},
+        audioContext: null,
+        scoreAtStart: 0,
+        coinsAtStart: 0,
+        livesAtStart: 3
+    };
 
-for (let i = 0; i < 50; i++) {
-    const difficulty = i / 49;
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const random = (min, max) => min + Math.random() * (max - min);
 
-    registerMission({
-        id: `mission-${i + 1}`,
-        index: i,
-        name: MISSION_THEMES[i],
-        description:
-            `${MISSION_OBJECTIVES[i % MISSION_OBJECTIVES.length]} ` +
-            `Distance : ${Math.round(150 + i * 32)} mètres.`,
-        distance: Math.round(150 + i * 32),
-        speed: 10 + difficulty * 9,
-        obstacleRate: 1.9 - difficulty * 0.85,
-        coinRate: 1.15 - difficulty * 0.25,
-        reward: 100 + i * 30,
-        color: `hsl(${185 + i * 3.2}, 85%, 58%)`,
-        difficulty: i + 1
-    });
-}
-
-/* ------------------------------------------------------------
-   ÉTAT CENTRAL
------------------------------------------------------------- */
-
-export const state = {
-    ready: false,
-    running: false,
-    paused: false,
-    gameOver: false,
-    completed: false,
-
-    missionIndex: 0,
-    selectedMission: 0,
-    completedMissions: [],
-    bestScores: {},
-
-    score: 0,
-    coins: 0,
-    totalCoins: 0,
-    lives: 3,
-
-    distance: 0,
-    elapsed: 0,
-    obstacleTimer: 0,
-    coinTimer: 0,
-    invulnerable: 0,
-    slideTimer: 0,
-    jumpVelocity: 0,
-    jumpHeight: 0,
-
-    lane: 1,
-    targetLane: 1,
-    cameraZoom: 1,
-    cameraRotation: 0,
-
-    quality: "medium",
-    sensitivity: 5,
-    volume: 60,
-    soundEnabled: true,
-    vibrationEnabled: true,
-
-    app: null,
-    pc: null,
-    canvas: null,
-    camera: null,
-    player: null,
-    playerBody: null,
-    playerHead: null,
-    road: null,
-    ground: null,
-    obstacles: [],
-    collectibles: [],
-    scenery: [],
-    roadSegments: [],
-
-    rafActive: false,
-    lastFrame: 0,
-    lastSave: 0,
-    pendingConfirmation: null,
-    selectedFilter: "all",
-    audioContext: null,
-    destroyed: false
-};
-
-const cleanupCallbacks = [];
-const actionHandlers = new Map();
-
-function onCleanup(fn) {
-    cleanupCallbacks.push(fn);
-}
-
-function addEvent(target, type, handler, options) {
-    target.addEventListener(type, handler, options);
-    onCleanup(() => target.removeEventListener(type, handler, options));
-}
-
-function setText(id, value) {
-    const el = $(id);
-    if (el) el.textContent = String(value);
-}
-
-function showPanel(id) {
-    const panel = $(id);
-    if (panel) panel.classList.remove("hidden");
-}
-
-function hidePanel(id) {
-    const panel = $(id);
-    if (panel) panel.classList.add("hidden");
-}
-
-function hideAllPanels() {
-    [
-        "pausePanel",
-        "missionsPanel",
-        "missionCompletePanel",
-        "gameOverPanel",
-        "settingsPanel",
-        "inventoryPanel",
-        "helpPanel",
-        "systemPanel",
-        "confirmPanel"
-    ].forEach(hidePanel);
-
-    hidePanel("sideMenu");
-}
-
-function notify(message, duration = 2500) {
-    const el = $("gameNotification");
-    if (!el) return;
-
-    el.textContent = message;
-    el.classList.add("visible");
-    el.setAttribute("aria-live", "polite");
-
-    if (notify.timer) clearTimeout(notify.timer);
-
-    notify.timer = setTimeout(() => {
-        el.classList.remove("visible");
-    }, duration);
-}
-
-/* ------------------------------------------------------------
-   CHARGEMENT PLAYCANVAS
------------------------------------------------------------- */
-
-async function loadPlayCanvas() {
-    setLoading(12, "Chargement du moteur PlayCanvas...");
-
-    const pc = await import(
-        "https://cdn.jsdelivr.net/npm/playcanvas@2.14.4/+esm"
-    );
-
-    if (!pc.Application || !pc.Entity || !pc.Color) {
-        throw new Error("Le module PlayCanvas est incomplet.");
+    function safeText(id, value) {
+        const element = $(id);
+        if (element) element.textContent = String(value);
     }
 
-    state.pc = pc;
-    return pc;
-}
-
-function setLoading(percent, message) {
-    const progress = $("loadingProgress");
-    const label = $("loadingPercent");
-
-    if (progress) {
-        progress.style.width = `${clamp(percent, 0, 100)}%`;
+    function show(element, visible) {
+        if (!element) return;
+        element.classList.toggle("hidden", !visible);
+        element.setAttribute("aria-hidden", visible ? "false" : "true");
     }
 
-    if (label) {
-        label.textContent = `${Math.round(percent)} %`;
+    function notify(message, duration = 2200) {
+        if (!ui.notification) return;
+        ui.notification.textContent = message;
+        ui.notification.classList.add("visible");
+        ui.notification.style.display = "block";
+
+        clearTimeout(notify.timer);
+        notify.timer = setTimeout(() => {
+            if (!ui.notification) return;
+            ui.notification.classList.remove("visible");
+            ui.notification.style.display = "";
+        }, duration);
     }
 
-    setText("loadingMessage", message);
-}
-
-function hideLoading() {
-    const screen = $("loadingScreen");
-
-    if (screen) {
-        screen.classList.add("loaded");
-        screen.setAttribute("aria-hidden", "true");
-    }
-}
-
-/* ------------------------------------------------------------
-   MATÉRIAUX ET ENTITÉS 3D
------------------------------------------------------------- */
-
-function createMaterial(color, options = {}) {
-    const pc = state.pc;
-    const material = new pc.StandardMaterial();
-
-    material.diffuse = new pc.Color(
-        options.r ?? 0.1,
-        options.g ?? 0.8,
-        options.b ?? 1
-    );
-
-    if (Array.isArray(color)) {
-        material.diffuse = new pc.Color(
-            color[0],
-            color[1],
-            color[2]
-        );
+    function setLoading(percent, message) {
+        if (ui.loadingProgress) {
+            ui.loadingProgress.style.width = clamp(percent, 0, 100) + "%";
+        }
+        safeText("loadingPercent", Math.round(clamp(percent, 0, 100)) + " %");
+        safeText("loadingMessage", message);
     }
 
-    material.emissive = options.emissive
-        ? new pc.Color(
-            options.emissive[0],
-            options.emissive[1],
-            options.emissive[2]
-        )
-        : new pc.Color(0, 0, 0);
-
-    material.metalness = options.metalness ?? 0.05;
-    material.gloss = options.gloss ?? 45;
-    material.update();
-
-    return material;
-}
-
-function makeBox(name, position, scale, material, parent = null) {
-    const pc = state.pc;
-    const entity = new pc.Entity(name);
-
-    entity.addComponent("render", { type: "box" });
-
-    entity.setLocalScale(scale[0], scale[1], scale[2]);
-    entity.setPosition(position[0], position[1], position[2]);
-
-    if (material) entity.render.material = material;
-
-    (parent || state.app.root).addChild(entity);
-    return entity;
-}
-
-function makeSphere(name, position, scale, material, parent = null) {
-    const pc = state.pc;
-    const entity = new pc.Entity(name);
-
-    entity.addComponent("render", { type: "sphere" });
-    entity.setLocalScale(scale[0], scale[1], scale[2]);
-    entity.setPosition(position[0], position[1], position[2]);
-
-    if (material) entity.render.material = material;
-
-    (parent || state.app.root).addChild(entity);
-    return entity;
-}
-
-function setupScene() {
-    const pc = state.pc;
-    const canvas = $("jumperCanvas");
-
-    if (!canvas) {
-        throw new Error("Le canvas #jumperCanvas est introuvable.");
+    function hideLoading() {
+        if (!ui.loading) return;
+        ui.loading.style.display = "none";
+        ui.loading.setAttribute("aria-hidden", "true");
     }
 
-    state.canvas = canvas;
+    function showFatalError(error) {
+        console.error("[NINA JUMPER 3D]", error);
 
-    const app = new pc.Application(canvas, {
-        graphicsDeviceOptions: {
-            antialias: true,
-            alpha: false,
-            depth: true,
-            stencil: false,
-            powerPreference: "high-performance"
-        },
-        keyboard: false,
-        mouse: false,
-        touch: false
-    });
+        hideLoading();
+        show(ui.start, true);
 
-    state.app = app;
+        const status = $("saveStatus");
+        if (status) {
+            status.textContent =
+                "Le moteur 3D n'a pas pu se charger. Vérifiez Internet et rechargez la page.";
+        }
 
-    app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
-    app.setCanvasResolution(pc.RESOLUTION_AUTO);
-
-    const camera = new pc.Entity("NINA_CAMERA");
-
-    camera.addComponent("camera", {
-        clearColor: new pc.Color(0.025, 0.055, 0.12),
-        fov: 60,
-        nearClip: 0.1,
-        farClip: 250
-    });
-
-    camera.setPosition(0, 5.5, 10);
-    camera.lookAt(0, 1.3, -8);
-    app.root.addChild(camera);
-
-    state.camera = camera;
-
-    const light = new pc.Entity("MAIN_LIGHT");
-
-    light.addComponent("light", {
-        type: "directional",
-        color: new pc.Color(1, 0.94, 0.82),
-        intensity: 1.7,
-        castShadows: false
-    });
-
-    light.setEulerAngles(42, 25, 0);
-    app.root.addChild(light);
-
-    const fillLight = new pc.Entity("FILL_LIGHT");
-
-    fillLight.addComponent("light", {
-        type: "omni",
-        color: new pc.Color(0.2, 0.55, 1),
-        intensity: 0.65,
-        range: 35
-    });
-
-    fillLight.setPosition(-5, 6, 2);
-    app.root.addChild(fillLight);
-
-    const floorMaterial = createMaterial([0.035, 0.09, 0.15], {
-        metalness: 0.15
-    });
-
-    const roadMaterial = createMaterial([0.06, 0.13, 0.2], {
-        metalness: 0.25
-    });
-
-    const edgeMaterial = createMaterial([0.05, 0.75, 1], {
-        emissive: [0.01, 0.22, 0.4]
-    });
-
-    state.ground = makeBox(
-        "WORLD_GROUND",
-        [0, -0.4, -40],
-        [200, 0.4, 220],
-        floorMaterial
-    );
-
-    state.road = makeBox(
-        "RUNWAY",
-        [0, -0.12, -45],
-        [7.4, 0.16, 120],
-        roadMaterial
-    );
-
-    for (const x of [-3.65, 3.65]) {
-        makeBox(
-            "RUNWAY_EDGE",
-            [x, -0.02, -45],
-            [0.12, 0.1, 120],
-            edgeMaterial
-        );
+        notify("Chargement 3D impossible. L'interface reste accessible.", 5000);
     }
 
-    for (const x of [-1.1, 1.1]) {
-        makeBox(
-            "LANE_MARKING",
-            [x, -0.025, -45],
-            [0.035, 0.025, 120],
-            edgeMaterial
-        );
-    }
+    /* --------------------------------------------------------
+       LES 50 MISSIONS
+    -------------------------------------------------------- */
 
-    const bodyMaterial = createMaterial([0.05, 0.65, 1], {
-        metalness: 0.12,
-        gloss: 70
+    const missionNames = [
+        "Le premier saut", "Les pièces perdues", "La piste rapide",
+        "Les premiers obstacles", "Le pont suspendu", "Course de précision",
+        "La vallée des pièces", "Les barrières basses", "Le chemin étroit",
+        "Le sprint de Nina", "La zone dangereuse", "La série dorée",
+        "Les obstacles doubles", "La course nocturne", "Le grand fossé",
+        "La route sinueuse", "Les pièces rares", "Le saut parfait",
+        "Le parcours rapide", "La forêt mystérieuse", "La piste technique",
+        "La pluie d'obstacles", "Les trois voies", "Le tunnel secret",
+        "La course du courage", "Le défi des pièces", "La grande montée",
+        "Les obstacles mobiles", "Le parcours expert", "Le pont des étoiles",
+        "La course extrême", "Le chemin des trésors", "Le saut impossible",
+        "La piste infernale", "La chasse aux pièces", "Le couloir dangereux",
+        "Le défi du champion", "La course éclair", "Les trois récompenses",
+        "La route légendaire", "Le temple perdu", "Le défi de Nina",
+        "La grande traversée", "Le sprint ultime", "La route des champions",
+        "Le labyrinthe", "La dernière ligne droite", "Le parcours légendaire",
+        "Le défi final", "La légende de Nina"
+    ];
+
+    const missions = Array.from({ length: TOTAL_MISSIONS }, (_, index) => {
+        const number = index + 1;
+        return {
+            id: number,
+            name: missionNames[index],
+            targetCoins: 3 + Math.floor(index * 0.65),
+            targetDistance: 100 + index * 35,
+            targetScore: 100 + index * 90,
+            speed: Math.min(8 + index * 0.12, 15),
+            description:
+                "Parcourez " + (100 + index * 35) +
+                " m et ramassez " + (3 + Math.floor(index * 0.65)) +
+                " pièces."
+        };
     });
 
-    const headMaterial = createMaterial([1, 0.72, 0.52], {
-        gloss: 55
-    });
-
-    const hairMaterial = createMaterial([0.12, 0.045, 0.025]);
-    const accentMaterial = createMaterial([1, 0.12, 0.5], {
-        emissive: [0.25, 0.015, 0.06]
-    });
-
-    state.player = new pc.Entity("NINA_PLAYER");
-    app.root.addChild(state.player);
-
-    state.playerBody = makeBox(
-        "NINA_BODY",
-        [0, 0.92, 0],
-        [0.62, 0.95, 0.38],
-        bodyMaterial,
-        state.player
-    );
-
-    state.playerHead = makeSphere(
-        "NINA_HEAD",
-        [0, 1.68, 0],
-        [0.56, 0.56, 0.52],
-        headMaterial,
-        state.player
-    );
-
-    makeSphere(
-        "NINA_HAIR",
-        [0, 1.9, -0.04],
-        [0.59, 0.3, 0.54],
-        hairMaterial,
-        state.player
-    );
-
-    makeBox(
-        "NINA_SCARF",
-        [0, 1.28, -0.03],
-        [0.68, 0.15, 0.43],
-        accentMaterial,
-        state.player
-    );
-
-    const legMaterial = createMaterial([0.08, 0.13, 0.4]);
-    const shoeMaterial = createMaterial([0.96, 0.96, 1]);
-
-    state.playerParts = [];
-
-    for (const x of [-0.19, 0.19]) {
-        const leg = makeBox(
-            "NINA_LEG",
-            [x, 0.28, 0],
-            [0.2, 0.48, 0.24],
-            legMaterial,
-            state.player
-        );
-
-        makeBox(
-            "NINA_SHOE",
-            [x, 0.06, -0.09],
-            [0.25, 0.12, 0.38],
-            shoeMaterial,
-            state.player
-        );
-
-        state.playerParts.push(leg);
+    function getMission() {
+        return missions[clamp(state.mission, 1, TOTAL_MISSIONS) - 1];
     }
 
-    state.player.setPosition(0, 0, 0);
+    /* --------------------------------------------------------
+       SAUVEGARDE ROBUSTE
+    -------------------------------------------------------- */
 
-    for (let i = 0; i < 20; i++) {
-        const z = -i * 5 - 10;
-
-        const left = makeBox(
-            "SCENERY_LEFT",
-            [-6.5 - rand(0, 3), 1.5, z],
-            [rand(1, 2.5), rand(2, 5), rand(1, 2)],
-            createMaterial(choice([
-                [0.04, 0.25, 0.24],
-                [0.08, 0.16, 0.35],
-                [0.14, 0.09, 0.3]
-            ]))
-        );
-
-        const right = makeBox(
-            "SCENERY_RIGHT",
-            [6.5 + rand(0, 3), 1.5, z - 2],
-            [rand(1, 2.5), rand(2, 5), rand(1, 2)],
-            createMaterial(choice([
-                [0.04, 0.25, 0.24],
-                [0.08, 0.16, 0.35],
-                [0.14, 0.09, 0.3]
-            ]))
-        );
-
-        state.scenery.push(left, right);
-    }
-
-    app.on("update", updateGame);
-    app.start();
-
-    applyQuality();
-    resizeCanvas();
-}
-
-/* ------------------------------------------------------------
-   OBJETS DE COURSE : OBSTACLES ET PIÈCES
------------------------------------------------------------- */
-
-function clearObjects(list) {
-    for (const item of list) {
-        if (item.entity && !item.entity.destroyed) {
-            item.entity.destroy();
+    function readJSON(key, fallback) {
+        try {
+            const value = localStorage.getItem(key);
+            return value ? JSON.parse(value) : fallback;
+        } catch (error) {
+            console.warn("Lecture du stockage impossible :", error);
+            return fallback;
         }
     }
 
-    list.length = 0;
-}
+    function saveGame(silent = false) {
+        const data = {
+            version: 1,
+            mission: state.mission,
+            selectedMission: state.selectedMission,
+            unlockedMission: state.unlockedMission,
+            completedMissions: state.completedMissions,
+            score: state.score,
+            coins: state.coins,
+            best: state.best,
+            lives: state.lives,
+            savedAt: new Date().toISOString()
+        };
 
-function spawnObstacle() {
-    if (!state.app || !state.running) return;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            safeText("saveStatus", "Progression sauvegardée sur cet appareil.");
+            safeText("databaseStatus", "Base de données : sauvegarde locale disponible.");
+            safeText("systemMessage", "Sauvegarde effectuée avec succès.");
 
-    const pc = state.pc;
-    const lane = Math.floor(Math.random() * 3);
-    const type = choice(["block", "barrier", "block", "barrier"]);
+            if (!silent) notify("Progression sauvegardée !");
+            updateHUD();
+            return true;
+        } catch (error) {
+            console.error("Sauvegarde impossible :", error);
+            safeText("systemMessage", "Sauvegarde impossible : stockage indisponible.");
+            if (!silent) notify("Impossible de sauvegarder les données.");
+            return false;
+        }
+    }
 
-    const material = type === "barrier"
-        ? createMaterial([1, 0.25, 0.12], {
-            emissive: [0.3, 0.025, 0.005]
-        })
-        : createMaterial([0.95, 0.52, 0.08], {
-            metalness: 0.15
+    function loadGame() {
+        const data = readJSON(STORAGE_KEY, null);
+
+        if (!data || typeof data !== "object") {
+            safeText("saveStatus", "Nouvelle partie disponible.");
+            return;
+        }
+
+        state.mission = clamp(Number(data.mission) || 1, 1, TOTAL_MISSIONS);
+        state.selectedMission = clamp(
+            Number(data.selectedMission) || state.mission,
+            1,
+            TOTAL_MISSIONS
+        );
+        state.unlockedMission = clamp(
+            Number(data.unlockedMission) || state.mission,
+            1,
+            TOTAL_MISSIONS
+        );
+
+        state.completedMissions = Array.isArray(data.completedMissions)
+            ? data.completedMissions
+                .map(Number)
+                .filter(n => Number.isInteger(n) && n >= 1 && n <= TOTAL_MISSIONS)
+            : [];
+
+        state.score = Math.max(0, Number(data.score) || 0);
+        state.coins = Math.max(0, Number(data.coins) || 0);
+        state.best = Math.max(0, Number(data.best) || 0);
+        state.lives = clamp(Number(data.lives) || 3, 1, 3);
+
+        safeText("saveStatus", "Sauvegarde locale détectée.");
+    }
+
+    function loadSettings() {
+        const data = readJSON(SETTINGS_KEY, {});
+
+        state.quality = ["low", "medium", "high"].includes(data.quality)
+            ? data.quality : "medium";
+        state.sensitivity = clamp(Number(data.sensitivity) || 5, 1, 10);
+        state.volume = clamp(Number(data.volume ?? 60), 0, 100);
+        state.soundEnabled = data.soundEnabled !== false;
+        state.vibrationEnabled = data.vibrationEnabled !== false;
+
+        if ($("qualitySelect")) $("qualitySelect").value = state.quality;
+        if ($("sensitivityRange")) $("sensitivityRange").value = state.sensitivity;
+        if ($("volumeRange")) $("volumeRange").value = state.volume;
+        if ($("soundEnabled")) $("soundEnabled").checked = state.soundEnabled;
+        if ($("vibrationEnabled")) $("vibrationEnabled").checked = state.vibrationEnabled;
+
+        updateSettingsLabels();
+    }
+
+    function updateSettingsLabels() {
+        safeText("sensitivityValue", state.sensitivity);
+        safeText("volumeValue", state.volume + " %");
+    }
+
+    function applySettings() {
+        state.quality = $("qualitySelect")?.value || "medium";
+        state.sensitivity = clamp(Number($("sensitivityRange")?.value) || 5, 1, 10);
+        state.volume = clamp(Number($("volumeRange")?.value) || 0, 0, 100);
+        state.soundEnabled = $("soundEnabled")?.checked !== false;
+        state.vibrationEnabled = $("vibrationEnabled")?.checked !== false;
+
+        try {
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+                quality: state.quality,
+                sensitivity: state.sensitivity,
+                volume: state.volume,
+                soundEnabled: state.soundEnabled,
+                vibrationEnabled: state.vibrationEnabled
+            }));
+        } catch (error) {
+            console.warn("Paramètres non sauvegardés :", error);
+        }
+
+        updateSettingsLabels();
+        applyQuality();
+        notify("Paramètres appliqués.");
+        show($("settingsPanel"), false);
+    }
+
+    /* --------------------------------------------------------
+       INTERFACE ET HUD
+    -------------------------------------------------------- */
+
+    function updateHUD() {
+        const mission = getMission();
+
+        safeText("currentMission",
+            String(state.mission).padStart(2, "0") + " / " + TOTAL_MISSIONS);
+        safeText("scoreValue", Math.floor(state.score));
+        safeText("coinsValue", state.coins);
+        safeText("livesValue", "❤ ".repeat(Math.max(0, state.lives)).trim() || "—");
+        safeText("missionName", mission.name);
+        safeText("objectiveText", mission.description);
+        safeText("inventoryCoins", state.coins);
+
+        const progress = clamp(
+            Math.round(state.distance / mission.targetDistance * 100),
+            0,
+            100
+        );
+
+        safeText("missionProgressText", progress + " %");
+
+        if ($("missionProgressBar")) {
+            $("missionProgressBar").style.width = progress + "%";
+        }
+        if ($("missionProgressTrack")) {
+            $("missionProgressTrack").setAttribute("aria-valuenow", progress);
+        }
+
+        safeText("missionsSummary",
+            state.completedMissions.length + " / " + TOTAL_MISSIONS +
+            " missions terminées.");
+
+        safeText("gameOverScore", Math.floor(state.score));
+        safeText("gameOverBest", Math.floor(state.best));
+    }
+
+    function renderMissions() {
+        const list = ui.missionList;
+        if (!list) return;
+
+        list.replaceChildren();
+
+        missions.forEach(mission => {
+            const completed = state.completedMissions.includes(mission.id);
+            const available = mission.id <= state.unlockedMission;
+            if (state.filter === "available" && (!available || completed)) return;
+            if (state.filter === "completed" && !completed) return;
+
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "mission-item";
+            item.dataset.missionId = String(mission.id);
+            item.style.width = "100%";
+            item.style.textAlign = "left";
+            item.style.padding = "12px";
+            item.style.marginBottom = "7px";
+            item.style.borderRadius = "10px";
+            item.style.border = mission.id === state.selectedMission
+                ? "2px solid #55d9ff"
+                : "1px solid rgba(255,255,255,.16)";
+            item.style.background = completed
+                ? "rgba(38,180,120,.16)"
+                : "rgba(255,255,255,.05)";
+            item.style.color = "inherit";
+            item.style.opacity = available ? "1" : ".48";
+
+            const status = completed ? "✓ Terminée"
+                : available ? "▶ Disponible" : "🔒 Verrouillée";
+
+            item.textContent =
+                String(mission.id).padStart(2, "0") + " — " +
+                mission.name + " | " + status;
+
+            item.disabled = !available;
+            item.addEventListener("click", () => {
+                state.selectedMission = mission.id;
+                renderMissions();
+            });
+
+            list.appendChild(item);
         });
 
-    const entity = new pc.Entity(`OBSTACLE_${type}`);
-    entity.addComponent("render", {
-        type: type === "barrier" ? "box" : "box"
-    });
+        if (!list.children.length) {
+            const message = document.createElement("p");
+            message.textContent = "Aucune mission dans cette catégorie.";
+            list.appendChild(message);
+        }
+    }
 
-    entity.setPosition(LANES[lane], type === "barrier" ? 0.55 : 0.65, -70);
+    function hideAllPanels(except = null) {
+        [
+            "pausePanel", "missionCompletePanel", "gameOverPanel",
+            "missionsPanel", "settingsPanel", "inventoryPanel",
+            "helpPanel", "systemPanel", "confirmPanel"
+        ].forEach(id => {
+            if (id !== except) show($(id), false);
+        });
+    }
 
-    entity.setLocalScale(
-        type === "barrier" ? 1.45 : 0.95,
-        type === "barrier" ? 0.55 : 1.3,
-        0.75
-    );
+    function showPanel(id) {
+        hideAllPanels(id);
+        show($(id), true);
+    }
 
-    entity.render.material = material;
-    state.app.root.addChild(entity);
+    function openHome() {
+        state.running = false;
+        state.paused = false;
+        hideAllPanels();
+        show(ui.start, true);
+        show(ui.sideMenu, false);
+        safeText("saveStatus", "Votre progression reste sauvegardée sur cet appareil.");
+    }
 
-    state.obstacles.push({
-        entity,
-        lane,
-        type,
-        z: -70,
-        passed: false
-    });
-}
+    /* --------------------------------------------------------
+       MOTEUR 3D PLAYCANVAS
+    -------------------------------------------------------- */
 
-function spawnCoinLine() {
-    if (!state.app || !state.running) return;
+    function makeMaterial(pc, color, emissive = null) {
+        const material = new pc.StandardMaterial();
+        material.diffuse = new pc.Color(color[0], color[1], color[2]);
 
-    const pc = state.pc;
-    const lane = Math.floor(Math.random() * 3);
-    const count = 3 + Math.floor(Math.random() * 4);
+        if (emissive) {
+            material.emissive = new pc.Color(emissive[0], emissive[1], emissive[2]);
+        }
 
-    const material = createMaterial([1, 0.78, 0.06], {
-        emissive: [0.3, 0.17, 0.005],
-        metalness: 0.5
-    });
+        material.metalness = 0.08;
+        material.gloss = 0.35;
+        material.update();
+        return material;
+    }
 
-    for (let i = 0; i < count; i++) {
-        const entity = new pc.Entity("COIN");
+    function addPrimitive(type, name, position, scale, material, parent = null) {
+        const pc = state.pc;
+        const entity = new pc.Entity(name);
 
         entity.addComponent("render", {
-            type: "cylinder"
+            type,
+            material
         });
 
-        entity.setLocalScale(0.34, 0.1, 0.34);
-        entity.setEulerAngles(90, 0, 0);
-        entity.setPosition(LANES[lane], 1.05, -60 - i * 1.35);
-        entity.render.material = material;
+        entity.setLocalPosition(position[0], position[1], position[2]);
+        entity.setLocalScale(scale[0], scale[1], scale[2]);
 
-        state.app.root.addChild(entity);
+        (parent || state.app.root).addChild(entity);
+        return entity;
+    }
+
+    function createScene() {
+        const pc = state.pc;
+        const canvas = ui.canvas;
+
+        if (!canvas) throw new Error("Élément #jumperCanvas introuvable.");
+
+        state.app = new pc.Application(canvas, {
+            graphicsDeviceOptions: {
+                antialias: state.quality !== "low",
+                alpha: false,
+                powerPreference: "high-performance"
+            }
+        });
+
+        const app = state.app;
+        app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+        app.setCanvasResolution(pc.RESOLUTION_AUTO);
+        app.scene.ambientLight = new pc.Color(0.48, 0.51, 0.62);
+
+        app.scene.exposure = 1;
+        app.scene.toneMapping = pc.TONEMAP_ACES;
+
+        const camera = new pc.Entity("NINA_CAMERA");
+        camera.addComponent("camera", {
+            clearColor: new pc.Color(0.035, 0.075, 0.14),
+            fov: 62,
+            nearClip: 0.1,
+            farClip: 300
+        });
+        camera.setLocalPosition(0, 5.1, 9.5);
+        camera.lookAt(0, 1.5, -7);
+        app.root.addChild(camera);
+        state.camera = camera;
+
+        const light = new pc.Entity("NINA_DIRECTIONAL_LIGHT");
+        light.addComponent("light", {
+            type: "directional",
+            color: new pc.Color(1, 0.93, 0.8),
+            intensity: 1.5,
+            castShadows: state.quality === "high"
+        });
+        light.setLocalEulerAngles(42, 28, 0);
+        app.root.addChild(light);
+
+        const fillLight = new pc.Entity("NINA_FILL_LIGHT");
+        fillLight.addComponent("light", {
+            type: "omni",
+            color: new pc.Color(0.18, 0.48, 1),
+            intensity: 0.7,
+            range: 35
+        });
+        fillLight.setLocalPosition(-5, 7, 2);
+        app.root.addChild(fillLight);
+
+        state.materials.ground = makeMaterial(pc, [0.10, 0.16, 0.23]);
+        state.materials.lane = makeMaterial(pc, [0.13, 0.24, 0.34]);
+        state.materials.line = makeMaterial(pc, [0.1, 0.65, 0.95], [0.02, 0.2, 0.5]);
+        state.materials.player = makeMaterial(pc, [0.15, 0.72, 1], [0.02, 0.12, 0.28]);
+        state.materials.skin = makeMaterial(pc, [0.94, 0.65, 0.43]);
+        state.materials.hair = makeMaterial(pc, [0.12, 0.055, 0.03]);
+        state.materials.obstacle = makeMaterial(pc, [0.94, 0.18, 0.24], [0.16, 0.01, 0.01]);
+        state.materials.coin = makeMaterial(pc, [1, 0.73, 0.08], [0.4, 0.22, 0.01]);
+        state.materials.platform = makeMaterial(pc, [0.10, 0.35, 0.44]);
+
+        addPrimitive("box", "NINA_TRACK", [0, -0.18, -70], [9, 0.35, 160],
+            state.materials.ground);
+
+        for (let lane = -1; lane <= 1; lane++) {
+            addPrimitive("box", "NINA_LANE_" + lane, [lane * 2.3, 0.005, -70],
+                [2.12, 0.025, 160], state.materials.lane);
+
+            if (lane < 1) {
+                addPrimitive("box", "NINA_LANE_LINE_" + lane,
+                    [lane * 2.3 + 1.15, 0.025, -70],
+                    [0.035, 0.025, 160], state.materials.line);
+            }
+        }
+
+        for (let z = 0; z > -150; z -= 5) {
+            for (let lane = -1; lane <= 1; lane++) {
+                const mark = addPrimitive(
+                    "box", "NINA_TRACK_MARK",
+                    [lane * 2.3, 0.045, z],
+                    [0.07, 0.025, 1.3],
+                    state.materials.line
+                );
+                state.tracks.push(mark);
+            }
+        }
+
+        createPlayer();
+        app.on("update", updateGame);
+        app.start();
+
+        state.engineReady = true;
+        state.initialized = true;
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+    }
+
+    function createPlayer() {
+        const pc = state.pc;
+        const player = new pc.Entity("NINA_PLAYER");
+        player.setLocalPosition(0, 0, 1);
+        state.app.root.addChild(player);
+        state.player = player;
+
+        const body = addPrimitive(
+            "capsule", "NINA_BODY", [0, 1.0, 0],
+            [0.72, 1.0, 0.5], state.materials.player, player
+        );
+
+        const head = addPrimitive(
+            "sphere", "NINA_HEAD", [0, 1.85, 0],
+            [0.47, 0.47, 0.43], state.materials.skin, player
+        );
+
+        addPrimitive("sphere", "NINA_HAIR", [0, 2.08, -0.04],
+            [0.49, 0.27, 0.45], state.materials.hair, player);
+
+        addPrimitive("box", "NINA_LEFT_EYE", [-0.15, 1.88, 0.37],
+            [0.055, 0.07, 0.035], state.materials.hair, player);
+
+        addPrimitive("box", "NINA_RIGHT_EYE", [0.15, 1.88, 0.37],
+            [0.055, 0.07, 0.035], state.materials.hair, player);
+
+        addPrimitive("box", "NINA_LEFT_LEG", [-0.20, 0.34, 0],
+            [0.20, 0.58, 0.25], state.materials.hair, player);
+
+        addPrimitive("box", "NINA_RIGHT_LEG", [0.20, 0.34, 0],
+            [0.20, 0.58, 0.25], state.materials.hair, player);
+
+        player.bodyPart = body;
+        player.headPart = head;
+    }
+
+    function resizeCanvas() {
+        if (!state.app || !ui.canvas) return;
+        try {
+            state.app.resizeCanvas(
+                Math.max(1, ui.canvas.clientWidth),
+                Math.max(1, ui.canvas.clientHeight)
+            );
+        } catch (error) {
+            console.warn("Redimensionnement du canvas :", error);
+        }
+    }
+
+    function applyQuality() {
+        if (!state.app || !state.pc) return;
+
+        try {
+            const canvas = ui.canvas;
+            const ratio = state.quality === "low" ? 1
+                : state.quality === "high" ? Math.min(window.devicePixelRatio || 1, 2)
+                : Math.min(window.devicePixelRatio || 1, 1.5);
+
+            state.app.graphicsDevice.maxPixelRatio = ratio;
+            state.app.graphicsDevice.updateClientRect();
+            resizeCanvas();
+        } catch (error) {
+            console.warn("Réglage graphique partiel :", error);
+        }
+    }
+
+    /* --------------------------------------------------------
+       OBSTACLES ET PIÈCES
+    -------------------------------------------------------- */
+
+    function clearDynamicObjects() {
+        [...state.obstacles, ...state.collectibles].forEach(object => {
+            if (object.entity && object.entity.destroy) object.entity.destroy();
+        });
+        state.obstacles = [];
+        state.collectibles = [];
+    }
+
+    function spawnObstacle(lane, z) {
+        const height = Math.random() < 0.5 ? 0.8 : 1.55;
+        const entity = addPrimitive(
+            "box",
+            "NINA_OBSTACLE",
+            [lane * 2.3, height / 2, z],
+            [1.15, height, 0.75],
+            state.materials.obstacle
+        );
+
+        state.obstacles.push({
+            entity,
+            lane,
+            z,
+            height,
+            passed: false
+        });
+    }
+
+    function spawnCoin(lane, z, y = 1.15) {
+        const entity = addPrimitive(
+            "cylinder",
+            "NINA_COIN",
+            [lane * 2.3, y, z],
+            [0.45, 0.12, 0.45],
+            state.materials.coin
+        );
 
         state.collectibles.push({
             entity,
             lane,
-            z: -60 - i * 1.35,
-            collected: false
-        });
-    }
-}
-
-/* ------------------------------------------------------------
-   GESTION DES MISSIONS
------------------------------------------------------------- */
-
-export function getMission(index = state.missionIndex) {
-    if (missionRegistry.length === 0) return null;
-
-    return missionRegistry[
-        clamp(index, 0, missionRegistry.length - 1)
-    ];
-}
-
-function getUnlockedCount() {
-    return Math.min(
-        missionRegistry.length,
-        state.completedMissions.length + 1
-    );
-}
-
-function updateMissionHUD() {
-    const mission = getMission();
-
-    if (!mission) return;
-
-    setText(
-        "currentMission",
-        `${String(state.missionIndex + 1).padStart(2, "0")} / ${missionRegistry.length}`
-    );
-
-    setText("missionName", mission.name);
-    setText("scoreValue", state.score);
-    setText("coinsValue", state.coins);
-    setText("livesValue", "❤ ".repeat(Math.max(0, state.lives)).trim() || "0");
-
-    setText(
-        "objectiveText",
-        `${mission.description} Distance : ${Math.floor(state.distance)} / ${mission.distance} m`
-    );
-
-    const percent = clamp(
-        (state.distance / mission.distance) * 100,
-        0,
-        100
-    );
-
-    setText("missionProgressText", `${Math.floor(percent)} %`);
-
-    const bar = $("missionProgressBar");
-    const track = $("missionProgressTrack");
-
-    if (bar) bar.style.width = `${percent}%`;
-
-    if (track) {
-        track.setAttribute("aria-valuenow", String(Math.floor(percent)));
-    }
-}
-
-function resetMissionState() {
-    state.score = 0;
-    state.coins = 0;
-    state.lives = 3;
-    state.distance = 0;
-    state.elapsed = 0;
-    state.obstacleTimer = 0.5;
-    state.coinTimer = 1;
-    state.invulnerable = 0;
-    state.slideTimer = 0;
-    state.jumpVelocity = 0;
-    state.jumpHeight = 0;
-    state.lane = 1;
-    state.targetLane = 1;
-    state.gameOver = false;
-    state.completed = false;
-
-    clearObjects(state.obstacles);
-    clearObjects(state.collectibles);
-
-    if (state.player) {
-        state.player.setPosition(0, 0, 0);
-    }
-}
-
-export function startMission(index = state.missionIndex) {
-    if (!state.ready) {
-        notify("Le moteur 3D est encore en cours de chargement.");
-        return false;
-    }
-
-    const mission = getMission(index);
-
-    if (!mission) {
-        notify("Aucune mission disponible.");
-        return false;
-    }
-
-    if (
-        index > getUnlockedCount() - 1 &&
-        !state.completedMissions.includes(index - 1)
-    ) {
-        notify("Terminez d'abord la mission précédente.");
-        return false;
-    }
-
-    state.missionIndex = index;
-    state.selectedMission = index;
-
-    resetMissionState();
-    hideAllPanels();
-
-    state.running = true;
-    state.paused = false;
-
-    setText("startMissionButton", "JOUER LA MISSION");
-    notify(`Mission ${index + 1} : ${mission.name}`, 3000);
-
-    updateMissionHUD();
-    return true;
-}
-
-function finishMission() {
-    if (state.completed || state.gameOver) return;
-
-    state.running = false;
-    state.completed = true;
-
-    const index = state.missionIndex;
-    const mission = getMission(index);
-
-    if (!mission) return;
-
-    const stars = state.lives >= 3 ? 3 : state.lives === 2 ? 2 : 1;
-    const reward = mission.reward + state.coins * 2 + stars * 50;
-
-    state.score += reward;
-    state.totalCoins += state.coins;
-
-    if (!state.completedMissions.includes(index)) {
-        state.completedMissions.push(index);
-    }
-
-    state.bestScores[index] = Math.max(
-        state.bestScores[index] || 0,
-        state.score
-    );
-
-    setText("missionFinalScore", state.score);
-    setText("missionFinalCoins", state.coins);
-    setText("missionFinalStars", `${stars} / 3`);
-
-    setText(
-        "completeDescription",
-        `${mission.name} terminée ! Récompense : ${reward} points.`
-    );
-
-    const next = $("nextMissionButton");
-
-    if (next) {
-        next.disabled = index >= missionRegistry.length - 1;
-        next.textContent = index >= missionRegistry.length - 1
-            ? "AVENTURE TERMINÉE"
-            : "MISSION SUIVANTE";
-    }
-
-    showPanel("missionCompletePanel");
-    updateMissionHUD();
-    saveGame();
-
-    if (index >= missionRegistry.length - 1) {
-        notify("Félicitations ! Vous avez terminé les 50 missions.", 5000);
-    } else {
-        notify("Mission réussie ! La prochaine aventure est débloquée.");
-    }
-}
-
-function endGame() {
-    if (state.gameOver || state.completed) return;
-
-    state.running = false;
-    state.gameOver = true;
-
-    const index = state.missionIndex;
-
-    state.bestScores[index] = Math.max(
-        state.bestScores[index] || 0,
-        state.score
-    );
-
-    setText("gameOverScore", state.score);
-    setText("gameOverBest", state.bestScores[index] || 0);
-
-    showPanel("gameOverPanel");
-    saveGame();
-}
-
-function goNextMission() {
-    if (state.missionIndex >= missionRegistry.length - 1) {
-        notify("Vous avez terminé toutes les missions !");
-        return;
-    }
-
-    startMission(state.missionIndex + 1);
-}
-
-/* ------------------------------------------------------------
-   PHYSIQUE SIMPLIFIÉE : COURSE, SAUT, GLISSADE
------------------------------------------------------------- */
-
-function jump() {
-    if (!state.running || state.paused || state.completed) return;
-
-    if (state.jumpHeight > 0.02) return;
-    if (state.slideTimer > 0) return;
-
-    state.jumpVelocity = 8.2;
-    playTone(520, 0.07);
-    vibrate(10);
-}
-
-function slide() {
-    if (!state.running || state.paused || state.completed) return;
-
-    if (state.jumpHeight > 0.15) return;
-
-    state.slideTimer = 0.72;
-    playTone(260, 0.05);
-    vibrate(8);
-}
-
-function moveLane(direction) {
-    if (!state.running || state.paused) return;
-
-    state.targetLane = clamp(
-        state.targetLane + direction,
-        0,
-        2
-    );
-}
-
-function updateGame(dt) {
-    if (!state.ready || state.destroyed) return;
-
-    const safeDt = clamp(dt, 0, 0.05);
-
-    if (state.paused || !state.running) {
-        updateCamera(safeDt);
-        return;
-    }
-
-    const mission = getMission();
-
-    if (!mission) return;
-
-    state.elapsed += safeDt;
-    state.invulnerable = Math.max(0, state.invulnerable - safeDt);
-    state.slideTimer = Math.max(0, state.slideTimer - safeDt);
-
-    const speed = mission.speed * (1 + state.distance / 10000);
-
-    state.distance += speed * safeDt;
-
-    state.obstacleTimer -= safeDt;
-    state.coinTimer -= safeDt;
-
-    if (state.obstacleTimer <= 0) {
-        spawnObstacle();
-
-        state.obstacleTimer = Math.max(
-            0.58,
-            mission.obstacleRate * rand(0.72, 1.28)
-        );
-    }
-
-    if (state.coinTimer <= 0) {
-        spawnCoinLine();
-
-        state.coinTimer = Math.max(
-            0.45,
-            mission.coinRate * rand(0.7, 1.25)
-        );
-    }
-
-    // Déplacement progressif entre les trois voies.
-    const targetX = LANES[state.targetLane];
-    const currentX = state.player.getPosition().x;
-    const nextX = currentX + (targetX - currentX) * Math.min(1, safeDt * 12);
-
-    state.player.setPosition(nextX, state.jumpHeight, 0);
-    state.lane = state.targetLane;
-
-    // Saut avec gravité.
-    if (state.jumpHeight > 0 || state.jumpVelocity > 0) {
-        state.jumpVelocity -= 19 * safeDt;
-        state.jumpHeight += state.jumpVelocity * safeDt;
-
-        if (state.jumpHeight <= 0) {
-            state.jumpHeight = 0;
-            state.jumpVelocity = 0;
-        }
-    }
-
-    // Animation des jambes.
-    if (state.playerParts) {
-        const runningCycle = Math.sin(state.elapsed * 14) * 0.4;
-
-        state.playerParts.forEach((leg, i) => {
-            leg.setLocalPosition(
-                i === 0 ? -0.19 : 0.19,
-                0.28 + Math.abs(runningCycle) * 0.1,
-                runningCycle * (i === 0 ? 1 : -1)
-            );
+            z,
+            y,
+            collected: false,
+            phase: random(0, Math.PI * 2)
         });
     }
 
-    // Animation du corps et de la tête.
-    if (state.playerBody) {
-        const slideScale = state.slideTimer > 0 ? 0.52 : 1;
+    function spawnPattern() {
+        const z = -65;
+        const difficulty = state.mission;
+        const lane = Math.floor(random(0, 3)) - 1;
+        const roll = Math.random();
 
-        state.playerBody.setLocalScale(
-            0.62,
-            0.95 * slideScale,
-            0.38
-        );
-
-        state.playerBody.setLocalPosition(
-            0,
-            state.slideTimer > 0 ? 0.48 : 0.92,
-            0
-        );
-    }
-
-    if (state.playerHead) {
-        state.playerHead.enabled = state.slideTimer <= 0;
-    }
-
-    // Avancement des obstacles et détection des collisions.
-    for (let i = state.obstacles.length - 1; i >= 0; i--) {
-        const obstacle = state.obstacles[i];
-
-        obstacle.z += speed * safeDt;
-        obstacle.entity.setPosition(
-            LANES[obstacle.lane],
-            obstacle.type === "barrier" ? 0.55 : 0.65,
-            obstacle.z
-        );
-
-        const sameLane = obstacle.lane === state.targetLane;
-        const close = obstacle.z > -0.9 && obstacle.z < 0.9;
-
-        if (sameLane && close && !obstacle.passed) {
-            obstacle.passed = true;
-
-            const jumpedOver = state.jumpHeight > 0.85;
-            const slidUnder =
-                state.slideTimer > 0 && obstacle.type === "barrier";
-
-            if (!jumpedOver && !slidUnder && state.invulnerable <= 0) {
-                hitPlayer();
-            } else {
-                state.score += 15;
-            }
-        }
-
-        if (obstacle.z > 8) {
-            obstacle.entity.destroy();
-            state.obstacles.splice(i, 1);
-        }
-    }
-
-    // Pièces à collecter.
-    for (let i = state.collectibles.length - 1; i >= 0; i--) {
-        const coin = state.collectibles[i];
-
-        coin.z += speed * safeDt;
-        coin.entity.setPosition(
-            LANES[coin.lane],
-            1.05 + Math.sin(state.elapsed * 5 + i) * 0.08,
-            coin.z
-        );
-
-        coin.entity.rotate(0, 180 * safeDt, 0);
-
-        if (
-            coin.lane === state.targetLane &&
-            coin.z > -0.8 &&
-            coin.z < 0.8 &&
-            !coin.collected
-        ) {
-            coin.collected = true;
-            state.coins++;
-            state.score += 10;
-            state.totalCoins++;
-            playTone(880, 0.045);
-            vibrate(6);
-        }
-
-        if (coin.z > 8 || coin.collected) {
-            coin.entity.destroy();
-            state.collectibles.splice(i, 1);
-        }
-    }
-
-    // Défilement du décor.
-    for (const object of state.scenery) {
-        const pos = object.getPosition();
-
-        if (pos.z > 15) {
-            object.setPosition(
-                pos.x,
-                pos.y,
-                -100 - Math.random() * 30
-            );
+        if (roll < 0.55) {
+            spawnObstacle(lane, z);
+        } else if (roll < 0.75) {
+            spawnObstacle(lane, z);
+            spawnCoin(-lane, z - 1.5);
         } else {
-            object.setPosition(
-                pos.x,
-                pos.y,
-                pos.z + speed * safeDt
-            );
+            spawnCoin(lane, z);
+            spawnCoin(lane, z - 2.2);
+            spawnCoin(lane, z - 4.4);
+        }
+
+        if (difficulty > 5 && Math.random() < 0.22) {
+            const otherLane = [-1, 0, 1].filter(n => n !== lane)[
+                Math.floor(Math.random() * 2)
+            ];
+            spawnObstacle(otherLane, z - random(5, 9));
         }
     }
 
-    state.score += Math.floor(speed * safeDt);
+    function resetWorld() {
+        clearDynamicObjects();
 
-    if (state.distance >= mission.distance) {
-        finishMission();
+        state.distance = 0;
+        state.spawnDistance = 0;
+        state.elapsed = 0;
+        state.speed = getMission().speed;
+        state.lane = 0;
+        state.laneTarget = 0;
+        state.jumpY = 0;
+        state.jumpVelocity = 0;
+        state.jumping = false;
+        state.sliding = false;
+        state.slideUntil = 0;
+        state.invulnerableUntil = 0;
+        state.lives = 3;
+        state.score = 0;
+        state.coins = 0;
+        state.gameOver = false;
+        state.completed = false;
+        updateHUD();
     }
 
-    if (state.elapsed - state.lastSave > 20) {
-        state.lastSave = state.elapsed;
-        saveGame();
-    }
+    /* --------------------------------------------------------
+       MOUVEMENT ET COLLISIONS
+    -------------------------------------------------------- */
 
-    updateCamera(safeDt);
-    updateMissionHUD();
-}
+    function moveLane(direction) {
+        if (!state.running || state.paused || state.gameOver || state.completed) return;
 
-function hitPlayer() {
-    if (state.invulnerable > 0) return;
-
-    state.lives--;
-    state.invulnerable = 1.25;
-    state.score = Math.max(0, state.score - 25);
-
-    notify("Attention ! NINA a heurté un obstacle.", 1600);
-    playTone(130, 0.16);
-    vibrate(100);
-
-    if (state.lives <= 0) {
-        endGame();
-    }
-}
-
-/* ------------------------------------------------------------
-   CAMÉRA ET ZOOM
------------------------------------------------------------- */
-
-function updateCamera(dt) {
-    if (!state.camera || !state.player) return;
-
-    const targetX = state.player.getPosition().x * 0.25;
-    const cameraPosition = state.camera.getPosition();
-
-    state.camera.setPosition(
-        cameraPosition.x + (targetX - cameraPosition.x) * Math.min(1, dt * 3),
-        5.5,
-        10 * state.cameraZoom
-    );
-
-    state.camera.lookAt(
-        targetX * 0.4,
-        1.2,
-        -8
-    );
-
-    if (state.cameraRotation !== 0) {
-        state.camera.setEulerAngles(
-            16,
-            state.cameraRotation,
-            0
+        state.laneTarget = clamp(
+            state.laneTarget + direction,
+            -1,
+            1
         );
-    }
-}
-
-function changeZoom(amount) {
-    state.cameraZoom = clamp(
-        state.cameraZoom + amount,
-        0.65,
-        1.8
-    );
-
-    notify(`Zoom : ${Math.round(100 / state.cameraZoom)} %`, 800);
-}
-
-function resetZoom() {
-    state.cameraZoom = 1;
-    state.cameraRotation = 0;
-    notify("Caméra réinitialisée.");
-}
-
-function rotateCamera() {
-    state.cameraRotation = (state.cameraRotation + 20) % 360;
-}
-
-/* ------------------------------------------------------------
-   GESTES TACTILES ANDROID
-   - Un doigt : swipe gauche/droite/haut/bas
-   - Deux doigts : pinch-to-zoom
------------------------------------------------------------- */
-
-function setupTouchGestures() {
-    const surface = $("gestureSurface");
-    const canvas = $("jumperCanvas");
-
-    if (!surface || !canvas) return;
-
-    const activeTouches = new Map();
-    let pinchStartDistance = 0;
-    let pinchStartZoom = 1;
-    let swipeStartX = 0;
-    let swipeStartY = 0;
-    let gestureHandled = false;
-
-    function distance(a, b) {
-        return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+        soundEffect(420, 0.045);
     }
 
-    function getTouchPoints(event) {
-        return Array.from(event.touches || []);
+    function jump() {
+        if (!state.running || state.paused || state.gameOver ||
+            state.completed || state.jumping) return;
+
+        state.jumping = true;
+        state.jumpVelocity = 9.4;
+        state.sliding = false;
+        soundEffect(560, 0.08);
+        vibrate(20);
     }
 
-    const start = (event) => {
-        for (const touch of getTouchPoints(event)) {
-            activeTouches.set(touch.identifier, {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
+    function slide() {
+        if (!state.running || state.paused || state.gameOver || state.completed) return;
+
+        state.sliding = true;
+        state.slideUntil = performance.now() + 750;
+        soundEffect(220, 0.07);
+    }
+
+    function vibrate(ms = 30) {
+        if (!state.vibrationEnabled) return;
+        try {
+            if (navigator.vibrate) navigator.vibrate(ms);
+        } catch (_) {}
+    }
+
+    function collideWithObstacle(obstacle) {
+        if (performance.now() < state.invulnerableUntil) return false;
+        if (Math.abs(state.lane - obstacle.lane) > 0.42) return false;
+        if (Math.abs(obstacle.z - 1) > 1.0) return false;
+
+        const safelyJumping = state.jumping && state.jumpY > 0.85;
+        const safelySliding = state.sliding && obstacle.height < 1.1;
+
+        return !safelyJumping && !safelySliding;
+    }
+
+    function endGame() {
+        state.running = false;
+        state.paused = false;
+        state.gameOver = true;
+        state.best = Math.max(state.best, Math.floor(state.score));
+
+        safeText("gameOverScore", Math.floor(state.score));
+        safeText("gameOverBest", state.best);
+
+        show(ui.gameOver, true);
+        saveGame(true);
+        notify("Course terminée. Vous pouvez réessayer.");
+        vibrate([100, 60, 100]);
+    }
+
+    function completeMission() {
+        if (state.completed) return;
+
+        state.running = false;
+        state.completed = true;
+        state.best = Math.max(state.best, Math.floor(state.score));
+
+        if (!state.completedMissions.includes(state.mission)) {
+            state.completedMissions.push(state.mission);
         }
 
-        gestureHandled = false;
+        state.unlockedMission = Math.max(
+            state.unlockedMission,
+            Math.min(TOTAL_MISSIONS, state.mission + 1)
+        );
 
-        if (event.touches.length === 1) {
-            swipeStartX = event.touches[0].clientX;
-            swipeStartY = event.touches[0].clientY;
+        const stars = state.lives >= 3 ? 3 : state.lives === 2 ? 2 : 1;
+
+        safeText("missionFinalScore", Math.floor(state.score));
+        safeText("missionFinalCoins", state.coins);
+        safeText("missionFinalStars", stars + " / 3");
+        safeText("completeDescription",
+            "Mission " + state.mission + " terminée. Vous avez gagné " +
+            state.coins + " pièces.");
+
+        const nextButton = $("nextMissionButton");
+        if (nextButton) {
+            nextButton.disabled = state.mission >= TOTAL_MISSIONS;
+            nextButton.textContent = state.mission >= TOTAL_MISSIONS
+                ? "TOUTES LES MISSIONS TERMINÉES"
+                : "MISSION SUIVANTE";
         }
 
-        if (event.touches.length >= 2) {
-            pinchStartDistance = distance(
-                event.touches[0],
-                event.touches[1]
-            );
+        show(ui.complete, true);
+        saveGame(true);
+        notify("Mission réussie !");
+        soundEffect(820, 0.2);
+        vibrate([40, 50, 80]);
+    }
 
-            pinchStartZoom = state.cameraZoom;
+    function updateGame(dt) {
+        if (!Number.isFinite(dt) || dt < 0) return;
+        dt = Math.min(dt, 0.05);
+
+        if (!state.running || state.paused || state.gameOver || state.completed) {
+            return;
         }
-    };
 
-    const move = (event) => {
-        if (event.touches.length >= 2) {
-            event.preventDefault();
+        state.elapsed += dt;
+        state.distance += state.speed * dt;
+        state.score += state.speed * dt * 2;
+        state.spawnDistance += dt;
 
-            const currentDistance = distance(
-                event.touches[0],
-                event.touches[1]
-            );
+        state.lane += (state.laneTarget - state.lane) *
+            Math.min(1, dt * (5 + state.sensitivity * 0.5));
 
-            if (pinchStartDistance > 0) {
-                const ratio = currentDistance / pinchStartDistance;
+        if (state.jumping) {
+            state.jumpVelocity -= 22 * dt;
+            state.jumpY += state.jumpVelocity * dt;
 
-                state.cameraZoom = clamp(
-                    pinchStartZoom / ratio,
-                    0.65,
-                    1.8
-                );
+            if (state.jumpY <= 0) {
+                state.jumpY = 0;
+                state.jumpVelocity = 0;
+                state.jumping = false;
             }
-
-            gestureHandled = true;
         }
-    };
 
-    const end = (event) => {
-        if (!gestureHandled && state.running && !state.paused) {
-            const changed = event.changedTouches;
+        if (state.sliding && performance.now() > state.slideUntil) {
+            state.sliding = false;
+        }
 
-            if (changed && changed.length) {
-                const touch = changed[0];
+        if (state.player) {
+            state.player.setLocalPosition(
+                state.lane * 2.3,
+                state.jumpY,
+                1
+            );
 
-                const dx = touch.clientX - swipeStartX;
-                const dy = touch.clientY - swipeStartY;
+            state.player.setLocalScale(
+                1,
+                state.sliding ? 0.55 : 1,
+                1
+            );
+        }
 
-                if (Math.abs(dx) > 35 || Math.abs(dy) > 35) {
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        moveLane(dx < 0 ? -1 : 1);
-                    } else if (dy < -35) {
-                        jump();
-                    } else if (dy > 35) {
-                        slide();
-                    }
+        if (state.camera) {
+            const angle = state.cameraAngle * Math.PI / 180;
+            const zoom = state.cameraZoom;
+
+            state.camera.setLocalPosition(
+                Math.sin(angle) * 2.0,
+                5.1 / zoom,
+                9.5 / zoom
+            );
+            state.camera.lookAt(state.lane * 0.8, 1.4, -7);
+        }
+
+        state.tracks.forEach(mark => {
+            const p = mark.getLocalPosition();
+            const z = p.z + state.speed * dt;
+            mark.setLocalPosition(p.x, p.y, z > 5 ? z - 150 : z);
+        });
+
+        if (state.spawnDistance > Math.max(0.72, 1.5 - state.mission * 0.012)) {
+            spawnPattern();
+            state.spawnDistance = 0;
+        }
+
+        state.obstacles.forEach(obstacle => {
+            if (!obstacle.entity) return;
+
+            obstacle.z += state.speed * dt;
+            obstacle.entity.setLocalPosition(
+                obstacle.lane * 2.3,
+                obstacle.height / 2,
+                obstacle.z
+            );
+
+            if (!obstacle.passed && collideWithObstacle(obstacle)) {
+                obstacle.passed = true;
+                state.lives--;
+                state.invulnerableUntil = performance.now() + 1300;
+                vibrate(100);
+                notify("Attention ! Vous avez heurté un obstacle.");
+
+                if (state.lives <= 0) {
+                    endGame();
                 }
             }
+
+            if (obstacle.z > 12 && obstacle.entity) {
+                obstacle.entity.destroy();
+                obstacle.entity = null;
+            }
+        });
+
+        state.obstacles = state.obstacles.filter(item => item.entity);
+
+        state.collectibles.forEach(coin => {
+            if (!coin.entity) return;
+
+            coin.z += state.speed * dt;
+            coin.phase += dt * 3.5;
+
+            coin.entity.setLocalPosition(
+                coin.lane * 2.3,
+                coin.y + Math.sin(coin.phase) * 0.12,
+                coin.z
+            );
+            coin.entity.rotate(0, 120 * dt, 0);
+
+            if (!coin.collected &&
+                Math.abs(state.lane - coin.lane) < 0.45 &&
+                Math.abs(coin.z - 1) < 1.1 &&
+                Math.abs(state.jumpY + 1 - coin.y) < 1.8) {
+                coin.collected = true;
+                state.coins++;
+                state.score += 25;
+                soundEffect(900, 0.06);
+                if (coin.entity) coin.entity.destroy();
+                coin.entity = null;
+            }
+
+            if (coin.z > 12 && coin.entity) {
+                coin.entity.destroy();
+                coin.entity = null;
+            }
+        });
+
+        state.collectibles = state.collectibles.filter(item => item.entity);
+
+        const mission = getMission();
+
+        if (state.distance >= mission.targetDistance &&
+            state.coins >= mission.targetCoins) {
+            completeMission();
+        } else if (state.distance >= mission.targetDistance * 1.5) {
+            completeMission();
         }
 
-        activeTouches.clear();
+        updateHUD();
 
-        if (event.touches.length < 2) {
-            pinchStartDistance = 0;
+        if (Math.floor(state.elapsed) % 10 === 0 &&
+            Math.abs(state.elapsed - Math.round(state.elapsed)) < dt) {
+            saveGame(true);
         }
-    };
-
-    surface.style.touchAction = "none";
-    canvas.style.touchAction = "none";
-
-    addEvent(surface, "touchstart", start, { passive: true });
-    addEvent(surface, "touchmove", move, { passive: false });
-    addEvent(surface, "touchend", end, { passive: true });
-    addEvent(surface, "touchcancel", end, { passive: true });
-
-    // Le canvas accepte aussi le pinch, utile lorsque la surface
-    // est placée sous un élément d'interface.
-    addEvent(canvas, "touchstart", start, { passive: true });
-    addEvent(canvas, "touchmove", move, { passive: false });
-    addEvent(canvas, "touchend", end, { passive: true });
-    addEvent(canvas, "touchcancel", end, { passive: true });
-
-    addEvent(surface, "contextmenu", (event) => {
-        event.preventDefault();
-    });
-}
-
-/* ------------------------------------------------------------
-   SON ET VIBRATION
------------------------------------------------------------- */
-
-function playTone(frequency = 440, duration = 0.08) {
-    if (!state.soundEnabled || state.volume <= 0) return;
-
-    try {
-        const AudioContextClass =
-            globalThis.AudioContext ||
-            globalThis.webkitAudioContext;
-
-        if (!AudioContextClass) return;
-
-        if (!state.audioContext) {
-            state.audioContext = new AudioContextClass();
-        }
-
-        const context = state.audioContext;
-
-        if (context.state === "suspended") {
-            context.resume().catch(() => {});
-        }
-
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-
-        oscillator.type = "sine";
-        oscillator.frequency.value = frequency;
-
-        gain.gain.value = Math.min(0.12, state.volume / 1000);
-
-        oscillator.connect(gain);
-        gain.connect(context.destination);
-
-        oscillator.start();
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            context.currentTime + duration
-        );
-
-        oscillator.stop(context.currentTime + duration);
-    } catch (error) {
-        console.warn("Audio indisponible :", error);
     }
-}
 
-function vibrate(duration = 20) {
-    if (!state.vibrationEnabled) return;
+    /* --------------------------------------------------------
+       DEMARRAGE, PAUSE, REPRISE
+    -------------------------------------------------------- */
 
-    try {
-        if (typeof navigator !== "undefined" &&
-            typeof navigator.vibrate === "function") {
-            navigator.vibrate(duration);
+    function startGame(missionNumber = state.mission, continueGame = false) {
+        if (!state.engineReady) {
+            notify("Le moteur 3D n'est pas encore prêt.", 3500);
+            return;
         }
-    } catch {
-        // La vibration n'est pas disponible sur tous les appareils.
+
+        const target = clamp(Number(missionNumber) || 1, 1, TOTAL_MISSIONS);
+        if (target > state.unlockedMission) {
+            notify("Cette mission est verrouillée.");
+            return;
+        }
+
+        state.mission = target;
+        state.selectedMission = target;
+        resetWorld();
+
+        if (continueGame) {
+            const saved = readJSON(STORAGE_KEY, null);
+            if (saved && saved.mission === target) {
+                state.score = Math.max(0, Number(saved.score) || 0);
+                state.coins = Math.max(0, Number(saved.coins) || 0);
+            }
+        }
+
+        hideAllPanels();
+        show(ui.start, false);
+        show(ui.sideMenu, false);
+
+        state.running = true;
+        state.paused = false;
+        state.gameOver = false;
+        state.completed = false;
+
+        notify("Mission " + target + " : " + getMission().name);
+        updateHUD();
     }
-}
 
-/* ------------------------------------------------------------
-   SAUVEGARDE, IMPORT ET EXPORT
------------------------------------------------------------- */
-
-function makeSaveData() {
-    return {
-        version: VERSION,
-        savedAt: new Date().toISOString(),
-        missionIndex: state.missionIndex,
-        selectedMission: state.selectedMission,
-        completedMissions: state.completedMissions,
-        bestScores: state.bestScores,
-        score: state.score,
-        coins: state.coins,
-        totalCoins: state.totalCoins,
-        lives: state.lives,
-        distance: state.distance,
-        settings: {
-            quality: state.quality,
-            sensitivity: state.sensitivity,
-            volume: state.volume,
-            soundEnabled: state.soundEnabled,
-            vibrationEnabled: state.vibrationEnabled
-        }
-    };
-}
-
-export function saveGame() {
-    try {
-        const data = JSON.stringify(makeSaveData());
-
-        localStorage.setItem(SAVE_KEY, data);
-        setText("saveStatus", "Progression sauvegardée.");
-        setText("databaseStatus", "Base de données : sauvegarde locale active.");
-        setText("systemMessage", "Sauvegarde effectuée avec succès.");
-
-        return true;
-    } catch (error) {
-        console.error("Échec de sauvegarde :", error);
-
-        setText("saveStatus", "Sauvegarde indisponible.");
-        setText("systemMessage", "Impossible d'enregistrer les données.");
-
-        notify("La sauvegarde locale a échoué.");
-        return false;
+    function pauseGame() {
+        if (!state.running || state.paused) return;
+        state.paused = true;
+        show(ui.pause, true);
     }
-}
 
-export function loadGame() {
-    try {
-        const raw = localStorage.getItem(SAVE_KEY);
-
-        if (!raw) {
-            setText("saveStatus", "Aucune sauvegarde trouvée.");
-            return false;
-        }
-
-        const data = JSON.parse(raw);
-
-        if (!data || typeof data !== "object") {
-            throw new Error("Format de sauvegarde invalide.");
-        }
-
-        state.missionIndex = clamp(
-            Number(data.missionIndex) || 0,
-            0,
-            missionRegistry.length - 1
-        );
-
-        state.selectedMission = state.missionIndex;
-
-        state.completedMissions = Array.isArray(data.completedMissions)
-            ? data.completedMissions.filter(
-                (i) => Number.isInteger(i) &&
-                    i >= 0 &&
-                    i < missionRegistry.length
-            )
-            : [];
-
-        state.bestScores = data.bestScores &&
-            typeof data.bestScores === "object"
-            ? data.bestScores
-            : {};
-
-        state.score = Math.max(0, Number(data.score) || 0);
-        state.coins = Math.max(0, Number(data.coins) || 0);
-        state.totalCoins = Math.max(0, Number(data.totalCoins) || 0);
-        state.lives = clamp(Number(data.lives) || 3, 1, 3);
-        state.distance = Math.max(0, Number(data.distance) || 0);
-
-        if (data.settings) {
-            Object.assign(state, {
-                quality: data.settings.quality || state.quality,
-                sensitivity: clamp(Number(data.settings.sensitivity) || 5, 1, 10),
-                volume: clamp(Number(data.settings.volume) || 60, 0, 100),
-                soundEnabled: data.settings.soundEnabled !== false,
-                vibrationEnabled: data.settings.vibrationEnabled !== false
-            });
-        }
-
-        updateSettingsUI();
-        updateMissionHUD();
-
-        setText("saveStatus", "Sauvegarde disponible.");
-        setText("databaseStatus", "Base de données : données restaurées.");
-
-        return true;
-    } catch (error) {
-        console.error("Lecture de sauvegarde impossible :", error);
-        setText("saveStatus", "Sauvegarde illisible.");
-        return false;
+    function resumeGame() {
+        if (!state.engineReady || state.gameOver || state.completed) return;
+        hideAllPanels();
+        state.paused = false;
+        state.running = true;
     }
-}
 
-function exportSave() {
-    try {
-        const blob = new Blob(
-            [JSON.stringify(makeSaveData(), null, 2)],
-            { type: "application/json" }
-        );
+    function restartMission() {
+        startGame(state.mission);
+    }
 
+    function nextMission() {
+        if (state.mission >= TOTAL_MISSIONS) {
+            notify("Félicitations ! Vous avez terminé les 50 missions.");
+            return;
+        }
+        startGame(state.mission + 1);
+    }
+
+    /* --------------------------------------------------------
+       SON
+    -------------------------------------------------------- */
+
+    function soundEffect(frequency = 440, duration = 0.07) {
+        if (!state.soundEnabled || state.volume <= 0) return;
+
+        try {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+
+            if (!state.audioContext) state.audioContext = new AudioContextClass();
+            const ctx = state.audioContext;
+            if (ctx.state === "suspended") ctx.resume().catch(() => {});
+
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.value = frequency;
+            gain.gain.value = (state.volume / 100) * 0.06;
+
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+
+            oscillator.start();
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                ctx.currentTime + duration
+            );
+            oscillator.stop(ctx.currentTime + duration);
+        } catch (error) {
+            console.warn("Son indisponible :", error);
+        }
+    }
+
+    /* --------------------------------------------------------
+       IMPORT / EXPORT ET INITIALISATION
+    -------------------------------------------------------- */
+
+    function exportSave() {
+        const data = readJSON(STORAGE_KEY, null);
+        if (!data) {
+            notify("Aucune sauvegarde à exporter.");
+            return;
+        }
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+            type: "application/json"
+        });
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement("a");
-
         anchor.href = url;
         anchor.download = "nina-jumper-sauvegarde.json";
+        document.body.appendChild(anchor);
         anchor.click();
-
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         notify("Fichier de sauvegarde exporté.");
-    } catch (error) {
-        console.error(error);
-        notify("Échec de l'exportation.");
-    }
-}
-
-function importSave() {
-    const input = $("importSaveFile");
-
-    if (!input) {
-        notify("Champ d'importation introuvable.");
-        return;
     }
 
-    input.value = "";
+    function importSave() {
+        $("importSaveFile")?.click();
+    }
 
-    input.onchange = async () => {
-        const file = input.files && input.files[0];
-
+    async function handleImportFile(file) {
         if (!file) return;
 
         try {
-            const textData = await file.text();
-            const data = JSON.parse(textData);
-
-            if (!data || typeof data !== "object") {
-                throw new Error("Le fichier JSON est invalide.");
+            if (file.size > 1024 * 1024) {
+                throw new Error("Fichier trop volumineux.");
             }
 
-            localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+            const data = JSON.parse(await file.text());
 
-            if (loadGame()) {
-                notify("Sauvegarde importée avec succès.");
+            if (!data || typeof data !== "object" ||
+                !Number.isFinite(Number(data.mission))) {
+                throw new Error("Format de sauvegarde invalide.");
             }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            loadGame();
+            updateHUD();
+            renderMissions();
+            notify("Sauvegarde importée avec succès.");
         } catch (error) {
             console.error(error);
             notify("Impossible d'importer ce fichier.");
         }
-    };
 
-    input.click();
-}
-
-/* ------------------------------------------------------------
-   PARAMÈTRES
------------------------------------------------------------- */
-
-function readSettings() {
-    try {
-        const raw = localStorage.getItem(SETTINGS_KEY);
-        if (!raw) return;
-
-        const settings = JSON.parse(raw);
-
-        state.quality = settings.quality || "medium";
-        state.sensitivity = clamp(Number(settings.sensitivity) || 5, 1, 10);
-        state.volume = clamp(Number(settings.volume) || 60, 0, 100);
-        state.soundEnabled = settings.soundEnabled !== false;
-        state.vibrationEnabled = settings.vibrationEnabled !== false;
-    } catch (error) {
-        console.warn("Paramètres par défaut utilisés :", error);
+        if ($("importSaveFile")) $("importSaveFile").value = "";
     }
-}
 
-function saveSettings() {
-    try {
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify({
-            quality: state.quality,
-            sensitivity: state.sensitivity,
-            volume: state.volume,
-            soundEnabled: state.soundEnabled,
-            vibrationEnabled: state.vibrationEnabled
-        }));
-    } catch (error) {
-        console.warn("Paramètres non sauvegardés :", error);
-    }
-}
-
-function updateSettingsUI() {
-    const quality = $("qualitySelect");
-    const sensitivity = $("sensitivityRange");
-    const volume = $("volumeRange");
-    const sound = $("soundEnabled");
-    const vibration = $("vibrationEnabled");
-
-    if (quality) quality.value = state.quality;
-    if (sensitivity) sensitivity.value = String(state.sensitivity);
-    if (volume) volume.value = String(state.volume);
-    if (sound) sound.checked = state.soundEnabled;
-    if (vibration) vibration.checked = state.vibrationEnabled;
-
-    setText("sensitivityValue", state.sensitivity);
-    setText("volumeValue", `${state.volume} %`);
-}
-
-function applyQuality() {
-    if (!state.app || !state.app.graphicsDevice) return;
-
-    const device = state.app.graphicsDevice;
-
-    const ratio = state.quality === "low"
-        ? 1
-        : state.quality === "high"
-            ? 1.75
-            : 1.35;
-
-    try {
-        device.maxPixelRatio = ratio;
-        state.app.setCanvasResolution(state.pc.RESOLUTION_AUTO);
-    } catch (error) {
-        console.warn("Réglage graphique partiel :", error);
-    }
-}
-
-function applySettings() {
-    state.quality = $("qualitySelect")?.value || "medium";
-    state.sensitivity = clamp(
-        Number($("sensitivityRange")?.value) || 5,
-        1,
-        10
-    );
-
-    state.volume = clamp(
-        Number($("volumeRange")?.value) || 0,
-        0,
-        100
-    );
-
-    state.soundEnabled = $("soundEnabled")?.checked ?? true;
-    state.vibrationEnabled = $("vibrationEnabled")?.checked ?? true;
-
-    applyQuality();
-    updateSettingsUI();
-    saveSettings();
-
-    notify("Paramètres appliqués.");
-    hidePanel("settingsPanel");
-}
-
-/* ------------------------------------------------------------
-   MISSIONS : LISTE ET FILTRES
------------------------------------------------------------- */
-
-function renderMissions(filter = state.selectedFilter) {
-    const container = $("missionsList");
-
-    if (!container) return;
-
-    container.replaceChildren();
-
-    const unlocked = getUnlockedCount();
-
-    missionRegistry.forEach((mission, index) => {
-        const completed = state.completedMissions.includes(index);
-        const available = index < unlocked;
-
-        if (filter === "completed" && !completed) return;
-        if (filter === "available" && !available) return;
-
-        const row = document.createElement("button");
-
-        row.type = "button";
-        row.className = "mission-item";
-        row.dataset.missionIndex = String(index);
-
-        row.disabled = !available;
-
-        const status = completed
-            ? "✓ Terminée"
-            : available
-                ? "▶ Disponible"
-                : "🔒 Verrouillée";
-
-        const title = document.createElement("strong");
-        title.textContent =
-            `${String(index + 1).padStart(2, "0")}. ${mission.name}`;
-
-        const description = document.createElement("small");
-        description.textContent =
-            `${mission.distance} m • Difficulté ${index + 1} • ${status}`;
-
-        row.append(title, description);
-
-        if (index === state.selectedMission) {
-            row.classList.add("selected");
-            row.setAttribute("aria-pressed", "true");
-        }
-
-        row.addEventListener("click", () => {
-            if (!available) return;
-
-            state.selectedMission = index;
-            renderMissions(filter);
-        });
-
-        container.appendChild(row);
-    });
-
-    setText(
-        "missionsSummary",
-        `${state.completedMissions.length} / ${missionRegistry.length} missions terminées`
-    );
-}
-
-/* ------------------------------------------------------------
-   MENU, CONFIRMATION ET INITIALISATION
------------------------------------------------------------- */
-
-function openConfirmation(title, message, callback) {
-    setText("confirmTitle", title);
-    setText("confirmMessage", message);
-
-    state.pendingConfirmation = callback;
-    showPanel("confirmPanel");
-}
-
-function confirmAction() {
-    const callback = state.pendingConfirmation;
-    state.pendingConfirmation = null;
-
-    hidePanel("confirmPanel");
-
-    if (typeof callback === "function") {
-        callback();
-    }
-}
-
-function initializeGame() {
-    openConfirmation(
-        "INITIALISER LE JEU",
-        "Supprimer la sauvegarde locale et recommencer ? Cette action est irréversible.",
-        () => {
+    function requestInitialize() {
+        safeText("confirmTitle", "INITIALISER LE JEU");
+        safeText("confirmMessage",
+            "Supprimer la progression locale et recommencer depuis la mission 1 ?");
+        state.confirmAction = () => {
             try {
-                localStorage.removeItem(SAVE_KEY);
-
+                localStorage.removeItem(STORAGE_KEY);
+                state.mission = 1;
+                state.selectedMission = 1;
+                state.unlockedMission = 1;
                 state.completedMissions = [];
-                state.bestScores = {};
-                state.totalCoins = 0;
+                state.score = 0;
+                state.coins = 0;
+                state.best = 0;
+                state.lives = 3;
 
-                state.missionIndex = 0;
-                state.selectedMission = 0;
-
-                resetMissionState();
-                saveGame();
-
-                hideAllPanels();
-                showPanel("startPanel");
-
-                setText("saveStatus", "Nouvelle partie prête.");
+                saveGame(true);
+                renderMissions();
+                updateHUD();
+                openHome();
                 notify("Progression réinitialisée.");
             } catch (error) {
-                console.error(error);
-                notify("Impossible d'initialiser les données.");
+                notify("Réinitialisation impossible.");
             }
+        };
+
+        showPanel("confirmPanel");
+    }
+
+    /* --------------------------------------------------------
+       GESTION CENTRALISÉE DES BOUTONS HTML
+    -------------------------------------------------------- */
+
+    function handleAction(action, element) {
+        switch (action) {
+            case "start-game":
+                startGame(1);
+                break;
+
+            case "continue-game":
+                startGame(state.mission, true);
+                break;
+
+            case "pause":
+                pauseGame();
+                break;
+
+            case "resume":
+                resumeGame();
+                break;
+
+            case "restart-mission":
+                restartMission();
+                break;
+
+            case "next-mission":
+                nextMission();
+                break;
+
+            case "save":
+                saveGame();
+                break;
+
+            case "toggle-menu":
+                show(ui.sideMenu, ui.sideMenu?.classList.contains("hidden"));
+                break;
+
+            case "close-menu":
+                show(ui.sideMenu, false);
+                break;
+
+            case "open-missions":
+                state.filter = "all";
+                renderMissions();
+                show(ui.sideMenu, false);
+                showPanel("missionsPanel");
+                break;
+
+            case "filter-missions":
+                state.filter = element.dataset.filter || "all";
+                renderMissions();
+                break;
+
+            case "start-selected-mission":
+                startGame(state.selectedMission);
+                break;
+
+            case "open-inventory":
+                safeText("inventoryCoins", state.coins);
+                show(ui.sideMenu, false);
+                showPanel("inventoryPanel");
+                break;
+
+            case "open-settings":
+                show(ui.sideMenu, false);
+                showPanel("settingsPanel");
+                break;
+
+            case "open-help":
+                show(ui.sideMenu, false);
+                showPanel("helpPanel");
+                break;
+
+            case "open-system":
+                show(ui.sideMenu, false);
+                showPanel("systemPanel");
+                break;
+
+            case "close-panel":
+                show($(element.dataset.panel), false);
+                break;
+
+            case "return-home":
+                openHome();
+                break;
+
+            case "apply-settings":
+                applySettings();
+                break;
+
+            case "zoom-in":
+                setZoom(state.cameraZoom + 0.12);
+                break;
+
+            case "zoom-out":
+                setZoom(state.cameraZoom - 0.12);
+                break;
+
+            case "zoom-reset":
+                setZoom(1);
+                state.cameraAngle = 0;
+                break;
+
+            case "rotate-camera":
+                state.cameraAngle = (state.cameraAngle + 15) % 360;
+                break;
+
+            case "move-left":
+                moveLane(-1);
+                break;
+
+            case "move-right":
+                moveLane(1);
+                break;
+
+            case "jump":
+                jump();
+                break;
+
+            case "slide":
+                slide();
+                break;
+
+            case "fullscreen":
+                toggleFullscreen();
+                break;
+
+            case "toggle-sound":
+                state.soundEnabled = !state.soundEnabled;
+                notify(state.soundEnabled ? "Son activé." : "Son désactivé.");
+                break;
+
+            case "export-save":
+                exportSave();
+                break;
+
+            case "import-save":
+                importSave();
+                break;
+
+            case "initialize":
+                requestInitialize();
+                break;
+
+            case "confirm-yes":
+                show($("confirmPanel"), false);
+                if (typeof state.confirmAction === "function") {
+                    const callback = state.confirmAction;
+                    state.confirmAction = null;
+                    callback();
+                }
+                break;
+
+            case "confirm-no":
+                state.confirmAction = null;
+                show($("confirmPanel"), false);
+                break;
+
+            default:
+                console.debug("Action sans gestionnaire :", action);
         }
-    );
-}
-
-function togglePause() {
-    if (!state.running && !state.paused) return;
-
-    state.paused = !state.paused;
-    state.running = !state.paused;
-
-    if (state.paused) {
-        showPanel("pausePanel");
-    } else {
-        hidePanel("pausePanel");
-    }
-}
-
-function returnHome() {
-    state.running = false;
-    state.paused = false;
-
-    hideAllPanels();
-    showPanel("startPanel");
-    saveGame();
-}
-
-function toggleMenu() {
-    const menu = $("sideMenu");
-
-    if (!menu) return;
-
-    menu.classList.toggle("hidden");
-}
-
-function toggleSound() {
-    state.soundEnabled = !state.soundEnabled;
-
-    const button = $("soundButton");
-
-    if (button) {
-        button.textContent = state.soundEnabled ? "♫" : "🔇";
     }
 
-    saveSettings();
-    notify(state.soundEnabled ? "Son activé." : "Son désactivé.");
-}
+    function setZoom(value) {
+        state.cameraZoom = clamp(value, 0.65, 1.6);
+    }
 
-async function toggleFullscreen() {
-    const root = $("appJumper");
-
-    try {
-        if (!document.fullscreenElement) {
-            if (root?.requestFullscreen) {
-                await root.requestFullscreen();
-            } else {
-                notify("Le plein écran n'est pas pris en charge ici.");
+    async function toggleFullscreen() {
+        try {
+            if (!document.fullscreenElement) {
+                const target = $("appJumper") || document.documentElement;
+                if (target.requestFullscreen) await target.requestFullscreen();
+                else notify("Le plein écran n'est pas disponible sur ce navigateur.");
+            } else if (document.exitFullscreen) {
+                await document.exitFullscreen();
             }
-        } else if (document.exitFullscreen) {
-            await document.exitFullscreen();
+        } catch (error) {
+            notify("Le plein écran est bloqué par le navigateur.");
         }
-    } catch (error) {
-        console.warn("Plein écran indisponible :", error);
-        notify("Impossible d'activer le plein écran.");
     }
-}
 
-function resizeCanvas() {
-    try {
-        if (state.app) {
-            state.app.resizeCanvas();
-        }
-    } catch (error) {
-        console.warn("Redimensionnement différé :", error);
-    }
-}
-
-/* ------------------------------------------------------------
-   INVENTAIRE ET AIDE
------------------------------------------------------------- */
-
-function renderInventory() {
-    setText("inventoryCoins", state.totalCoins);
-
-    const list = $("inventoryList");
-    if (!list) return;
-
-    list.replaceChildren();
-
-    const entries = [
-        `Pièces collectées : ${state.totalCoins}`,
-        `Missions terminées : ${state.completedMissions.length}`,
-        `Record actuel : ${Math.max(0, ...Object.values(state.bestScores))}`
-    ];
-
-    entries.forEach((text) => {
-        const p = document.createElement("p");
-        p.textContent = text;
-        list.appendChild(p);
-    });
-}
-
-/* ------------------------------------------------------------
-   REGISTRE DES ACTIONS HTML
------------------------------------------------------------- */
-
-function registerAction(name, handler) {
-    actionHandlers.set(name, handler);
-}
-
-function registerDefaultActions() {
-    registerAction("start-game", () => {
-        hideAllPanels();
-        showPanel("startPanel");
-        startMission(0);
-        hidePanel("startPanel");
-    });
-
-    registerAction("continue-game", () => {
-        loadGame();
-        startMission(state.missionIndex);
-        hidePanel("startPanel");
-    });
-
-    registerAction("start-selected-mission", () => {
-        startMission(state.selectedMission);
-    });
-
-    registerAction("next-mission", goNextMission);
-
-    registerAction("restart-mission", () => {
-        startMission(state.missionIndex);
-    });
-
-    registerAction("jump", jump);
-    registerAction("slide", slide);
-
-    registerAction("move-left", () => moveLane(-1));
-    registerAction("move-right", () => moveLane(1));
-
-    registerAction("pause", togglePause);
-    registerAction("resume", () => {
-        state.paused = false;
-        state.running = true;
-        hidePanel("pausePanel");
-    });
-
-    registerAction("toggle-menu", toggleMenu);
-    registerAction("close-menu", () => hidePanel("sideMenu"));
-
-    registerAction("open-missions", () => {
-        hidePanel("sideMenu");
-        renderMissions();
-        showPanel("missionsPanel");
-    });
-
-    registerAction("open-inventory", () => {
-        hidePanel("sideMenu");
-        renderInventory();
-        showPanel("inventoryPanel");
-    });
-
-    registerAction("open-settings", () => {
-        hidePanel("sideMenu");
-        updateSettingsUI();
-        showPanel("settingsPanel");
-    });
-
-    registerAction("open-help", () => {
-        hidePanel("sideMenu");
-        showPanel("helpPanel");
-    });
-
-    registerAction("open-system", () => {
-        hidePanel("sideMenu");
-        showPanel("systemPanel");
-    });
-
-    registerAction("close-panel", (button) => {
-        const panelId = button.dataset.panel;
-        if (panelId) hidePanel(panelId);
-    });
-
-    registerAction("filter-missions", (button) => {
-        state.selectedFilter = button.dataset.filter || "all";
-        renderMissions(state.selectedFilter);
-    });
-
-    registerAction("save", () => {
-        saveGame();
-        notify("Progression sauvegardée.");
-    });
-
-    registerAction("export-save", exportSave);
-    registerAction("import-save", importSave);
-    registerAction("initialize", initializeGame);
-
-    registerAction("confirm-yes", confirmAction);
-    registerAction("confirm-no", () => {
-        state.pendingConfirmation = null;
-        hidePanel("confirmPanel");
-    });
-
-    registerAction("apply-settings", applySettings);
-    registerAction("toggle-sound", toggleSound);
-    registerAction("fullscreen", toggleFullscreen);
-
-    registerAction("zoom-in", () => changeZoom(-0.12));
-    registerAction("zoom-out", () => changeZoom(0.12));
-    registerAction("zoom-reset", resetZoom);
-    registerAction("rotate-camera", rotateCamera);
-
-    registerAction("return-home", returnHome);
-}
-
-function bindActions() {
-    registerDefaultActions();
-
-    document.addEventListener("click", (event) => {
-        const target = event.target instanceof Element
-            ? event.target.closest("[data-action]")
-            : null;
-
-        if (!target) return;
-
-        const action = target.dataset.action;
-        const handler = actionHandlers.get(action);
-
-        if (handler) {
-            try {
-                handler(target);
-            } catch (error) {
-                console.error(`Action "${action}" :`, error);
-                notify("Une erreur est survenue pendant cette action.");
-            }
-        }
-    });
-}
-
-/* ------------------------------------------------------------
-   CLAVIER OPTIONNEL
------------------------------------------------------------- */
-
-function setupKeyboard() {
-    addEvent(document, "keydown", (event) => {
-        if (event.repeat) return;
-
-        if (event.code === "Space" || event.code === "ArrowUp") {
+    function bindButtons() {
+        document.addEventListener("click", event => {
+            const button = event.target.closest("[data-action]");
+            if (!button || button.disabled) return;
             event.preventDefault();
-            jump();
-        } else if (event.code === "ArrowDown") {
-            event.preventDefault();
-            slide();
-        } else if (event.code === "ArrowLeft" || event.code === "KeyA") {
-            moveLane(-1);
-        } else if (event.code === "ArrowRight" || event.code === "KeyD") {
-            moveLane(1);
-        } else if (event.code === "Escape" && state.running) {
-            togglePause();
-        }
-    });
-}
-
-/* ------------------------------------------------------------
-   SÉCURITÉ DE DÉMARRAGE
------------------------------------------------------------- */
-
-function showFatalError(error) {
-    console.error("[NINA JUMPER 3D]", error);
-
-    setLoading(100, "Erreur de démarrage.");
-
-    const message = error?.message || String(error);
-
-    setText(
-        "loadingMessage",
-        `Impossible de démarrer : ${message}. Vérifiez Internet, WebGL 2 et le serveur HTTP.`
-    );
-
-    const screen = $("loadingScreen");
-    if (screen) {
-        screen.classList.remove("loaded");
-        screen.setAttribute("aria-hidden", "false");
-    }
-}
-
-export async function initGame() {
-    if (state.ready) return state;
-    if (state.destroyed) {
-        throw new Error("Le jeu a été détruit.");
-    }
-
-    try {
-        setLoading(3, "Préparation de NINA JUMPER 3D...");
-
-        readSettings();
-        updateSettingsUI();
-
-        setLoading(8, "Préparation de l'interface...");
-        bindActions();
-        setupKeyboard();
-
-        setLoading(15, "Chargement du moteur 3D...");
-        await loadPlayCanvas();
-
-        setLoading(55, "Construction de l'univers 3D...");
-        setupScene();
-
-        setLoading(78, "Activation des commandes tactiles...");
-        setupTouchGestures();
-
-        setLoading(88, "Récupération de la progression...");
-        loadGame();
-
-        setLoading(96, "Préparation des 50 missions...");
-        renderMissions();
-        updateMissionHUD();
-
-        addEvent(document, "fullscreenchange", resizeCanvas);
-        addEvent(document, "visibilitychange", () => {
-            if (document.hidden && state.running) {
-                state.running = false;
-                state.paused = true;
-                showPanel("pausePanel");
-            }
+            handleAction(button.dataset.action, button);
         });
 
-        state.ready = true;
+        $("sensitivityRange")?.addEventListener("input", event => {
+            state.sensitivity = Number(event.target.value);
+            updateSettingsLabels();
+        });
 
-        setLoading(100, "Prêt !");
-        hideLoading();
+        $("volumeRange")?.addEventListener("input", event => {
+            state.volume = Number(event.target.value);
+            updateSettingsLabels();
+        });
 
-        setText("databaseStatus", "Base de données : opérationnelle.");
-        setText("saveStatus", "Prêt à jouer.");
+        $("importSaveFile")?.addEventListener("change", event => {
+            handleImportFile(event.target.files?.[0]);
+        });
 
-        notify("NINA JUMPER 3D est prêt !");
-        return state;
-    } catch (error) {
-        showFatalError(error);
-        throw error;
+        document.addEventListener("keydown", event => {
+            if (event.repeat) return;
+
+            switch (event.key) {
+                case "ArrowLeft":
+                case "a":
+                case "A":
+                    event.preventDefault();
+                    moveLane(-1);
+                    break;
+
+                case "ArrowRight":
+                case "d":
+                case "D":
+                    event.preventDefault();
+                    moveLane(1);
+                    break;
+
+                case "ArrowUp":
+                case " ":
+                case "w":
+                case "W":
+                    event.preventDefault();
+                    jump();
+                    break;
+
+                case "ArrowDown":
+                case "s":
+                case "S":
+                    event.preventDefault();
+                    slide();
+                    break;
+
+                case "Escape":
+                    if (state.running && !state.paused) pauseGame();
+                    else if (state.paused) resumeGame();
+                    else show(ui.sideMenu, false);
+                    break;
+            }
+        });
     }
-}
 
-export function destroyGame() {
-    if (state.destroyed) return;
+    /* --------------------------------------------------------
+       GESTES ANDROID : GLISSEMENT ET PINCH À DEUX DOIGTS
+    -------------------------------------------------------- */
 
-    state.running = false;
-    state.paused = true;
-    state.destroyed = true;
+    function bindGestures() {
+        const surface = $("gestureSurface");
+        if (!surface) return;
 
-    for (const cleanup of cleanupCallbacks.splice(0)) {
+        let startX = 0;
+        let startY = 0;
+        let startTime = 0;
+        let pinchStartDistance = 0;
+        let pinchStartZoom = 1;
+
+        const distance = (a, b) =>
+            Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+
+        surface.addEventListener("touchstart", event => {
+            if (event.touches.length === 2) {
+                pinchStartDistance = distance(event.touches[0], event.touches[1]);
+                pinchStartZoom = state.cameraZoom;
+            } else if (event.touches.length === 1) {
+                startX = event.touches[0].clientX;
+                startY = event.touches[0].clientY;
+                startTime = performance.now();
+            }
+        }, { passive: true });
+
+        surface.addEventListener("touchmove", event => {
+            if (event.touches.length === 2 && pinchStartDistance > 0) {
+                const currentDistance = distance(event.touches[0], event.touches[1]);
+                setZoom(pinchStartZoom * currentDistance / pinchStartDistance);
+            }
+        }, { passive: true });
+
+        surface.addEventListener("touchend", event => {
+            if (event.changedTouches.length !== 1 || !startTime) return;
+
+            const touch = event.changedTouches[0];
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+            const elapsed = performance.now() - startTime;
+
+            if (elapsed > 800) return;
+
+            if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+                moveLane(dx < 0 ? -1 : 1);
+            } else if (Math.abs(dy) > 35) {
+                if (dy < 0) jump();
+                else slide();
+            }
+
+            startTime = 0;
+        }, { passive: true });
+
+        let pointerStart = null;
+
+        surface.addEventListener("pointerdown", event => {
+            if (event.pointerType === "touch") return;
+            pointerStart = {
+                x: event.clientX,
+                y: event.clientY,
+                time: performance.now()
+            };
+        });
+
+        surface.addEventListener("pointerup", event => {
+            if (!pointerStart || event.pointerType === "touch") return;
+
+            const dx = event.clientX - pointerStart.x;
+            const dy = event.clientY - pointerStart.y;
+
+            if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+                moveLane(dx < 0 ? -1 : 1);
+            } else if (Math.abs(dy) > 35) {
+                if (dy < 0) jump();
+                else slide();
+            }
+
+            pointerStart = null;
+        });
+    }
+
+    /* --------------------------------------------------------
+       INITIALISATION PRINCIPALE
+    -------------------------------------------------------- */
+
+    async function initialize() {
         try {
-            cleanup();
+            setLoading(5, "Préparation de l'interface...");
+            bindButtons();
+            bindGestures();
+            loadGame();
+            loadSettings();
+            updateHUD();
+            renderMissions();
+
+            setLoading(18, "Chargement du moteur 3D PlayCanvas...");
+
+            const pc = await import(
+                "https://cdn.jsdelivr.net/npm/playcanvas@2.14.4/+esm"
+            );
+
+            state.pc = pc;
+            setLoading(45, "Construction de l'univers 3D...");
+
+            createScene();
+            applyQuality();
+
+            setLoading(82, "Préparation des missions...");
+            updateHUD();
+            renderMissions();
+
+            setLoading(100, "Prêt !");
+            hideLoading();
+
+            show(ui.start, true);
+            show(ui.pause, false);
+            show(ui.complete, false);
+            show(ui.gameOver, false);
+
+            safeText("databaseStatus", "Base de données : stockage local prêt.");
+            safeText("saveStatus", "Prêt à commencer votre aventure.");
+
+            console.info(
+                "NINA JUMPER 3D prêt :",
+                TOTAL_MISSIONS,
+                "missions chargées."
+            );
         } catch (error) {
-            console.warn("Nettoyage incomplet :", error);
+            showFatalError(error);
         }
     }
 
-    try {
-        clearObjects(state.obstacles);
-        clearObjects(state.collectibles);
-
-        if (state.app) {
-            state.app.destroy();
-        }
-
-        if (state.audioContext) {
-            state.audioContext.close().catch(() => {});
-        }
-    } catch (error) {
-        console.warn("Erreur pendant la fermeture :", error);
-    }
-
-    state.app = null;
-    state.ready = false;
-}
-
-/* ------------------------------------------------------------
-   API PUBLIQUE POUR AJOUTER DES FONCTIONS
------------------------------------------------------------- */
-
-export function registerGameAction(name, callback) {
-    if (typeof name !== "string" || !name.trim()) {
-        throw new TypeError("Le nom de l'action est obligatoire.");
-    }
-
-    if (typeof callback !== "function") {
-        throw new TypeError("Le callback doit être une fonction.");
-    }
-
-    registerAction(name, callback);
-}
-
-export function getGameState() {
-    return {
-        ready: state.ready,
-        running: state.running,
-        paused: state.paused,
-        missionIndex: state.missionIndex,
-        missionCount: missionRegistry.length,
-        completedMissions: [...state.completedMissions],
-        score: state.score,
-        coins: state.coins,
-        lives: state.lives,
-        distance: state.distance
+    window.NINA_JUMPER_3D = {
+        start: startGame,
+        pause: pauseGame,
+        resume: resumeGame,
+        save: saveGame,
+        missions,
+        getState: () => ({ ...state })
     };
-}
 
-export function addMission(mission) {
-    const created = registerMission(mission);
-
-    renderMissions();
-    setText("missionsSummary", `${missionRegistry.length} missions disponibles`);
-
-    notify(`Mission ajoutée : ${created.name}`);
-    return created;
-}
-
-/* ------------------------------------------------------------
-   LANCEMENT AUTOMATIQUE DU MODULE
------------------------------------------------------------- */
-
-initGame().catch((error) => {
-    console.error("Échec de l'initialisation :", error);
-});
+    await initialize();
+})();
