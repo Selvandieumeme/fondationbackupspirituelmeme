@@ -1,4 +1,3 @@
-
 /* ============================================================
    NINA JUMPER 3D — ENGINE PRINCIPAL
    ES MODULES • PLAYCANVAS • ANDROID TOUCH
