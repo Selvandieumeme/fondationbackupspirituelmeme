@@ -7,16 +7,16 @@
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     >
     <meta name="theme-color" content="#07111f">
-    <meta name="description" content="NINA JUMPER 3D — Jeu de plateforme et de course avec 50 missions progressives.">
+    <meta name="description" content="NINA JUMPER 3D — Jeu de plateforme et de course avec 60 missions progressives.">
     <title>NINA JUMPER 3D</title>
 
     <link rel="stylesheet" href="appjumperfobas.css">
-
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
 </head>
 
 <body>
-    <main id="appJumper" class="app-jumper" data-app="nina-jumper-3d">
+    <main id="appJumper" class="app-jumper" data-app="nina-jumper-3d" data-mission-count="60">
 
         <!-- ÉCRAN DE CHARGEMENT -->
         <section id="loadingScreen" class="loading-screen" aria-live="polite">
@@ -84,7 +84,7 @@
 
                 <div class="hud-card">
                     <span class="hud-label">MISSION</span>
-                    <strong id="currentMission">01 / 50</strong>
+                    <strong id="currentMission" data-total-missions="60">01 / 60</strong>
                 </div>
 
                 <div class="hud-card">
@@ -223,7 +223,7 @@
                 </div>
             </nav>
 
-            <!-- GESTES TACTILES : LE JAVASCRIPT GÈRE LE PINCH ET LE GLISSEMENT -->
+            <!-- GESTES TACTILES : PINCH ET GLISSEMENT -->
             <div
                 id="gestureSurface"
                 class="gesture-surface"
@@ -259,7 +259,7 @@
                     <div class="panel-heading">
                         <div>
                             <span class="eyebrow">PROGRESSION</span>
-                            <h2 id="missionsTitle">LES 50 MISSIONS</h2>
+                            <h2 id="missionsTitle">LES 60 MISSIONS</h2>
                         </div>
 
                         <button
@@ -280,8 +280,8 @@
                         <button type="button" data-action="filter-missions" data-filter="completed">Terminées</button>
                     </div>
 
-                    <div id="missionsList" class="missions-list" aria-live="polite">
-                        <p id="missionsLoading">Préparation des 50 missions...</p>
+                    <div id="missionsList" class="missions-list" aria-live="polite" data-total-missions="60">
+                        <p id="missionsLoading">Préparation des 60 missions...</p>
                     </div>
 
                     <div class="panel-actions">
@@ -303,11 +303,11 @@
                     <h1>NINA <span>JUMPER</span></h1>
                     <p class="intro-text">
                         Courez, sautez, esquivez les pièges et relevez
-                        50 missions de plus en plus exigeantes.
+                        60 missions de plus en plus exigeantes.
                     </p>
 
                     <div class="feature-list">
-                        <span>✦ 50 missions évolutives</span>
+                        <span>✦ 60 missions évolutives</span>
                         <span>✦ Univers 3D interactif</span>
                         <span>✦ Progression sauvegardée</span>
                     </div>
@@ -663,8 +663,8 @@
     </main>
 
     <!--
-      Le moteur PlayCanvas sera chargé dans appjumperfobas.js
-      avec import() et des modules exportés.
+      PlayCanvas est chargé dans appjumperfobas.js
+      avec import() et les modules ES.
       Aucun moteur graphique n'est chargé ici comme script classique.
     -->
     <script type="module" src="appjumperfobas.js"></script>
