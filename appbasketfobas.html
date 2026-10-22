@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#101923">
+    <meta name="description"
+          content="FOBAS BASKET 3D — Jeu de basketball avec 100 missions dynamiques.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <title>FOBAS BASKET 3D</title>
+
+    <link rel="stylesheet" href="./appbasketfobas.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "playcanvas": "https://cdn.jsdelivr.net/npm/playcanvas@2.7.3/build/playcanvas.mjs"
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <div id="app" class="basket-app">
+
+        <!-- ==================================================
+             1. BARRE SUPÉRIEURE
+        =================================================== -->
+        <header id="topbar" class="topbar">
+            <div class="brand">
+                <div class="brand-logo" aria-hidden="true">🏀</div>
+
+                <div class="brand-text">
+                    <h1>FOBAS <span>BASKET 3D</span></h1>
+                    <p>ULTIMATE BASKETBALL EXPERIENCE</p>
+                </div>
+            </div>
+
+            <div class="topbar-actions">
+                <button
+                    id="btn-save"
+                    class="icon-button"
+                    type="button"
+                    data-action="save"
+                    title="Sauvegarder la progression"
+                    aria-label="Sauvegarder">
+                    <span aria-hidden="true">💾</span>
+                </button>
+
+                <button
+                    id="btn-settings"
+                    class="icon-button"
+                    type="button"
+                    data-action="settings"
+                    title="Paramètres"
+                    aria-label="Paramètres">
+                    <span aria-hidden="true">⚙️</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ==================================================
+             2. CONTENU PRINCIPAL
+        =================================================== -->
+        <main id="main-content" class="main-content">
+
+            <!-- PROFIL DU JOUEUR -->
+            <section id="profile-panel" class="profile-panel"
+                     aria-labelledby="profile-heading">
+
+                <div class="profile-avatar" aria-hidden="true">👤</div>
+
+                <div class="profile-information">
+                    <h2 id="profile-heading">PROFIL DU JOUEUR</h2>
+
+                    <p id="player-display-name">
+                        Bienvenue, joueur !
+                    </p>
+
+                    <p id="profile-status" class="status-text">
+                        Profil à configurer
+                    </p>
+                </div>
+
+                <button
+                    id="btn-edit-profile"
+                    class="secondary-button"
+                    type="button"
+                    data-action="edit-profile">
+                    Mon profil
+                </button>
+            </section>
+
+            <!-- FORMULAIRE DE PROFIL -->
+            <section id="profile-editor" class="panel profile-editor"
+                     aria-labelledby="profile-editor-heading"
+                     hidden>
+
+                <h2 id="profile-editor-heading">
+                    CRÉER MON PROFIL
+                </h2>
+
+                <label for="player-full-name">
+                    Nom complet
+                </label>
+
+                <input
+                    id="player-full-name"
+                    name="playerFullName"
+                    type="text"
+                    autocomplete="name"
+                    maxlength="80"
+                    placeholder="Entrez votre nom complet">
+
+                <div class="button-row">
+                    <button
+                        id="btn-save-profile"
+                        class="primary-button"
+                        type="button"
+                        data-action="save-profile">
+                        Enregistrer le profil
+                    </button>
+
+                    <button
+                        id="btn-cancel-profile"
+                        class="secondary-button"
+                        type="button"
+                        data-action="cancel-profile">
+                        Annuler
+                    </button>
+                </div>
+
+                <p id="profile-message" class="message-text"
+                   role="status" aria-live="polite"></p>
+            </section>
+
+            <!-- ==================================================
+                 3. TABLEAU DE BORD
+            =================================================== -->
+            <section id="dashboard" class="dashboard"
+                     aria-label="Tableau de bord du jeu">
+
+                <article class="stat-card">
+                    <span class="stat-icon" aria-hidden="true">🏆</span>
+                    <div>
+                        <p class="stat-label">MISSION</p>
+                        <p id="hud-mission" class="stat-value">1 / 100</p>
+                    </div>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-icon" aria-hidden="true">🎯</span>
+                    <div>
+                        <p class="stat-label">POSITIONS RÉUSSIES</p>
+                        <p id="hud-progress" class="stat-value">0 / 1</p>
+                    </div>
+                </article>
+
+                <article class="stat-card">
+                    <span class="stat-icon" aria-hidden="true">⭐</span>
+                    <div>
+                        <p class="stat-label">SCORE</p>
+                        <p id="hud-score" class="stat-value">0</p>
+                    </div>
+                </article>
+            </section>
+
+            <!-- ==================================================
+                 4. ZONE DE JEU 3D
+            =================================================== -->
+            <section id="game-section" class="game-section"
+                     aria-label="Terrain de basketball 3D">
+
+                <div id="game-header" class="game-header">
+                    <div class="game-title">
+                        <span class="live-indicator"
+                              aria-hidden="true"></span>
+
+                        <div>
+                            <h2>ARÈNE 3D</h2>
+                            <p id="game-state">
+                                Préparation du terrain...
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        id="btn-fullscreen"
+                        class="icon-button"
+                        type="button"
+                        data-action="fullscreen"
+                        aria-label="Plein écran"
+                        title="Plein écran">
+                        ⛶
+                    </button>
+                </div>
+
+                <!-- Le moteur PlayCanvas affichera la scène dans ce canvas. -->
+                <div id="game-viewport" class="game-viewport">
+
+                    <canvas
+                        id="game-canvas"
+                        tabindex="0"
+                        aria-label="Vue 3D du terrain de basketball">
+                    </canvas>
+
+                    <!-- Écran de chargement -->
+                    <div id="loading-screen" class="loading-screen"
+                         role="status" aria-live="polite">
+
+                        <div class="loading-basketball"
+                             aria-hidden="true">🏀</div>
+
+                        <h2>FOBAS BASKET 3D</h2>
+
+                        <p id="loading-message">
+                            Chargement du terrain 3D...
+                        </p>
+
+                        <div class="loading-track">
+                            <div id="loading-progress"
+                                 class="loading-progress"></div>
+                        </div>
+                    </div>
+
+                    <!-- Message de statut superposé au jeu -->
+                    <div id="game-notification"
+                         class="game-notification"
+                         role="status"
+                         aria-live="polite"
+                         hidden>
+                    </div>
+
+                    <!-- Informations sur le personnage DIEUBEN -->
+                    <div id="dieuben-panel" class="dieuben-panel">
+                        <div class="dieuben-avatar"
+                             aria-hidden="true">🤖</div>
+
+                        <div class="dieuben-information">
+                            <h3>DIEUBEN</h3>
+                            <p id="dieuben-status">
+                                Expert de basketball
+                            </p>
+                        </div>
+
+                        <button
+                            id="btn-dieuben"
+                            class="small-button"
+                            type="button"
+                            data-action="dieuben-demo">
+                            Démonstration
+                        </button>
+                    </div>
+
+                    <!-- Commandes de zoom -->
+                    <div id="zoom-controls" class="zoom-controls"
+                         aria-label="Contrôles de zoom">
+
+                        <button
+                            id="btn-zoom-in"
+                            class="zoom-button"
+                            type="button"
+                            data-action="zoom-in"
+                            aria-label="Zoom avant">
+                            +
+                        </button>
+
+                        <button
+                            id="btn-zoom-out"
+                            class="zoom-button"
+                            type="button"
+                            data-action="zoom-out"
+                            aria-label="Zoom arrière">
+                            −
+                        </button>
+
+                        <button
+                            id="btn-zoom-reset"
+                            class="zoom-button"
+                            type="button"
+                            data-action="zoom-reset"
+                            aria-label="Réinitialiser le zoom">
+                            ↺
+                        </button>
+                    </div>
+
+                    <!-- Rappel des gestes mobiles -->
+                    <div id="touch-hint" class="touch-hint">
+                        <span aria-hidden="true">🤏</span>
+                        Pincez avec deux doigts pour zoomer
+                    </div>
+                </div>
+
+                <!-- ==================================================
+                     5. COMMANDES DU JOUEUR
+                =================================================== -->
+                <div id="game-controls" class="game-controls">
+
+                    <div class="aim-control">
+                        <label for="aim-power">
+                            PUISSANCE DU TIR
+                            <span id="aim-power-value">50%</span>
+                        </label>
+
+                        <input
+                            id="aim-power"
+                            name="aimPower"
+                            type="range"
+                            min="1"
+                            max="100"
+                            value="50"
+                            step="1"
+                            aria-label="Puissance du tir">
+                    </div>
+
+                    <div class="aim-control">
+                        <label for="aim-angle">
+                            ANGLE DE TIR
+                            <span id="aim-angle-value">45°</span>
+                        </label>
+
+                        <input
+                            id="aim-angle"
+                            name="aimAngle"
+                            type="range"
+                            min="10"
+                            max="80"
+                            value="45"
+                            step="1"
+                            aria-label="Angle de tir">
+                    </div>
+
+                    <div class="shooting-buttons">
+                        <button
+                            id="btn-aim"
+                            class="secondary-button action-button"
+                            type="button"
+                            data-action="aim">
+                            <span aria-hidden="true">🎯</span>
+                            VISER
+                        </button>
+
+                        <button
+                            id="btn-shoot"
+                            class="shoot-button action-button"
+                            type="button"
+                            data-action="shoot">
+                            <span aria-hidden="true">🏀</span>
+                            TIRER
+                        </button>
+                    </div>
+
+                    <p id="shoot-message" class="message-text"
+                       role="status" aria-live="polite">
+                        Préparez votre tir.
+                    </p>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 6. OBJECTIF DE LA MISSION
+            =================================================== -->
+            <section id="mission-panel" class="panel mission-panel"
+                     aria-labelledby="mission-heading">
+
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">DÉFI EN COURS</p>
+                        <h2 id="mission-heading">MISSION 1</h2>
+                    </div>
+
+                    <span id="mission-difficulty"
+                          class="difficulty-label">
+                        Débutant
+                    </span>
+                </div>
+
+                <p id="mission-description" class="mission-description">
+                    Réussissez tous les tirs obligatoires dans des
+                    positions différentes pour terminer cette mission.
+                </p>
+
+                <div class="mission-objective">
+                    <span aria-hidden="true">🏀</span>
+
+                    <div>
+                        <p class="objective-label">
+                            OBJECTIF DE RÉUSSITE
+                        </p>
+
+                        <p id="mission-target">
+                            Réussir 1 changement de position
+                        </p>
+                    </div>
+                </div>
+
+                <div class="progress-information">
+                    <span>Progression</span>
+                    <span id="mission-progress-text">0%</span>
+                </div>
+
+                <div id="mission-progress-track"
+                     class="progress-track"
+                     role="progressbar"
+                     aria-label="Progression de la mission"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-valuenow="0">
+
+                    <div id="mission-progress-bar"
+                         class="progress-bar"></div>
+                </div>
+
+                <p id="mission-rules" class="mission-rules">
+                    Les tirs manqués ne comptent pas. Les tentatives
+                    sont illimitées : réussissez chaque position
+                    obligatoire pour avancer.
+                </p>
+
+                <p id="mission-feedback" class="message-text"
+                   role="status" aria-live="polite"></p>
+
+                <div class="button-row">
+                    <button
+                        id="btn-start-mission"
+                        class="primary-button"
+                        type="button"
+                        data-action="start-mission">
+                        Commencer la mission
+                    </button>
+
+                    <button
+                        id="btn-restart-mission"
+                        class="secondary-button"
+                        type="button"
+                        data-action="restart-mission">
+                        Recommencer
+                    </button>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 7. LISTE DES 100 MISSIONS
+            =================================================== -->
+            <section id="missions-section" class="panel missions-section"
+                     aria-labelledby="missions-heading">
+
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">PROGRESSION DU JOUEUR</p>
+                        <h2 id="missions-heading">LES 100 MISSIONS</h2>
+                    </div>
+
+                    <span id="completed-missions-count"
+                          class="counter-label">
+                        0 / 100 terminées
+                    </span>
+                </div>
+
+                <p class="section-description">
+                    Débloquez progressivement les missions et
+                    améliorez votre précision.
+                </p>
+
+                <div id="missions-grid" class="missions-grid"
+                     aria-label="Sélection des missions">
+
+                    <!-- Les 100 missions seront créées dynamiquement
+                         par appbasketfobas.js. -->
+                </div>
+
+                <p id="missions-message" class="message-text"
+                   role="status" aria-live="polite"></p>
+            </section>
+
+            <!-- ==================================================
+                 8. AIDE AU JOUEUR
+            =================================================== -->
+            <section id="help-section" class="panel help-section"
+                     aria-labelledby="help-heading">
+
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">GUIDE DU JOUEUR</p>
+                        <h2 id="help-heading">COMMENT JOUER ?</h2>
+                    </div>
+                </div>
+
+                <button
+                    id="btn-how-to-play"
+                    class="secondary-button help-toggle"
+                    type="button"
+                    data-action="toggle-help"
+                    aria-expanded="false"
+                    aria-controls="how-to-play-content">
+                    <span aria-hidden="true">📖</span>
+                    COMMENT JOUER
+                </button>
+
+                <div id="how-to-play-content"
+                     class="help-content"
+                     hidden>
+
+                    <ol>
+                        <li>
+                            Créez votre profil avec votre nom complet.
+                        </li>
+
+                        <li>
+                            Lancez une mission disponible.
+                        </li>
+
+                        <li>
+                            Ajustez la puissance et l'angle de votre tir.
+                        </li>
+
+                        <li>
+                            Appuyez sur <strong>VISER</strong> pour
+                            préparer votre tir.
+                        </li>
+
+                        <li>
+                            Appuyez sur <strong>TIRER</strong> pour
+                            lancer le ballon.
+                        </li>
+
+                        <li>
+                            Un tir ne compte que si le ballon traverse
+                            correctement le panier.
+                        </li>
+
+                        <li>
+                            Après une réussite, le panier change de
+                            position. Réussissez le tir dans cette
+                            nouvelle position pour continuer.
+                        </li>
+
+                        <li>
+                            Les ballons et les tentatives sont illimités.
+                            Un tir manqué ne vous élimine pas.
+                        </li>
+
+                        <li>
+                            Terminez tous les changements de position
+                            obligatoires pour réussir la mission.
+                        </li>
+
+                        <li>
+                            Utilisez deux doigts sur l'écran Android
+                            pour zoomer, ou les boutons + et −.
+                        </li>
+                    </ol>
+
+                    <p>
+                        <strong>Mission 100 :</strong>
+                        réussissez 25 tirs exacts dans 25 positions
+                        obligatoires différentes.
+                    </p>
+                </div>
+            </section>
+
+            <!-- ==================================================
+                 9. PARAMÈTRES
+            =================================================== -->
+            <section id="settings-panel" class="panel settings-panel"
+                     aria-labelledby="settings-heading"
+                     hidden>
+
+                <div class="section-heading">
+                    <h2 id="settings-heading">PARAMÈTRES</h2>
+                </div>
+
+                <div class="setting-row">
+                    <label for="setting-sound">
+                        Sons du jeu
+                    </label>
+
+                    <input
+                        id="setting-sound"
+                        type="checkbox"
+                        checked>
+                </div>
+
+                <div class="setting-row">
+                    <label for="setting-haptics">
+                        Vibrations sur mobile
+                    </label>
+
+                    <input
+                        id="setting-haptics"
+                        type="checkbox"
+                        checked>
+                </div>
+
+                <div class="setting-row">
+                    <label for="setting-quality">
+                        Qualité graphique
+                    </label>
+
+                    <select id="setting-quality" name="graphicsQuality">
+                        <option value="low">Économique</option>
+                        <option value="medium" selected>Équilibrée</option>
+                        <option value="high">Élevée</option>
+                    </select>
+                </div>
+
+                <div class="button-row">
+                    <button
+                        id="btn-save-settings"
+                        class="primary-button"
+                        type="button"
+                        data-action="save-settings">
+                        Enregistrer les paramètres
+                    </button>
+
+                    <button
+                        id="btn-close-settings"
+                        class="secondary-button"
+                        type="button"
+                        data-action="close-settings">
+                        Fermer
+                    </button>
+                </div>
+
+                <p id="settings-message" class="message-text"
+                   role="status" aria-live="polite"></p>
+            </section>
+
+            <!-- ==================================================
+                 10. SAUVEGARDE ET RÉINITIALISATION
+            =================================================== -->
+            <section id="save-panel" class="panel save-panel"
+                     aria-labelledby="save-heading">
+
+                <div>
+                    <p class="eyebrow">VOTRE PARTIE</p>
+                    <h2 id="save-heading">SAUVEGARDE</h2>
+
+                    <p id="save-status" class="section-description">
+                        La progression sera enregistrée localement
+                        sur cet appareil.
+                    </p>
+                </div>
+
+                <div class="button-row">
+                    <button
+                        id="btn-save-progress"
+                        class="primary-button"
+                        type="button"
+                        data-action="save">
+                        <span aria-hidden="true">💾</span>
+                        Sauvegarder
+                    </button>
+
+                    <button
+                        id="btn-reset-game"
+                        class="danger-button"
+                        type="button"
+                        data-action="reset">
+                        Réinitialiser
+                    </button>
+                </div>
+
+                <p id="storage-message" class="message-text"
+                   role="status" aria-live="polite"></p>
+            </section>
+        </main>
+
+        <!-- ==================================================
+             11. PIED DE PAGE
+        =================================================== -->
+        <footer id="app-footer" class="app-footer">
+            <p>FOBAS BASKET 3D</p>
+            <p>100 MISSIONS · TIRS ILLIMITÉS · DÉFIS DYNAMIQUES</p>
+        </footer>
+
+        <!-- ==================================================
+             12. BOÎTE DE DIALOGUE DE CONFIRMATION
+        =================================================== -->
+        <dialog id="confirmation-dialog"
+                class="confirmation-dialog"
+                aria-labelledby="confirmation-title">
+
+            <h2 id="confirmation-title">Confirmation</h2>
+
+            <p id="confirmation-message">
+                Voulez-vous continuer ?
+            </p>
+
+            <div class="button-row">
+                <button
+                    id="btn-confirm-yes"
+                    class="danger-button"
+                    type="button"
+                    data-action="confirm-yes">
+                    Confirmer
+                </button>
+
+                <button
+                    id="btn-confirm-no"
+                    class="secondary-button"
+                    type="button"
+                    data-action="confirm-no">
+                    Annuler
+                </button>
+            </div>
+        </dialog>
+
+    </div>
+
+    <!--
+        MODULE PRINCIPAL :
+        Il gère la scène 3D, les missions, les tirs, DIEUBEN,
+        les contrôles tactiles, le profil et la sauvegarde.
+
+        Le moteur PlayCanvas est importé dynamiquement
+        depuis appbasketfobas.js.
+    -->
+    <script type="module" src="./appbasketfobas.js"></script>
+</body>
+</html>
