@@ -1,0 +1,2578 @@
+
+/* ============================================================
+   FOBAS BASKET 3D — FEUILLE DE STYLE COMPLÈTE
+   Fichier : appbasketfobas.css
+   Compatible avec appbasketfobas.html
+   Interface responsive : Android, tablette et ordinateur
+============================================================ */
+
+/* ============================================================
+   01. VARIABLES ET RÉINITIALISATION
+============================================================ */
+
+:root {
+    color-scheme: dark;
+
+    --bg-main: #08111b;
+    --bg-secondary: #101923;
+    --bg-panel: #121f2d;
+    --bg-panel-light: #192a3a;
+    --bg-input: #0b1520;
+
+    --text-primary: #f3f7fb;
+    --text-secondary: #a8b8c9;
+    --text-muted: #75889c;
+
+    --accent: #ff8b26;
+    --accent-light: #ffb34f;
+    --accent-dark: #d9610b;
+
+    --blue: #39a9ff;
+    --blue-dark: #1767bb;
+
+    --green: #37d995;
+    --red: #ff5c69;
+    --yellow: #ffd166;
+
+    --border: rgba(172, 198, 222, 0.14);
+    --border-strong: rgba(172, 198, 222, 0.25);
+
+    --shadow:
+        0 14px 36px rgba(0, 0, 0, 0.24);
+
+    --shadow-strong:
+        0 20px 55px rgba(0, 0, 0, 0.38);
+
+    --radius-small: 10px;
+    --radius-medium: 16px;
+    --radius-large: 22px;
+    --radius-pill: 999px;
+
+    --content-width: 1240px;
+    --topbar-height: 76px;
+
+    --transition-fast: 150ms ease;
+    --transition-normal: 230ms ease;
+
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+    background: var(--bg-main);
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    background:
+        radial-gradient(
+            ellipse at 50% -15%,
+            rgba(38, 105, 151, 0.20),
+            transparent 54%
+        ),
+        var(--bg-main);
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+button,
+input,
+select {
+    font-family:
+        Inter,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+}
+
+button,
+input,
+select {
+    font-size: inherit;
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select {
+    touch-action: manipulation;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+canvas:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 3px;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+    transform: none;
+    filter: grayscale(0.25);
+}
+
+img,
+canvas,
+svg {
+    max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3 {
+    overflow-wrap: anywhere;
+}
+
+p {
+    margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+    margin-top: 0;
+    line-height: 1.2;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+::selection {
+    color: #fff;
+    background: rgba(255, 139, 38, 0.55);
+}
+
+/* ============================================================
+   02. CONTENEUR PRINCIPAL
+============================================================ */
+
+#app,
+.basket-app {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+.basket-app {
+    display: flex;
+    flex-direction: column;
+}
+
+#main-content,
+.main-content {
+    width: min(100% - 32px, var(--content-width));
+    margin-inline: auto;
+    padding-top: 24px;
+    padding-bottom: 32px;
+}
+
+#main-content > section {
+    margin-bottom: 22px;
+}
+
+/* ============================================================
+   03. BARRE SUPÉRIEURE
+============================================================ */
+
+.topbar {
+    position: relative;
+    z-index: 20;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    min-height: var(--topbar-height);
+    padding:
+        calc(12px + var(--safe-top))
+        max(20px, var(--safe-right))
+        12px
+        max(20px, var(--safe-left));
+
+    border-bottom: 1px solid var(--border);
+
+    background:
+        linear-gradient(
+            110deg,
+            rgba(18, 31, 45, 0.98),
+            rgba(8, 17, 27, 0.97)
+        );
+
+    box-shadow: 0 5px 24px rgba(0, 0, 0, 0.14);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.brand-logo {
+    display: grid;
+    flex: 0 0 48px;
+    place-items: center;
+
+    width: 48px;
+    height: 48px;
+
+    border: 1px solid rgba(255, 179, 79, 0.35);
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 139, 38, 0.24),
+            rgba(255, 139, 38, 0.07)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 6px 18px rgba(255, 110, 15, 0.08);
+
+    font-size: 27px;
+}
+
+.brand-text {
+    min-width: 0;
+}
+
+.brand-text h1 {
+    margin: 0;
+    font-size: clamp(17px, 2.3vw, 23px);
+    font-weight: 900;
+    letter-spacing: 0.045em;
+}
+
+.brand-text h1 span {
+    color: var(--accent);
+}
+
+.brand-text p {
+    margin: 5px 0 0;
+    color: var(--text-muted);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   04. BOUTONS COMMUNS
+============================================================ */
+
+.primary-button,
+.secondary-button,
+.danger-button,
+.shoot-button,
+.icon-button,
+.small-button,
+.zoom-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-height: 44px;
+    padding: 11px 17px;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius-small);
+
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.primary-button {
+    color: #211307;
+
+    border-color: rgba(255, 194, 116, 0.4);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent-light),
+            var(--accent)
+        );
+
+    box-shadow:
+        0 7px 18px rgba(255, 123, 20, 0.16);
+}
+
+.primary-button:hover:not(:disabled) {
+    background:
+        linear-gradient(
+            135deg,
+            #ffc36f,
+            #ff982f
+        );
+
+    box-shadow:
+        0 9px 24px rgba(255, 123, 20, 0.24);
+
+    transform: translateY(-1px);
+}
+
+.secondary-button {
+    color: var(--text-primary);
+
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.secondary-button:hover:not(:disabled) {
+    border-color: rgba(57, 169, 255, 0.5);
+    background: rgba(57, 169, 255, 0.10);
+}
+
+.danger-button {
+    color: #fff;
+
+    border-color: rgba(255, 92, 105, 0.38);
+
+    background:
+        linear-gradient(
+            135deg,
+            #e84a59,
+            #b8243a
+        );
+}
+
+.danger-button:hover:not(:disabled) {
+    background:
+        linear-gradient(
+            135deg,
+            #ff6270,
+            #cf2d43
+        );
+
+    box-shadow: 0 7px 20px rgba(255, 64, 85, 0.17);
+}
+
+.icon-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+
+    border-color: var(--border);
+    background: rgba(255, 255, 255, 0.045);
+
+    color: var(--text-primary);
+    font-size: 21px;
+}
+
+.icon-button:hover:not(:disabled) {
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.small-button {
+    min-height: 36px;
+    padding: 8px 11px;
+
+    border-color: rgba(255, 179, 79, 0.30);
+    background: rgba(255, 139, 38, 0.13);
+
+    color: #ffd3a0;
+    font-size: 11px;
+}
+
+.small-button:hover:not(:disabled) {
+    background: rgba(255, 139, 38, 0.23);
+}
+
+.primary-button:active:not(:disabled),
+.secondary-button:active:not(:disabled),
+.danger-button:active:not(:disabled),
+.shoot-button:active:not(:disabled),
+.icon-button:active:not(:disabled),
+.small-button:active:not(:disabled),
+.zoom-button:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/* ============================================================
+   05. PROFIL DU JOUEUR
+============================================================ */
+
+.profile-panel {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    min-width: 0;
+    padding: 18px 20px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-medium);
+
+    background:
+        linear-gradient(
+            110deg,
+            rgba(25, 42, 58, 0.94),
+            rgba(17, 30, 43, 0.94)
+        );
+
+    box-shadow: var(--shadow);
+}
+
+.profile-avatar {
+    display: grid;
+    flex: 0 0 52px;
+    place-items: center;
+
+    width: 52px;
+    height: 52px;
+
+    border: 1px solid rgba(57, 169, 255, 0.28);
+    border-radius: 17px;
+
+    background: rgba(57, 169, 255, 0.10);
+    font-size: 26px;
+}
+
+.profile-information {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-information h2 {
+    margin: 0 0 5px;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.13em;
+}
+
+#player-display-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 850;
+}
+
+.status-text {
+    margin: 5px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+#profile-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#profile-editor[hidden] {
+    display: none !important;
+}
+
+.profile-editor h2 {
+    margin-bottom: 3px;
+    font-size: 17px;
+}
+
+/* ============================================================
+   06. PANNEAUX GÉNÉRAUX
+============================================================ */
+
+.panel {
+    min-width: 0;
+    padding: 23px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-large);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 31, 45, 0.97),
+            rgba(13, 25, 37, 0.97)
+        );
+
+    box-shadow: var(--shadow);
+}
+
+.panel h2 {
+    margin-bottom: 9px;
+    font-size: clamp(17px, 2vw, 21px);
+    font-weight: 900;
+    letter-spacing: 0.015em;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    margin-bottom: 17px;
+}
+
+.section-heading > div {
+    min-width: 0;
+}
+
+.section-heading h2 {
+    margin-bottom: 0;
+}
+
+.eyebrow {
+    margin: 0 0 6px;
+
+    color: var(--accent-light);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+}
+
+.section-description {
+    margin: 9px 0 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.message-text {
+    min-height: 1em;
+    margin: 12px 0 0;
+
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 16px;
+}
+
+.button-row > button {
+    max-width: 100%;
+}
+
+/* ============================================================
+   07. CHAMPS DE SAISIE
+============================================================ */
+
+label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 11px 13px;
+
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-small);
+
+    background: var(--bg-input);
+    color: var(--text-primary);
+
+    outline: none;
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+input::placeholder {
+    color: #71849a;
+    opacity: 1;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+select:focus {
+    border-color: var(--blue);
+
+    box-shadow:
+        0 0 0 3px rgba(57, 169, 255, 0.12);
+}
+
+select {
+    cursor: pointer;
+}
+
+select option {
+    background: var(--bg-panel);
+    color: var(--text-primary);
+}
+
+input[type="checkbox"] {
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+/* ============================================================
+   08. TABLEAU DE BORD
+============================================================ */
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    min-width: 0;
+    min-height: 92px;
+    padding: 16px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-medium);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(24, 40, 56, 0.97),
+            rgba(15, 27, 40, 0.97)
+        );
+
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+
+    transition:
+        border-color var(--transition-normal),
+        transform var(--transition-normal);
+}
+
+.stat-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    display: grid;
+    flex: 0 0 42px;
+    place-items: center;
+
+    width: 42px;
+    height: 42px;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 13px;
+
+    background: rgba(255, 255, 255, 0.045);
+    font-size: 22px;
+}
+
+.stat-card > div {
+    min-width: 0;
+}
+
+.stat-label {
+    margin: 0 0 6px;
+
+    color: var(--text-muted);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.10em;
+}
+
+.stat-value {
+    margin: 0;
+
+    color: var(--text-primary);
+    font-size: clamp(17px, 2.3vw, 23px);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   09. SECTION DE JEU
+============================================================ */
+
+.game-section {
+    min-width: 0;
+    overflow: hidden;
+
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-large);
+
+    background: #080f17;
+    box-shadow: var(--shadow-strong);
+}
+
+.game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    min-height: 69px;
+    padding: 13px 19px;
+
+    border-bottom: 1px solid var(--border);
+    background: rgba(18, 31, 45, 0.97);
+}
+
+.game-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.game-title > div {
+    min-width: 0;
+}
+
+.game-title h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+}
+
+.game-title p {
+    margin: 4px 0 0;
+
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.live-indicator {
+    position: relative;
+
+    display: inline-block;
+    flex: 0 0 10px;
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+    background: var(--green);
+
+    box-shadow: 0 0 12px rgba(55, 217, 149, 0.45);
+}
+
+.live-indicator::after {
+    position: absolute;
+    inset: -4px;
+
+    border: 1px solid rgba(55, 217, 149, 0.4);
+    border-radius: 50%;
+
+    content: "";
+    animation: live-pulse 2s ease-out infinite;
+}
+
+@keyframes live-pulse {
+    0% {
+        transform: scale(0.7);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+}
+
+/* ============================================================
+   10. VUE 3D ET CANVAS PLAYCANVAS
+============================================================ */
+
+.game-viewport {
+    position: relative;
+    isolation: isolate;
+
+    width: 100%;
+    height: clamp(350px, 58vw, 650px);
+    min-height: 350px;
+    max-height: 76vh;
+    max-height: 76dvh;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 45%,
+            #233d50 0%,
+            #132638 46%,
+            #09131e 100%
+        );
+
+    contain: layout paint;
+}
+
+#game-canvas {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+
+    /*
+       Les gestes tactiles sont gérés par le module JavaScript.
+       Le navigateur ne doit pas intercepter le pincement
+       utilisé pour le zoom dans la scène 3D.
+    */
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.game-viewport:fullscreen {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+
+    border: 0;
+    border-radius: 0;
+}
+
+.game-viewport:fullscreen #game-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================================
+   11. ÉCRAN DE CHARGEMENT
+============================================================ */
+
+.loading-screen {
+    position: absolute;
+    z-index: 10;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 11px;
+    padding: 24px;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 35%,
+            rgba(32, 65, 87, 0.98),
+            rgba(7, 15, 24, 0.99) 75%
+        );
+
+    text-align: center;
+
+    transition:
+        opacity 350ms ease,
+        visibility 350ms ease;
+}
+
+.loading-screen h2 {
+    margin: 0;
+    font-size: clamp(20px, 4vw, 30px);
+    font-weight: 950;
+    letter-spacing: 0.06em;
+}
+
+.loading-screen > p {
+    max-width: 380px;
+    margin: 0;
+
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.loading-basketball {
+    display: grid;
+    place-items: center;
+
+    width: 72px;
+    height: 72px;
+
+    border: 1px solid rgba(255, 179, 79, 0.25);
+    border-radius: 50%;
+
+    background: rgba(255, 139, 38, 0.10);
+    font-size: 42px;
+
+    animation: ball-loading 1.8s ease-in-out infinite;
+}
+
+@keyframes ball-loading {
+    0%,
+    100% {
+        transform: translateY(0) rotate(-12deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(12deg);
+    }
+}
+
+.loading-track {
+    width: min(100%, 300px);
+    height: 6px;
+    margin-top: 8px;
+
+    overflow: hidden;
+
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.loading-progress {
+    width: 0%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent-dark),
+            var(--accent-light)
+        );
+
+    box-shadow: 0 0 14px rgba(255, 139, 38, 0.35);
+
+    transition: width 250ms ease;
+}
+
+/* ============================================================
+   12. NOTIFICATIONS DANS LE JEU
+============================================================ */
+
+.game-notification {
+    position: absolute;
+    z-index: 12;
+    top: 16px;
+    left: 50%;
+
+    width: max-content;
+    max-width: calc(100% - 32px);
+    padding: 12px 18px;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius-pill);
+
+    background: rgba(8, 17, 27, 0.93);
+    color: var(--text-primary);
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+
+    transform: translateX(-50%);
+    pointer-events: none;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ============================================================
+   13. PANNEAU DIEUBEN
+============================================================ */
+
+.dieuben-panel {
+    position: absolute;
+    z-index: 5;
+    top: 15px;
+    left: 15px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    max-width: calc(100% - 30px);
+    padding: 10px 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+
+    background: rgba(8, 17, 27, 0.84);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.dieuben-avatar {
+    display: grid;
+    flex: 0 0 38px;
+    place-items: center;
+
+    width: 38px;
+    height: 38px;
+
+    border: 1px solid rgba(57, 169, 255, 0.24);
+    border-radius: 12px;
+
+    background: rgba(57, 169, 255, 0.12);
+    font-size: 21px;
+}
+
+.dieuben-information {
+    min-width: 0;
+}
+
+.dieuben-information h3 {
+    margin: 0 0 3px;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+}
+
+.dieuben-information p {
+    margin: 0;
+
+    color: var(--text-secondary);
+    font-size: 10px;
+}
+
+/* ============================================================
+   14. COMMANDES DE ZOOM
+============================================================ */
+
+.zoom-controls {
+    position: absolute;
+    z-index: 6;
+    top: 15px;
+    right: 15px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    padding: 7px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 15px;
+
+    background: rgba(8, 17, 27, 0.77);
+
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+}
+
+.zoom-button {
+    display: grid;
+    place-items: center;
+
+    width: 43px;
+    min-width: 43px;
+    height: 43px;
+    min-height: 43px;
+    padding: 0;
+
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 11px;
+
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+
+    font-size: 25px;
+    font-weight: 700;
+
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.zoom-button:hover:not(:disabled) {
+    border-color: rgba(255, 179, 79, 0.45);
+    background: rgba(255, 139, 38, 0.20);
+}
+
+/* ============================================================
+   15. INDICATION DES GESTES TACTILES
+============================================================ */
+
+.touch-hint {
+    position: absolute;
+    z-index: 4;
+    right: 15px;
+    bottom: 15px;
+    left: 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    width: fit-content;
+    max-width: calc(100% - 30px);
+    margin-inline: auto;
+    padding: 9px 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: var(--radius-pill);
+
+    background: rgba(8, 17, 27, 0.73);
+    color: rgba(255, 255, 255, 0.88);
+
+    font-size: 11px;
+    text-align: center;
+
+    pointer-events: none;
+
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+}
+
+/* ============================================================
+   16. COMMANDES DE TIR
+============================================================ */
+
+.game-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 19px;
+
+    padding: 21px;
+
+    border-top: 1px solid var(--border);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 31, 45, 0.99),
+            rgba(12, 23, 34, 0.99)
+        );
+}
+
+.aim-control {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    min-width: 0;
+}
+
+.aim-control label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.045em;
+}
+
+.aim-control label span {
+    flex-shrink: 0;
+    color: var(--accent-light);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Curseurs de puissance et d'angle */
+
+input[type="range"] {
+    display: block;
+
+    width: 100%;
+    min-height: 28px;
+    margin: 0;
+
+    border: 0;
+    border-radius: var(--radius-pill);
+
+    background: transparent;
+
+    accent-color: var(--accent);
+
+    cursor: pointer;
+    touch-action: pan-y;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 7px;
+
+    border-radius: var(--radius-pill);
+    background: #2a3c4f;
+}
+
+input[type="range"]::-moz-range-track {
+    height: 7px;
+
+    border-radius: var(--radius-pill);
+    background: #2a3c4f;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    width: 21px;
+    height: 21px;
+    margin-top: -7px;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    border: 3px solid #fff;
+    border-radius: 50%;
+
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255, 139, 38, 0.14);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+
+    border: 3px solid #fff;
+    border-radius: 50%;
+
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255, 139, 38, 0.14);
+}
+
+.shooting-buttons {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+    gap: 12px;
+}
+
+.action-button {
+    min-height: 58px;
+    padding: 15px 16px;
+
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+.shoot-button {
+    min-height: 58px;
+    padding: 15px 20px;
+
+    border-color: rgba(255, 190, 105, 0.5);
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffb64f,
+            #ff7b19
+        );
+
+    color: #241204;
+
+    box-shadow:
+        0 8px 24px rgba(255, 123, 25, 0.23),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+
+    font-size: 15px;
+    font-weight: 950;
+    letter-spacing: 0.09em;
+}
+
+.shoot-button:hover:not(:disabled) {
+    background:
+        linear-gradient(
+            135deg,
+            #ffca72,
+            #ff8c2c
+        );
+
+    box-shadow:
+        0 10px 29px rgba(255, 123, 25, 0.30);
+
+    transform: translateY(-1px);
+}
+
+#shoot-message {
+    margin: -6px 0 0;
+    text-align: center;
+}
+
+/* ============================================================
+   17. PANNEAU DE MISSION
+============================================================ */
+
+.mission-panel {
+    position: relative;
+    overflow: hidden;
+}
+
+.mission-panel::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+
+    height: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--accent),
+            var(--blue),
+            transparent
+        );
+
+    content: "";
+}
+
+.difficulty-label,
+.counter-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+    max-width: 48%;
+    padding: 7px 11px;
+
+    border: 1px solid rgba(255, 179, 79, 0.24);
+    border-radius: var(--radius-pill);
+
+    background: rgba(255, 139, 38, 0.10);
+    color: var(--accent-light);
+
+    font-size: 10px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.mission-description {
+    max-width: 760px;
+    margin: 0 0 18px;
+
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.mission-objective {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-width: 0;
+    padding: 17px;
+
+    border: 1px solid rgba(255, 139, 38, 0.22);
+    border-radius: var(--radius-medium);
+
+    background:
+        linear-gradient(
+            110deg,
+            rgba(255, 139, 38, 0.10),
+            rgba(255, 139, 38, 0.035)
+        );
+}
+
+.mission-objective > span {
+    display: grid;
+    flex: 0 0 46px;
+    place-items: center;
+
+    width: 46px;
+    height: 46px;
+
+    border-radius: 14px;
+    background: rgba(255, 139, 38, 0.12);
+
+    font-size: 25px;
+}
+
+.mission-objective > div {
+    min-width: 0;
+}
+
+.objective-label {
+    margin: 0 0 5px;
+
+    color: var(--accent-light);
+    font-size: 9px;
+    font-weight: 950;
+    letter-spacing: 0.13em;
+}
+
+#mission-target {
+    margin: 0;
+
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 850;
+    line-height: 1.55;
+}
+
+.progress-information {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin: 22px 0 10px;
+
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+#mission-progress-text {
+    color: var(--accent-light);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+    width: 100%;
+    height: 11px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-pill);
+
+    background: #253444;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ed701d,
+            #ffb44f,
+            #ffe09a
+        );
+
+    box-shadow: 0 0 14px rgba(255, 139, 38, 0.25);
+
+    transition: width 350ms ease;
+}
+
+.mission-rules {
+    margin: 15px 0 0;
+    padding: 12px 14px;
+
+    border-left: 3px solid var(--blue);
+    border-radius: 0 9px 9px 0;
+
+    background: rgba(57, 169, 255, 0.06);
+    color: var(--text-secondary);
+
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+#mission-feedback {
+    margin-top: 14px;
+}
+
+#mission-panel .button-row {
+    margin-top: 18px;
+}
+
+/* ============================================================
+   18. GRILLE DES 100 MISSIONS
+============================================================ */
+
+.missions-section {
+    overflow: hidden;
+}
+
+.missions-grid {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 9px;
+
+    margin-top: 20px;
+}
+
+/*
+   Le JavaScript crée dynamiquement les boutons de mission.
+   Les sélecteurs suivants prennent en charge les éléments
+   button, article ou div créés dans #missions-grid.
+*/
+
+.missions-grid > button,
+.missions-grid > .mission-card,
+.missions-grid > article,
+.missions-grid > div {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    min-width: 0;
+    min-height: 67px;
+    padding: 9px 5px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 45, 61, 0.96),
+            rgba(17, 30, 43, 0.96)
+        );
+
+    color: var(--text-secondary);
+    text-align: center;
+
+    transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.missions-grid > button {
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.missions-grid > button:hover:not(:disabled),
+.missions-grid > .mission-card:hover,
+.missions-grid > article:hover,
+.missions-grid > div:hover {
+    border-color: rgba(255, 179, 79, 0.40);
+    background: rgba(255, 139, 38, 0.10);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+.missions-grid > button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+/* Classes facultatives que le JavaScript peut attribuer */
+
+.missions-grid .active,
+.missions-grid .current,
+.missions-grid .mission-active,
+.missions-grid [aria-current="step"] {
+    border-color: var(--accent);
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 139, 38, 0.23),
+            rgba(255, 139, 38, 0.08)
+        );
+
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(255, 139, 38, 0.10);
+}
+
+.missions-grid .completed,
+.missions-grid .mission-completed {
+    border-color: rgba(55, 217, 149, 0.34);
+    background: rgba(55, 217, 149, 0.09);
+    color: #a2f3cf;
+}
+
+.missions-grid .locked,
+.missions-grid .mission-locked {
+    border-color: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.025);
+    color: var(--text-muted);
+}
+
+.missions-grid .locked::after,
+.missions-grid .mission-locked::after {
+    content: "🔒";
+    font-size: 10px;
+}
+
+/* ============================================================
+   19. AIDE — COMMENT JOUER
+============================================================ */
+
+.help-section {
+    overflow: hidden;
+}
+
+.help-toggle {
+    width: 100%;
+    min-height: 49px;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.help-content {
+    margin-top: 17px;
+    padding: 18px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-medium);
+
+    background: rgba(6, 15, 24, 0.40);
+}
+
+.help-content ol {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+
+    margin: 0;
+    padding-left: 23px;
+
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.75;
+}
+
+.help-content li {
+    padding-left: 3px;
+}
+
+.help-content li::marker {
+    color: var(--accent-light);
+    font-weight: 900;
+}
+
+.help-content strong {
+    color: var(--text-primary);
+}
+
+.help-content > p {
+    margin: 18px 0 0;
+    padding: 13px;
+
+    border: 1px solid rgba(255, 179, 79, 0.20);
+    border-radius: 11px;
+
+    background: rgba(255, 139, 38, 0.07);
+    color: var(--text-secondary);
+
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* ============================================================
+   20. PARAMÈTRES
+============================================================ */
+
+.settings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+}
+
+.settings-panel[hidden] {
+    display: none !important;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    min-height: 54px;
+    padding: 13px 15px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-small);
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.setting-row label {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.setting-row select {
+    width: min(55%, 220px);
+    min-height: 40px;
+}
+
+/* ============================================================
+   21. SAUVEGARDE ET RÉINITIALISATION
+============================================================ */
+
+.save-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.save-panel h2 {
+    margin-bottom: 0;
+}
+
+#save-status {
+    max-width: 720px;
+    line-height: 1.7;
+}
+
+#storage-message {
+    margin-top: 3px;
+}
+
+/* ============================================================
+   22. BOÎTE DE DIALOGUE
+============================================================ */
+
+.confirmation-dialog {
+    width: min(92vw, 450px);
+    max-width: 450px;
+    max-height: min(85vh, 700px);
+    max-height: min(85dvh, 700px);
+
+    padding: 25px;
+
+    overflow: auto;
+
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-large);
+
+    background:
+        linear-gradient(
+            145deg,
+            #192a3b,
+            #0c1723
+        );
+
+    color: var(--text-primary);
+    box-shadow: var(--shadow-strong);
+}
+
+.confirmation-dialog::backdrop {
+    background: rgba(1, 6, 12, 0.76);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.confirmation-dialog h2 {
+    margin: 0 0 12px;
+    font-size: 20px;
+}
+
+.confirmation-dialog > p {
+    margin: 0;
+
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+.confirmation-dialog .button-row {
+    justify-content: flex-end;
+}
+
+/* ============================================================
+   23. PIED DE PAGE
+============================================================ */
+
+.app-footer {
+    width: 100%;
+    margin-top: auto;
+    padding:
+        23px
+        max(20px, var(--safe-right))
+        calc(23px + var(--safe-bottom))
+        max(20px, var(--safe-left));
+
+    border-top: 1px solid var(--border);
+
+    background: rgba(7, 15, 24, 0.70);
+
+    text-align: center;
+}
+
+.app-footer p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.app-footer p + p {
+    margin-top: 7px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+}
+
+/* ============================================================
+   24. ÉTATS DE RÉUSSITE ET D'ERREUR
+============================================================ */
+
+.message-text:empty {
+    display: none;
+}
+
+.message-text.success,
+.message-text.is-success,
+.success-message {
+    color: var(--green);
+}
+
+.message-text.error,
+.message-text.is-error,
+.error-message {
+    color: #ff8992;
+}
+
+.message-text.warning,
+.message-text.is-warning,
+.warning-message {
+    color: var(--yellow);
+}
+
+.message-text.info,
+.message-text.is-info,
+.info-message {
+    color: #80caff;
+}
+
+/* Classes supplémentaires disponibles pour le JavaScript */
+
+.is-loading {
+    cursor: progress;
+}
+
+.is-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.is-hidden {
+    display: none !important;
+}
+
+/* ============================================================
+   25. MODE PLEIN ÉCRAN
+============================================================ */
+
+#app:fullscreen,
+.basket-app:fullscreen {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background: var(--bg-main);
+}
+
+#game-section:fullscreen {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: 100%;
+    max-height: none;
+
+    border: 0;
+    border-radius: 0;
+    background: #080f17;
+}
+
+#game-section:fullscreen .game-viewport {
+    flex: 1;
+
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+}
+
+#game-section:fullscreen .game-controls {
+    flex-shrink: 0;
+}
+
+body:has(#game-section:fullscreen) {
+    overflow: hidden;
+}
+
+/* ============================================================
+   26. TABLETTES
+============================================================ */
+
+@media (max-width: 1000px) {
+    #main-content,
+    .main-content {
+        width: min(100% - 26px, 850px);
+        padding-top: 18px;
+    }
+
+    .missions-grid {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .game-viewport {
+        height: clamp(340px, 63vw, 570px);
+    }
+
+    .panel {
+        padding: 20px;
+    }
+}
+
+/* ============================================================
+   27. TÉLÉPHONES ANDROID ET PETITS ÉCRANS
+============================================================ */
+
+@media (max-width: 600px) {
+    :root {
+        --topbar-height: 65px;
+        --radius-large: 17px;
+        --radius-medium: 13px;
+    }
+
+    body {
+        font-size: 14px;
+    }
+
+    .topbar {
+        gap: 9px;
+        min-height: var(--topbar-height);
+
+        padding:
+            calc(9px + var(--safe-top))
+            max(11px, var(--safe-right))
+            9px
+            max(11px, var(--safe-left));
+    }
+
+    .brand {
+        gap: 9px;
+    }
+
+    .brand-logo {
+        flex-basis: 40px;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 23px;
+    }
+
+    .brand-text h1 {
+        font-size: 16px;
+        letter-spacing: 0.015em;
+    }
+
+    .brand-text p {
+        margin-top: 3px;
+        font-size: 7px;
+        letter-spacing: 0.08em;
+    }
+
+    .topbar-actions {
+        gap: 6px;
+    }
+
+    .icon-button {
+        width: 39px;
+        min-width: 39px;
+        height: 39px;
+        min-height: 39px;
+        border-radius: 10px;
+    }
+
+    #main-content,
+    .main-content {
+        width: calc(100% - 20px);
+        padding-top: 12px;
+        padding-bottom: 20px;
+    }
+
+    #main-content > section {
+        margin-bottom: 13px;
+    }
+
+    .profile-panel {
+        gap: 10px;
+        padding: 13px;
+    }
+
+    .profile-avatar {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        font-size: 22px;
+    }
+
+    .profile-information h2 {
+        font-size: 9px;
+    }
+
+    #player-display-name {
+        font-size: 13px;
+    }
+
+    .status-text {
+        font-size: 10px;
+    }
+
+    .profile-panel > .secondary-button {
+        min-height: 38px;
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .panel {
+        padding: 15px;
+    }
+
+    .panel h2 {
+        font-size: 17px;
+    }
+
+    .section-heading {
+        gap: 9px;
+        margin-bottom: 13px;
+    }
+
+    .eyebrow {
+        font-size: 9px;
+    }
+
+    .section-description {
+        font-size: 12px;
+    }
+
+    .dashboard {
+        gap: 7px;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 8px;
+
+        min-height: 103px;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .stat-icon {
+        flex-basis: 31px;
+        width: 31px;
+        height: 31px;
+        border-radius: 9px;
+        font-size: 17px;
+    }
+
+    .stat-label {
+        margin-bottom: 4px;
+        font-size: 8px;
+        letter-spacing: 0.035em;
+    }
+
+    .stat-value {
+        font-size: clamp(15px, 4.5vw, 20px);
+    }
+
+    .game-section {
+        border-radius: 15px;
+    }
+
+    .game-header {
+        min-height: 57px;
+        padding: 9px 12px;
+    }
+
+    .game-title {
+        gap: 9px;
+    }
+
+    .game-title h2 {
+        font-size: 13px;
+    }
+
+    .game-title p {
+        font-size: 10px;
+    }
+
+    .game-viewport {
+        height: clamp(340px, 105vw, 490px);
+        min-height: 340px;
+        max-height: 72dvh;
+    }
+
+    .dieuben-panel {
+        top: 9px;
+        left: 9px;
+        gap: 7px;
+        padding: 7px;
+        border-radius: 11px;
+    }
+
+    .dieuben-avatar {
+        flex-basis: 31px;
+        width: 31px;
+        height: 31px;
+        border-radius: 9px;
+        font-size: 17px;
+    }
+
+    .dieuben-information h3 {
+        font-size: 9px;
+    }
+
+    .dieuben-information p {
+        max-width: 100px;
+        font-size: 9px;
+    }
+
+    .small-button {
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 9px;
+    }
+
+    .zoom-controls {
+        top: 9px;
+        right: 9px;
+        gap: 6px;
+        padding: 5px;
+        border-radius: 12px;
+    }
+
+    .zoom-button {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        min-height: 36px;
+        border-radius: 9px;
+        font-size: 22px;
+    }
+
+    .touch-hint {
+        right: 8px;
+        bottom: 9px;
+        left: 8px;
+
+        max-width: calc(100% - 16px);
+        padding: 7px 10px;
+
+        font-size: 10px;
+    }
+
+    .loading-basketball {
+        width: 58px;
+        height: 58px;
+        font-size: 35px;
+    }
+
+    .loading-screen h2 {
+        font-size: 21px;
+    }
+
+    .loading-screen > p {
+        font-size: 12px;
+    }
+
+    .game-controls {
+        gap: 16px;
+        padding: 15px 12px;
+    }
+
+    .aim-control {
+        gap: 7px;
+    }
+
+    .aim-control label {
+        font-size: 10px;
+    }
+
+    .aim-control label span {
+        font-size: 13px;
+    }
+
+    .shooting-buttons {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+        gap: 8px;
+    }
+
+    .action-button,
+    .shoot-button {
+        min-height: 53px;
+        padding: 12px 8px;
+        font-size: 11px;
+        letter-spacing: 0.035em;
+    }
+
+    .shoot-button {
+        font-size: 13px;
+    }
+
+    .message-text {
+        font-size: 12px;
+    }
+
+    .mission-description {
+        font-size: 12px;
+    }
+
+    .mission-objective {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .mission-objective > span {
+        flex-basis: 37px;
+        width: 37px;
+        height: 37px;
+        border-radius: 11px;
+        font-size: 21px;
+    }
+
+    .objective-label {
+        font-size: 8px;
+        letter-spacing: 0.08em;
+    }
+
+    #mission-target {
+        font-size: 12px;
+    }
+
+    .mission-rules {
+        padding: 10px;
+        font-size: 11px;
+    }
+
+    .difficulty-label,
+    .counter-label {
+        max-width: 47%;
+        padding: 6px 8px;
+        font-size: 9px;
+    }
+
+    .missions-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 14px;
+    }
+
+    .missions-grid > button,
+    .missions-grid > .mission-card,
+    .missions-grid > article,
+    .missions-grid > div {
+        min-height: 55px;
+        padding: 7px 3px;
+        border-radius: 9px;
+        font-size: 11px;
+    }
+
+    .help-content {
+        padding: 12px;
+    }
+
+    .help-content ol {
+        gap: 10px;
+        padding-left: 20px;
+        font-size: 12px;
+    }
+
+    .help-content > p {
+        padding: 10px;
+        font-size: 11px;
+    }
+
+    .button-row {
+        gap: 8px;
+    }
+
+    .button-row > button {
+        min-height: 42px;
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .setting-row {
+        padding: 10px;
+    }
+
+    .setting-row label {
+        font-size: 12px;
+    }
+
+    .setting-row select {
+        width: 52%;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .app-footer {
+        padding:
+            19px
+            max(12px, var(--safe-right))
+            calc(19px + var(--safe-bottom))
+            max(12px, var(--safe-left));
+    }
+
+    .app-footer p {
+        font-size: 9px;
+    }
+
+    .app-footer p + p {
+        font-size: 8px;
+    }
+
+    .confirmation-dialog {
+        padding: 19px;
+    }
+
+    .confirmation-dialog h2 {
+        font-size: 18px;
+    }
+}
+
+/* ============================================================
+   28. TRÈS PETITS ÉCRANS
+============================================================ */
+
+@media (max-width: 360px) {
+    .brand-text h1 {
+        font-size: 14px;
+    }
+
+    .brand-text p {
+        font-size: 6px;
+    }
+
+    .brand-logo {
+        flex-basis: 35px;
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+    }
+
+    .topbar {
+        gap: 6px;
+    }
+
+    .topbar-actions {
+        gap: 4px;
+    }
+
+    .icon-button {
+        width: 35px;
+        min-width: 35px;
+        height: 35px;
+        min-height: 35px;
+    }
+
+    .profile-panel {
+        flex-wrap: wrap;
+    }
+
+    .profile-panel > .secondary-button {
+        margin-left: auto;
+    }
+
+    .stat-card {
+        padding: 8px;
+    }
+
+    .stat-value {
+        font-size: 14px;
+    }
+
+    .stat-label {
+        font-size: 7px;
+    }
+
+    .dieuben-information p {
+        max-width: 75px;
+    }
+
+    .small-button {
+        padding-inline: 6px;
+        font-size: 8px;
+    }
+
+    .missions-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .shooting-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ============================================================
+   29. ORIENTATION PAYSAGE SUR MOBILE
+============================================================ */
+
+@media (max-width: 900px) and (orientation: landscape) {
+    .game-viewport {
+        height: 72dvh;
+        min-height: 260px;
+        max-height: none;
+    }
+
+    .game-viewport:fullscreen {
+        height: 100dvh;
+    }
+
+    .dieuben-panel {
+        top: 8px;
+        left: 8px;
+    }
+
+    .zoom-controls {
+        top: 8px;
+        right: 8px;
+    }
+
+    .touch-hint {
+        bottom: 7px;
+    }
+}
+
+/* ============================================================
+   30. ÉCRANS LARGES
+============================================================ */
+
+@media (min-width: 1200px) {
+    #main-content,
+    .main-content {
+        padding-top: 28px;
+    }
+
+    .game-viewport {
+        height: 610px;
+    }
+
+    .game-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        column-gap: 28px;
+    }
+
+    .shooting-buttons {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    #shoot-message {
+        grid-column: 1 / -1;
+    }
+
+    .missions-grid {
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+    }
+}
+
+/* ============================================================
+   31. ACCESSIBILITÉ : RÉDUCTION DES ANIMATIONS
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================================
+   32. CONTRASTE RENFORCÉ
+============================================================ */
+
+@media (prefers-contrast: more) {
+    :root {
+        --border: rgba(220, 235, 250, 0.35);
+        --border-strong: rgba(230, 242, 255, 0.58);
+        --text-secondary: #d2deea;
+        --text-muted: #a9bacb;
+    }
+
+    button,
+    input,
+    select,
+    .panel,
+    .stat-card {
+        border-width: 1px;
+    }
+}
+
+/* ============================================================
+   33. FIN DU FICHIER CSS
+============================================================ */
