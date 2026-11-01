@@ -1,0 +1,94 @@
+
+/* ---------- RESET DE BASE ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- TYPOGRAPHIE ---------- */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+    background: #f9f9f9;
+    color: #333;
+}
+
+/* ---------- NAVBAR ---------- */
+.navbar {
+    background: #0066cc;
+    padding: 0.5rem;
+}
+.navbar ul {
+    display: flex;
+    list-style: none;
+    justify-content: center;
+    gap: 1rem;
+}
+.navbar button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.4rem 0.8rem;
+    transition: background 0.3s, color 0.3s;
+}
+.navbar button:hover,
+.navbar button:focus {
+    background: #fff;
+    color: #0066cc;
+    border-radius: 4px;
+}
+
+/* ---------- SECTION ---------- */
+main {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+.page-section {
+    display: none;               /* tout seksyon kache pa default */
+    animation: fadeIn 0.4s ease;
+}
+.page-section.active {
+    display: block;              /* sèlman seksyon ki gen klas active montre */
+}
+
+/* ---------- FORMULAIRE CONTACT ---------- */
+#contactForm {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+#contactForm label {
+    font-weight: bold;
+}
+#contactForm input,
+#contactForm textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#contactForm button {
+    width: fit-content;
+    background: #0066cc;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+#contactForm button:hover {
+    background: #004c99;
+}
+
+/* ---------- ANIMATION ---------- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+)
