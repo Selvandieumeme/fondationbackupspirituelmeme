@@ -1,5 +1,36 @@
 
-/* ---------- RESET DE BASE ---------- */
+/* -------------------------------------------------
+   Variables globales – facilite la personnalisation
+   ------------------------------------------------- */
+:root {
+    /* Couleurs principales */
+    --c-primary-1: #0d47a1;          /* Bleu foncé */
+    --c-primary-2: #1976d2;          /* Bleu moyen */
+    --c-primary-3: #42a5f5;          /* Bleu clair */
+    --c-accent:    #ff6f61;          /* Rouge corail (akcent) */
+    --c-bg-start:  #e3f2fd;          /* Dégradé départ (bleu très pâle) */
+    --c-bg-end:    #bbdefb;          /* Dégradé fin */
+    --c-text:      #212121;          /* Texte sombre */
+    --c-light:     #fafafa;          /* Fond clair des cartes */
+
+    /* Typographie */
+    --font-base:   'Inter', system-ui, -apple-system, sans-serif;
+    --fs-base:     1rem;            /* 16 px */
+    --fs-title:    2.2rem;
+    --fs-h2:       1.8rem;
+    --fs-nav:      1rem;
+    --fw-regular:  400;
+    --fw-bold:     600;
+
+    /* Espacements */
+    --gap:         1.5rem;
+    --radius:      .8rem;
+    --radius-round: 2rem;          /* Pour les boutons actifs */
+}
+
+/* -------------------------------------------------
+   Reset & base styles
+   ------------------------------------------------- */
 *,
 *::before,
 *::after {
@@ -8,87 +39,183 @@
     padding: 0;
 }
 
-/* ---------- TYPOGRAPHIE ---------- */
+html {
+    scroll-behavior: smooth;
+    font-size: 100%;               /* 16 px de base */
+}
+
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-base);
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-base);
     line-height: 1.6;
-    background: #f9f9f9;
-    color: #333;
-}
-
-/* ---------- NAVBAR ---------- */
-.navbar {
-    background: #0066cc;
-    padding: 0.5rem;
-}
-.navbar ul {
+    color: var(--c-text);
+    background: linear-gradient(135deg, var(--c-bg-start), var(--c-bg-end));
+    min-height: 100vh;
     display: flex;
-    list-style: none;
+    flex-direction: column;
+}
+
+/* -------------------------------------------------
+   Header – logo + navigation
+   ------------------------------------------------- */
+.site-header {
+    background: var(--c-primary-2);
+    color: #fff;
+    padding: var(--gap) var(--gap);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+/* Logo – texte centré, légèrement arrondi */
+.logo {
+    font-size: 2rem;
+    font-weight: var(--fw-bold);
+    margin: 0;
+    text-align: center;
+}
+
+/* Navigation */
+.navbar {
+    margin-top: var(--gap);
+    display: flex;
     justify-content: center;
-    gap: 1rem;
 }
-.navbar button {
+
+.nav-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+/* Boutons de navigation */
+.nav-btn {
     background: transparent;
-    border: none;
+    border: 2px solid #fff;
     color: #fff;
-    font-size: 1rem;
+    padding: .5rem 1rem;
+    font-size: var(--fs-nav);
+    font-weight: var(--fw-bold);
+    border-radius: var(--radius);
     cursor: pointer;
-    padding: 0.4rem 0.8rem;
-    transition: background 0.3s, color 0.3s;
-}
-.navbar button:hover,
-.navbar button:focus {
-    background: #fff;
-    color: #0066cc;
-    border-radius: 4px;
+    transition: all .3s ease;
 }
 
-/* ---------- SECTION ---------- */
+/* État actif / survol */
+.nav-btn.active,
+.nav-btn:hover,
+.nav-btn:focus {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255,111,97,.3);
+}
+
+/* -------------------------------------------------
+   Main – sections
+   ------------------------------------------------- */
 main {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-}
-.page-section {
-    display: none;               /* tout seksyon kache pa default */
-    animation: fadeIn 0.4s ease;
-}
-.page-section.active {
-    display: block;              /* sèlman seksyon ki gen klas active montre */
-}
-
-/* ---------- FORMULAIRE CONTACT ---------- */
-#contactForm {
+    flex: 1;
+    padding: calc(var(--gap) * 2) var(--gap);
     display: grid;
-    gap: 0.8rem;
-    margin-top: 1rem;
-}
-#contactForm label {
-    font-weight: bold;
-}
-#contactForm input,
-#contactForm textarea {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-#contactForm button {
-    width: fit-content;
-    background: #0066cc;
-    color: #fff;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-#contactForm button:hover {
-    background: #004c99;
+    gap: var(--gap);
 }
 
-/* ---------- ANIMATION ---------- */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-)
+/* Chaque section occupe toute la largeur, mais on ajoute
+   un effet de "card" avec des coins arrondis et une ombre */
+.page-section {
+    background: var(--c-light);
+    border-radius: var(--radius);
+    padding: var(--gap);
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity .6s ease-out, transform .6s ease-out;
+}
+
+/* Section visible (classe .active) */
+.page-section.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Titres de section */
+.page-section h2 {
+    font-size: var(--fs-h2);
+    margin-bottom: .5rem;
+    color: var(--c-primary-1);
+}
+
+/* Paragraphes */
+.page-section p {
+    margin-top: .5rem;
+}
+
+/* -------------------------------------------------
+   Curved background – effet “wave” derrière le header
+   ------------------------------------------------- */
+.site-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 4rem;
+    background: var(--c-primary-2);
+    border-bottom-left-radius: 100% 40%;
+    border-bottom-right-radius: 100% 40%;
+    z-index: -1;
+}
+
+/* -------------------------------------------------
+   Responsive design
+   ------------------------------------------------- */
+@media (max-width: 768px) {
+    .logo {
+        font-size: 1.6rem;
+    }
+
+    .nav-btn {
+        padding: .4rem .8rem;
+        font-size: .9rem;
+    }
+
+    main {
+        padding: var(--gap);
+    }
+
+    .page-section {
+        padding: var(--gap);
+    }
+}
+
+/* -------------------------------------------------
+   Utilities (facultatif)
+   ------------------------------------------------- */
+.hidden {
+    display: none !important;
+}
+
+/* -------------------------------------------------
+   Animations – fade‑in des sections au scroll (optionnel)
+   ------------------------------------------------- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Si vous ajoutez du JavaScript pour déclencher
+   l’animation au scroll, utilisez simplement : */
+.section-visible {
+    animation: fadeInUp .6s forwards;
+}
