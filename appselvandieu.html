@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>App Selvandieu</title>
+    <link rel="stylesheet" href="appselvandieu.css">
+</head>
+<body>
+
+    <!-- -------------- MENU DE NAVIGATION -------------- -->
+    <nav class="navbar">
+        <ul>
+            <li><button data-section="accueil">Accueil</button></li>
+            <li><button data-section="ma-vie">Ma vie</button></li>
+            <li><button data-section="mare-rouge">Mare‑Rouge</button></li>
+            <li><button data-section="mes-projets">Mes Projets</button></li>
+            <li><button data-section="contact">Contact</button></li>
+        </ul>
+    </nav>
+
+    <!-- -------------- CONTENU DES RIBRIQUES -------------- -->
+    <main>
+        <section id="accueil" class="page-section active">
+            <h1>Bienvenue ! 👋</h1>
+            <p>Ceci est la page d’accueil de l’application Selvandieu.</p>
+        </section>
+
+        <section id="ma-vie" class="page-section">
+            <h1>Ma vie</h1>
+            <p>Un petit texte qui décrit ma vie, mes passions, etc.</p>
+        </section>
+
+        <section id="mare-rouge" class="page-section">
+            <h1>Mare‑Rouge</h1>
+            <p>Informations sur le projet « Mare‑Rouge ».</p>
+        </section>
+
+        <section id="mes-projets" class="page-section">
+            <h1>Mes Projets</h1>
+            <ul>
+                <li>Projet A – <a href="#" target="_blank">Voir le détail</a></li>
+                <li>Projet B – <a href="#" target="_blank">Voir le détail</a></li>
+                <li>Projet C – <a href="#" target="_blank">Voir le détail</a></li>
+            </ul>
+        </section>
+
+        <section id="contact" class="page-section">
+            <h1>Contact</h1>
+            <form id="contactForm">
+                <label for="name">Nom :</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">E‑mail :</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="message">Message :</label>
+                <textarea id="message" name="message" rows="4" required></textarea>
+
+                <button type="submit">Envoyer</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="appselvandieu.js"></script>
+</body>
+</html>
