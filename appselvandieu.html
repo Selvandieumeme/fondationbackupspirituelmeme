@@ -1,66 +1,136 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- Métadonnées essentielles -->
     <meta charset="UTF-8">
-    <title>App Selvandieu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Application Selvandieu – Présentation du parcours, projets et contact.">
+    <title>Selvandieu – Accueil</title>
+
+    <!-- Fonts (opsyonèl) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Exemple : <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"> -->
+
+    <!-- Feuille de style -->
     <link rel="stylesheet" href="appselvandieu.css">
 </head>
+
 <body>
+    <!-- En‑tête global -->
+    <header class="site-header">
+        <h1 class="logo">Selvandieu</h1>
+        <!-- Menu de navigation principal -->
+        <nav class="navbar" aria-label="Menu principal">
+            <ul class="nav-list">
+                <li><button type="button"
+                            data-section="accueil"
+                            aria-controls="accueil"
+                            aria-selected="true"
+                            class="nav-btn active">Accueil</button></li>
+                <li><button type="button"
+                            data-section="ma-vie"
+                            aria-controls="ma-vie"
+                            aria-selected="false"
+                            class="nav-btn">Ma vie</button></li>
+                <li><button type="button"
+                            data-section="mare-rouge"
+                            aria-controls="mare-rouge"
+                            aria-selected="false"
+                            class="nav-btn">Mare‑Rouge</button></li>
+                <li><button type="button"
+                            data-section="mes-projets"
+                            aria-controls="mes-projets"
+                            aria-selected="false"
+                            class="nav-btn">Mes Projets</button></li>
+                <li><button type="button"
+                            data-section="contact"
+                            aria-controls="contact"
+                            aria-selected="false"
+                            class="nav-btn">Contact</button></li>
+            </ul>
+        </nav>
+    </header>
 
-    <!-- -------------- MENU DE NAVIGATION -------------- -->
-    <nav class="navbar">
-        <ul>
-            <li><button data-section="accueil">Accueil</button></li>
-            <li><button data-section="ma-vie">Ma vie</button></li>
-            <li><button data-section="mare-rouge">Mare‑Rouge</button></li>
-            <li><button data-section="mes-projets">Mes Projets</button></li>
-            <li><button data-section="contact">Contact</button></li>
-        </ul>
-    </nav>
-
-    <!-- -------------- CONTENU DES RIBRIQUES -------------- -->
-    <main>
-        <section id="accueil" class="page-section active">
-            <h1>Bienvenue ! 👋</h1>
+    <!-- Contenu principal -->
+    <main role="main">
+        <!-- Chaque section possède un id, une classe « page-section » et un aria‑labelledby -->
+        <section id="accueil"
+                 class="page-section active"
+                 role="region"
+                 aria-labelledby="titre-accueil"
+                 aria-live="polite">
+            <h2 id="titre-accueil">Bienvenue ! 👋</h2>
             <p>Ceci est la page d’accueil de l’application Selvandieu.</p>
         </section>
 
-        <section id="ma-vie" class="page-section">
-            <h1>Ma vie</h1>
+        <section id="ma-vie"
+                 class="page-section"
+                 role="region"
+                 aria-labelledby="titre-ma-vie">
+            <h2 id="titre-ma-vie">Ma vie</h2>
             <p>Un petit texte qui décrit ma vie, mes passions, etc.</p>
         </section>
 
-        <section id="mare-rouge" class="page-section">
-            <h1>Mare‑Rouge</h1>
+        <section id="mare-rouge"
+                 class="page-section"
+                 role="region"
+                 aria-labelledby="titre-mare-rouge">
+            <h2 id="titre-mare-rouge">Mare‑Rouge</h2>
             <p>Informations sur le projet « Mare‑Rouge ».</p>
         </section>
 
-        <section id="mes-projets" class="page-section">
-            <h1>Mes Projets</h1>
-            <ul>
-                <li>Projet A – <a href="#" target="_blank">Voir le détail</a></li>
-                <li>Projet B – <a href="#" target="_blank">Voir le détail</a></li>
-                <li>Projet C – <a href="#" target="_blank">Voir le détail</a></li>
+        <section id="mes-projets"
+                 class="page-section"
+                 role="region"
+                 aria-labelledby="titre-mes-projets">
+            <h2 id="titre-mes-projets">Mes Projets</h2>
+            <ul class="project-list">
+                <li>Projet A – <a href="#" target="_blank" rel="noopener">Voir le détail</a></li>
+                <li>Projet B – <a href="#" target="_blank" rel="noopener">Voir le détail</a></li>
+                <li>Projet C – <a href="#" target="_blank" rel="noopener">Voir le détail</a></li>
             </ul>
         </section>
 
-        <section id="contact" class="page-section">
-            <h1>Contact</h1>
-            <form id="contactForm">
-                <label for="name">Nom :</label>
-                <input type="text" id="name" name="name" required>
+        <section id="contact"
+                 class="page-section"
+                 role="region"
+                 aria-labelledby="titre-contact">
+            <h2 id="titre-contact">Contact</h2>
 
-                <label for="email">E‑mail :</label>
-                <input type="email" id="email" name="email" required>
+            <form id="contactForm" novalidate>
+                <div class="form-group">
+                    <label for="name">Nom :</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
 
-                <label for="message">Message :</label>
-                <textarea id="message" name="message" rows="4" required></textarea>
+                <div class="form-group">
+                    <label for="email">E‑mail :</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
 
-                <button type="submit">Envoyer</button>
+                <div class="form-group">
+                    <label for="message">Message :</label>
+                    <textarea id="message" name="message" rows="4" required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Envoyer</button>
             </form>
         </section>
     </main>
 
-    <script src="appselvandieu.js"></script>
+    <!-- Pied de page (opsyonèl) -->
+    <footer class="site-footer">
+        <p>&copy; <span id="currentYear"></span> Selvandieu – Tous droits réservés.</p>
+    </footer>
+
+    <!-- Script JavaScript – defer pour charger après le HTML -->
+    <script src="appselvandieu.js" defer></script>
+
+    <!-- Petit script pour mettre à jour l'année du footer (facultatif) -->
+    <script>
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
